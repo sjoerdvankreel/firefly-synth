@@ -34,10 +34,9 @@ features[] = { FF_PLUGIN_FEATURE, CLAP_PLUGIN_FEATURE_STEREO, nullptr };
 static void CLAP_ABI
 deinit()
 {
-  PB_WRITE_LOG_FUNC_ENTER();
+  PB_LOG_FUNC_ENTRY_EXIT();
   juce::shutdownJuce_GUI();
   _topo.reset();
-  PB_WRITE_LOG_FUNC_EXIT();
   cleanup_logging();
 }
 
@@ -45,10 +44,9 @@ static bool CLAP_ABI
 init(char const*)
 {
   init_logging(FF_SYNTH_VENDOR_NAME, FF_SYNTH_FULL_NAME);
-  PB_WRITE_LOG_FUNC_ENTER();
+  PB_LOG_FUNC_ENTRY_EXIT();
   _topo = synth_topo(PB_IS_FX, FF_SYNTH_FULL_NAME);
   juce::initialiseJuce_GUI();
-  PB_WRITE_LOG_FUNC_EXIT();
   return true;
 }
 

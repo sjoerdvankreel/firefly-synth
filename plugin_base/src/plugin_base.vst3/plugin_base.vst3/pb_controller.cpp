@@ -2,6 +2,7 @@
 #include <plugin_base/dsp/utility.hpp>
 #include <plugin_base/shared/value.hpp>
 #include <plugin_base/shared/io_plugin.hpp>
+#include <plugin_base/shared/logger.hpp>
 
 #include <plugin_base.vst3/utility.hpp>
 #include <plugin_base.vst3/pb_param.hpp>
@@ -25,7 +26,10 @@ pb_controller(plugin_topo const* topo):
 _desc(std::make_unique<plugin_desc>(topo, this)),
 _gui_state(_desc.get(), true),
 _extra_state(gui_extra_state_keyset(*_desc->plugin))
-{ _gui_state.add_any_listener(this); }
+{ 
+  PB_LOG_FUNC_ENTRY_EXIT();
+  _gui_state.add_any_listener(this); 
+}
 
 void 
 pb_controller::gui_param_begin_changes(int index) 
@@ -44,6 +48,7 @@ pb_controller::gui_param_end_changes(int index)
 IPlugView* PLUGIN_API
 pb_controller::createView(char const* name)
 {
+  PB_LOG_FUNC_ENTRY_EXIT();
   if (ConstString(name) != ViewType::kEditor) return nullptr;
   return _editor = new pb_editor(this);
 }
@@ -51,6 +56,7 @@ pb_controller::createView(char const* name)
 tresult PLUGIN_API
 pb_controller::getState(IBStream* state)
 {
+  PB_LOG_FUNC_ENTRY_EXIT();
   std::vector<char> data(plugin_io_save_extra(*_gui_state.desc().plugin, _extra_state));
   return state->write(data.data(), data.size());
 }
@@ -58,6 +64,7 @@ pb_controller::getState(IBStream* state)
 tresult PLUGIN_API 
 pb_controller::setState(IBStream* state)
 {
+  PB_LOG_FUNC_ENTRY_EXIT();
   if (!plugin_io_load_extra(*_gui_state.desc().plugin, load_ibstream(state), _extra_state).ok())
     return kResultFalse;
   return kResultOk;
@@ -66,6 +73,7 @@ pb_controller::setState(IBStream* state)
 tresult PLUGIN_API
 pb_controller::setComponentState(IBStream* state)
 {
+  PB_LOG_FUNC_ENTRY_EXIT();
   gui_state().begin_undo_region();
   if (!plugin_io_load_state(load_ibstream(state), gui_state()).ok())
   {
@@ -98,6 +106,7 @@ pb_controller::setParamNormalized(ParamID tag, ParamValue value)
 tresult PLUGIN_API 
 pb_controller::getMidiControllerAssignment(int32 bus, int16 channel, CtrlNumber number, ParamID& id)
 {
+  PB_LOG_FUNC_ENTRY_EXIT();
   if(bus != 0) return kResultFalse;
   auto iter = _midi_id_to_param.find(number);
   if(iter == _midi_id_to_param.end()) return kResultFalse;
@@ -172,6 +181,8 @@ pb_controller::context_menu(int param_id) const
 tresult PLUGIN_API 
 pb_controller::initialize(FUnknown* context)
 {
+  PB_LOG_FUNC_ENTRY_EXIT();
+
   int unit_id = 1;
   if(EditController::initialize(context) != kResultTrue) 
     return kResultFalse;

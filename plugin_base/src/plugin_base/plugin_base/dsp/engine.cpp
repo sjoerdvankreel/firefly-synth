@@ -36,7 +36,7 @@ _voice_processor(voice_processor),
 _voice_thread_ids(_polyphony, std::thread::id()),
 _voice_processor_context(voice_processor_context)
 {
-  PB_WRITE_LOG_FUNC_ENTER();
+  PB_LOG_FUNC_ENTRY_EXIT();
 
   assert(_polyphony >= 0);
 
@@ -61,8 +61,6 @@ _voice_processor_context(voice_processor_context)
   _automation_lerp_filters.resize(_dims.module_slot_param_slot);
   _automation_lp_filters.resize(_dims.module_slot_param_slot);
   _automation_state_last_round_end.resize(_dims.module_slot_param_slot);
-
-  PB_WRITE_LOG_FUNC_EXIT();
 }
 
 plugin_voice_block 
@@ -179,7 +177,7 @@ plugin_engine::prepare_block()
 void
 plugin_engine::deactivate()
 {
-  PB_WRITE_LOG_FUNC_ENTER();
+  PB_LOG_FUNC_ENTRY_EXIT();
 
   _cpu_usage = 0;
   _sample_rate = 0;
@@ -232,14 +230,12 @@ plugin_engine::deactivate()
   for (int m = _state.desc().module_output_start; m < _state.desc().plugin->modules.size(); m++)
     for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
       _output_engines[m][mi].reset();
-
-  PB_WRITE_LOG_FUNC_EXIT();
 }
 
 void
 plugin_engine::activate(int max_frame_count)
-{  
-  PB_WRITE_LOG_FUNC_ENTER(); 
+{
+  PB_LOG_FUNC_ENTRY_EXIT();
 
   deactivate();
   _stream_time = 0;
@@ -269,8 +265,6 @@ plugin_engine::activate(int max_frame_count)
   // set automation values to current state, events may overwrite
   automation_state_dirty();
   init_automation_from_state();
-
-  PB_WRITE_LOG_FUNC_EXIT();
 }
 
 void
@@ -290,7 +284,7 @@ plugin_engine::automation_state_dirty()
 void
 plugin_engine::activate_modules()
 {
-  PB_WRITE_LOG_FUNC_ENTER();
+  PB_LOG_FUNC_ENTRY_EXIT();
 
   assert(_sample_rate > 0);
   assert(_max_frame_count > 0);
@@ -345,8 +339,6 @@ plugin_engine::activate_modules()
         _output_engines[m][mi]->reset(&block);
       }
     }
-
-  PB_WRITE_LOG_FUNC_EXIT();
 }
 
 void

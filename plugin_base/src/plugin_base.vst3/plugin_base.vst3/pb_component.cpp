@@ -1,4 +1,5 @@
 #include <plugin_base/shared/io_plugin.hpp>
+#include <plugin_base/shared/logger.hpp>
 #include <plugin_base.vst3/utility.hpp>
 #include <plugin_base.vst3/pb_component.hpp>
 
@@ -17,6 +18,7 @@ pb_component(plugin_topo const* topo, FUID const& controller_id) :
 _desc(std::make_unique<plugin_desc>(topo, nullptr)),
 _splice_engine(_desc.get(), false, nullptr, nullptr)
 {
+  PB_LOG_FUNC_ENTRY_EXIT();
   setControllerClass(controller_id);
   processContextRequirements.needTempo();
   processContextRequirements.needFrameRate();
@@ -38,6 +40,7 @@ _splice_engine(_desc.get(), false, nullptr, nullptr)
 tresult PLUGIN_API
 pb_component::getState(IBStream* state)
 {
+  PB_LOG_FUNC_ENTRY_EXIT();
   std::vector<char> data(plugin_io_save_state(_splice_engine.state()));
   return state->write(data.data(), data.size());
 }
@@ -45,6 +48,7 @@ pb_component::getState(IBStream* state)
 tresult PLUGIN_API
 pb_component::setState(IBStream* state)
 {
+  PB_LOG_FUNC_ENTRY_EXIT();
   if (!plugin_io_load_state(load_ibstream(state), _splice_engine.state()).ok())
     return kResultFalse;
   _splice_engine.automation_state_dirty();
@@ -54,6 +58,7 @@ pb_component::setState(IBStream* state)
 tresult PLUGIN_API
 pb_component::canProcessSampleSize(int32 symbolic_size)
 {
+  PB_LOG_FUNC_ENTRY_EXIT();
   if (symbolic_size == kSample32) return kResultTrue;
   return kResultFalse;
 }
@@ -61,6 +66,7 @@ pb_component::canProcessSampleSize(int32 symbolic_size)
 tresult PLUGIN_API
 pb_component::setupProcessing(ProcessSetup& setup)
 {
+  PB_LOG_FUNC_ENTRY_EXIT();
   _scratch_in_l.resize(setup.maxSamplesPerBlock);
   _scratch_in_r.resize(setup.maxSamplesPerBlock);
   _scratch_out_l.resize(setup.maxSamplesPerBlock);
@@ -74,6 +80,7 @@ pb_component::setupProcessing(ProcessSetup& setup)
 tresult PLUGIN_API
 pb_component::initialize(FUnknown* context)
 {
+  PB_LOG_FUNC_ENTRY_EXIT();
   if(AudioEffect::initialize(context) != kResultTrue) return kResultFalse;
   addEventInput(STR16("Event In"));
   addAudioOutput(STR16("Stereo Out"), SpeakerArr::kStereo);
@@ -86,6 +93,7 @@ pb_component::setBusArrangements(
   SpeakerArrangement* inputs, int32 input_count,
   SpeakerArrangement* outputs, int32 output_count)
 {
+  PB_LOG_FUNC_ENTRY_EXIT();
   if (_splice_engine.state().desc().plugin->type == plugin_type::synth && input_count != 0) return kResultFalse;
   if (output_count != 1 || outputs[0] != SpeakerArr::kStereo) return kResultFalse;
   if((_splice_engine.state().desc().plugin->type == plugin_type::fx) && (input_count != 1 || inputs[0] != SpeakerArr::kStereo))  return kResultFalse;

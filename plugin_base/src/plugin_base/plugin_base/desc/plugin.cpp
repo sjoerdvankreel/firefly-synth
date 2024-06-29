@@ -11,7 +11,7 @@ plugin_desc::
 plugin_desc(plugin_topo const* plugin, format_config const* config):
 plugin(plugin), config(config)
 {
-  PB_WRITE_LOG_FUNC_ENTER();
+  PB_LOG_FUNC_ENTRY_EXIT();
     
   assert(plugin);
 
@@ -118,8 +118,6 @@ plugin(plugin), config(config)
   param_count = param_global;
   midi_count = midi_source_global;
   module_count = modules.size();
-
-  PB_WRITE_LOG_FUNC_EXIT();
 }
 
 std::vector<std::string>

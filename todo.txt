@@ -45,6 +45,14 @@ automate the json creation
 how to do multi-format release?
 how to do multi-plugin release?
 
+1.8.0
+- logger
+- Linux logger
+- simple automated regtest
+- some new presets
+- DSF falloff to the left
+- FM backwards (sub from phase)
+
 nice to have and make: 
 * DSF falloff to the left
 * FM backwards (sub from phase)

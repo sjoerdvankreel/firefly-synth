@@ -6,7 +6,7 @@ namespace plugin_base {
 plugin_dims::
 plugin_dims(plugin_topo const& plugin, int polyphony)
 {
-  PB_WRITE_LOG_FUNC_ENTER();
+  PB_LOG_FUNC_ENTRY_EXIT();
 
   for (int v = 0; v < polyphony; v++)
   {
@@ -34,8 +34,6 @@ plugin_dims(plugin_topo const& plugin, int polyphony)
   }
 
   validate(plugin, polyphony);
-
-  PB_WRITE_LOG_FUNC_EXIT();
 }
 
 void

@@ -327,28 +327,26 @@ gui_extra_state_keyset(plugin_topo const& topo)
 plugin_gui::
 ~plugin_gui() 
 { 
-  PB_WRITE_LOG_FUNC_ENTER();
+  PB_LOG_FUNC_ENTRY_EXIT();
   setLookAndFeel(nullptr);
   removeMouseListener(&_undo_listener);
-  PB_WRITE_LOG_FUNC_EXIT();
 }
 
 plugin_gui::
 plugin_gui(plugin_state* gui_state, plugin_base::extra_state* extra_state):
 _gui_state(gui_state), _undo_listener(this), _extra_state(extra_state)
 {
-  PB_WRITE_LOG_FUNC_ENTER();
+  PB_LOG_FUNC_ENTRY_EXIT();
   setOpaque(true);
   addMouseListener(&_undo_listener, true);
   auto const& topo = *gui_state->desc().plugin;
   theme_changed(user_io_load_list(topo, user_io::base, user_state_theme_key, topo.gui.default_theme, gui_state->desc().themes()));
-  PB_WRITE_LOG_FUNC_EXIT();
 }
 
 void
 plugin_gui::theme_changed(std::string const& theme_name)
 {
-  PB_WRITE_LOG_FUNC_ENTER();
+  PB_LOG_FUNC_ENTRY_EXIT();
 
   // don't just clear out everything!
   // only stuff that gets rebuild by the gui must be reset
@@ -393,8 +391,6 @@ plugin_gui::theme_changed(std::string const& theme_name)
   setSize(w, w * ratio);
   resized();
   _tooltip = std::make_unique<TooltipWindow>(getChildComponent(0));
-
-  PB_WRITE_LOG_FUNC_EXIT();
 } 
 
 void
@@ -587,8 +583,7 @@ plugin_gui::init_multi_tab_component(tab_component& tab, std::string const& id, 
 void
 plugin_gui::reloaded()
 {
-  PB_WRITE_LOG_FUNC_ENTER();
-
+  PB_LOG_FUNC_ENTRY_EXIT();
   auto const& topo = *_gui_state->desc().plugin;
   auto settings = _lnf->global_settings();
   bool is_fx = _gui_state->desc().plugin->type == plugin_type::fx;
@@ -598,8 +593,6 @@ plugin_gui::reloaded()
     settings.min_scale, settings.max_scale);
   float w = default_width * user_scale * _system_dpi_scale;
   setSize(w, (int)(w * ratio));
-
-  PB_WRITE_LOG_FUNC_EXIT();
 }
 
 Component&
@@ -997,42 +990,35 @@ plugin_gui::clear_patch()
 void
 plugin_gui::save_patch()
 {
-  PB_WRITE_LOG_FUNC_ENTER();
-
+  PB_LOG_FUNC_ENTRY_EXIT();
   int save_flags = FileBrowserComponent::saveMode | FileBrowserComponent::warnAboutOverwriting;
   FileChooser* chooser = new FileChooser("Save Patch", File(), String("*.") + _gui_state->desc().plugin->extension, true, false, this);
   chooser->launchAsync(save_flags, [this](FileChooser const& chooser) {
     auto path = chooser.getResult().getFullPathName();
     delete& chooser;
     if (path.length() == 0) return;
-
     plugin_io_save_file_all(path.toStdString(), *_gui_state, *_extra_state);
-
-    PB_WRITE_LOG_FUNC_EXIT_ASYNC();
-    });
+  });
 }
 
 void
 plugin_gui::load_patch()
 {
-  PB_WRITE_LOG_FUNC_ENTER();
-
+  PB_LOG_FUNC_ENTRY_EXIT();
   int load_flags = FileBrowserComponent::openMode;
   FileChooser* chooser = new FileChooser("Load Patch", File(), String("*.") + _gui_state->desc().plugin->extension, true, false, this);
   chooser->launchAsync(load_flags, [this](FileChooser const& chooser) {
     auto path = chooser.getResult().getFullPathName();
     delete& chooser;
-    if (path.length() == 0) return;
-      
+    if (path.length() == 0) return;      
     load_patch(path.toStdString(), false);
-
-    PB_WRITE_LOG_FUNC_EXIT_ASYNC();
   });
 }
 
 void
 plugin_gui::load_patch(std::string const& path, bool preset)
 {
+  PB_LOG_FUNC_ENTRY_EXIT();  
   _gui_state->begin_undo_region();
   auto icon = MessageBoxIconType::WarningIcon;
   auto result = plugin_io_load_file_all(path, *_gui_state, *_extra_state);

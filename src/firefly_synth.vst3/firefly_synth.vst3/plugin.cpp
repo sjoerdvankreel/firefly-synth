@@ -36,10 +36,9 @@ static std::unique_ptr<plugin_topo> _topo = {};
 bool
 DeinitModule()
 {
-  PB_WRITE_LOG_FUNC_ENTER();
+  PB_LOG_FUNC_ENTRY_EXIT();
   juce::shutdownJuce_GUI();
   _topo.reset();
-  PB_WRITE_LOG_FUNC_EXIT();
   cleanup_logging();
   return true;
 }
@@ -48,10 +47,9 @@ bool
 InitModule() 
 { 
   init_logging(FF_SYNTH_VENDOR_NAME, FF_SYNTH_FULL_NAME);
-  PB_WRITE_LOG_FUNC_ENTER();
+  PB_LOG_FUNC_ENTRY_EXIT();
   _topo = synth_topo(PB_IS_FX, FF_SYNTH_FULL_NAME);
   juce::initialiseJuce_GUI();
-  PB_WRITE_LOG_FUNC_EXIT();
   return true; 
 }
 

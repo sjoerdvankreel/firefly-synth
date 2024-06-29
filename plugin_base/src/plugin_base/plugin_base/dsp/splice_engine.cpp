@@ -1,4 +1,5 @@
 #include <plugin_base/dsp/splice_engine.hpp>
+#include <plugin_base/shared/logger.hpp>
 
 namespace plugin_base {
 
@@ -71,7 +72,9 @@ plugin_splice_engine(
   plugin_desc const* desc, bool graph,
   thread_pool_voice_processor voice_processor,
   void* voice_processor_context):
-_engine(desc, graph, voice_processor, voice_processor_context) {}
+_engine(desc, graph, voice_processor, voice_processor_context) {
+  PB_LOG_FUNC_ENTRY_EXIT();
+}
 
 host_block&
 plugin_splice_engine::prepare_block()
@@ -83,6 +86,7 @@ plugin_splice_engine::prepare_block()
 void
 plugin_splice_engine::deactivate()
 {
+  PB_LOG_FUNC_ENTRY_EXIT();
   _splice_block_size = -1;
   _engine.deactivate();
   _host_block.events.deactivate();
@@ -93,6 +97,8 @@ plugin_splice_engine::deactivate()
 void 
 plugin_splice_engine::activate(int max_frame_count)
 {
+  PB_LOG_FUNC_ENTRY_EXIT();
+
   // WASAPI likes multiples of 32 (160 samples = 3ms @ 48khz).
   // Other stuff likes powers of 2. 
   // Below 128 samples performance impact gets noticeable. So:
