@@ -4,6 +4,7 @@
 #include <plugin_base/gui/gui.hpp>
 #include <plugin_base/shared/logger.hpp>
 #include <plugin_base/gui/utility.hpp>
+#include <plugin_base/topo/ref_gen.hpp>
 #include <plugin_base.clap/pb_plugin.hpp>
 
 #include <juce_gui_basics/juce_gui_basics.h>
@@ -90,7 +91,11 @@ clap_plugin_entry_t const clap_entry =
 };
 
 // for param list generator
+extern "C" PB_EXPORT void
+pb_plugin_topo_destroy(plugin_topo const* topo) { delete topo; }
 extern "C" PB_EXPORT plugin_topo const*
 pb_plugin_topo_create() { return synth_topo(PB_IS_FX, FF_SYNTH_FULL_NAME).release(); }
 extern "C" PB_EXPORT void
-pb_plugin_topo_destroy(plugin_topo const* topo) { delete topo; }
+pb_plugin_topo_generate_reference(plugin_topo const* topo, plugin_topo_on_reference_generated on_generated, void* ctx) 
+{ plugin_topo_generate_reference(topo, on_generated, ctx); }
+
