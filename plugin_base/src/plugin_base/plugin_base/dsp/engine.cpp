@@ -36,8 +36,6 @@ _voice_processor(voice_processor),
 _voice_thread_ids(_polyphony, std::thread::id()),
 _voice_processor_context(voice_processor_context)
 {
-  PB_LOG_FUNC_ENTRY_EXIT();
-
   assert(_polyphony >= 0);
 
   // validate here instead of plugin_desc ctor 
@@ -177,8 +175,6 @@ plugin_engine::prepare_block()
 void
 plugin_engine::deactivate()
 {
-  PB_LOG_FUNC_ENTRY_EXIT();
-
   _cpu_usage = 0;
   _sample_rate = 0;
   _stream_time = 0;
@@ -235,8 +231,6 @@ plugin_engine::deactivate()
 void
 plugin_engine::activate(int max_frame_count)
 {
-  PB_LOG_FUNC_ENTRY_EXIT();
-
   deactivate();
   _stream_time = 0;
   _blocks_processed = 0;

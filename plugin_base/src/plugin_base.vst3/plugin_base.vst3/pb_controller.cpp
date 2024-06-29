@@ -106,7 +106,6 @@ pb_controller::setParamNormalized(ParamID tag, ParamValue value)
 tresult PLUGIN_API 
 pb_controller::getMidiControllerAssignment(int32 bus, int16 channel, CtrlNumber number, ParamID& id)
 {
-  PB_LOG_FUNC_ENTRY_EXIT();
   if(bus != 0) return kResultFalse;
   auto iter = _midi_id_to_param.find(number);
   if(iter == _midi_id_to_param.end()) return kResultFalse;

@@ -6,8 +6,6 @@ namespace plugin_base {
 plugin_frame_dims::
 plugin_frame_dims(plugin_topo const& plugin, int polyphony, int frame_count)
 {
-  PB_LOG_FUNC_ENTRY_EXIT();
-
   audio = jarray<int, 1>(2, frame_count);
   for (int v = 0; v < polyphony; v++)
   {
