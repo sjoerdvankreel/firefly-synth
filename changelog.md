@@ -2,6 +2,7 @@
 
 - Added logging.
 - Add some more presets.
+- Renamed unipolar acid preset.
 - Add another demo tune to go with it.
 - Switched to static linking of MSVCRT on windows.
 - Added backwards FM + renamed bipolar -> through-zero + renamed unipolar -> forwards.
