@@ -1,3 +1,5 @@
+#define _CRT_SECURE_NO_WARNINGS 1
+
 #include <plugin_base/shared/logger.hpp>
 #include <plugin_base/shared/io_shared.hpp>
 
@@ -5,7 +7,6 @@
 
 #include <memory>
 #include <chrono>
-#include <format>
 #include <filesystem>
 
 namespace plugin_base {
@@ -41,8 +42,17 @@ write_log(std::string const& file, int line, std::string const& func, std::strin
 
   std::filesystem::path path(file);
   auto file_name = path.filename().string();
-  auto now = std::chrono::system_clock::now();
-  std::string date_time = std::format("{:%d-%m-%Y %H:%M:%OS}", now);
+  
+  // gcc doesnt support std::format yet
+  time_t rawtime;
+  struct tm* timeinfo;
+  char buffer[80];
+
+  time(&rawtime);
+  timeinfo = localtime(&rawtime);
+  strftime(buffer, sizeof(buffer), "%d-%m-%Y %H:%M:%S", timeinfo);
+  std::string date_time(buffer);
+
   std::string instance_id = _instance_id->toString().toStdString();
   std::string full_message = date_time + ": " + "instance " + instance_id + ": " + file_name + " line " + std::to_string(line) + ", " + func + ": " + message;
   _logger->logMessage(full_message);

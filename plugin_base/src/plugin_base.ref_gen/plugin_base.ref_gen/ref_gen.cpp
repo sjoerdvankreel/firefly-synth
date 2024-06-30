@@ -36,7 +36,7 @@ load_library(char const* path)
 { return dlopen(path, RTLD_NOW); }
 static void
 close_library(void* handle)
-{ PB_ASSERT_EXEC(dlclose(handle) == 0); }
+{ dlclose(handle); }
 static void*
 library_get_address(void* handle, char const* sym)
 { return dlsym(handle, sym); }
