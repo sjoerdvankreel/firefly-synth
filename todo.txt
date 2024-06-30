@@ -50,7 +50,7 @@ how to do multi-plugin release?
 V logger
 V Linux logger
 V some new presets
-V? fix the actual bug that caused need logger
+V fix the actual bug that caused need logger
 V static link win
 V make zip work again
 V FM backwards (sub from phase)
