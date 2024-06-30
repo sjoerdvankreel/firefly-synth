@@ -1,5 +1,5 @@
 {
-  "checksum": "ac53d1e5e7e8f8fd3fa936593eeb2c32",
+  "checksum": "db5b45b0b07d9aed003c4dfd4560d103",
   "checked": {
     "meta": {
       "file_magic": "{296BBDE2-6411-4A85-BFAF-A9A7B9703DF0}",
@@ -7,12 +7,12 @@
       "plugin_id": "56AFFFF7565F48348C4359D5E6C856A4",
       "plugin_name": "Firefly Synth",
       "plugin_version_major": 1,
-      "plugin_version_minor": 7,
-      "plugin_version_patch": 6
+      "plugin_version_minor": 8,
+      "plugin_version_patch": 0
     },
     "content": {
       "extra": {
-        "checksum": "25dd59c9687f115cd7e8564497ccdcb4",
+        "checksum": "a82a39a15396311ea7448392320e899b",
         "checked": {
           "meta": {
             "file_magic": "{296BBDE2-6411-4A85-BFAF-A9A7B9703DF0}",
@@ -20,23 +20,17 @@
             "plugin_id": "56AFFFF7565F48348C4359D5E6C856A4",
             "plugin_name": "Firefly Synth",
             "plugin_version_major": 1,
-            "plugin_version_minor": 7,
-            "plugin_version_patch": 6
+            "plugin_version_minor": 8,
+            "plugin_version_patch": 0
           },
           "content": {
-            "{11A46FE6-9009-4C17-B177-467243E171C8}/tab": 0,
-            "{31EF3492-FE63-4A59-91DA-C2B4DD4A8891}/tab": 0,
-            "{45C2CCFE-48D9-4231-A327-319DAE5C9366}/tab": 0,
-            "{4901E1B1-BFD6-4C85-83C4-699DC27C6BC4}/tab": 2,
-            "{58205EAB-FB60-4E46-B2AB-7D27F069CDD3}/tab": 0,
-            "{D450B51E-468E-457E-B954-FF1B9645CADB}/tab": 0,
-            "{DE952BFA-88AC-4F05-B60A-2CEAF9EE8BF9}/tab": 1,
-            "{FAF92753-C6E4-4D78-BD7C-584EF473E29F}/tab": 0
+            "{4901E1B1-BFD6-4C85-83C4-699DC27C6BC4}/tab": 0,
+            "{DE952BFA-88AC-4F05-B60A-2CEAF9EE8BF9}/tab": 0
           }
         }
       },
       "plugin": {
-        "checksum": "497dabb3652685fec867606f2665a7fb",
+        "checksum": "a3190086c35659d38cb64f558381842b",
         "checked": {
           "meta": {
             "file_magic": "{296BBDE2-6411-4A85-BFAF-A9A7B9703DF0}",
@@ -44,8 +38,8 @@
             "plugin_id": "56AFFFF7565F48348C4359D5E6C856A4",
             "plugin_name": "Firefly Synth",
             "plugin_version_major": 1,
-            "plugin_version_minor": 7,
-            "plugin_version_patch": 6
+            "plugin_version_minor": 8,
+            "plugin_version_patch": 0
           },
           "content": {
             "modules": [
@@ -4838,7 +4832,7 @@
                       },
                       {
                         "slots": [
-                          "{0E688960-E59A-4E78-8812-6BADDAF881B8}",
+                          "{4B6716B2-4422-40AE-8AF4-2B31FFCC7E8C}",
                           "{B5CD2CE9-89C0-4E15-87E9-D8EF4D399EE6}",
                           "{B5CD2CE9-89C0-4E15-87E9-D8EF4D399EE6}",
                           "{B5CD2CE9-89C0-4E15-87E9-D8EF4D399EE6}",
