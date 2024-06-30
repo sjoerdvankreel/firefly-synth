@@ -25,10 +25,16 @@ cleanup_logging()
 void 
 init_logging(std::string const& vendor, std::string const& full_name)
 {
-  // TODO make it work on linux
+  std::filesystem::path path;
+#ifdef __linux__
+  char const* xdg_config_home = std::getenv("XDG_CONFIG_HOME");
+  if (xdg_config_home == nullptr) xdg_config_home = "~/.config";
+  path = std::filesystem::path(xdg_config_home) / std::filesystem::path(vendor) / full_name / "plugin.log";
+#else
   auto user_data = juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory);
   auto user_data_str = user_data.getFullPathName().toStdString();
-  auto path = std::filesystem::path(user_data_str) / user_location(vendor, full_name) / "plugin.log";
+  path = std::filesystem::path(user_data_str) / user_location(vendor, full_name) / "plugin.log";
+#endif
   auto file = juce::File(juce::String(path.string()));
   _logger = std::make_unique<juce::FileLogger>(file, juce::String(full_name), max_log_size);
   _instance_id = std::make_unique<juce::Uuid>();
