@@ -1,5 +1,6 @@
 ### ?, ?, 2024 - V1.8.0.
 
+- Added logging.
 - Add some more presets.
 - Add another demo tune to go with it.
 - Switched to static linking of MSVCRT on windows.

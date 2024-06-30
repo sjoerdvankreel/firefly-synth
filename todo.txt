@@ -39,6 +39,7 @@ do visual am/fm demo
 make voice count adjustable with default 16 + reallocate on switch and switch of global unison
 >> plus make drain warning
 variable number of modules with +/- button in UI
+simple automated regtest
 
 studiorack:
 automate the json creation
@@ -47,14 +48,13 @@ how to do multi-plugin release?
 
 1.8.0
 V logger
-- Linux logger
-- simple automated regtest
+V Linux logger
 V some new presets
-- DSF falloff to the left
-- FM backwards (sub from phase)
 V? fix the actual bug that caused need logger
 V static link win
 V make zip work again
+- FM backwards (sub from phase)
+- DSF falloff to the left
 
 nice to have and make: 
 * DSF falloff to the left
