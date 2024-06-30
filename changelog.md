@@ -2,6 +2,7 @@
 
 - Add some more presets.
 - Add another demo tune to go with it.
+- Switched to static linking of MSVCRT on windows.
 - Bugfix: FX version tried to read global unison params causing the plugin to crash on windows 11.
 - Changed location of user settings (gui size and selected theme). Also these are no longer shared between clap/vst3.
 
