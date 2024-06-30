@@ -53,8 +53,9 @@ V some new presets
 V? fix the actual bug that caused need logger
 V static link win
 V make zip work again
-- FM backwards (sub from phase)
+V FM backwards (sub from phase)
 - DSF falloff to the left
+- add backwards fm demo + rename demos + upload to kvr
 
 nice to have and make: 
 * DSF falloff to the left
