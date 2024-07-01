@@ -12,6 +12,8 @@ dont forget to update the version nr in code and cmake and mac bundle and build/
 *** and studiorack
 make a github release
 
+TODO name the presets in the readme / what does it sound like
+
 sometimes:
 update hosts
 update submodules
