@@ -6,7 +6,7 @@ cpu/mem profiling
 on release: 
 update kvr
 dont forget to tag
-update screenshots
+V update screenshots
 update the history
 upload new binaries
 make a github release

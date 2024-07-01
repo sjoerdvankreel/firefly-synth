@@ -1,9 +1,9 @@
-### ?, ?, 2024 - V1.8.0.
+### July 1, 2024 - V1.8.0.
 
 - Added logging.
 - Add some more presets.
-- Renamed unipolar acid preset.
 - Add another demo tune to go with it.
+- Renamed unipolar acid preset.
 - Switched to static linking of MSVCRT on windows.
 - Added backwards FM + renamed bipolar -> through-zero + renamed unipolar -> forwards.
 - Bugfix: FX version tried to read global unison params causing the plugin to crash on windows 11.
