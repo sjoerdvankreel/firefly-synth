@@ -1,5 +1,8 @@
 #include <plugin_base/desc/plugin.hpp>
 #include <plugin_base/shared/utility.hpp> 
+#include <plugin_base/shared/logger.hpp>
+
+
 #include <set>
 
 namespace plugin_base {
@@ -8,6 +11,8 @@ plugin_desc::
 plugin_desc(plugin_topo const* plugin, format_config const* config):
 plugin(plugin), config(config)
 {
+  PB_LOG_FUNC_ENTRY_EXIT();
+    
   assert(plugin);
 
   int param_global = 0;

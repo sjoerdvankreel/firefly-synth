@@ -1,4 +1,5 @@
 #include <plugin_base/shared/value.hpp>
+#include <plugin_base/shared/logger.hpp>
 #include <plugin_base/shared/io_plugin.hpp>
 #include <plugin_base.clap/pb_plugin.hpp>
 #if (defined __linux__) || (defined  __FreeBSD__)
@@ -54,6 +55,7 @@ forward_thread_pool_voice_processor(plugin_engine& engine, void* context)
 pb_plugin::
 ~pb_plugin() 
 { 
+  PB_LOG_FUNC_ENTRY_EXIT();
   stopTimer();
   _gui_state.remove_any_listener(this);
 }
@@ -69,6 +71,7 @@ _extra_state(gui_extra_state_keyset(*_desc->plugin)), _gui_state(_desc.get(), tr
 _to_gui_events(std::make_unique<event_queue>(default_q_size)), 
 _to_audio_events(std::make_unique<event_queue>(default_q_size))
 { 
+  PB_LOG_FUNC_ENTRY_EXIT();
   _gui_state.add_any_listener(this);
   _block_automation_seen.resize(_splice_engine.state().desc().param_count);
 }
@@ -99,6 +102,8 @@ pb_plugin::param_state_changed(int index, plain_value plain)
 bool
 pb_plugin::init() noexcept
 {
+  PB_LOG_FUNC_ENTRY_EXIT();
+
   // Need to start timer on the main thread. 
   // Constructor is not guaranteed to run there.
   startTimerHz(60);
@@ -118,6 +123,8 @@ pb_plugin::timerCallback()
 bool 
 pb_plugin::stateSave(clap_ostream const* stream) noexcept
 {
+  PB_LOG_FUNC_ENTRY_EXIT();
+
   // clap validator says we need to be prepared to write in chunks
   // don't bother with that and just write byte-for-byte
   int written = 1;
@@ -135,6 +142,8 @@ pb_plugin::stateSave(clap_ostream const* stream) noexcept
 bool 
 pb_plugin::stateLoad(clap_istream const* stream) noexcept
 {
+  PB_LOG_FUNC_ENTRY_EXIT();
+
   std::vector<char> data;
   do {
     char byte;
@@ -160,6 +169,7 @@ pb_plugin::stateLoad(clap_istream const* stream) noexcept
 bool
 pb_plugin::guiShow() noexcept
 {
+  PB_LOG_FUNC_ENTRY_EXIT();
   _gui->setVisible(true);
   return true;
 }
@@ -167,6 +177,7 @@ pb_plugin::guiShow() noexcept
 bool
 pb_plugin::guiHide() noexcept
 {
+  PB_LOG_FUNC_ENTRY_EXIT();
   _gui->setVisible(false);
   return true;
 }
@@ -180,6 +191,7 @@ pb_plugin::onPosixFd(int fd, clap_posix_fd_flags_t flags) noexcept
 void 
 pb_plugin::guiDestroy() noexcept
 {
+  PB_LOG_FUNC_ENTRY_EXIT();
   _gui->remove_param_listener(this);
   _gui->setVisible(false);
   _gui->removeFromDesktop();
@@ -193,6 +205,7 @@ pb_plugin::guiDestroy() noexcept
 bool
 pb_plugin::guiSetParent(clap_window const* window) noexcept
 {
+  PB_LOG_FUNC_ENTRY_EXIT();
   _gui->addToDesktop(0, window->ptr);
 #if (defined __linux__) || (defined  __FreeBSD__)
   for (int fd : LinuxEventLoopInternal::getRegisteredFds())
@@ -207,6 +220,7 @@ pb_plugin::guiSetParent(clap_window const* window) noexcept
 bool
 pb_plugin::guiIsApiSupported(char const* api, bool is_floating) noexcept
 {
+  PB_LOG_FUNC_ENTRY_EXIT();
   if (is_floating) return false;
 #if(WIN32)
   return !strcmp(api, CLAP_WINDOW_API_WIN32);
@@ -242,6 +256,7 @@ pb_plugin::guiSetSize(uint32_t width, uint32_t height) noexcept
 bool
 pb_plugin::guiCreate(char const* api, bool is_floating) noexcept
 {
+  PB_LOG_FUNC_ENTRY_EXIT();
   _gui = std::make_unique<plugin_gui>(&_gui_state, &_extra_state);
   return true;
 }
@@ -475,6 +490,7 @@ pb_plugin::audioPortsInfo(std::uint32_t index, bool is_input, clap_audio_port_in
 void 
 pb_plugin::deactivate() noexcept 
 { 
+  PB_LOG_FUNC_ENTRY_EXIT();
   _splice_engine.deactivate();
   _is_active.store(false);
 }
@@ -482,6 +498,7 @@ pb_plugin::deactivate() noexcept
 bool
 pb_plugin::activate(double sample_rate, std::uint32_t min_frame_count, std::uint32_t max_frame_count) noexcept
 {
+  PB_LOG_FUNC_ENTRY_EXIT();
   _is_active.store(true);
   _splice_engine.activate(max_frame_count);
   _splice_engine.set_sample_rate(sample_rate);

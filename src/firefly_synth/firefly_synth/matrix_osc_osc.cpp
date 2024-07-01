@@ -23,9 +23,10 @@ enum { scratch_fm_idx, scratch_count };
 // it appears the "magical" through zero mode is really just about 
 // modulation by an unipolar vs bipolar (e.g. through-zero) signal?
 // bipolar mod has the nice property that the carrier's phase can
-// travel "backwards" so produces a distinct sound from unipolar mod
+// travel both backwards and forwards so produces a distinct sound from unipolar mod
+// and just to be complete i also add forward [0, 1] and backward [-1, 0] as carrier
 // https://ristoid.net/modular/fm_variants.html
-enum { fm_mode_bipolar, fm_mode_unipolar };
+enum { fm_mode_tru, fm_mode_fwd, fm_mode_bwd };
 
 enum { 
   param_am_on, param_am_source, param_am_target, param_am_amt, param_am_ring,
@@ -41,8 +42,9 @@ static std::vector<list_item>
 fm_mode_items()
 {
   std::vector<list_item> result;
-  result.emplace_back("{B5CD2CE9-89C0-4E15-87E9-D8EF4D399EE6}", "Bi");
-  result.emplace_back("{0E688960-E59A-4E78-8812-6BADDAF881B8}", "Uni");
+  result.emplace_back("{B5CD2CE9-89C0-4E15-87E9-D8EF4D399EE6}", "Tru");
+  result.emplace_back("{0E688960-E59A-4E78-8812-6BADDAF881B8}", "Fwd");
+  result.emplace_back("{4B6716B2-4422-40AE-8AF4-2B31FFCC7E8C}", "Bwd");
   return result;
 }
 
@@ -396,19 +398,25 @@ osc_osc_matrix_engine::modulate_fm(
 
     // through zero stuff
     int route_mode = block_auto[param_fm_mode][r].step();
-    assert(route_mode == fm_mode_bipolar || route_mode == fm_mode_unipolar);
-    float mode_add;
-    float mode_mul;
-    if (route_mode == fm_mode_bipolar)
+    assert(route_mode == fm_mode_tru || route_mode == fm_mode_fwd || route_mode == fm_mode_bwd);
+    float mode_add = 0;
+    float mode_mul = 0;
+    if (route_mode == fm_mode_tru)
     {
       mode_add = 0;
       mode_mul = 1;
     }
-    else
+    else if (route_mode == fm_mode_fwd)
     {
       mode_add = 0.5f;
       mode_mul = 0.5f;
     }
+    else if (route_mode == fm_mode_bwd)
+    {
+      mode_add = -0.5f;
+      mode_mul = 0.5f;
+    }
+    else assert(false);
 
     // apply modulation on per unison voice level
     // mapping both source count and target count to [0, 1]

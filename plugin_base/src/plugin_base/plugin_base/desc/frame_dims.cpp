@@ -1,4 +1,5 @@
 #include <plugin_base/desc/frame_dims.hpp>
+#include <plugin_base/shared/logger.hpp>
 
 namespace plugin_base {
 

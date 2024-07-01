@@ -2,6 +2,7 @@
 #include <plugin_base/dsp/utility.hpp>
 #include <plugin_base/dsp/block/host.hpp>
 #include <plugin_base/desc/frame_dims.hpp>
+#include <plugin_base/shared/logger.hpp>
 
 #include <limits>
 #include <algorithm>
@@ -229,7 +230,7 @@ plugin_engine::deactivate()
 
 void
 plugin_engine::activate(int max_frame_count)
-{  
+{
   deactivate();
   _stream_time = 0;
   _blocks_processed = 0;
@@ -277,6 +278,8 @@ plugin_engine::automation_state_dirty()
 void
 plugin_engine::activate_modules()
 {
+  PB_LOG_FUNC_ENTRY_EXIT();
+
   assert(_sample_rate > 0);
   assert(_max_frame_count > 0);
 

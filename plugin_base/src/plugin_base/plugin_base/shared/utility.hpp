@@ -30,6 +30,8 @@
 
 #define PB_STR_(x) #x
 #define PB_STR(x) PB_STR_(x)
+#define PB_COMBINE_(x, y) x##y
+#define PB_COMBINE(x, y) PB_COMBINE_(x, y)
 #define PB_VERSION_TEXT(major, minor, patch) PB_STR(major.minor.patch)
 #define PB_ASSERT_EXEC(x) do { if(!(x)) assert(false); } while(false)
 

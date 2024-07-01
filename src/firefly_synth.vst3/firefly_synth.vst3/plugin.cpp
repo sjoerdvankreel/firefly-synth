@@ -2,6 +2,9 @@
 #include <firefly_synth/plugin.hpp>
 
 #include <plugin_base/gui/utility.hpp>
+#include <plugin_base/shared/logger.hpp>
+#include <plugin_base/topo/ref_gen.hpp>
+
 #include <plugin_base.vst3/utility.hpp>
 #include <plugin_base.vst3/pb_component.hpp>
 #include <plugin_base.vst3/pb_controller.hpp>
@@ -35,15 +38,19 @@ static std::unique_ptr<plugin_topo> _topo = {};
 bool
 DeinitModule()
 {
+  PB_LOG_FUNC_ENTRY_EXIT();
   juce::shutdownJuce_GUI();
   _topo.reset();
+  cleanup_logging();
   return true;
 }
 
 bool 
 InitModule() 
 { 
-  _topo = synth_topo(PB_IS_FX);
+  init_logging(FF_SYNTH_VENDOR_NAME, FF_SYNTH_FULL_NAME);
+  PB_LOG_FUNC_ENTRY_EXIT();
+  _topo = synth_topo(PB_IS_FX, FF_SYNTH_FULL_NAME);
   juce::initialiseJuce_GUI();
   return true; 
 }
@@ -64,10 +71,13 @@ component_factory(void*)
 }
 
 // for param list generator
-extern "C" PB_EXPORT plugin_topo const* 
-pb_plugin_topo_create() { return synth_topo(PB_IS_FX).release(); }
 extern "C" PB_EXPORT void
 pb_plugin_topo_destroy(plugin_topo const* topo) { delete topo; }
+extern "C" PB_EXPORT plugin_topo const*
+pb_plugin_topo_create() { return synth_topo(PB_IS_FX, FF_SYNTH_FULL_NAME).release(); }
+extern "C" PB_EXPORT void
+pb_plugin_topo_generate_reference(plugin_topo const* topo, plugin_topo_on_reference_generated on_generated, void* ctx) 
+{ plugin_topo_generate_reference(topo, on_generated, ctx); }
 
 BEGIN_FACTORY_DEF(FF_SYNTH_VENDOR_NAME, FF_SYNTH_VENDOR_URL, FF_SYNTH_VENDOR_MAIL)
   DEF_CLASS2(

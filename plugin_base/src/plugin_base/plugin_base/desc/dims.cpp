@@ -1,4 +1,5 @@
 #include <plugin_base/desc/dims.hpp>
+#include <plugin_base/shared/logger.hpp>
 
 namespace plugin_base {
 

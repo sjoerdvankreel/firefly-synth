@@ -1,5 +1,6 @@
 #include <plugin_base/topo/plugin.hpp>
 #include <plugin_base/shared/io_plugin.hpp>
+#include <plugin_base/shared/logger.hpp>
 
 #include <juce_core/juce_core.h>
 #include <juce_cryptography/juce_cryptography.h>
@@ -150,6 +151,7 @@ unwrap_json_from_meta(
 std::vector<char>
 plugin_io_save_extra(plugin_topo const& topo, extra_state const& state)
 {
+  PB_LOG_FUNC_ENTRY_EXIT();
   auto json = wrap_json_with_meta(topo, var(save_extra_internal(state).release()));
   return release_json_to_buffer(std::move(json));
 }
@@ -157,6 +159,7 @@ plugin_io_save_extra(plugin_topo const& topo, extra_state const& state)
 std::vector<char>
 plugin_io_save_state(plugin_state const& state)
 {
+  PB_LOG_FUNC_ENTRY_EXIT();
   auto json = wrap_json_with_meta(*state.desc().plugin, var(save_state_internal(state).release()));
   return release_json_to_buffer(std::move(json));
 }
@@ -167,6 +170,8 @@ plugin_io_load_state(std::vector<char> const& data, plugin_state& state)
   var json;
   var content;
   plugin_version old_version;
+
+  PB_LOG_FUNC_ENTRY_EXIT();
   auto result = load_json_from_buffer(data, json);
   if (!result.ok()) return result;
   result = unwrap_json_from_meta(*state.desc().plugin, json, content, old_version);
@@ -179,6 +184,8 @@ plugin_io_load_extra(plugin_topo const& topo, std::vector<char> const& data, ext
   var json;
   var content;
   plugin_version old_version;
+
+  PB_LOG_FUNC_ENTRY_EXIT();
   auto result = load_json_from_buffer(data, json);
   if (!result.ok()) return result;
   result = unwrap_json_from_meta(topo, json, content, old_version);
@@ -189,6 +196,7 @@ load_result
 plugin_io_load_file_all(
   std::filesystem::path const& path, plugin_state& plugin, extra_state& extra)
 {
+  PB_LOG_FUNC_ENTRY_EXIT();
   load_result failed("Could not read file.");
   std::vector<char> data = file_load(path);
   if(data.size() == 0) return failed;
@@ -199,6 +207,7 @@ bool
 plugin_io_save_file_all(
   std::filesystem::path const& path, plugin_state const& plugin, extra_state const& extra)
 {
+  PB_LOG_FUNC_ENTRY_EXIT();
   std::ofstream stream(path, std::ios::out | std::ios::binary);
   if (stream.bad()) return false;
   auto data(plugin_io_save_all(plugin, extra));
@@ -209,6 +218,7 @@ plugin_io_save_file_all(
 std::vector<char> 
 plugin_io_save_all(plugin_state const& plugin, extra_state const& extra)
 {
+  PB_LOG_FUNC_ENTRY_EXIT();
   auto const& topo = *plugin.desc().plugin;
   auto root = std::make_unique<DynamicObject>();
   root->setProperty("extra", var(wrap_json_with_meta(topo, var(save_extra_internal(extra).release())).release()));
@@ -223,6 +233,7 @@ plugin_io_load_all(std::vector<char> const& data, plugin_state& plugin, extra_st
   var content;
   plugin_version old_version;
 
+  PB_LOG_FUNC_ENTRY_EXIT();
   auto result = load_json_from_buffer(data, json);
   if(!result.ok()) return result;
   result = unwrap_json_from_meta(*plugin.desc().plugin, json, content, old_version);

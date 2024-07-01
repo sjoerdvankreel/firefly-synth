@@ -1,77 +1,41 @@
-on release: 
-*** add missing presets from demos
-update kvr
-update screenshots
-dont forget to tag
-upload new binaries
-update the history
-check if need update github social preview
-drop all conversion code on breaking plugin id
-dont forget to update the version nr in code and cmake and mac bundle and build/zip scripts and downloads
-make a github release
-
-TODO name the presets in the readme / what does it sound like
-
 sometimes:
 update hosts
 update submodules
 cpu/mem profiling
 
-host:
-check out carla 2.6
+on release: 
+update kvr
+dont forget to tag
+V update screenshots
+V update the history
+V upload new binaries
+make a github release
+V run some debug builds
+V add missing presets from demos
+V check if need update github social preview
+V drop all conversion code on breaking plugin id
+V dont forget to update the version nr in code and cmake and mac bundle and build/zip scripts and downloads and studiorack
 
-someday:
+todo this release:
+- add backwards fm demo + rename demos + upload to kvr
+
+wishlist soon:
+DSF falloff to the left
+clap polyphonic modulation
+full-blown renoise support
+fix global unison for mono mode
+
+wishlist sometime:
 mseg
 midi mpe
 microtonal
 .com website 
 cheby shaper
-cakewalk bug report
-phaser/flanger/chorus
 incorporate mts-esp
+phaser/flanger/chorus
 vst3 note expressions
+flstudio clap support
 visual routing indicators
-document the header files a bit
-basic osc waveform icons
-solo osc/fx
-out gain/cpu meter
-do visual am/fm demo
-make voice count adjustable with default 16 + reallocate on switch and switch of global unison
->> plus make drain warning
-variable number of modules with +/- button in UI
-
-studiorack:
-automate the json creation
-how to do multi-format release?
-how to do multi-plugin release?
-
-nice to have and make: 
-* DSF falloff to the left
-* FM backwards (sub from phase)
-* maybe do a tutorial ?
-* fix global unison for mono mode
-
-missing demo presets:
-downtempo goa
-fun with rave synth
-
-vnext clap polymod
-- polymod
-- monophonic mode polymod
-- how does this work with global unison?
-- allow to disable env 1, use external env ?
-
-vnext next:
-Title not visible on renoise mac
-flstudio beta CLAP automation test is broken, retest when the thing is released
-do not include plugin version in the name, waveform seeks for it
-do automated tests somehow
-bug: preset select jumps back to previous
-do forward compat checks - dont load newer versions
-do async clear delay lines etc on patch select -> 
-  idea: since all the reset/reload stuff seems kinda fuzzy and different between clap/vst3:
-  add a hidden readonly int parameter acting as a random token and flush stuff on the dsp side when it changes?
-
-other:
-CLAP gui not showing on qtractor/fedora
-do indexed release schema + regular backwards compat
+automated regression tests
+better studiorack integration
+do async clear delay lines etc on patch select
