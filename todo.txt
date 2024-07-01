@@ -12,8 +12,6 @@ dont forget to update the version nr in code and cmake and mac bundle and build/
 *** and studiorack
 make a github release
 
-TODO name the presets in the readme / what does it sound like
-
 sometimes:
 update hosts
 update submodules
@@ -48,6 +46,8 @@ automate the json creation
 how to do multi-format release?
 how to do multi-plugin release?
 
+- extra studiorack stuff gets zipped into the mac bundle
+
 1.8.0
 V logger
 V Linux logger
@@ -58,6 +58,7 @@ V make zip work again
 V FM backwards (sub from phase)
 - DSF falloff to the left
 - add backwards fm demo + rename demos + upload to kvr
+TODO name the presets in the readme / what does it sound like
 
 nice to have and make: 
 * DSF falloff to the left
