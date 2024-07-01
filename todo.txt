@@ -18,7 +18,6 @@ dont forget to update the version nr in code and cmake and mac bundle and build/
 
 todo this release:
 - add backwards fm demo + rename demos + upload to kvr
-TODO name the presets in the readme / what does it sound like
 
 wishlist soon:
 DSF falloff to the left
