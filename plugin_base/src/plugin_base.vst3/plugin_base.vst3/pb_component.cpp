@@ -58,7 +58,6 @@ pb_component::setState(IBStream* state)
 tresult PLUGIN_API
 pb_component::canProcessSampleSize(int32 symbolic_size)
 {
-  PB_LOG_FUNC_ENTRY_EXIT();
   if (symbolic_size == kSample32) return kResultTrue;
   return kResultFalse;
 }
