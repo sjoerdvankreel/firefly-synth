@@ -35,7 +35,6 @@ incorporate mts-esp
 phaser/flanger/chorus
 vst3 note expressions
 flstudio clap support
-simple automated regtest
 visual routing indicators
 automated regression tests
 better studiorack integration
