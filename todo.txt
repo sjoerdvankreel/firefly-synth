@@ -14,7 +14,7 @@ V run some debug builds
 V add missing presets from demos
 V check if need update github social preview
 V drop all conversion code on breaking plugin id
-dont forget to update the version nr in code and cmake and mac bundle and build/zip scripts and downloads and studiorack
+V dont forget to update the version nr in code and cmake and mac bundle and build/zip scripts and downloads and studiorack
 
 todo this release:
 - add backwards fm demo + rename demos + upload to kvr
