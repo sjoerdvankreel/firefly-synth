@@ -7,13 +7,13 @@ on release:
 update kvr
 dont forget to tag
 V update screenshots
-update the history
-upload new binaries
+V update the history
+V upload new binaries
 make a github release
-run some debug builds
-add missing presets from demos
-check if need update github social preview
-drop all conversion code on breaking plugin id
+V run some debug builds
+V add missing presets from demos
+V check if need update github social preview
+V drop all conversion code on breaking plugin id
 dont forget to update the version nr in code and cmake and mac bundle and build/zip scripts and downloads and studiorack
 
 todo this release:

@@ -36,18 +36,18 @@ See below for some built-in themes.
 MacOS: if you get a warning like "archive damaged" or "failed to open" etc, it's probably this: 
 [https://syntheway.com/fix-au-vst-vst3-macos.htm](https://syntheway.com/fix-au-vst-vst3-macos.htm)
 
-- Mac VST3: [firefly_synth_1.7.8_mac_vst3_instrument.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.8_mac_vst3_instrument.zip)
-- Mac VST3 Fx: [firefly_synth_1.7.8_mac_vst3_fx.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.8_mac_vst3_fx.zip)
-- Mac CLAP: [firefly_synth_1.7.8_mac_clap_instrument.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.8_mac_clap_instrument.zip)
-- Mac CLAP Fx: [firefly_synth_1.7.8_mac_clap_fx.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.8_mac_clap_fx.zip)
-- Linux VST3: [firefly_synth_1.7.8_linux_vst3_instrument.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.8_linux_vst3_instrument.zip)
-- Linux VST3 Fx: [release/firefly_synth_1.7.8_linux_vst3_fx.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.8_linux_vst3_fx.zip)
-- Linux CLAP: [firefly_synth_1.7.8_linux_clap_instrument.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.8_linux_clap_instrument.zip)
-- Linux CLAP Fx: [firefly_synth_1.7.8_linux_clap_fx.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.8_linux_clap_fx.zip)
-- Windows VST3: [firefly_synth_1.7.8_windows_vst3_instrument.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.8_windows_vst3_instrument.zip)
-- Windows VST3 Fx: [firefly_synth_1.7.8_windows_vst3_fx.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.8_windows_vst3_fx.zip)
-- Windows CLAP: [firefly_synth_1.7.8_windows_clap_instrument.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.8_windows_clap_instrument.zip)
-- Windows CLAP Fx: [firefly_synth_1.7.8_windows_clap_fx.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.8_windows_clap_fx.zip)
+- Mac VST3: [firefly_synth_1.8.0_mac_vst3_instrument.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.8.0_mac_vst3_instrument.zip)
+- Mac VST3 Fx: [firefly_synth_1.8.0_mac_vst3_fx.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.8.0_mac_vst3_fx.zip)
+- Mac CLAP: [firefly_synth_1.8.0_mac_clap_instrument.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.8.0_mac_clap_instrument.zip)
+- Mac CLAP Fx: [firefly_synth_1.8.0_mac_clap_fx.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.8.0_mac_clap_fx.zip)
+- Linux VST3: [firefly_synth_1.8.0_linux_vst3_instrument.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.8.0_linux_vst3_instrument.zip)
+- Linux VST3 Fx: [release/firefly_synth_1.8.0_linux_vst3_fx.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.8.0_linux_vst3_fx.zip)
+- Linux CLAP: [firefly_synth_1.8.0_linux_clap_instrument.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.8.0_linux_clap_instrument.zip)
+- Linux CLAP Fx: [firefly_synth_1.8.0_linux_clap_fx.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.8.0_linux_clap_fx.zip)
+- Windows VST3: [firefly_synth_1.8.0_windows_vst3_instrument.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.8.0_windows_vst3_instrument.zip)
+- Windows VST3 Fx: [firefly_synth_1.8.0_windows_vst3_fx.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.8.0_windows_vst3_fx.zip)
+- Windows CLAP: [firefly_synth_1.8.0_windows_clap_instrument.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.8.0_windows_clap_instrument.zip)
+- Windows CLAP Fx: [firefly_synth_1.8.0_windows_clap_fx.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.8.0_windows_clap_fx.zip)
 
 # Install
 Extract the zipped folder and copy/replace it (the entire folder, not just the .dll/.so/.dylib!) to your VST3/CLAP folder:
@@ -88,9 +88,9 @@ Demo tunes:
 - Demo track 2: [demo_track_2.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/demo_track_2.mp3)
 - Demo track 3: [demo_track_3.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/demo_track_3.mp3)
 - Fun with rave synth (Rave Synth Preset + Big Pad 2 Preset): [fun_with_rave_synth.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/fun_with_rave_synth.mp3)
-- Downtempo ambient psy (TODO make these presets): [downtempo_ambient_psy.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/downtempo_ambient_psy.mp3)
 - Renoise test (sort of trance melody hard edit) (Rave Synth Preset): [renoise_test_sort_of_trance_melody_hard_edit.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/renoise_test_sort_of_trance_melody_hard_edit.mp3)
 - Renoise test (sort of goa trance) (Trance Pad 2 Preset + Goa Bass Preset + Some more): [renoise_test_sort_of_goa_trance.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/renoise_test_sort_of_goa_trance.mp3)
+- Downtempo ambient psy (Bass 3 Preset + Closed Hat 3 + Distorted Bells 2 + FM Bells + Kick 6 + Open Hat 3): [downtempo_ambient_psy.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/downtempo_ambient_psy.mp3)
 
 Other:
 - FX Demo: [fx_demo_reaper_clap.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/fx_demo_reaper_clap.mp3)
