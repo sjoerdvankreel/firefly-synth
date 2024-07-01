@@ -5,7 +5,7 @@ cpu/mem profiling
 
 on release: 
 update kvr
-dont forget to tag
+V dont forget to tag
 V update screenshots
 V update the history
 V upload new binaries
