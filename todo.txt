@@ -20,6 +20,7 @@ add presets from:
 all fm and no filters
 
 wishlist soon:
+AM/FM on separate tabs
 DSF falloff to the left
 clap polyphonic modulation
 full-blown renoise support
