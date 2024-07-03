@@ -211,7 +211,7 @@ osc_osc_matrix_topo(int section, gui_position const& pos, plugin_topo const* plu
   fm_source.gui.bindings.enabled.bind_params({ param_fm_on }, [](auto const& vs) { return vs[0] != 0; });
   fm_source.gui.item_enabled.bind_param({ module_osc_osc_matrix, 0, param_fm_target, gui_item_binding::match_param_slot },
     [osc = osc_matrix.mappings](int other, int self) {
-      return osc[self].slot < osc[other].slot; });
+      return osc[self].slot <= osc[other].slot; }); // TODO this will crash the audio engine if selected
   fm_source.info.description = std::string("Selects FM routing source. Note that you can only route 'upwards', so not Osc2->Osc1. ") + 
     "Self-modulation is not possible (AKA, feedback-FM not implemented)."; // TODO
   auto& fm_target = result.params.emplace_back(make_param(
@@ -222,7 +222,7 @@ osc_osc_matrix_topo(int section, gui_position const& pos, plugin_topo const* plu
   fm_target.gui.bindings.enabled.bind_params({ param_fm_on }, [](auto const& vs) { return vs[0] != 0; });
   fm_target.gui.item_enabled.bind_param({ module_osc_osc_matrix, 0, param_fm_source, gui_item_binding::match_param_slot },
     [osc = osc_matrix.mappings](int other, int self) {
-      return osc[other].slot < osc[self].slot; });
+      return osc[other].slot <= osc[self].slot; }); // TODO this will crash the audio engine if selected
   fm_target.info.description = "Selects FM routing target.";
   auto& fm_mode = result.params.emplace_back(make_param(
     make_topo_info_tabular("{277ED206-E225-46C9-BFBF-DC277C7F264A}", "FM Mode", "Mode", param_fm_mode, route_count),
