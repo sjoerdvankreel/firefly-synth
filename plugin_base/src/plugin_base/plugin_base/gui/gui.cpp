@@ -746,6 +746,7 @@ plugin_gui::make_multi_param(module_desc const& module, param_desc const* slots)
   if (param->gui.tabular)
   {
     std::string display_name = param->info.tag.display_name;
+    if (!param->info.tag.tabular_display_name.empty()) display_name = param->info.tag.tabular_display_name;
     auto colors = _lnf->module_gui_colors(module.module->info.tag.full_name);
     auto& header = make_component<autofit_label>(module_lnf(module.module->info.index), display_name, false, -1, true);
     header.setText(display_name, dontSendNotification);

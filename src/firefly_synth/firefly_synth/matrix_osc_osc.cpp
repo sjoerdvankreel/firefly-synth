@@ -144,14 +144,14 @@ osc_osc_matrix_topo(int section, gui_position const& pos, plugin_topo const* plu
     make_param_section_gui({ 0, 0 }, { { 1 }, { -25, gui_dimension::auto_size, gui_dimension::auto_size, 1, 1, 1 } })));
   am.gui.scroll_mode = gui_scroll_mode::vertical;  
   auto& am_on = result.params.emplace_back(make_param(
-    make_topo_info_basic("{13B61F71-161B-40CE-BF7F-5022F48D60C7}", "On", param_am_on, route_count),
+    make_topo_info_tabular("{13B61F71-161B-40CE-BF7F-5022F48D60C7}", "AM On", "On", param_am_on, route_count),
     make_param_dsp_voice(param_automate::automate), make_domain_toggle(false),
     make_param_gui(section_am, gui_edit_type::toggle, param_layout::vertical, { 0, 0 }, make_label_none())));
   am_on.gui.tabular = true;
   am_on.gui.menu_handler_factory = [](plugin_state* state) { return make_matrix_param_menu_handler(state, 2, 0, route_count, 1); };
   am_on.info.description = "Toggles AM routing on/off.";
   auto& am_source = result.params.emplace_back(make_param(
-    make_topo_info_basic("{1D8F3294-2463-470D-853B-561E8228467A}", "Src", param_am_source, route_count),
+    make_topo_info_tabular("{1D8F3294-2463-470D-853B-561E8228467A}", "AM Src", "Src", param_am_source, route_count),
     make_param_dsp_voice(param_automate::automate), make_domain_item(osc_matrix.items, ""),
     make_param_gui(section_am, gui_edit_type::autofit_list, param_layout::vertical, { 0, 1 }, make_label_none())));
   am_source.gui.tabular = true;
@@ -161,7 +161,7 @@ osc_osc_matrix_topo(int section, gui_position const& pos, plugin_topo const* plu
       return osc[self].slot <= osc[other].slot; });
   am_source.info.description = "Selects AM routing source. Note that you can only route 'upwards', so not Osc2->Osc1. However self-modulation is possible.";
   auto& am_target = result.params.emplace_back(make_param(
-    make_topo_info_basic("{1AF0E66A-ADB5-40F4-A4E1-9F31941171E2}", "Tgt", param_am_target, route_count),
+    make_topo_info_tabular("{1AF0E66A-ADB5-40F4-A4E1-9F31941171E2}", "AM Tgt", "Tgt", param_am_target, route_count),
     make_param_dsp_voice(param_automate::automate), make_domain_item(osc_matrix.items, "2"),
     make_param_gui(section_am, gui_edit_type::autofit_list, param_layout::vertical, { 0, 2 }, make_label_none())));
   am_target.gui.tabular = true;
@@ -171,21 +171,21 @@ osc_osc_matrix_topo(int section, gui_position const& pos, plugin_topo const* plu
       return osc[other].slot <= osc[self].slot; });
   am_target.info.description = "Selects AM routing target.";
   auto& am_amount = result.params.emplace_back(make_param(
-    make_topo_info_basic("{A1A7298E-542D-4C2F-9B26-C1AF7213D095}", "Mix", param_am_amt, route_count),
+    make_topo_info_tabular("{A1A7298E-542D-4C2F-9B26-C1AF7213D095}", "AM Mix", "Mix", param_am_amt, route_count),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(1, 0, true),
     make_param_gui(section_am, gui_edit_type::knob, param_layout::vertical, { 0, 3 }, make_label_none())));
   am_amount.gui.tabular = true;
   am_amount.gui.bindings.enabled.bind_params({ param_am_on }, [](auto const& vs) { return vs[0] != 0; });
   am_amount.info.description = "Dry/wet control between unmodulated and modulated signal.";
   auto& am_ring = result.params.emplace_back(make_param(
-    make_topo_info_basic("{3DF51ADC-9882-4F95-AF4E-5208EB14E645}", "Ring", param_am_ring, route_count),
+    make_topo_info_tabular("{3DF51ADC-9882-4F95-AF4E-5208EB14E645}", "AM Ring", "Ring", param_am_ring, route_count),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0, 0, true),
     make_param_gui(section_am, gui_edit_type::knob, param_layout::vertical, { 0, 4 }, make_label_none())));
   am_ring.gui.tabular = true;
   am_ring.gui.bindings.enabled.bind_params({ param_am_on }, [](auto const& vs) { return vs[0] != 0; });
   am_ring.info.description = "Dry/wet control between amplitude-modulated and ring-modulated signal.";
   auto& am_dly = result.params.emplace_back(make_param(
-    make_topo_info_basic("{D4A758D9-EADE-45F7-8A3C-617857D6D58D}", "AM Dly", param_am_dly, route_count),
+    make_topo_info_tabular("{D4A758D9-EADE-45F7-8A3C-617857D6D58D}", "AM Dly", "Dly", param_am_dly, route_count),
     make_param_dsp_accurate(param_automate::modulate), make_domain_linear(0, 50, 0, 2, "Ms"), // todo must this be modulatable?
     make_param_gui(section_am, gui_edit_type::knob, param_layout::vertical, { 0, 5 }, make_label_none())));
   am_dly.gui.tabular = true;
@@ -197,14 +197,14 @@ osc_osc_matrix_topo(int section, gui_position const& pos, plugin_topo const* plu
     make_param_section_gui({ 0, 0 }, { { 1 }, { -25, gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, 1, 1 } })));
   fm.gui.scroll_mode = gui_scroll_mode::vertical;
   auto& fm_on = result.params.emplace_back(make_param(
-    make_topo_info_basic("{02112C80-D1E9-409E-A9FB-6DCA34F5CABA}", "On", param_fm_on, route_count),
+    make_topo_info_tabular("{02112C80-D1E9-409E-A9FB-6DCA34F5CABA}", "FM On", "On", param_fm_on, route_count),
     make_param_dsp_voice(param_automate::automate), make_domain_toggle(false),
     make_param_gui(section_fm, gui_edit_type::toggle, param_layout::vertical, { 0, 0 }, make_label_none())));
   fm_on.gui.tabular = true;
   fm_on.gui.menu_handler_factory = [](plugin_state* state) { return make_matrix_param_menu_handler(state, 2, 1, route_count, 1); };
   fm_on.info.description = "Toggles FM routing on/off.";
   auto& fm_source = result.params.emplace_back(make_param(
-    make_topo_info_basic("{61E9C704-E704-4669-9DC3-D3AA9FD6A952}", "Src", param_fm_source, route_count),
+    make_topo_info_tabular("{61E9C704-E704-4669-9DC3-D3AA9FD6A952}", "FM Src", "Src", param_fm_source, route_count),
     make_param_dsp_voice(param_automate::automate), make_domain_item(osc_matrix.items, ""),
     make_param_gui(section_fm, gui_edit_type::autofit_list, param_layout::vertical, { 0, 1 }, make_label_none())));
   fm_source.gui.tabular = true;
@@ -215,7 +215,7 @@ osc_osc_matrix_topo(int section, gui_position const& pos, plugin_topo const* plu
   fm_source.info.description = std::string("Selects FM routing source. Note that you can only route 'upwards', so not Osc2->Osc1. ") + 
     "Self-modulation is not possible (AKA, feedback-FM not implemented)."; // TODO
   auto& fm_target = result.params.emplace_back(make_param(
-    make_topo_info_basic("{DBDD28D6-46B9-4F9A-9682-66E68A261B87}", "Tgt", param_fm_target, route_count),
+    make_topo_info_tabular("{DBDD28D6-46B9-4F9A-9682-66E68A261B87}", "FM Tgt", "Tgt", param_fm_target, route_count),
     make_param_dsp_voice(param_automate::automate), make_domain_item(osc_matrix.items, "2"),
     make_param_gui(section_fm, gui_edit_type::autofit_list, param_layout::vertical, { 0, 2 }, make_label_none())));
   fm_target.gui.tabular = true;
@@ -225,7 +225,7 @@ osc_osc_matrix_topo(int section, gui_position const& pos, plugin_topo const* plu
       return osc[other].slot < osc[self].slot; });
   fm_target.info.description = "Selects FM routing target.";
   auto& fm_mode = result.params.emplace_back(make_param(
-    make_topo_info_basic("{277ED206-E225-46C9-BFBF-DC277C7F264A}", "Mode", param_fm_mode, route_count),
+    make_topo_info_tabular("{277ED206-E225-46C9-BFBF-DC277C7F264A}", "FM Mode", "Mode", param_fm_mode, route_count),
     make_param_dsp_voice(param_automate::automate), make_domain_item(fm_mode_items(), ""),
     make_param_gui(section_fm, gui_edit_type::autofit_list, param_layout::vertical, { 0, 3 }, make_label_none())));
   fm_mode.gui.tabular = true;
@@ -233,7 +233,7 @@ osc_osc_matrix_topo(int section, gui_position const& pos, plugin_topo const* plu
   fm_mode.info.description = std::string("Selects unipolar/bipolar mode. ") + 
     "Bipolar causes the target Osc's phase to travel both forward and backward and is apparently referred to as through-zero FM.";
   auto& fm_amount = result.params.emplace_back(make_param(
-    make_topo_info("{444B0AFD-2B4A-40B5-B952-52002141C5DD}", true, "Index", "Idx", "Index", param_fm_idx, route_count),
+    make_topo_info_tabular("{444B0AFD-2B4A-40B5-B952-52002141C5DD}", "FM Idx", "Idx", param_fm_idx, route_count),
     make_param_dsp_accurate(param_automate::modulate), make_domain_log(0, 1, 0.01, 0.05, 4, ""),
     make_param_gui(section_fm, gui_edit_type::knob, param_layout::vertical, { 0, 4 }, make_label_none())));
   fm_amount.gui.tabular = true;
@@ -242,7 +242,7 @@ osc_osc_matrix_topo(int section, gui_position const& pos, plugin_topo const* plu
     "Less index is less phase adjustment on the target signal. I did not implement automatic scaling with pitch, " + 
     "but this is a modulatable parameter which you can couple with the Note Key modulation source.";
   auto& fm_dly = result.params.emplace_back(make_param(
-    make_topo_info_basic("{669EEDB6-5AD6-4340-8483-2AB37A007179}", "FM Dly", param_fm_dly, route_count),
+    make_topo_info_tabular("{669EEDB6-5AD6-4340-8483-2AB37A007179}", "FM Dly", "Dly", param_fm_dly, route_count),
     make_param_dsp_accurate(param_automate::modulate), make_domain_linear(0, 50, 0, 2, "Ms"), // todo must this be modulatable? // todo how much (50)?
     make_param_gui(section_fm, gui_edit_type::knob, param_layout::vertical, { 0, 5 }, make_label_none())));
   fm_dly.gui.tabular = true;

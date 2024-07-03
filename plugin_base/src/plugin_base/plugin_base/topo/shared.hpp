@@ -58,6 +58,7 @@ struct topo_tag final {
   std::string full_name = {};
   std::string display_name = {};
   std::string menu_display_name = {};
+  std::string tabular_display_name = {};
   bool name_one_based = true;
 
   void validate() const;
