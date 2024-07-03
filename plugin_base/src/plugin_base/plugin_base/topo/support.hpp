@@ -72,8 +72,6 @@ module_topo_gui
 make_module_gui_none(int section);
 module_topo_gui
 make_module_gui(int section, gui_position const& position, gui_dimension const& dimension);
-module_topo_gui
-make_module_gui_tabbed(int section, gui_position const& position, std::vector<int> const& tab_order);
 
 param_dsp
 make_param_dsp_midi(midi_topo_mapping const& source);

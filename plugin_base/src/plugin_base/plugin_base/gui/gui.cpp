@@ -563,26 +563,19 @@ plugin_gui::get_module_graph_engine(module_topo const& module)
   return _module_graph_engines[module.info.index].get();
 }
 
-// NOTE! This only applies to 
-// 1) Multi-slot modules or
-// 2) Tabbed module sections.
-// It is NOT used for modules with multiple parameter sections on different tabs.
-// I.e., stuff only "happens" (repaint graphs, store tab index etc)
-// when either an active module or an active module slot changes.
-// So far there's just no need to track "what-happens-within-a-single-module-instance" other than parameter changes.
 void
 plugin_gui::init_multi_tab_component(tab_component& tab, std::string const& id, int module_index, int section_index)
 {
   assert((module_index == -1) != (section_index == -1));
-  tab.tab_changed = [this, id, module_index, section_index](int tab_index) {
+  tab.tab_changed = [this, id, module_index, section_index](int tab_index) { 
     set_extra_state_num(id, extra_state_tab_index, tab_index);
-    if (module_index != -1)
-      for (int i = 0; i < _tab_selection_listeners.size(); i++)
+    if(module_index != -1)
+      for(int i = 0; i < _tab_selection_listeners.size(); i++)
         _tab_selection_listeners[i]->module_tab_changed(module_index, tab_index);
     if (section_index != -1)
       for (int i = 0; i < _tab_selection_listeners.size(); i++)
         _tab_selection_listeners[i]->section_tab_changed(section_index, tab_index);
-    };
+  };
   tab.setCurrentTabIndex(std::clamp((int)get_extra_state_num(id, extra_state_tab_index, 0), 0, tab.getNumTabs() - 1));
   set_extra_state_num(id, extra_state_tab_index, tab.getCurrentTabIndex());
 }
@@ -681,26 +674,11 @@ Component&
 plugin_gui::make_param_sections(module_desc const& module)
 {
   auto const& topo = *module.module;
-  if (!topo.gui.tabbed)
-  {
-    auto& result = make_component<grid_component>(topo.gui.dimension, margin_vsection, 0, topo.gui.autofit_row, topo.gui.autofit_column);
-    for (int s = 0; s < topo.sections.size(); s++)
-      result.add(make_param_section(module, topo.sections[s], topo.sections[s].gui.position.column == 0), topo.sections[s].gui.position);
-    add_hover_listener(result, gui_hover_type::module, module.info.global);
-    return result;
-  }
-  else
-  {
-    // need this to be 1 because we dont support multi-slot components with inner tabs
-    assert(topo.info.slot_count == 1);
-    auto& tabs = make_tab_component(topo.info.tag.id, "", topo.info.index);
-    for (int o = 0; o < topo.gui.tab_order.size(); o++)
-    {
-      auto const& section = topo.sections[topo.gui.tab_order[o]];
-      add_component_tab(tabs, make_param_section(module, section, false), module.info.global, section.tag.display_name);
-    }
-    return tabs;
-  }
+  auto& result = make_component<grid_component>(topo.gui.dimension, margin_vsection, 0, topo.gui.autofit_row, topo.gui.autofit_column);
+  for (int s = 0; s < topo.sections.size(); s++)
+    result.add(make_param_section(module, topo.sections[s], topo.sections[s].gui.position.column == 0), topo.sections[s].gui.position);
+  add_hover_listener(result, gui_hover_type::module, module.info.global);
+  return result;
 }
 
 Component&
