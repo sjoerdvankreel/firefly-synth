@@ -185,7 +185,7 @@ osc_osc_matrix_topo(int section, gui_position const& pos, plugin_topo const* plu
   am_ring.gui.bindings.enabled.bind_params({ param_am_on }, [](auto const& vs) { return vs[0] != 0; });
   am_ring.info.description = "Dry/wet control between amplitude-modulated and ring-modulated signal.";
   auto& am_dly = result.params.emplace_back(make_param(
-    make_topo_info_basic("{D4A758D9-EADE-45F7-8A3C-617857D6D58D}", "Dly", param_am_dly, route_count),
+    make_topo_info_basic("{D4A758D9-EADE-45F7-8A3C-617857D6D58D}", "AM Dly", param_am_dly, route_count),
     make_param_dsp_accurate(param_automate::modulate), make_domain_linear(0, 50, 0, 2, "Ms"), // todo must this be modulatable?
     make_param_gui(section_am, gui_edit_type::knob, param_layout::vertical, { 0, 5 }, make_label_none())));
   am_dly.gui.tabular = true;
@@ -242,12 +242,12 @@ osc_osc_matrix_topo(int section, gui_position const& pos, plugin_topo const* plu
     "Less index is less phase adjustment on the target signal. I did not implement automatic scaling with pitch, " + 
     "but this is a modulatable parameter which you can couple with the Note Key modulation source.";
   auto& fm_dly = result.params.emplace_back(make_param(
-    make_topo_info_basic("{669EEDB6-5AD6-4340-8483-2AB37A007179}", "Dly", param_fm_dly, route_count),
+    make_topo_info_basic("{669EEDB6-5AD6-4340-8483-2AB37A007179}", "FM Dly", param_fm_dly, route_count),
     make_param_dsp_accurate(param_automate::modulate), make_domain_linear(0, 50, 0, 2, "Ms"), // todo must this be modulatable? // todo how much (50)?
     make_param_gui(section_fm, gui_edit_type::knob, param_layout::vertical, { 0, 5 }, make_label_none())));
-  am_dly.gui.tabular = true;
-  am_dly.gui.bindings.enabled.bind_params({ param_am_on }, [](auto const& vs) { return vs[0] != 0; });
-  am_dly.info.description = "Delays the modulator signal.";
+  fm_dly.gui.tabular = true;
+  fm_dly.gui.bindings.enabled.bind_params({ param_am_on }, [](auto const& vs) { return vs[0] != 0; });
+  fm_dly.info.description = "Delays the modulator signal.";
 
   return result;
 }
