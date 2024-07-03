@@ -24,6 +24,7 @@ feedback FM
 feedback AM
 AM/FM on separate tabs
 AM into oversampler
+recheck the renoise demos
 
 wishlist soon:
 DSF falloff to the left
