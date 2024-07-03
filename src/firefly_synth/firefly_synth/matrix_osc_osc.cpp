@@ -144,7 +144,7 @@ osc_osc_matrix_topo(int section, gui_position const& pos, plugin_topo const* plu
     make_param_section_gui({ 0, 0 }, { { 1 }, { -25, gui_dimension::auto_size, gui_dimension::auto_size, 1, 1 } })));
   am.gui.scroll_mode = gui_scroll_mode::vertical;  
   auto& am_on = result.params.emplace_back(make_param(
-    make_topo_info_basic("{13B61F71-161B-40CE-BF7F-5022F48D60C7}", "AM", param_am_on, route_count),
+    make_topo_info_basic("{13B61F71-161B-40CE-BF7F-5022F48D60C7}", "On", param_am_on, route_count),
     make_param_dsp_voice(param_automate::automate), make_domain_toggle(false),
     make_param_gui(section_am, gui_edit_type::toggle, param_layout::vertical, { 0, 0 }, make_label_none())));
   am_on.gui.tabular = true;
@@ -190,7 +190,7 @@ osc_osc_matrix_topo(int section, gui_position const& pos, plugin_topo const* plu
     make_param_section_gui({ 0, 0 }, { { 1 }, { -25, gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, 1 } })));
   fm.gui.scroll_mode = gui_scroll_mode::vertical;
   auto& fm_on = result.params.emplace_back(make_param(
-    make_topo_info_basic("{02112C80-D1E9-409E-A9FB-6DCA34F5CABA}", "FM", param_fm_on, route_count),
+    make_topo_info_basic("{02112C80-D1E9-409E-A9FB-6DCA34F5CABA}", "On", param_fm_on, route_count),
     make_param_dsp_voice(param_automate::automate), make_domain_toggle(false),
     make_param_gui(section_fm, gui_edit_type::toggle, param_layout::vertical, { 0, 0 }, make_label_none())));
   fm_on.gui.tabular = true;

@@ -1,3 +1,7 @@
+### ?, ? - V1.8.1.
+
+- Rearranged oscillator AM/FM GUI.
+
 ### July 1, 2024 - V1.8.0.
 
 - Added logging.
