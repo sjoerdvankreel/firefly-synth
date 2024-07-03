@@ -109,8 +109,8 @@ make_audio_routing_osc_mod_params(plugin_state* state)
   result.matrix_on_params = { param_am_on, param_fm_on };
   result.matrix_source_params = { param_am_source, param_fm_source };
   result.matrix_target_params = { param_am_target, param_fm_target };
-  result.sources = make_audio_matrix({ &state->desc().plugin->modules[module_osc] }, 0).mappings;
-  result.targets = make_audio_matrix({ &state->desc().plugin->modules[module_osc] }, 0).mappings;
+  result.sources = make_audio_matrix({ &state->desc().plugin->modules[module_osc] }, 0, true).mappings;
+  result.targets = make_audio_matrix({ &state->desc().plugin->modules[module_osc] }, 0, true).mappings;
   return result;
 }
 
@@ -118,7 +118,7 @@ module_topo
 osc_osc_matrix_topo(int section, gui_position const& pos, plugin_topo const* plugin)
 {
   std::vector<module_dsp_output> outputs;
-  auto osc_matrix = make_audio_matrix({ &plugin->modules[module_osc] }, 0);
+  auto osc_matrix = make_audio_matrix({ &plugin->modules[module_osc] }, 0, false);
 
   // scratch state for AM
   // for FM we use oversampled mono series
@@ -162,7 +162,7 @@ osc_osc_matrix_topo(int section, gui_position const& pos, plugin_topo const* plu
   am_source.info.description = "Selects AM routing source. Note that you can only route 'upwards', so not Osc2->Osc1. However self-modulation is possible.";
   auto& am_target = result.params.emplace_back(make_param(
     make_topo_info_basic("{1AF0E66A-ADB5-40F4-A4E1-9F31941171E2}", "Target", param_am_target, route_count),
-    make_param_dsp_voice(param_automate::automate), make_domain_item(osc_matrix.items, "Osc 2"),
+    make_param_dsp_voice(param_automate::automate), make_domain_item(osc_matrix.items, "2"),
     make_param_gui(section_am, gui_edit_type::autofit_list, param_layout::vertical, { 0, 2 }, make_label_none())));
   am_target.gui.tabular = true;
   am_target.gui.bindings.enabled.bind_params({ param_am_on }, [](auto const& vs) { return vs[0] != 0; });
@@ -216,7 +216,7 @@ osc_osc_matrix_topo(int section, gui_position const& pos, plugin_topo const* plu
     "Self-modulation is not possible (AKA, feedback-FM not implemented)."; // TODO
   auto& fm_target = result.params.emplace_back(make_param(
     make_topo_info_basic("{DBDD28D6-46B9-4F9A-9682-66E68A261B87}", "Target", param_fm_target, route_count),
-    make_param_dsp_voice(param_automate::automate), make_domain_item(osc_matrix.items, "Osc 2"),
+    make_param_dsp_voice(param_automate::automate), make_domain_item(osc_matrix.items, "2"),
     make_param_gui(section_fm, gui_edit_type::autofit_list, param_layout::vertical, { 0, 2 }, make_label_none())));
   fm_target.gui.tabular = true;
   fm_target.gui.bindings.enabled.bind_params({ param_fm_on }, [](auto const& vs) { return vs[0] != 0; });

@@ -136,8 +136,8 @@ make_audio_routing_audio_params(plugin_state* state, bool global)
   result.matrix_source_params = { param_source };
   result.matrix_target_params = { param_target };
   result.matrix_module = global ? module_gaudio_audio_matrix : module_vaudio_audio_matrix;
-  result.sources = make_audio_matrix(make_audio_audio_matrix_sources(state->desc().plugin, global), 0).mappings;
-  result.targets = make_audio_matrix(make_audio_audio_matrix_targets(state->desc().plugin, global), 0).mappings;
+  result.sources = make_audio_matrix(make_audio_audio_matrix_sources(state->desc().plugin, global), 0, true).mappings;
+  result.targets = make_audio_matrix(make_audio_audio_matrix_targets(state->desc().plugin, global), 0, true).mappings;
   return result;
 }
 
@@ -155,8 +155,8 @@ audio_audio_matrix_topo(
   auto const info = topo_info(global ? global_info : voice_info);
 
   int this_module = global? module_gaudio_audio_matrix: module_vaudio_audio_matrix;
-  auto source_matrix = make_audio_matrix(sources, 0);
-  auto target_matrix = make_audio_matrix(targets, 0);
+  auto source_matrix = make_audio_matrix(sources, 0, true);
+  auto target_matrix = make_audio_matrix(targets, 0, true);
 
   module_topo result(make_module(info,
     make_module_dsp(stage, module_output::audio, scratch_count, { 
