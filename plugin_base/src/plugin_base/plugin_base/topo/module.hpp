@@ -102,9 +102,17 @@ struct module_output_mapping final {
 struct module_topo_gui final {
   int section;
   bool visible;
+  
+  // indicates if content (param sections) are tabbed
+  bool tabbed;
+  std::vector<int> tab_order;
+
   gui_position position;
   gui_dimension dimension;
+  
+  // my own tab header in case my container is tabbed
   std::string tabbed_name;
+  
   int autofit_row = 0;
   int autofit_column = 0;
   bool enable_tab_menu = true;
