@@ -246,7 +246,7 @@ osc_osc_matrix_topo(int section, gui_position const& pos, plugin_topo const* plu
     make_param_dsp_accurate(param_automate::modulate), make_domain_linear(0, 50, 0, 2, "Ms"), // todo must this be modulatable? // todo how much (50)?
     make_param_gui(section_fm, gui_edit_type::knob, param_layout::vertical, { 0, 5 }, make_label_none())));
   fm_dly.gui.tabular = true;
-  fm_dly.gui.bindings.enabled.bind_params({ param_am_on }, [](auto const& vs) { return vs[0] != 0; });
+  fm_dly.gui.bindings.enabled.bind_params({ param_fm_on }, [](auto const& vs) { return vs[0] != 0; });
   fm_dly.info.description = "Delays the modulator signal.";
 
   return result;
