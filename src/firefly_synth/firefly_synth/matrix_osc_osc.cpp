@@ -29,8 +29,8 @@ enum { scratch_fm_idx, scratch_count };
 enum { fm_mode_tru, fm_mode_fwd, fm_mode_bwd };
 
 enum { 
-  param_am_on, param_am_source, param_am_target, param_am_amt, param_am_ring,
-  param_fm_on, param_fm_source, param_fm_target, param_fm_mode, param_fm_idx
+  param_am_on, param_am_source, param_am_target, param_am_amt, param_am_ring, param_am_dly, // todo move am into the oversampling stage ?
+  param_fm_on, param_fm_source, param_fm_target, param_fm_mode, param_fm_idx, param_fm_dly // todo not exclude osc 1 -> osc 1
 };
 
 static int const route_count = 8;
@@ -141,7 +141,7 @@ osc_osc_matrix_topo(int section, gui_position const& pos, plugin_topo const* plu
 
   auto& am = result.sections.emplace_back(make_param_section(section_am,
     make_topo_tag_basic("{A48C0675-C020-4D05-A384-EF2B8CA8A066}", "AM"),
-    make_param_section_gui({ 0, 0 }, { { 1 }, { -25, gui_dimension::auto_size, gui_dimension::auto_size, 1, 1 } })));
+    make_param_section_gui({ 0, 0 }, { { 1 }, { -25, gui_dimension::auto_size, gui_dimension::auto_size, 1, 1, 1 } })));
   am.gui.scroll_mode = gui_scroll_mode::vertical;  
   auto& am_on = result.params.emplace_back(make_param(
     make_topo_info_basic("{13B61F71-161B-40CE-BF7F-5022F48D60C7}", "On", param_am_on, route_count),
@@ -184,10 +184,17 @@ osc_osc_matrix_topo(int section, gui_position const& pos, plugin_topo const* plu
   am_ring.gui.tabular = true;
   am_ring.gui.bindings.enabled.bind_params({ param_am_on }, [](auto const& vs) { return vs[0] != 0; });
   am_ring.info.description = "Dry/wet control between amplitude-modulated and ring-modulated signal.";
+  auto& am_dly = result.params.emplace_back(make_param(
+    make_topo_info_basic("{D4A758D9-EADE-45F7-8A3C-617857D6D58D}", "Dly", param_am_dly, route_count),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_linear(0, 50, 0, 2, "Ms"), // todo must this be modulatable?
+    make_param_gui(section_am, gui_edit_type::knob, param_layout::vertical, { 0, 5 }, make_label_none())));
+  am_dly.gui.tabular = true;
+  am_dly.gui.bindings.enabled.bind_params({ param_am_on }, [](auto const& vs) { return vs[0] != 0; });
+  am_dly.info.description = "Delays the modulator signal.";
 
   auto& fm = result.sections.emplace_back(make_param_section(section_fm,
     make_topo_tag_basic("{1B39A828-3429-4245-BF07-551C17A78341}", "FM"),
-    make_param_section_gui({ 0, 0 }, { { 1 }, { -25, gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, 1 } })));
+    make_param_section_gui({ 0, 0 }, { { 1 }, { -25, gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, 1, 1 } })));
   fm.gui.scroll_mode = gui_scroll_mode::vertical;
   auto& fm_on = result.params.emplace_back(make_param(
     make_topo_info_basic("{02112C80-D1E9-409E-A9FB-6DCA34F5CABA}", "On", param_fm_on, route_count),
@@ -234,6 +241,13 @@ osc_osc_matrix_topo(int section, gui_position const& pos, plugin_topo const* plu
   fm_amount.info.description = std::string("Modulation index. This is really just a multiplier for the source signal. ") + 
     "Less index is less phase adjustment on the target signal. I did not implement automatic scaling with pitch, " + 
     "but this is a modulatable parameter which you can couple with the Note Key modulation source.";
+  auto& fm_dly = result.params.emplace_back(make_param(
+    make_topo_info_basic("{669EEDB6-5AD6-4340-8483-2AB37A007179}", "Dly", param_fm_dly, route_count),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_linear(0, 50, 0, 2, "Ms"), // todo must this be modulatable? // todo how much (50)?
+    make_param_gui(section_fm, gui_edit_type::knob, param_layout::vertical, { 0, 5 }, make_label_none())));
+  am_dly.gui.tabular = true;
+  am_dly.gui.bindings.enabled.bind_params({ param_am_on }, [](auto const& vs) { return vs[0] != 0; });
+  am_dly.info.description = "Delays the modulator signal.";
 
   return result;
 }
