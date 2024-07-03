@@ -151,7 +151,7 @@ osc_osc_matrix_topo(int section, gui_position const& pos, plugin_topo const* plu
   am_on.gui.menu_handler_factory = [](plugin_state* state) { return make_matrix_param_menu_handler(state, 2, 0, route_count, 1); };
   am_on.info.description = "Toggles AM routing on/off.";
   auto& am_source = result.params.emplace_back(make_param(
-    make_topo_info_basic("{1D8F3294-2463-470D-853B-561E8228467A}", "Source", param_am_source, route_count),
+    make_topo_info_basic("{1D8F3294-2463-470D-853B-561E8228467A}", "Src", param_am_source, route_count),
     make_param_dsp_voice(param_automate::automate), make_domain_item(osc_matrix.items, ""),
     make_param_gui(section_am, gui_edit_type::autofit_list, param_layout::vertical, { 0, 1 }, make_label_none())));
   am_source.gui.tabular = true;
@@ -161,7 +161,7 @@ osc_osc_matrix_topo(int section, gui_position const& pos, plugin_topo const* plu
       return osc[self].slot <= osc[other].slot; });
   am_source.info.description = "Selects AM routing source. Note that you can only route 'upwards', so not Osc2->Osc1. However self-modulation is possible.";
   auto& am_target = result.params.emplace_back(make_param(
-    make_topo_info_basic("{1AF0E66A-ADB5-40F4-A4E1-9F31941171E2}", "Target", param_am_target, route_count),
+    make_topo_info_basic("{1AF0E66A-ADB5-40F4-A4E1-9F31941171E2}", "Tgt", param_am_target, route_count),
     make_param_dsp_voice(param_automate::automate), make_domain_item(osc_matrix.items, "2"),
     make_param_gui(section_am, gui_edit_type::autofit_list, param_layout::vertical, { 0, 2 }, make_label_none())));
   am_target.gui.tabular = true;
@@ -204,7 +204,7 @@ osc_osc_matrix_topo(int section, gui_position const& pos, plugin_topo const* plu
   fm_on.gui.menu_handler_factory = [](plugin_state* state) { return make_matrix_param_menu_handler(state, 2, 1, route_count, 1); };
   fm_on.info.description = "Toggles FM routing on/off.";
   auto& fm_source = result.params.emplace_back(make_param(
-    make_topo_info_basic("{61E9C704-E704-4669-9DC3-D3AA9FD6A952}", "Source", param_fm_source, route_count),
+    make_topo_info_basic("{61E9C704-E704-4669-9DC3-D3AA9FD6A952}", "Src", param_fm_source, route_count),
     make_param_dsp_voice(param_automate::automate), make_domain_item(osc_matrix.items, ""),
     make_param_gui(section_fm, gui_edit_type::autofit_list, param_layout::vertical, { 0, 1 }, make_label_none())));
   fm_source.gui.tabular = true;
@@ -215,7 +215,7 @@ osc_osc_matrix_topo(int section, gui_position const& pos, plugin_topo const* plu
   fm_source.info.description = std::string("Selects FM routing source. Note that you can only route 'upwards', so not Osc2->Osc1. ") + 
     "Self-modulation is not possible (AKA, feedback-FM not implemented)."; // TODO
   auto& fm_target = result.params.emplace_back(make_param(
-    make_topo_info_basic("{DBDD28D6-46B9-4F9A-9682-66E68A261B87}", "Target", param_fm_target, route_count),
+    make_topo_info_basic("{DBDD28D6-46B9-4F9A-9682-66E68A261B87}", "Tgt", param_fm_target, route_count),
     make_param_dsp_voice(param_automate::automate), make_domain_item(osc_matrix.items, "2"),
     make_param_gui(section_fm, gui_edit_type::autofit_list, param_layout::vertical, { 0, 2 }, make_label_none())));
   fm_target.gui.tabular = true;
