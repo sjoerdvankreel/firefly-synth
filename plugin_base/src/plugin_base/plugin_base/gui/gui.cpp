@@ -667,14 +667,24 @@ plugin_gui::add_component_tab(TabbedComponent& tc, Component& child, int module,
 Component&
 plugin_gui::make_modules(module_desc const* slots)
 {
-  int index = slots[0].module->info.index;
-  auto const& tag = slots[0].module->info.tag;
-  auto& result = make_tab_component(tag.id, tag.display_name, index);
-  for (int i = 0; i < slots[0].module->info.slot_count; i++)
-    add_component_tab(result, make_param_sections(slots[i]), slots[i].info.global, std::to_string(i + 1));
-  if(slots[0].module->info.slot_count > 1)
-    init_multi_tab_component(result, tag.id, index, -1);
-  return result;
+  auto const& topo = *slots[0].module;
+  if (!topo.gui.tabbed)
+  {
+    int index = topo.info.index;
+    auto const& tag = topo.info.tag;
+    auto& result = make_tab_component(tag.id, tag.display_name, index);
+    for (int i = 0; i < topo.info.slot_count; i++)
+      add_component_tab(result, make_param_sections(slots[i]), slots[i].info.global, std::to_string(i + 1));
+    if (topo.info.slot_count > 1)
+      init_multi_tab_component(result, tag.id, index, -1);
+    return result;
+  }
+  else
+  {
+    // tabbed param sections in multi-slot modules not supported
+    assert(topo.info.slot_count == 1);
+    return make_param_sections(slots[0]);
+  }
 }
 
 Component&
@@ -693,7 +703,7 @@ plugin_gui::make_param_sections(module_desc const& module)
   {
     // need this to be 1 because we dont support multi-slot components with inner tabs
     assert(topo.info.slot_count == 1);
-    auto& tabs = make_tab_component(topo.info.tag.id, "", topo.info.index);
+    auto& tabs = make_tab_component(topo.info.tag.id, topo.info.tag.display_name, topo.info.index);
     for (int o = 0; o < topo.gui.tab_order.size(); o++)
     {
       auto const& section = topo.sections[topo.gui.tab_order[o]];
