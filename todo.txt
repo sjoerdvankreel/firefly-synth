@@ -16,12 +16,6 @@ check if need update github social preview
 drop all conversion code on breaking plugin id
 dont forget to update the version nr in code and cmake and mac bundle and build/zip scripts and downloads and studiorack
 
-v1.8.1:
-add presets from:
-all fm and no filters
-check the todos
-v AM/FM on separate tabs
-
 wishlist soon:
 DSF falloff to the left
 clap polyphonic modulation
