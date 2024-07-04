@@ -29,8 +29,8 @@ enum { scratch_fm_idx, scratch_count };
 enum { fm_mode_tru, fm_mode_fwd, fm_mode_bwd };
 
 enum { 
-  param_am_on, param_am_source, param_am_target, param_am_amt, param_am_ring, param_am_dly, // todo move am into the oversampling stage ?
-  param_fm_on, param_fm_source, param_fm_target, param_fm_mode, param_fm_idx, param_fm_dly // todo not exclude osc 1 -> osc 1
+  param_am_on, param_am_source, param_am_target, param_am_amt, param_am_ring,
+  param_fm_on, param_fm_source, param_fm_target, param_fm_mode, param_fm_idx,
 };
 
 static int const route_count = 8;
@@ -184,13 +184,6 @@ osc_osc_matrix_topo(int section, gui_position const& pos, plugin_topo const* plu
   am_ring.gui.tabular = true;
   am_ring.gui.bindings.enabled.bind_params({ param_am_on }, [](auto const& vs) { return vs[0] != 0; });
   am_ring.info.description = "Dry/wet control between amplitude-modulated and ring-modulated signal.";
-  auto& am_dly = result.params.emplace_back(make_param(
-    make_topo_info_tabular("{D4A758D9-EADE-45F7-8A3C-617857D6D58D}", "AM Dly", "Dly", param_am_dly, route_count),
-    make_param_dsp_accurate(param_automate::modulate), make_domain_linear(0, 50, 0, 2, "Ms"), // todo must this be modulatable?
-    make_param_gui(section_am, gui_edit_type::knob, param_layout::vertical, { 0, 5 }, make_label_none())));
-  am_dly.gui.tabular = true;
-  am_dly.gui.bindings.enabled.bind_params({ param_am_on }, [](auto const& vs) { return vs[0] != 0; });
-  am_dly.info.description = "Delays the modulator signal.";
 
   auto& fm = result.sections.emplace_back(make_param_section(section_fm,
     make_topo_tag_basic("{1B39A828-3429-4245-BF07-551C17A78341}", "FM"),
@@ -211,9 +204,9 @@ osc_osc_matrix_topo(int section, gui_position const& pos, plugin_topo const* plu
   fm_source.gui.bindings.enabled.bind_params({ param_fm_on }, [](auto const& vs) { return vs[0] != 0; });
   fm_source.gui.item_enabled.bind_param({ module_osc_osc_matrix, 0, param_fm_target, gui_item_binding::match_param_slot },
     [osc = osc_matrix.mappings](int other, int self) {
-      return osc[self].slot <= osc[other].slot; }); // TODO this will crash the audio engine if selected
+      return osc[self].slot < osc[other].slot; });
   fm_source.info.description = std::string("Selects FM routing source. Note that you can only route 'upwards', so not Osc2->Osc1. ") + 
-    "Self-modulation is not possible (AKA, feedback-FM not implemented)."; // TODO
+    "Self-modulation is not possible (AKA, feedback-FM not implemented).";
   auto& fm_target = result.params.emplace_back(make_param(
     make_topo_info_tabular("{DBDD28D6-46B9-4F9A-9682-66E68A261B87}", "FM Tgt", "Tgt", param_fm_target, route_count),
     make_param_dsp_voice(param_automate::automate), make_domain_item(osc_matrix.items, "2"),
@@ -222,7 +215,7 @@ osc_osc_matrix_topo(int section, gui_position const& pos, plugin_topo const* plu
   fm_target.gui.bindings.enabled.bind_params({ param_fm_on }, [](auto const& vs) { return vs[0] != 0; });
   fm_target.gui.item_enabled.bind_param({ module_osc_osc_matrix, 0, param_fm_source, gui_item_binding::match_param_slot },
     [osc = osc_matrix.mappings](int other, int self) {
-      return osc[other].slot <= osc[self].slot; }); // TODO this will crash the audio engine if selected
+      return osc[other].slot < osc[self].slot; });
   fm_target.info.description = "Selects FM routing target.";
   auto& fm_mode = result.params.emplace_back(make_param(
     make_topo_info_tabular("{277ED206-E225-46C9-BFBF-DC277C7F264A}", "FM Mode", "Mode", param_fm_mode, route_count),
@@ -241,13 +234,6 @@ osc_osc_matrix_topo(int section, gui_position const& pos, plugin_topo const* plu
   fm_amount.info.description = std::string("Modulation index. This is really just a multiplier for the source signal. ") + 
     "Less index is less phase adjustment on the target signal. I did not implement automatic scaling with pitch, " + 
     "but this is a modulatable parameter which you can couple with the Note Key modulation source.";
-  auto& fm_dly = result.params.emplace_back(make_param(
-    make_topo_info_tabular("{669EEDB6-5AD6-4340-8483-2AB37A007179}", "FM Dly", "Dly", param_fm_dly, route_count),
-    make_param_dsp_accurate(param_automate::modulate), make_domain_linear(0, 50, 0, 2, "Ms"), // todo must this be modulatable? // todo how much (50)?
-    make_param_gui(section_fm, gui_edit_type::knob, param_layout::vertical, { 0, 5 }, make_label_none())));
-  fm_dly.gui.tabular = true;
-  fm_dly.gui.bindings.enabled.bind_params({ param_fm_on }, [](auto const& vs) { return vs[0] != 0; });
-  fm_dly.info.description = "Delays the modulator signal.";
 
   return result;
 }

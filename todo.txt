@@ -20,17 +20,14 @@ v1.8.1:
 add presets from:
 all fm and no filters
 check the todos
-feedback FM
-feedback AM
-AM/FM on separate tabs
-AM into oversampler
-recheck the renoise demos
+v AM/FM on separate tabs
 
 wishlist soon:
 DSF falloff to the left
 clap polyphonic modulation
 full-blown renoise support
 fix global unison for mono mode
+Feedback FM, but NOT through the mod matrix
 
 wishlist sometime:
 mseg
