@@ -16,6 +16,8 @@ class osc_osc_matrix_engine;
 class osc_osc_matrix_am_modulator;
 class osc_osc_matrix_fm_modulator;
 
+// needed by osc and osc mod
+inline int const osc_mod_max_delay_ms = 50;
 // for osc and voice in
 inline int const max_osc_unison_voices = 8;
 // global unison, very memory hungry so only 4
@@ -46,11 +48,22 @@ struct osc_osc_matrix_context
   osc_osc_matrix_fm_modulator* fm_modulator;
 };
 
+// keep track of oversampled history for feedback AM/FM
+struct osc_oversampled_history
+{
+  int pos = 0;
+  int capacity = -1;
+  std::array<plugin_base::jarray<float, 2>, max_osc_unison_voices + 1> buffer;
+};
+
 // these are needed by the osc matrix
 struct oscillator_context
 {
+  // used for AM TODO - implement self-mod differently i.e. within the osc itself? (for FM)
+  osc_oversampled_history* oversampled_history = nullptr;
   // dimensions are [oversmp stage][lanes * channels][frames]
-  std::array<float**, plugin_base::max_oversampler_stages + 1> oversampled_lanes_channels_ptrs;
+  // TODO these are used for FM, for now
+  std::array<float**, plugin_base::max_oversampler_stages + 1> oversampled_lanes_channels_ptrs; // todo get rid if this ?
 };
 
 // everybody needs these

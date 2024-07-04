@@ -98,6 +98,7 @@ public module_engine {
   // basic and dsf
   float _ref_phases[max_osc_unison_voices];
   float _sync_phases[max_osc_unison_voices];
+  
   // for lerp hardsync
   int _unsync_samples[max_osc_unison_voices];
   float _unsync_phases[max_osc_unison_voices];
@@ -112,6 +113,9 @@ public module_engine {
   // static
   std::array<static_noise, max_osc_unison_voices> _static_noises = {};
   std::array<state_var_filter, max_osc_unison_voices> _static_svfs = {};
+
+  // keep track of oversampled history for feedback AM/FM
+  osc_oversampled_history _oversampled_history = {};
 
   // kps
   int _kps_max_length = {};
@@ -673,6 +677,13 @@ _oversampler(max_frame_count)
 
   for (int s = 0; s <= max_oversampler_stages; s++)
     _context.oversampled_lanes_channels_ptrs[s] = _oversampler.get_upsampled_lanes_channels_ptrs(1 << s);
+
+  int max_oversmp_factor = 1 << max_oversampler_stages;
+  int max_osc_history_size = osc_mod_max_delay_ms * sample_rate / 1000.0f;
+  _oversampled_history.capacity = (int)std::ceil(max_oversmp_factor * max_osc_history_size);
+  for (int v = 0; v <= max_osc_unison_voices; v++)
+    _oversampled_history.buffer[v].resize(jarray<int, 1>({ _oversampled_history.capacity, _oversampled_history.capacity }));
+  _context.oversampled_history = &_oversampled_history;
 }
 
 void
@@ -709,12 +720,16 @@ osc_engine::reset(plugin_block const* block)
     _unsync_samples[v] = 0;
   }
 
-  // publish the oversampler ptrs
+  // publish the oversampler ptrs and history buffers
   // note: it is important to do this during reset() rather than process()
   // because we have a circular dependency osc<>osc_fm
   // and the call order is reset_osc, reset_osc_fm, process_osc, process_osc_fm
   // luckily the fm matrix only needs the oversampler ptrs in the process() call
   *block->state.own_context = &_context;
+
+  // get rid of old buffer from previous voice
+  for (int v = 0; v <= max_osc_unison_voices; v++)
+    _oversampled_history.buffer[v].fill(0.0f);
 }
 
 // Cant be in the reset call because we need access to modulation.
@@ -1185,8 +1200,14 @@ osc_engine::process_unison(plugin_block& block, cv_audio_matrix_mixdown const* m
         }
       }
 
-      lanes_channels[(v + 1) * 2 + 0][frame] = gain_curve[mod_index] * mono_pan_sqrt<0>(pan) * synced_sample;
-      lanes_channels[(v + 1) * 2 + 1][frame] = gain_curve[mod_index] * mono_pan_sqrt<1>(pan) * synced_sample;
+      float oversampled_l = gain_curve[mod_index] * mono_pan_sqrt<0>(pan) * synced_sample;
+      float oversampled_r = gain_curve[mod_index] * mono_pan_sqrt<1>(pan) * synced_sample;
+      lanes_channels[(v + 1) * 2 + 0][frame] = oversampled_l;
+      lanes_channels[(v + 1) * 2 + 1][frame] = oversampled_r;
+      _oversampled_history.buffer[v + 1][0][_oversampled_history.pos] = oversampled_l;
+      _oversampled_history.buffer[v + 1][1][_oversampled_history.pos] = oversampled_r;
+      _oversampled_history.pos++;
+      _oversampled_history.pos %= _oversampled_history.capacity;
     }
   });
   
