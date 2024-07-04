@@ -18,7 +18,7 @@ using namespace plugin_base;
 namespace firefly_synth { 
 
 enum { section_am, section_fm };
-enum { scratch_fm_idx, scratch_fm_dly, scratch_count };
+enum { scratch_fm_idx, scratch_count };
 
 // it appears the "magical" through zero mode is really just about 
 // modulation by an unipolar vs bipolar (e.g. through-zero) signal?
@@ -186,7 +186,7 @@ osc_osc_matrix_topo(int section, gui_position const& pos, plugin_topo const* plu
   am_ring.info.description = "Dry/wet control between amplitude-modulated and ring-modulated signal.";
   auto& am_dly = result.params.emplace_back(make_param(
     make_topo_info_tabular("{D4A758D9-EADE-45F7-8A3C-617857D6D58D}", "AM Dly", "Dly", param_am_dly, route_count),
-    make_param_dsp_accurate(param_automate::modulate), make_domain_linear(0, osc_mod_max_delay_ms, 0, 2, "Ms"), // todo must this be modulatable?
+    make_param_dsp_accurate(param_automate::modulate), make_domain_linear(0, 50, 0, 2, "Ms"), // todo must this be modulatable?
     make_param_gui(section_am, gui_edit_type::knob, param_layout::vertical, { 0, 5 }, make_label_none())));
   am_dly.gui.tabular = true;
   am_dly.gui.bindings.enabled.bind_params({ param_am_on }, [](auto const& vs) { return vs[0] != 0; });
@@ -211,7 +211,7 @@ osc_osc_matrix_topo(int section, gui_position const& pos, plugin_topo const* plu
   fm_source.gui.bindings.enabled.bind_params({ param_fm_on }, [](auto const& vs) { return vs[0] != 0; });
   fm_source.gui.item_enabled.bind_param({ module_osc_osc_matrix, 0, param_fm_target, gui_item_binding::match_param_slot },
     [osc = osc_matrix.mappings](int other, int self) {
-      return osc[self].slot < osc[other].slot; });
+      return osc[self].slot <= osc[other].slot; }); // TODO this will crash the audio engine if selected
   fm_source.info.description = std::string("Selects FM routing source. Note that you can only route 'upwards', so not Osc2->Osc1. ") + 
     "Self-modulation is not possible (AKA, feedback-FM not implemented)."; // TODO
   auto& fm_target = result.params.emplace_back(make_param(
@@ -222,7 +222,7 @@ osc_osc_matrix_topo(int section, gui_position const& pos, plugin_topo const* plu
   fm_target.gui.bindings.enabled.bind_params({ param_fm_on }, [](auto const& vs) { return vs[0] != 0; });
   fm_target.gui.item_enabled.bind_param({ module_osc_osc_matrix, 0, param_fm_source, gui_item_binding::match_param_slot },
     [osc = osc_matrix.mappings](int other, int self) {
-      return osc[other].slot < osc[self].slot; });
+      return osc[other].slot <= osc[self].slot; }); // TODO this will crash the audio engine if selected
   fm_target.info.description = "Selects FM routing target.";
   auto& fm_mode = result.params.emplace_back(make_param(
     make_topo_info_tabular("{277ED206-E225-46C9-BFBF-DC277C7F264A}", "FM Mode", "Mode", param_fm_mode, route_count),
@@ -243,7 +243,7 @@ osc_osc_matrix_topo(int section, gui_position const& pos, plugin_topo const* plu
     "but this is a modulatable parameter which you can couple with the Note Key modulation source.";
   auto& fm_dly = result.params.emplace_back(make_param(
     make_topo_info_tabular("{669EEDB6-5AD6-4340-8483-2AB37A007179}", "FM Dly", "Dly", param_fm_dly, route_count),
-    make_param_dsp_accurate(param_automate::modulate), make_domain_linear(0, osc_mod_max_delay_ms, 0, 2, "Ms"), // todo must this be modulatable? // todo how much (50)?
+    make_param_dsp_accurate(param_automate::modulate), make_domain_linear(0, 50, 0, 2, "Ms"), // todo must this be modulatable? // todo how much (50)?
     make_param_gui(section_fm, gui_edit_type::knob, param_layout::vertical, { 0, 5 }, make_label_none())));
   fm_dly.gui.tabular = true;
   fm_dly.gui.bindings.enabled.bind_params({ param_fm_on }, [](auto const& vs) { return vs[0] != 0; });
@@ -440,9 +440,6 @@ osc_osc_matrix_engine::modulate_fm(
     auto const& idx_curve_plain = *(*cv_modulation)[module_osc_osc_matrix][0][param_fm_idx][r];
     auto& idx_curve = (*_own_scratch)[scratch_fm_idx];
     block.normalized_to_raw_block<domain_type::log>(module_osc_osc_matrix, param_fm_idx, idx_curve_plain, idx_curve);
-    auto const& dly_curve_plain = *(*cv_modulation)[module_osc_osc_matrix][0][param_fm_dly][r];
-    auto& dly_curve = (*_own_scratch)[scratch_fm_dly];
-    block.normalized_to_raw_block<domain_type::linear>(module_osc_osc_matrix, param_fm_dly, dly_curve_plain, dly_curve);
     int source_uni_voices = block.state.all_block_automation[module_osc][source_osc][osc_param_uni_voices][0].step();
     int oversmp_stages = block.state.all_block_automation[module_voice_in][0][voice_in_param_oversmp][0].step();
     int oversmp_factor = 1 << oversmp_stages;
@@ -454,10 +451,10 @@ osc_osc_matrix_engine::modulate_fm(
       oversmp_stages = 0;
     }
 
-    // oscillator provides us with the upsampled buffers so we can do oversampled FM
+    // oscillator provides us with the upsampled buffers to we can do oversampled FM
     void* source_context_ptr = block.module_context(module_osc, source_osc);
     auto source_context = static_cast<oscillator_context*>(source_context_ptr);
-    auto const& source_audio = *source_context->oversampled_history;
+    auto source_audio = source_context->oversampled_lanes_channels_ptrs[oversmp_stages];
 
     // in case the source osc is off, the oversampled signal is *not* generated
     // and it will contain garbage from the last time the osc was active
@@ -479,11 +476,6 @@ osc_osc_matrix_engine::modulate_fm(
       // note we work on the oversmp data from 0 to (end_frame - start_frame) * oversmp_factor
       for (int f = 0; f < (block.end_frame - block.start_frame) * oversmp_factor; f++)
       {
-        // oversampler is from 0 to (end_frame - start_frame) * oversmp_factor
-        // all the not-oversampled stuff requires from start_frame to end_frame
-        // so mind the bookkeeping
-        int mod_index = block.start_frame + f / oversmp_factor;
-
         // do not assume [-1, 1] here as oscillator can go beyond that
         // what to do with the stereo signal ? 
         // the oscs output a 2 channel signal but we only
@@ -492,46 +484,34 @@ osc_osc_matrix_engine::modulate_fm(
         // an additional mono signal but i doubt its worth the bookkeeping
         
         // also the bookkeeping is already complicated here:
-        // we got history buffer from the source osc which is circular
-        // and dimensions are [max_osc_uni + 1][channels[oversampled_frame]
+        // source_audio[(unison_voice + 1) * stero_channels + stereo_channel)
         // where + 1 is because voice 0 is the mixdown of all unison voices
-        // and where circular buffer pos corresponds to our (end_frame - start_frame)    
-
-        // now figure out where to look in the history buffer (which is oversampled)
-        // by accounting for the current delay amount curve (which is not)
-        float delay_ms = dly_curve[mod_index];
-        int delay_samples = (int)(delay_ms * block.sample_rate * oversmp_factor / 1000.0f);
-        assert(0 <= delay_samples && delay_samples < source_audio.capacity);
-        int delayed_frame = source_audio.pos + f - delay_samples;
-        if (delayed_frame < 0) delayed_frame += source_audio.capacity;
-        if (delayed_frame >= source_audio.capacity) delayed_frame -= source_audio.capacity;
-        assert(0 <= delayed_frame && delayed_frame < source_audio.capacity);
-
-        float mod0_l = source_audio.buffer[source_voice_0 + 1][0][delayed_frame];
-        float mod0_r = source_audio.buffer[source_voice_0 + 1][1][delayed_frame];
-        float mod1_l = source_audio.buffer[source_voice_1 + 1][0][delayed_frame];
-        float mod1_r = source_audio.buffer[source_voice_1 + 1][1][delayed_frame];
+        float mod0_l = source_audio[(source_voice_0 + 1) * 2 + 0][f];
+        float mod0_r = source_audio[(source_voice_0 + 1) * 2 + 1][f];
+        float mod1_l = source_audio[(source_voice_1 + 1) * 2 + 0][f];
+        float mod1_r = source_audio[(source_voice_1 + 1) * 2 + 1][f];
         float mod0 = (mod0_l + mod0_r) * 0.5f;
         float mod1 = (mod1_l + mod1_r) * 0.5f;
         float mod = (1 - source_voice_pos) * mod0 + source_voice_pos * mod1;
 
-#if 0 // TODO do we even need this anymore ?
         // in this case the oversampled pointers are not published
         // yet by the oscillators. since we dont oversample anyway
         // for graphs, just reach back into the original osc-provided
         // audio buffers
         if constexpr (Graph)
         {
-          assert(oversmp_factor == 1);
-          assert(oversmp_stages == 0);
-          mod0 = block.module_audio(module_osc, source_osc)[0][source_voice_0 + 1][0][delayed_frame];
-          mod1 = block.module_audio(module_osc, source_osc)[0][source_voice_1 + 1][0][delayed_frame];
+          mod0 = block.module_audio(module_osc, source_osc)[0][source_voice_0 + 1][0][f];
+          mod1 = block.module_audio(module_osc, source_osc)[0][source_voice_1 + 1][0][f];
           mod = (1 - source_voice_pos) * mod0 + source_voice_pos * mod1;
         }
-#endif
 
         // through zero + account for inactive source osc
         mod = ((mode_mul * mod) + mode_add) * source_multiplier;
+
+        // oversampler is from 0 to (end_frame - start_frame) * oversmp_factor
+        // all the not-oversampled stuff requires from start_frame to end_frame
+        // so mind the bookkeeping
+        int mod_index = block.start_frame + f / oversmp_factor;
 
         // fm modulation is oversampled so "f"
         // automation is NOT oversampled so "mod_index"
