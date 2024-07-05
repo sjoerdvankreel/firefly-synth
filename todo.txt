@@ -16,6 +16,10 @@ check if need update github social preview
 drop all conversion code on breaking plugin id
 dont forget to update the version nr in code and cmake and mac bundle and build/zip scripts and downloads and studiorack
 
+1.8.1:
+feedback fm
+recheck renoise stuff
+
 wishlist soon:
 DSF falloff to the left
 clap polyphonic modulation

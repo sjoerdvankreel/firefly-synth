@@ -17,9 +17,14 @@ using namespace plugin_base;
 
 namespace firefly_synth {
 
+static float const fdbk_fm_min_ms = 1.0f;
+static float const fdbk_fm_max_ms = 50.0f;
+
 enum { type_off, type_basic, type_dsf, type_kps1, type_kps2, type_static };
 enum { rand_svf_lpf, rand_svf_hpf, rand_svf_bpf, rand_svf_bsf, rand_svf_peq };
-enum { section_type, section_sync_params, section_sync_on, section_uni, section_basic, section_basic_pw, section_dsf, section_rand };
+enum { 
+  section_type, section_sync_params, section_sync_on, section_uni, 
+  section_basic, section_basic_pw, section_dsf, section_fbdk_fm, section_rand };
 enum { 
   scratch_pb, scratch_cent, scratch_pitch, scratch_sync_semi, 
   scratch_basic_sin_mix, scratch_basic_saw_mix, scratch_basic_tri_mix, scratch_basic_sqr_mix, 
@@ -32,6 +37,7 @@ enum {
   param_basic_sin_on, param_basic_sin_mix, param_basic_saw_on, param_basic_saw_mix,
   param_basic_tri_on, param_basic_tri_mix, param_basic_sqr_on, param_basic_sqr_mix, param_basic_sqr_pw,
   param_dsf_parts, param_dsf_dist, param_dsf_dcy,
+  param_fdbk_fm_on, param_fdbk_fm_idx, param_fdbk_fm_dly, // shared basic + dsf
   param_rand_svf, param_rand_rate, param_rand_freq, param_rand_res, param_rand_seed, // shared k+s/noise
   param_kps_fdbk, param_kps_mid, param_kps_stretch,
   param_pitch, param_pb };
@@ -272,7 +278,7 @@ osc_topo(int section, gui_position const& pos)
     make_topo_info("{45C2CCFE-48D9-4231-A327-319DAE5C9366}", true, "Oscillator", "Oscillator", "Osc", module_osc, 5),
     make_module_dsp(module_stage::voice, module_output::audio, scratch_count, {
       make_module_dsp_output(false, make_topo_info_basic("{FA702356-D73E-4438-8127-0FDD01526B7E}", "Output", 0, 1 + max_osc_unison_voices)) }),
-    make_module_gui(section, pos, { { 1, 1 }, { 32, 13, 8, 26, 55, 8 } })));
+    make_module_gui(section, pos, { { 1, 1 }, { 32, 13, 8, 26, 35, 8, 20 } })));
   result.info.description = "Oscillator module with sine/saw/triangle/square/DSF/Karplus-Strong/noise generators, hardsync and unison support.";
 
   result.minimal_initializer = init_minimal;
@@ -487,9 +493,36 @@ osc_topo(int section, gui_position const& pos)
   dsf_dcy.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dsf; });
   dsf_dcy.info.description = "Controls the amplitude decay of successive partials.";
 
+  auto& fdbk_fm = result.sections.emplace_back(make_param_section(section_fbdk_fm,
+    make_topo_tag_basic("{D4BD0903-E130-4F7E-B327-A2C705D0B347}", "Feedback FM"),
+    make_param_section_gui({ 0, 6, 2, 1 }, gui_dimension({ 1, 1 }, { 1, 1 }))));
+  fdbk_fm.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return can_do_phase(vs[0]); });
+  fdbk_fm.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return can_do_phase(vs[0]); });
+  auto& fdbk_fm_on = result.params.emplace_back(make_param(
+    make_topo_info("{FA02D7AF-FE02-4007-B39D-539FCA24E50B}", true, "Feedback FM On", "Feedback FM", "Feedback FM", param_fdbk_fm_on, 1),
+    make_param_dsp_voice(param_automate::automate), make_domain_toggle(false),
+    make_param_gui_single(section_fbdk_fm, gui_edit_type::toggle, { 0, 0, 1, 2 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
+  fdbk_fm_on.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return can_do_phase(vs[0]); });
+  fdbk_fm_on.info.description = "Enable feedback FM.";
+  auto& fdbk_fm_idx = result.params.emplace_back(make_param(
+    make_topo_info("{B7358D30-9AE3-4C20-87F6-C78D68B14E57}", true, "Feedback FM Index", "Idx", "Fdbk FM Idx", param_fdbk_fm_idx, 1),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_log(0, 1, 0.01, 0.05, 4, ""),
+    make_param_gui_single(section_fbdk_fm, gui_edit_type::knob, { 1, 0, 1, 1 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
+  fdbk_fm_idx.gui.bindings.enabled.bind_params({ param_type, param_fdbk_fm_on }, [](auto const& vs) { return can_do_phase(vs[0]) && vs[1] != 0; });
+  fdbk_fm_idx.info.description = "Feedback FM index.";
+  auto& fdbk_fm_dly = result.params.emplace_back(make_param(
+    make_topo_info("{8393FC16-5053-41A5-A452-971F519614F1}", true, "Feedback FM Delay", "Dly", "Fdbk FM Dly", param_fdbk_fm_dly, 1), // TODO modulate?
+    make_param_dsp_accurate(param_automate::modulate), make_domain_linear(fdbk_fm_min_ms, fdbk_fm_max_ms, fdbk_fm_min_ms, 1, "Ms"),
+    make_param_gui_single(section_fbdk_fm, gui_edit_type::knob, { 1, 1, 1, 1 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
+  fdbk_fm_dly.gui.bindings.enabled.bind_params({ param_type, param_fdbk_fm_on }, [](auto const& vs) { return can_do_phase(vs[0]) && vs[1] != 0; });
+  fdbk_fm_dly.info.description = "Feedback FM delay.";
+
   auto& random = result.sections.emplace_back(make_param_section(section_rand,
     make_topo_tag_basic("{AB9E6684-243D-4579-A0AF-5BEF2C72EBA6}", "Random"),
-    make_param_section_gui({ 0, 4, 2, 2 }, gui_dimension({ 1, 1 }, {
+    make_param_section_gui({ 0, 4, 2, 3 }, gui_dimension({ 1, 1 }, {
       gui_dimension::auto_size_all, 1, gui_dimension::auto_size_all, gui_dimension::auto_size_all,
       gui_dimension::auto_size_all, gui_dimension::auto_size_all, gui_dimension::auto_size_all, gui_dimension::auto_size_all }), gui_label_edit_cell_split::horizontal)));
   random.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_random(vs[0]); });
