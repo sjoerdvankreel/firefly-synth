@@ -163,7 +163,7 @@ private:
   template <bool Graph, bool Sin, bool Saw, bool Tri, bool Sqr>
   void process_basic_sin_saw_tri_sqr(plugin_block& block, cv_audio_matrix_mixdown const* modulation);
   template <bool Graph, bool Sin, bool Saw, bool Tri, bool Sqr, bool DSF, bool Sync, bool KPS, bool KPSAutoFdbk, bool Static, int StaticSVFType>
-  void process_unison(plugin_block& block, cv_audio_matrix_mixdown const* modulation);
+  void process_unison_sync(plugin_block& block, cv_audio_matrix_mixdown const* modulation);
 };
 
 static void
@@ -894,7 +894,7 @@ osc_engine::process(plugin_block& block, cv_audio_matrix_mixdown const* modulati
   if (type == type_off)
   {
     // still need to process to clear out the buffer in case we are mod source
-    process_unison<Graph, false, false, false, false, false, false, false, false, false, -1>(block, modulation);
+    process_unison_sync<Graph, false, false, false, false, false, false, false, false, false, -1>(block, modulation);
     return;
   }
 
@@ -903,8 +903,8 @@ osc_engine::process(plugin_block& block, cv_audio_matrix_mixdown const* modulati
   case type_dsf: process_dsf<Graph>(block, modulation); break;
   case type_basic: process_basic<Graph>(block, modulation); break;
   case type_static: process_static<Graph>(block, modulation); break;
-  case type_kps1: process_unison<Graph, false, false, false, false, false, false, true, false, false, -1>(block, modulation); break;
-  case type_kps2: process_unison<Graph, false, false, false, false, false, false, true, true, false, -1>(block, modulation); break;
+  case type_kps1: process_unison_sync<Graph, false, false, false, false, false, false, true, false, false, -1>(block, modulation); break;
+  case type_kps2: process_unison_sync<Graph, false, false, false, false, false, false, true, true, false, -1>(block, modulation); break;
   default: assert(false); break;
   }
 }
@@ -913,9 +913,9 @@ template <bool Graph> void
 osc_engine::process_dsf(plugin_block& block, cv_audio_matrix_mixdown const* modulation)
 {
   if(block.state.own_block_automation[param_hard_sync][0].step())
-    process_unison<Graph, false, false, false, false, true, true, false, false, false, -1>(block, modulation);
+    process_unison_sync<Graph, false, false, false, false, true, true, false, false, false, -1>(block, modulation);
   else
-    process_unison<Graph, false, false, false, false, true, false, false, false, false, -1>(block, modulation);
+    process_unison_sync<Graph, false, false, false, false, true, false, false, false, false, -1>(block, modulation);
 }
 
 template <bool Graph> void
@@ -925,11 +925,11 @@ osc_engine::process_static(plugin_block& block, cv_audio_matrix_mixdown const* m
   int svf_mode = block_auto[param_rand_svf][0].step();
   switch (svf_mode)
   {
-  case rand_svf_lpf: process_unison<Graph, false, false, false, false, false, false, false, false, true, rand_svf_lpf>(block, modulation); break;
-  case rand_svf_hpf: process_unison<Graph, false, false, false, false, false, false, false, false, true, rand_svf_hpf>(block, modulation); break;
-  case rand_svf_bpf: process_unison<Graph, false, false, false, false, false, false, false, false, true, rand_svf_bpf>(block, modulation); break;
-  case rand_svf_bsf: process_unison<Graph, false, false, false, false, false, false, false, false, true, rand_svf_bsf>(block, modulation); break;
-  case rand_svf_peq: process_unison<Graph, false, false, false, false, false, false, false, false, true, rand_svf_peq>(block, modulation); break;
+  case rand_svf_lpf: process_unison_sync<Graph, false, false, false, false, false, false, false, false, true, rand_svf_lpf>(block, modulation); break;
+  case rand_svf_hpf: process_unison_sync<Graph, false, false, false, false, false, false, false, false, true, rand_svf_hpf>(block, modulation); break;
+  case rand_svf_bpf: process_unison_sync<Graph, false, false, false, false, false, false, false, false, true, rand_svf_bpf>(block, modulation); break;
+  case rand_svf_bsf: process_unison_sync<Graph, false, false, false, false, false, false, false, false, true, rand_svf_bsf>(block, modulation); break;
+  case rand_svf_peq: process_unison_sync<Graph, false, false, false, false, false, false, false, false, true, rand_svf_peq>(block, modulation); break;
   default: assert(false); break;
   }
 }
@@ -975,13 +975,13 @@ osc_engine::process_basic_sin_saw_tri_sqr(plugin_block& block, cv_audio_matrix_m
 {
   auto const& block_auto = block.state.own_block_automation;
   bool sync = block_auto[param_hard_sync][0].step() != 0;
-  if (sync) process_unison<Graph, Sin, Saw, Tri, Sqr, false, true, false, false, false, -1>(block, modulation);
-  else process_unison<Graph, Sin, Saw, Tri, Sqr, false, false, false, false, false, -1>(block, modulation);
+  if (sync) process_unison_sync<Graph, Sin, Saw, Tri, Sqr, false, true, false, false, false, -1>(block, modulation);
+  else process_unison_sync<Graph, Sin, Saw, Tri, Sqr, false, false, false, false, false, -1>(block, modulation);
 }
 
 template <bool Graph, bool Sin, bool Saw, bool Tri, bool Sqr, bool DSF, bool Sync, bool KPS, bool KPSAutoFdbk, bool Static, int StaticSVFType> 
 void
-osc_engine::process_unison(plugin_block& block, cv_audio_matrix_mixdown const* modulation)
+osc_engine::process_unison_sync(plugin_block& block, cv_audio_matrix_mixdown const* modulation)
 {
   int generator_count = 0;
   if constexpr (Sin) generator_count++;
