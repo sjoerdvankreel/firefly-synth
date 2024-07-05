@@ -164,6 +164,8 @@ private:
   void process_basic_sin_saw_tri_sqr(plugin_block& block, cv_audio_matrix_mixdown const* modulation);
   template <bool Graph, bool Sin, bool Saw, bool Tri, bool Sqr, bool DSF, bool Sync, bool KPS, bool KPSAutoFdbk, bool Static, int StaticSVFType>
   void process_unison_sync(plugin_block& block, cv_audio_matrix_mixdown const* modulation);
+  template <bool Graph, bool Sin, bool Saw, bool Tri, bool Sqr, bool DSF, bool Sync, bool FeedbackFM, bool KPS, bool KPSAutoFdbk, bool Static, int StaticSVFType>
+  void process_unison_sync_feedback_fm(plugin_block& block, cv_audio_matrix_mixdown const* modulation);
 };
 
 static void
@@ -979,9 +981,19 @@ osc_engine::process_basic_sin_saw_tri_sqr(plugin_block& block, cv_audio_matrix_m
   else process_unison_sync<Graph, Sin, Saw, Tri, Sqr, false, false, false, false, false, -1>(block, modulation);
 }
 
-template <bool Graph, bool Sin, bool Saw, bool Tri, bool Sqr, bool DSF, bool Sync, bool KPS, bool KPSAutoFdbk, bool Static, int StaticSVFType> 
+template <bool Graph, bool Sin, bool Saw, bool Tri, bool Sqr, bool DSF, bool Sync, bool KPS, bool KPSAutoFdbk, bool Static, int StaticSVFType>
 void
 osc_engine::process_unison_sync(plugin_block& block, cv_audio_matrix_mixdown const* modulation)
+{
+  auto const& block_auto = block.state.own_block_automation;
+  bool feedback_fm = block_auto[param_fdbk_fm_on][0].step() != 0;
+  if (feedback_fm) process_unison_sync_feedback_fm<Graph, Sin, Saw, Tri, Sqr, false, Sync, true, false, false, false, -1>(block, modulation);
+  else process_unison_sync_feedback_fm<Graph, Sin, Saw, Tri, Sqr, false, Sync, false, false, false, false, -1>(block, modulation);
+}
+
+template <bool Graph, bool Sin, bool Saw, bool Tri, bool Sqr, bool DSF, bool Sync, bool FeedbackFM, bool KPS, bool KPSAutoFdbk, bool Static, int StaticSVFType> 
+void
+osc_engine::process_unison_sync_feedback_fm(plugin_block& block, cv_audio_matrix_mixdown const* modulation)
 {
   int generator_count = 0;
   if constexpr (Sin) generator_count++;
