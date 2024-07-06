@@ -45,7 +45,7 @@ topo_tag
 make_topo_tag(
   std::string const& id, bool name_one_based,
   std::string const& full_name, std::string const& display_name,
-  std::string const& menu_display_name)
+  std::string const& menu_display_name, std::string const& tabular_display_name)
 {
   topo_tag result = {};
   result.id = id;
@@ -53,6 +53,7 @@ make_topo_tag(
   result.display_name = display_name;
   result.name_one_based = name_one_based;
   result.menu_display_name = menu_display_name;
+  result.tabular_display_name = tabular_display_name;
   return result;
 }
 
@@ -60,12 +61,25 @@ topo_info
 make_topo_info(
   std::string const& id, bool name_one_based,
   std::string const& full_name, std::string const& display_name,
-  std::string const& menu_display_name, int index, int slot_count)
+  std::string const& menu_display_name,
+  int index, int slot_count)
 {
   topo_info result = {};
   result.index = index;
   result.slot_count = slot_count;
-  result.tag = make_topo_tag(id, name_one_based, full_name, display_name, menu_display_name);
+  result.tag = make_topo_tag(id, name_one_based, full_name, display_name, menu_display_name, "");
+  return result;
+}
+
+topo_info
+make_topo_info_tabular(
+  std::string const& id, std::string const& name,
+  std::string const& tabular_name, int index, int slot_count)
+{
+  topo_info result = {};
+  result.index = index;
+  result.slot_count = slot_count;
+  result.tag = make_topo_tag(id, true, name, name, name, tabular_name);
   return result;
 }
 
@@ -200,10 +214,24 @@ module_topo_gui
 make_module_gui(int section, gui_position const& position, gui_dimension const& dimension)
 {
   module_topo_gui result = {};
+  result.tabbed = false;
   result.visible = true;
   result.section = section;
   result.position = position;
   result.dimension = dimension;
+  return result;
+}
+
+module_topo_gui
+make_module_gui_tabbed(int section, gui_position const& position, std::vector<int> const& tab_order)
+{
+  module_topo_gui result = {};
+  result.tabbed = true;
+  result.visible = true;
+  result.section = section;
+  result.position = position;
+  result.tab_order = tab_order;
+  result.dimension = { 1, 1 };
   return result;
 }
 

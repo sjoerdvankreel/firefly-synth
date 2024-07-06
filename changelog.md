@@ -1,3 +1,9 @@
+### July 6, 2024 - V1.8.1.
+
+- Add some presets.
+- Add another demo tune to go with it.
+- Split oscillator AM/FM gui to separate tabs.
+
 ### July 1, 2024 - V1.8.0.
 
 - Added logging.

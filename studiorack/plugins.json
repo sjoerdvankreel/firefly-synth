@@ -6,29 +6,24 @@
       "name": "Firefly Synth",
       "description": "Firefly Synth",
       "tags": [ "Instrument", "Synth" ],
-      "version": "1.8.0",
+      "version": "1.8.1",
       "id": "io.github.sjoerdvankreel.firefly_synth",
       "date": "2024-06-03T17:25:12.081Z",
       "files": {
         "audio": {
-          "name": "studiorack.flac",
-          "size": 826259
+          "name": "studiorack.flac"
         },
         "image": {
-          "name": "studiorack.jpg",
-          "size": 442533
+          "name": "studiorack.jpg"
         },
         "linux": {
-          "name": "firefly_synth_1.8.0_linux_vst3_instrument.zip",
-          "size": 5972016
+          "name": "firefly_synth_1.8.0_linux_vst3_instrument.zip"
         },
         "mac": {
-          "name": "firefly_synth_1.8.0_mac_vst3_instrument.zip",
-          "size": 8717242
+          "name": "firefly_synth_1.8.0_mac_vst3_instrument.zip"
         },
         "win": {
-          "name": "firefly_synth_1.8.0_windows_vst3_instrument.zip",
-          "size": 3473444
+          "name": "firefly_synth_1.8.0_windows_vst3_instrument.zip"
         }
       }
     }
