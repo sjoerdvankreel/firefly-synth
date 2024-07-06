@@ -1,4 +1,4 @@
-### ?, ? - V1.8.1.
+### July 6, 2024 - V1.8.1.
 
 - Add some presets.
 - Add another demo tune to go with it.
