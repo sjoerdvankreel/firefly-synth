@@ -2,7 +2,7 @@
 
 - Add some presets.
 - Add another demo tune to go with it.
-- Rearranged oscillator AM/FM GUI.
+- Split oscillator AM/FM gui to separate tabs.
 
 ### July 1, 2024 - V1.8.0.
 
