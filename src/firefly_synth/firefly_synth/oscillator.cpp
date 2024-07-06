@@ -474,14 +474,14 @@ osc_topo(int section, gui_position const& pos)
   auto& dsf_partials = result.params.emplace_back(make_param(
     make_topo_info("{21BC6524-9FDB-4551-9D3D-B180AB93B5CE}", true, "DSF Partials", "Partials", "DSF Parts", param_dsf_parts, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_log(1, 1000, 2, 20, 0, ""),
-    make_param_gui_single(section_dsf, gui_edit_type::knob, { 0, 0, 1, 1 },
+    make_param_gui_single(section_dsf, gui_edit_type::hslider, { 0, 0, 1, 1 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   dsf_partials.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dsf; });
   dsf_partials.info.description = "Controls the number of partials (overtones).";
   auto& dsf_dist = result.params.emplace_back(make_param(
     make_topo_info("{E5E66BBD-DCC9-4A7E-AB09-2D7107548090}", true, "DSF Distance", "Distance", "DSF Dist", param_dsf_dist, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_linear(0.05, 20, 1, 2, ""),
-    make_param_gui_single(section_dsf, gui_edit_type::knob, { 0, 1, 1, 1 },
+    make_param_gui_single(section_dsf, gui_edit_type::hslider, { 0, 1, 1, 1 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   dsf_dist.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dsf; });
   dsf_dist.info.description = "Controls the frequency distance between the base frequency and subsequent partials.";
