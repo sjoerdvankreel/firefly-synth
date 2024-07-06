@@ -127,11 +127,6 @@ public module_engine {
   std::array<int, max_osc_unison_voices> _kps_positions = {};
   std::array<std::vector<float>, max_osc_unison_voices> _kps_lines = {};
 
-  // feedback fm
-  int _oversampled_history_pos = 0;
-  int _oversampled_history_capacity = -1;
-  std::array<jarray<float, 2>, max_osc_unison_voices> _oversampled_history;
-
 public:
   PB_PREVENT_ACCIDENTAL_COPY(osc_engine);
   osc_engine(int max_frame_count, float sample_rate);
@@ -711,12 +706,6 @@ _oversampler(max_frame_count)
 
   for (int s = 0; s <= max_oversampler_stages; s++)
     _context.oversampled_lanes_channels_ptrs[s] = _oversampler.get_upsampled_lanes_channels_ptrs(1 << s);
-
-  int max_oversmp_factor = 1 << max_oversampler_stages;
-  int max_osc_history_size = fdbk_fm_max_ms * sample_rate / 1000.0f;
-  _oversampled_history_capacity = (int)std::ceil(max_oversmp_factor * max_osc_history_size);
-  for (int v = 0; v < max_osc_unison_voices; v++)
-    _oversampled_history[v].resize(jarray<int, 1>({ _oversampled_history_capacity, _oversampled_history_capacity }));
 }
 
 void
@@ -752,10 +741,6 @@ osc_engine::reset(plugin_block const* block)
     _unsync_phases[v] = 0;
     _unsync_samples[v] = 0;
   }
-
-  // get rid of old buffer from previous voice
-  for (int v = 0; v < max_osc_unison_voices; v++)
-    _oversampled_history[v].fill(0.0f);
 
   // publish the oversampler ptrs
   // note: it is important to do this during reset() rather than process()
@@ -1233,14 +1218,8 @@ osc_engine::process_unison(plugin_block& block, cv_audio_matrix_mixdown const* m
         }
       }
 
-      float oversampled_l = gain_curve[mod_index] * mono_pan_sqrt<0>(pan) * synced_sample;
-      float oversampled_r = gain_curve[mod_index] * mono_pan_sqrt<1>(pan) * synced_sample;
-      lanes_channels[(v + 1) * 2 + 0][frame] = oversampled_l;
-      lanes_channels[(v + 1) * 2 + 1][frame] = oversampled_r;
-      _oversampled_history[v + 1][0][_oversampled_history_pos] = oversampled_l;
-      _oversampled_history[v + 1][1][_oversampled_history_pos] = oversampled_r;
-      _oversampled_history_pos++;
-      _oversampled_history_pos %= _oversampled_history_capacity;
+      lanes_channels[(v + 1) * 2 + 0][frame] = gain_curve[mod_index] * mono_pan_sqrt<0>(pan) * synced_sample;
+      lanes_channels[(v + 1) * 2 + 1][frame] = gain_curve[mod_index] * mono_pan_sqrt<1>(pan) * synced_sample;
     }
   });
   
