@@ -16,12 +16,12 @@ check if need update github social preview
 drop all conversion code on breaking plugin id
 dont forget to update the version nr in code and cmake and mac bundle and build/zip scripts and downloads and studiorack
 
-wishlist soon:
+wishlist:
 DSF falloff to the left
 clap polyphonic modulation
 full-blown renoise support
 fix global unison for mono mode
-Feedback FM, but NOT through the mod matrix
+Feedback FM - but needs per-sample processing, not block
 
 wishlist sometime:
 mseg
