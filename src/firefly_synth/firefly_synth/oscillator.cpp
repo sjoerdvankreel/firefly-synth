@@ -1060,15 +1060,11 @@ osc_engine::process_unison_sync_feedback_fm(plugin_block& block, cv_audio_matrix
   auto const& pb_curve_norm = *(*modulation)[module_osc][block.module_slot][param_pb][0];
   auto const& cent_curve_norm = *(*modulation)[module_osc][block.module_slot][param_cent][0];
   auto const& pitch_curve_norm = *(*modulation)[module_osc][block.module_slot][param_pitch][0];
-  auto const& fdbk_fm_idx_curve_norm = *(*modulation)[module_osc][block.module_slot][param_fdbk_fm_idx][0];
-  auto const& fdbk_fm_dly_curve_norm = *(*modulation)[module_osc][block.module_slot][param_fdbk_fm_dly][0];
   auto const& sync_semis_curve_norm = *(*modulation)[module_osc][block.module_slot][param_hard_sync_semis][0];
   block.normalized_to_raw_block<domain_type::linear>(module_osc, param_pb, pb_curve_norm, pb_curve);
   block.normalized_to_raw_block<domain_type::linear>(module_osc, param_cent, cent_curve_norm, cent_curve);
   block.normalized_to_raw_block<domain_type::linear>(module_osc, param_pitch, pitch_curve_norm, pitch_curve);
-  if constexpr (Sync) block.normalized_to_raw_block<domain_type::linear>(module_osc, param_hard_sync_semis, sync_semis_curve_norm, sync_semis_curve);
-  if constexpr (FeedbackFM) block.normalized_to_raw_block<domain_type::log>(module_osc, param_fdbk_fm_idx, fdbk_fm_idx_curve_norm, fdbk_fm_idx_curve);
-  if constexpr (FeedbackFM) block.normalized_to_raw_block<domain_type::linear>(module_osc, param_fdbk_fm_dly, fdbk_fm_dly_curve_norm, fdbk_fm_dly_curve);
+  if constexpr(Sync) block.normalized_to_raw_block<domain_type::linear>(module_osc, param_hard_sync_semis, sync_semis_curve_norm, sync_semis_curve);
 
   auto& sin_mix_curve = block.state.own_scratch[scratch_basic_sin_mix];
   auto& saw_mix_curve = block.state.own_scratch[scratch_basic_saw_mix];
