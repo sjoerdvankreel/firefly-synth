@@ -45,7 +45,7 @@ voice_on_note_topo(plugin_topo const* topo, int section)
   std::string const on_note_id("{68360340-68B2-4B88-95BD-B1929F240BAA}");
   auto global_sources(make_cv_source_matrix(make_cv_matrix_sources(topo, true)));
   outputs.push_back(make_module_dsp_output(true,
-    make_topo_info("{8E4692CE-0A00-4739-BBD2-1E671D24F1B8}", true, "On Note Rnd", "Rnd", "Rnd", 0, 1)));
+    make_topo_info("{8E4692CE-0A00-4739-BBD2-1E671D24F1B8}", true, "On Note Voice Rnd", "Voice Rnd", "Voice Rnd", 0, 1)));
   for(int i = 0; i < global_sources.items.size(); i++)
     outputs.push_back(make_module_dsp_output(true, make_topo_info(
       global_sources.items[i].id, true,

@@ -1,6 +1,6 @@
 ### ?, ? - V1.8.2.
 
-- Add new modulation source: on-note-random. 
+- Add new modulation source: on-voice-random (inside the on-note menu).
 This is a fixed value at voice start but differs from on-note-global-random-lfo
 in that it is re-drawn for each voice. So, you have to play chords to hear it's effect.
 
