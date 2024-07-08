@@ -16,6 +16,10 @@ on release:
 10 make a github release
 11 update kvr
 
+1.8.2
+update the manual
+and the patches
+
 wishlist:
 DSF falloff to the left
 clap polyphonic modulation
