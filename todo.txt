@@ -21,6 +21,7 @@ DSF falloff to the left
 clap polyphonic modulation
 full-blown renoise support
 fix global unison for mono mode
+fixed random at voice start as mod source
 Feedback FM - but needs per-sample processing, not block
 
 wishlist sometime:
