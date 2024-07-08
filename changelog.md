@@ -1,5 +1,9 @@
 ### ?, ? - V1.8.2.
 
+- Add new modulation source: on-note-random. 
+This is a fixed value at voice start but differs from on-note-global-random-lfo
+in that it is re-drawn for each voice. So, you have to play chords to hear it's effect.
+
 ### July 6, 2024 - V1.8.1.
 
 - Add some presets.
