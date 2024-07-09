@@ -586,11 +586,11 @@ lfo_engine::process(plugin_block& block, cv_cv_matrix_mixdown const* modulation)
     return; 
   }
 
-  int seed = block_auto[param_seed][0].step();
-  int steps = block_auto[param_steps][0].step();
   if(_global)
   {
     update_block_params(&block);
+    int seed = block_auto[param_seed][0].step();
+    int steps = block_auto[param_steps][0].step();
     if (seed != _prev_seed)
     {
       _prev_seed = seed;
