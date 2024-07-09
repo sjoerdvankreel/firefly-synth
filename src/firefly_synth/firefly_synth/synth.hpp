@@ -21,6 +21,9 @@ inline int const max_osc_unison_voices = 8;
 // global unison, very memory hungry so only 4
 inline int const max_global_unison_voices = 4;
 
+// for vlfo and on-note modules
+inline int const on_voice_random_count = 3;
+
 // some parameters need to be exposed to modules other than the one that declares them
 extern int const osc_param_type;
 extern int const osc_param_uni_voices;

@@ -28,12 +28,27 @@ enum { section_left, section_sync, section_skew, section_right, section_phase };
 enum {
   param_type, param_rate, param_tempo, param_sync,
   param_skew_x, param_skew_x_amt, param_skew_y, param_skew_y_amt,
-  param_shape, param_steps, param_seed, param_filter, param_phase };
+  param_shape, param_steps, param_seed, param_voice_rnd, param_filter, param_phase };
 
-static bool is_noise(int shape) {
-  return shape == wave_shape_type_smooth_1 || shape == wave_shape_type_smooth_2 ||
-    shape == wave_shape_type_static_1 || shape == wave_shape_type_static_2 ||
-    shape == wave_shape_type_static_free_1 || shape == wave_shape_type_static_free_2; }
+static bool
+is_noise_voice_rand(int shape)
+{
+  return shape == wave_shape_type_smooth_2 || 
+    shape == wave_shape_type_static_2 || 
+    shape == wave_shape_type_static_free_2;
+}
+
+static bool
+is_noise_not_voice_rand(int shape)
+{
+  return shape == wave_shape_type_smooth_1 ||
+    shape == wave_shape_type_static_1 ||
+    shape == wave_shape_type_static_free_1;
+}
+
+static bool
+is_noise(int shape) 
+{ return is_noise_voice_rand(shape) || is_noise_not_voice_rand(shape); }
 
 static std::vector<list_item>
 type_items()
@@ -453,8 +468,17 @@ lfo_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_param_dsp_automate_if_voice(!global), make_domain_step(1, 255, 1, 0),
     make_param_gui_single(section_right, gui_edit_type::hslider, { 0, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  seed.gui.bindings.enabled.bind_params({ param_type, param_shape }, [](auto const& vs) { return vs[0] != type_off && is_noise(vs[1]); });
+  seed.gui.bindings.visible.bind_params({ param_type, param_shape }, [](auto const& vs) { return !is_noise_voice_rand(vs[1]); });
+  seed.gui.bindings.enabled.bind_params({ param_type, param_shape }, [](auto const& vs) { return vs[0] != type_off && is_noise_not_voice_rand(vs[1]); });
   seed.info.description = "Seed value for static and smooth noise generators.";
+  auto& voice_rnd = result.params.emplace_back(make_param(
+    make_topo_info_basic("{81DAE640-815C-4D61-8DDE-D4CAD70309EF}", "Voice Rnd", param_voice_rnd, 1),
+    make_param_dsp_automate_if_voice(!global), make_domain_step(0, on_voice_random_count - 1, 1, 1),
+    make_param_gui_single(section_right, gui_edit_type::list, { 0, 2 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
+  voice_rnd.gui.bindings.visible.bind_params({ param_type, param_shape }, [](auto const& vs) { return is_noise_voice_rand(vs[1]); });
+  voice_rnd.gui.bindings.enabled.bind_params({ param_type, param_shape }, [](auto const& vs) { return vs[0] != type_off && is_noise_voice_rand(vs[1]); });
+  voice_rnd.info.description = "Per-voice random stream source for static and smooth noise generators.";
   auto& smooth = result.params.emplace_back(make_param(
     make_topo_info_basic("{21DBFFBE-79DA-45D4-B778-AC939B7EF785}", "Smooth", param_filter, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_linear(0, max_filter_time_ms, 0, 0, "Ms"),
@@ -636,6 +660,10 @@ lfo_engine::process_uni_type_sync(plugin_block& block, cv_cv_matrix_mixdown cons
   case wave_shape_type_static_free_1: process_uni_type_sync_shape<GlobalUnison, Type, Sync, false, true>(block, modulation, [this, seed](float in) {
     return wave_shape_uni_custom(in, [this, seed](float in) {
       return _static_noise.next<true>(in, seed); }); }); break;
+  case wave_shape_type_smooth_2:
+  case wave_shape_type_static_2:
+  case wave_shape_type_static_free_2:
+  break; // TODO
   default: assert(false); break;
   }
 }

@@ -13,8 +13,6 @@ using namespace plugin_base;
 
 namespace firefly_synth {
 
-static int const on_voice_random_count = 3;
-
 // https://stackoverflow.com/questions/21237905/how-do-i-generate-thread-safe-uniform-random-numbers
 static float 
 thread_random_next() 
