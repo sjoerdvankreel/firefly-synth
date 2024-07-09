@@ -44,9 +44,12 @@ wave_make_name_shape(int shape, bool for_shaper)
   case wave_shape_type_cos_cos_sin: return "CosCosSin";
   case wave_shape_type_cos_cos_cos: return "CosCosCos";
   case wave_shape_type_sqr_or_fold: return for_shaper? "Foldback": "Sqr";
-  case wave_shape_type_smooth: return "Smooth";
-  case wave_shape_type_static: return "Static";
-  case wave_shape_type_static_free: return "Free Static";
+  case wave_shape_type_smooth_1: return "Smooth 1";
+  case wave_shape_type_static_1: return "Static 1";
+  case wave_shape_type_static_free_1: return "Free Static 1";
+  case wave_shape_type_smooth_2: return "Smooth 2";
+  case wave_shape_type_static_2: return "Static 2";
+  case wave_shape_type_static_free_2: return "Free Static 2";
   default: assert(false); return {};
   }
 }
@@ -87,9 +90,12 @@ wave_shape_type_tags(bool for_shaper)
   result.push_back(make_topo_tag_basic("{E16E6DC4-ACB3-4313-A094-A6EA9F8ACA85}", wave_make_name_shape(wave_shape_type_sqr_or_fold, for_shaper)));
 
   if(for_shaper) return result;
-  result.push_back(make_topo_tag_basic("{7176FE9E-D2A8-44FE-B312-93D712173D29}", wave_make_name_shape(wave_shape_type_smooth, for_shaper)));
-  result.push_back(make_topo_tag_basic("{FA26FEFB-CACD-4D00-A986-246F09959F5E}", wave_make_name_shape(wave_shape_type_static, for_shaper)));
-  result.push_back(make_topo_tag_basic("{FA86B2EE-12F7-40FB-BEB9-070E62C7C691}", wave_make_name_shape(wave_shape_type_static_free, for_shaper)));
+  result.push_back(make_topo_tag_basic("{7176FE9E-D2A8-44FE-B312-93D712173D29}", wave_make_name_shape(wave_shape_type_smooth_1, false)));
+  result.push_back(make_topo_tag_basic("{4CB433AA-C15E-4560-999D-4C2D5DAF14B3}", wave_make_name_shape(wave_shape_type_smooth_2, false)));
+  result.push_back(make_topo_tag_basic("{FA26FEFB-CACD-4D00-A986-246F09959F5E}", wave_make_name_shape(wave_shape_type_static_1, false)));
+  result.push_back(make_topo_tag_basic("{E3735241-E420-4E25-9B82-D6CD2D9E8C2C}", wave_make_name_shape(wave_shape_type_static_2, false)));
+  result.push_back(make_topo_tag_basic("{FA86B2EE-12F7-40FB-BEB9-070E62C7C691}", wave_make_name_shape(wave_shape_type_static_free_1, false)));
+  result.push_back(make_topo_tag_basic("{B4A2ABBF-2433-4B12-96B2-221B3F56FDAE}", wave_make_name_shape(wave_shape_type_static_free_2, false)));
   return result;
 }
 

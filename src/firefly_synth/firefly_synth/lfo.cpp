@@ -31,7 +31,9 @@ enum {
   param_shape, param_steps, param_seed, param_filter, param_phase };
 
 static bool is_noise(int shape) {
-  return shape == wave_shape_type_smooth || shape == wave_shape_type_static || shape == wave_shape_type_static_free; }
+  return shape == wave_shape_type_smooth_1 || shape == wave_shape_type_smooth_2 ||
+    shape == wave_shape_type_static_1 || shape == wave_shape_type_static_2 ||
+    shape == wave_shape_type_static_free_1 || shape == wave_shape_type_static_free_2; }
 
 static std::vector<list_item>
 type_items()
@@ -223,7 +225,7 @@ lfo_state_converter::handle_invalid_param_value(
       // was smooth or fold
       if (old_shape_guid == "{E16E6DC4-ACB3-4313-A094-A6EA9F8ACA85}")
       {
-        new_value = _desc->raw_to_plain_at(module_glfo, param_shape, wave_shape_type_smooth);
+        new_value = _desc->raw_to_plain_at(module_glfo, param_shape, wave_shape_type_smooth_1);
         return true;
       }
 
