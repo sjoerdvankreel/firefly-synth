@@ -74,7 +74,7 @@ void
 voice_on_note_engine::reset(plugin_block const* block)
 {   
   for(int i = 0; i < on_voice_random_count; i++)
-    _random_values[i] = block->graph? 0.5f: thread_random_next();
+    _random_values[i] = block->graph? (i / (on_voice_random_count - 1.0f)) : thread_random_next();
   for(int i = 0; i < _global_outputs.size(); i++)
   {
     auto const& o = _global_outputs[i];
