@@ -211,6 +211,12 @@ render_graph(
   }
 
   engine->process_begin(&state, sample_rate, params.max_frame_count, -1);
+  
+  // we need this for the on-voice-random
+  // although it's just mapped to fixed values
+  // but nice to see the effect of source selection
+  engine->process_default(module_voice_on_note, 0);
+
   auto const* block = engine->process(mapping.module_index, mapping.module_slot, [global, mapping](plugin_block& block) {
     lfo_engine engine(global);
     engine.reset(&block);
@@ -616,7 +622,8 @@ lfo_engine::process(plugin_block& block, cv_cv_matrix_mixdown const* modulation)
           int source_index = block_auto[param_voice_rnd_source][0].step();
           assert(0 <= source_index && source_index < on_voice_random_count);
           // noise generators hate zero seed
-          _per_voice_seed = (int)(1 + (block.module_cv(module_voice_on_note, 0)[on_voice_random_output_index][source_index][0] * (RAND_MAX - 1)));
+          float on_note_rnd_cv = block.module_cv(module_voice_on_note, 0)[on_voice_random_output_index][source_index][0];
+          _per_voice_seed = (int)(1 + (on_note_rnd_cv * (RAND_MAX - 1)));
         }
         _static_noise.reset(_per_voice_seed);
         reset_smooth_noise(_per_voice_seed, block_auto[param_steps][0].step());
