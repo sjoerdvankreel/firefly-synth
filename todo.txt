@@ -18,12 +18,9 @@ on release:
 
 1.8.2
 update the manual
-and the patches
-and check the demos especially renoise
-and make a new demo with and without
 and add new presets
 v run all demo material in debug
-run specific renoise material in release
+v run specific renoise material in release
 
 wishlist:
 DSF falloff to the left
