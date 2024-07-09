@@ -90,6 +90,10 @@ struct plugin_block_state final {
 
 // single module process call
 struct plugin_block final {
+
+  // are we graphing?
+  bool graph;
+
   int start_frame;
   int end_frame;
   int module_slot;

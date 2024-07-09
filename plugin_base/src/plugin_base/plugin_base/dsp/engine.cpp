@@ -115,6 +115,7 @@ plugin_engine::make_plugin_block(
     own_block_auto, all_block_auto
   };
   return {
+    _graph,
     start_frame, end_frame, slot,
     _sample_rate, state, nullptr, nullptr, 
     _host_block->shared, *_state.desc().plugin, 

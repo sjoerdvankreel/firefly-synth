@@ -1,10 +1,10 @@
 <html>
 <head>
-<title>Firefly Synth 1.8.1</title>
+<title>Firefly Synth 1.8.2</title>
 <style>th, td { padding: 3px; }a, a:visited { color: #666666; }.description { background:#EEEEEE; }h1 { font-size: 19px; color: black; }h2 { font-size: 17px; color: black; }h3 { font-size: 15px; color: black; }body { font-family: Verdana; color: black; }html { position: relative; max-width: 1024px; margin: auto; }tr td { width: auto; white-space: nowrap; } tr th { width: auto; white-space: nowrap; }table, th, td { font-size: 13px; border: 1px solid gray; border-collapse: collapse; text-align: left; }tr td:last-child { width: 100%; white-space: wrap; } tr th:last-child { width: 100%; white-space: wrap; }</style>
 </head>
 <body>
-<h1>Firefly Synth 1.8.1</h1>
+<h1>Firefly Synth 1.8.2</h1>
 <h2>Module Overview</h2>
 <table>
 <tr>
@@ -85,7 +85,7 @@
 <td>No</td>
 <td>Voice</td>
 <td>1</td>
-<td class='description'>Provides on-note versions of all global modulation sources for the per-voice CV mod matrix.</td>
+<td class='description'>Provides a couple of random-on-voice values plus on-note versions of all global modulation sources for the per-voice CV mod matrix.</td>
 </tr>
 <tr>
 <td><a href='#10'>10</a></td>
@@ -724,7 +724,7 @@
 <td>Block</td>
 <td>None</td>
 <td>Saw</td>
-<td>Free Static</td>
+<td>Free Static 1</td>
 <td>Sin</td>
 <td>N/A</td>
 </tr>
@@ -762,6 +762,22 @@
 </tr>
 <tr>
 <td colspan='11' class='description'>Seed value for static and smooth noise generators.</td>
+</tr>
+<tr>
+<td rowspan='2'>Source</td>
+<td>Right</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Block</td>
+<td>None</td>
+<td>1</td>
+<td>3</td>
+<td>1</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Per-voice random stream source for static and smooth noise generators.</td>
 </tr>
 <tr>
 <td rowspan='2'>Smooth</td>
@@ -1528,7 +1544,7 @@
 <td>Voice</td>
 <td>Automate</td>
 <td>Saw</td>
-<td>Free Static</td>
+<td>Free Static 2</td>
 <td>Sin</td>
 <td>N/A</td>
 </tr>
@@ -1566,6 +1582,22 @@
 </tr>
 <tr>
 <td colspan='11' class='description'>Seed value for static and smooth noise generators.</td>
+</tr>
+<tr>
+<td rowspan='2'>Source</td>
+<td>Right</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Voice</td>
+<td>Automate</td>
+<td>1</td>
+<td>3</td>
+<td>1</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Per-voice random stream source for static and smooth noise generators.</td>
 </tr>
 <tr>
 <td rowspan='2'>Smooth</td>

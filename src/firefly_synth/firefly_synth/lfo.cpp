@@ -28,10 +28,27 @@ enum { section_left, section_sync, section_skew, section_right, section_phase };
 enum {
   param_type, param_rate, param_tempo, param_sync,
   param_skew_x, param_skew_x_amt, param_skew_y, param_skew_y_amt,
-  param_shape, param_steps, param_seed, param_filter, param_phase };
+  param_shape, param_steps, param_seed, param_voice_rnd_source, param_filter, param_phase };
 
-static bool is_noise(int shape) {
-  return shape == wave_shape_type_smooth || shape == wave_shape_type_static || shape == wave_shape_type_static_free; }
+static bool
+is_noise_voice_rand(int shape)
+{
+  return shape == wave_shape_type_smooth_2 || 
+    shape == wave_shape_type_static_2 || 
+    shape == wave_shape_type_static_free_2;
+}
+
+static bool
+is_noise_not_voice_rand(int shape)
+{
+  return shape == wave_shape_type_smooth_1 ||
+    shape == wave_shape_type_static_1 ||
+    shape == wave_shape_type_static_free_1;
+}
+
+static bool
+is_noise(int shape) 
+{ return is_noise_voice_rand(shape) || is_noise_not_voice_rand(shape); }
 
 static std::vector<list_item>
 type_items()
@@ -73,11 +90,14 @@ public module_engine {
   smooth_noise _smooth_noise;
   static_noise _static_noise;
 
-  int _prev_seed = -1;
   int _end_filter_pos = 0;
   int _end_filter_stage_samples = 0;
   int _smooth_noise_total_pos = 0;
   int _smooth_noise_total_samples = 0;
+
+  int _per_voice_seed = -1;
+  int _prev_global_seed = -1;
+  bool _per_voice_seed_was_initialized = false;
 
   void reset_smooth_noise(int seed, int steps);
   void update_block_params(plugin_block const* block);
@@ -191,6 +211,12 @@ render_graph(
   }
 
   engine->process_begin(&state, sample_rate, params.max_frame_count, -1);
+  
+  // we need this for the on-voice-random
+  // although it's just mapped to fixed values
+  // but nice to see the effect of source selection
+  engine->process_default(module_voice_on_note, 0);
+
   auto const* block = engine->process(mapping.module_index, mapping.module_slot, [global, mapping](plugin_block& block) {
     lfo_engine engine(global);
     engine.reset(&block);
@@ -217,13 +243,13 @@ lfo_state_converter::handle_invalid_param_value(
     {
       // format is {guid}-{guid}-{guid}
       if (old_value.size() != 3 * 38 + 2) return false;
-      auto shape_items = wave_shape_type_items(false);
+      auto shape_items = wave_shape_type_items(false, _global);
       std::string old_shape_guid = old_value.substr(0, 38);
       
       // was smooth or fold
       if (old_shape_guid == "{E16E6DC4-ACB3-4313-A094-A6EA9F8ACA85}")
       {
-        new_value = _desc->raw_to_plain_at(module_glfo, param_shape, wave_shape_type_smooth);
+        new_value = _desc->raw_to_plain_at(module_glfo, param_shape, wave_shape_type_smooth_1);
         return true;
       }
 
@@ -263,7 +289,7 @@ lfo_state_converter::handle_invalid_param_value(
     {
       // format is {guid}-{guid}-{guid}
       if (old_value.size() != 3 * 38 + 2) return false;
-      auto shape_items = wave_shape_type_items(false);
+      auto shape_items = wave_shape_type_items(false, _global);
       std::string old_shape_guid = old_value.substr(0, 38);
       for (int i = 0; i < shape_items.size(); i++)
         if (old_shape_guid == shape_items[i].id)
@@ -431,7 +457,7 @@ lfo_topo(int section, gui_position const& pos, bool global, bool is_fx)
     gui_dimension::auto_size_all, gui_dimension::auto_size, gui_dimension::auto_size_all, 1 }), gui_label_edit_cell_split::horizontal)));
   auto& shape = result.params.emplace_back(make_param(
     make_topo_info_basic("{7D48C09B-AC99-4B88-B880-4633BC8DFB37}", "Shape", param_shape, 1),
-    make_param_dsp_automate_if_voice(!global), make_domain_item(wave_shape_type_items(false), "Sin"),
+    make_param_dsp_automate_if_voice(!global), make_domain_item(wave_shape_type_items(false, global), "Sin"),
     make_param_gui_single(section_right, gui_edit_type::autofit_list, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   shape.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
@@ -451,8 +477,17 @@ lfo_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_param_dsp_automate_if_voice(!global), make_domain_step(1, 255, 1, 0),
     make_param_gui_single(section_right, gui_edit_type::hslider, { 0, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  seed.gui.bindings.enabled.bind_params({ param_type, param_shape }, [](auto const& vs) { return vs[0] != type_off && is_noise(vs[1]); });
+  seed.gui.bindings.visible.bind_params({ param_type, param_shape }, [](auto const& vs) { return !is_noise_voice_rand(vs[1]); });
+  seed.gui.bindings.enabled.bind_params({ param_type, param_shape }, [](auto const& vs) { return vs[0] != type_off && is_noise_not_voice_rand(vs[1]); });
   seed.info.description = "Seed value for static and smooth noise generators.";
+  auto& voice_rnd_source = result.params.emplace_back(make_param(
+    make_topo_info_basic("{81DAE640-815C-4D61-8DDE-D4CAD70309EF}", "Source", param_voice_rnd_source, 1),
+    make_param_dsp_automate_if_voice(!global), make_domain_step(0, on_voice_random_count - 1, 1, 1),
+    make_param_gui_single(section_right, gui_edit_type::list, { 0, 2 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
+  voice_rnd_source.gui.bindings.visible.bind_params({ param_type, param_shape }, [](auto const& vs) { return is_noise_voice_rand(vs[1]); });
+  voice_rnd_source.gui.bindings.enabled.bind_params({ param_type, param_shape }, [](auto const& vs) { return vs[0] != type_off && is_noise_voice_rand(vs[1]); });
+  voice_rnd_source.info.description = "Per-voice random stream source for static and smooth noise generators.";
   auto& smooth = result.params.emplace_back(make_param(
     make_topo_info_basic("{21DBFFBE-79DA-45D4-B778-AC939B7EF785}", "Smooth", param_filter, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_linear(0, max_filter_time_ms, 0, 0, "Ms"),
@@ -517,7 +552,10 @@ lfo_engine::reset(plugin_block const* block)
   _filter_end_value = 0;
   _stage = lfo_stage::cycle;
   _end_filter_stage_samples = 0;
-  
+  _per_voice_seed = -1;
+  _prev_global_seed = -1;
+  _per_voice_seed_was_initialized = false;
+
   update_block_params(block);
   auto const& block_auto = block->state.own_block_automation;
   _phase = _global? 0: block_auto[param_phase][0].real();
@@ -530,9 +568,6 @@ lfo_engine::reset(plugin_block const* block)
     _phase += voice_pos * glob_uni_phs_offset;
     _phase -= (int)_phase;
   }
-
-  _static_noise.reset(block_auto[param_seed][0].step());
-  reset_smooth_noise(block_auto[param_seed][0].step(), block_auto[param_steps][0].step());
 }
 
 void
@@ -560,16 +595,40 @@ lfo_engine::process(plugin_block& block, cv_cv_matrix_mixdown const* modulation)
     return; 
   }
 
-  int seed = block_auto[param_seed][0].step();
-  int steps = block_auto[param_steps][0].step();
   if(_global)
   {
     update_block_params(&block);
-    if (seed != _prev_seed)
+    int seed = block_auto[param_seed][0].step();
+    int steps = block_auto[param_steps][0].step();
+    if (seed != _prev_global_seed)
     {
-      _prev_seed = seed;
+      _prev_global_seed = seed;
       _static_noise.reset(seed);
       reset_smooth_noise(seed, steps);
+    }
+  }
+  else
+  {
+    // cannot do this in reset() because we depend on output of the on-note module
+    int shape = block_auto[param_shape][0].step();
+    if (!_per_voice_seed_was_initialized)
+    {
+      if (is_noise(shape))
+      {
+        if (is_noise_not_voice_rand(shape))
+          _per_voice_seed = block_auto[param_seed][0].step();
+        else
+        {
+          int source_index = block_auto[param_voice_rnd_source][0].step();
+          assert(0 <= source_index && source_index < on_voice_random_count);
+          // noise generators hate zero seed
+          float on_note_rnd_cv = block.module_cv(module_voice_on_note, 0)[on_voice_random_output_index][source_index][0];
+          _per_voice_seed = (int)(1 + (on_note_rnd_cv * (RAND_MAX - 1)));
+        }
+        _static_noise.reset(_per_voice_seed);
+        reset_smooth_noise(_per_voice_seed, block_auto[param_steps][0].step());
+      }
+      _per_voice_seed_was_initialized = true;
     }
   }
 
@@ -604,7 +663,7 @@ template <bool GlobalUnison, int Type, bool Sync> void
 lfo_engine::process_uni_type_sync(plugin_block& block, cv_cv_matrix_mixdown const* modulation)
 {
   auto const& block_auto = block.state.own_block_automation;
-  int seed = block_auto[param_seed][0].step();
+  int seed = _global ? _prev_global_seed : _per_voice_seed;
   int steps = block_auto[param_steps][0].step();
   switch (block.state.own_block_automation[param_shape][0].step())
   {
@@ -625,15 +684,24 @@ lfo_engine::process_uni_type_sync(plugin_block& block, cv_cv_matrix_mixdown cons
   case wave_shape_type_cos_sin_cos: process_uni_type_sync_shape<GlobalUnison, Type, Sync, false, false>(block, modulation, wave_shape_uni_cos_sin_cos); break;
   case wave_shape_type_cos_cos_sin: process_uni_type_sync_shape<GlobalUnison, Type, Sync, false, false>(block, modulation, wave_shape_uni_cos_cos_sin); break;
   case wave_shape_type_cos_cos_cos: process_uni_type_sync_shape<GlobalUnison, Type, Sync, false, false>(block, modulation, wave_shape_uni_cos_cos_cos); break;
-  case wave_shape_type_smooth: process_uni_type_sync_shape<GlobalUnison, Type, Sync, true, false>(block, modulation, [this, seed, steps](float in) {
-    return wave_shape_uni_custom(in, [this, seed, steps](float in) {
-      return calc_smooth(in, seed, steps); }); }); break;
-  case wave_shape_type_static: process_uni_type_sync_shape<GlobalUnison, Type, Sync, false, true>(block, modulation, [this, seed](float in) {
-    return wave_shape_uni_custom(in, [this, seed](float in) {
-      return _static_noise.next<false>(in, seed); }); }); break;
-  case wave_shape_type_static_free: process_uni_type_sync_shape<GlobalUnison, Type, Sync, false, true>(block, modulation, [this, seed](float in) {
-    return wave_shape_uni_custom(in, [this, seed](float in) {
-      return _static_noise.next<true>(in, seed); }); }); break;
+  case wave_shape_type_smooth_1: 
+  case wave_shape_type_smooth_2:
+    process_uni_type_sync_shape<GlobalUnison, Type, Sync, true, false>(block, modulation, [this, seed, steps](float in) {
+      return wave_shape_uni_custom(in, [this, seed, steps](float in) {
+        return calc_smooth(in, seed, steps); }); }); 
+    break;
+  case wave_shape_type_static_1:
+  case wave_shape_type_static_2:
+    process_uni_type_sync_shape<GlobalUnison, Type, Sync, false, true>(block, modulation, [this, seed](float in) {
+      return wave_shape_uni_custom(in, [this, seed](float in) {
+        return _static_noise.next<false>(in, seed); }); }); 
+    break;
+  case wave_shape_type_static_free_1: 
+  case wave_shape_type_static_free_2:
+    process_uni_type_sync_shape<GlobalUnison, Type, Sync, false, true>(block, modulation, [this, seed](float in) {
+      return wave_shape_uni_custom(in, [this, seed](float in) {
+        return _static_noise.next<true>(in, seed); }); }); 
+    break;
   default: assert(false); break;
   }
 }

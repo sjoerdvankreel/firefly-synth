@@ -70,6 +70,22 @@ Release-monophonic mode is much more easily understood as a series of
 independent monophonic sections (which may overlap in their envelope release section,
 hence, not "true monophonic").
 
+## Per-voice random mod sources
+
+Firefly features 3 random mod sources for each voice.
+These can be selected in the per-voice mod-matrices as "On Note->On Nt Rnd N".
+In this case each mod source will be a static/fixed value determined at the start of each voice.
+
+These 3 random values can also be used as seed-values for per-voice random LFOs (smooth 2/(free)-static 2).
+When used in this way it essentially allows you to draw a complete new random stream for each voice.
+This is especially useful when playing chords: although each note kicks in at the exact same sample
+position (assuming host data, not external midi), each of these notes/voices can use 3 entirely
+different random lfos. So 9 streams for a 3-note chord.
+
+It is also possible to select a used-defined seed value for per-voice LFO's
+in (smooth 1/(free)-static 1), in which case the modulation source is deterministic
+(even if random). However in this case each note in a chord will follow the exact same "random"  pattern.
+
 ## Feature overview
 
 See the parameter reference document for details.
@@ -90,6 +106,7 @@ See the parameter reference document for details.
 - Per-voice DAHDSR envelopes with tempo syncing, linear and exponential slopes and 3 envelope modes.
 - Oscillators with classic waveforms, DSF synthesis, 2 Karplus-Strong modes, noise generator, unison and hard-sync.
 - Per-voice and global LFO's with tempo syncing, one-shot mode, various waveforms and horizontal and vertical skewing.
+- Per-voice random as mod source + per-voice random mod source as seed-value for per-voice random lfo generators.
 - Per-voice and global FX modules with state variable filter, comb filter, distortion and (global only) reverb, feedback- and multitap delay.
 
 ## Routing overview

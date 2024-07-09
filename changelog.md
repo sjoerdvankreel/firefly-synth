@@ -1,3 +1,28 @@
+### July 10, 2024 - V1.8.2.
+
+- Add some presets + demo tune.
+
+Add some random goodness!
+Just some non-deterministic mod sources which result in different values
+for each voice (rather than for-each-sample-start-position, as is the case with
+sampling (On Note) from global random LFO). This is mostly useful to
+add some more subtle "live-like" touch to a patch but of course it's
+a mod source like anything else to potentially go crazy with.
+
+- New modulation sources: on-note-random (inside the on-note menu, there's 3 of them).
+These are fixed values at voice start but differ from on-note-global-random-lfo
+in that they are re-drawn for each voice. So this gets you a random value as mod source
+per-voice. Useful for chords.
+
+- New per-voice LFO types: static 2, smooth noise 2, free running static noise 2.
+These are conceptually similar to the existing smooth/static/free-static,
+but instead of a fixed user-supplied seed value, they draw the seed value
+from the above mentioned on-voice-random source. This gets you an entire new
+random stream at the start of each voice. For hosts that allow you to play the same
+note twice at the exact same sample position (like renoise), this allows to render
+multiple completely different f.e. "C4" notes with the same start position.
+But again, mostly useful for chords.
+
 ### July 6, 2024 - V1.8.1.
 
 - Add some presets.
