@@ -1,9 +1,11 @@
-### ?, ? - V1.8.2.
+### July 9, 2024 - V1.8.2.
 
-Add some random goodness! 
-Just some non-deterministic mod sources which result in different values 
+- Add some presets + demo tune.
+
+Add some random goodness!
+Just some non-deterministic mod sources which result in different values
 for each voice (rather than for-each-sample-start-position, as is the case with
-sampling (On Note) from global random LFO). This is mostly useful to 
+sampling (On Note) from global random LFO). This is mostly useful to
 add some more subtle "live-like" touch to a patch but of course it's
 a mod source like anything else to potentially go crazy with.
 
