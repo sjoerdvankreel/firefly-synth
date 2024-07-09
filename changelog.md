@@ -1,4 +1,4 @@
-### July 9, 2024 - V1.8.2.
+### July 10, 2024 - V1.8.2.
 
 - Add some presets + demo tune.
 
