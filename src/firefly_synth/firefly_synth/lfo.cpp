@@ -28,7 +28,7 @@ enum { section_left, section_sync, section_skew, section_right, section_phase };
 enum {
   param_type, param_rate, param_tempo, param_sync,
   param_skew_x, param_skew_x_amt, param_skew_y, param_skew_y_amt,
-  param_shape, param_steps, param_seed, param_voice_rnd, param_filter, param_phase };
+  param_shape, param_steps, param_seed, param_voice_rnd_source, param_filter, param_phase };
 
 static bool
 is_noise_voice_rand(int shape)
@@ -471,14 +471,14 @@ lfo_topo(int section, gui_position const& pos, bool global, bool is_fx)
   seed.gui.bindings.visible.bind_params({ param_type, param_shape }, [](auto const& vs) { return !is_noise_voice_rand(vs[1]); });
   seed.gui.bindings.enabled.bind_params({ param_type, param_shape }, [](auto const& vs) { return vs[0] != type_off && is_noise_not_voice_rand(vs[1]); });
   seed.info.description = "Seed value for static and smooth noise generators.";
-  auto& voice_rnd = result.params.emplace_back(make_param(
-    make_topo_info_basic("{81DAE640-815C-4D61-8DDE-D4CAD70309EF}", "Voice Rnd", param_voice_rnd, 1),
+  auto& voice_rnd_source = result.params.emplace_back(make_param(
+    make_topo_info_basic("{81DAE640-815C-4D61-8DDE-D4CAD70309EF}", "Source", param_voice_rnd_source, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_step(0, on_voice_random_count - 1, 1, 1),
     make_param_gui_single(section_right, gui_edit_type::list, { 0, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  voice_rnd.gui.bindings.visible.bind_params({ param_type, param_shape }, [](auto const& vs) { return is_noise_voice_rand(vs[1]); });
-  voice_rnd.gui.bindings.enabled.bind_params({ param_type, param_shape }, [](auto const& vs) { return vs[0] != type_off && is_noise_voice_rand(vs[1]); });
-  voice_rnd.info.description = "Per-voice random stream source for static and smooth noise generators.";
+  voice_rnd_source.gui.bindings.visible.bind_params({ param_type, param_shape }, [](auto const& vs) { return is_noise_voice_rand(vs[1]); });
+  voice_rnd_source.gui.bindings.enabled.bind_params({ param_type, param_shape }, [](auto const& vs) { return vs[0] != type_off && is_noise_voice_rand(vs[1]); });
+  voice_rnd_source.info.description = "Per-voice random stream source for static and smooth noise generators.";
   auto& smooth = result.params.emplace_back(make_param(
     make_topo_info_basic("{21DBFFBE-79DA-45D4-B778-AC939B7EF785}", "Smooth", param_filter, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_linear(0, max_filter_time_ms, 0, 0, "Ms"),
