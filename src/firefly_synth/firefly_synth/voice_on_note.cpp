@@ -51,7 +51,7 @@ voice_on_note_topo(plugin_topo const* topo, int section)
       global_sources.items[i].id, true,
       global_sources.items[i].name, 
       global_sources.items[i].name,
-      global_sources.items[i].name, i + 1, 1)));
+      global_sources.items[i].name, i + on_voice_random_output_index + 1, 1)));
 
   module_topo result(make_module(
     make_topo_info("{EF1A4E73-BCAD-4D38-A54E-44B83EF46CB5}", true, "On Note", "On Note", "On Nt", module_voice_on_note, 1),
@@ -65,9 +65,9 @@ void
 voice_on_note_engine::process(plugin_block& block)
 {
   for(int i = 0; i < on_voice_random_count; i++)
-    block.state.own_cv[0][i].fill(block.start_frame, block.end_frame, _random_values[i]);
+    block.state.own_cv[on_voice_random_output_index][i].fill(block.start_frame, block.end_frame, _random_values[i]);
   for (int i = 0; i < _global_outputs.size(); i++)
-    block.state.own_cv[i + 1][0].fill(block.start_frame, block.end_frame, _on_note_values[i]);
+    block.state.own_cv[i + on_voice_random_output_index + 1][0].fill(block.start_frame, block.end_frame, _on_note_values[i]);
 }
 
 void 

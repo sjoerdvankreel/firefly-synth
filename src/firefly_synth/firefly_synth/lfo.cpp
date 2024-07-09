@@ -90,11 +90,14 @@ public module_engine {
   smooth_noise _smooth_noise;
   static_noise _static_noise;
 
-  int _prev_seed = -1;
   int _end_filter_pos = 0;
   int _end_filter_stage_samples = 0;
   int _smooth_noise_total_pos = 0;
   int _smooth_noise_total_samples = 0;
+
+  int _per_voice_seed = -1;
+  int _prev_global_seed = -1;
+  bool _per_voice_seed_was_initialized = false;
 
   void reset_smooth_noise(int seed, int steps);
   void update_block_params(plugin_block const* block);
@@ -543,7 +546,10 @@ lfo_engine::reset(plugin_block const* block)
   _filter_end_value = 0;
   _stage = lfo_stage::cycle;
   _end_filter_stage_samples = 0;
-  
+  _per_voice_seed = -1;
+  _prev_global_seed = -1;
+  _per_voice_seed_was_initialized = false;
+
   update_block_params(block);
   auto const& block_auto = block->state.own_block_automation;
   _phase = _global? 0: block_auto[param_phase][0].real();
@@ -556,9 +562,6 @@ lfo_engine::reset(plugin_block const* block)
     _phase += voice_pos * glob_uni_phs_offset;
     _phase -= (int)_phase;
   }
-
-  _static_noise.reset(block_auto[param_seed][0].step());
-  reset_smooth_noise(block_auto[param_seed][0].step(), block_auto[param_steps][0].step());
 }
 
 void
@@ -591,11 +594,34 @@ lfo_engine::process(plugin_block& block, cv_cv_matrix_mixdown const* modulation)
     update_block_params(&block);
     int seed = block_auto[param_seed][0].step();
     int steps = block_auto[param_steps][0].step();
-    if (seed != _prev_seed)
+    if (seed != _prev_global_seed)
     {
-      _prev_seed = seed;
+      _prev_global_seed = seed;
       _static_noise.reset(seed);
       reset_smooth_noise(seed, steps);
+    }
+  }
+  else
+  {
+    // cannot do this in reset() because we depend on output of the on-note module
+    int shape = block_auto[param_shape][0].step();
+    if (!_per_voice_seed_was_initialized)
+    {
+      if (is_noise(shape))
+      {
+        if (is_noise_not_voice_rand(shape))
+          _per_voice_seed = block_auto[param_seed][0].step();
+        else
+        {
+          int source_index = block_auto[param_voice_rnd_source][0].step();
+          assert(0 <= source_index && source_index < on_voice_random_count);
+          // noise generators hate zero seed
+          _per_voice_seed = (int)(1 + (block.module_cv(module_voice_on_note, 0)[on_voice_random_output_index][source_index][0] * (RAND_MAX - 1)));
+        }
+        _static_noise.reset(_per_voice_seed);
+        reset_smooth_noise(_per_voice_seed, block_auto[param_steps][0].step());
+      }
+      _per_voice_seed_was_initialized = true;
     }
   }
 
@@ -630,7 +656,7 @@ template <bool GlobalUnison, int Type, bool Sync> void
 lfo_engine::process_uni_type_sync(plugin_block& block, cv_cv_matrix_mixdown const* modulation)
 {
   auto const& block_auto = block.state.own_block_automation;
-  int seed = block_auto[param_seed][0].step();
+  int seed = _global ? _prev_global_seed : _per_voice_seed;
   int steps = block_auto[param_steps][0].step();
   switch (block.state.own_block_automation[param_shape][0].step())
   {
@@ -651,19 +677,24 @@ lfo_engine::process_uni_type_sync(plugin_block& block, cv_cv_matrix_mixdown cons
   case wave_shape_type_cos_sin_cos: process_uni_type_sync_shape<GlobalUnison, Type, Sync, false, false>(block, modulation, wave_shape_uni_cos_sin_cos); break;
   case wave_shape_type_cos_cos_sin: process_uni_type_sync_shape<GlobalUnison, Type, Sync, false, false>(block, modulation, wave_shape_uni_cos_cos_sin); break;
   case wave_shape_type_cos_cos_cos: process_uni_type_sync_shape<GlobalUnison, Type, Sync, false, false>(block, modulation, wave_shape_uni_cos_cos_cos); break;
-  case wave_shape_type_smooth_1: process_uni_type_sync_shape<GlobalUnison, Type, Sync, true, false>(block, modulation, [this, seed, steps](float in) {
-    return wave_shape_uni_custom(in, [this, seed, steps](float in) {
-      return calc_smooth(in, seed, steps); }); }); break;
-  case wave_shape_type_static_1: process_uni_type_sync_shape<GlobalUnison, Type, Sync, false, true>(block, modulation, [this, seed](float in) {
-    return wave_shape_uni_custom(in, [this, seed](float in) {
-      return _static_noise.next<false>(in, seed); }); }); break;
-  case wave_shape_type_static_free_1: process_uni_type_sync_shape<GlobalUnison, Type, Sync, false, true>(block, modulation, [this, seed](float in) {
-    return wave_shape_uni_custom(in, [this, seed](float in) {
-      return _static_noise.next<true>(in, seed); }); }); break;
+  case wave_shape_type_smooth_1: 
   case wave_shape_type_smooth_2:
+    process_uni_type_sync_shape<GlobalUnison, Type, Sync, true, false>(block, modulation, [this, seed, steps](float in) {
+      return wave_shape_uni_custom(in, [this, seed, steps](float in) {
+        return calc_smooth(in, seed, steps); }); }); 
+    break;
+  case wave_shape_type_static_1:
   case wave_shape_type_static_2:
+    process_uni_type_sync_shape<GlobalUnison, Type, Sync, false, true>(block, modulation, [this, seed](float in) {
+      return wave_shape_uni_custom(in, [this, seed](float in) {
+        return _static_noise.next<false>(in, seed); }); }); 
+    break;
+  case wave_shape_type_static_free_1: 
   case wave_shape_type_static_free_2:
-  break; // TODO
+    process_uni_type_sync_shape<GlobalUnison, Type, Sync, false, true>(block, modulation, [this, seed](float in) {
+      return wave_shape_uni_custom(in, [this, seed](float in) {
+        return _static_noise.next<true>(in, seed); }); }); 
+    break;
   default: assert(false); break;
   }
 }

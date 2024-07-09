@@ -21,6 +21,7 @@ update the manual
 and the patches
 and check the demos especially renoise
 and make a new demo with and without
+and add new presets
 
 wishlist:
 DSF falloff to the left
