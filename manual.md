@@ -70,6 +70,18 @@ Release-monophonic mode is much more easily understood as a series of
 independent monophonic sections (which may overlap in their envelope release section,
 hence, not "true monophonic").
 
+## Per-voice random mod sources
+
+Firefly features 3 random mod sources for each voice.
+These can be selected in the per-voice mod-matrices as "On Note->On Nt Rnd N".
+In this case each mod source will be a static/fixed value determined at the start of each voice.
+
+These 3 random values can also be used as seed-values for per-voice random LFOs (smooth 2/(free)-static 2).
+When used in this way it essentially allows you to draw a complete new random stream for each voice.
+This is especially useful when playing chords: although each note kicks in at the exact same sample
+position (assuming host data, not external midi), each of these notes/voices can use 3 entirely
+different random lfos. So 9 streams for a 3-note chord.
+
 ## Feature overview
 
 See the parameter reference document for details.
