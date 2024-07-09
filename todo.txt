@@ -18,7 +18,7 @@ on release:
 
 1.8.2
 update the manual
-and add new presets
+v and add new presets
 v run all demo material in debug
 v run specific renoise material in release
 
