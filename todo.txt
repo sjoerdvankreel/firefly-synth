@@ -22,7 +22,7 @@ and the patches
 and check the demos especially renoise
 and make a new demo with and without
 and add new presets
-run all demo material in debug
+v run all demo material in debug
 run specific renoise material in release
 
 wishlist:
