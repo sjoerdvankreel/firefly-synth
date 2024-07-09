@@ -68,7 +68,7 @@ wave_skew_type_tags()
 }
 
 static std::vector<topo_tag>
-wave_shape_type_tags(bool for_shaper)
+wave_shape_type_tags(bool for_shaper, bool global)
 {
   std::vector<topo_tag> result;
   result.push_back(make_topo_tag_basic("{CA30E83B-2A11-4833-8A45-81F666A3A4F5}", wave_make_name_shape(wave_shape_type_saw, for_shaper)));
@@ -89,12 +89,14 @@ wave_shape_type_tags(bool for_shaper)
   result.push_back(make_topo_tag_basic("{6A56691C-0F9C-4CE1-B835-85CF4D3B1F9B}", wave_make_name_shape(wave_shape_type_cos_cos_cos, for_shaper)));
   result.push_back(make_topo_tag_basic("{E16E6DC4-ACB3-4313-A094-A6EA9F8ACA85}", wave_make_name_shape(wave_shape_type_sqr_or_fold, for_shaper)));
 
-  if(for_shaper) return result;
+  if (for_shaper) return result;
   result.push_back(make_topo_tag_basic("{7176FE9E-D2A8-44FE-B312-93D712173D29}", wave_make_name_shape(wave_shape_type_smooth_1, false)));
-  result.push_back(make_topo_tag_basic("{4CB433AA-C15E-4560-999D-4C2D5DAF14B3}", wave_make_name_shape(wave_shape_type_smooth_2, false)));
   result.push_back(make_topo_tag_basic("{FA26FEFB-CACD-4D00-A986-246F09959F5E}", wave_make_name_shape(wave_shape_type_static_1, false)));
-  result.push_back(make_topo_tag_basic("{E3735241-E420-4E25-9B82-D6CD2D9E8C2C}", wave_make_name_shape(wave_shape_type_static_2, false)));
   result.push_back(make_topo_tag_basic("{FA86B2EE-12F7-40FB-BEB9-070E62C7C691}", wave_make_name_shape(wave_shape_type_static_free_1, false)));
+
+  if (global) return result;
+  result.push_back(make_topo_tag_basic("{4CB433AA-C15E-4560-999D-4C2D5DAF14B3}", wave_make_name_shape(wave_shape_type_smooth_2, false)));
+  result.push_back(make_topo_tag_basic("{E3735241-E420-4E25-9B82-D6CD2D9E8C2C}", wave_make_name_shape(wave_shape_type_static_2, false)));
   result.push_back(make_topo_tag_basic("{B4A2ABBF-2433-4B12-96B2-221B3F56FDAE}", wave_make_name_shape(wave_shape_type_static_free_2, false)));
   return result;
 }
@@ -110,10 +112,10 @@ wave_skew_type_items()
 }
 
 std::vector<list_item>
-wave_shape_type_items(bool for_shaper)
+wave_shape_type_items(bool for_shaper, bool global)
 {
   std::vector<list_item> result;
-  auto tags = wave_shape_type_tags(for_shaper);
+  auto tags = wave_shape_type_tags(for_shaper, global);
   for (int i = 0; i < tags.size(); i++)
     result.push_back({ tags[i].id, tags[i].menu_display_name });
   return result;
