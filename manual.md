@@ -82,6 +82,10 @@ This is especially useful when playing chords: although each note kicks in at th
 position (assuming host data, not external midi), each of these notes/voices can use 3 entirely
 different random lfos. So 9 streams for a 3-note chord.
 
+It is also possible to select a used-defined seed value for per-voice LFO's
+in (smooth 1/(free)-static 1), in which case the modulation source is deterministic
+(even if random). However in this case each note in a chord will follow the exact same "random"  pattern.
+
 ## Feature overview
 
 See the parameter reference document for details.
