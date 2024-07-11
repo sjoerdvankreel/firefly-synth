@@ -612,7 +612,8 @@ plugin_gui::make_content()
   for(int s = 0; s < topo.gui.module_sections.size(); s++)
     if(topo.gui.module_sections[s].visible)
       grid.add(make_module_section(topo.gui.module_sections[s]), topo.gui.module_sections[s].position);
-  return make_component<margin_component>(&grid, BorderSize<int>(margin_content));
+  auto& dnd_support = make_component<plugin_drag_drop_container>(&grid);
+  return make_component<margin_component>(&dnd_support, BorderSize<int>(margin_content));
 }
 
 Component& 

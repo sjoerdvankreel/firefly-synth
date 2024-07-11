@@ -35,6 +35,28 @@ public:
   _child(child), _margin(margin) { add_and_make_visible(*this, *child); }
 };
 
+// d&d support for the entire plugin UI
+class plugin_drag_drop_container :
+public juce::Component,
+public juce::DragAndDropContainer,
+public autofit_component
+{
+  juce::Component* const _child;
+public:
+  void resized() override 
+  { getChildComponent(0)->setBounds(getLocalBounds()); }
+  plugin_drag_drop_container(juce::Component* child) : _child(child) 
+  { add_and_make_visible(*this, *child); }
+
+  void dragOperationEnded(juce::DragAndDropTarget::SourceDetails const&) override;
+  void dragOperationStarted(juce::DragAndDropTarget::SourceDetails const&) override;
+
+  int fixed_width(int parent_w, int parent_h) const override 
+  { return dynamic_cast<autofit_component*>(getChildComponent(0))->fixed_width(parent_w, parent_h); }
+  int fixed_height(int parent_w, int parent_h) const override 
+  { return dynamic_cast<autofit_component*>(getChildComponent(0))->fixed_height(parent_w, parent_h); }
+};
+
 // displays a child component based on extra state changes
 class extra_state_container:
 public juce::Component,
