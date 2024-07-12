@@ -17,10 +17,10 @@ on release:
 11 update kvr
 
 1.8.3 drag-drop
-* drop possible indicator
-* allow drag with alternate param (ie basic sine amt)
+* allow drag with alternate param (ie basic sine amt) -> link param to other param
+* allow drag param to source -> link param to source (ie link aux N to output aux N)
 * drag with sources
-* drag all matrices
+* drag all matrices -> check all sources and targets in the matrices
 
 wishlist:
 DSF falloff to the left

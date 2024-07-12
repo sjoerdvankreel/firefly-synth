@@ -442,6 +442,7 @@ cv_matrix_topo(
   source.gui.tabular = true;
   source.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   source.gui.submenu = source_matrix.submenu;
+  source.gui.enable_dropdown_drop_target = true;
   source.info.description = std::string("All global CV and MIDI sources, plus for per-voice CV all per-voice CV sources, ") + 
     "MIDI note and velocity, and On-Note all global CV sources.";
   if (cv)
