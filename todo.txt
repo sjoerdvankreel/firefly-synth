@@ -20,6 +20,7 @@ on release:
 * drop possible indicator
 * allow drag with alternate param (ie basic sine amt)
 * drag with sources
+* drag all matrices
 
 wishlist:
 DSF falloff to the left
