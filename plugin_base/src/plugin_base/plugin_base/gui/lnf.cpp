@@ -592,6 +592,17 @@ lnf::drawComboBox(Graphics& g, int width, int height, bool, int, int, int, int, 
   path.closeSubPath();  
   g.setColour(box.findColour(ComboBox::arrowColourId).withAlpha((box.isEnabled() ? 0.9f : 0.2f)));
   g.fillPath(path);
+
+  int apply_w = g.getCurrentFont().getStringWidth("+");
+  auto apply_mod_box = Rectangle<int>(
+    boxBounds.getTopRight().x - apply_w,
+    boxBounds.getTopLeft().y,
+    apply_w,
+    boxBounds.getHeight());
+  g.setColour(Colours::white);
+  g.fillRoundedRectangle(apply_mod_box.toFloat(), 2.0f);
+  g.setColour(box.findColour(ComboBox::arrowColourId));
+  g.drawText("+", apply_mod_box.toFloat(), Justification::centred);
 }
 
 void 
