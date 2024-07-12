@@ -638,6 +638,7 @@ param_combobox::itemDropped(DragAndDropTarget::SourceDetails const& details)
   int index = get_item_index(details.description.toString().toStdString());
   if (index != -1) setSelectedItemIndex(index);
   else assert(false);
+  itemDragExit(details);
 }
 
 bool 

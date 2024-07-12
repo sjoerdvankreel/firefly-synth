@@ -601,7 +601,7 @@ lnf::drawComboBox(Graphics& g, int width, int height, bool, int, int, int, int, 
     boxBounds.getTopLeft().y,
     apply_w,
     boxBounds.getHeight());
-  g.setColour(Colours::white);
+  g.setColour(Colours::darkgrey);
   g.fillRoundedRectangle(apply_mod_box.toFloat(), 2.0f);
   g.setColour(box.findColour(ComboBox::arrowColourId));
   g.drawText("+", apply_mod_box.toFloat(), Justification::centred);
