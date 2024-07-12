@@ -120,14 +120,30 @@ autofit_label(lnf, label_ref_text(param)), _module(module), _param(param)
   init();
 }
 
-MouseCursor param_name_label::getMouseCursor()
+bool
+param_name_label::is_enabled_mod_source() const
+{
+  if (!isEnabled()) return false;
+  if (!_param->param->dsp.can_modulate(_module->info.slot)) return false;
+  return true;
+}
+
+MouseCursor 
+param_name_label::getMouseCursor()
 {
   // TODO deal with label-less sliders
-  if(!isEnabled())
-    return Component::getMouseCursor();
-  if(!_param->param->dsp.can_modulate(_module->info.slot)) 
-    return Component::getMouseCursor();
+  if(!is_enabled_mod_source()) return Component::getMouseCursor();
   return MouseCursor::DraggingHandCursor;
+}
+
+void 
+param_name_label::mouseDrag(juce::MouseEvent const& e)
+{
+  if (!is_enabled_mod_source()) return;
+  auto* container = DragAndDropContainer::findParentDragContainerFor(this);
+  assert(container != nullptr);
+  if (container->isDragAndDropActive()) return;
+  container->startDragging(juce::String(_param->info.id), this);
 }
 
 last_tweaked_label::
