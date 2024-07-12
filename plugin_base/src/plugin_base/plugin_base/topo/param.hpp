@@ -43,8 +43,8 @@ public:
 // drag/drop target handling
 class drop_target_handler {
 public:
-  virtual void on_drop(std::string const& id) = 0;
-  virtual bool can_drop(std::string const& id) const = 0;
+  virtual int on_drop(plugin_state const& state, std::string const& id) = 0;
+  virtual bool can_drop(plugin_state const& state, std::string const& id) const = 0;
 };
 
 typedef std::function<std::string(param_desc const& desc)> 

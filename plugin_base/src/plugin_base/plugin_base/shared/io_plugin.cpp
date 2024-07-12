@@ -364,8 +364,8 @@ load_state_internal(
     // check for old module not found
     auto module_id = json["modules"][m]["id"].toString().toStdString();
     auto module_name = json["modules"][m]["name"].toString().toStdString();
-    auto module_iter = state.desc().module_id_to_index.find(module_id);
-    if (module_iter == state.desc().module_id_to_index.end())
+    auto module_iter = state.desc().module_topo_id_to_index.find(module_id);
+    if (module_iter == state.desc().module_topo_id_to_index.end())
     {
       result.warnings.push_back("Module '" + module_name + "' was deleted.");
       continue;
@@ -401,8 +401,8 @@ load_state_internal(
   for (int m = 0; m < json["state"].size(); m++)
   {
     auto module_id = json["modules"][m]["id"].toString().toStdString();
-    auto module_iter = state.desc().module_id_to_index.find(module_id);
-    if(module_iter == state.desc().module_id_to_index.end()) continue;
+    auto module_iter = state.desc().module_topo_id_to_index.find(module_id);
+    if(module_iter == state.desc().module_topo_id_to_index.end()) continue;
     var module_slots = json["state"][m]["slots"];
 
     // set up the topo specific converter, if any
