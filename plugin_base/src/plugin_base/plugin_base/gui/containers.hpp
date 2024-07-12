@@ -48,9 +48,6 @@ public:
   plugin_drag_drop_container(juce::Component* child) : _child(child) 
   { add_and_make_visible(*this, *child); }
 
-  void dragOperationEnded(juce::DragAndDropTarget::SourceDetails const&) override;
-  void dragOperationStarted(juce::DragAndDropTarget::SourceDetails const&) override;
-
   int fixed_width(int parent_w, int parent_h) const override 
   { return dynamic_cast<autofit_component*>(getChildComponent(0))->fixed_width(parent_w, parent_h); }
   int fixed_height(int parent_w, int parent_h) const override 

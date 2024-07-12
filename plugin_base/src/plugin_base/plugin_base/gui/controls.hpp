@@ -268,9 +268,11 @@ public:
 };
 
 // dropdown bound to single parameter
+// NOTE: we only support drag-drop onto combos for now
 class param_combobox :
 public param_component,
 public autofit_combobox, 
+public juce::DragAndDropTarget,
 public juce::ComboBox::Listener
 {
 protected:
@@ -279,6 +281,12 @@ protected:
 public:
   ~param_combobox() { removeListener(this); }
   param_combobox(plugin_gui* gui, module_desc const* module, param_desc const* param, lnf* lnf);
+
+  // d&d support
+  void itemDropped(juce::DragAndDropTarget::SourceDetails const& details) override;
+  void itemDragExit(juce::DragAndDropTarget::SourceDetails const& details) override;
+  void itemDragEnter(juce::DragAndDropTarget::SourceDetails const& details) override;
+  bool isInterestedInDragSource(juce::DragAndDropTarget::SourceDetails const& details) override;
 
   void showPopup() override;
   void comboBoxChanged(ComboBox*) override final

@@ -277,16 +277,4 @@ grid_component::resized()
   grid.performLayout(getLocalBounds());
 }
 
-void 
-plugin_drag_drop_container::dragOperationEnded(DragAndDropTarget::SourceDetails const&)
-{
-
-}
-
-void 
-plugin_drag_drop_container::dragOperationStarted(DragAndDropTarget::SourceDetails const&)
-{
-
-}
-
 }

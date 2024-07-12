@@ -40,6 +40,13 @@ public:
   virtual std::string execute(int menu_id, int action, int module_index, int module_slot, int param_index, int param_slot) = 0;
 };
 
+// drag/drop target handling
+class drop_target_handler {
+public:
+  virtual void on_drop(std::string const& id) = 0;
+  virtual bool can_drop(std::string const& id) const = 0;
+};
+
 typedef std::function<std::string(param_desc const& desc)> 
 param_display_formatter;
 typedef std::function<param_automate(int module_slot)>
@@ -83,6 +90,9 @@ struct param_topo_gui final {
   gui_item_binding item_enabled = {};
   std::shared_ptr<gui_submenu> submenu;
   param_menu_handler_factory menu_handler_factory;
+
+  // d&d handling
+  std::shared_ptr<drop_target_handler> drag_drop_target_handler;
 
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(param_topo_gui);
   bool is_list() const;
