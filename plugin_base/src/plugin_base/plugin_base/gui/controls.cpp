@@ -621,11 +621,15 @@ param_combobox::get_item_index(std::string const& item_id) const
 void
 param_combobox::itemDragExit(DragAndDropTarget::SourceDetails const& details)
 {
+  _is_drop_possible = false;
+  repaint();
 }
 
 void
 param_combobox::itemDragEnter(DragAndDropTarget::SourceDetails const& details)
 {
+  _is_drop_possible = true;
+  repaint();
 }
 
 void 

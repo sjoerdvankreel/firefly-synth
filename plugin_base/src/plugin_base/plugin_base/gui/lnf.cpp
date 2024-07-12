@@ -569,12 +569,12 @@ void
 lnf::drawComboBox(Graphics& g, int width, int height, bool, int, int, int, int, ComboBox& box)
 {
   bool tabular = false;
-  if (auto ps = dynamic_cast<param_combobox*>(&box))
-    if (ps->param()->param->gui.tabular)
-    {
-      tabular = true;
-      draw_tabular_cell_bg(g, &box, global_settings().table_cell_radius);
-    }
+  param_combobox* param_cb = dynamic_cast<param_combobox*>(&box);
+  if (param_cb != nullptr && param_cb->param()->param->gui.tabular)
+  {
+    tabular = true;
+    draw_tabular_cell_bg(g, &box, global_settings().table_cell_radius);
+  }
 
   Path path;
   int arrowPad = 4;
@@ -592,6 +592,8 @@ lnf::drawComboBox(Graphics& g, int width, int height, bool, int, int, int, int, 
   path.closeSubPath();  
   g.setColour(box.findColour(ComboBox::arrowColourId).withAlpha((box.isEnabled() ? 0.9f : 0.2f)));
   g.fillPath(path);
+
+  if (!param_cb || !param_cb->is_drop_possible()) return;
 
   int apply_w = g.getCurrentFont().getStringWidth("+");
   auto apply_mod_box = Rectangle<int>(

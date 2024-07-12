@@ -275,6 +275,7 @@ public autofit_combobox,
 public juce::DragAndDropTarget,
 public juce::ComboBox::Listener
 {
+  bool _is_drop_possible = false;
   int get_item_index(std::string const& item_id) const;
 
 protected:
@@ -285,6 +286,7 @@ public:
   param_combobox(plugin_gui* gui, module_desc const* module, param_desc const* param, lnf* lnf);
 
   // d&d support
+  bool is_drop_possible() const { return _is_drop_possible; }
   void itemDropped(juce::DragAndDropTarget::SourceDetails const& details) override;
   void itemDragExit(juce::DragAndDropTarget::SourceDetails const& details) override;
   void itemDragEnter(juce::DragAndDropTarget::SourceDetails const& details) override;
