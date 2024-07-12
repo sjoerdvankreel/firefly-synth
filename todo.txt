@@ -16,6 +16,11 @@ on release:
 10 make a github release
 11 update kvr
 
+1.8.3 drag-drop
+* drop possible indicator
+* allow drag with alternate param (ie basic sine amt)
+* drag with sources
+
 wishlist:
 DSF falloff to the left
 clap polyphonic modulation
