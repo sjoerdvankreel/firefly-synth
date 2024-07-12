@@ -113,11 +113,21 @@ param_name_label::label_ref_text(param_desc const* param)
 param_name_label::
 param_name_label(plugin_gui* gui, module_desc const* module, param_desc const* param, lnf* lnf):
 binding_component(gui, module, &param->param->gui.bindings, param->info.slot),
-autofit_label(lnf, label_ref_text(param)), _param(param)
+autofit_label(lnf, label_ref_text(param)), _module(module), _param(param)
 {
   std::string name = param_slot_name(param);
   setText(name, juce::dontSendNotification); 
   init();
+}
+
+MouseCursor param_name_label::getMouseCursor()
+{
+  // TODO deal with label-less sliders
+  if(!isEnabled())
+    return Component::getMouseCursor();
+  if(!_param->param->dsp.can_modulate(_module->info.slot)) 
+    return Component::getMouseCursor();
+  return MouseCursor::DraggingHandCursor;
 }
 
 last_tweaked_label::

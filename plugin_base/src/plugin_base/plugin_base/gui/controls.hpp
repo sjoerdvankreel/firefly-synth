@@ -188,14 +188,16 @@ protected:
   param_component(plugin_gui* gui, module_desc const* module, param_desc const* param);
 };
 
-// static parameter name display
+// static parameter name display + d&d support
 class param_name_label:
 public binding_component,
 public autofit_label
 {
+  module_desc const* const _module;
   param_desc const* const _param;
   static std::string label_ref_text(param_desc const* param);
 public:
+  juce::MouseCursor getMouseCursor() override;
   param_desc const* param() const { return _param; }
   param_name_label(plugin_gui* gui, module_desc const* module, param_desc const* param, lnf* lnf);
 };
