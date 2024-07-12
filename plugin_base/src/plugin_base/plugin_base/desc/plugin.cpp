@@ -27,7 +27,7 @@ plugin(plugin), config(config)
     if(module.dsp.stage == module_stage::input) module_voice_start++;
     if(module.dsp.stage == module_stage::input) module_output_start++;
     if(module.dsp.stage == module_stage::voice) module_output_start++;
-    module_topo_id_to_index[module.info.tag.id] = m;
+    module_id_to_index[module.info.tag.id] = m;
     auto& param_id_mapping = param_mappings.id_to_index[module.info.tag.id];
     for(int p = 0; p < module.params.size(); p++)
       param_id_mapping[module.params[p].info.tag.id] = p;

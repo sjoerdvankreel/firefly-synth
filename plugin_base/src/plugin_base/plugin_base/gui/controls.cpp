@@ -620,10 +620,10 @@ param_combobox::itemDragEnter(DragAndDropTarget::SourceDetails const& details)
 
 void 
 param_combobox::itemDropped(DragAndDropTarget::SourceDetails const& details)
-{  
+{
   auto handler = _param->param->gui.drag_drop_target_handler;
   assert(handler);
-  handler->on_drop(*gui()->gui_state(), details.description.toString().toStdString());
+  handler->on_drop(details.description.toString().toStdString());
 }
 
 bool 
@@ -632,7 +632,7 @@ param_combobox::isInterestedInDragSource(DragAndDropTarget::SourceDetails const&
   auto handler = _param->param->gui.drag_drop_target_handler;
   if (handler == nullptr) return false;
   std::string source_id = details.description.toString().toStdString();
-  return handler->can_drop(*gui()->gui_state(), source_id);
+  return handler->can_drop(source_id);
 }
 
 }

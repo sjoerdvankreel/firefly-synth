@@ -145,11 +145,9 @@ public:
 class matrix_cv_drop_handler:
 public drop_target_handler
 {
-  std::vector<list_item> const _items;
 public:
-  matrix_cv_drop_handler(std::vector<list_item> const& items) : _items(items) {}
-  void on_drop(plugin_state const& state, std::string const& id) override;
-  bool can_drop(plugin_state const& state, std::string const& id) const override;
+  void on_drop(std::string const& id) override;
+  bool can_drop(std::string const& id) const override;
 };
 
 static void
@@ -350,17 +348,15 @@ render_graph(
 }
 
 void 
-matrix_cv_drop_handler::on_drop(plugin_state const& state, std::string const& id)
+matrix_cv_drop_handler::on_drop(std::string const& id)
 {
+
 }
 
 bool 
-matrix_cv_drop_handler::can_drop(plugin_state const& state, std::string const& id) const
+matrix_cv_drop_handler::can_drop(std::string const& id) const
 {
-  for (int i = 0; i < _items.size(); i++)
-    if (_items[i].id == id)
-      return true;
-  return false;
+  return true;
 }
 
 module_topo
@@ -483,7 +479,7 @@ cv_matrix_topo(
   target.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   target.gui.submenu = target_matrix.submenu;
   target.gui.item_enabled.auto_bind = true;
-  target.gui.drag_drop_target_handler = std::make_shared<matrix_cv_drop_handler>(target_matrix.items);
+  target.gui.drag_drop_target_handler = std::make_shared<matrix_cv_drop_handler>();
   if(cv)
     target.info.description = "Any modulatable parameter of any LFO or the CV-to-audio matrix. You can only route 'upwards', so not LFO2->LFO1.";
   else

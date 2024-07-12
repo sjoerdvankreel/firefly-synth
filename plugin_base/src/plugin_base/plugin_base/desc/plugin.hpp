@@ -86,7 +86,7 @@ public:
   std::vector<param_desc const*> params = {};
   std::map<int, int> module_topo_to_index = {};
   std::vector<midi_desc const*> midi_sources = {};
-  std::map<std::string, int> module_topo_id_to_index = {};
+  std::map<std::string, int> module_id_to_index = {};
 
   void validate() const;
   std::vector<std::string> themes() const;

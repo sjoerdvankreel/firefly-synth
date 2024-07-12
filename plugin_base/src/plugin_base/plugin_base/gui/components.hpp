@@ -34,8 +34,6 @@ protected:
   gui_bindings const* const _bindings;
 
   virtual void init();
-  plugin_gui* gui() const { return _gui; }
-
   binding_component(
     plugin_gui* gui, module_desc const* module, 
     gui_bindings const* bindings, int own_slot_index);
