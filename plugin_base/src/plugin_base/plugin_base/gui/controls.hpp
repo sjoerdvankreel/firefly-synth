@@ -275,6 +275,8 @@ public autofit_combobox,
 public juce::DragAndDropTarget,
 public juce::ComboBox::Listener
 {
+  int get_item_index(std::string const& item_id) const;
+
 protected:
   void own_param_changed(plain_value plain) override final;
 

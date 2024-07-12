@@ -608,6 +608,16 @@ param_combobox::showPopup()
   ComboBox::showPopup();
 }
 
+int 
+param_combobox::get_item_index(std::string const& item_id) const
+{
+  assert(_param->param->gui.enable_dropdown_drop_target);
+  for (int i = 0; i < _param->param->domain.items.size(); i++)
+    if (item_id == _param->param->domain.items[i].id)
+      return i;
+  return -1;
+}
+
 void
 param_combobox::itemDragExit(DragAndDropTarget::SourceDetails const& details)
 {
@@ -621,18 +631,17 @@ param_combobox::itemDragEnter(DragAndDropTarget::SourceDetails const& details)
 void 
 param_combobox::itemDropped(DragAndDropTarget::SourceDetails const& details)
 {
-  auto handler = _param->param->gui.drag_drop_target_handler;
-  assert(handler);
-  handler->on_drop(details.description.toString().toStdString());
+  int index = get_item_index(details.description.toString().toStdString());
+  if (index != -1) setSelectedItemIndex(index);
+  else assert(false);
 }
 
 bool 
 param_combobox::isInterestedInDragSource(DragAndDropTarget::SourceDetails const& details)
 {
-  auto handler = _param->param->gui.drag_drop_target_handler;
-  if (handler == nullptr) return false;
+  if (!_param->param->gui.enable_dropdown_drop_target) return false;
   std::string source_id = details.description.toString().toStdString();
-  return handler->can_drop(source_id);
+  return get_item_index(source_id) != -1;
 }
 
 }
