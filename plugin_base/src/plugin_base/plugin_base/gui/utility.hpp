@@ -15,6 +15,6 @@ juce::Colour
 color_to_grayscale(juce::Colour const& c);
 
 juce::ScaledImage
-make_drag_source_image(juce::Font const& font, std::string const& text, juce::Colour text_color);
+make_drag_source_image(juce::Font const& font, std::string const& text, juce::Colour border_color);
 
 }

@@ -607,6 +607,7 @@ lnf::drawComboBox(Graphics& g, int width, int height, bool, int, int, int, int, 
   g.setColour(Colours::darkgrey);
   g.fillRoundedRectangle(apply_mod_box.toFloat(), 2.0f);
   g.setColour(colors().control_text);
+  g.setFont(font());
   g.drawText(drop_icon, apply_mod_box.toFloat(), Justification::centred);
 }
 

@@ -28,19 +28,22 @@ color_to_grayscale(juce::Colour const& c)
 }
 
 juce::ScaledImage
-make_drag_source_image(Font const& font, std::string const& text, Colour text_color)
+make_drag_source_image(Font const& font, std::string const& text, Colour border_color)
 {
-  float margin = 4.0f;
+  float margin_w = 8.0f;
+  float margin_h = 4.0f;
   float text_h = font.getHeight();
-  float text_w = font.getStringWidthFloat(String(text)) + 4;
+  float text_w = font.getStringWidthFloat(String(text));
 
-  Image image(Image::PixelFormat::ARGB, text_w + margin, text_h + margin, true);
+  Image image(Image::PixelFormat::ARGB, text_w + margin_w, text_h + margin_h, true);
   Graphics g(image);
+  g.setFont(font);
+  g.setColour(Colours::black);
+  g.fillRect(0.0f, 0.0f, text_w + margin_w - 1, text_h + margin_h);
+  g.setColour(border_color);
+  g.drawRect(Rectangle<float>(0.0f, 0.0f, text_w + margin_w - 1, text_h + margin_h).reduced(0.5f), 1.0f);
   g.setColour(Colours::white);
-  g.fillRoundedRectangle(0, 0, text_w + margin - 1, text_h + margin, 2);
-  g.setColour(text_color);
-  g.drawRoundedRectangle(0, 0, text_w + margin - 1, text_h + margin, 2, 1);
-  g.drawText(text, margin / 2, margin / 2, text_w, text_h, Justification::centredBottom, false);
+  g.drawText(text, margin_w / 2, margin_h / 2, text_w, text_h, Justification::centredBottom, false);
   return ScaledImage(image);
 }
 
