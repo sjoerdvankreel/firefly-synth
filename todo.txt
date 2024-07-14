@@ -25,6 +25,8 @@ v allow drag f.e. dist skewx
 * drag the module headers if they have audio/cv outs
 * drag aux1 = drag cv signal, not the button
 * drag all matrices -> check all sources and targets in the matrices
+* better paint what is being dragged (see eg osc 1)
+* why cannot drop env 2?
 
 wishlist:
 DSF falloff to the left

@@ -94,10 +94,12 @@ public juce::TabBarButton,
 public juce::DragAndDropTarget
 {
   bool const _select_tab_on_drag_hover;
+  module_desc const* const _drag_module_descriptors;
 public:
-  tab_bar_button(juce::String const& name, juce::TabbedButtonBar& owner, bool select_tab_on_drag_hover) :
-  TabBarButton(name, owner), _select_tab_on_drag_hover(select_tab_on_drag_hover) {}
+  tab_bar_button(juce::String const& name, juce::TabbedButtonBar& owner, bool select_tab_on_drag_hover, module_desc const* drag_module_descriptors) :
+  TabBarButton(name, owner), _select_tab_on_drag_hover(select_tab_on_drag_hover), _drag_module_descriptors(drag_module_descriptors) {}
 
+  void mouseDrag(juce::MouseEvent const& e) override;
   void itemDragEnter(juce::DragAndDropTarget::SourceDetails const& details) override;
   void itemDropped(juce::DragAndDropTarget::SourceDetails const& details) override { }
   bool isInterestedInDragSource(juce::DragAndDropTarget::SourceDetails const& details) override { return _select_tab_on_drag_hover; }
@@ -111,15 +113,18 @@ public extra_state_listener
   extra_state* const _state;
   std::string const _storage_id;
   bool const _select_tab_on_drag_hover;
+  module_desc const* const _drag_module_descriptors;
 
 protected:
   juce::TabBarButton* createTabButton(juce::String const& name, int index) override 
-  { return new tab_bar_button(name, *tabs, _select_tab_on_drag_hover); }
+  { return new tab_bar_button(name, *tabs, _select_tab_on_drag_hover, _drag_module_descriptors); }
 
 public:
   std::function<void(int)> tab_changed;
   ~tab_component();
-  tab_component(extra_state* state, std::string const& storage_id, juce::TabbedButtonBar::Orientation orientation, bool select_tab_on_drag_hover);
+  tab_component(
+    extra_state* state, std::string const& storage_id, juce::TabbedButtonBar::Orientation orientation,
+    bool select_tab_on_drag_hover, module_desc const* drag_module_descriptors);
 
   void extra_state_changed() override
   { setCurrentTabIndex(std::clamp(_state->get_num(_storage_id, 0), 0, getNumTabs())); }

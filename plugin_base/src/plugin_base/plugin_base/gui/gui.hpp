@@ -222,7 +222,8 @@ private:
   Component& make_module_section(module_section_gui const& section);
   Component& make_custom_section(custom_section_gui const& section);
   void add_component_tab(juce::TabbedComponent& tc, juce::Component& child, int module, std::string const& title);
-  tab_component& make_tab_component(std::string const& id, std::string const& title, int module, bool select_tab_on_drag_hover);
+  tab_component& make_tab_component(std::string const& id, std::string const& title, int module, 
+    bool select_tab_on_drag_hover, module_desc const* drag_module_descriptors);
 };
 
 }

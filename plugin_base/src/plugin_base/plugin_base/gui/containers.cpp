@@ -9,15 +9,34 @@ tab_component::
 { _state->remove_listener(_storage_id, this); }
 
 tab_component::
-tab_component(extra_state* state, std::string const& storage_id, juce::TabbedButtonBar::Orientation orientation, bool select_tab_on_drag_hover) :
-juce::TabbedComponent(orientation), _state(state), _storage_id(storage_id), _select_tab_on_drag_hover(select_tab_on_drag_hover)
+tab_component(extra_state* state, std::string const& storage_id, juce::TabbedButtonBar::Orientation orientation, 
+  bool select_tab_on_drag_hover, module_desc const* drag_module_descriptors) :
+juce::TabbedComponent(orientation), _state(state), _storage_id(storage_id), 
+_select_tab_on_drag_hover(select_tab_on_drag_hover), _drag_module_descriptors(drag_module_descriptors)
 { state->add_listener(storage_id, this); }
 
 void 
 tab_bar_button::itemDragEnter(DragAndDropTarget::SourceDetails const& details)
 {
   if (!_select_tab_on_drag_hover) return;
-  getTabbedButtonBar().setCurrentTabIndex(getTabbedButtonBar().indexOfTabButton(this));
+  int index = getTabbedButtonBar().indexOfTabButton(this);
+  if(index >= 0) getTabbedButtonBar().setCurrentTabIndex(index);
+}
+
+void 
+tab_bar_button::mouseDrag(MouseEvent const& e)
+{
+  if (_drag_module_descriptors == nullptr) return;
+  int index = getTabbedButtonBar().indexOfTabButton(this);
+  if (index < 0) return;
+  int slot_count = _drag_module_descriptors[0].module->info.slot_count;
+  (void)slot_count;
+  assert(0 <= index && index < slot_count);
+  auto* container = DragAndDropContainer::findParentDragContainerFor(this);
+  if (container == nullptr) return;
+  if (container->isDragAndDropActive()) return;
+  std::string id = _drag_module_descriptors[index].info.id;
+  container->startDragging(juce::String(id), this);
 }
 
 void 
