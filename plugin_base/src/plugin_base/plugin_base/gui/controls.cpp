@@ -37,7 +37,7 @@ drag_source_start_drag(
   param_desc const* drag_param = alternate_drag_param != nullptr ? alternate_drag_param : param;
   if (!is_enabled_mod_source(component, module, param, alternate_drag_param)) return;
   auto* container = DragAndDropContainer::findParentDragContainerFor(&component);
-  assert(container != nullptr);
+  if (container == nullptr) return;
   if (container->isDragAndDropActive()) return;
   container->startDragging(juce::String(drag_param->info.id), &component);
 }
