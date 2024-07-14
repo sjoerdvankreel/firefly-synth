@@ -1,4 +1,5 @@
 #include <plugin_base/gui/containers.hpp>
+#include <plugin_base/helpers/matrix.hpp>
 
 using namespace juce;
 
@@ -39,11 +40,19 @@ tab_bar_button::mouseDrag(MouseEvent const& e)
   int slot_count = _drag_module_descriptors[0].module->info.slot_count;
   (void)slot_count;
   assert(0 <= index && index < slot_count);
+
+  // this is just a heuristic - if the module (per slot)
+  // contains exactly 1 cv or audio output, that is the drag source
+  // lets see how it works out  
+  auto drag_module = &_drag_module_descriptors[index];
+  if (drag_module->module->dsp.output == module_output::none) return;
+  if (drag_module->module->dsp.outputs.size() != 1) return;
+  
   auto* container = DragAndDropContainer::findParentDragContainerFor(this);
   if (container == nullptr) return;
   if (container->isDragAndDropActive()) return;
-  std::string id = _drag_module_descriptors[index].info.id;
-  std::string name = _drag_module_descriptors[index].info.name;
+  std::string name = drag_module->info.name;
+  std::string id = make_module_single_output_id(drag_module);
   auto& lnf_ = dynamic_cast<plugin_base::lnf&>(getLookAndFeel());
   ScaledImage drag_image = make_drag_source_image(lnf_.font(), name, lnf_.colors().bubble_outline);
   Point<int> offset(drag_image.getImage().getWidth() / 2 + 10, drag_image.getImage().getHeight() / 2 + 10);

@@ -31,6 +31,13 @@ make_id(std::string const& id1, int slot1, std::string const& id2, int slot2)
   return result;
 }
 
+std::string
+make_module_single_output_id(module_desc const* module)
+{
+  assert(module->module->dsp.outputs.size() == 1);
+  return make_id(module->module->info.tag.id, module->info.slot, module->module->dsp.outputs[0].info.tag.id, 0);
+}
+
 static std::string
 make_name(topo_tag const& tag1, int slot1, int slots1, topo_tag const& tag2, int slot2, int slots2)
 {

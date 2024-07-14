@@ -1,6 +1,7 @@
 #pragma once
 
 #include <plugin_base/topo/plugin.hpp>
+#include <plugin_base/desc/module.hpp>
 
 #include <vector>
 #include <string>
@@ -57,6 +58,10 @@ make_cv_target_matrix(std::vector<module_topo const*> const& modules);
 // any audio module as a source or target
 routing_matrix<module_topo_mapping>
 make_audio_matrix(std::vector<module_topo const*> const& modules, int start_slot, bool prefix_with_display_name);
+
+// helper for drag/drop
+std::string
+make_module_single_output_id(module_desc const* module);
 
 // allows to manage matrix routes
 class matrix_param_menu_handler:
