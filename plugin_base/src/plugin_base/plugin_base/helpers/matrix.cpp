@@ -32,10 +32,13 @@ make_id(std::string const& id1, int slot1, std::string const& id2, int slot2)
 }
 
 std::string
-make_module_single_output_id(module_desc const* module)
+make_module_drag_source_id(module_desc const* module)
 {
+  // note this should *really* line up with the matrix helpers below
   assert(module->module->dsp.outputs.size() == 1);
-  return make_id(module->module->info.tag.id, module->info.slot, module->module->dsp.outputs[0].info.tag.id, 0);
+  if(module->module->dsp.output == module_output::cv)
+    return make_id(module->module->info.tag.id, module->info.slot, module->module->dsp.outputs[0].info.tag.id, 0);
+  return make_id(module->module->info.tag.id, module->info.slot);
 }
 
 static std::string

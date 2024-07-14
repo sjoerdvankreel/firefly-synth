@@ -61,7 +61,7 @@ make_audio_matrix(std::vector<module_topo const*> const& modules, int start_slot
 
 // helper for drag/drop
 std::string
-make_module_single_output_id(module_desc const* module);
+make_module_drag_source_id(module_desc const* module);
 
 // allows to manage matrix routes
 class matrix_param_menu_handler:

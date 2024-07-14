@@ -52,7 +52,7 @@ tab_bar_button::mouseDrag(MouseEvent const& e)
   if (container == nullptr) return;
   if (container->isDragAndDropActive()) return;
   std::string name = drag_module->info.name;
-  std::string id = make_module_single_output_id(drag_module);
+  std::string id = make_module_drag_source_id(drag_module);
   auto& lnf_ = dynamic_cast<plugin_base::lnf&>(getLookAndFeel());
   ScaledImage drag_image = make_drag_source_image(lnf_.font(), name, lnf_.colors().bubble_outline);
   Point<int> offset(drag_image.getImage().getWidth() / 2 + 10, drag_image.getImage().getHeight() / 2 + 10);
