@@ -40,7 +40,8 @@ drag_source_start_drag(
   if (container == nullptr) return;
   if (container->isDragAndDropActive()) return;
   ScaledImage drag_image = make_drag_source_image(font, drag_param->info.name, color);
-  container->startDragging(juce::String(drag_param->info.id), &component, drag_image);
+  Point<int> offset(drag_image.getImage().getWidth() / 2 + 10, drag_image.getImage().getHeight() / 2 + 10);
+  container->startDragging(juce::String(drag_param->info.id), &component, drag_image, false, &offset);
 }
 
 static void

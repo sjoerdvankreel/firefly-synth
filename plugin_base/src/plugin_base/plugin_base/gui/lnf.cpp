@@ -597,8 +597,8 @@ lnf::drawComboBox(Graphics& g, int width, int height, bool, int, int, int, int, 
   auto drop_action = param_cb->get_drop_target_action();
   if (drop_action == drop_target_action::none) return;
 
-  char const* drop_icon = drop_action == drop_target_action::allow ? "+" : "!";
-  int apply_w = g.getCurrentFont().getStringWidth("+");
+  char const* drop_icon = drop_action == drop_target_action::allow ? "Apply" : "N/A";
+  int apply_w = g.getCurrentFont().getStringWidth("Apply") + 2;
   auto apply_mod_box = Rectangle<int>(
     boxBounds.getTopRight().x - apply_w,
     boxBounds.getTopLeft().y,
