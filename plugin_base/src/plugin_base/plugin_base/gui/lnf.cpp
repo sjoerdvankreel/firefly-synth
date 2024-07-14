@@ -28,7 +28,7 @@ get_combobox_mod_target_indicator_width(ComboBox const& box, Font const& font)
   if (param_cb == nullptr) return 0;
   auto drop_action = param_cb->get_drop_target_action();
   if (drop_action == drop_target_action::none) return 0;
-  return font.getStringWidth("Apply") + 4;
+  return font.getStringWidth("Apply") + 2;
 }
 
 static void 
@@ -371,11 +371,7 @@ void
 lnf::positionComboBoxText(ComboBox& box, Label& label)
 {
   int mod_ind_width = get_combobox_mod_target_indicator_width(box, label.getFont());
-  if (mod_ind_width != 0)
-  {
-    int x = 0;
-    x++;
-  }
+  if (mod_ind_width != 0) mod_ind_width += 2;
   label.setBounds(1, 1, box.getWidth() - 10 - mod_ind_width, box.getHeight() - 2);
   label.setFont(getComboBoxFont(box));
 }   
@@ -601,7 +597,7 @@ lnf::drawComboBox(Graphics& g, int width, int height, bool, int, int, int, int, 
     if (drop_action != drop_target_action::none)
     {
       apply_mod_width = apply_mod_width;
-      box_width -= apply_mod_width;
+      box_width -= apply_mod_width + 2;
     }
   }
 
