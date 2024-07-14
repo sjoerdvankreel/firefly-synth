@@ -197,6 +197,10 @@ public juce::Component
   static int const _size = 7;
   lnf* const _lnf;
   param_desc const* const _param;
+
+protected:
+  void enablementChanged() { repaint(); }
+
 public:
   void paint(juce::Graphics& g) override;
   juce::MouseCursor getMouseCursor() override;
