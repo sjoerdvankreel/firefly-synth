@@ -6,7 +6,7 @@
       "name": "Firefly Synth",
       "description": "Firefly Synth",
       "tags": [ "Instrument", "Synth" ],
-      "version": "1.8.2",
+      "version": "1.8.3",
       "id": "io.github.sjoerdvankreel.firefly_synth",
       "date": "2024-06-03T17:25:12.081Z",
       "files": {
@@ -17,13 +17,13 @@
           "name": "studiorack.jpg"
         },
         "linux": {
-          "name": "firefly_synth_1.8.2_linux_vst3_instrument.zip"
+          "name": "firefly_synth_1.8.3_linux_vst3_instrument.zip"
         },
         "mac": {
-          "name": "firefly_synth_1.8.2_mac_vst3_instrument.zip"
+          "name": "firefly_synth_1.8.3_mac_vst3_instrument.zip"
         },
         "win": {
-          "name": "firefly_synth_1.8.2_windows_vst3_instrument.zip"
+          "name": "firefly_synth_1.8.3_windows_vst3_instrument.zip"
         }
       }
     }
