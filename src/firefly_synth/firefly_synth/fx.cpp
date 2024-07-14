@@ -788,6 +788,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
   dist_skew_out_amt.gui.bindings.enabled.bind_params({ param_type, param_dist_skew_y }, [](auto const& vs) {
     return vs[0] == type_dst && vs[1] != wave_skew_type_off; });
   dist_skew_out_amt.info.description = "After-shape skew amount.";
+  dist_skew_out.gui.alternate_drag_source_id = dist_skew_out_amt.info.tag.id;
 
   auto& dist_right = result.sections.emplace_back(make_param_section(section_dist_right,
     make_topo_tag_basic("{4FD908CC-0EBA-4ADD-8622-EB95013CD429}", "Distortion Right"),

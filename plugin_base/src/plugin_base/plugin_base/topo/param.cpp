@@ -94,6 +94,20 @@ param_topo::validate(plugin_topo const& plugin, module_topo const& module, int i
     auto dimension = module.sections[gui.section].gui.dimension;
     assert(dimension.row_sizes.size() * dimension.column_sizes.size() == info.slot_count * 2);
   }
+
+  // if we are modulatable but dont have a label, make sure some other param allows to modulate us
+  if (dsp.can_modulate(module.info.slot_count) && gui.label.contents == gui_label_contents::none)
+  {
+    bool found = false;
+    for (int i = 0; i < module.params.size(); i++)
+      if (module.params[i].gui.alternate_drag_source_id == info.tag.id)
+      {
+        found = true;
+        assert(!module.params[i].dsp.can_modulate(module.info.slot_count));
+        break;
+      }
+    assert(found);
+  }
 }
 
 }

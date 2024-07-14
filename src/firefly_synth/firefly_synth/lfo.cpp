@@ -437,6 +437,7 @@ lfo_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_param_gui_single(section_skew, gui_edit_type::knob, { 0, 2 }, make_label_none())));
   x_amt.gui.bindings.enabled.bind_params({ param_type, param_skew_x }, [](auto const& vs) { return vs[0] != type_off && vs[1] != wave_skew_type_off; });
   x_amt.info.description = "Horizontal skew amount.";
+  x_mode.gui.alternate_drag_source_id = x_amt.info.tag.id;
   auto& y_mode = result.params.emplace_back(make_param(
     make_topo_info("{5D716AA7-CAE6-4965-8FC1-345DAA7141B6}", true, "Skew Y Mode", "Skew Y", "Skew Y", param_skew_y, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(wave_skew_type_items(), "Off"),
@@ -450,6 +451,7 @@ lfo_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_param_gui_single(section_skew, gui_edit_type::knob, { 1, 2 }, make_label_none())));
   y_amt.gui.bindings.enabled.bind_params({ param_type, param_skew_y }, [](auto const& vs) { return vs[0] != type_off && vs[1] != wave_skew_type_off; });
   y_amt.info.description = "Vertical skew amount.";
+  y_mode.gui.alternate_drag_source_id = y_amt.info.tag.id;
 
   result.sections.emplace_back(make_param_section(section_right,
     make_topo_tag_basic("{A5B5DC53-2E73-4C0B-9DD1-721A335EA076}", "Right"),
