@@ -851,34 +851,42 @@ plugin_gui::make_module_section(module_section_gui const& section)
   return tabs;
 }
 
-Label&
+Component&
 plugin_gui::make_param_label(module_desc const& module, param_desc const& param, gui_label_contents contents)
 {
   param_desc const* alternate_drag_param = nullptr;
   if (param.param->gui.alternate_drag_source_id.size())
   {
+    assert(contents == gui_label_contents::name);
     for (int i = 0; i < module.params.size(); i++)
       if (module.params[i].param->info.tag.id == param.param->gui.alternate_drag_source_id)
         alternate_drag_param = &module.params[i];
     assert(alternate_drag_param != nullptr);
   }
 
-  Label* result = {};
+  Component* result = {};
+  Label* label_result = {};
   switch (contents)
   {
   case gui_label_contents::name:
-    result = &make_component<param_name_label>(this, &module, &param, 
+    label_result = &make_component<param_name_label>(this, &module, &param,
       alternate_drag_param, _module_lnfs[module.module->info.index].get());
+    label_result->setJustificationType(justification_type(param.param->gui.label));
+    result = label_result;
     break;
   case gui_label_contents::value:
-    result = &make_component<param_value_label>(this, &module, &param, 
-      alternate_drag_param, _module_lnfs[module.module->info.index].get());
+    label_result = &make_component<param_value_label>(this, &module, &param,
+      _module_lnfs[module.module->info.index].get());
+    label_result->setJustificationType(justification_type(param.param->gui.label));
+    result = label_result;
+    break;
+  case gui_label_contents::drag:
+    result = &make_component<param_drag_label>(this, &module, &param);
     break;
   default:
     assert(false);
     break;
   }
-  result->setJustificationType(justification_type(param.param->gui.label));
   return *result;
 }
 

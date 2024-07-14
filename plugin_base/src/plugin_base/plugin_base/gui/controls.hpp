@@ -188,6 +188,23 @@ protected:
   param_component(plugin_gui* gui, module_desc const* module, param_desc const* param);
 };
 
+// just a drag handle for d&d support
+class param_drag_label:
+public binding_component,
+public autofit_component,
+public juce::Component
+{
+  static int const _size = 8;
+  param_desc const* const _param;
+public:
+  void paint(juce::Graphics& g) override;
+  juce::MouseCursor getMouseCursor() override;
+  void mouseDrag(juce::MouseEvent const& e) override;
+  int fixed_width(int parent_w, int parent_h) const override { return _size; }
+  int fixed_height(int parent_w, int parent_h) const override { return _size; }
+  param_drag_label(plugin_gui* gui, module_desc const* module, param_desc const* param);
+};
+
 // static parameter name display + d&d support
 class param_name_label:
 public binding_component,
@@ -202,19 +219,18 @@ public:
   param_name_label(plugin_gui* gui, module_desc const* module, param_desc const* param, param_desc const* alternate_drag_param, lnf* lnf);
 };
 
-// dynamic parameter value display
+// dynamic parameter value display + d&d support
 class param_value_label:
 public param_component, 
 public autofit_label
 {
   static std::string value_ref_text(plugin_gui* gui, param_desc const* param);
-  param_desc const* const _alternate_drag_param;
 protected:
   void own_param_changed(plain_value plain) override final;
 public:
   juce::MouseCursor getMouseCursor() override;
   void mouseDrag(juce::MouseEvent const& e) override;
-  param_value_label(plugin_gui* gui, module_desc const* module, param_desc const* param, param_desc const* alternate_drag_param, lnf* lnf);
+  param_value_label(plugin_gui* gui, module_desc const* module, param_desc const* param, lnf* lnf);
 };
 
 // dynamic module name display

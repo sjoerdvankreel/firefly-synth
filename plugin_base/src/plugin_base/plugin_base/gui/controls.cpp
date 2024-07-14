@@ -136,6 +136,27 @@ param_slot_name(param_desc const* param)
   return result;
 }
 
+param_drag_label::
+param_drag_label(plugin_gui* gui, module_desc const* module, param_desc const* param) :
+binding_component(gui, module, &param->param->gui.bindings, param->info.slot),
+_param(param)
+{ init(); }
+
+MouseCursor 
+param_drag_label::getMouseCursor()
+{ return drag_source_cursor(*this, _module, _param, nullptr, Component::getMouseCursor()); }
+
+void 
+param_drag_label::mouseDrag(juce::MouseEvent const& e)
+{ drag_source_start_drag(*this, _module, _param, nullptr); }
+
+void
+param_drag_label::paint(Graphics& g)
+{
+  g.setColour(Colours::red);
+  g.fillEllipse(0, 0, _size, _size);
+}
+
 std::string 
 param_name_label::label_ref_text(param_desc const* param)
 {
@@ -173,10 +194,9 @@ param_value_label::value_ref_text(plugin_gui* gui, param_desc const* param)
 
 // Just guess max value is representative of the longest text.
 param_value_label::
-param_value_label(plugin_gui* gui, module_desc const* module, param_desc const* param, param_desc const* alternate_drag_param, lnf* lnf) :
+param_value_label(plugin_gui* gui, module_desc const* module, param_desc const* param, lnf* lnf) :
 param_component(gui, module, param), 
-autofit_label(lnf, value_ref_text(gui, param)),
-_alternate_drag_param(alternate_drag_param)
+autofit_label(lnf, value_ref_text(gui, param))
 { init(); }
 
 void
@@ -189,11 +209,11 @@ param_value_label::own_param_changed(plain_value plain)
 
 MouseCursor 
 param_value_label::getMouseCursor()
-{ return drag_source_cursor(*this, _module, _param, _alternate_drag_param, Component::getMouseCursor()); }
+{ return drag_source_cursor(*this, _module, _param, nullptr, Component::getMouseCursor()); }
 
 void 
 param_value_label::mouseDrag(juce::MouseEvent const& e)
-{ drag_source_start_drag(*this, _module, _param, _alternate_drag_param); }
+{ drag_source_start_drag(*this, _module, _param, nullptr); }
 
 last_tweaked_label::
 last_tweaked_label(plugin_state const* state):

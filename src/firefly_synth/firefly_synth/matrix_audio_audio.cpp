@@ -227,7 +227,8 @@ audio_audio_matrix_topo(
   auto& amount = result.params.emplace_back(make_param(
     make_topo_info_basic("{C12ADFE9-1D83-439C-BCA3-30AD7B86848B}", "Gain", param_gain, route_count),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(1, 0, true),
-    make_param_gui(section_main, is_fx? gui_edit_type::hslider: gui_edit_type::knob, param_layout::vertical, { 0, 3 }, make_label_none())));
+    make_param_gui(section_main, is_fx ? gui_edit_type::hslider : gui_edit_type::knob, param_layout::vertical, { 0, 3 },
+      make_label(gui_label_contents::drag, gui_label_align::left, gui_label_justify::center))));
   amount.gui.tabular = true;
   amount.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
   amount.info.description = "Controls route gain.";
