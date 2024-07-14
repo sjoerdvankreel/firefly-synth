@@ -29,6 +29,7 @@ v drag the module headers if they have audio/cv outs
 * can_modulate doesn't cut it anymore, we now need can_modulate_by_host and can_module_by_host_and_mod_matrix
 * filter out invalid combis eg glfo1 to glfo1 rate
 * the order is still wrong
+* osc src/tgt is ugly
 
 wishlist:
 DSF falloff to the left
