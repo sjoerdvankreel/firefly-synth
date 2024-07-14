@@ -9,6 +9,35 @@ using namespace juce;
 
 namespace plugin_base {
 
+static bool
+is_enabled_mod_source(
+  Component const& component, module_desc const* module, param_desc const* param)
+{
+  if (!component.isEnabled()) return false;
+  if (!param->param->dsp.can_modulate(module->info.slot)) return false;
+  return true;
+}
+
+static MouseCursor
+drag_source_cursor(
+  Component const& component, module_desc const* module, 
+  param_desc const* param, MouseCursor base_cursor)
+{
+  if (!is_enabled_mod_source(component, module, param)) return base_cursor;
+  return MouseCursor::DraggingHandCursor;
+}
+
+static void
+drag_source_start_drag(
+  Component& component, module_desc const* module, param_desc const* param)
+{
+  if (!is_enabled_mod_source(component, module, param)) return;
+  auto* container = DragAndDropContainer::findParentDragContainerFor(&component);
+  assert(container != nullptr);
+  if (container->isDragAndDropActive()) return;
+  container->startDragging(juce::String(param->info.id), &component);
+}
+
 static void
 fill_popup_menu(param_domain const& domain, PopupMenu& menu, gui_submenu const* data, Colour const& subheader_color)
 {
@@ -113,38 +142,52 @@ param_name_label::label_ref_text(param_desc const* param)
 param_name_label::
 param_name_label(plugin_gui* gui, module_desc const* module, param_desc const* param, lnf* lnf):
 binding_component(gui, module, &param->param->gui.bindings, param->info.slot),
-autofit_label(lnf, label_ref_text(param)), _module(module), _param(param)
+autofit_label(lnf, label_ref_text(param)), _param(param)
 {
   std::string name = param_slot_name(param);
   setText(name, juce::dontSendNotification); 
   init();
 }
 
-bool
-param_name_label::is_enabled_mod_source() const
-{
-  if (!isEnabled()) return false;
-  if (!_param->param->dsp.can_modulate(_module->info.slot)) return false;
-  return true;
-}
-
 MouseCursor 
 param_name_label::getMouseCursor()
-{
-  // TODO deal with label-less sliders
-  if(!is_enabled_mod_source()) return Component::getMouseCursor();
-  return MouseCursor::DraggingHandCursor;
-}
+{ return drag_source_cursor(*this, _module, _param, Component::getMouseCursor()); }
 
 void 
 param_name_label::mouseDrag(juce::MouseEvent const& e)
+{ drag_source_start_drag(*this, _module, _param); }
+
+std::string
+param_value_label::value_ref_text(plugin_gui* gui, param_desc const* param)
 {
-  if (!is_enabled_mod_source()) return;
-  auto* container = DragAndDropContainer::findParentDragContainerFor(this);
-  assert(container != nullptr);
-  if (container->isDragAndDropActive()) return;
-  container->startDragging(juce::String(_param->info.id), this);
+  auto const& ref_text = param->param->gui.value_reference_text;
+  if (ref_text.size()) return ref_text;
+  auto plain = param->param->domain.raw_to_plain(param->param->domain.max);
+  return gui->gui_state()->plain_to_text_at_index(false, param->info.global, plain);
 }
+
+// Just guess max value is representative of the longest text.
+param_value_label::
+param_value_label(plugin_gui* gui, module_desc const* module, param_desc const* param, lnf* lnf) :
+param_component(gui, module, param), 
+autofit_label(lnf, value_ref_text(gui, param))
+{ init(); }
+
+void
+param_value_label::own_param_changed(plain_value plain)
+{ 
+  std::string text = _gui->gui_state()->plain_to_text_at_index(false, _param->info.global, plain);
+  setText(text, dontSendNotification); 
+  setTooltip(_param->info.name + ": " + text);
+}
+
+MouseCursor 
+param_value_label::getMouseCursor()
+{ return drag_source_cursor(*this, _module, _param, Component::getMouseCursor()); }
+
+void 
+param_value_label::mouseDrag(juce::MouseEvent const& e)
+{ drag_source_start_drag(*this, _module, _param); }
 
 last_tweaked_label::
 last_tweaked_label(plugin_state const* state):
@@ -402,30 +445,6 @@ param_component::mouseUp(MouseEvent const& evt)
     delete host_menu;
     delete plugin_handler;
   });
-}
-
-std::string
-param_value_label::value_ref_text(plugin_gui* gui, param_desc const* param)
-{
-  auto const& ref_text = param->param->gui.value_reference_text;
-  if (ref_text.size()) return ref_text;
-  auto plain = param->param->domain.raw_to_plain(param->param->domain.max);
-  return gui->gui_state()->plain_to_text_at_index(false, param->info.global, plain);
-}
-
-// Just guess max value is representative of the longest text.
-param_value_label::
-param_value_label(plugin_gui* gui, module_desc const* module, param_desc const* param, lnf* lnf) :
-param_component(gui, module, param), 
-autofit_label(lnf, value_ref_text(gui, param))
-{ init(); }
-
-void
-param_value_label::own_param_changed(plain_value plain)
-{ 
-  std::string text = _gui->gui_state()->plain_to_text_at_index(false, _param->info.global, plain);
-  setText(text, dontSendNotification); 
-  setTooltip(_param->info.name + ": " + text);
 }
 
 module_name_label::

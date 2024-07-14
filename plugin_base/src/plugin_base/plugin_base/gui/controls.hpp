@@ -193,14 +193,11 @@ class param_name_label:
 public binding_component,
 public autofit_label
 {
-  module_desc const* const _module;
   param_desc const* const _param;
   static std::string label_ref_text(param_desc const* param);
-  bool is_enabled_mod_source() const;
 public:
   juce::MouseCursor getMouseCursor() override;
   void mouseDrag(juce::MouseEvent const& e) override;
-  param_desc const* param() const { return _param; }
   param_name_label(plugin_gui* gui, module_desc const* module, param_desc const* param, lnf* lnf);
 };
 
@@ -213,6 +210,8 @@ public autofit_label
 protected:
   void own_param_changed(plain_value plain) override final;
 public:
+  juce::MouseCursor getMouseCursor() override;
+  void mouseDrag(juce::MouseEvent const& e) override;
   param_value_label(plugin_gui* gui, module_desc const* module, param_desc const* param, lnf* lnf);
 };
 
