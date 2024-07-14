@@ -593,8 +593,11 @@ lnf::drawComboBox(Graphics& g, int width, int height, bool, int, int, int, int, 
   g.setColour(box.findColour(ComboBox::arrowColourId).withAlpha((box.isEnabled() ? 0.9f : 0.2f)));
   g.fillPath(path);
 
-  if (!param_cb || !param_cb->is_drop_possible()) return;
+  if (!param_cb) return;
+  auto drop_action = param_cb->get_drop_target_action();
+  if (drop_action == drop_target_action::none) return;
 
+  char const* drop_icon = drop_action == drop_target_action::allow ? "+" : "!";
   int apply_w = g.getCurrentFont().getStringWidth("+");
   auto apply_mod_box = Rectangle<int>(
     boxBounds.getTopRight().x - apply_w,
@@ -603,8 +606,8 @@ lnf::drawComboBox(Graphics& g, int width, int height, bool, int, int, int, int, 
     boxBounds.getHeight());
   g.setColour(Colours::darkgrey);
   g.fillRoundedRectangle(apply_mod_box.toFloat(), 2.0f);
-  g.setColour(box.findColour(ComboBox::arrowColourId));
-  g.drawText("+", apply_mod_box.toFloat(), Justification::centred);
+  g.setColour(colors().control_text);
+  g.drawText(drop_icon, apply_mod_box.toFloat(), Justification::centred);
 }
 
 void 

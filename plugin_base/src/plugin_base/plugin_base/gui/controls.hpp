@@ -289,6 +289,8 @@ public:
   { return juce::String(_param->info.name + ": ") + juce::Slider::getTextFromValue(value * (_param->param->domain.display == domain_display::percentage ? 100 : 1)); }
 };
 
+enum class drop_target_action { none, allow, deny };
+
 // dropdown bound to single parameter
 // NOTE: we only support drag-drop onto combos for now
 class param_combobox :
@@ -297,7 +299,7 @@ public autofit_combobox,
 public juce::DragAndDropTarget,
 public juce::ComboBox::Listener
 {
-  bool _is_drop_possible = false;
+  drop_target_action _drop_target_action = drop_target_action::none;
   int get_item_index(std::string const& item_id) const;
 
 protected:
@@ -308,7 +310,7 @@ public:
   param_combobox(plugin_gui* gui, module_desc const* module, param_desc const* param, lnf* lnf);
 
   // d&d support
-  bool is_drop_possible() const { return _is_drop_possible; }
+  drop_target_action get_drop_target_action() const { return _drop_target_action; }
   void itemDropped(juce::DragAndDropTarget::SourceDetails const& details) override;
   void itemDragExit(juce::DragAndDropTarget::SourceDetails const& details) override;
   void itemDragEnter(juce::DragAndDropTarget::SourceDetails const& details) override;
