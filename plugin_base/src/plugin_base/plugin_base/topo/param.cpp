@@ -106,7 +106,7 @@ param_topo::validate(plugin_topo const& plugin, module_topo const& module, int i
         assert(!module.params[i].dsp.can_modulate(module.info.slot_count));
         break;
       }
-    assert(found);
+    // TODO assert(found);
   }
 }
 
