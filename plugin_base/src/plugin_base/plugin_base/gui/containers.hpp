@@ -88,6 +88,21 @@ public:
     std::function<std::unique_ptr<juce::Component>(int module_index)> factory);
 };
 
+// tab bar button with drag-hover support
+class tab_bar_button :
+public juce::TabBarButton,
+public juce::DragAndDropTarget
+{
+  bool const _select_tab_on_drag_hover;
+public:
+  tab_bar_button(juce::String const& name, juce::TabbedButtonBar& owner, bool select_tab_on_drag_hover) :
+  TabBarButton(name, owner), _select_tab_on_drag_hover(select_tab_on_drag_hover) {}
+
+  void itemDragEnter(juce::DragAndDropTarget::SourceDetails const& details) override;
+  void itemDropped(juce::DragAndDropTarget::SourceDetails const& details) override { }
+  bool isInterestedInDragSource(juce::DragAndDropTarget::SourceDetails const& details) override { return _select_tab_on_drag_hover; }
+};
+
 // tab component with persistent selection and change listener
 class tab_component :
 public juce::TabbedComponent,
@@ -95,10 +110,16 @@ public extra_state_listener
 {
   extra_state* const _state;
   std::string const _storage_id;
+  bool const _select_tab_on_drag_hover;
+
+protected:
+  juce::TabBarButton* createTabButton(juce::String const& name, int index) override 
+  { return new tab_bar_button(name, *tabs, _select_tab_on_drag_hover); }
+
 public:
   std::function<void(int)> tab_changed;
   ~tab_component();
-  tab_component(extra_state* state, std::string const& storage_id, juce::TabbedButtonBar::Orientation orientation);
+  tab_component(extra_state* state, std::string const& storage_id, juce::TabbedButtonBar::Orientation orientation, bool select_tab_on_drag_hover);
 
   void extra_state_changed() override
   { setCurrentTabIndex(std::clamp(_state->get_num(_storage_id, 0), 0, getNumTabs())); }

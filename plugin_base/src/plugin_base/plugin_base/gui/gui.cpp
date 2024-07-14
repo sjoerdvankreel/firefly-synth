@@ -641,9 +641,9 @@ plugin_gui::make_custom_section(custom_section_gui const& section)
 }
 
 tab_component&
-plugin_gui::make_tab_component(std::string const& id, std::string const& title, int module)
+plugin_gui::make_tab_component(std::string const& id, std::string const& title, int module, bool select_tab_on_drag_hover)
 {
-  auto& result = make_component<tab_component>(_extra_state, id + "/tab", TabbedButtonBar::Orientation::TabsAtTop);
+  auto& result = make_component<tab_component>(_extra_state, id + "/tab", TabbedButtonBar::Orientation::TabsAtTop, select_tab_on_drag_hover);
   result.setOutline(0);
   result.setLookAndFeel(module_lnf(module));
   result.getTabbedButtonBar().setTitle(title);
@@ -673,7 +673,7 @@ plugin_gui::make_modules(module_desc const* slots)
   {
     int index = topo.info.index;
     auto const& tag = topo.info.tag;
-    auto& result = make_tab_component(tag.id, tag.display_name, index);
+    auto& result = make_tab_component(tag.id, tag.display_name, index, false);
     for (int i = 0; i < topo.info.slot_count; i++)
       add_component_tab(result, make_param_sections(slots[i]), slots[i].info.global, std::to_string(i + 1));
     if (topo.info.slot_count > 1)
@@ -704,7 +704,7 @@ plugin_gui::make_param_sections(module_desc const& module)
   {
     // need this to be 1 because we dont support multi-slot components with inner tabs
     assert(topo.info.slot_count == 1);
-    auto& tabs = make_tab_component(topo.info.tag.id, topo.info.tag.display_name, topo.info.index);
+    auto& tabs = make_tab_component(topo.info.tag.id, topo.info.tag.display_name, topo.info.index, true);
     for (int o = 0; o < topo.gui.tab_order.size(); o++)
     {
       auto const& section = topo.sections[topo.gui.tab_order[o]];
@@ -842,7 +842,7 @@ plugin_gui::make_module_section(module_section_gui const& section)
     if (topo.modules[i].gui.section == section.index)
       matched_module = i;
   assert(matched_module >= 0);
-  auto& tabs = make_tab_component(section.id, "", matched_module);
+  auto& tabs = make_tab_component(section.id, "", matched_module, true);
   for(int o = 0; o < section.tab_order.size(); o++)
     for (auto iter = modules.begin(); iter != modules.end(); iter += iter->module->info.slot_count)
       if (iter->module->gui.visible && iter->module->gui.section == section.index && section.tab_order[o] == iter->module->info.index)

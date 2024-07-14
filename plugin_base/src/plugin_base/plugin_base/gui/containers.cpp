@@ -9,9 +9,16 @@ tab_component::
 { _state->remove_listener(_storage_id, this); }
 
 tab_component::
-tab_component(extra_state* state, std::string const& storage_id, juce::TabbedButtonBar::Orientation orientation) :
-juce::TabbedComponent(orientation), _state(state), _storage_id(storage_id)
+tab_component(extra_state* state, std::string const& storage_id, juce::TabbedButtonBar::Orientation orientation, bool select_tab_on_drag_hover) :
+juce::TabbedComponent(orientation), _state(state), _storage_id(storage_id), _select_tab_on_drag_hover(select_tab_on_drag_hover)
 { state->add_listener(storage_id, this); }
+
+void 
+tab_bar_button::itemDragEnter(DragAndDropTarget::SourceDetails const& details)
+{
+  if (!_select_tab_on_drag_hover) return;
+  getTabbedButtonBar().setCurrentTabIndex(getTabbedButtonBar().indexOfTabButton(this));
+}
 
 void 
 autofit_viewport::resized()
