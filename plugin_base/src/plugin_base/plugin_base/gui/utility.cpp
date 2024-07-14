@@ -37,8 +37,9 @@ make_drag_source_image(Font const& font, std::string const& text, Colour text_co
   Image image(Image::PixelFormat::ARGB, text_w + margin, text_h + margin, true);
   Graphics g(image);
   g.setColour(Colours::white);
-  g.fillRoundedRectangle(0, 0, text_w + margin, text_h + margin, 2);
+  g.fillRoundedRectangle(0, 0, text_w + margin - 1, text_h + margin, 2);
   g.setColour(text_color);
+  g.drawRoundedRectangle(0, 0, text_w + margin - 1, text_h + margin, 2, 1);
   g.drawText(text, margin / 2, margin / 2, text_w, text_h, Justification::centredBottom, false);
   return ScaledImage(image);
 }

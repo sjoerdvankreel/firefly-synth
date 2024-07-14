@@ -149,7 +149,7 @@ param_drag_label::getMouseCursor()
 
 void 
 param_drag_label::mouseDrag(juce::MouseEvent const& e)
-{ drag_source_start_drag(*this, _lnf->font(), _lnf->colors().control_text, _module, _param, nullptr); }
+{ drag_source_start_drag(*this, _lnf->font(), _lnf->colors().bubble_outline, _module, _param, nullptr); }
 
 void
 param_drag_label::paint(Graphics& g)
@@ -191,7 +191,7 @@ void
 param_name_label::mouseDrag(juce::MouseEvent const& e)
 { 
   auto& lnf_ = dynamic_cast<plugin_base::lnf&>(getLookAndFeel());
-  drag_source_start_drag(*this, lnf_.font(), lnf_.colors().label_text, _module, _param, _alternate_drag_param);
+  drag_source_start_drag(*this, lnf_.font(), lnf_.colors().bubble_outline, _module, _param, _alternate_drag_param);
 }
 
 std::string
@@ -226,7 +226,7 @@ void
 param_value_label::mouseDrag(juce::MouseEvent const& e)
 { 
   auto& lnf_ = dynamic_cast<plugin_base::lnf&>(getLookAndFeel());
-  drag_source_start_drag(*this, lnf_.font(), lnf_.colors().label_text, _module, _param, nullptr);
+  drag_source_start_drag(*this, lnf_.font(), lnf_.colors().bubble_outline, _module, _param, nullptr);
 }
 
 last_tweaked_label::

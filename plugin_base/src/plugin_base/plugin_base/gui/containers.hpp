@@ -99,6 +99,7 @@ public:
   tab_bar_button(juce::String const& name, juce::TabbedButtonBar& owner, bool select_tab_on_drag_hover, module_desc const* drag_module_descriptors) :
   TabBarButton(name, owner), _select_tab_on_drag_hover(select_tab_on_drag_hover), _drag_module_descriptors(drag_module_descriptors) {}
 
+  juce::MouseCursor getMouseCursor() override;
   void mouseDrag(juce::MouseEvent const& e) override;
   void itemDragEnter(juce::DragAndDropTarget::SourceDetails const& details) override;
   void itemDropped(juce::DragAndDropTarget::SourceDetails const& details) override { }

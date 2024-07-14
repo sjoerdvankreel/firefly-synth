@@ -15,6 +15,13 @@ juce::TabbedComponent(orientation), _state(state), _storage_id(storage_id),
 _select_tab_on_drag_hover(select_tab_on_drag_hover), _drag_module_descriptors(drag_module_descriptors)
 { state->add_listener(storage_id, this); }
 
+MouseCursor
+tab_bar_button::getMouseCursor()
+{
+  if (_drag_module_descriptors == nullptr) return TabBarButton::getMouseCursor();
+  return MouseCursor::DraggingHandCursor;
+}
+
 void 
 tab_bar_button::itemDragEnter(DragAndDropTarget::SourceDetails const& details)
 {
@@ -38,7 +45,7 @@ tab_bar_button::mouseDrag(MouseEvent const& e)
   std::string id = _drag_module_descriptors[index].info.id;
   std::string name = _drag_module_descriptors[index].info.name;
   auto& lnf_ = dynamic_cast<plugin_base::lnf&>(getLookAndFeel());
-  ScaledImage drag_image = make_drag_source_image(lnf_.font(), name, lnf_.colors().tab_header);
+  ScaledImage drag_image = make_drag_source_image(lnf_.font(), name, lnf_.colors().bubble_outline);
   container->startDragging(juce::String(id), this, drag_image);
 }
 
