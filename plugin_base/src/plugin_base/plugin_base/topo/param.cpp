@@ -95,6 +95,10 @@ param_topo::validate(plugin_topo const& plugin, module_topo const& module, int i
     assert(dimension.row_sizes.size() * dimension.column_sizes.size() == info.slot_count * 2);
   }
 
+  // if we are set to be explicitly modulatable in the gui, make sure we can modulate
+  if (gui.label.contents == gui_label_contents::drag)
+    assert(dsp.can_modulate(module.info.slot_count));
+
   // if we are modulatable but dont have a label, make sure some other param allows to modulate us
   if (dsp.can_modulate(module.info.slot_count) && gui.label.contents == gui_label_contents::none)
   {

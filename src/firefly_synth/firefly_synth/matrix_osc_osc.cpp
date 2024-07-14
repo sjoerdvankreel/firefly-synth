@@ -173,14 +173,16 @@ osc_osc_matrix_topo(int section, gui_position const& pos, plugin_topo const* plu
   auto& am_amount = result.params.emplace_back(make_param(
     make_topo_info_tabular("{A1A7298E-542D-4C2F-9B26-C1AF7213D095}", "AM Mix", "Mix", param_am_amt, route_count),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(1, 0, true),
-    make_param_gui(section_am, gui_edit_type::hslider, param_layout::vertical, { 0, 3 }, make_label_none())));
+    make_param_gui(section_am, gui_edit_type::hslider, param_layout::vertical, { 0, 3 },
+      make_label(gui_label_contents::drag, gui_label_align::left, gui_label_justify::center))));
   am_amount.gui.tabular = true;
   am_amount.gui.bindings.enabled.bind_params({ param_am_on }, [](auto const& vs) { return vs[0] != 0; });
   am_amount.info.description = "Dry/wet control between unmodulated and modulated signal.";
   auto& am_ring = result.params.emplace_back(make_param(
     make_topo_info_tabular("{3DF51ADC-9882-4F95-AF4E-5208EB14E645}", "AM Ring", "Ring", param_am_ring, route_count),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0, 0, true),
-    make_param_gui(section_am, gui_edit_type::hslider, param_layout::vertical, { 0, 4 }, make_label_none())));
+    make_param_gui(section_am, gui_edit_type::hslider, param_layout::vertical, { 0, 4 },
+      make_label(gui_label_contents::drag, gui_label_align::left, gui_label_justify::center))));
   am_ring.gui.tabular = true;
   am_ring.gui.bindings.enabled.bind_params({ param_am_on }, [](auto const& vs) { return vs[0] != 0; });
   am_ring.info.description = "Dry/wet control between amplitude-modulated and ring-modulated signal.";
@@ -228,7 +230,8 @@ osc_osc_matrix_topo(int section, gui_position const& pos, plugin_topo const* plu
   auto& fm_amount = result.params.emplace_back(make_param(
     make_topo_info_tabular("{444B0AFD-2B4A-40B5-B952-52002141C5DD}", "FM Index", "Index", param_fm_idx, route_count),
     make_param_dsp_accurate(param_automate::modulate), make_domain_log(0, 1, 0.01, 0.05, 4, ""),
-    make_param_gui(section_fm, gui_edit_type::hslider, param_layout::vertical, { 0, 4 }, make_label_none())));
+    make_param_gui(section_fm, gui_edit_type::hslider, param_layout::vertical, { 0, 4 },
+      make_label(gui_label_contents::drag, gui_label_align::left, gui_label_justify::center))));
   fm_amount.gui.tabular = true;
   fm_amount.gui.bindings.enabled.bind_params({ param_fm_on }, [](auto const& vs) { return vs[0] != 0; });
   fm_amount.info.description = std::string("Modulation index. This is really just a multiplier for the source signal. ") + 
