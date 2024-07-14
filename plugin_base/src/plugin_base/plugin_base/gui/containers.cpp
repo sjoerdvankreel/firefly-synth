@@ -36,7 +36,10 @@ tab_bar_button::mouseDrag(MouseEvent const& e)
   if (container == nullptr) return;
   if (container->isDragAndDropActive()) return;
   std::string id = _drag_module_descriptors[index].info.id;
-  container->startDragging(juce::String(id), this);
+  std::string name = _drag_module_descriptors[index].info.name;
+  auto& lnf_ = dynamic_cast<plugin_base::lnf&>(getLookAndFeel());
+  ScaledImage drag_image = make_drag_source_image(lnf_.font(), name, lnf_.colors().tab_header);
+  container->startDragging(juce::String(id), this, drag_image);
 }
 
 void 

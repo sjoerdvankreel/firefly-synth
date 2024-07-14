@@ -31,7 +31,7 @@ drag_source_cursor(
 
 static void
 drag_source_start_drag(
-  Component& component, module_desc const* module, 
+  Component& component, Font const& font, Colour color, module_desc const* module, 
   param_desc const* param, param_desc const* alternate_drag_param)
 {
   param_desc const* drag_param = alternate_drag_param != nullptr ? alternate_drag_param : param;
@@ -39,7 +39,8 @@ drag_source_start_drag(
   auto* container = DragAndDropContainer::findParentDragContainerFor(&component);
   if (container == nullptr) return;
   if (container->isDragAndDropActive()) return;
-  container->startDragging(juce::String(drag_param->info.id), &component);
+  ScaledImage drag_image = make_drag_source_image(font, drag_param->info.name, color);
+  container->startDragging(juce::String(drag_param->info.id), &component, drag_image);
 }
 
 static void
@@ -148,7 +149,7 @@ param_drag_label::getMouseCursor()
 
 void 
 param_drag_label::mouseDrag(juce::MouseEvent const& e)
-{ drag_source_start_drag(*this, _module, _param, nullptr); }
+{ drag_source_start_drag(*this, _lnf->font(), _lnf->colors().control_text, _module, _param, nullptr); }
 
 void
 param_drag_label::paint(Graphics& g)
@@ -188,7 +189,10 @@ param_name_label::getMouseCursor()
 
 void 
 param_name_label::mouseDrag(juce::MouseEvent const& e)
-{ drag_source_start_drag(*this, _module, _param, _alternate_drag_param); }
+{ 
+  auto& lnf_ = dynamic_cast<plugin_base::lnf&>(getLookAndFeel());
+  drag_source_start_drag(*this, lnf_.font(), lnf_.colors().label_text, _module, _param, _alternate_drag_param);
+}
 
 std::string
 param_value_label::value_ref_text(plugin_gui* gui, param_desc const* param)
@@ -220,7 +224,10 @@ param_value_label::getMouseCursor()
 
 void 
 param_value_label::mouseDrag(juce::MouseEvent const& e)
-{ drag_source_start_drag(*this, _module, _param, nullptr); }
+{ 
+  auto& lnf_ = dynamic_cast<plugin_base::lnf&>(getLookAndFeel());
+  drag_source_start_drag(*this, lnf_.font(), lnf_.colors().label_text, _module, _param, nullptr);
+}
 
 last_tweaked_label::
 last_tweaked_label(plugin_state const* state):

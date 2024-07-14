@@ -27,4 +27,20 @@ color_to_grayscale(juce::Colour const& c)
   return Colour(rgb, rgb, rgb, c.getAlpha());
 }
 
+juce::ScaledImage
+make_drag_source_image(Font const& font, std::string const& text, Colour text_color)
+{
+  float margin = 4.0f;
+  float text_h = font.getHeight();
+  float text_w = font.getStringWidthFloat(String(text)) + 4;
+
+  Image image(Image::PixelFormat::ARGB, text_w + margin, text_h + margin, true);
+  Graphics g(image);
+  g.setColour(Colours::white);
+  g.fillRoundedRectangle(0, 0, text_w + margin, text_h + margin, 2);
+  g.setColour(text_color);
+  g.drawText(text, margin / 2, margin / 2, text_w, text_h, Justification::centredBottom, false);
+  return ScaledImage(image);
+}
+
 }
