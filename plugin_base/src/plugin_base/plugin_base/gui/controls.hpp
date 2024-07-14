@@ -194,7 +194,8 @@ public binding_component,
 public autofit_component,
 public juce::Component
 {
-  static int const _size = 8;
+  static int const _size = 7;
+  lnf* const _lnf;
   param_desc const* const _param;
 public:
   void paint(juce::Graphics& g) override;
@@ -202,7 +203,7 @@ public:
   void mouseDrag(juce::MouseEvent const& e) override;
   int fixed_width(int parent_w, int parent_h) const override { return _size; }
   int fixed_height(int parent_w, int parent_h) const override { return _size; }
-  param_drag_label(plugin_gui* gui, module_desc const* module, param_desc const* param);
+  param_drag_label(plugin_gui* gui, module_desc const* module, param_desc const* param, lnf* lnf);
 };
 
 // static parameter name display + d&d support

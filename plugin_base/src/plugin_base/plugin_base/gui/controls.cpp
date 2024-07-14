@@ -137,9 +137,9 @@ param_slot_name(param_desc const* param)
 }
 
 param_drag_label::
-param_drag_label(plugin_gui* gui, module_desc const* module, param_desc const* param) :
+param_drag_label(plugin_gui* gui, module_desc const* module, param_desc const* param, lnf* lnf) :
 binding_component(gui, module, &param->param->gui.bindings, param->info.slot),
-_param(param)
+_lnf(lnf), _param(param)
 { init(); }
 
 MouseCursor 
@@ -153,8 +153,15 @@ param_drag_label::mouseDrag(juce::MouseEvent const& e)
 void
 param_drag_label::paint(Graphics& g)
 {
-  g.setColour(Colours::red);
-  g.fillEllipse(0, 0, _size, _size);
+  float w = getWidth();
+  float h = getHeight();
+  float x = (w - _size) / 2.0f;
+  float y = (h - _size) / 2.0f;
+  if(isEnabled())
+    g.setColour(_lnf->colors().control_text);
+  else
+    g.setColour(_lnf->colors().control_text.darker(0.67f));
+  g.fillEllipse(x, y, _size, _size);
 }
 
 std::string 

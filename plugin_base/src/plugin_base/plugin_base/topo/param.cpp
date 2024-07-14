@@ -100,7 +100,8 @@ param_topo::validate(plugin_topo const& plugin, module_topo const& module, int i
     assert(dsp.can_modulate(module.info.slot_count));
 
   // if we are modulatable but dont have a label, make sure some other param allows to modulate us
-  if (dsp.can_modulate(module.info.slot_count) && gui.label.contents == gui_label_contents::none)
+  // except for stuff that's invisible (i.e. params that are *only* controllable by the mod matrix)
+  if (dsp.can_modulate(module.info.slot_count) && gui.label.contents == gui_label_contents::none && gui.visible)
   {
     bool found = false;
     for (int i = 0; i < module.params.size(); i++)
@@ -110,7 +111,7 @@ param_topo::validate(plugin_topo const& plugin, module_topo const& module, int i
         assert(!module.params[i].dsp.can_modulate(module.info.slot_count));
         break;
       }
-    // TODO assert(found);
+    assert(found);
   }
 }
 
