@@ -44,21 +44,46 @@ drag_source_start_drag(
   container->startDragging(juce::String(drag_param->info.id), &component, drag_image, false, &offset);
 }
 
+// either builds up a popupmenu or figures out the index of the domain item in the combobox (yeah its ugly)
 static void
-fill_popup_menu(param_domain const& domain, PopupMenu& menu, gui_submenu const* data, Colour const& subheader_color)
+fill_popup_menu(
+  param_domain const& domain, PopupMenu* menu, gui_submenu const* data, Colour const& subheader_color, 
+  int* current_domain_index, int* current_combo_index, std::map<int, int>* domain_index_to_combo_index)
 {
-  menu.clear();
+  assert((menu != nullptr) == (current_combo_index == nullptr));
+  assert((menu != nullptr) == (current_domain_index == nullptr));
+  assert((menu != nullptr) == (domain_index_to_combo_index == nullptr));
+
+  if(menu) menu->clear();
   for (int i = 0; i < data->indices.size(); i++)
-    menu.addItem(data->indices[i] + 1, domain.raw_to_text(false, data->indices[i]));
+  {
+    if(menu) 
+      menu->addItem(data->indices[i] + 1, domain.raw_to_text(false, data->indices[i]));
+    else
+    {
+      (*domain_index_to_combo_index)[*current_domain_index] = *current_combo_index;
+      (*current_combo_index)++;
+      (*current_domain_index)++;
+    }
+  }
   for(int i = 0; i < data->children.size(); i++)
   {
     if (data->children[i]->is_subheader)
-      menu.addColouredItem(-1, data->children[i]->name, subheader_color, false, false, nullptr);
+    {
+      if(menu)
+        menu->addColouredItem(-1, data->children[i]->name, subheader_color, false, false, nullptr);
+      else
+        (*current_combo_index)++;
+    }
     else
     {
-      PopupMenu child;
-      fill_popup_menu(domain, child, data->children[i].get(), subheader_color);
-      menu.addSubMenu(data->children[i]->name, child);
+      if (menu)
+      {
+        PopupMenu child;
+        fill_popup_menu(domain, &child, data->children[i].get(), subheader_color, current_domain_index, current_combo_index, domain_index_to_combo_index);
+        menu->addSubMenu(data->children[i]->name, child);
+      } else
+        fill_popup_menu(domain, nullptr, data->children[i].get(), subheader_color, current_domain_index, current_combo_index, domain_index_to_combo_index);
     }
   }
 }
@@ -594,7 +619,7 @@ autofit_combobox(lnf, param->param->gui.edit_type == gui_edit_type::autofit_list
   else
   {
     auto const& color = colors.tab_text;
-    fill_popup_menu(domain, *getRootMenu(), param_gui.submenu.get(), color);
+    fill_popup_menu(domain, getRootMenu(), param_gui.submenu.get(), color, nullptr, nullptr, nullptr);
   }
   autofit();
   addListener(this);
@@ -671,11 +696,29 @@ param_combobox::showPopup()
 int 
 param_combobox::get_item_index(std::string const& item_id) const
 {
+  int result = -1;
   assert(_param->param->gui.enable_dropdown_drop_target);
   for (int i = 0; i < _param->param->domain.items.size(); i++)
     if (item_id == _param->param->domain.items[i].id)
-      return i;
-  return -1;
+    {
+      result = i;
+      break;
+    }
+
+  if (result == -1) return result;
+  
+  // need to take subheaders into account
+  if (_param->param->gui.submenu)
+  {
+    int current_combo_index = 0;
+    int current_domain_index = 0;
+    std::map<int, int> domain_index_to_combo_index = {};
+    fill_popup_menu(_param->param->domain, nullptr, _param->param->gui.submenu.get(), Colour(), 
+      &current_domain_index, &current_combo_index, &domain_index_to_combo_index);
+    result = domain_index_to_combo_index.at(result);
+  }
+
+  return result;
 }
 
 void
