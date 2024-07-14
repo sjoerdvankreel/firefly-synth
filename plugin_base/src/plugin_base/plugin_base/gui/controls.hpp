@@ -194,11 +194,12 @@ public binding_component,
 public autofit_label
 {
   param_desc const* const _param;
+  param_desc const* const _alternate_drag_param;
   static std::string label_ref_text(param_desc const* param);
 public:
   juce::MouseCursor getMouseCursor() override;
   void mouseDrag(juce::MouseEvent const& e) override;
-  param_name_label(plugin_gui* gui, module_desc const* module, param_desc const* param, lnf* lnf);
+  param_name_label(plugin_gui* gui, module_desc const* module, param_desc const* param, param_desc const* alternate_drag_param, lnf* lnf);
 };
 
 // dynamic parameter value display
@@ -207,12 +208,13 @@ public param_component,
 public autofit_label
 {
   static std::string value_ref_text(plugin_gui* gui, param_desc const* param);
+  param_desc const* const _alternate_drag_param;
 protected:
   void own_param_changed(plain_value plain) override final;
 public:
   juce::MouseCursor getMouseCursor() override;
   void mouseDrag(juce::MouseEvent const& e) override;
-  param_value_label(plugin_gui* gui, module_desc const* module, param_desc const* param, lnf* lnf);
+  param_value_label(plugin_gui* gui, module_desc const* module, param_desc const* param, param_desc const* alternate_drag_param, lnf* lnf);
 };
 
 // dynamic module name display

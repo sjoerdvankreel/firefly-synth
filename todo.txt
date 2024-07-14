@@ -25,6 +25,7 @@ v also do param_value_label
 * hover over matrix tab = select it
 * allow drag f.e. dist skewx 
 * drag aux1 = drag cv signal, not the button
+* do validation
 
 wishlist:
 DSF falloff to the left

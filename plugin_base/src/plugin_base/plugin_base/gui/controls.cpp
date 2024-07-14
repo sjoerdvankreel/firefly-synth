@@ -11,31 +11,35 @@ namespace plugin_base {
 
 static bool
 is_enabled_mod_source(
-  Component const& component, module_desc const* module, param_desc const* param)
+  Component const& component, module_desc const* module, 
+  param_desc const* param, param_desc const* alternate_drag_param)
 {
+  param_desc const* drag_param = alternate_drag_param != nullptr ? alternate_drag_param : param;
   if (!component.isEnabled()) return false;
-  if (!param->param->dsp.can_modulate(module->info.slot)) return false;
+  if (!drag_param->param->dsp.can_modulate(module->info.slot)) return false;
   return true;
 }
 
 static MouseCursor
 drag_source_cursor(
   Component const& component, module_desc const* module, 
-  param_desc const* param, MouseCursor base_cursor)
+  param_desc const* param, param_desc const* alternate_drag_param, MouseCursor base_cursor)
 {
-  if (!is_enabled_mod_source(component, module, param)) return base_cursor;
+  if (!is_enabled_mod_source(component, module, param, alternate_drag_param)) return base_cursor;
   return MouseCursor::DraggingHandCursor;
 }
 
 static void
 drag_source_start_drag(
-  Component& component, module_desc const* module, param_desc const* param)
+  Component& component, module_desc const* module, 
+  param_desc const* param, param_desc const* alternate_drag_param)
 {
-  if (!is_enabled_mod_source(component, module, param)) return;
+  param_desc const* drag_param = alternate_drag_param != nullptr ? alternate_drag_param : param;
+  if (!is_enabled_mod_source(component, module, param, alternate_drag_param)) return;
   auto* container = DragAndDropContainer::findParentDragContainerFor(&component);
   assert(container != nullptr);
   if (container->isDragAndDropActive()) return;
-  container->startDragging(juce::String(param->info.id), &component);
+  container->startDragging(juce::String(drag_param->info.id), &component);
 }
 
 static void
@@ -140,9 +144,10 @@ param_name_label::label_ref_text(param_desc const* param)
 }
 
 param_name_label::
-param_name_label(plugin_gui* gui, module_desc const* module, param_desc const* param, lnf* lnf):
+param_name_label(plugin_gui* gui, module_desc const* module, param_desc const* param, param_desc const* alternate_drag_param, lnf* lnf):
 binding_component(gui, module, &param->param->gui.bindings, param->info.slot),
-autofit_label(lnf, label_ref_text(param)), _param(param)
+autofit_label(lnf, label_ref_text(param)),
+_param(param), _alternate_drag_param(alternate_drag_param)
 {
   std::string name = param_slot_name(param);
   setText(name, juce::dontSendNotification); 
@@ -151,11 +156,11 @@ autofit_label(lnf, label_ref_text(param)), _param(param)
 
 MouseCursor 
 param_name_label::getMouseCursor()
-{ return drag_source_cursor(*this, _module, _param, Component::getMouseCursor()); }
+{ return drag_source_cursor(*this, _module, _param, _alternate_drag_param, Component::getMouseCursor()); }
 
 void 
 param_name_label::mouseDrag(juce::MouseEvent const& e)
-{ drag_source_start_drag(*this, _module, _param); }
+{ drag_source_start_drag(*this, _module, _param, _alternate_drag_param); }
 
 std::string
 param_value_label::value_ref_text(plugin_gui* gui, param_desc const* param)
@@ -168,9 +173,10 @@ param_value_label::value_ref_text(plugin_gui* gui, param_desc const* param)
 
 // Just guess max value is representative of the longest text.
 param_value_label::
-param_value_label(plugin_gui* gui, module_desc const* module, param_desc const* param, lnf* lnf) :
+param_value_label(plugin_gui* gui, module_desc const* module, param_desc const* param, param_desc const* alternate_drag_param, lnf* lnf) :
 param_component(gui, module, param), 
-autofit_label(lnf, value_ref_text(gui, param))
+autofit_label(lnf, value_ref_text(gui, param)),
+_alternate_drag_param(alternate_drag_param)
 { init(); }
 
 void
@@ -183,11 +189,11 @@ param_value_label::own_param_changed(plain_value plain)
 
 MouseCursor 
 param_value_label::getMouseCursor()
-{ return drag_source_cursor(*this, _module, _param, Component::getMouseCursor()); }
+{ return drag_source_cursor(*this, _module, _param, _alternate_drag_param, Component::getMouseCursor()); }
 
 void 
 param_value_label::mouseDrag(juce::MouseEvent const& e)
-{ drag_source_start_drag(*this, _module, _param); }
+{ drag_source_start_drag(*this, _module, _param, _alternate_drag_param); }
 
 last_tweaked_label::
 last_tweaked_label(plugin_state const* state):
