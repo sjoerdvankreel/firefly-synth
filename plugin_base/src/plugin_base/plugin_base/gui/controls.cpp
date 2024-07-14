@@ -682,6 +682,7 @@ void
 param_combobox::itemDragExit(DragAndDropTarget::SourceDetails const& details)
 {
   _drop_target_action = drop_target_action::none;
+  resized(); // needed to trigger positionComboBoxText
   repaint();
 }
 
@@ -690,6 +691,7 @@ param_combobox::itemDragEnter(DragAndDropTarget::SourceDetails const& details)
 {
   std::string source_id = details.description.toString().toStdString();
   _drop_target_action = get_item_index(source_id) != -1 ? drop_target_action::allow : drop_target_action::deny;
+  resized(); // needed to trigger positionComboBoxText
   repaint();
 }
 
