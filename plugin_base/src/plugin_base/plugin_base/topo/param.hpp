@@ -93,8 +93,9 @@ struct param_topo_gui final {
   std::string alternate_drag_output_id = {};
 
   // if dropped onto "this", what param should be set to 1, to enable the route?
-  // note - 0 is assumed to be "off" and 1 is assumed to be the firts not-off value
+  // note - 0 is assumed to be "off" and below value is selected if not-off
   std::string drop_route_enabled_param_id = {};
+  int drop_route_enabled_param_value = -1;
 
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(param_topo_gui);
   bool is_list() const;

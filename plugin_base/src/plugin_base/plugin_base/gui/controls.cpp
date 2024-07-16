@@ -739,7 +739,8 @@ param_combobox::itemDropped(DragAndDropTarget::SourceDetails const& details)
         int pi = _param->info.slot;
         if(_gui->gui_state()->get_plain_at(m, mi, p, pi).step() == 0)
           _gui->gui_state()->set_plain_at(m, mi, p, pi,
-            _module->module->params[i].domain.normalized_to_plain(normalized_value(1)));
+            _module->module->params[i].domain.normalized_to_plain(
+              normalized_value(_param->param->gui.drop_route_enabled_param_value)));
         itemDragExit(details);
         return;
       }

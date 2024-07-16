@@ -70,7 +70,10 @@ param_topo_gui::validate(plugin_topo const& plugin, module_topo const& module, p
     assert(param.info.index != bindings.visible.params[v]);
 
   if (enable_dropdown_drop_target)
+  {
     assert(drop_route_enabled_param_id.size() > 0);
+    assert(drop_route_enabled_param_value != -1);
+  }
 }
 
 void

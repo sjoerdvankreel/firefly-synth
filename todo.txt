@@ -29,10 +29,10 @@ V cannot drag voice out/mout
 V do validation
 V drag aux1 = drag cv signal, not the button
 V drag all matrices -> check all sources and targets in the matrices
+V enable a route when drop onto it
 * filter out invalid combis eg glfo1 to glfo1 rate
 * retest all the lfo-to-lfo
 * update the docs
-* enable a route when drop onto it
 
 wishlist:
 DSF falloff to the left
