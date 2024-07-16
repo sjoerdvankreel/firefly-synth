@@ -33,6 +33,7 @@ V enable a route when drop onto it
 * filter out invalid combis eg glfo1 to glfo1 rate
 * retest all the lfo-to-lfo
 * update the docs
+* scroll-into-view on drag
 
 wishlist:
 DSF falloff to the left
