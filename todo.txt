@@ -32,6 +32,7 @@ V drag all matrices -> check all sources and targets in the matrices
 * filter out invalid combis eg glfo1 to glfo1 rate
 * retest all the lfo-to-lfo
 * update the docs
+* enable a route when drop onto it
 
 wishlist:
 DSF falloff to the left
