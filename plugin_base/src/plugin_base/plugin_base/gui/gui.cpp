@@ -872,7 +872,8 @@ plugin_gui::make_param_label(module_desc const& module, param_desc const& param,
   {
     assert(contents == gui_label_contents::name);
     for (int i = 0; i < module.output_sources.size(); i++)
-      if (module.output_sources[i].source->info.tag.id == param.param->gui.alternate_drag_output_id)
+      if (module.output_sources[i].source->info.tag.id == param.param->gui.alternate_drag_output_id &&
+        module.output_sources[i].info.slot == param.info.slot)
         alternate_drag_output = &module.output_sources[i];
     assert(alternate_drag_output != nullptr);
   }
