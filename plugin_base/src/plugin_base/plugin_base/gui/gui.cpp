@@ -858,11 +858,11 @@ Component&
 plugin_gui::make_param_label(module_desc const& module, param_desc const& param, gui_label_contents contents)
 {
   param_desc const* alternate_drag_param = nullptr;
-  if (param.param->gui.alternate_drag_source_id.size())
+  if (param.param->gui.alternate_drag_param_id.size())
   {
     assert(contents == gui_label_contents::name);
     for (int i = 0; i < module.params.size(); i++)
-      if (module.params[i].param->info.tag.id == param.param->gui.alternate_drag_source_id)
+      if (module.params[i].param->info.tag.id == param.param->gui.alternate_drag_param_id)
         alternate_drag_param = &module.params[i];
     assert(alternate_drag_param != nullptr);
   }

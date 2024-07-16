@@ -105,7 +105,7 @@ param_topo::validate(plugin_topo const& plugin, module_topo const& module, int i
   {
     bool found = false;
     for (int i = 0; i < module.params.size(); i++)
-      if (module.params[i].gui.alternate_drag_source_id == info.tag.id)
+      if (module.params[i].gui.alternate_drag_param_id == info.tag.id)
       {
         found = true;
         assert(!module.params[i].dsp.can_modulate(module.info.slot_count));

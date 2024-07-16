@@ -88,7 +88,7 @@ struct param_topo_gui final {
   // allow to drop on this combobox?
   bool enable_dropdown_drop_target = false;
   // if dragging this label, mod source is "self" or the one below
-  std::string alternate_drag_source_id = {};
+  std::string alternate_drag_param_id = {};
 
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(param_topo_gui);
   bool is_list() const;
