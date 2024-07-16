@@ -715,8 +715,35 @@ void
 param_combobox::itemDropped(DragAndDropTarget::SourceDetails const& details)
 {
   int tag = get_item_tag(details.description.toString().toStdString());
-  if (tag != -1) setSelectedId(tag);
-  itemDragExit(details);
+  if (tag == -1)
+  {
+    itemDragExit(details);
+    return;
+  }
+
+  if (tag != -1)
+  {
+    // found corresponding drop target, select it
+    setSelectedId(tag);
+
+    // now figure out the matrix route enabled selector, and if its 0, set it to 1
+    auto enabled_id = _param->param->gui.drop_route_enabled_param_id;
+    assert(enabled_id.size());
+    for (int i = 0; i < _module->module->params.size(); i++)
+      if(_module->module->params[i].info.tag.id == enabled_id)
+      {
+        assert(_module->module->params[i].info.slot_count == _param->param->info.slot_count);
+        int m = _module->module->info.index;
+        int mi = _module->info.slot;
+        int p = _module->module->params[i].info.index;
+        int pi = _param->info.slot;
+        if(_gui->gui_state()->get_plain_at(m, mi, p, pi).step() == 0)
+          _gui->gui_state()->set_plain_at(m, mi, p, pi,
+            _module->module->params[i].domain.normalized_to_plain(normalized_value(1)));
+        return;
+      }
+    assert(false);
+  }
 }
 
 bool 

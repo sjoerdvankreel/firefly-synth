@@ -68,6 +68,9 @@ param_topo_gui::validate(plugin_topo const& plugin, module_topo const& module, p
     assert(param.info.index != bindings.enabled.params[e]);
   for (int v = 0; v < bindings.visible.params.size(); v++)
     assert(param.info.index != bindings.visible.params[v]);
+
+  if (enable_dropdown_drop_target)
+    assert(drop_route_enabled_param_id.size() > 0);
 }
 
 void
