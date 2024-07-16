@@ -112,11 +112,15 @@ struct module_topo_gui final {
   
   // my own tab header in case my container is tabbed
   std::string tabbed_name;
+
+  // d&d support
+  std::string alternate_drag_source_id = {};
   
   int autofit_row = 0;
   int autofit_column = 0;
   bool enable_tab_menu = true;
   module_tab_menu_handler_factory menu_handler_factory;
+
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(module_topo_gui);
 };
 
@@ -156,6 +160,7 @@ struct module_topo final {
   state_initializer minimal_initializer;
   state_initializer default_initializer;
   bool force_rerender_on_param_hover = false;
+
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(module_topo);
   void validate(plugin_topo const& plugin, int index) const;
 };

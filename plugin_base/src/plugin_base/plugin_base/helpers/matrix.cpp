@@ -34,8 +34,18 @@ make_id(std::string const& id1, int slot1, std::string const& id2, int slot2)
 std::string
 make_module_drag_source_id(module_desc const* module)
 {
+  // explicit drag source -- assume exactly 1
+  if (module->module->gui.alternate_drag_source_id.size())
+  {
+    assert(module->module->dsp.outputs.size() == 0);
+    assert(module->module->info.slot_count == 1);
+    return make_id(module->module->gui.alternate_drag_source_id, 0);
+  }
+
+  // make a wild guess - if its something with a single dsp output, then thats it
+  if (module->module->dsp.output == module_output::none || module->module->dsp.outputs.size() != 1) return {};
+
   // note this should *really* line up with the matrix helpers below
-  assert(module->module->dsp.outputs.size() == 1);
   if(module->module->dsp.output == module_output::cv)
     return make_id(module->module->info.tag.id, module->info.slot, module->module->dsp.outputs[0].info.tag.id, 0);
   return make_id(module->module->info.tag.id, module->info.slot);

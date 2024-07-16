@@ -41,22 +41,18 @@ tab_bar_button::mouseDrag(MouseEvent const& e)
   (void)slot_count;
   assert(0 <= index && index < slot_count);
 
-  // this is just a heuristic - if the module (per slot)
-  // contains exactly 1 cv or audio output, that is the drag source
-  // lets see how it works out  
   auto drag_module = &_drag_module_descriptors[index];
-  if (drag_module->module->dsp.output == module_output::none) return;
-  if (drag_module->module->dsp.outputs.size() != 1) return;
+  std::string drag_source_name = drag_module->info.name;
+  std::string drag_source_id = make_module_drag_source_id(drag_module);
+  if (drag_source_id.size() == 0) return;
   
   auto* container = DragAndDropContainer::findParentDragContainerFor(this);
   if (container == nullptr) return;
   if (container->isDragAndDropActive()) return;
-  std::string name = drag_module->info.name;
-  std::string id = make_module_drag_source_id(drag_module);
   auto& lnf_ = dynamic_cast<plugin_base::lnf&>(getLookAndFeel());
-  ScaledImage drag_image = make_drag_source_image(lnf_.font(), name, lnf_.colors().bubble_outline);
+  ScaledImage drag_image = make_drag_source_image(lnf_.font(), drag_source_name, lnf_.colors().bubble_outline);
   Point<int> offset(drag_image.getImage().getWidth() / 2 + 10, drag_image.getImage().getHeight() / 2 + 10);
-  container->startDragging(juce::String(id), this, drag_image, false, &offset);
+  container->startDragging(juce::String(drag_source_id), this, drag_image, false, &offset);
 }
 
 void 
