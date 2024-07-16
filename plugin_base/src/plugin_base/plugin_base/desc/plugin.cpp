@@ -43,11 +43,7 @@ plugin(plugin), config(config)
         midi_mappings.topo_to_index[m][mi].push_back(midi_source_global++);
       }
       for (int os = 0; os < module.dsp.outputs.size(); os++)
-      {
-        auto const& source = module.dsp.outputs[os];
-        PB_ASSERT_EXEC(output_mappings.id_to_index.insert(std::pair(source.info.tag.id, output_source_global)).second);
         output_mappings.topo_to_index[m][mi].push_back(output_source_global++);
-      }
       for(int p = 0; p < module.params.size(); p++)
       {
         auto const& param = module.params[p];
@@ -192,6 +188,7 @@ plugin_desc::validate() const
   plugin->validate();
   midi_mappings.validate(*this);
   param_mappings.validate(*this);
+  output_mappings.validate(*this);
 
   assert(param_count > 0);
   assert(module_count > 0);
@@ -223,6 +220,30 @@ plugin_desc::validate() const
       assert(param.info.global == param_global++);
       PB_ASSERT_EXEC(all_ids.insert(param.info.id).second);
       PB_ASSERT_EXEC(all_hashes.insert(param.info.id_hash).second);
+    }
+  }
+}
+
+void
+plugin_output_mappings::validate(plugin_desc const& plugin) const
+{
+  assert(tag_to_index.size() == plugin.output_count);
+  assert(index_to_tag.size() == plugin.output_count);
+  assert(output_sources.size() == plugin.output_count);
+  assert(topo_to_index.size() == plugin.plugin->modules.size());
+
+  int output_source_global = 0;
+  (void)output_source_global;
+  for (int m = 0; m < plugin.plugin->modules.size(); m++)
+  {
+    auto const& module = plugin.plugin->modules[m];
+    (void)module;
+    assert(topo_to_index[m].size() == module.info.slot_count);
+    for (int mi = 0; mi < module.info.slot_count; mi++)
+    {
+      assert(topo_to_index[m][mi].size() == module.dsp.outputs.size());
+      for (int os = 0; os < module.dsp.outputs.size(); os++)
+        assert(topo_to_index[m][mi][os] == output_source_global++);
     }
   }
 }

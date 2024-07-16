@@ -63,7 +63,6 @@ struct plugin_midi_mappings final {
 // mapping to/from global dsp output source info
 struct plugin_output_mappings final {
   std::vector<int> index_to_tag = {};
-  std::map<int, int> id_to_index = {};
   std::map<int, int> tag_to_index = {};
   std::vector<output_mapping> output_sources = {};
   std::vector<std::vector<std::vector<int>>> topo_to_index = {};

@@ -46,6 +46,8 @@ module_desc::validate(plugin_desc const& plugin, int index) const
     params[p].validate(*this, p);
   for (int ms = 0; ms < midi_sources.size(); ms++)
     midi_sources[ms].validate(*this, ms);
+  for (int os = 0; os < output_sources.size(); os++)
+    output_sources[os].validate(*this, os);
 }
 
 }
