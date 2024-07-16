@@ -443,7 +443,7 @@ cv_matrix_topo(
   source.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   source.gui.submenu = source_matrix.submenu;
   source.gui.enable_dropdown_drop_target = true;
-  source.gui.drop_route_enabled_param_id = type.info.tag.id;
+  source.gui.drop_route_enabled_param_id = result.params[param_type].info.tag.id;
   source.info.description = std::string("All global CV and MIDI sources, plus for per-voice CV all per-voice CV sources, ") + 
     "MIDI note and velocity, and On-Note all global CV sources.";
   if (cv)
@@ -462,7 +462,7 @@ cv_matrix_topo(
   target.gui.submenu = target_matrix.submenu;
   target.gui.item_enabled.auto_bind = true;
   target.gui.enable_dropdown_drop_target = true;
-  target.gui.drop_route_enabled_param_id = type.info.tag.id;
+  target.gui.drop_route_enabled_param_id = result.params[param_type].info.tag.id;
   if(cv)
     target.info.description = "Any modulatable parameter of any LFO or the CV-to-audio matrix. You can only route 'upwards', so not LFO2->LFO1.";
   else

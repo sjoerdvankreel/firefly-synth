@@ -740,6 +740,7 @@ param_combobox::itemDropped(DragAndDropTarget::SourceDetails const& details)
         if(_gui->gui_state()->get_plain_at(m, mi, p, pi).step() == 0)
           _gui->gui_state()->set_plain_at(m, mi, p, pi,
             _module->module->params[i].domain.normalized_to_plain(normalized_value(1)));
+        itemDragExit(details);
         return;
       }
     assert(false);

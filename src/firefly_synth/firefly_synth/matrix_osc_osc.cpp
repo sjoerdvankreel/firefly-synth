@@ -156,7 +156,7 @@ osc_osc_matrix_topo(int section, gui_position const& pos, plugin_topo const* plu
     make_param_gui(section_am, gui_edit_type::autofit_list, param_layout::vertical, { 0, 1 }, make_label_none())));
   am_source.gui.tabular = true;
   am_source.gui.enable_dropdown_drop_target = true;
-  am_source.gui.drop_route_enabled_param_id = am_on.info.tag.id;
+  am_source.gui.drop_route_enabled_param_id = result.params[param_am_on].info.tag.id;
   am_source.gui.bindings.enabled.bind_params({ param_am_on }, [](auto const& vs) { return vs[0] != 0; });
   am_source.gui.item_enabled.bind_param({ module_osc_osc_matrix, 0, param_am_target, gui_item_binding::match_param_slot },
     [osc = osc_matrix.mappings](int other, int self) {
@@ -168,7 +168,7 @@ osc_osc_matrix_topo(int section, gui_position const& pos, plugin_topo const* plu
     make_param_gui(section_am, gui_edit_type::autofit_list, param_layout::vertical, { 0, 2 }, make_label_none())));
   am_target.gui.tabular = true;
   am_target.gui.enable_dropdown_drop_target = true;
-  am_target.gui.drop_route_enabled_param_id = am_on.info.tag.id;
+  am_target.gui.drop_route_enabled_param_id = result.params[param_am_on].info.tag.id;
   am_target.gui.bindings.enabled.bind_params({ param_am_on }, [](auto const& vs) { return vs[0] != 0; });
   am_target.gui.item_enabled.bind_param({ module_osc_osc_matrix, 0, param_am_source, gui_item_binding::match_param_slot },
     [osc = osc_matrix.mappings](int other, int self) { 
@@ -208,7 +208,7 @@ osc_osc_matrix_topo(int section, gui_position const& pos, plugin_topo const* plu
     make_param_gui(section_fm, gui_edit_type::autofit_list, param_layout::vertical, { 0, 1 }, make_label_none())));
   fm_source.gui.tabular = true;
   fm_source.gui.enable_dropdown_drop_target = true;
-  fm_source.gui.drop_route_enabled_param_id = fm_on.info.tag.id;
+  fm_source.gui.drop_route_enabled_param_id = result.params[param_fm_on].info.tag.id;
   fm_source.gui.bindings.enabled.bind_params({ param_fm_on }, [](auto const& vs) { return vs[0] != 0; });
   fm_source.gui.item_enabled.bind_param({ module_osc_osc_matrix, 0, param_fm_target, gui_item_binding::match_param_slot },
     [osc = osc_matrix.mappings](int other, int self) {
@@ -221,7 +221,7 @@ osc_osc_matrix_topo(int section, gui_position const& pos, plugin_topo const* plu
     make_param_gui(section_fm, gui_edit_type::autofit_list, param_layout::vertical, { 0, 2 }, make_label_none())));
   fm_target.gui.tabular = true;
   fm_target.gui.enable_dropdown_drop_target = true;
-  fm_target.gui.drop_route_enabled_param_id = fm_on.info.tag.id;
+  fm_target.gui.drop_route_enabled_param_id = result.params[param_fm_on].info.tag.id;
   fm_target.gui.bindings.enabled.bind_params({ param_fm_on }, [](auto const& vs) { return vs[0] != 0; });
   fm_target.gui.item_enabled.bind_param({ module_osc_osc_matrix, 0, param_fm_source, gui_item_binding::match_param_slot },
     [osc = osc_matrix.mappings](int other, int self) {

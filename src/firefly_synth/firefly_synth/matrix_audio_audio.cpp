@@ -202,7 +202,7 @@ audio_audio_matrix_topo(
   source.gui.tabular = true;
   source.gui.submenu = source_matrix.submenu;
   source.gui.enable_dropdown_drop_target = true;
-  source.gui.drop_route_enabled_param_id = on.info.tag.id;
+  source.gui.drop_route_enabled_param_id = result.params[param_on].info.tag.id;
   source.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
   source.gui.item_enabled.bind_param({ this_module, 0, param_target, gui_item_binding::match_param_slot },
     [global, sm = source_matrix.mappings, tm = target_matrix.mappings](int other, int self) {
@@ -219,7 +219,7 @@ audio_audio_matrix_topo(
   target.gui.tabular = true;
   target.gui.submenu = target_matrix.submenu;
   target.gui.enable_dropdown_drop_target = true;
-  target.gui.drop_route_enabled_param_id = on.info.tag.id;
+  target.gui.drop_route_enabled_param_id = result.params[param_on].info.tag.id;
   target.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
   target.gui.item_enabled.bind_param({ this_module, 0, param_source, gui_item_binding::match_param_slot }, 
     [global, sm = source_matrix.mappings, tm = target_matrix.mappings](int other, int self) {
