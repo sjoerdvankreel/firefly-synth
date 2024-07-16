@@ -20,6 +20,7 @@ MouseCursor
 tab_bar_button::getMouseCursor()
 {
   if (_drag_module_descriptors == nullptr) return TabBarButton::getMouseCursor();
+  if(!_drag_module_descriptors[0].module->gui.is_drag_mod_source) return TabBarButton::getMouseCursor();
   return MouseCursor::DraggingHandCursor;
 }
 
@@ -42,6 +43,7 @@ tab_bar_button::mouseDrag(MouseEvent const& e)
   assert(0 <= index && index < slot_count);
 
   auto drag_module = &_drag_module_descriptors[index];
+  if (!drag_module->module->gui.is_drag_mod_source) return;
   std::string drag_source_name = drag_module->info.name;
   std::string drag_source_id = make_module_drag_source_id(drag_module);
   if (drag_source_id.size() == 0) return;

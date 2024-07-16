@@ -114,6 +114,7 @@ struct module_topo_gui final {
   std::string tabbed_name;
 
   // d&d support
+  bool is_drag_mod_source = false; // enable if can drag onto mod matrix source
   std::string alternate_drag_source_id = {};
   
   int autofit_row = 0;

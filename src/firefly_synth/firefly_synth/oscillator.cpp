@@ -274,6 +274,7 @@ osc_topo(int section, gui_position const& pos)
       make_module_dsp_output(false, make_topo_info_basic("{FA702356-D73E-4438-8127-0FDD01526B7E}", "Output", 0, 1 + max_osc_unison_voices)) }),
     make_module_gui(section, pos, { { 1, 1 }, { 32, 13, 8, 26, 55, 8 } })));
   result.info.description = "Oscillator module with sine/saw/triangle/square/DSF/Karplus-Strong/noise generators, hardsync and unison support.";
+  result.gui.is_drag_mod_source = true;
 
   result.minimal_initializer = init_minimal;
   result.default_initializer = init_default;
