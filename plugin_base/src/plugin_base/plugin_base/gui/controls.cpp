@@ -44,46 +44,21 @@ drag_source_start_drag(
   container->startDragging(juce::String(drag_param->info.id), &component, drag_image, false, &offset);
 }
 
-// either builds up a popupmenu or figures out the index of the domain item in the combobox (yeah its ugly)
 static void
-fill_popup_menu(
-  param_domain const& domain, PopupMenu* menu, gui_submenu const* data, Colour const& subheader_color, 
-  int* current_domain_index, int* current_combo_index, std::map<int, int>* domain_index_to_combo_index)
+fill_popup_menu(param_domain const& domain, PopupMenu& menu, gui_submenu const* data, Colour const& subheader_color)
 {
-  assert((menu != nullptr) == (current_combo_index == nullptr));
-  assert((menu != nullptr) == (current_domain_index == nullptr));
-  assert((menu != nullptr) == (domain_index_to_combo_index == nullptr));
-
-  if(menu) menu->clear();
+  menu.clear();
   for (int i = 0; i < data->indices.size(); i++)
-  {
-    if(menu) 
-      menu->addItem(data->indices[i] + 1, domain.raw_to_text(false, data->indices[i]));
-    else
-    {
-      (*domain_index_to_combo_index)[*current_domain_index] = *current_combo_index;
-      (*current_combo_index)++;
-      (*current_domain_index)++;
-    }
-  }
+    menu.addItem(data->indices[i] + 1, domain.raw_to_text(false, data->indices[i]));
   for(int i = 0; i < data->children.size(); i++)
   {
     if (data->children[i]->is_subheader)
-    {
-      if(menu)
-        menu->addColouredItem(-1, data->children[i]->name, subheader_color, false, false, nullptr);
-      else
-        (*current_combo_index)++;
-    }
+      menu.addColouredItem(-1, data->children[i]->name, subheader_color, false, false, nullptr);
     else
     {
-      if (menu)
-      {
-        PopupMenu child;
-        fill_popup_menu(domain, &child, data->children[i].get(), subheader_color, current_domain_index, current_combo_index, domain_index_to_combo_index);
-        menu->addSubMenu(data->children[i]->name, child);
-      } else
-        fill_popup_menu(domain, nullptr, data->children[i].get(), subheader_color, current_domain_index, current_combo_index, domain_index_to_combo_index);
+      PopupMenu child;
+      fill_popup_menu(domain, child, data->children[i].get(), subheader_color);
+      menu.addSubMenu(data->children[i]->name, child);
     }
   }
 }
@@ -619,7 +594,7 @@ autofit_combobox(lnf, param->param->gui.edit_type == gui_edit_type::autofit_list
   else
   {
     auto const& color = colors.tab_text;
-    fill_popup_menu(domain, getRootMenu(), param_gui.submenu.get(), color, nullptr, nullptr, nullptr);
+    fill_popup_menu(domain, *getRootMenu(), param_gui.submenu.get(), color);
   }
   autofit();
   addListener(this);
@@ -694,31 +669,13 @@ param_combobox::showPopup()
 }
 
 int 
-param_combobox::get_item_index(std::string const& item_id) const
+param_combobox::get_item_tag(std::string const& item_id) const
 {
-  int result = -1;
   assert(_param->param->gui.enable_dropdown_drop_target);
   for (int i = 0; i < _param->param->domain.items.size(); i++)
     if (item_id == _param->param->domain.items[i].id)
-    {
-      result = i;
-      break;
-    }
-
-  if (result == -1) return result;
-  
-  // need to take subheaders into account
-  if (_param->param->gui.submenu)
-  {
-    int current_combo_index = 0;
-    int current_domain_index = 0;
-    std::map<int, int> domain_index_to_combo_index = {};
-    fill_popup_menu(_param->param->domain, nullptr, _param->param->gui.submenu.get(), Colour(), 
-      &current_domain_index, &current_combo_index, &domain_index_to_combo_index);
-    result = domain_index_to_combo_index.at(result);
-  }
-
-  return result;
+      return i + 1;
+  return -1;
 }
 
 void
@@ -733,7 +690,7 @@ void
 param_combobox::itemDragEnter(DragAndDropTarget::SourceDetails const& details)
 {
   std::string source_id = details.description.toString().toStdString();
-  _drop_target_action = get_item_index(source_id) != -1 ? drop_target_action::allow : drop_target_action::deny;
+  _drop_target_action = get_item_tag(source_id) != -1 ? drop_target_action::allow : drop_target_action::deny;
   resized(); // needed to trigger positionComboBoxText
   repaint();
 }
@@ -741,8 +698,8 @@ param_combobox::itemDragEnter(DragAndDropTarget::SourceDetails const& details)
 void 
 param_combobox::itemDropped(DragAndDropTarget::SourceDetails const& details)
 {
-  int index = get_item_index(details.description.toString().toStdString());
-  if (index != -1) setSelectedItemIndex(index);
+  int tag = get_item_tag(details.description.toString().toStdString());
+  if (tag != -1) setSelectedId(tag);
   itemDragExit(details);
 }
 

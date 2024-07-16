@@ -300,7 +300,7 @@ public juce::DragAndDropTarget,
 public juce::ComboBox::Listener
 {
   drop_target_action _drop_target_action = drop_target_action::none;
-  int get_item_index(std::string const& item_id) const;
+  int get_item_tag(std::string const& item_id) const;
 
 protected:
   void own_param_changed(plain_value plain) override final;
