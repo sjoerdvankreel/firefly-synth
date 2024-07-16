@@ -132,6 +132,19 @@ struct module_dsp_output final {
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(module_dsp_output);
 };
 
+// dsp output topo mapping
+struct output_topo_mapping final {
+  int module_index;
+  int module_slot;
+  int output_index;
+
+  bool operator==(output_topo_mapping const&) const = default;
+  template <class T> auto& value_at(T& container) const
+  { return container[module_index][module_slot][output_index]; }
+  template <class T> auto const& value_at(T const& container) const 
+  { return container[module_index][module_slot][output_index]; }
+};
+
 // module dsp
 struct module_dsp final {
   int scratch_count;

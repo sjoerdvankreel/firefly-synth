@@ -2,7 +2,6 @@
 #include <plugin_base/shared/utility.hpp> 
 #include <plugin_base/shared/logger.hpp>
 
-
 #include <set>
 
 namespace plugin_base {
@@ -18,6 +17,7 @@ plugin(plugin), config(config)
   int param_global = 0;
   int module_global = 0;
   int midi_source_global = 0;
+  int output_source_global = 0;
 
   for(int m = 0; m < plugin->modules.size(); m++)
   {
@@ -35,12 +35,18 @@ plugin(plugin), config(config)
     {
       midi_mappings.topo_to_index[m].emplace_back();
       param_mappings.topo_to_index[m].emplace_back();
-      modules.emplace_back(module_desc(module, m, mi, module_global++, param_global, midi_source_global));
+      modules.emplace_back(module_desc(module, m, mi, module_global++, param_global, midi_source_global, output_source_global));
       for (int ms = 0; ms < module.midi_sources.size(); ms++)
       {
         auto const& source = module.midi_sources[ms];
         PB_ASSERT_EXEC(midi_mappings.id_to_index.insert(std::pair(source.id, midi_source_global)).second);
         midi_mappings.topo_to_index[m][mi].push_back(midi_source_global++);
+      }
+      for (int os = 0; os < module.dsp.outputs.size(); os++)
+      {
+        auto const& source = module.dsp.outputs[os];
+        PB_ASSERT_EXEC(output_mappings.id_to_index.insert(std::pair(source.info.tag.id, output_source_global)).second);
+        output_mappings.topo_to_index[m][mi].push_back(output_source_global++);
       }
       for(int p = 0; p < module.params.size(); p++)
       {
@@ -54,6 +60,7 @@ plugin(plugin), config(config)
 
   param_global = 0;
   midi_source_global = 0;
+  output_source_global = 0;
   for(int m = 0; m < modules.size(); m++)
   {
     auto const& module = modules[m];
@@ -92,6 +99,22 @@ plugin(plugin), config(config)
       midi_mappings.midi_sources.push_back(std::move(mapping));
       midi_sources.push_back(&module.midi_sources[ms]);
     }
+
+    for (int os = 0; os < module.output_sources.size(); os++)
+    {
+      auto const& source = module.output_sources[os];
+      output_mapping mapping;
+      mapping.output_local = os;
+      mapping.module_global = m;
+      mapping.topo.output_index = source.info.topo;
+      mapping.topo.module_slot = module.info.slot;
+      mapping.topo.module_index = module.info.topo;
+      mapping.output_global = output_source_global++;
+      output_mappings.index_to_tag.push_back(source.info.id_hash);
+      output_mappings.tag_to_index[source.info.id_hash] = output_mappings.output_sources.size();
+      output_mappings.output_sources.push_back(std::move(mapping));
+      output_sources.push_back(&module.output_sources[os]);
+    }
   }
 
   // link midi sources <-> regular params
@@ -117,6 +140,7 @@ plugin(plugin), config(config)
 
   param_count = param_global;
   midi_count = midi_source_global;
+  output_count = output_source_global;
   module_count = modules.size();
 }
 

@@ -29,6 +29,15 @@ struct midi_mapping final {
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(midi_mapping);
 };
 
+// mapping plugin level output source index
+struct output_mapping final {
+  int output_local = {};
+  int output_global = {};
+  int module_global = {};
+  output_topo_mapping topo = {};
+  PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(output_mapping);
+};
+
 // mapping plugin level parameter index
 struct param_mapping final {
   int param_local = {};
@@ -49,6 +58,18 @@ struct plugin_midi_mappings final {
 
   void validate(plugin_desc const& plugin) const;
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(plugin_midi_mappings);
+};
+
+// mapping to/from global dsp output source info
+struct plugin_output_mappings final {
+  std::vector<int> index_to_tag = {};
+  std::map<int, int> id_to_index = {};
+  std::map<int, int> tag_to_index = {};
+  std::vector<output_mapping> output_sources = {};
+  std::vector<std::vector<std::vector<int>>> topo_to_index = {};
+
+  void validate(plugin_desc const& plugin) const;
+  PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(plugin_output_mappings);
 };
 
 // mapping to/from global parameter info
@@ -74,6 +95,7 @@ private:
 public:
   int midi_count = {};
   int param_count = {};
+  int output_count = {};
   int module_count = {};
   int module_voice_start = {};
   int module_output_start = {};
@@ -83,9 +105,11 @@ public:
   std::vector<module_desc> modules = {};
   plugin_midi_mappings midi_mappings = {};
   plugin_param_mappings param_mappings = {};
+  plugin_output_mappings output_mappings = {};
   std::vector<param_desc const*> params = {};
   std::map<int, int> module_topo_to_index = {};
   std::vector<midi_desc const*> midi_sources = {};
+  std::vector<output_desc const*> output_sources = {};
   std::map<std::string, int> module_id_to_index = {};
 
   void validate() const;
