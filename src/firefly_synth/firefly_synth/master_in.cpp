@@ -108,6 +108,7 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
     make_param_gui(section_aux, gui_edit_type::knob, param_layout::single_grid, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   aux.info.description = "Auxilliary controls to be used through automation and the CV matrices.";
+  aux.gui.alternate_drag_output_id = result.dsp.outputs[output_aux].info.tag.id;
   aux.gui.display_formatter = [is_fx](auto const& desc) { return (desc.info.slot == 0 || (!is_fx && desc.info.slot == 3))? desc.info.name: std::to_string(desc.info.slot + 1); };
 
   auto auto_smooth_gui = make_param_section_gui({ 0, 1, 2, 1 }, gui_dimension({ 1, 1 }, { { 1 } }), gui_label_edit_cell_split::vertical);
@@ -150,12 +151,14 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
     make_param_gui_single(section_linked, gui_edit_type::knob, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   mod_wheel.info.description = "Linked to MIDI mod wheel, updates on incoming MIDI events.";
+  mod_wheel.gui.alternate_drag_output_id = result.dsp.outputs[output_mod].info.tag.id;
   auto& pitch_bend = result.params.emplace_back(make_param(
     make_topo_info("{D1B334A6-FA2F-4AE4-97A0-A28DD0C1B48D}", true, "Pitch Bend", "PB", "PB", param_pb, 1),
     make_param_dsp_midi({ module_midi, 0, midi_source_pb }), make_domain_percentage(-1, 1, 0, 0, true),
     make_param_gui_single(section_linked, gui_edit_type::knob, { is_fx? 0: 1, is_fx? 1: 0 },
     make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   pitch_bend.info.description = "Linked to MIDI pitch bend, updates on incoming MIDI events.";
+  pitch_bend.gui.alternate_drag_output_id = result.dsp.outputs[output_pb].info.tag.id;
 
   if(is_fx) return result;
 

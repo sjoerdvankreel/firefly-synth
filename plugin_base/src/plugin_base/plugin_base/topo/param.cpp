@@ -87,6 +87,7 @@ param_topo::validate(plugin_topo const& plugin, module_topo const& module, int i
   assert(dsp.direction == param_direction::input || !gui.bindings.global_enabled.is_bound());
   assert(gui.edit_type != gui_edit_type::toggle || domain.type == domain_type::toggle);
   assert(dsp.direction != param_direction::output || module.dsp.stage == module_stage::output);
+  assert(gui.alternate_drag_output_id.size() == 0 || gui.alternate_drag_param_id.size() == 0);
 
   if (gui.layout == param_layout::single_grid)
   {
@@ -109,6 +110,21 @@ param_topo::validate(plugin_topo const& plugin, module_topo const& module, int i
       {
         found = true;
         assert(!module.params[i].dsp.can_modulate(module.info.slot_count));
+        break;
+      }
+    assert(found);
+  }
+
+  // if we are, wrt to gui dragging, proxy for a module output, make
+  // sure it exists and slot count is equal to our parameter count
+  if (gui.alternate_drag_output_id.size())
+  {
+    bool found = false;
+    for(int i = 0; i < module.dsp.outputs.size(); i++)
+      if (module.dsp.outputs[i].info.tag.id == gui.alternate_drag_output_id)
+      {
+        found = true;
+        assert(module.dsp.outputs[i].info.slot_count == info.slot_count);
         break;
       }
     assert(found);
