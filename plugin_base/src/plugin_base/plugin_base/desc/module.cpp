@@ -20,8 +20,8 @@ module_desc(
   int param_local = 0;
   for(int p = 0; p < module_.params.size(); p++)
     for(int i = 0; i < module_.params[p].info.slot_count; i++)
-      params.emplace_back(param_desc(module_, slot, 
-        module_.params[p], p, i, param_local++, param_global_start++));
+      params.emplace_back(param_desc(module_, slot, module_.params[p],
+        p, i, param_local++, param_global_start++));
 
   int midi_local = 0;
   for(int ms = 0; ms < module_.midi_sources.size(); ms++)
@@ -30,8 +30,9 @@ module_desc(
 
   int output_local = 0;
   for (int os = 0; os < module_.dsp.outputs.size(); os++)
-    output_sources.emplace_back(output_desc(module_, slot, module_.dsp.outputs[os],
-      os, output_local++, output_source_global_start++));
+    for (int i = 0; i < module_.dsp.outputs[os].info.slot_count; i++)
+      output_sources.emplace_back(output_desc(module_, slot, module_.dsp.outputs[os],
+        os, i, output_local++, output_source_global_start++));
 }
 
 void

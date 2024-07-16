@@ -867,13 +867,25 @@ plugin_gui::make_param_label(module_desc const& module, param_desc const& param,
     assert(alternate_drag_param != nullptr);
   }
 
+  output_desc const* alternate_drag_output = nullptr;
+  if (param.param->gui.alternate_drag_output_id.size())
+  {
+    assert(contents == gui_label_contents::name);
+    for (int i = 0; i < module.output_sources.size(); i++)
+      if (module.output_sources[i].source->info.tag.id == param.param->gui.alternate_drag_output_id)
+        alternate_drag_output = &module.output_sources[i];
+    assert(alternate_drag_output != nullptr);
+  }
+
+  assert(alternate_drag_param == nullptr || alternate_drag_output == nullptr);
+
   Component* result = {};
   Label* label_result = {};
   switch (contents)
   {
   case gui_label_contents::name:
     label_result = &make_component<param_name_label>(this, &module, &param,
-      alternate_drag_param, _module_lnfs[module.module->info.index].get());
+      alternate_drag_param, alternate_drag_output, _module_lnfs[module.module->info.index].get());
     label_result->setJustificationType(justification_type(param.param->gui.label));
     result = label_result;
     break;

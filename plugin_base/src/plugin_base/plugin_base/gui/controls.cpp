@@ -11,37 +11,42 @@ namespace plugin_base {
 
 static bool
 is_enabled_mod_source(
-  Component const& component, module_desc const* module, 
-  param_desc const* param, param_desc const* alternate_drag_param)
+  Component const& component, module_desc const* module, param_desc const* param, 
+  param_desc const* alternate_drag_param, output_desc const* alternate_drag_output)
 {
   param_desc const* drag_param = alternate_drag_param != nullptr ? alternate_drag_param : param;
   if (!component.isEnabled()) return false;
+  if (alternate_drag_output != nullptr) return true; // explicitly specified, could be anything
   if (!drag_param->param->dsp.can_modulate(module->info.slot)) return false;
   return true;
 }
 
 static MouseCursor
 drag_source_cursor(
-  Component const& component, module_desc const* module, 
-  param_desc const* param, param_desc const* alternate_drag_param, MouseCursor base_cursor)
+  Component const& component, module_desc const* module, param_desc const* param, 
+  param_desc const* alternate_drag_param, output_desc const* alternate_drag_output, MouseCursor base_cursor)
 {
-  if (!is_enabled_mod_source(component, module, param, alternate_drag_param)) return base_cursor;
+  if (!is_enabled_mod_source(component, module, param, alternate_drag_param, alternate_drag_output)) return base_cursor;
   return MouseCursor::DraggingHandCursor;
 }
 
 static void
 drag_source_start_drag(
   Component& component, Font const& font, Colour color, module_desc const* module, 
-  param_desc const* param, param_desc const* alternate_drag_param)
+  param_desc const* param, param_desc const* alternate_drag_param, output_desc const* alternate_drag_output)
 {
-  param_desc const* drag_param = alternate_drag_param != nullptr ? alternate_drag_param : param;
-  if (!is_enabled_mod_source(component, module, param, alternate_drag_param)) return;
+  assert(alternate_drag_param == nullptr || alternate_drag_output == nullptr);
+  topo_desc_info const* drag_source_info = &param->info;
+  if (alternate_drag_param != nullptr) drag_source_info = &alternate_drag_param->info;
+  if (alternate_drag_output != nullptr) drag_source_info = &alternate_drag_output->info;
+
+  if (!is_enabled_mod_source(component, module, param, alternate_drag_param, alternate_drag_output)) return;
   auto* container = DragAndDropContainer::findParentDragContainerFor(&component);
   if (container == nullptr) return;
   if (container->isDragAndDropActive()) return;
-  ScaledImage drag_image = make_drag_source_image(font, drag_param->info.name, color);
+  ScaledImage drag_image = make_drag_source_image(font, drag_source_info->name, color);
   Point<int> offset(drag_image.getImage().getWidth() / 2 + 10, drag_image.getImage().getHeight() / 2 + 10);
-  container->startDragging(juce::String(drag_param->info.id), &component, drag_image, false, &offset);
+  container->startDragging(juce::String(drag_source_info->id), &component, drag_image, false, &offset);
 }
 
 static void
@@ -146,11 +151,14 @@ _lnf(lnf), _param(param)
 
 MouseCursor 
 param_drag_label::getMouseCursor()
-{ return drag_source_cursor(*this, _module, _param, nullptr, Component::getMouseCursor()); }
+{ return drag_source_cursor(*this, _module, _param, nullptr, nullptr, Component::getMouseCursor()); }
 
 void 
 param_drag_label::mouseDrag(juce::MouseEvent const& e)
-{ drag_source_start_drag(*this, _lnf->font(), _lnf->colors().bubble_outline, _module, _param, nullptr); }
+{ 
+  drag_source_start_drag(*this, _lnf->font(), _lnf->colors().bubble_outline, 
+    _module, _param, nullptr, nullptr); 
+}
 
 void
 param_drag_label::paint(Graphics& g)
@@ -174,10 +182,14 @@ param_name_label::label_ref_text(param_desc const* param)
 }
 
 param_name_label::
-param_name_label(plugin_gui* gui, module_desc const* module, param_desc const* param, param_desc const* alternate_drag_param, lnf* lnf):
+param_name_label(
+  plugin_gui* gui, module_desc const* module, param_desc const* param, 
+  param_desc const* alternate_drag_param, output_desc const* alternate_drag_output, lnf* lnf):
 binding_component(gui, module, &param->param->gui.bindings, param->info.slot),
 autofit_label(lnf, label_ref_text(param)),
-_param(param), _alternate_drag_param(alternate_drag_param)
+_param(param), 
+_alternate_drag_param(alternate_drag_param),
+_alternate_drag_output(alternate_drag_output)
 {
   std::string name = param_slot_name(param);
   setText(name, juce::dontSendNotification); 
@@ -186,13 +198,17 @@ _param(param), _alternate_drag_param(alternate_drag_param)
 
 MouseCursor 
 param_name_label::getMouseCursor()
-{ return drag_source_cursor(*this, _module, _param, _alternate_drag_param, Component::getMouseCursor()); }
+{ 
+  return drag_source_cursor(*this, _module, _param, _alternate_drag_param, 
+    _alternate_drag_output, Component::getMouseCursor()); 
+}
 
 void 
 param_name_label::mouseDrag(juce::MouseEvent const& e)
 { 
   auto& lnf_ = dynamic_cast<plugin_base::lnf&>(getLookAndFeel());
-  drag_source_start_drag(*this, lnf_.font(), lnf_.colors().bubble_outline, _module, _param, _alternate_drag_param);
+  drag_source_start_drag(*this, lnf_.font(), lnf_.colors().bubble_outline, 
+    _module, _param, _alternate_drag_param, _alternate_drag_output);
 }
 
 std::string
@@ -221,13 +237,13 @@ param_value_label::own_param_changed(plain_value plain)
 
 MouseCursor 
 param_value_label::getMouseCursor()
-{ return drag_source_cursor(*this, _module, _param, nullptr, Component::getMouseCursor()); }
+{ return drag_source_cursor(*this, _module, _param, nullptr, nullptr, Component::getMouseCursor()); }
 
 void 
 param_value_label::mouseDrag(juce::MouseEvent const& e)
 { 
   auto& lnf_ = dynamic_cast<plugin_base::lnf&>(getLookAndFeel());
-  drag_source_start_drag(*this, lnf_.font(), lnf_.colors().bubble_outline, _module, _param, nullptr);
+  drag_source_start_drag(*this, lnf_.font(), lnf_.colors().bubble_outline, _module, _param, nullptr, nullptr);
 }
 
 last_tweaked_label::

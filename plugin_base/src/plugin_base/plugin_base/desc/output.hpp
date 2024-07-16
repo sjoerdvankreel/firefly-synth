@@ -13,7 +13,7 @@ struct module_desc;
 // runtime output source descriptor
 struct output_desc final {
   int local = {};
-  desc_info info = {};
+  topo_desc_info info = {};
   std::string full_name = {};
   module_dsp_output const* source = {};
 
@@ -22,7 +22,7 @@ struct output_desc final {
 
   output_desc(
     module_topo const& module_, int module_slot,
-    module_dsp_output const& source_, int topo, int local_, int global);
+    module_dsp_output const& source_, int topo, int slot, int local_, int global);
 };
 
 }

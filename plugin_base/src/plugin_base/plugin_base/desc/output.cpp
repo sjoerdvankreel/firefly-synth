@@ -9,10 +9,11 @@ namespace plugin_base {
 output_desc::
 output_desc(
   module_topo const& module_, int module_slot,
-  module_dsp_output const& source_, int topo, int local_, int global)
+  module_dsp_output const& source_, int topo, int slot, int local_, int global)
 {
   local = local_;
   source = &source_;
+  info.slot = slot;
   info.topo = topo;
   info.global = global;
   info.name = source_.info.tag.display_name;
@@ -28,7 +29,7 @@ output_desc::validate(module_desc const& module, int index) const
   assert(local == index);
   assert(info.topo == index);
   assert(info.name.size() < full_name.size());
-  info.validate(module.output_sources.size());
+  info.validate(module.output_sources.size(), source->info.slot_count);
 }
 
 }

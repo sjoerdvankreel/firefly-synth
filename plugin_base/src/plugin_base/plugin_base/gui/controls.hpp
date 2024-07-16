@@ -217,11 +217,14 @@ public autofit_label
 {
   param_desc const* const _param;
   param_desc const* const _alternate_drag_param;
+  output_desc const* const _alternate_drag_output;
   static std::string label_ref_text(param_desc const* param);
 public:
   juce::MouseCursor getMouseCursor() override;
   void mouseDrag(juce::MouseEvent const& e) override;
-  param_name_label(plugin_gui* gui, module_desc const* module, param_desc const* param, param_desc const* alternate_drag_param, lnf* lnf);
+  param_name_label(
+    plugin_gui* gui, module_desc const* module, param_desc const* param, 
+    param_desc const* alternate_drag_param, output_desc const* alternate_drag_output, lnf* lnf);
 };
 
 // dynamic parameter value display + d&d support
