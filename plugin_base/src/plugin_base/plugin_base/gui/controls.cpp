@@ -723,8 +723,12 @@ param_combobox::itemDropped(DragAndDropTarget::SourceDetails const& details)
 
   if (tag != -1)
   {
+    _gui->gui_state()->begin_undo_region();
+
     // found corresponding drop target, select it
-    setSelectedId(tag);
+    // dont do setSelectedId -- that triggers async update and gets us 2 items in the undo history
+    _gui->gui_state()->set_plain_at_index(_param->info.global,
+      _param->param->domain.raw_to_plain(tag - 1));
 
     // now figure out the matrix route enabled selector, and if its 0, set it to 1
     auto enabled_id = _param->param->gui.drop_route_enabled_param_id;
@@ -740,7 +744,10 @@ param_combobox::itemDropped(DragAndDropTarget::SourceDetails const& details)
         if (_gui->gui_state()->get_plain_at(m, mi, p, pi).step() == 0)
           _gui->gui_state()->set_plain_at(m, mi, p, pi,
             _module->module->params[i].domain.raw_to_plain(_param->param->gui.drop_route_enabled_param_value));
+        
         itemDragExit(details);
+        _gui->gui_state()->end_undo_region("Drop", details.description.toString().toStdString());
+
         return;
       }
     assert(false);
