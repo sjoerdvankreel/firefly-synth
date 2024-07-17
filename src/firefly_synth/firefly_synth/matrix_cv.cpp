@@ -422,11 +422,6 @@ cv_matrix_topo(
   type.gui.tabular = true;
   type.gui.menu_handler_factory = [route_count](plugin_state* state) { 
     return make_matrix_param_menu_handler(state, 1, 0, route_count, type_mul_abs); };
-  type.gui.submenu = std::make_shared<gui_submenu>();
-  type.gui.submenu->indices.push_back(type_off);
-  type.gui.submenu->add_submenu("Mul", { type_mul_abs, type_mul_rel, type_mul_stk });
-  type.gui.submenu->add_submenu("Add", { type_add_abs, type_add_rel, type_add_stk });
-  type.gui.submenu->add_submenu("Add Bipolar", { type_ab_abs, type_ab_rel, type_ab_stk });
   type.info.description = std::string("Selects operation and stacking mode.<br/>") +
     "Add: add source signal to target parameter.<br/>" + 
     "Mul: multiply target parameter by source signal.<br/>" +
