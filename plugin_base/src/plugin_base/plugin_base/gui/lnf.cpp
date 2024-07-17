@@ -621,8 +621,8 @@ lnf::drawComboBox(Graphics& g, int width, int height, bool, int, int, int, int, 
   if (!param_cb || drop_action == drop_target_action::none) return;
 
   char const* drop_icon = nullptr;
-  if (drop_action == drop_target_action::ok) drop_icon = "[+]";
-  else if (drop_action == drop_target_action::not_now) drop_icon = "[!]";
+  if (drop_action == drop_target_action::ok) drop_icon = "[OK]";
+  else if (drop_action == drop_target_action::not_now) drop_icon = "[X]";
   else if (drop_action == drop_target_action::never) drop_icon = "[N/A]";
   else assert(false);
 
