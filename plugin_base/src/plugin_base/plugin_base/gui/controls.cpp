@@ -721,37 +721,35 @@ param_combobox::itemDropped(DragAndDropTarget::SourceDetails const& details)
     return;
   }
 
-  if (tag != -1)
-  {
-    _gui->gui_state()->begin_undo_region();
+  int item_index = tag - 1;
+  _gui->gui_state()->begin_undo_region();
 
-    // found corresponding drop target, select it
-    // dont do setSelectedId -- that triggers async update and gets us 2 items in the undo history
-    _gui->gui_state()->set_plain_at_index(_param->info.global,
-      _param->param->domain.raw_to_plain(tag - 1));
+  // found corresponding drop target, select it
+  // dont do setSelectedId -- that triggers async update and gets us 2 items in the undo history
+  _gui->gui_state()->set_plain_at_index(_param->info.global,
+    _param->param->domain.raw_to_plain(item_index));
 
-    // now figure out the matrix route enabled selector, and if its 0, set it to 1
-    auto enabled_id = _param->param->gui.drop_route_enabled_param_id;
-    assert(enabled_id.size());
-    for (int i = 0; i < _module->module->params.size(); i++)
-      if(_module->module->params[i].info.tag.id == enabled_id)
-      {
-        assert(_module->module->params[i].info.slot_count == _param->param->info.slot_count);
-        int m = _module->module->info.index;
-        int mi = _module->info.slot;
-        int p = _module->module->params[i].info.index;
-        int pi = _param->info.slot;
-        if (_gui->gui_state()->get_plain_at(m, mi, p, pi).step() == 0)
-          _gui->gui_state()->set_plain_at(m, mi, p, pi,
-            _module->module->params[i].domain.raw_to_plain(_param->param->gui.drop_route_enabled_param_value));
-        
-        itemDragExit(details);
-        _gui->gui_state()->end_undo_region("Drop", details.description.toString().toStdString());
-
-        return;
-      }
-    assert(false);
-  }
+  // now figure out the matrix route enabled selector, and if its 0, set it to 1
+  auto enabled_id = _param->param->gui.drop_route_enabled_param_id;
+  assert(enabled_id.size());
+  for (int i = 0; i < _module->module->params.size(); i++)
+    if(_module->module->params[i].info.tag.id == enabled_id)
+    {
+      assert(_module->module->params[i].info.slot_count == _param->param->info.slot_count);
+      int m = _module->module->info.index;
+      int mi = _module->info.slot;
+      int p = _module->module->params[i].info.index;
+      int pi = _param->info.slot;
+      if (_gui->gui_state()->get_plain_at(m, mi, p, pi).step() == 0)
+        _gui->gui_state()->set_plain_at(m, mi, p, pi,
+          _module->module->params[i].domain.raw_to_plain(_param->param->gui.drop_route_enabled_param_value));
+      
+      itemDragExit(details);
+      _gui->gui_state()->end_undo_region("Drop", _gui->gui_state()->plain_to_text_at_index(
+        false, _param->info.global, _gui->gui_state()->get_plain_at_index(_param->info.global)));
+       return;
+    }
+  assert(false);
 }
 
 bool 
