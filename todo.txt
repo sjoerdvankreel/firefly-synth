@@ -16,23 +16,6 @@ on release:
 10 make a github release
 11 update kvr
 
-1.8.3 drag-drop
-v allow drag with alternate param (ie basic sine amt) -> link param to other param
-v also do param_value_label
-v hover over matrix tab = select it
-v allow drag f.e. dist skewx 
-v better paint what is being dragged (see eg osc 1)
-v drag the module headers if they have audio/cv outs
-v osc src/tgt is ugly
-V the order is still wrong (drag vfx6 as audio target)
-V cannot drag voice out/mout
-V do validation
-V drag aux1 = drag cv signal, not the button
-V drag all matrices -> check all sources and targets in the matrices
-V enable a route when drop onto it
-V filter out invalid combis eg glfo1 to glfo1 rate
-* update the docs
-
 wishlist:
 DSF falloff to the left
 clap polyphonic modulation
