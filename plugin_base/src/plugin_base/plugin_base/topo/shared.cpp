@@ -178,7 +178,7 @@ gui_dimension::validate(
       if (children[i].row != 0) continue;
       assert(children[i].column_span == 1);
       if(validation_taken.insert(std::make_pair(children[i].row, children[i].column)).second)
-        if(label_contents[i] == gui_label_contents::none)
+        if(label_contents[i] == gui_label_contents::none || label_contents[i] == gui_label_contents::no_drag)
           split_column_sizes.insert(split_column_sizes.end(), 1);
         else
           split_column_sizes.insert(split_column_sizes.end(), { 1, 1 });
@@ -192,7 +192,7 @@ gui_dimension::validate(
       if (children[i].column != 0) continue;
       assert(children[i].row_span == 1);
       if (validation_taken.insert(std::make_pair(children[i].row, children[i].column)).second)
-        if (label_contents[i] == gui_label_contents::none)
+        if (label_contents[i] == gui_label_contents::none || label_contents[i] == gui_label_contents::no_drag)
           split_row_sizes.insert(split_row_sizes.end(), 1);
         else
           split_row_sizes.insert(split_row_sizes.end(), { 1, 1 });
@@ -210,7 +210,7 @@ gui_dimension::validate(
       for (int r = pos.row; r < pos.row + pos.row_span; r++)
         for (int c = pos.column; c < pos.column + pos.column_span; c++)
           PB_ASSERT_EXEC(gui_taken.insert(std::make_pair(r, c)).second || !always_visible(k));
-    else if (label_contents[k] == gui_label_contents::none)
+    else if (label_contents[k] == gui_label_contents::none || label_contents[k] == gui_label_contents::no_drag)
       PB_ASSERT_EXEC(gui_taken.insert(std::make_pair(pos.row, pos.column)).second || !always_visible(k));
     else if(cell_split == gui_label_edit_cell_split::horizontal)
     {

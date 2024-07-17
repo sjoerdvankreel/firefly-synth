@@ -730,7 +730,8 @@ Component&
 plugin_gui::make_single_param(module_desc const& module, param_desc const& param)
 {
   Component* result = nullptr;
-  if (param.param->gui.label.contents == gui_label_contents::none)
+  auto contents = param.param->gui.label.contents;
+  if (contents == gui_label_contents::none || contents == gui_label_contents::no_drag)
     result = &make_param_editor(module, param);
   else
     result = &make_param_label_edit(module, param);
@@ -798,7 +799,8 @@ plugin_gui::make_param_section(module_desc const& module, param_section const& s
       else
       {
         assert(iter->param->info.slot_count == 1);
-        if (iter->param->gui.label.contents == gui_label_contents::none)
+        auto contents = iter->param->gui.label.contents;
+        if (contents == gui_label_contents::none || contents == gui_label_contents::no_drag)
           grid.add(make_param_editor(module, *iter), iter->param->gui.position);
         else if (section.gui.cell_split == gui_label_edit_cell_split::horizontal)
         {
