@@ -616,6 +616,7 @@ autofit_combobox(lnf, param->param->gui.edit_type == gui_edit_type::autofit_list
   addListener(this);
   setEditableText(false);
   init();
+  update_all_items_enabled_state();
 }
 
 void 
@@ -627,7 +628,7 @@ param_combobox::own_param_changed(plain_value plain)
 }
 
 void 
-param_combobox::showPopup()
+param_combobox::update_all_items_enabled_state()
 {
   auto const& items = _param->param->domain.items;
   for (int i = 0; i < items.size(); i++)
@@ -681,6 +682,12 @@ param_combobox::showPopup()
       setItemEnabled(i + 1, isItemEnabled(i + 1) && enabled);
     }
   }
+}
+
+void
+param_combobox::showPopup()
+{
+  update_all_items_enabled_state();
   ComboBox::showPopup();
 }
 
@@ -705,8 +712,10 @@ param_combobox::itemDragExit(DragAndDropTarget::SourceDetails const& details)
 void
 param_combobox::itemDragEnter(DragAndDropTarget::SourceDetails const& details)
 {
+  update_all_items_enabled_state();
   std::string source_id = details.description.toString().toStdString();
-  _drop_target_action = get_item_tag(source_id) != -1 ? drop_target_action::allow : drop_target_action::deny;
+  int item_tag = get_item_tag(source_id);
+  _drop_target_action = item_tag != -1 && isItemEnabled(item_tag) ? drop_target_action::allow : drop_target_action::deny;
   resized(); // needed to trigger positionComboBoxText
   repaint();
 }

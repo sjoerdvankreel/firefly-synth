@@ -305,6 +305,8 @@ public juce::ComboBox::Listener
   drop_target_action _drop_target_action = drop_target_action::none;
   int get_item_tag(std::string const& item_id) const;
 
+  void update_all_items_enabled_state();
+
 protected:
   void own_param_changed(plain_value plain) override final;
 
