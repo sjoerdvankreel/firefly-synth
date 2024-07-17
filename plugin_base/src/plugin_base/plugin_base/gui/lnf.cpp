@@ -28,7 +28,7 @@ get_combobox_mod_target_indicator_width(ComboBox const& box, Font const& font)
   if (param_cb == nullptr) return 0;
   auto drop_action = param_cb->get_drop_target_action();
   if (drop_action == drop_target_action::none) return 0;
-  return font.getStringWidth("Apply") + 2;
+  return font.getStringWidth("[N/A]") + 2;
 }
 
 static void 
@@ -620,7 +620,12 @@ lnf::drawComboBox(Graphics& g, int width, int height, bool, int, int, int, int, 
 
   if (!param_cb || drop_action == drop_target_action::none) return;
 
-  char const* drop_icon = drop_action == drop_target_action::allow ? "Apply" : "N/A";
+  char const* drop_icon = nullptr;
+  if (drop_action == drop_target_action::ok) drop_icon = "[+]";
+  else if (drop_action == drop_target_action::not_now) drop_icon = "[!]";
+  else if (drop_action == drop_target_action::never) drop_icon = "[N/A]";
+  else assert(false);
+
   auto apply_mod_box = Rectangle<int>(
     boxBounds.getTopRight().x + 2,
     boxBounds.getTopLeft().y,

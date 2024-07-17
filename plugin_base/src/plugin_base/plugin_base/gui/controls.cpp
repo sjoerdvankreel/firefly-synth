@@ -715,7 +715,8 @@ param_combobox::itemDragEnter(DragAndDropTarget::SourceDetails const& details)
   update_all_items_enabled_state();
   std::string source_id = details.description.toString().toStdString();
   int item_tag = get_item_tag(source_id);
-  _drop_target_action = item_tag != -1 && isItemEnabled(item_tag) ? drop_target_action::allow : drop_target_action::deny;
+  if (item_tag == -1) _drop_target_action = drop_target_action::never;
+  else _drop_target_action = isItemEnabled(item_tag) ? drop_target_action::ok : drop_target_action::not_now;
   resized(); // needed to trigger positionComboBoxText
   repaint();
 }
@@ -724,7 +725,7 @@ void
 param_combobox::itemDropped(DragAndDropTarget::SourceDetails const& details)
 {
   int tag = get_item_tag(details.description.toString().toStdString());
-  if (tag == -1)
+  if (tag == -1 || !isItemEnabled(tag))
   {
     itemDragExit(details);
     return;

@@ -292,7 +292,7 @@ public:
   { return juce::String(_param->info.name + ": ") + juce::Slider::getTextFromValue(value * (_param->param->domain.display == domain_display::percentage ? 100 : 1)); }
 };
 
-enum class drop_target_action { none, allow, deny };
+enum class drop_target_action { none, never, not_now, ok };
 
 // dropdown bound to single parameter
 // NOTE: we only support drag-drop onto combos for now
