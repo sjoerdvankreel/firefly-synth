@@ -34,7 +34,11 @@ void
 print_topo_stats(
   plugin_topo const& topo)
 {
+  int midi_count = 0;
   int total_mod_count = 0;
+  int total_cv_out_count = 0;
+  int total_audio_out_count = 0;
+
   int total_param_count = 0;
   int total_block_param_count = 0;
   int total_accurate_param_count = 0;
@@ -42,6 +46,9 @@ print_topo_stats(
   int total_voice_accurate_param_count = 0;
 
   int unique_mod_count = 0;
+  int unique_cv_out_count = 0;
+  int unique_audio_out_count = 0;
+
   int unique_param_count = 0;
   int unique_block_param_count = 0;
   int unique_accurate_param_count = 0;
@@ -53,6 +60,19 @@ print_topo_stats(
     auto const& module = topo.modules[m];
     unique_mod_count++;
     total_mod_count += topo.modules[m].info.slot_count;
+
+    midi_count +=  module.midi_sources.size();
+    for (int o = 0; o < module.dsp.outputs.size(); o++)
+      if (module.dsp.output == module_output::cv)
+      {
+        unique_cv_out_count++;
+        total_cv_out_count += module.dsp.outputs[o].info.slot_count;
+      } else if (module.dsp.output == module_output::audio)
+      {
+        unique_audio_out_count++;
+        total_audio_out_count += module.dsp.outputs[o].info.slot_count;
+      }
+
     for (int p = 0; p < module.params.size(); p++)
     {
       auto const& param = module.params[p];
@@ -71,6 +91,11 @@ print_topo_stats(
 
   std::cout << "Total modules: " << total_mod_count << ".\n";
   std::cout << "Unique modules: " << unique_mod_count << ".\n";
+  std::cout << "Midi sources: " << midi_count << ".\n";
+  std::cout << "Total cv outputs: " << total_cv_out_count << ".\n";
+  std::cout << "Unique cv outputs: " << unique_cv_out_count << ".\n";
+  std::cout << "Total audio outputs: " << total_audio_out_count << ".\n";
+  std::cout << "Unique audio outputs: " << unique_audio_out_count << ".\n";
   std::cout << "Total params: " << total_param_count << ".\n";
   std::cout << "Unique params: " << unique_param_count << ".\n";
   std::cout << "Total block params: " << total_block_param_count << ".\n";
