@@ -25,7 +25,7 @@ When dragging, the following indicators show whether the dragged item can be dro
 - No indicator means nothing can be dropped here
 - [N/A] means the dragged item can never be dropped here
 - [OK] means the dragged item can be dropped here. Release the mouse to apply.
-- [X] means the dragged item can not currently be dropped here because it would result in invalid routing.
+- [ X] means the dragged item can not currently be dropped here because it would result in invalid routing.
 
 ## Theming
 
