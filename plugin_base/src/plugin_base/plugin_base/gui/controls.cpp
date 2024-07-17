@@ -9,6 +9,46 @@ using namespace juce;
 
 namespace plugin_base {
 
+static bool
+is_enabled_mod_source(
+  Component const& component, module_desc const* module, param_desc const* param, 
+  param_desc const* alternate_drag_param, output_desc const* alternate_drag_output)
+{
+  param_desc const* drag_param = alternate_drag_param != nullptr ? alternate_drag_param : param;
+  if (!component.isEnabled()) return false;
+  if (alternate_drag_output != nullptr) return true; // explicitly specified, could be anything
+  if (!drag_param->param->dsp.can_modulate(module->info.slot)) return false;
+  return true;
+}
+
+static MouseCursor
+drag_source_cursor(
+  Component const& component, module_desc const* module, param_desc const* param, 
+  param_desc const* alternate_drag_param, output_desc const* alternate_drag_output, MouseCursor base_cursor)
+{
+  if (!is_enabled_mod_source(component, module, param, alternate_drag_param, alternate_drag_output)) return base_cursor;
+  return MouseCursor::DraggingHandCursor;
+}
+
+static void
+drag_source_start_drag(
+  Component& component, Font const& font, Colour color, module_desc const* module, 
+  param_desc const* param, param_desc const* alternate_drag_param, output_desc const* alternate_drag_output)
+{
+  assert(alternate_drag_param == nullptr || alternate_drag_output == nullptr);
+  topo_desc_info const* drag_source_info = &param->info;
+  if (alternate_drag_param != nullptr) drag_source_info = &alternate_drag_param->info;
+  if (alternate_drag_output != nullptr) drag_source_info = &alternate_drag_output->info;
+
+  if (!is_enabled_mod_source(component, module, param, alternate_drag_param, alternate_drag_output)) return;
+  auto* container = DragAndDropContainer::findParentDragContainerFor(&component);
+  if (container == nullptr) return;
+  if (container->isDragAndDropActive()) return;
+  ScaledImage drag_image = make_drag_source_image(font, drag_source_info->name, color);
+  Point<int> offset(drag_image.getImage().getWidth() / 2 + 10, drag_image.getImage().getHeight() / 2 + 10);
+  container->startDragging(juce::String(drag_source_info->id), &component, drag_image, false, &offset);
+}
+
 static void
 fill_popup_menu(param_domain const& domain, PopupMenu& menu, gui_submenu const* data, Colour const& subheader_color)
 {
@@ -103,6 +143,37 @@ param_slot_name(param_desc const* param)
   return result;
 }
 
+param_drag_label::
+param_drag_label(plugin_gui* gui, module_desc const* module, param_desc const* param, lnf* lnf) :
+binding_component(gui, module, &param->param->gui.bindings, param->info.slot),
+_lnf(lnf), _param(param)
+{ init(); }
+
+MouseCursor 
+param_drag_label::getMouseCursor()
+{ return drag_source_cursor(*this, _module, _param, nullptr, nullptr, Component::getMouseCursor()); }
+
+void 
+param_drag_label::mouseDrag(juce::MouseEvent const& e)
+{ 
+  drag_source_start_drag(*this, _lnf->font(), _lnf->colors().bubble_outline, 
+    _module, _param, nullptr, nullptr); 
+}
+
+void
+param_drag_label::paint(Graphics& g)
+{
+  float w = getWidth();
+  float h = getHeight();
+  float x = (w - _size) / 2.0f;
+  float y = (h - _size) / 2.0f;
+  if(isEnabled())
+    g.setColour(_lnf->colors().control_text);
+  else
+    g.setColour(_lnf->colors().control_text.darker(0.67f));
+  g.fillEllipse(x, y, _size, _size);
+}
+
 std::string 
 param_name_label::label_ref_text(param_desc const* param)
 {
@@ -111,13 +182,68 @@ param_name_label::label_ref_text(param_desc const* param)
 }
 
 param_name_label::
-param_name_label(plugin_gui* gui, module_desc const* module, param_desc const* param, lnf* lnf):
+param_name_label(
+  plugin_gui* gui, module_desc const* module, param_desc const* param, 
+  param_desc const* alternate_drag_param, output_desc const* alternate_drag_output, lnf* lnf):
 binding_component(gui, module, &param->param->gui.bindings, param->info.slot),
-autofit_label(lnf, label_ref_text(param)), _param(param)
+autofit_label(lnf, label_ref_text(param)),
+_param(param), 
+_alternate_drag_param(alternate_drag_param),
+_alternate_drag_output(alternate_drag_output)
 {
   std::string name = param_slot_name(param);
   setText(name, juce::dontSendNotification); 
   init();
+}
+
+MouseCursor 
+param_name_label::getMouseCursor()
+{ 
+  return drag_source_cursor(*this, _module, _param, _alternate_drag_param, 
+    _alternate_drag_output, Component::getMouseCursor()); 
+}
+
+void 
+param_name_label::mouseDrag(juce::MouseEvent const& e)
+{ 
+  auto& lnf_ = dynamic_cast<plugin_base::lnf&>(getLookAndFeel());
+  drag_source_start_drag(*this, lnf_.font(), lnf_.colors().bubble_outline, 
+    _module, _param, _alternate_drag_param, _alternate_drag_output);
+}
+
+std::string
+param_value_label::value_ref_text(plugin_gui* gui, param_desc const* param)
+{
+  auto const& ref_text = param->param->gui.value_reference_text;
+  if (ref_text.size()) return ref_text;
+  auto plain = param->param->domain.raw_to_plain(param->param->domain.max);
+  return gui->gui_state()->plain_to_text_at_index(false, param->info.global, plain);
+}
+
+// Just guess max value is representative of the longest text.
+param_value_label::
+param_value_label(plugin_gui* gui, module_desc const* module, param_desc const* param, lnf* lnf) :
+param_component(gui, module, param), 
+autofit_label(lnf, value_ref_text(gui, param))
+{ init(); }
+
+void
+param_value_label::own_param_changed(plain_value plain)
+{ 
+  std::string text = _gui->gui_state()->plain_to_text_at_index(false, _param->info.global, plain);
+  setText(text, dontSendNotification); 
+  setTooltip(_param->info.name + ": " + text);
+}
+
+MouseCursor 
+param_value_label::getMouseCursor()
+{ return drag_source_cursor(*this, _module, _param, nullptr, nullptr, Component::getMouseCursor()); }
+
+void 
+param_value_label::mouseDrag(juce::MouseEvent const& e)
+{ 
+  auto& lnf_ = dynamic_cast<plugin_base::lnf&>(getLookAndFeel());
+  drag_source_start_drag(*this, lnf_.font(), lnf_.colors().bubble_outline, _module, _param, nullptr, nullptr);
 }
 
 last_tweaked_label::
@@ -378,30 +504,6 @@ param_component::mouseUp(MouseEvent const& evt)
   });
 }
 
-std::string
-param_value_label::value_ref_text(plugin_gui* gui, param_desc const* param)
-{
-  auto const& ref_text = param->param->gui.value_reference_text;
-  if (ref_text.size()) return ref_text;
-  auto plain = param->param->domain.raw_to_plain(param->param->domain.max);
-  return gui->gui_state()->plain_to_text_at_index(false, param->info.global, plain);
-}
-
-// Just guess max value is representative of the longest text.
-param_value_label::
-param_value_label(plugin_gui* gui, module_desc const* module, param_desc const* param, lnf* lnf) :
-param_component(gui, module, param), 
-autofit_label(lnf, value_ref_text(gui, param))
-{ init(); }
-
-void
-param_value_label::own_param_changed(plain_value plain)
-{ 
-  std::string text = _gui->gui_state()->plain_to_text_at_index(false, _param->info.global, plain);
-  setText(text, dontSendNotification); 
-  setTooltip(_param->info.name + ": " + text);
-}
-
 module_name_label::
 module_name_label(plugin_gui* gui, module_desc const* module, param_desc const* param, lnf* lnf) :
 param_component(gui, module, param), 
@@ -514,6 +616,7 @@ autofit_combobox(lnf, param->param->gui.edit_type == gui_edit_type::autofit_list
   addListener(this);
   setEditableText(false);
   init();
+  update_all_items_enabled_state();
 }
 
 void 
@@ -525,7 +628,7 @@ param_combobox::own_param_changed(plain_value plain)
 }
 
 void 
-param_combobox::showPopup()
+param_combobox::update_all_items_enabled_state()
 {
   auto const& items = _param->param->domain.items;
   for (int i = 0; i < items.size(); i++)
@@ -579,7 +682,90 @@ param_combobox::showPopup()
       setItemEnabled(i + 1, isItemEnabled(i + 1) && enabled);
     }
   }
+}
+
+void
+param_combobox::showPopup()
+{
+  update_all_items_enabled_state();
   ComboBox::showPopup();
+}
+
+int 
+param_combobox::get_item_tag(std::string const& item_id) const
+{
+  assert(_param->param->gui.enable_dropdown_drop_target);
+  for (int i = 0; i < _param->param->domain.items.size(); i++)
+    if (item_id == _param->param->domain.items[i].id)
+      return i + 1;
+  return -1;
+}
+
+void
+param_combobox::itemDragExit(DragAndDropTarget::SourceDetails const& details)
+{
+  _drop_target_action = drop_target_action::none;
+  resized(); // needed to trigger positionComboBoxText
+  repaint();
+}
+
+void
+param_combobox::itemDragEnter(DragAndDropTarget::SourceDetails const& details)
+{
+  update_all_items_enabled_state();
+  std::string source_id = details.description.toString().toStdString();
+  int item_tag = get_item_tag(source_id);
+  if (item_tag == -1) _drop_target_action = drop_target_action::never;
+  else _drop_target_action = isItemEnabled(item_tag) ? drop_target_action::ok : drop_target_action::not_now;
+  resized(); // needed to trigger positionComboBoxText
+  repaint();
+}
+
+void 
+param_combobox::itemDropped(DragAndDropTarget::SourceDetails const& details)
+{
+  int tag = get_item_tag(details.description.toString().toStdString());
+  if (tag == -1 || !isItemEnabled(tag))
+  {
+    itemDragExit(details);
+    return;
+  }
+
+  int item_index = tag - 1;
+  _gui->gui_state()->begin_undo_region();
+
+  // found corresponding drop target, select it
+  // dont do setSelectedId -- that triggers async update and gets us 2 items in the undo history
+  _gui->gui_state()->set_plain_at_index(_param->info.global,
+    _param->param->domain.raw_to_plain(item_index));
+
+  // now figure out the matrix route enabled selector, and if its 0, set it to 1
+  auto enabled_id = _param->param->gui.drop_route_enabled_param_id;
+  assert(enabled_id.size());
+  for (int i = 0; i < _module->module->params.size(); i++)
+    if(_module->module->params[i].info.tag.id == enabled_id)
+    {
+      assert(_module->module->params[i].info.slot_count == _param->param->info.slot_count);
+      int m = _module->module->info.index;
+      int mi = _module->info.slot;
+      int p = _module->module->params[i].info.index;
+      int pi = _param->info.slot;
+      if (_gui->gui_state()->get_plain_at(m, mi, p, pi).step() == 0)
+        _gui->gui_state()->set_plain_at(m, mi, p, pi,
+          _module->module->params[i].domain.raw_to_plain(_param->param->gui.drop_route_enabled_param_value));
+      
+      itemDragExit(details);
+      _gui->gui_state()->end_undo_region("Drop", _gui->gui_state()->plain_to_text_at_index(
+        false, _param->info.global, _gui->gui_state()->get_plain_at_index(_param->info.global)));
+       return;
+    }
+  assert(false);
+}
+
+bool 
+param_combobox::isInterestedInDragSource(DragAndDropTarget::SourceDetails const& details)
+{
+  return _param->param->gui.enable_dropdown_drop_target;
 }
 
 }

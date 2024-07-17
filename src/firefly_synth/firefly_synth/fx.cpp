@@ -600,6 +600,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_module_dsp(stage, module_output::audio, scratch_count, {
       make_module_dsp_output(false, make_topo_info_basic("{E7C21225-7ED5-45CC-9417-84A69BECA73C}", "Output", 0, 1)) }),
     make_module_gui(section, pos, { { 1, 1 }, { 32, 13, 34, 55, 8 } })));
+  result.gui.is_drag_mod_source = true;
  
   result.graph_engine_factory = make_graph_engine;
   if (global) result.default_initializer = [is_fx](auto& s) { init_global_default(s); };
@@ -773,6 +774,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
   dist_skew_in_amt.gui.bindings.enabled.bind_params({ param_type, param_dist_skew_x }, [](auto const& vs) {
     return vs[0] == type_dst && vs[1] != wave_skew_type_off; });
   dist_skew_in_amt.info.description = "Before-shape skew amount.";
+  dist_skew_in.gui.alternate_drag_param_id = dist_skew_in_amt.info.tag.id;
   auto& dist_skew_out = result.params.emplace_back(make_param(
     make_topo_info("{BF8BB684-50E5-414D-9DAD-6290330C0C40}", true, "Dist Skew Y Mode", "Skew Y", "Dst SkY", param_dist_skew_y, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(wave_skew_type_items(), "Off"),
@@ -787,6 +789,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
   dist_skew_out_amt.gui.bindings.enabled.bind_params({ param_type, param_dist_skew_y }, [](auto const& vs) {
     return vs[0] == type_dst && vs[1] != wave_skew_type_off; });
   dist_skew_out_amt.info.description = "After-shape skew amount.";
+  dist_skew_out.gui.alternate_drag_param_id = dist_skew_out_amt.info.tag.id;
 
   auto& dist_right = result.sections.emplace_back(make_param_section(section_dist_right,
     make_topo_tag_basic("{4FD908CC-0EBA-4ADD-8622-EB95013CD429}", "Distortion Right"),

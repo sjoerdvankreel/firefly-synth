@@ -216,13 +216,14 @@ private:
   Component& make_single_param(module_desc const& module, param_desc const& param);
   Component& make_param_label_edit(module_desc const& module, param_desc const& param);
   Component& make_param_section(module_desc const& module, param_section const& section, bool first_horizontal);
-  juce::Label& make_param_label(module_desc const& module, param_desc const& param, gui_label_contents contents);
+  Component& make_param_label(module_desc const& module, param_desc const& param, gui_label_contents contents);
 
   Component& make_modules(module_desc const* slots);
   Component& make_module_section(module_section_gui const& section);
   Component& make_custom_section(custom_section_gui const& section);
-  tab_component& make_tab_component(std::string const& id, std::string const& title, int module);
   void add_component_tab(juce::TabbedComponent& tc, juce::Component& child, int module, std::string const& title);
+  tab_component& make_tab_component(std::string const& id, std::string const& title, int module, 
+    bool select_tab_on_drag_hover, module_desc const* drag_module_descriptors);
 };
 
 }

@@ -84,6 +84,19 @@ struct param_topo_gui final {
   std::shared_ptr<gui_submenu> submenu;
   param_menu_handler_factory menu_handler_factory;
 
+  // d&d handling
+  // allow to drop on this combobox?
+  bool enable_dropdown_drop_target = false;
+
+  // if dragging this label, mod source is "self" or below
+  std::string alternate_drag_param_id = {};
+  std::string alternate_drag_output_id = {};
+
+  // if dropped onto "this", what param should be set to 1, to enable the route?
+  // note - 0 is assumed to be "off" and below value is selected if not-off
+  std::string drop_route_enabled_param_id = {};
+  int drop_route_enabled_param_value = -1;
+
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(param_topo_gui);
   bool is_list() const;
   void validate(plugin_topo const& plugin, module_topo const& module, param_topo const& param) const;

@@ -56,6 +56,8 @@ audio_out_topo(int section, gui_position const& pos, bool global, bool is_fx)
   module_topo result(make_module(info,
     make_module_dsp(stage, module_output::none, scratch_count, {}),
     make_module_gui(section, pos, { 1, 1 })));
+  result.gui.alternate_drag_source_id = info.tag.id;
+  result.gui.is_drag_mod_source = true;
 
   result.graph_renderer = render_graph;
   result.gui.menu_handler_factory = [global](plugin_state* state) {

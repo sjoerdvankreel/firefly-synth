@@ -188,19 +188,46 @@ protected:
   param_component(plugin_gui* gui, module_desc const* module, param_desc const* param);
 };
 
-// static parameter name display
+// just a drag handle for d&d support
+class param_drag_label:
+public binding_component,
+public autofit_component,
+public juce::Component
+{
+  static int const _size = 7;
+  lnf* const _lnf;
+  param_desc const* const _param;
+
+protected:
+  void enablementChanged() { repaint(); }
+
+public:
+  void paint(juce::Graphics& g) override;
+  juce::MouseCursor getMouseCursor() override;
+  void mouseDrag(juce::MouseEvent const& e) override;
+  int fixed_width(int parent_w, int parent_h) const override { return _size; }
+  int fixed_height(int parent_w, int parent_h) const override { return _size; }
+  param_drag_label(plugin_gui* gui, module_desc const* module, param_desc const* param, lnf* lnf);
+};
+
+// static parameter name display + d&d support
 class param_name_label:
 public binding_component,
 public autofit_label
 {
   param_desc const* const _param;
+  param_desc const* const _alternate_drag_param;
+  output_desc const* const _alternate_drag_output;
   static std::string label_ref_text(param_desc const* param);
 public:
-  param_desc const* param() const { return _param; }
-  param_name_label(plugin_gui* gui, module_desc const* module, param_desc const* param, lnf* lnf);
+  juce::MouseCursor getMouseCursor() override;
+  void mouseDrag(juce::MouseEvent const& e) override;
+  param_name_label(
+    plugin_gui* gui, module_desc const* module, param_desc const* param, 
+    param_desc const* alternate_drag_param, output_desc const* alternate_drag_output, lnf* lnf);
 };
 
-// dynamic parameter value display
+// dynamic parameter value display + d&d support
 class param_value_label:
 public param_component, 
 public autofit_label
@@ -209,6 +236,8 @@ public autofit_label
 protected:
   void own_param_changed(plain_value plain) override final;
 public:
+  juce::MouseCursor getMouseCursor() override;
+  void mouseDrag(juce::MouseEvent const& e) override;
   param_value_label(plugin_gui* gui, module_desc const* module, param_desc const* param, lnf* lnf);
 };
 
@@ -263,18 +292,34 @@ public:
   { return juce::String(_param->info.name + ": ") + juce::Slider::getTextFromValue(value * (_param->param->domain.display == domain_display::percentage ? 100 : 1)); }
 };
 
+enum class drop_target_action { none, never, not_now, ok };
+
 // dropdown bound to single parameter
+// NOTE: we only support drag-drop onto combos for now
 class param_combobox :
 public param_component,
 public autofit_combobox, 
+public juce::DragAndDropTarget,
 public juce::ComboBox::Listener
 {
+  drop_target_action _drop_target_action = drop_target_action::none;
+  int get_item_tag(std::string const& item_id) const;
+
+  void update_all_items_enabled_state();
+
 protected:
   void own_param_changed(plain_value plain) override final;
 
 public:
   ~param_combobox() { removeListener(this); }
   param_combobox(plugin_gui* gui, module_desc const* module, param_desc const* param, lnf* lnf);
+
+  // d&d support
+  drop_target_action get_drop_target_action() const { return _drop_target_action; }
+  void itemDropped(juce::DragAndDropTarget::SourceDetails const& details) override;
+  void itemDragExit(juce::DragAndDropTarget::SourceDetails const& details) override;
+  void itemDragEnter(juce::DragAndDropTarget::SourceDetails const& details) override;
+  bool isInterestedInDragSource(juce::DragAndDropTarget::SourceDetails const& details) override;
 
   void showPopup() override;
   void comboBoxChanged(ComboBox*) override final

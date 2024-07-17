@@ -68,6 +68,12 @@ param_topo_gui::validate(plugin_topo const& plugin, module_topo const& module, p
     assert(param.info.index != bindings.enabled.params[e]);
   for (int v = 0; v < bindings.visible.params.size(); v++)
     assert(param.info.index != bindings.visible.params[v]);
+
+  if (enable_dropdown_drop_target)
+  {
+    assert(drop_route_enabled_param_id.size() > 0);
+    assert(drop_route_enabled_param_value != -1);
+  }
 }
 
 void
@@ -87,12 +93,47 @@ param_topo::validate(plugin_topo const& plugin, module_topo const& module, int i
   assert(dsp.direction == param_direction::input || !gui.bindings.global_enabled.is_bound());
   assert(gui.edit_type != gui_edit_type::toggle || domain.type == domain_type::toggle);
   assert(dsp.direction != param_direction::output || module.dsp.stage == module_stage::output);
+  assert(gui.alternate_drag_output_id.size() == 0 || gui.alternate_drag_param_id.size() == 0);
 
   if (gui.layout == param_layout::single_grid)
   {
     // assert * 2 is for the labels
     auto dimension = module.sections[gui.section].gui.dimension;
     assert(dimension.row_sizes.size() * dimension.column_sizes.size() == info.slot_count * 2);
+  }
+
+  // if we are set to be explicitly modulatable in the gui, make sure we can modulate
+  if (gui.label.contents == gui_label_contents::drag)
+    assert(dsp.can_modulate(module.info.slot_count));
+
+  // if we are modulatable but dont have a label, make sure some other param allows to modulate us
+  // except for stuff that's invisible (i.e. params that are *only* controllable by the mod matrix)
+  if (dsp.can_modulate(module.info.slot_count) && gui.label.contents == gui_label_contents::none && gui.visible)
+  {
+    bool found = false;
+    for (int i = 0; i < module.params.size(); i++)
+      if (module.params[i].gui.alternate_drag_param_id == info.tag.id)
+      {
+        found = true;
+        assert(!module.params[i].dsp.can_modulate(module.info.slot_count));
+        break;
+      }
+    assert(found);
+  }
+
+  // if we are, wrt to gui dragging, proxy for a module output, make
+  // sure it exists and slot count is equal to our parameter count
+  if (gui.alternate_drag_output_id.size())
+  {
+    bool found = false;
+    for(int i = 0; i < module.dsp.outputs.size(); i++)
+      if (module.dsp.outputs[i].info.tag.id == gui.alternate_drag_output_id)
+      {
+        found = true;
+        assert(module.dsp.outputs[i].info.slot_count == info.slot_count);
+        break;
+      }
+    assert(found);
   }
 }
 

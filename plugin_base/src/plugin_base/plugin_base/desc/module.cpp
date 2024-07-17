@@ -7,7 +7,7 @@ namespace plugin_base {
 module_desc::
 module_desc(
   module_topo const& module_, int topo, int slot, int global, 
-  int param_global_start, int midi_source_global_start)
+  int param_global_start, int midi_source_global_start, int output_source_global_start)
 {
   module = &module_;
   info.topo = topo;
@@ -20,13 +20,19 @@ module_desc(
   int param_local = 0;
   for(int p = 0; p < module_.params.size(); p++)
     for(int i = 0; i < module_.params[p].info.slot_count; i++)
-      params.emplace_back(param_desc(module_, slot, 
-        module_.params[p], p, i, param_local++, param_global_start++));
+      params.emplace_back(param_desc(module_, slot, module_.params[p],
+        p, i, param_local++, param_global_start++));
 
   int midi_local = 0;
   for(int ms = 0; ms < module_.midi_sources.size(); ms++)
     midi_sources.emplace_back(midi_desc(module_, slot, module_.midi_sources[ms], 
       ms, midi_local++, midi_source_global_start++));
+
+  int output_local = 0;
+  for (int os = 0; os < module_.dsp.outputs.size(); os++)
+    for (int i = 0; i < module_.dsp.outputs[os].info.slot_count; i++)
+      output_sources.emplace_back(output_desc(module_, slot, module_.dsp.outputs[os],
+        os, i, output_local++, output_source_global_start++));
 }
 
 void
@@ -41,6 +47,8 @@ module_desc::validate(plugin_desc const& plugin, int index) const
     params[p].validate(*this, p);
   for (int ms = 0; ms < midi_sources.size(); ms++)
     midi_sources[ms].validate(*this, ms);
+  for (int os = 0; os < output_sources.size(); os++)
+    output_sources[os].validate(*this, os);
 }
 
 }

@@ -1,3 +1,8 @@
+### July 17, 2024 - V1.8.3.
+
+- Add drag-and-drop to mod matrix support.
+- You can now populate the matrices by dragging module headers and parameter labels onto them. See manual for details.
+
 ### July 10, 2024 - V1.8.2.
 
 - Add some presets + demo tune.

@@ -612,7 +612,8 @@ plugin_gui::make_content()
   for(int s = 0; s < topo.gui.module_sections.size(); s++)
     if(topo.gui.module_sections[s].visible)
       grid.add(make_module_section(topo.gui.module_sections[s]), topo.gui.module_sections[s].position);
-  return make_component<margin_component>(&grid, BorderSize<int>(margin_content));
+  auto& dnd_support = make_component<plugin_drag_drop_container>(&grid);
+  return make_component<margin_component>(&dnd_support, BorderSize<int>(margin_content));
 }
 
 Component& 
@@ -640,9 +641,12 @@ plugin_gui::make_custom_section(custom_section_gui const& section)
 }
 
 tab_component&
-plugin_gui::make_tab_component(std::string const& id, std::string const& title, int module)
+plugin_gui::make_tab_component(
+  std::string const& id, std::string const& title, int module,
+  bool select_tab_on_drag_hover, module_desc const* drag_module_descriptors)
 {
-  auto& result = make_component<tab_component>(_extra_state, id + "/tab", TabbedButtonBar::Orientation::TabsAtTop);
+  auto& result = make_component<tab_component>(_extra_state, id + "/tab", 
+    TabbedButtonBar::Orientation::TabsAtTop, select_tab_on_drag_hover, drag_module_descriptors);
   result.setOutline(0);
   result.setLookAndFeel(module_lnf(module));
   result.getTabbedButtonBar().setTitle(title);
@@ -672,7 +676,7 @@ plugin_gui::make_modules(module_desc const* slots)
   {
     int index = topo.info.index;
     auto const& tag = topo.info.tag;
-    auto& result = make_tab_component(tag.id, tag.display_name, index);
+    auto& result = make_tab_component(tag.id, tag.display_name, index, false, slots);
     for (int i = 0; i < topo.info.slot_count; i++)
       add_component_tab(result, make_param_sections(slots[i]), slots[i].info.global, std::to_string(i + 1));
     if (topo.info.slot_count > 1)
@@ -703,7 +707,7 @@ plugin_gui::make_param_sections(module_desc const& module)
   {
     // need this to be 1 because we dont support multi-slot components with inner tabs
     assert(topo.info.slot_count == 1);
-    auto& tabs = make_tab_component(topo.info.tag.id, topo.info.tag.display_name, topo.info.index);
+    auto& tabs = make_tab_component(topo.info.tag.id, topo.info.tag.display_name, topo.info.index, true, nullptr);
     for (int o = 0; o < topo.gui.tab_order.size(); o++)
     {
       auto const& section = topo.sections[topo.gui.tab_order[o]];
@@ -726,7 +730,8 @@ Component&
 plugin_gui::make_single_param(module_desc const& module, param_desc const& param)
 {
   Component* result = nullptr;
-  if (param.param->gui.label.contents == gui_label_contents::none)
+  auto contents = param.param->gui.label.contents;
+  if (contents == gui_label_contents::none || contents == gui_label_contents::no_drag)
     result = &make_param_editor(module, param);
   else
     result = &make_param_label_edit(module, param);
@@ -794,7 +799,8 @@ plugin_gui::make_param_section(module_desc const& module, param_section const& s
       else
       {
         assert(iter->param->info.slot_count == 1);
-        if (iter->param->gui.label.contents == gui_label_contents::none)
+        auto contents = iter->param->gui.label.contents;
+        if (contents == gui_label_contents::none || contents == gui_label_contents::no_drag)
           grid.add(make_param_editor(module, *iter), iter->param->gui.position);
         else if (section.gui.cell_split == gui_label_edit_cell_split::horizontal)
         {
@@ -841,7 +847,7 @@ plugin_gui::make_module_section(module_section_gui const& section)
     if (topo.modules[i].gui.section == section.index)
       matched_module = i;
   assert(matched_module >= 0);
-  auto& tabs = make_tab_component(section.id, "", matched_module);
+  auto& tabs = make_tab_component(section.id, "", matched_module, true, nullptr);
   for(int o = 0; o < section.tab_order.size(); o++)
     for (auto iter = modules.begin(); iter != modules.end(); iter += iter->module->info.slot_count)
       if (iter->module->gui.visible && iter->module->gui.section == section.index && section.tab_order[o] == iter->module->info.index)
@@ -850,23 +856,56 @@ plugin_gui::make_module_section(module_section_gui const& section)
   return tabs;
 }
 
-Label&
+Component&
 plugin_gui::make_param_label(module_desc const& module, param_desc const& param, gui_label_contents contents)
 {
-  Label* result = {};
+  param_desc const* alternate_drag_param = nullptr;
+  if (param.param->gui.alternate_drag_param_id.size())
+  {
+    assert(contents == gui_label_contents::name);
+    for (int i = 0; i < module.params.size(); i++)
+      if (module.params[i].param->info.tag.id == param.param->gui.alternate_drag_param_id)
+        alternate_drag_param = &module.params[i];
+    assert(alternate_drag_param != nullptr);
+  }
+
+  output_desc const* alternate_drag_output = nullptr;
+  if (param.param->gui.alternate_drag_output_id.size())
+  {
+    assert(contents == gui_label_contents::name);
+    for (int i = 0; i < module.output_sources.size(); i++)
+      if (module.output_sources[i].source->info.tag.id == param.param->gui.alternate_drag_output_id &&
+        module.output_sources[i].info.slot == param.info.slot)
+        alternate_drag_output = &module.output_sources[i];
+    assert(alternate_drag_output != nullptr);
+  }
+
+  assert(alternate_drag_param == nullptr || alternate_drag_output == nullptr);
+
+  Component* result = {};
+  Label* label_result = {};
   switch (contents)
   {
   case gui_label_contents::name:
-    result = &make_component<param_name_label>(this, &module, &param, _module_lnfs[module.module->info.index].get());
+    label_result = &make_component<param_name_label>(this, &module, &param,
+      alternate_drag_param, alternate_drag_output, _module_lnfs[module.module->info.index].get());
+    label_result->setJustificationType(justification_type(param.param->gui.label));
+    result = label_result;
     break;
   case gui_label_contents::value:
-    result = &make_component<param_value_label>(this, &module, &param, _module_lnfs[module.module->info.index].get()); 
+    label_result = &make_component<param_value_label>(this, &module, &param,
+      _module_lnfs[module.module->info.index].get());
+    label_result->setJustificationType(justification_type(param.param->gui.label));
+    result = label_result;
+    break;
+  case gui_label_contents::drag:
+    result = &make_component<param_drag_label>(this, &module, &param, 
+      _module_lnfs[module.module->info.index].get());
     break;
   default:
     assert(false);
     break;
   }
-  result->setJustificationType(justification_type(param.param->gui.label));
   return *result;
 }
 

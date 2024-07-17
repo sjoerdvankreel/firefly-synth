@@ -1,4 +1,5 @@
 #include <plugin_base/gui/containers.hpp>
+#include <plugin_base/helpers/matrix.hpp>
 
 using namespace juce;
 
@@ -9,9 +10,52 @@ tab_component::
 { _state->remove_listener(_storage_id, this); }
 
 tab_component::
-tab_component(extra_state* state, std::string const& storage_id, juce::TabbedButtonBar::Orientation orientation) :
-juce::TabbedComponent(orientation), _state(state), _storage_id(storage_id)
+tab_component(extra_state* state, std::string const& storage_id, juce::TabbedButtonBar::Orientation orientation, 
+  bool select_tab_on_drag_hover, module_desc const* drag_module_descriptors) :
+juce::TabbedComponent(orientation), _state(state), _storage_id(storage_id), 
+_select_tab_on_drag_hover(select_tab_on_drag_hover), _drag_module_descriptors(drag_module_descriptors)
 { state->add_listener(storage_id, this); }
+
+MouseCursor
+tab_bar_button::getMouseCursor()
+{
+  if (_drag_module_descriptors == nullptr) return TabBarButton::getMouseCursor();
+  if(!_drag_module_descriptors[0].module->gui.is_drag_mod_source) return TabBarButton::getMouseCursor();
+  return MouseCursor::DraggingHandCursor;
+}
+
+void 
+tab_bar_button::itemDragEnter(DragAndDropTarget::SourceDetails const& details)
+{
+  if (!_select_tab_on_drag_hover) return;
+  int index = getTabbedButtonBar().indexOfTabButton(this);
+  if(index >= 0) getTabbedButtonBar().setCurrentTabIndex(index);
+}
+
+void 
+tab_bar_button::mouseDrag(MouseEvent const& e)
+{
+  if (_drag_module_descriptors == nullptr) return;
+  int index = getTabbedButtonBar().indexOfTabButton(this);
+  if (index < 0) return;
+  int slot_count = _drag_module_descriptors[0].module->info.slot_count;
+  (void)slot_count;
+  assert(0 <= index && index < slot_count);
+
+  auto drag_module = &_drag_module_descriptors[index];
+  if (!drag_module->module->gui.is_drag_mod_source) return;
+  std::string drag_source_name = drag_module->info.name;
+  std::string drag_source_id = make_module_drag_source_id(drag_module);
+  if (drag_source_id.size() == 0) return;
+  
+  auto* container = DragAndDropContainer::findParentDragContainerFor(this);
+  if (container == nullptr) return;
+  if (container->isDragAndDropActive()) return;
+  auto& lnf_ = dynamic_cast<plugin_base::lnf&>(getLookAndFeel());
+  ScaledImage drag_image = make_drag_source_image(lnf_.font(), drag_source_name, lnf_.colors().bubble_outline);
+  Point<int> offset(drag_image.getImage().getWidth() / 2 + 10, drag_image.getImage().getHeight() / 2 + 10);
+  container->startDragging(juce::String(drag_source_id), this, drag_image, false, &offset);
+}
 
 void 
 autofit_viewport::resized()

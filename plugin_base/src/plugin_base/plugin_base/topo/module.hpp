@@ -112,11 +112,16 @@ struct module_topo_gui final {
   
   // my own tab header in case my container is tabbed
   std::string tabbed_name;
+
+  // d&d support
+  bool is_drag_mod_source = false; // enable if can drag onto mod matrix source
+  std::string alternate_drag_source_id = {};
   
   int autofit_row = 0;
   int autofit_column = 0;
   bool enable_tab_menu = true;
   module_tab_menu_handler_factory menu_handler_factory;
+
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(module_topo_gui);
 };
 
@@ -125,6 +130,19 @@ struct module_dsp_output final {
   topo_info info;
   bool is_modulation_source;
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(module_dsp_output);
+};
+
+// dsp output topo mapping
+struct output_topo_mapping final {
+  int module_index;
+  int module_slot;
+  int output_index;
+
+  bool operator==(output_topo_mapping const&) const = default;
+  template <class T> auto& value_at(T& container) const
+  { return container[module_index][module_slot][output_index]; }
+  template <class T> auto const& value_at(T const& container) const 
+  { return container[module_index][module_slot][output_index]; }
 };
 
 // module dsp
@@ -156,6 +174,7 @@ struct module_topo final {
   state_initializer minimal_initializer;
   state_initializer default_initializer;
   bool force_rerender_on_param_hover = false;
+
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(module_topo);
   void validate(plugin_topo const& plugin, int index) const;
 };

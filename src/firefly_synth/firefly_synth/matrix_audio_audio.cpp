@@ -201,6 +201,9 @@ audio_audio_matrix_topo(
     make_param_gui(section_main, gui_edit_type::autofit_list, param_layout::vertical, { 0, 1 }, make_label_none())));
   source.gui.tabular = true;
   source.gui.submenu = source_matrix.submenu;
+  source.gui.enable_dropdown_drop_target = true;
+  source.gui.drop_route_enabled_param_value = 1;
+  source.gui.drop_route_enabled_param_id = result.params[param_on].info.tag.id;
   source.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
   source.gui.item_enabled.bind_param({ this_module, 0, param_target, gui_item_binding::match_param_slot },
     [global, sm = source_matrix.mappings, tm = target_matrix.mappings](int other, int self) {
@@ -216,6 +219,9 @@ audio_audio_matrix_topo(
     make_param_gui(section_main, gui_edit_type::autofit_list, param_layout::vertical, { 0, 2 }, make_label_none())));
   target.gui.tabular = true;
   target.gui.submenu = target_matrix.submenu;
+  target.gui.enable_dropdown_drop_target = true;
+  target.gui.drop_route_enabled_param_value = 1;
+  target.gui.drop_route_enabled_param_id = result.params[param_on].info.tag.id;
   target.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
   target.gui.item_enabled.bind_param({ this_module, 0, param_source, gui_item_binding::match_param_slot }, 
     [global, sm = source_matrix.mappings, tm = target_matrix.mappings](int other, int self) {
@@ -227,14 +233,16 @@ audio_audio_matrix_topo(
   auto& amount = result.params.emplace_back(make_param(
     make_topo_info_basic("{C12ADFE9-1D83-439C-BCA3-30AD7B86848B}", "Gain", param_gain, route_count),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(1, 0, true),
-    make_param_gui(section_main, is_fx? gui_edit_type::hslider: gui_edit_type::knob, param_layout::vertical, { 0, 3 }, make_label_none())));
+    make_param_gui(section_main, is_fx ? gui_edit_type::hslider : gui_edit_type::knob, param_layout::vertical, { 0, 3 },
+      make_label(gui_label_contents::drag, gui_label_align::left, gui_label_justify::center))));
   amount.gui.tabular = true;
   amount.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
   amount.info.description = "Controls route gain.";
   auto& bal = result.params.emplace_back(make_param(
     make_topo_info("{941C6961-044F-431E-8296-C5303EAFD11D}", true, "Balance", "Bal", "Bal", param_bal, route_count),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 0, 0, true),
-    make_param_gui(section_main, is_fx ? gui_edit_type::hslider : gui_edit_type::knob, param_layout::vertical, { 0, 4 }, make_label_none())));
+    make_param_gui(section_main, is_fx ? gui_edit_type::hslider : gui_edit_type::knob, param_layout::vertical, { 0, 4 },
+      make_label(gui_label_contents::drag, gui_label_align::left, gui_label_justify::center))));
   bal.gui.tabular = true;
   bal.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
   bal.info.description = "Controls route stereo balance.";

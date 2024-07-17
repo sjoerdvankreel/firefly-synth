@@ -118,7 +118,7 @@ module_topo
 osc_osc_matrix_topo(int section, gui_position const& pos, plugin_topo const* plugin)
 {
   std::vector<module_dsp_output> outputs;
-  auto osc_matrix = make_audio_matrix({ &plugin->modules[module_osc] }, 0, false);
+  auto osc_matrix = make_audio_matrix({ &plugin->modules[module_osc] }, 0, true);
 
   // scratch state for AM
   // for FM we use oversampled mono series
@@ -151,20 +151,26 @@ osc_osc_matrix_topo(int section, gui_position const& pos, plugin_topo const* plu
   am_on.gui.menu_handler_factory = [](plugin_state* state) { return make_matrix_param_menu_handler(state, 2, 0, route_count, 1); };
   am_on.info.description = "Toggles AM routing on/off.";
   auto& am_source = result.params.emplace_back(make_param(
-    make_topo_info_tabular("{1D8F3294-2463-470D-853B-561E8228467A}", "AM Src", "Src", param_am_source, route_count),
+    make_topo_info_tabular("{1D8F3294-2463-470D-853B-561E8228467A}", "AM Source", "Source", param_am_source, route_count),
     make_param_dsp_voice(param_automate::automate), make_domain_item(osc_matrix.items, ""),
     make_param_gui(section_am, gui_edit_type::autofit_list, param_layout::vertical, { 0, 1 }, make_label_none())));
   am_source.gui.tabular = true;
+  am_source.gui.enable_dropdown_drop_target = true;
+  am_source.gui.drop_route_enabled_param_value = 1;
+  am_source.gui.drop_route_enabled_param_id = result.params[param_am_on].info.tag.id;
   am_source.gui.bindings.enabled.bind_params({ param_am_on }, [](auto const& vs) { return vs[0] != 0; });
   am_source.gui.item_enabled.bind_param({ module_osc_osc_matrix, 0, param_am_target, gui_item_binding::match_param_slot },
     [osc = osc_matrix.mappings](int other, int self) {
       return osc[self].slot <= osc[other].slot; });
   am_source.info.description = "Selects AM routing source. Note that you can only route 'upwards', so not Osc2->Osc1. However self-modulation is possible.";
   auto& am_target = result.params.emplace_back(make_param(
-    make_topo_info_tabular("{1AF0E66A-ADB5-40F4-A4E1-9F31941171E2}", "AM Tgt", "Tgt", param_am_target, route_count),
-    make_param_dsp_voice(param_automate::automate), make_domain_item(osc_matrix.items, "2"),
+    make_topo_info_tabular("{1AF0E66A-ADB5-40F4-A4E1-9F31941171E2}", "AM Target", "Target", param_am_target, route_count),
+    make_param_dsp_voice(param_automate::automate), make_domain_item(osc_matrix.items, "Osc 2"),
     make_param_gui(section_am, gui_edit_type::autofit_list, param_layout::vertical, { 0, 2 }, make_label_none())));
   am_target.gui.tabular = true;
+  am_target.gui.enable_dropdown_drop_target = true;
+  am_target.gui.drop_route_enabled_param_value = 1;
+  am_target.gui.drop_route_enabled_param_id = result.params[param_am_on].info.tag.id;
   am_target.gui.bindings.enabled.bind_params({ param_am_on }, [](auto const& vs) { return vs[0] != 0; });
   am_target.gui.item_enabled.bind_param({ module_osc_osc_matrix, 0, param_am_source, gui_item_binding::match_param_slot },
     [osc = osc_matrix.mappings](int other, int self) { 
@@ -173,21 +179,23 @@ osc_osc_matrix_topo(int section, gui_position const& pos, plugin_topo const* plu
   auto& am_amount = result.params.emplace_back(make_param(
     make_topo_info_tabular("{A1A7298E-542D-4C2F-9B26-C1AF7213D095}", "AM Mix", "Mix", param_am_amt, route_count),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(1, 0, true),
-    make_param_gui(section_am, gui_edit_type::hslider, param_layout::vertical, { 0, 3 }, make_label_none())));
+    make_param_gui(section_am, gui_edit_type::knob, param_layout::vertical, { 0, 3 },
+      make_label(gui_label_contents::drag, gui_label_align::left, gui_label_justify::center))));
   am_amount.gui.tabular = true;
   am_amount.gui.bindings.enabled.bind_params({ param_am_on }, [](auto const& vs) { return vs[0] != 0; });
   am_amount.info.description = "Dry/wet control between unmodulated and modulated signal.";
   auto& am_ring = result.params.emplace_back(make_param(
     make_topo_info_tabular("{3DF51ADC-9882-4F95-AF4E-5208EB14E645}", "AM Ring", "Ring", param_am_ring, route_count),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0, 0, true),
-    make_param_gui(section_am, gui_edit_type::hslider, param_layout::vertical, { 0, 4 }, make_label_none())));
+    make_param_gui(section_am, gui_edit_type::knob, param_layout::vertical, { 0, 4 },
+      make_label(gui_label_contents::drag, gui_label_align::left, gui_label_justify::center))));
   am_ring.gui.tabular = true;
   am_ring.gui.bindings.enabled.bind_params({ param_am_on }, [](auto const& vs) { return vs[0] != 0; });
   am_ring.info.description = "Dry/wet control between amplitude-modulated and ring-modulated signal.";
 
   auto& fm = result.sections.emplace_back(make_param_section(section_fm,
     make_topo_tag_basic("{1B39A828-3429-4245-BF07-551C17A78341}", "FM"),
-    make_param_section_gui({ 0, 0 }, { { 1 }, { -25, gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, 1 } })));
+    make_param_section_gui({ 0, 0 }, { { 1 }, { -25, -55, -55, -45, 1 } })));
   fm.gui.scroll_mode = gui_scroll_mode::vertical;
   auto& fm_on = result.params.emplace_back(make_param(
     make_topo_info_tabular("{02112C80-D1E9-409E-A9FB-6DCA34F5CABA}", "FM On", "On", param_fm_on, route_count),
@@ -197,10 +205,13 @@ osc_osc_matrix_topo(int section, gui_position const& pos, plugin_topo const* plu
   fm_on.gui.menu_handler_factory = [](plugin_state* state) { return make_matrix_param_menu_handler(state, 2, 1, route_count, 1); };
   fm_on.info.description = "Toggles FM routing on/off.";
   auto& fm_source = result.params.emplace_back(make_param(
-    make_topo_info_tabular("{61E9C704-E704-4669-9DC3-D3AA9FD6A952}", "FM Src", "Src", param_fm_source, route_count),
+    make_topo_info_tabular("{61E9C704-E704-4669-9DC3-D3AA9FD6A952}", "FM Source", "Source", param_fm_source, route_count),
     make_param_dsp_voice(param_automate::automate), make_domain_item(osc_matrix.items, ""),
     make_param_gui(section_fm, gui_edit_type::autofit_list, param_layout::vertical, { 0, 1 }, make_label_none())));
   fm_source.gui.tabular = true;
+  fm_source.gui.enable_dropdown_drop_target = true;
+  fm_source.gui.drop_route_enabled_param_value = 1;
+  fm_source.gui.drop_route_enabled_param_id = result.params[param_fm_on].info.tag.id;
   fm_source.gui.bindings.enabled.bind_params({ param_fm_on }, [](auto const& vs) { return vs[0] != 0; });
   fm_source.gui.item_enabled.bind_param({ module_osc_osc_matrix, 0, param_fm_target, gui_item_binding::match_param_slot },
     [osc = osc_matrix.mappings](int other, int self) {
@@ -208,10 +219,13 @@ osc_osc_matrix_topo(int section, gui_position const& pos, plugin_topo const* plu
   fm_source.info.description = std::string("Selects FM routing source. Note that you can only route 'upwards', so not Osc2->Osc1. ") + 
     "Self-modulation is not possible (AKA, feedback-FM not implemented).";
   auto& fm_target = result.params.emplace_back(make_param(
-    make_topo_info_tabular("{DBDD28D6-46B9-4F9A-9682-66E68A261B87}", "FM Tgt", "Tgt", param_fm_target, route_count),
-    make_param_dsp_voice(param_automate::automate), make_domain_item(osc_matrix.items, "2"),
+    make_topo_info_tabular("{DBDD28D6-46B9-4F9A-9682-66E68A261B87}", "FM Target", "Target", param_fm_target, route_count),
+    make_param_dsp_voice(param_automate::automate), make_domain_item(osc_matrix.items, "Osc 2"),
     make_param_gui(section_fm, gui_edit_type::autofit_list, param_layout::vertical, { 0, 2 }, make_label_none())));
   fm_target.gui.tabular = true;
+  fm_target.gui.enable_dropdown_drop_target = true;
+  fm_target.gui.drop_route_enabled_param_value = 1;
+  fm_target.gui.drop_route_enabled_param_id = result.params[param_fm_on].info.tag.id;
   fm_target.gui.bindings.enabled.bind_params({ param_fm_on }, [](auto const& vs) { return vs[0] != 0; });
   fm_target.gui.item_enabled.bind_param({ module_osc_osc_matrix, 0, param_fm_source, gui_item_binding::match_param_slot },
     [osc = osc_matrix.mappings](int other, int self) {
@@ -226,9 +240,10 @@ osc_osc_matrix_topo(int section, gui_position const& pos, plugin_topo const* plu
   fm_mode.info.description = std::string("Selects unipolar/bipolar mode. ") + 
     "Bipolar causes the target Osc's phase to travel both forward and backward and is apparently referred to as through-zero FM.";
   auto& fm_amount = result.params.emplace_back(make_param(
-    make_topo_info_tabular("{444B0AFD-2B4A-40B5-B952-52002141C5DD}", "FM Index", "Index", param_fm_idx, route_count),
+    make_topo_info_tabular("{444B0AFD-2B4A-40B5-B952-52002141C5DD}", "FM Idx", "Idx", param_fm_idx, route_count),
     make_param_dsp_accurate(param_automate::modulate), make_domain_log(0, 1, 0.01, 0.05, 4, ""),
-    make_param_gui(section_fm, gui_edit_type::hslider, param_layout::vertical, { 0, 4 }, make_label_none())));
+    make_param_gui(section_fm, gui_edit_type::knob, param_layout::vertical, { 0, 4 },
+      make_label(gui_label_contents::drag, gui_label_align::left, gui_label_justify::center))));
   fm_amount.gui.tabular = true;
   fm_amount.gui.bindings.enabled.bind_params({ param_fm_on }, [](auto const& vs) { return vs[0] != 0; });
   fm_amount.info.description = std::string("Modulation index. This is really just a multiplier for the source signal. ") + 

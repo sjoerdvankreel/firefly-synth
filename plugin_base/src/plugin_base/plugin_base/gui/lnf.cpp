@@ -21,6 +21,16 @@ draw_tabular_cell_bg(Graphics& g, Component* c, int radius)
   g.fillRoundedRectangle(c->getLocalBounds().reduced(1).toFloat(), radius);
 }
 
+static int
+get_combobox_mod_target_indicator_width(ComboBox const& box, Font const& font)
+{
+  param_combobox const* param_cb = dynamic_cast<param_combobox const*>(&box);
+  if (param_cb == nullptr) return 0;
+  auto drop_action = param_cb->get_drop_target_action();
+  if (drop_action == drop_target_action::none) return 0;
+  return font.getStringWidth("[N/A]") + 2;
+}
+
 static void 
 draw_conic_arc(
   Graphics&g, float left, float top, float size, float start_angle, 
@@ -360,7 +370,9 @@ lnf::getTickShape(float h)
 void 
 lnf::positionComboBoxText(ComboBox& box, Label& label)
 {
-  label.setBounds(1, 1, box.getWidth() - 10, box.getHeight() - 2);
+  int mod_ind_width = get_combobox_mod_target_indicator_width(box, label.getFont());
+  if (mod_ind_width != 0) mod_ind_width += 2;
+  label.setBounds(1, 1, box.getWidth() - 10 - mod_ind_width, box.getHeight() - 2);
   label.setFont(getComboBoxFont(box));
 }   
 
@@ -569,12 +581,25 @@ void
 lnf::drawComboBox(Graphics& g, int width, int height, bool, int, int, int, int, ComboBox& box)
 {
   bool tabular = false;
-  if (auto ps = dynamic_cast<param_combobox*>(&box))
-    if (ps->param()->param->gui.tabular)
+  int box_width = width;
+  auto drop_action = drop_target_action::none;
+  int apply_mod_width = get_combobox_mod_target_indicator_width(box, g.getCurrentFont());
+
+  param_combobox* param_cb = dynamic_cast<param_combobox*>(&box);
+  if (param_cb != nullptr)
+  {
+    if (param_cb->param()->param->gui.tabular)
     {
       tabular = true;
       draw_tabular_cell_bg(g, &box, global_settings().table_cell_radius);
     }
+    drop_action = param_cb->get_drop_target_action();
+    if (drop_action != drop_target_action::none)
+    {
+      apply_mod_width = apply_mod_width;
+      box_width -= apply_mod_width + 2;
+    }
+  }
 
   Path path;
   int arrowPad = 4;
@@ -583,15 +608,34 @@ lnf::drawComboBox(Graphics& g, int width, int height, bool, int, int, int, int, 
   int const fixedHeight = combo_height(tabular) - (tabular? 4: 0);
   int const comboTop = height < fixedHeight ? 0 : (height - fixedHeight) / 2;
   auto cornerSize = box.findParentComponentOfClass<ChoicePropertyComponent>() != nullptr ? 0.0f : global_settings().combo_radius;
-  Rectangle<int> boxBounds(tabular? 3: 1, comboTop, width - 2 - (tabular? 4: 0), fixedHeight);
+  Rectangle<int> boxBounds(tabular? 3: 1, comboTop, box_width - 2 - (tabular? 4: 0), fixedHeight);
   g.setColour(Colours::white.withAlpha(0.125f));
   g.fillRoundedRectangle(boxBounds.toFloat(), cornerSize);
-  path.startNewSubPath(width - arrowWidth - arrowPad, height / 2 - arrowHeight / 2 + 1);
-  path.lineTo(width - arrowWidth / 2 - arrowPad, height / 2 + arrowHeight / 2 + 1);
-  path.lineTo(width - arrowPad, height / 2 - arrowHeight / 2 + 1);
+  path.startNewSubPath(box_width - arrowWidth - arrowPad, height / 2 - arrowHeight / 2 + 1);
+  path.lineTo(box_width - arrowWidth / 2 - arrowPad, height / 2 + arrowHeight / 2 + 1);
+  path.lineTo(box_width - arrowPad, height / 2 - arrowHeight / 2 + 1);
   path.closeSubPath();  
   g.setColour(box.findColour(ComboBox::arrowColourId).withAlpha((box.isEnabled() ? 0.9f : 0.2f)));
   g.fillPath(path);
+
+  if (!param_cb || drop_action == drop_target_action::none) return;
+
+  char const* drop_icon = nullptr;
+  if (drop_action == drop_target_action::ok) drop_icon = "[OK]";
+  else if (drop_action == drop_target_action::not_now) drop_icon = "[X]";
+  else if (drop_action == drop_target_action::never) drop_icon = "[N/A]";
+  else assert(false);
+
+  auto apply_mod_box = Rectangle<int>(
+    boxBounds.getTopRight().x + 2,
+    boxBounds.getTopLeft().y,
+    apply_mod_width,
+    boxBounds.getHeight());
+  g.setColour(Colours::darkgrey);
+  g.fillRoundedRectangle(apply_mod_box.toFloat(), 2.0f);
+  g.setColour(colors().control_text);
+  g.setFont(font());
+  g.drawText(drop_icon, apply_mod_box.toFloat(), Justification::centred);
 }
 
 void 
