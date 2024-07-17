@@ -475,7 +475,7 @@ cv_matrix_topo(
     make_topo_info("{86ECE946-D554-4445-B8ED-2A7380C910E4}", true, "Offset", "Off", "Off", param_offset, route_count),
     make_param_dsp_accurate(param_automate::modulate), make_domain_linear(-1, 1, 0, 2, ""),
     make_param_gui(section_main, gui_edit_type::knob, param_layout::vertical, { 0, 3 },
-      make_label(gui_label_contents::drag, gui_label_align::left, gui_label_justify::center))));
+      make_label(cv? gui_label_contents::none: gui_label_contents::drag, gui_label_align::left, gui_label_justify::center))));
   offset.gui.tabular = true;
   offset.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   offset.info.description = std::string("Source signal offset. Used to transform source before modulation is applied. ") +
@@ -484,7 +484,7 @@ cv_matrix_topo(
     make_topo_info("{6564CE04-0AB8-4CDD-8F3D-E477DD1F4715}", true, "Scale", "Scl", "Scl", param_scale, route_count),
     make_param_dsp_accurate(param_automate::modulate), make_domain_linear(1, 32, 1, 2, ""),
     make_param_gui(section_main, gui_edit_type::knob, param_layout::vertical, { 0, 4 },
-      make_label(gui_label_contents::drag, gui_label_align::left, gui_label_justify::center))));
+      make_label(cv ? gui_label_contents::none : gui_label_contents::drag, gui_label_align::left, gui_label_justify::center))));
   scale.gui.tabular = true;
   scale.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   scale.info.description = std::string("Source signal multiplier. Used to transform source before modulation is applied. ") +
@@ -493,7 +493,7 @@ cv_matrix_topo(
     make_topo_info_basic("{71E6F836-1950-4C8D-B62B-FAAD20B1FDBD}", "Min", param_min, route_count),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0, 0, true),
     make_param_gui(section_main, gui_edit_type::knob, param_layout::vertical, { 0, 5 },
-      make_label(gui_label_contents::drag, gui_label_align::left, gui_label_justify::center))));
+      make_label(cv ? gui_label_contents::none : gui_label_contents::drag, gui_label_align::left, gui_label_justify::center))));
   min.gui.tabular = true;
   min.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   min.info.description = "Defines the bounds of the modulation effect. When min > max, modulation will invert.";
@@ -501,7 +501,7 @@ cv_matrix_topo(
     make_topo_info_basic("{DB3A5D43-95CB-48DC-97FA-984F55B57F7B}", "Max", param_max, route_count),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(1, 0, true),
     make_param_gui(section_main, gui_edit_type::knob, param_layout::vertical, { 0, 6 },
-      make_label(gui_label_contents::drag, gui_label_align::left, gui_label_justify::center))));
+      make_label(cv ? gui_label_contents::none : gui_label_contents::drag, gui_label_align::left, gui_label_justify::center))));
   max.gui.tabular = true;
   max.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   max.info.description = "Defines the bounds of the modulation effect. When min > max, modulation will invert.";
