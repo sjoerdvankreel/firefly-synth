@@ -12,9 +12,20 @@ It's fully resizable by scaling (by dragging the bottom right corner) and also r
 A knob with a circle in it or a slider with a small dot in it means it can be modulated by the CV matrices.<br/>
 Hover over a parameter to see a more detailed description.
 
-### Drag-and-drop support
+### Drag-and-drop to mod matrix support
 
-Hooray!
+- Drag any parameter that can act as a mod source (Aux N, Mod Wheel etc) by dragging the parameter label
+- Drag any parameter that can act as a mod target (Osc Gain, Filter Freq etc) by dragging the parameter label
+- Drag any module that can act as a mod source (Global LFO N, Envelope N etc) by dragging the tab header
+- Drag any module that can act as an audio route source or target (Osc N, Voice FX N, Voice Out, Master Out etc) by dragging the tab header
+- For a modulatable parameter that is itself inside one of the mod matrices, drag that parameter by dragging the small dot left of it, to another mod matrix
+
+When dragging, the following indicators show whether the dragged item can be dropped onto a matrix route source/target:
+
+- No indicator means nothing can be dropped here
+- [N/A] means the dragged item can never be dropped here
+- [OK] means the dragged item can be dropped here. Release the mouse to apply.
+- [X] means the dragged item can not currently be dropped here because it would result in invalid routing.
 
 ## Theming
 
