@@ -23,9 +23,9 @@ Hover over a parameter to see a more detailed description.
 When dragging, the following indicators show whether the dragged item can be dropped onto a matrix route source/target:
 
 - No indicator means nothing can be dropped here
-- [N/A] means the dragged item can never be dropped here
-- [OK] means the dragged item can be dropped here. Release the mouse to apply.
-- [ X] means the dragged item can not currently be dropped here because it would result in invalid routing.
+- [ N/A ] means the dragged item can never be dropped here
+- [ OK ] means the dragged item can be dropped here. Release the mouse to apply.
+- [ X ] means the dragged item can not currently be dropped here because it would result in invalid routing.
 
 ## Theming
 
