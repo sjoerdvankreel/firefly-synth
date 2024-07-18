@@ -29,6 +29,7 @@ on release:
 - make note continuous
 - check if it can be made a better mod source
 - fix the tab width
+- fix the fx gui
 
 
 wishlist:
