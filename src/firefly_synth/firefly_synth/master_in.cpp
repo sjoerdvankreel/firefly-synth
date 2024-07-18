@@ -79,7 +79,7 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
   result.gui.menu_handler_factory = make_cv_routing_menu_handler;
   result.engine_factory = [](auto const&, int, int) { return std::make_unique<master_in_engine>(); };
 
-  auto section_aux_gui = make_param_section_gui({ 0, 0, 2, 4 }, gui_dimension({ 1, 1 }, {
+  auto section_aux_gui = make_param_section_gui({ 0, 0, 2, 2 }, gui_dimension({ 1, 1 }, {
       gui_dimension::auto_size_all, 1,
       gui_dimension::auto_size_all, 1,
       gui_dimension::auto_size_all, 1, }), 
@@ -105,7 +105,8 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
   aux.gui.display_formatter = [is_fx](auto const& desc) { return (desc.info.slot == 0 || (!is_fx && desc.info.slot == 3))? desc.info.name: std::to_string(desc.info.slot + 1); };
 
   auto linked_gui = make_param_section_gui(
-    { 0, 4, 2, 1 }, gui_dimension({ 1, 1 }, { gui_dimension::auto_size_all, 1 }), gui_label_edit_cell_split::horizontal);
+    { 0, 2, 2, 3 }, gui_dimension({ 1, 1 }, { gui_dimension::auto_size_all, 1 }), gui_label_edit_cell_split::horizontal);
+  // todo
   if(is_fx) linked_gui = make_param_section_gui(
     { 0, 5, 1, 1 }, gui_dimension({ 1 }, { 1, 1 }), gui_label_edit_cell_split::no_split);
   result.sections.emplace_back(make_param_section(section_linked,
