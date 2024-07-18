@@ -26,6 +26,10 @@ on release:
 - and hopefully get the nfr
 - drop min params
 - fix the stylesheets
+- make note continuous
+- check if it can be made a better mod source
+- fix the tab width
+
 
 wishlist:
 DSF falloff to the left

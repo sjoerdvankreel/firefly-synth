@@ -436,7 +436,7 @@ synth_topo(bool is_fx, std::string const& full_name)
   result->gui.module_sections[module_section_gfx] = make_module_section_gui(
     "{654B206B-27AE-4DFD-B885-772A8AD0A4F3}", module_section_gfx, { 2, 0, 1, 3 }, { 1, 1 });
   result->gui.module_sections[module_section_master_in] = make_module_section_gui_tabbed(
-    "{F9578AAA-66A4-4B0C-A941-4719B5F0E998}", module_section_master_in, { 1, 0, 1, 3 }, { module_master_in, module_master_smooth });
+    "{F9578AAA-66A4-4B0C-A941-4719B5F0E998}", module_section_master_in, { 1, 0, 1, 3 }, { module_master_in, module_master_settings });
   result->gui.module_sections[module_section_master_out] = make_module_section_gui(
     "{F77335AC-B701-40DA-B4C2-1F55DBCC29A4}", module_section_master_out, { 1, 3, 1, 1 }, { { 1 }, { 1 } });
   result->gui.module_sections[module_section_monitor] = make_module_section_gui(
@@ -485,7 +485,7 @@ synth_topo(bool is_fx, std::string const& full_name)
   result->modules[module_vlfo] = lfo_topo(is_fx ? module_section_hidden : module_section_vlfo, { 0, 0 }, false, is_fx);
   result->modules[module_osc] = osc_topo(is_fx ? module_section_hidden : module_section_osc, { 0, 0 });
   result->modules[module_master_in] = master_in_topo(module_section_master_in, is_fx, { 0, 0 });
-  result->modules[module_master_smooth] = master_smooth_topo(module_section_master_in, { 0, 0 });
+  result->modules[module_master_settings] = master_settings_topo(module_section_master_in, { 0, 0 });
   result->modules[module_voice_on_note] = voice_on_note_topo(result.get(), module_section_hidden); // must be after all global cv  
   result->modules[module_voice_in] = voice_in_topo(is_fx ? module_section_hidden : module_section_voice_in, { 0, 0 }); // must be after all cv
   result->modules[module_voice_out] = audio_out_topo(is_fx ? module_section_hidden : module_section_voice_out, { 0, 0 }, false, is_fx);
