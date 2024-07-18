@@ -11,7 +11,7 @@ namespace firefly_synth {
 static int const max_auto_smoothing_ms = 50;
 static int const max_other_smoothing_ms = 1000;
 
-enum { section_main };
+enum { section_main }; 
 enum { param_midi_smooth, param_tempo_smooth, param_auto_smooth, param_count };
 
 // we provide the buttons, everyone else needs to implement it
@@ -38,13 +38,13 @@ master_smooth_topo(int section, gui_position const& pos)
   std::vector<int> row_distribution = { 1 };
   std::vector<int> column_distribution = { 1 };
   module_topo result(make_module(
-    make_topo_info("{79A688D2-4223-489A-B2E4-3E78A7975C4D}", true, "Master Smoothing", "Master Smoothing", "Master Smoothing", module_master_smooth, 1),
+    make_topo_info("{79A688D2-4223-489A-B2E4-3E78A7975C4D}", true, "Settings", "Settings", "Settings", module_master_smooth, 1),
     make_module_dsp(module_stage::input, module_output::none, 0, {}),
       make_module_gui(section, pos, { row_distribution, column_distribution } )));
-  result.info.description = "Automation, MIDI and BPM smoothing control.";
+  result.info.description = "Microtuning support and automation, MIDI and BPM smoothing control.";
+  result.gui.tabbed_name = "Settings";
   result.graph_renderer = render_graph;
   result.force_rerender_on_param_hover = true;
-  result.gui.tabbed_name = "Smoothing";
 
   auto section_gui = make_param_section_gui({ 0, 0, 1, 1 }, gui_dimension({ 1, 1 }, { 1, 1, 1, 1 }), gui_label_edit_cell_split::horizontal);
   result.sections.emplace_back(make_param_section(section_main,

@@ -99,7 +99,7 @@
     },
     {
       "custom_sections": ["Global FX Graph", "Global LFO Graph"],
-      "module_sections": ["Master In", "Master Out", "Global FX", "Global LFO"],
+      "module_sections": ["Master In", "Master Out", "Global FX", "Global LFO", "Settings"],
       "colors": {
         "tab_text": "FF4488FF",
         "knob_thumb": "FF4488FF",

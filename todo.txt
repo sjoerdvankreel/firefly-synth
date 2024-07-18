@@ -21,9 +21,11 @@ on release:
 - + do the conversion
 - + fix the renoise demos
 - pretty up the master module
-- add mts-esp tab
+- make it a settings tab
 - plus implement it
 - and hopefully get the nfr
+- drop min params
+- fix the stylesheets
 
 wishlist:
 DSF falloff to the left
