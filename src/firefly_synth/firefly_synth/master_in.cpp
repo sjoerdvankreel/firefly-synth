@@ -104,7 +104,7 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
   aux.gui.alternate_drag_output_id = result.dsp.outputs[output_aux].info.tag.id;
 
   auto linked_gui = make_param_section_gui(
-    { 0, 3, 2, 2 }, gui_dimension({ 1, 1 }, { gui_dimension::auto_size_all, 1 }), gui_label_edit_cell_split::horizontal);
+    { 0, 3, 2, 1 }, gui_dimension({ 1, 1 }, { gui_dimension::auto_size_all, 1 }), gui_label_edit_cell_split::horizontal);
   // todo
   if(is_fx) linked_gui = make_param_section_gui(
     { 0, 5, 1, 1 }, gui_dimension({ 1 }, { 1, 1 }), gui_label_edit_cell_split::no_split);
@@ -129,7 +129,7 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
 
   result.sections.emplace_back(make_param_section(section_linked_pbrange,
     make_topo_tag_basic("{12EAD382-DF92-486C-A451-E19EC1C009BD}", "Linked PB Range"),
-    make_param_section_gui({ 0, 5, is_fx? 1: 2, 1 }, gui_dimension({ 1, 1 }, { 1 }),
+    make_param_section_gui({ 0, 4, is_fx? 1: 2, 2 /* todo fx */}, gui_dimension({1, 1}, {1}),
       gui_label_edit_cell_split::vertical)));
   auto& pb_range = result.params.emplace_back(make_param(
     make_topo_info("{79B7592A-4911-4B04-8F71-5DD4B2733F4F}", true, "PB Range", "Rng", "Range", param_pb_range, 1),
