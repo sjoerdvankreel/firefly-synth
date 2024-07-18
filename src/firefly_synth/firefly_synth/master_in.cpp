@@ -15,23 +15,18 @@ using namespace plugin_base;
 namespace firefly_synth {
 
 static int const aux_count = 6;
-static int const max_auto_smoothing_ms = 50;
-static int const max_other_smoothing_ms = 1000;
 
 enum { output_aux, output_mod, output_pb };
-enum { section_aux, section_auto_smooth, section_other_smooth, section_linked, section_linked_pbrange, section_glob_uni_prms, section_glob_uni_count };
+enum { section_aux, section_linked, section_linked_pbrange, section_glob_uni_prms, section_glob_uni_count };
 
 enum { 
-  param_aux, param_auto_smooth, param_midi_smooth, param_tempo_smooth, param_mod, param_pb, param_pb_range, 
+  param_aux, param_mod, param_pb, param_pb_range, 
   param_glob_uni_dtn, param_glob_uni_sprd, param_glob_uni_lfo_phase, 
   param_glob_uni_lfo_dtn, param_glob_uni_osc_phase, param_glob_uni_env_dtn, 
   param_glob_uni_voices, param_count };
 
 // we provide the buttons, everyone else needs to implement it
 extern int const master_in_param_pb_range = param_pb_range;
-extern int const master_in_param_auto_smooth = param_auto_smooth;
-extern int const master_in_param_midi_smooth = param_midi_smooth;
-extern int const master_in_param_tempo_smooth = param_tempo_smooth;
 extern int const master_in_param_glob_uni_dtn = param_glob_uni_dtn;
 extern int const master_in_param_glob_uni_sprd = param_glob_uni_sprd;
 extern int const master_in_param_glob_uni_voices = param_glob_uni_voices; 
@@ -55,10 +50,6 @@ render_graph(plugin_state const& state, graph_engine* engine, int param, param_t
     return graph_data(graph_data_type::na, {});
   float value = state.get_plain_at(mapping).real();
   bool bipolar = mapping.param_index == param_pb;
-  if(mapping.param_index == param_auto_smooth)
-    value /= max_auto_smoothing_ms;
-  if(mapping.param_index == param_midi_smooth || mapping.param_index == param_tempo_smooth)
-    value /= max_other_smoothing_ms;
   std::string partition = state.desc().params[param]->info.name;
   return graph_data(value, bipolar, { partition });
 }
@@ -88,11 +79,12 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
   result.gui.menu_handler_factory = make_cv_routing_menu_handler;
   result.engine_factory = [](auto const&, int, int) { return std::make_unique<master_in_engine>(); };
 
-  auto section_aux_gui = make_param_section_gui({ 0, 2, 2, 2 }, gui_dimension({ 1, 1 }, {
+  auto section_aux_gui = make_param_section_gui({ 0, 0, 2, 4 }, gui_dimension({ 1, 1 }, {
       gui_dimension::auto_size_all, 1,
       gui_dimension::auto_size_all, 1,
       gui_dimension::auto_size_all, 1, }), 
       gui_label_edit_cell_split::horizontal);
+  // TODO
   if(is_fx) section_aux_gui = make_param_section_gui({ 0, 0, 1, 3 }, gui_dimension({ 1 }, { 
       gui_dimension::auto_size_all, 1,
       gui_dimension::auto_size_all, 1,
@@ -111,34 +103,6 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
   aux.info.description = "Auxilliary controls to be used through automation and the CV matrices.";
   aux.gui.alternate_drag_output_id = result.dsp.outputs[output_aux].info.tag.id;
   aux.gui.display_formatter = [is_fx](auto const& desc) { return (desc.info.slot == 0 || (!is_fx && desc.info.slot == 3))? desc.info.name: std::to_string(desc.info.slot + 1); };
-
-  auto auto_smooth_gui = make_param_section_gui({ 0, 1, 2, 1 }, gui_dimension({ 1, 1 }, { { 1 } }), gui_label_edit_cell_split::vertical);
-  if(is_fx) auto_smooth_gui = make_param_section_gui({ 0, 3, 1, 1 }, gui_dimension({ 1 }, { { 1 } }), gui_label_edit_cell_split::no_split);
-  result.sections.emplace_back(make_param_section(section_auto_smooth,
-    make_topo_tag_basic("{E55E8C1C-84CD-4965-97FF-8F0779775EC1}", "Automation Smoothing"), auto_smooth_gui));
-  auto& auto_smooth = result.params.emplace_back(make_param(
-    make_topo_info("{468FE12E-C1A1-43DF-8D87-ED6C93B2C08D}", true, "Automation Smoothing", "AutoSmt", "Auto Smt", param_auto_smooth, 1),
-    make_param_dsp_input(false, param_automate::none), make_domain_linear(1, max_auto_smoothing_ms, 1, 0, "Ms"),
-    make_param_gui_single(section_auto_smooth, is_fx? gui_edit_type::knob: gui_edit_type::hslider, { 0, 0 },
-      make_label(gui_label_contents::name, is_fx? gui_label_align::left: gui_label_align::top, is_fx ? gui_label_justify::near: gui_label_justify::center))));
-  auto_smooth.info.description = "Smoothing automation parameter changes.";
-
-  auto other_smooth_gui = make_param_section_gui({ 0, 0, 2, 1 }, gui_dimension({ 1, 1 }, { { 1 } }), gui_label_edit_cell_split::no_split);
-  if(is_fx) other_smooth_gui = make_param_section_gui({ 0, 4, 1, 1 }, gui_dimension({ 1 }, { { 1, 1 } }), gui_label_edit_cell_split::no_split);
-  result.sections.emplace_back(make_param_section(section_other_smooth,
-    make_topo_tag_basic("{22B9E1E5-EC4E-47E0-ABED-6265C6CB03A9}", "Other Smoothing"), other_smooth_gui));
-  auto& midi_smooth = result.params.emplace_back(make_param(
-    make_topo_info("{EEA24DB4-220A-4C13-A895-B157BF6158A9}", true, "MIDI Smoothing", "MIDI Smt", "MIDI Smt", param_midi_smooth, 1),
-    make_param_dsp_input(false, param_automate::none), make_domain_linear(1, max_other_smoothing_ms, 50, 0, "Ms"),
-    make_param_gui_single(section_other_smooth, gui_edit_type::knob, { 0, 0 },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  midi_smooth.info.description = "Smoothing MIDI controller changes.";
-  auto& bpm_smooth = result.params.emplace_back(make_param(
-    make_topo_info("{75053CE4-1543-4595-869D-CC43C6F8CB85}", true, "BPM Smoothing", "BPM Smt", "BPM Smt", param_tempo_smooth, 1),
-    make_param_dsp_input(false, param_automate::none), make_domain_linear(1, max_other_smoothing_ms, 200, 0, "Ms"),
-    make_param_gui_single(section_other_smooth, gui_edit_type::knob, { is_fx? 0: 1, is_fx? 1: 0 },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  bpm_smooth.info.description = "Smoothing host BPM parameter changes. Affects tempo-synced delay lines.";
 
   auto linked_gui = make_param_section_gui(
     { 0, 4, 2, 1 }, gui_dimension({ 1, 1 }, { gui_dimension::auto_size_all, 1 }), gui_label_edit_cell_split::horizontal);
