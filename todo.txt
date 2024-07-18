@@ -16,6 +16,14 @@ on release:
 10 make a github release
 11 update kvr
 
+1.8.4
+- split smoothing params to sepate module
+- + do the conversion
+- + fix the renoise demos
+- add mts-esp tab
+- plus implement it
+- and hopefully get the nfr
+
 wishlist:
 DSF falloff to the left
 clap polyphonic modulation
