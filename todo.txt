@@ -20,6 +20,7 @@ on release:
 - split smoothing params to sepate module
 - + do the conversion
 - + fix the renoise demos
+- pretty up the master module
 - add mts-esp tab
 - plus implement it
 - and hopefully get the nfr
