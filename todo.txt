@@ -17,21 +17,19 @@ on release:
 11 update kvr
 
 1.8.4
-- split smoothing params to sepate module
-- + do the conversion
-- + fix the renoise demos
-- pretty up the master module
-- make it a settings tab
-- plus implement it
-- and hopefully get the nfr
-- drop min params
-- fix the stylesheets
+V split smoothing params to separate module
+V + do the conversion
+V pretty up the master module
+V make it a settings tab
+V and hopefully get the nfr
+V drop mstin params
+V fix the stylesheets
+- fix the renoise demos
 - make note continuous
 - check if it can be made a better mod source
 - fix the tab width
 - fix the fx gui
 - refix all the patches
-
 
 wishlist:
 DSF falloff to the left
