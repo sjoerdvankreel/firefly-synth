@@ -453,8 +453,8 @@ load_state_internal(
     auto const& mod_topo = state.desc().plugin->modules[m];
     if (mod_topo.state_converter_factory != nullptr)
     {
-      auto converter = mod_topo.state_converter_factory(&state.desc());
-      if (converter) converter->post_process_always(handler, state);
+      auto always_converter = mod_topo.state_converter_factory(&state.desc());
+      if (always_converter) always_converter->post_process_always(handler, state);
     }
   }
 
