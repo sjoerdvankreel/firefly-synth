@@ -71,7 +71,7 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
       make_module_dsp_output(true, make_topo_info("{EB8CBA31-212A-42EA-956E-69063BF93C58}", true, "Pitch Bend", "PB", "PB", output_pb, 1)) }),
       make_module_gui(section, pos, { row_distribution, column_distribution } )));
   result.gui.tabbed_name = "Master In";
-  result.info.description = "Master CV module with automation, MIDI and BPM smoothing, MIDI-linked modwheel and pitchbend plus some additional freely-assignable parameters.";
+  result.info.description = "Master CV module with MIDI-linked modwheel and pitchbend, some additional freely-assignable parameters and global unison support.";
 
   result.graph_renderer = render_graph;
   result.force_rerender_on_param_hover = true;

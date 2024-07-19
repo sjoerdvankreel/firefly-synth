@@ -1,6 +1,7 @@
 #include <plugin_base/topo/plugin.hpp>
 #include <plugin_base/topo/support.hpp>
 #include <plugin_base/dsp/graph_engine.hpp>
+#include <plugin_base/shared/io_plugin.hpp>
 
 #include <firefly_synth/synth.hpp>
 
@@ -32,6 +33,44 @@ render_graph(plugin_state const& state, graph_engine* engine, int param, param_t
   return graph_data(value, false, { partition });
 }
 
+class master_settings_state_converter :
+public state_converter
+{
+  plugin_desc const* const _desc;
+public:
+  master_settings_state_converter(plugin_desc const* const desc) : _desc(desc) {}
+  void post_process(load_handler const& handler, plugin_state& new_state) override;
+
+  // No params changed, just moved to other module, so we have to post_process everything.
+  bool handle_invalid_param_value(
+    std::string const& new_module_id, int new_module_slot,
+    std::string const& new_param_id, int new_param_slot,
+    std::string const& old_value, load_handler const& handler,
+    plain_value& new_value) override { return false; }
+};
+
+void
+master_settings_state_converter::post_process(load_handler const& handler, plugin_state& new_state)
+{
+  std::string old_value;
+  auto const& modules = new_state.desc().plugin->modules;
+  std::string master_in_id = modules[module_master_in].info.tag.id;
+
+  // All smoothing params moved from Master-In to Master-Settings.
+  if (handler.old_version() < plugin_version{ 1, 8, 4 })
+  {
+    // pick up value from midi smoothing
+    if (handler.old_param_value(master_in_id, 0, "{EEA24DB4-220A-4C13-A895-B157BF6158A9}", 0, old_value))
+      new_state.set_text_at(module_master_settings, 0, param_midi_smooth, 0, old_value);
+    // pick up value from bpm smoothing
+    if (handler.old_param_value(master_in_id, 0, "{75053CE4-1543-4595-869D-CC43C6F8CB85}", 0, old_value))
+      new_state.set_text_at(module_master_settings, 0, param_tempo_smooth, 0, old_value);
+    // pick up value from automation smoothing
+    if (handler.old_param_value(master_in_id, 0, "{468FE12E-C1A1-43DF-8D87-ED6C93B2C08D}", 0, old_value))
+      new_state.set_text_at(module_master_settings, 0, param_auto_smooth, 0, old_value);
+  }
+}
+
 module_topo
 master_settings_topo(int section, gui_position const& pos)
 {
@@ -45,6 +84,7 @@ master_settings_topo(int section, gui_position const& pos)
   result.gui.tabbed_name = "Master Settings";
   result.graph_renderer = render_graph;
   result.force_rerender_on_param_hover = true;
+  result.state_converter_factory = [](auto desc) { return std::make_unique<master_settings_state_converter>(desc); };
 
   auto section_gui = make_param_section_gui({ 0, 0, 1, 1 }, gui_dimension({ 1, 1 }, { 1, 1 }));
   result.sections.emplace_back(make_param_section(section_main,
