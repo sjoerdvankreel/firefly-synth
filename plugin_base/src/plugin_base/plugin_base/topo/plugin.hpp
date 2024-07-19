@@ -50,6 +50,7 @@ struct module_section_gui final {
   int index;
   bool tabbed;
   bool visible;
+  float tab_header_total_width = 1.0f;
 
   std::string id;
   gui_position position;

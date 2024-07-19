@@ -349,11 +349,17 @@ lnf::getLabelFont(Label& label)
   return result;
 }
 
+module_section_gui const&
+lnf::get_module_section_gui() const
+{
+  assert(_module_section != -1);
+  return _desc->plugin->gui.module_sections[_module_section];
+}
+
 int
 lnf::tab_width() const
 {
-  assert(_module_section != -1);
-  auto const& section = _desc->plugin->gui.module_sections[_module_section];
+  auto const& section = get_module_section_gui();
   if(section.tabbed) return -1;
   auto full_name = _desc->plugin->modules[_module].info.tag.full_name;
   return _module_settings.contains(full_name) ? _module_settings.at(full_name).tab_width : _default_settings.tab_width;
@@ -380,7 +386,7 @@ int
 lnf::getTabButtonBestWidth(TabBarButton& b, int)
 { 
   int result = tab_width();
-  if(result == -1) return b.getTabbedButtonBar().getWidth() / b.getTabbedButtonBar().getNumTabs();
+  if(result == -1) return b.getTabbedButtonBar().getWidth() / b.getTabbedButtonBar().getNumTabs() * get_module_section_gui().tab_header_total_width;
   auto full_name = _desc->plugin->modules[_module].info.tag.full_name;
   int header_width = _default_settings.header_width;
   if(_module_settings.contains(full_name)) header_width = _module_settings.at(full_name).header_width;

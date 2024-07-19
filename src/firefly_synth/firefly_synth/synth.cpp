@@ -460,6 +460,7 @@ synth_topo(bool is_fx, std::string const& full_name)
       "{7A457CCC-E719-4C07-98B1-017EA7DEFB1F}", module_section_osc, { 4, 0, 1, 3 }, { { 1 }, { 1 } });
     result->gui.module_sections[module_section_voice_in] = make_module_section_gui(
       "{FB435C64-8349-4F0F-84FC-FFC82002D69F}", module_section_voice_in, { 5, 0, 1, 3 }, { { 1 }, { 1 } });
+    result->gui.module_sections[module_section_voice_in].tab_header_total_width = 0.5;
     result->gui.module_sections[module_section_voice_out] = make_module_section_gui(
       "{2B764ECA-B745-4087-BB73-1B5952BC6B96}", module_section_voice_out, { 5, 3, 1, 1 }, { { 1 }, { 1 } });
 
