@@ -1,3 +1,8 @@
+### ?, ? - Add Microtuning (MTS-ESP) support.
+
+- Moved smoothing parameters from Master In to new Master Settings module.
+- Conversion code will fix existing patches, but Renoise automation data will be broken.
+
 ### July 17, 2024 - V1.8.3.
 
 - Add drag-and-drop to mod matrix support.
