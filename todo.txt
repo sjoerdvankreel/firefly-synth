@@ -30,6 +30,7 @@ on release:
 - check if it can be made a better mod source
 - fix the tab width
 - fix the fx gui
+- refix all the patches
 
 
 wishlist:
