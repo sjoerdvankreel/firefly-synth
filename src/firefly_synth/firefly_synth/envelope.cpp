@@ -70,7 +70,8 @@ public state_converter
   plugin_desc const* const _desc;
 public:
   env_state_converter(plugin_desc const* const desc) : _desc(desc) {}
-  void post_process(load_handler const& handler, plugin_state& new_state) override;
+  void post_process_always(load_handler const& handler, plugin_state& new_state) override {}
+  void post_process_existing(load_handler const& handler, plugin_state& new_state) override;
 
   bool handle_invalid_param_value(
     std::string const& new_module_id, int new_module_slot,
@@ -246,7 +247,7 @@ env_state_converter::handle_invalid_param_value(
 }
 
 void
-env_state_converter::post_process(load_handler const& handler, plugin_state& new_state)
+env_state_converter::post_process_existing(load_handler const& handler, plugin_state& new_state)
 {
   std::string old_value;
   auto const& modules = new_state.desc().plugin->modules;

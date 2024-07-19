@@ -441,7 +441,20 @@ load_state_internal(
 
       // all params are set, do optional post-process conversion
       if(converter) 
-        converter->post_process(handler, state);
+        converter->post_process_existing(handler, state);
+    }
+  }
+
+  // run unconditional postprocessors
+  // this is mainly meant to allow completely new stuff to copy over old stuff
+  for (int m = 0; m < state.desc().plugin->modules.size(); m++)
+  {
+    std::unique_ptr<state_converter> converter = {};
+    auto const& mod_topo = state.desc().plugin->modules[m];
+    if (mod_topo.state_converter_factory != nullptr)
+    {
+      auto converter = mod_topo.state_converter_factory(&state.desc());
+      if (converter) converter->post_process_always(handler, state);
     }
   }
 

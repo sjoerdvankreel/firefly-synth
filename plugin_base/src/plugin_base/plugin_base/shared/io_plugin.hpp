@@ -50,8 +50,12 @@ public:
     std::string const& old_value, load_handler const& handler, 
     plain_value& new_value) = 0;
 
+  // post process based on state present in the patch
   virtual void
-  post_process(load_handler const& handler, plugin_state& new_state) = 0;
+  post_process_existing(load_handler const& handler, plugin_state& new_state) = 0;
+  // post processing unconditionally
+  virtual void
+  post_process_always(load_handler const& handler, plugin_state& new_state) = 0;
 };
 
 std::vector<char> plugin_io_save_state(plugin_state const& state);

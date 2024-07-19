@@ -64,7 +64,8 @@ public state_converter
   plugin_desc const* const _desc;
 public:
   voice_in_state_converter(plugin_desc const* const desc) : _desc(desc) {}
-  void post_process(load_handler const& handler, plugin_state& new_state) override {}
+  void post_process_always(load_handler const& handler, plugin_state& new_state) override {}
+  void post_process_existing(load_handler const& handler, plugin_state& new_state) override {}
 
   bool handle_invalid_param_value(
     std::string const& new_module_id, int new_module_slot,
