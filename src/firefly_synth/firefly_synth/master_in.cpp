@@ -58,7 +58,7 @@ module_topo
 master_in_topo(int section, bool is_fx, gui_position const& pos)
 {
   std::vector<int> row_distribution = { 1, 1 };
-  std::vector<int> column_distribution = { 37, 27, 26, 44, 24, 18, 92, 16 };
+  std::vector<int> column_distribution = { 37, 27, 26, 44, 24, 18, 76, 32 };
   if(is_fx) 
   {
     row_distribution = { 1 };
@@ -196,7 +196,7 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
     make_topo_tag_basic("{550AAF78-C95A-4D4E-814C-0C5CC26C6457}", "Global Unison Voices"),
     make_param_section_gui({ 0, 7, is_fx? 1: 2, 1 }, gui_dimension({ 1, 1 }, { 1 }), gui_label_edit_cell_split::vertical)));
   auto& glob_uni_voices = result.params.emplace_back(make_param(
-    make_topo_info("{C2B06E63-0283-4564-BABB-F20D9B30AD68}", true, "Global Unison Voices", "Uni", "Uni", param_glob_uni_voices, 1),
+    make_topo_info("{C2B06E63-0283-4564-BABB-F20D9B30AD68}", true, "Global Unison Voices", "Global Uni", "Uni", param_glob_uni_voices, 1),
     make_param_dsp_block(param_automate::automate), make_domain_step(1, max_global_unison_voices, 1, 0),
     make_param_gui_single(section_glob_uni_count, gui_edit_type::list, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::top, gui_label_justify::center))));
