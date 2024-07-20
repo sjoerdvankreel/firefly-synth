@@ -24,6 +24,8 @@ V make it a settings tab
 V and hopefully get the nfr
 V drop mstin params
 V fix the stylesheets
+- show mts status in output section
+- do mts mode in glbal settings section
 - fix the renoise demos
 - make note continuous
 - check if it can be made a better mod source
