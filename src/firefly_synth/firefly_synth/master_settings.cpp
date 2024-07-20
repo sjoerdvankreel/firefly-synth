@@ -91,19 +91,19 @@ master_settings_topo(int section, gui_position const& pos)
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag_basic("{D02F55AF-1DC8-48F0-B12A-43B47AD6E392}", "Smoothing"), section_gui));
   auto& midi_smooth = result.params.emplace_back(make_param(
-    make_topo_info("{887D373C-D978-48F7-A9E7-70C03A58492A}", true, "MIDI Smoothing", "MIDI Smoothing", "MIDI Smoothing", param_midi_smooth, 1),
+    make_topo_info("{887D373C-D978-48F7-A9E7-70C03A58492A}", true, "MIDI Smooth", "MIDI Smooth", "MIDI Smooth", param_midi_smooth, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_linear(1, max_other_smoothing_ms, 50, 0, "Ms"),
     make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   midi_smooth.info.description = "Smoothing MIDI controller changes.";
   auto& bpm_smooth = result.params.emplace_back(make_param(
-    make_topo_info("{AA564CE1-4F1E-44F5-89D9-130F17F4185C}", true, "BPM Smoothing", "BPM Smoothing", "BPM Smoothing", param_tempo_smooth, 1),
+    make_topo_info("{AA564CE1-4F1E-44F5-89D9-130F17F4185C}", true, "BPM Smooth", "BPM Smooth", "BPM Smooth", param_tempo_smooth, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_linear(1, max_other_smoothing_ms, 200, 0, "Ms"),
     make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 1 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   bpm_smooth.info.description = "Smoothing host BPM parameter changes. Affects tempo-synced delay lines.";
   auto& auto_smooth = result.params.emplace_back(make_param(
-    make_topo_info("{852632AB-EF17-47DB-8C5A-3DB32BA78571}", true, "Automation Smoothing", "Automation Smoothing", "Automation Smoothing", param_auto_smooth, 1),
+    make_topo_info("{852632AB-EF17-47DB-8C5A-3DB32BA78571}", true, "Auto Smooth", "Auto Smooth", "Auto Smooth", param_auto_smooth, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_linear(1, max_auto_smoothing_ms, 1, 0, "Ms"),
     make_param_gui_single(section_main, gui_edit_type::hslider, { 1, 0, 1, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::far))));

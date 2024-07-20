@@ -32,6 +32,7 @@ V fix the stylesheets
 - refix all the patches
 
 wishlist:
+green-on-white UI
 DSF falloff to the left
 clap polyphonic modulation
 full-blown renoise support
