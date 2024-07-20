@@ -386,7 +386,13 @@ int
 lnf::getTabButtonBestWidth(TabBarButton& b, int)
 { 
   int result = tab_width();
-  if(result == -1) return b.getTabbedButtonBar().getWidth() / b.getTabbedButtonBar().getNumTabs() * get_module_section_gui().tab_header_total_width;
+  if (result == -1)
+  {
+    float sizing = get_module_section_gui().tab_header_total_width;
+    float bar_width = b.getTabbedButtonBar().getWidth();
+    int tab_count = b.getTabbedButtonBar().getNumTabs();
+    return bar_width / tab_count * sizing;
+  }
   auto full_name = _desc->plugin->modules[_module].info.tag.full_name;
   int header_width = _default_settings.header_width;
   if(_module_settings.contains(full_name)) header_width = _module_settings.at(full_name).header_width;
