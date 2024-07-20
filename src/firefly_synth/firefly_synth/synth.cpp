@@ -437,6 +437,7 @@ synth_topo(bool is_fx, std::string const& full_name)
     "{654B206B-27AE-4DFD-B885-772A8AD0A4F3}", module_section_gfx, { 2, 0, 1, 3 }, { 1, 1 });
   result->gui.module_sections[module_section_master_in] = make_module_section_gui_tabbed(
     "{F9578AAA-66A4-4B0C-A941-4719B5F0E998}", module_section_master_in, { 1, 0, 1, 3 }, { module_master_in, module_master_settings });
+  result->gui.module_sections[module_section_master_in].tab_header_total_width = 0.5;
   result->gui.module_sections[module_section_master_out] = make_module_section_gui(
     "{F77335AC-B701-40DA-B4C2-1F55DBCC29A4}", module_section_master_out, { 1, 3, 1, 1 }, { { 1 }, { 1 } });
   result->gui.module_sections[module_section_monitor] = make_module_section_gui(
@@ -460,7 +461,6 @@ synth_topo(bool is_fx, std::string const& full_name)
       "{7A457CCC-E719-4C07-98B1-017EA7DEFB1F}", module_section_osc, { 4, 0, 1, 3 }, { { 1 }, { 1 } });
     result->gui.module_sections[module_section_voice_in] = make_module_section_gui(
       "{FB435C64-8349-4F0F-84FC-FFC82002D69F}", module_section_voice_in, { 5, 0, 1, 3 }, { { 1 }, { 1 } });
-    result->gui.module_sections[module_section_voice_in].tab_header_total_width = 0.5;
     result->gui.module_sections[module_section_voice_out] = make_module_section_gui(
       "{2B764ECA-B745-4087-BB73-1B5952BC6B96}", module_section_voice_out, { 5, 3, 1, 1 }, { { 1 }, { 1 } });
 
