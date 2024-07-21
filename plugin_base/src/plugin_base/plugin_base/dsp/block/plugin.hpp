@@ -97,7 +97,7 @@ struct plugin_block final {
   bool graph;
 
   // MTS-ESP support
-  MTSClient* _mts_client = {};
+  MTSClient* mts_client = {};
 
   int start_frame;
   int end_frame;

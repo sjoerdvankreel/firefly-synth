@@ -2,6 +2,7 @@
 
 #include <plugin_base/topo/domain.hpp>
 #include <plugin_base/shared/jarray.hpp>
+#include <Client/libMTSClient.h>
 
 #include <cmath>
 #include <utility>
@@ -217,8 +218,21 @@ check_bipolar(float val)
 
 inline float mix_signal(float mix, float dry, float wet) 
 { return (1.0f - mix) * dry + mix * wet; }
-inline float pitch_to_freq(float pitch)
+
+inline float pitch_to_freq_no_tuning(float pitch)
 { return 440.0f * std::pow(2.0f, (pitch - 69.0f) / 12.0f); }
+
+// TODO hunt down occurrences of this, see where it makes sense
+inline float pitch_to_freq_continuous_tuning(MTSClient* mts_client, float pitch, int channel)
+{
+  assert(mts_client);
+  int pitch1 = (int)std::floor(pitch);
+  int pitch2 = (int)std::ceil(pitch);
+  float weight = pitch - pitch1;
+  float freq1 = MTS_NoteToFrequency(mts_client, (char)pitch1, (char)channel);
+  float freq2 = MTS_NoteToFrequency(mts_client, (char)pitch2, (char)channel);
+  return freq1 * (1.0f - weight) + freq2 * weight; // LERP
+}
 
 inline float timesig_to_freq(float bpm, timesig const& sig) 
 { return bpm / (60.0f * 4.0f * sig.num / sig.den); }
