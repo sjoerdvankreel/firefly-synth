@@ -73,7 +73,7 @@ master_settings_state_converter::post_process_always(load_handler const& handler
 }
 
 module_topo
-master_settings_topo(int section, gui_position const& pos)
+master_settings_topo(int section, bool is_fx, gui_position const& pos)
 {
   std::vector<int> row_distribution = { 1 };
   std::vector<int> column_distribution = { 1 };
@@ -87,25 +87,27 @@ master_settings_topo(int section, gui_position const& pos)
   result.force_rerender_on_param_hover = true;
   result.state_converter_factory = [](auto desc) { return std::make_unique<master_settings_state_converter>(desc); };
 
-  auto section_gui = make_param_section_gui({ 0, 0, 1, 1 }, gui_dimension({ 1, 1 }, { 1, 1 }));
+  gui_dimension dimension({ 1, 1 }, { 1, 1 });
+  if (is_fx) dimension = gui_dimension({ 1 }, { 1, 1, 1 });
+  auto section_gui = make_param_section_gui({ 0, 0, 1, 1 }, dimension);
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag_basic("{D02F55AF-1DC8-48F0-B12A-43B47AD6E392}", "Smoothing"), section_gui));
   auto& midi_smooth = result.params.emplace_back(make_param(
-    make_topo_info("{887D373C-D978-48F7-A9E7-70C03A58492A}", true, "MIDI Smooth", "MIDI Smooth", "MIDI Smooth", param_midi_smooth, 1),
+    make_topo_info("{887D373C-D978-48F7-A9E7-70C03A58492A}", true, "MIDI Smoothing", "MIDI Smooth", "MIDI Smooth", param_midi_smooth, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_linear(1, max_other_smoothing_ms, 50, 0, "Ms"),
     make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   midi_smooth.info.description = "Smoothing MIDI controller changes.";
   auto& bpm_smooth = result.params.emplace_back(make_param(
-    make_topo_info("{AA564CE1-4F1E-44F5-89D9-130F17F4185C}", true, "BPM Smooth", "BPM Smooth", "BPM Smooth", param_tempo_smooth, 1),
+    make_topo_info("{AA564CE1-4F1E-44F5-89D9-130F17F4185C}", true, "BPM Smoothing", "BPM Smooth", "BPM Smooth", param_tempo_smooth, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_linear(1, max_other_smoothing_ms, 200, 0, "Ms"),
     make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 1 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   bpm_smooth.info.description = "Smoothing host BPM parameter changes. Affects tempo-synced delay lines.";
   auto& auto_smooth = result.params.emplace_back(make_param(
-    make_topo_info("{852632AB-EF17-47DB-8C5A-3DB32BA78571}", true, "Auto Smooth", "Auto Smooth", "Auto Smooth", param_auto_smooth, 1),
+    make_topo_info("{852632AB-EF17-47DB-8C5A-3DB32BA78571}", true, "Automation Smoothing", "Auto Smooth", "Auto Smooth", param_auto_smooth, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_linear(1, max_auto_smoothing_ms, 1, 0, "Ms"),
-    make_param_gui_single(section_main, gui_edit_type::hslider, { 1, 0, 1, 2 },
+    make_param_gui_single(section_main, gui_edit_type::hslider, { is_fx? 0: 1, is_fx? 2: 0, 1, is_fx? 1: 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::far))));
   auto_smooth.info.description = "Smoothing automation parameter changes.";
 
