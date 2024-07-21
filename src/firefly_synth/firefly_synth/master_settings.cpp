@@ -98,9 +98,9 @@ master_settings_topo(int section, bool is_fx, gui_position const& pos)
   result.force_rerender_on_param_hover = true;
   result.state_converter_factory = [](auto desc) { return std::make_unique<master_settings_state_converter>(desc); };
 
-  gui_dimension dimension({ 1, 1 }, { 1, 1 });
-  if (is_fx) dimension = gui_dimension({ 1 }, { 1, 1, 1 });
-  auto section_gui = make_param_section_gui({ 0, 0, 1, 1 }, dimension);
+  gui_dimension dimension({ 1, 1 }, { gui_dimension::auto_size_all, 1, gui_dimension::auto_size_all, 1 });
+  if (is_fx) dimension = gui_dimension({ 1 }, { gui_dimension::auto_size_all, 1, gui_dimension::auto_size_all, 1, gui_dimension::auto_size_all, 1 });
+  auto section_gui = make_param_section_gui({ 0, 0, 1, 1 }, dimension, gui_label_edit_cell_split::horizontal);
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag_basic("{D02F55AF-1DC8-48F0-B12A-43B47AD6E392}", "Smoothing"), section_gui));
   auto& midi_smooth = result.params.emplace_back(make_param(
@@ -112,13 +112,13 @@ master_settings_topo(int section, bool is_fx, gui_position const& pos)
   auto& bpm_smooth = result.params.emplace_back(make_param(
     make_topo_info("{AA564CE1-4F1E-44F5-89D9-130F17F4185C}", true, "BPM Smoothing", "BPM Smooth", "BPM Smooth", param_tempo_smooth, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_linear(1, max_other_smoothing_ms, 200, 0, "Ms"),
-    make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 1 },
+    make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   bpm_smooth.info.description = "Smoothing host BPM parameter changes. Affects tempo-synced delay lines.";
   auto& auto_smooth = result.params.emplace_back(make_param(
     make_topo_info("{852632AB-EF17-47DB-8C5A-3DB32BA78571}", true, "Automation Smoothing", "Auto Smooth", "Auto Smooth", param_auto_smooth, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_linear(1, max_auto_smoothing_ms, 1, 0, "Ms"),
-    make_param_gui_single(section_main, gui_edit_type::hslider, { is_fx? 0: 1, is_fx? 2: 0, 1, 1 },
+    make_param_gui_single(section_main, gui_edit_type::hslider, { is_fx? 0: 1, is_fx? 4: 0, 1, 1 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::far))));
   auto_smooth.info.description = "Smoothing automation parameter changes.";
 
@@ -127,7 +127,7 @@ master_settings_topo(int section, bool is_fx, gui_position const& pos)
   auto& tuning_mode = result.params.emplace_back(make_param(
     make_topo_info("{EC300412-5D8D-49B7-97DD-44C967A76ADC}", true, "Tuning Mode", "Tuning", "Tuning", param_tuning_mode, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_item(tuning_mode_items(), "Off"),
-    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 1, 1 },
+    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 1, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   tuning_mode.info.description = "Selects MTS-ESP microtuning mode.";
 
