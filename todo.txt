@@ -32,6 +32,7 @@ V fix the stylesheets
 - fix the tab width
 - fix the fx gui
 - refix all the patches
+- figure out how to interpolate/modulate
 
 wishlist:
 green-on-white UI
