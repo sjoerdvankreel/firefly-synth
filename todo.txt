@@ -42,6 +42,7 @@ full-blown renoise support
 fix global unison for mono mode
 fixed random at voice start as mod source
 Feedback FM - but needs per-sample processing, not block
+turn on stuff when dragging (e.g. basic sin, dist skew etc)
 arpeggiator - hard - but easy -> play multiple octaves on-note. or maybe allow 3/s, 5/s, whatever selection
 
 wishlist sometime:
