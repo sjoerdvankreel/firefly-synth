@@ -15,6 +15,7 @@ namespace plugin_base::vst3 {
 
 pb_component::
 pb_component(plugin_topo const* topo, FUID const& controller_id) :
+_mts_client(MTS_RegisterClient()),
 _desc(std::make_unique<plugin_desc>(topo, nullptr)),
 _splice_engine(_desc.get(), false, nullptr, nullptr)
 {

@@ -7,6 +7,7 @@
 #include <plugin_base.clap/utility.hpp>
 
 #include <clap/helpers/plugin.hh>
+#include <Client/libMTSClient.h>
 #include <readerwriterqueue.h>
 
 #include <memory>
@@ -25,6 +26,9 @@ public any_state_listener,
 public gui_param_listener
 {
   typedef moodycamel::ReaderWriterQueue<sync_event, default_q_size> event_queue;
+
+  // MTS-ESP support
+  MTSClient* _mts_client = {};
 
   // needs to be first, everyone else needs it
   std::unique_ptr<plugin_desc> _desc;

@@ -5,12 +5,17 @@
 #include <plugin_base/shared/utility.hpp>
 
 #include <public.sdk/source/vst/vstaudioeffect.h>
+#include <Client/libMTSClient.h>
+
 #include <map>
 
 namespace plugin_base::vst3 {
 
 class pb_component final:
 public Steinberg::Vst::AudioEffect {
+
+  // MTS-ESP support
+  MTSClient* _mts_client = {};
   
   // needs to be first, everyone else needs it
   std::unique_ptr<plugin_desc> _desc;
@@ -25,6 +30,7 @@ public Steinberg::Vst::AudioEffect {
 
 public:
   PB_PREVENT_ACCIDENTAL_COPY(pb_component);
+  ~pb_component() { MTS_DeregisterClient(_mts_client); }
   pb_component(plugin_topo const* topo, Steinberg::FUID const& controller_id);
 
   Steinberg::tresult PLUGIN_API setState(Steinberg::IBStream* state) override;

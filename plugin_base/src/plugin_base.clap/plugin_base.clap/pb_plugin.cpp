@@ -58,6 +58,7 @@ pb_plugin::
   PB_LOG_FUNC_ENTRY_EXIT();
   stopTimer();
   _gui_state.remove_any_listener(this);
+  MTS_DeregisterClient(_mts_client);
 }
 
 pb_plugin::
@@ -65,6 +66,7 @@ pb_plugin(
   clap_plugin_descriptor const* clap_desc, 
   clap_host const* host, plugin_topo const* topo):
 Plugin(clap_desc, host), 
+_mts_client(MTS_RegisterClient()),
 _desc(std::make_unique<plugin_desc>(topo, this)),
 _splice_engine(_desc.get(), false, forward_thread_pool_voice_processor, this),
 _extra_state(gui_extra_state_keyset(*_desc->plugin)), _gui_state(_desc.get(), true),
