@@ -234,6 +234,18 @@ inline float pitch_to_freq_continuous_tuning(MTSClient* mts_client, float pitch,
   return freq1 * (1.0f - weight) + freq2 * weight; // LERP
 }
 
+template <bool Continuous>
+inline float pitch_to_freq_continuous_tuning_if(MTSClient* mts_client, float pitch, int channel)
+{
+  if constexpr (!Continuous) 
+    return pitch_to_freq_no_tuning(pitch);
+  else
+  {
+    assert(mts_client);
+    return pitch_to_freq_continuous_tuning(mts_client, pitch, channel);
+  }
+}
+
 inline float timesig_to_freq(float bpm, timesig const& sig) 
 { return bpm / (60.0f * 4.0f * sig.num / sig.den); }
 inline float timesig_to_time(float bpm, timesig const& sig) 

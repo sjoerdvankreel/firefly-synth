@@ -977,10 +977,11 @@ osc_engine::process_unison(plugin_block& block, cv_audio_matrix_mixdown const* m
 
   int dsf_parts = (int)std::round(block_auto[param_dsf_parts][0].real());
   int master_pb_range = block.state.all_block_automation[module_master_in][0][master_in_param_pb_range][0].step();
-
+  
   int rand_seed = block_auto[param_rand_seed][0].step();
   int kps_mid_note = block_auto[param_kps_mid][0].step();
-  float kps_mid_freq = pitch_to_freq_continuous_tuning(block.mts_client, kps_mid_note, block.voice->state.note_id_.channel);
+  float kps_mid_freq =pitch_to_freq_continuous_tuning_if<!Graph>(
+    block.mts_client, kps_mid_note, block.voice->state.note_id_.channel);
 
   float dsf_dist = block_auto[param_dsf_dist][0].real();
   float uni_voice_apply = uni_voices == 1 ? 0.0f : 1.0f;
@@ -1108,7 +1109,8 @@ osc_engine::process_unison(plugin_block& block, cv_audio_matrix_mixdown const* m
     {
       float synced_sample = 0;
       float pitch_ref = min_pitch_ref + (max_pitch_ref - min_pitch_ref) * v / uni_voice_range;
-      float freq_ref = std::clamp(pitch_to_freq_continuous_tuning(block.mts_client, pitch_ref, block.voice->state.note_id_.channel), 10.0f, oversampled_rate * 0.5f);
+      float freq_ref = std::clamp(pitch_to_freq_continuous_tuning_if<!Graph>(
+        block.mts_client, pitch_ref, block.voice->state.note_id_.channel), 10.0f, oversampled_rate * 0.5f);
       float inc_ref = freq_ref / oversampled_rate;
       float pitch_sync = pitch_ref;
       float freq_sync = freq_ref;
@@ -1121,7 +1123,8 @@ osc_engine::process_unison(plugin_block& block, cv_audio_matrix_mixdown const* m
       if constexpr (Sync)
       {
         pitch_sync = min_pitch_sync + (max_pitch_sync - min_pitch_sync) * v / uni_voice_range;
-        freq_sync = std::clamp(pitch_to_freq_continuous_tuning(block.mts_client, pitch_sync, block.voice->state.note_id_.channel), 10.0f, oversampled_rate * 0.5f);
+        freq_sync = std::clamp(pitch_to_freq_continuous_tuning_if<!Graph>(
+          block.mts_client, pitch_sync, block.voice->state.note_id_.channel), 10.0f, oversampled_rate * 0.5f);
         inc_sync = freq_sync / oversampled_rate;
       }
 
