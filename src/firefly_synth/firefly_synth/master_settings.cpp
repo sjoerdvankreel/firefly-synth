@@ -13,12 +13,23 @@ static int const max_auto_smoothing_ms = 50;
 static int const max_other_smoothing_ms = 1000;
 
 enum { section_main }; 
-enum { param_midi_smooth, param_tempo_smooth, param_auto_smooth, param_count };
+enum { param_midi_smooth, param_tempo_smooth, param_auto_smooth, param_tuning_mode, param_count };
 
 // we provide the buttons, everyone else needs to implement it
 extern int const master_settings_param_auto_smooth = param_auto_smooth;
 extern int const master_settings_param_midi_smooth = param_midi_smooth;
 extern int const master_settings_param_tempo_smooth = param_tempo_smooth;
+
+static std::vector<list_item>
+tuning_mode_items()
+{
+  std::vector<list_item> result;
+  result.emplace_back("{CB268630-186C-46E0-9AAC-FC17923A0005}", "Off");
+  result.emplace_back("{30759FEC-C751-44DB-AFAE-F67681929F15}", "On Note");
+  result.emplace_back("{29DC68DD-B67A-45B0-A3DB-2B663FA875BC}", "Continuous before mod");
+  result.emplace_back("{D4E1CF5F-A285-46AF-934C-B22F317AE64D}", "Continuous after mod");
+  return result;
+}
 
 static graph_data
 render_graph(plugin_state const& state, graph_engine* engine, int param, param_topo_mapping const& mapping)
@@ -28,7 +39,7 @@ render_graph(plugin_state const& state, graph_engine* engine, int param, param_t
     value /= max_auto_smoothing_ms;
   else if (mapping.param_index == param_midi_smooth || mapping.param_index == param_tempo_smooth)
     value /= max_other_smoothing_ms;
-  else assert(false);
+  else assert(mapping.param_index == param_tuning_mode);
   std::string partition = state.desc().params[param]->info.name;
   return graph_data(value, false, { partition });
 }
@@ -107,9 +118,18 @@ master_settings_topo(int section, bool is_fx, gui_position const& pos)
   auto& auto_smooth = result.params.emplace_back(make_param(
     make_topo_info("{852632AB-EF17-47DB-8C5A-3DB32BA78571}", true, "Automation Smoothing", "Auto Smooth", "Auto Smooth", param_auto_smooth, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_linear(1, max_auto_smoothing_ms, 1, 0, "Ms"),
-    make_param_gui_single(section_main, gui_edit_type::hslider, { is_fx? 0: 1, is_fx? 2: 0, 1, is_fx? 1: 2 },
+    make_param_gui_single(section_main, gui_edit_type::hslider, { is_fx? 0: 1, is_fx? 2: 0, 1, 1 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::far))));
   auto_smooth.info.description = "Smoothing automation parameter changes.";
+
+  if (is_fx) return result;
+
+  auto& tuning_mode = result.params.emplace_back(make_param(
+    make_topo_info("{EC300412-5D8D-49B7-97DD-44C967A76ADC}", true, "Tuning Mode", "Tuning", "Tuning", param_tuning_mode, 1),
+    make_param_dsp_input(false, param_automate::none), make_domain_item(tuning_mode_items(), "Off"),
+    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 1, 1 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
+  tuning_mode.info.description = "Selects MTS-ESP microtuning mode.";
 
   return result;
 }
