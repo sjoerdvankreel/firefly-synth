@@ -136,6 +136,7 @@ Windows: the build scripts assume 7zip is installed. It will build fine without,
 
 # Dependencies
 - CLAP SDK: [https://github.com/free-audio/clap](https://github.com/free-audio/clap)
+- MTS-ESP: [https://github.com/ODDSound/MTS-ESP](https://github.com/ODDSound/MTS-ESP)
 - JUCE: [https://github.com/juce-framework/JUCE](https://github.com/juce-framework/JUCE)
 - sse2neon: [https://github.com/DLTcollab/sse2neon](https://github.com/DLTcollab/sse2neon)
 - Steinberg VST3 SDK: [https://github.com/steinbergmedia/vst3sdk](https://github.com/steinbergmedia/vst3sdk)
