@@ -7,7 +7,7 @@ function(declare_local_target IS_EXECUTABLE LIBRARY_TYPE PROJECT_NAME SOURCE_DIR
     add_library(${PROJECT_NAME} ${LIBRARY_TYPE} "${${PROJECT_NAME}_SRC}")
   endif()
   target_include_directories(${PROJECT_NAME} PRIVATE "${${PROJECT_NAME}_SRC_DIR}")
-  target_include_directories(${PROJECT_NAME} SYSTEM PRIVATE ${CMAKE_SOURCE_DIR}/lib/JUCE/modules)
+  target_include_directories(${PROJECT_NAME} SYSTEM PRIVATE ${CMAKE_SOURCE_DIR}/lib/JUCE/modules ${CMAKE_SOURCE_DIR}/lib/MTS-ESP)
   if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     file(GLOB_RECURSE grouping_source "${${PROJECT_NAME}_SRC_DIR}/*.*")
     source_group(TREE ${${PROJECT_NAME}_SRC_DIR} FILES ${grouping_source})
