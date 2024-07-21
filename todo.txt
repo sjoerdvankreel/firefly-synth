@@ -34,6 +34,7 @@ V fix the fx gui
 - refix all the patches
 - figure out how to interpolate/modulate
 - deal with kbdtrack and anything else that might be affected
+- not forget to install the dynlib on mac/lin
 
 wishlist:
 green-on-white UI
