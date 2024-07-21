@@ -103,9 +103,8 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
 
   auto linked_gui = make_param_section_gui(
     { 0, 3, 2, 1 }, gui_dimension({ 1, 1 }, { gui_dimension::auto_size_all, 1 }), gui_label_edit_cell_split::horizontal);
-  // todo
   if(is_fx) linked_gui = make_param_section_gui(
-    { 0, 5, 1, 1 }, gui_dimension({ 1 }, { 1, 1 }), gui_label_edit_cell_split::no_split);
+    { 0, 4, 1, 2 }, gui_dimension({ 1 }, { 1, 1 }), gui_label_edit_cell_split::no_split);
   result.sections.emplace_back(make_param_section(section_linked,
     make_topo_tag_basic("{56FD2FEB-3084-4E28-B56C-06D31406EB42}", "Linked"), linked_gui));
   auto& mod_wheel = result.params.emplace_back(make_param(
