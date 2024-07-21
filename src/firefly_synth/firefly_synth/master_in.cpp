@@ -83,8 +83,7 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
       gui_dimension::auto_size_all, 1,
       gui_dimension::auto_size_all, 1, }), 
       gui_label_edit_cell_split::horizontal);
-  // TODO
-  if(is_fx) section_aux_gui = make_param_section_gui({ 0, 0, 1, 3 }, gui_dimension({ 1 }, { 
+  if(is_fx) section_aux_gui = make_param_section_gui({ 0, 0, 1, 4 }, gui_dimension({ 1 }, { 
       gui_dimension::auto_size_all, 1,
       gui_dimension::auto_size_all, 1,
       gui_dimension::auto_size_all, 1,
