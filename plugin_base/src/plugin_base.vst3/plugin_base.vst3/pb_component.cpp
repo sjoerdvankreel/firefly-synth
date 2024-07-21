@@ -103,6 +103,7 @@ tresult PLUGIN_API
 pb_component::process(ProcessData& data)
 {
   host_block& block = _splice_engine.prepare_block();
+  block.mts_client = _mts_client;
   block.frame_count = data.numSamples;
   block.shared.bpm = data.processContext ? data.processContext->tempo : 0;
 

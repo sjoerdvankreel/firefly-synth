@@ -34,6 +34,7 @@ graph_engine::process_begin(plugin_state const* state, int sample_rate, int fram
   _sample_rate = sample_rate;
   _voice_release_at = voice_release_at;
   _host_block = &_engine.prepare_block();
+  _host_block->mts_client = nullptr;
   _host_block->frame_count = frame_count;
   _host_block->shared.bpm = _params.bpm;
   _host_block->audio_out = _audio_out_ptrs;

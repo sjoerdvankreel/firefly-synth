@@ -633,6 +633,7 @@ clap_process_status
 pb_plugin::process(clap_process const* process) noexcept
 {
   host_block& block = _splice_engine.prepare_block();
+  block.mts_client = _mts_client;
   block.frame_count = process->frames_count;
   block.audio_out = process->audio_outputs[0].data32;
   block.shared.bpm = process->transport? process->transport->tempo: 0;

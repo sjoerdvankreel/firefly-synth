@@ -6,6 +6,8 @@
 #include <plugin_base/dsp/utility.hpp>
 #include <plugin_base/dsp/block/shared.hpp>
 
+#include <Client/libMTSClient.h>
+
 #include <cassert>
 
 namespace plugin_base {
@@ -93,6 +95,9 @@ struct plugin_block final {
 
   // are we graphing?
   bool graph;
+
+  // MTS-ESP support
+  MTSClient* _mts_client = {};
 
   int start_frame;
   int end_frame;

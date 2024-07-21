@@ -116,6 +116,7 @@ plugin_engine::make_plugin_block(
   };
   return {
     _graph,
+    _host_block->mts_client,
     start_frame, end_frame, slot,
     _sample_rate, state, nullptr, nullptr, 
     _host_block->shared, *_state.desc().plugin, 
