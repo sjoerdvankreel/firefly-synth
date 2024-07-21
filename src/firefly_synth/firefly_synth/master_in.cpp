@@ -110,14 +110,14 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
   auto& mod_wheel = result.params.emplace_back(make_param(
     make_topo_info("{7696305C-28F3-4C54-A6CA-7C9DB5635153}", true, "Mod Wheel", "Mod Wheel", "Mod", param_mod, 1),
     make_param_dsp_midi({ module_midi, 0, 1 }), make_domain_percentage_identity(0, 0, true),
-    make_param_gui_single(section_linked, gui_edit_type::knob, { 0, 0 },
+    make_param_gui_single(section_linked, is_fx? gui_edit_type::hslider: gui_edit_type::knob, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   mod_wheel.info.description = "Linked to MIDI mod wheel, updates on incoming MIDI events.";
   mod_wheel.gui.alternate_drag_output_id = result.dsp.outputs[output_mod].info.tag.id;
   auto& pitch_bend = result.params.emplace_back(make_param(
     make_topo_info("{D1B334A6-FA2F-4AE4-97A0-A28DD0C1B48D}", true, "Pitch Bend", "Pitch Bend", "PB", param_pb, 1),
     make_param_dsp_midi({ module_midi, 0, midi_source_pb }), make_domain_percentage(-1, 1, 0, 0, true),
-    make_param_gui_single(section_linked, gui_edit_type::knob, { is_fx? 0: 1, is_fx? 1: 0 },
+    make_param_gui_single(section_linked, is_fx ? gui_edit_type::hslider : gui_edit_type::knob, { is_fx? 0: 1, is_fx? 1: 0 },
     make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   pitch_bend.info.description = "Linked to MIDI pitch bend, updates on incoming MIDI events.";
   pitch_bend.gui.alternate_drag_output_id = result.dsp.outputs[output_pb].info.tag.id;
