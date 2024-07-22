@@ -35,6 +35,7 @@ V fix the fx gui
 - figure out how to interpolate/modulate
 - deal with kbdtrack and anything else that might be affected
 - not forget to install the dynlib on mac/lin
+- deal with unmapped keys
 
 wishlist:
 green-on-white UI

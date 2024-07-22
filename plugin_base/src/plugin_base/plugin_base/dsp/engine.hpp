@@ -33,10 +33,18 @@ typedef bool (*
 thread_pool_voice_processor)(
   plugin_engine& engine, void* context);
 
+// needs cooperation from the plug
 enum engine_voice_mode {
   engine_voice_mode_poly, // always pick a new voice for new note
   engine_voice_mode_mono, // only pick a new voice when voice count is 0
   engine_voice_mode_release // pick a new voice when voice count is 0 or voice 1 in in the release state
+};
+
+// needs cooperation from the plug
+enum engine_tuning_mode {
+  engine_tuning_mode_off, // no microtuning
+  engine_tuning_mode_block, // requery at block start
+  engine_tuning_mode_voice // requery at voice start, but degrades to block for global stuff
 };
 
 // global plugin audio processor

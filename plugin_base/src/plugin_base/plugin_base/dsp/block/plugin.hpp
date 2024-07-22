@@ -98,6 +98,10 @@ struct plugin_block final {
 
   // MTS-ESP support
   MTSClient* mts_client = {};
+  // If disabled, points to a local 12-tet setup.
+  // If per-block, points to a table populated at block start.
+  // If per-voice, points to a table populated at voice start.
+  std::vector<float>* current_tuning = {};
 
   int start_frame;
   int end_frame;
