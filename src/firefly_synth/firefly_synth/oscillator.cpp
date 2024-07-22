@@ -208,7 +208,7 @@ render_osc_graphs(plugin_state const& state, graph_engine* engine, int slot, boo
   int type = state.get_plain_at(module_osc, slot, param_type, 0).step();
   float cent = state.get_plain_at(module_osc, slot, param_cent, 0).real();
   float gain = state.get_plain_at(module_osc, slot, param_gain, 0).real();
-  float freq = pitch_to_freq_no_tuning(note + cent);
+  float freq = pitch_to_freq(note + cent);
   
   plugin_block const* block = nullptr;
   auto params = make_graph_engine_params();
@@ -980,8 +980,7 @@ osc_engine::process_unison(plugin_block& block, cv_audio_matrix_mixdown const* m
   
   int rand_seed = block_auto[param_rand_seed][0].step();
   int kps_mid_note = block_auto[param_kps_mid][0].step();
-  float kps_mid_freq =pitch_to_freq_continuous_tuning_if<!Graph>(
-    block.mts_client, kps_mid_note, block.voice->state.note_id_.channel);
+  float kps_mid_freq = pitch_to_freq(kps_mid_note);
 
   float dsf_dist = block_auto[param_dsf_dist][0].real();
   float uni_voice_apply = uni_voices == 1 ? 0.0f : 1.0f;
@@ -1109,8 +1108,7 @@ osc_engine::process_unison(plugin_block& block, cv_audio_matrix_mixdown const* m
     {
       float synced_sample = 0;
       float pitch_ref = min_pitch_ref + (max_pitch_ref - min_pitch_ref) * v / uni_voice_range;
-      float freq_ref = std::clamp(pitch_to_freq_continuous_tuning_if<!Graph>(
-        block.mts_client, pitch_ref, block.voice->state.note_id_.channel), 10.0f, oversampled_rate * 0.5f);
+      float freq_ref = std::clamp(pitch_to_freq(pitch_ref), 10.0f, oversampled_rate * 0.5f);
       float inc_ref = freq_ref / oversampled_rate;
       float pitch_sync = pitch_ref;
       float freq_sync = freq_ref;
@@ -1123,8 +1121,7 @@ osc_engine::process_unison(plugin_block& block, cv_audio_matrix_mixdown const* m
       if constexpr (Sync)
       {
         pitch_sync = min_pitch_sync + (max_pitch_sync - min_pitch_sync) * v / uni_voice_range;
-        freq_sync = std::clamp(pitch_to_freq_continuous_tuning_if<!Graph>(
-          block.mts_client, pitch_sync, block.voice->state.note_id_.channel), 10.0f, oversampled_rate * 0.5f);
+        freq_sync = std::clamp(pitch_to_freq(pitch_sync), 10.0f, oversampled_rate * 0.5f);
         inc_sync = freq_sync / oversampled_rate;
       }
 
