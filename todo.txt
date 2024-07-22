@@ -36,6 +36,9 @@ V fix the fx gui
 - deal with kbdtrack and anything else that might be affected
 - not forget to install the dynlib on mac/lin
 - deal with unmapped keys
+- fix the todos
+- do NOT use the tuning table when "Off", or - make sure it gives the same results with lerp
+- rename note_to_freq=>no_tuning, select version based on template params
 
 wishlist:
 green-on-white UI

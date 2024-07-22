@@ -59,6 +59,9 @@ _voice_processor_context(voice_processor_context)
   _automation_lerp_filters.resize(_dims.module_slot_param_slot);
   _automation_lp_filters.resize(_dims.module_slot_param_slot);
   _automation_state_last_round_end.resize(_dims.module_slot_param_slot);
+
+  // microtuning support
+  _current_voice_scales.resize(_polyphony);
 }
 
 plugin_voice_block 
@@ -574,6 +577,8 @@ plugin_engine::process()
   /***************************************/
   /* STEP 1: Set up per-block automation */
   /***************************************/
+
+  // microtuning in case not per-voice
 
   // smoothing per-block bpm values
   _bpm_filter.set(_host_block->shared.bpm);

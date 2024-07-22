@@ -98,6 +98,10 @@ class plugin_engine final {
   // offset wrt _state
   jarray<float, 4> _current_modulation = {};
 
+  // microtuning support
+  std::array<float, 128> _current_block_scale = {};
+  std::vector<std::array<float, 128>> _current_voice_scales = {};
+
   block_filter _bpm_filter = {};
   std::vector<int> _midi_was_automated = {};
   std::vector<block_filter> _midi_filters = {};
