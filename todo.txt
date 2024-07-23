@@ -41,6 +41,8 @@ V fix the fx gui
 - rename note_to_freq=>no_tuning, select version based on template params
 - ask oli about the possibility to do 1 IPC call for the entire tuning table
 - test the heck out of the clap threadpool
+- fix the tuning table at block start, copy over the whole thing at voice start, before threadpool kicks in -- and link it 1:1 to tuning mode.
+==> do NOT requery tuning mode anywhere else except where the actual table is filled !
 
 wishlist:
 green-on-white UI
