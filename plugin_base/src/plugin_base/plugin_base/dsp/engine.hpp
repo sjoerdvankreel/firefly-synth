@@ -124,6 +124,7 @@ class plugin_engine final {
   void automation_sanity_check(int frame_count);
 
   // microtuning support
+  engine_tuning_mode get_current_tuning_mode();
   void query_mts_esp_tuning(std::array<note_tuning, 128>& tuning, int channel);
 
   // Subvoice stuff is for global unison support.

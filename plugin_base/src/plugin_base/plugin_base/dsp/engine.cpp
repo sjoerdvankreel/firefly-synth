@@ -64,6 +64,18 @@ _voice_processor_context(voice_processor_context)
   _current_voice_tunings.resize(_polyphony);
 }
 
+engine_tuning_mode 
+plugin_engine::get_current_tuning_mode()
+{
+  auto const& topo = *_state.desc().plugin;
+  engine_tuning_mode result = (engine_tuning_mode)-1;
+  assert(topo.tuning_mode_param >= 0);
+  assert(topo.tuning_mode_module >= 0);
+  result = (engine_tuning_mode)_state.get_plain_at(topo.tuning_mode_module, 0, topo.tuning_mode_param, 0).step();
+  assert(result == engine_tuning_mode_off || result == engine_tuning_mode_block || result == engine_tuning_mode_voice);
+  return result;
+}
+
 void
 plugin_engine::query_mts_esp_tuning(std::array<note_tuning, 128>& tuning, int channel)
 {
@@ -467,6 +479,8 @@ plugin_engine::process_voice(int v, bool threaded)
 
   auto& state = _voice_states[v];
   std::pair<std::uint32_t, std::uint32_t> denormal_state;
+  engine_tuning_mode tuning_mode = get_current_tuning_mode();
+
   if(threaded) denormal_state = disable_denormals();
   for (int m = _state.desc().module_voice_start; m < _state.desc().module_output_start; m++)
     for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
@@ -607,13 +621,9 @@ plugin_engine::process()
   /* STEP 1: Set up per-block automation */
   /***************************************/
 
-  // microtuning in case not per-voice
-  engine_tuning_mode tuning_mode = (engine_tuning_mode) -1;
+  // microtuning mode
   auto const& topo = *_state.desc().plugin;
-  assert(topo.tuning_mode_param >= 0);
-  assert(topo.tuning_mode_module >= 0);
-  tuning_mode = (engine_tuning_mode)_state.get_plain_at(topo.tuning_mode_module, 0, topo.tuning_mode_param, 0).step();
-  assert(tuning_mode == engine_tuning_mode_off || tuning_mode == engine_tuning_mode_block || tuning_mode == engine_tuning_mode_voice);
+  engine_tuning_mode tuning_mode = get_current_tuning_mode();
   
 #ifndef NDEBUG
   _current_block_tuning = {};
