@@ -22,6 +22,13 @@ struct mono_note_state
   bool note_on = false;
 };
 
+// for MTS-ESP tuning
+struct note_tuning
+{
+  float frequency = -1;
+  bool is_mapped = false;
+};
+
 // for polyphonic synth
 struct voice_state final {
   note_id note_id_ = {};
@@ -98,10 +105,10 @@ struct plugin_block final {
 
   // MTS-ESP support
   MTSClient* mts_client = {};
-  // If disabled, points to a local 12-tet setup.
+  // If disabled, unused (we go with pitch-to-freq without an intermediate table).
   // If per-block, points to a table populated at block start.
   // If per-voice, points to a table populated at voice start.
-  std::array<float, 128>* current_tuning = {};
+  std::array<note_tuning, 128>* current_tuning = nullptr;
 
   int start_frame;
   int end_frame;
