@@ -153,6 +153,8 @@ private:
   void process_basic_sin_saw_tri_sqr(plugin_block& block, cv_audio_matrix_mixdown const* modulation);
   template <bool Graph, bool Sin, bool Saw, bool Tri, bool Sqr, bool DSF, bool Sync, bool KPS, bool KPSAutoFdbk, bool Static, int StaticSVFType>
   void process_unison(plugin_block& block, cv_audio_matrix_mixdown const* modulation);
+  template <bool Graph, bool Sin, bool Saw, bool Tri, bool Sqr, bool DSF, bool Sync, bool KPS, bool KPSAutoFdbk, bool Static, int StaticSVFType, engine_tuning_mode TuningMode>
+  void process_unison_tuning(plugin_block& block, cv_audio_matrix_mixdown const* modulation);
 };
 
 static void
@@ -208,7 +210,7 @@ render_osc_graphs(plugin_state const& state, graph_engine* engine, int slot, boo
   int type = state.get_plain_at(module_osc, slot, param_type, 0).step();
   float cent = state.get_plain_at(module_osc, slot, param_cent, 0).real();
   float gain = state.get_plain_at(module_osc, slot, param_gain, 0).real();
-  float freq = pitch_to_freq(note + cent);
+  float freq = pitch_to_freq_no_tuning(note + cent);
   
   plugin_block const* block = nullptr;
   auto params = make_graph_engine_params();
@@ -936,9 +938,32 @@ osc_engine::process_basic_sin_saw_tri_sqr(plugin_block& block, cv_audio_matrix_m
   else process_unison<Graph, Sin, Saw, Tri, Sqr, false, false, false, false, false, -1>(block, modulation);
 }
 
-template <bool Graph, bool Sin, bool Saw, bool Tri, bool Sqr, bool DSF, bool Sync, bool KPS, bool KPSAutoFdbk, bool Static, int StaticSVFType> 
+template <bool Graph, bool Sin, bool Saw, bool Tri, bool Sqr, bool DSF, bool Sync, bool KPS, bool KPSAutoFdbk, bool Static, int StaticSVFType>
 void
 osc_engine::process_unison(plugin_block& block, cv_audio_matrix_mixdown const* modulation)
+{
+  auto const& block_auto = block.state.all_block_automation;
+  engine_tuning_mode tuning_mode = (engine_tuning_mode)block_auto[module_master_settings][0][master_settings_param_tuning_mode][0].step();
+  switch (tuning_mode)
+  {
+  case engine_tuning_mode_off:
+    process_unison_tuning<Graph, Sin, Saw, Tri, Sqr, DSF, Sync, KPS, KPSAutoFdbk, Static, StaticSVFType, engine_tuning_mode_off>(block, modulation);
+    break;
+  case engine_tuning_mode_block:
+    process_unison_tuning<Graph, Sin, Saw, Tri, Sqr, DSF, Sync, KPS, KPSAutoFdbk, Static, StaticSVFType, engine_tuning_mode_block>(block, modulation);
+    break;
+  case engine_tuning_mode_voice:
+    process_unison_tuning<Graph, Sin, Saw, Tri, Sqr, DSF, Sync, KPS, KPSAutoFdbk, Static, StaticSVFType, engine_tuning_mode_voice>(block, modulation);
+    break;
+  default:
+    assert(false);
+    break;
+  }
+}
+
+template <bool Graph, bool Sin, bool Saw, bool Tri, bool Sqr, bool DSF, bool Sync, bool KPS, bool KPSAutoFdbk, bool Static, int StaticSVFType, engine_tuning_mode TuningMode> 
+void
+osc_engine::process_unison_tuning(plugin_block& block, cv_audio_matrix_mixdown const* modulation)
 {
   int generator_count = 0;
   if constexpr (Sin) generator_count++;
@@ -980,7 +1005,7 @@ osc_engine::process_unison(plugin_block& block, cv_audio_matrix_mixdown const* m
   
   int rand_seed = block_auto[param_rand_seed][0].step();
   int kps_mid_note = block_auto[param_kps_mid][0].step();
-  float kps_mid_freq = pitch_to_freq(kps_mid_note);
+  float kps_mid_freq = block.pitch_to_freq_with_tuning<TuningMode>(kps_mid_note);
 
   float dsf_dist = block_auto[param_dsf_dist][0].real();
   float uni_voice_apply = uni_voices == 1 ? 0.0f : 1.0f;
@@ -1108,7 +1133,7 @@ osc_engine::process_unison(plugin_block& block, cv_audio_matrix_mixdown const* m
     {
       float synced_sample = 0;
       float pitch_ref = min_pitch_ref + (max_pitch_ref - min_pitch_ref) * v / uni_voice_range;
-      float freq_ref = std::clamp(pitch_to_freq(pitch_ref), 10.0f, oversampled_rate * 0.5f);
+      float freq_ref = std::clamp(block.pitch_to_freq_with_tuning<TuningMode>(pitch_ref), 10.0f, oversampled_rate * 0.5f);
       float inc_ref = freq_ref / oversampled_rate;
       float pitch_sync = pitch_ref;
       float freq_sync = freq_ref;
@@ -1121,7 +1146,7 @@ osc_engine::process_unison(plugin_block& block, cv_audio_matrix_mixdown const* m
       if constexpr (Sync)
       {
         pitch_sync = min_pitch_sync + (max_pitch_sync - min_pitch_sync) * v / uni_voice_range;
-        freq_sync = std::clamp(pitch_to_freq(pitch_sync), 10.0f, oversampled_rate * 0.5f);
+        freq_sync = std::clamp(block.pitch_to_freq_with_tuning<TuningMode>(pitch_sync), 10.0f, oversampled_rate * 0.5f);
         inc_sync = freq_sync / oversampled_rate;
       }
 

@@ -13,6 +13,7 @@
 namespace plugin_base {
 
 struct plugin_topo;
+
 enum class voice_stage { unused, active, releasing, finishing };
 
 // for monophonic mode
@@ -27,6 +28,13 @@ struct note_tuning
 {
   float frequency = -1;
   bool is_mapped = false;
+};
+
+// needs cooperation from the plug
+enum engine_tuning_mode {
+  engine_tuning_mode_off, // no microtuning
+  engine_tuning_mode_block, // requery at block start
+  engine_tuning_mode_voice // requery at voice start, but degrades to block for global stuff
 };
 
 // for polyphonic synth
@@ -126,6 +134,10 @@ struct plugin_block final {
   jarray<float, 3> const& module_cv(int mod, int slot) const;
   jarray<float, 4> const& module_audio(int mod, int slot) const;
 
+  // mts-esp support
+  template <engine_tuning_mode tuning_mode>
+  float pitch_to_freq_with_tuning(float pitch);
+
   void set_out_param(int param, int slot, double raw) const;
   
   template <domain_type DomainType>
@@ -182,6 +194,31 @@ plugin_block::normalized_to_raw_block(int module_, int param_, jarray<float, 1> 
   for(int f = start_frame; f < end_frame; f++) check_unipolar(in[f]);
   auto const& param_topo = plugin.modules[module_].params[param_];
   param_topo.domain.normalized_to_raw_block<DomainType>(in, out, start_frame, end_frame);
+}
+
+template <engine_tuning_mode tuning_mode> inline float
+plugin_block::pitch_to_freq_with_tuning(float pitch)
+{
+  if constexpr (tuning_mode == engine_tuning_mode_off)
+  {
+    assert(current_tuning == nullptr);
+    return pitch_to_freq_no_tuning(pitch);
+  }
+  else
+  {
+    // plugin_engine stores a pointer to per-voice/per-block table here
+    assert(current_tuning != nullptr);
+    assert(tuning_mode == engine_tuning_mode_block || tuning_mode == engine_tuning_mode_voice);
+
+    // TODO it's just LERP for now, but look into log-interpolate, too
+    pitch = std::clamp(pitch, 0.0f, 127.0f);
+    int pitch_low = (int)std::floor(pitch);
+    int pitch_high = (int)std::ceil(pitch);
+    float pos = pitch - pitch_low;
+    float freq_low = MTS_NoteToFrequency(mts_client, (char)pitch_low, voice ? voice->state.note_id_.channel : -1);
+    float freq_high = MTS_NoteToFrequency(mts_client, (char)pitch_high, voice ? voice->state.note_id_.channel : -1);
+    return (1.0f - pos) * freq_low + pos * freq_high;
+  }
 }
 
 }

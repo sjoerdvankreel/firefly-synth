@@ -19,15 +19,16 @@ enum { param_midi_smooth, param_tempo_smooth, param_auto_smooth, param_tuning_mo
 extern int const master_settings_param_auto_smooth = param_auto_smooth;
 extern int const master_settings_param_midi_smooth = param_midi_smooth;
 extern int const master_settings_param_tempo_smooth = param_tempo_smooth;
+extern int const master_settings_param_tuning_mode = param_tuning_mode;
 
+// must match engine_tuning_mode
 static std::vector<list_item>
 tuning_mode_items()
 {
   std::vector<list_item> result;
   result.emplace_back("{CB268630-186C-46E0-9AAC-FC17923A0005}", "Off");
-  result.emplace_back("{30759FEC-C751-44DB-AFAE-F67681929F15}", "On Note");
-  result.emplace_back("{29DC68DD-B67A-45B0-A3DB-2B663FA875BC}", "Continuous before mod");
-  result.emplace_back("{D4E1CF5F-A285-46AF-934C-B22F317AE64D}", "Continuous after mod");
+  result.emplace_back("{30759FEC-C751-44DB-AFAE-F67681929F15}", "Block");
+  result.emplace_back("{29DC68DD-B67A-45B0-A3DB-2B663FA875BC}", "Voice");
   return result;
 }
 
