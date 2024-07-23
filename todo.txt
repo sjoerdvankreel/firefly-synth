@@ -40,6 +40,7 @@ V fix the fx gui
 - do NOT use the tuning table when "Off", or - make sure it gives the same results with lerp
 - rename note_to_freq=>no_tuning, select version based on template params
 - ask oli about the possibility to do 1 IPC call for the entire tuning table
+- test the heck out of the clap threadpool
 
 wishlist:
 green-on-white UI
