@@ -216,8 +216,8 @@ plugin_block::pitch_to_freq_with_tuning(float pitch)
     int pitch_low = (int)std::floor(pitch);
     int pitch_high = (int)std::ceil(pitch);
     float pos = pitch - pitch_low;
-    float freq_low = (*current_tuning)[pitch_low];
-    float freq_high = (*current_tuning)[pitch_high];
+    float freq_low = (*current_tuning)[pitch_low].frequency;
+    float freq_high = (*current_tuning)[pitch_high].frequency;
     return (1.0f - pos) * freq_low + pos * freq_high;
   }
 }
