@@ -113,9 +113,14 @@ master_settings_topo(int section, bool is_fx, gui_position const& pos)
   result.force_rerender_on_param_hover = true;
   result.state_converter_factory = [](auto desc) { return std::make_unique<master_settings_state_converter>(desc); };
 
-  gui_dimension smooth_dimension({ 1, 1 }, { gui_dimension::auto_size_all, 1, gui_dimension::auto_size_all, 1 });
-  if (is_fx) smooth_dimension = gui_dimension({ 1 }, { gui_dimension::auto_size_all, 1, gui_dimension::auto_size_all, 1, gui_dimension::auto_size_all, 1 });
-  auto smooth_section_gui = make_param_section_gui({ 0, 0, 1, 1 }, smooth_dimension, gui_label_edit_cell_split::horizontal);
+  gui_label_edit_cell_split cell_split = gui_label_edit_cell_split::no_split;
+  gui_dimension smooth_dimension({ 1, 1 }, { 1, 1 });
+  if (is_fx)
+  {
+    cell_split = gui_label_edit_cell_split::horizontal;
+    smooth_dimension = gui_dimension({ 1 }, { gui_dimension::auto_size_all, 1, gui_dimension::auto_size_all, 1, gui_dimension::auto_size_all, 1 });
+  }
+  auto smooth_section_gui = make_param_section_gui({ 0, 0, 1, 1 }, smooth_dimension, cell_split);
   result.sections.emplace_back(make_param_section(section_smooth,
     make_topo_tag_basic("{D02F55AF-1DC8-48F0-B12A-43B47AD6E392}", "Smoothing"), smooth_section_gui));
   auto& midi_smooth = result.params.emplace_back(make_param(
@@ -127,7 +132,7 @@ master_settings_topo(int section, bool is_fx, gui_position const& pos)
   auto& bpm_smooth = result.params.emplace_back(make_param(
     make_topo_info("{AA564CE1-4F1E-44F5-89D9-130F17F4185C}", true, "BPM Smoothing", "BPM Smooth", "BPM Smooth", param_tempo_smooth, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_linear(1, max_other_smoothing_ms, 200, 0, "Ms"),
-    make_param_gui_single(section_smooth, gui_edit_type::hslider, { 0, 2 },
+    make_param_gui_single(section_smooth, gui_edit_type::hslider, { 0, is_fx? 2: 1 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   bpm_smooth.info.description = "Smoothing host BPM parameter changes. Affects tempo-synced delay lines.";
   auto& auto_smooth = result.params.emplace_back(make_param(
