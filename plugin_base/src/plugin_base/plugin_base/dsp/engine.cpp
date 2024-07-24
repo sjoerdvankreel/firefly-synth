@@ -69,8 +69,7 @@ plugin_engine::get_current_retuning_timing()
 {
   auto const& topo = *_state.desc().plugin;
   engine_retuning_timing result = (engine_retuning_timing)-1;
-  assert(topo.retuning_timing_param >= 0);
-  assert(topo.retuning_timing_module >= 0);
+  if (topo.retuning_timing_module == -1 || topo.retuning_timing_param == -1) return engine_retuning_timing_off;
   result = (engine_retuning_timing)_state.get_plain_at(topo.retuning_timing_module, 0, topo.retuning_timing_param, 0).step();
   assert(result == engine_retuning_timing_off || result == engine_retuning_timing_block || result == engine_retuning_timing_voice);
   return result;
