@@ -153,7 +153,7 @@ private:
   void process_basic_sin_saw_tri_sqr(plugin_block& block, cv_audio_matrix_mixdown const* modulation);
   template <bool Graph, bool Sin, bool Saw, bool Tri, bool Sqr, bool DSF, bool Sync, bool KPS, bool KPSAutoFdbk, bool Static, int StaticSVFType>
   void process_unison(plugin_block& block, cv_audio_matrix_mixdown const* modulation);
-  template <bool Graph, bool Sin, bool Saw, bool Tri, bool Sqr, bool DSF, bool Sync, bool KPS, bool KPSAutoFdbk, bool Static, int StaticSVFType, engine_tuning_mode TuningMode>
+  template <bool Graph, bool Sin, bool Saw, bool Tri, bool Sqr, bool DSF, bool Sync, bool KPS, bool KPSAutoFdbk, bool Static, int StaticSVFType, engine_retuning_timing RetuningTiming>
   void process_unison_tuning(plugin_block& block, cv_audio_matrix_mixdown const* modulation);
 };
 
@@ -942,16 +942,16 @@ template <bool Graph, bool Sin, bool Saw, bool Tri, bool Sqr, bool DSF, bool Syn
 void
 osc_engine::process_unison(plugin_block& block, cv_audio_matrix_mixdown const* modulation)
 {
-  switch (block.current_tuning_mode)
+  switch (block.current_retuning_timing)
   {
-  case engine_tuning_mode_off:
-    process_unison_tuning<Graph, Sin, Saw, Tri, Sqr, DSF, Sync, KPS, KPSAutoFdbk, Static, StaticSVFType, engine_tuning_mode_off>(block, modulation);
+  case engine_retuning_timing_off:
+    process_unison_tuning<Graph, Sin, Saw, Tri, Sqr, DSF, Sync, KPS, KPSAutoFdbk, Static, StaticSVFType, engine_retuning_timing_off>(block, modulation);
     break;
-  case engine_tuning_mode_block:
-    process_unison_tuning<Graph, Sin, Saw, Tri, Sqr, DSF, Sync, KPS, KPSAutoFdbk, Static, StaticSVFType, engine_tuning_mode_block>(block, modulation);
+  case engine_retuning_timing_block:
+    process_unison_tuning<Graph, Sin, Saw, Tri, Sqr, DSF, Sync, KPS, KPSAutoFdbk, Static, StaticSVFType, engine_retuning_timing_block>(block, modulation);
     break;
-  case engine_tuning_mode_voice:
-    process_unison_tuning<Graph, Sin, Saw, Tri, Sqr, DSF, Sync, KPS, KPSAutoFdbk, Static, StaticSVFType, engine_tuning_mode_voice>(block, modulation);
+  case engine_retuning_timing_voice:
+    process_unison_tuning<Graph, Sin, Saw, Tri, Sqr, DSF, Sync, KPS, KPSAutoFdbk, Static, StaticSVFType, engine_retuning_timing_voice>(block, modulation);
     break;
   default:
     assert(false);
@@ -959,7 +959,7 @@ osc_engine::process_unison(plugin_block& block, cv_audio_matrix_mixdown const* m
   }
 }
 
-template <bool Graph, bool Sin, bool Saw, bool Tri, bool Sqr, bool DSF, bool Sync, bool KPS, bool KPSAutoFdbk, bool Static, int StaticSVFType, engine_tuning_mode TuningMode> 
+template <bool Graph, bool Sin, bool Saw, bool Tri, bool Sqr, bool DSF, bool Sync, bool KPS, bool KPSAutoFdbk, bool Static, int StaticSVFType, engine_retuning_timing RetuningTiming>
 void
 osc_engine::process_unison_tuning(plugin_block& block, cv_audio_matrix_mixdown const* modulation)
 {

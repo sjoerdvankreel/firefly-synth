@@ -27,6 +27,7 @@ V fix the stylesheets
 V fix the tab width
 V do mts mode in glbal settings section
 V fix the fx gui
+V do off/block/voice tuning
 - show mts status in output section
 - fix the renoise demos
 - make note continuous

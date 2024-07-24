@@ -31,10 +31,10 @@ struct note_tuning
 };
 
 // needs cooperation from the plug
-enum engine_tuning_mode {
-  engine_tuning_mode_off, // no microtuning
-  engine_tuning_mode_block, // requery at block start
-  engine_tuning_mode_voice // requery at voice start from current block, but degrades to block for global stuff
+enum engine_retuning_timing {
+  engine_retuning_timing_off, // no microtuning
+  engine_retuning_timing_block, // requery at block start
+  engine_retuning_timing_voice // requery at voice start from current block, but degrades to block for global stuff
 };
 
 // for polyphonic synth
@@ -117,7 +117,7 @@ struct plugin_block final {
   // If per-block, points to a table populated at block start.
   // If per-voice, points to a table populated at voice start.
   std::array<note_tuning, 128>* current_tuning = nullptr;
-  engine_tuning_mode current_tuning_mode = (engine_tuning_mode)-1;
+  engine_retuning_timing current_retuning_timing = (engine_retuning_timing)-1;
 
   int start_frame;
   int end_frame;
@@ -136,7 +136,7 @@ struct plugin_block final {
   jarray<float, 4> const& module_audio(int mod, int slot) const;
 
   // mts-esp support
-  template <engine_tuning_mode tuning_mode>
+  template <engine_retuning_timing retuning_timing>
   float pitch_to_freq_with_tuning(float pitch);
 
   void set_out_param(int param, int slot, double raw) const;
@@ -197,10 +197,10 @@ plugin_block::normalized_to_raw_block(int module_, int param_, jarray<float, 1> 
   param_topo.domain.normalized_to_raw_block<DomainType>(in, out, start_frame, end_frame);
 }
 
-template <engine_tuning_mode tuning_mode> inline float
+template <engine_retuning_timing retuning_timing> inline float
 plugin_block::pitch_to_freq_with_tuning(float pitch)
 {
-  if constexpr (tuning_mode == engine_tuning_mode_off)
+  if constexpr (retuning_timing == engine_retuning_timing_off)
   {
     assert(current_tuning == nullptr);
     return pitch_to_freq_no_tuning(pitch);
@@ -209,7 +209,7 @@ plugin_block::pitch_to_freq_with_tuning(float pitch)
   {
     // plugin_engine stores a pointer to per-voice/per-block table here
     assert(current_tuning != nullptr);
-    assert(tuning_mode == engine_tuning_mode_block || tuning_mode == engine_tuning_mode_voice);
+    assert(retuning_timing == engine_retuning_timing_block || retuning_timing == engine_retuning_timing_voice);
 
     // TODO it's just LERP for now, but look into log-interpolate, too
     pitch = std::clamp(pitch, 0.0f, 127.0f);

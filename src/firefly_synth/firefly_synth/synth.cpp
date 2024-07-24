@@ -347,8 +347,8 @@ synth_topo(bool is_fx, std::string const& full_name)
   result->midi_smooth_param = master_settings_param_midi_smooth;
   result->auto_smooth_module = module_master_settings;
   result->auto_smooth_param = master_settings_param_auto_smooth;
-  result->tuning_mode_module = module_master_settings;
-  result->tuning_mode_param = master_settings_param_tuning_mode;
+  result->retuning_timing_module = module_master_settings;
+  result->retuning_timing_param = master_settings_param_retuning_timing;
 
   // this is INCLUDING global unison!
   result->audio_polyphony = 64;

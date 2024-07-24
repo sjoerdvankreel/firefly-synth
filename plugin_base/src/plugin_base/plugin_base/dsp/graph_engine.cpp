@@ -69,7 +69,7 @@ graph_engine::process(int module_index, int module_slot, graph_processor process
 {
   int voice = _desc->plugin->modules[module_index].dsp.stage == module_stage::voice ? 0 : -1;
   _last_block = std::make_unique<plugin_block>(
-    _engine.make_plugin_block(voice, module_index, module_slot, engine_tuning_mode_off, 0, _host_block->frame_count));
+    _engine.make_plugin_block(voice, module_index, module_slot, engine_retuning_timing_off, 0, _host_block->frame_count));
   if(voice == -1)
     processor(*_last_block.get());
   else
