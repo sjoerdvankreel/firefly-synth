@@ -46,6 +46,7 @@ V deal with monophonic modes
 - yes or no on per-channel retuning ?
 => tuning -> retuning. reserve tuning for interpolation mode
 - load mapping files within firefly itself yes/no?
+- check if fx still works without retuning support
 
 wishlist:
 green-on-white UI

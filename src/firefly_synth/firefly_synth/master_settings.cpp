@@ -53,7 +53,7 @@ render_graph(plugin_state const& state, graph_engine* engine, int param, param_t
     value /= max_auto_smoothing_ms;
   else if (mapping.param_index == param_midi_smooth || mapping.param_index == param_tempo_smooth)
     value /= max_other_smoothing_ms;
-  else assert(mapping.param_index == param_retuning_timing);
+  else assert(mapping.param_index == param_retuning_timing || mapping.param_index == param_tuning_mode);
   std::string partition = state.desc().params[param]->info.name;
   return graph_data(value, false, { partition });
 }
