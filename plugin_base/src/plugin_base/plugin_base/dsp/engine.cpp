@@ -966,6 +966,10 @@ plugin_engine::process()
         auto const& event = _host_block->events.notes[e];
         if (event.type != note_event_type::on) continue;
 
+        // mts-esp support
+        if (_current_block_retuning_timing != engine_retuning_timing_off && 
+          !_current_block_tuning[event.id.key].is_mapped) continue;
+
         for(int sv = 0; sv < sub_voice_count; sv++)
         {
           int slot = find_best_voice_slot();
@@ -987,12 +991,21 @@ plugin_engine::process()
       // because subvoices may have unequal length, then stuff becomes too complicated
 
       int first_note_on_index = -1;
-      for(int e = 0; e < _host_block->events.notes.size(); e++)
-        if (_host_block->events.notes[e].type == note_event_type::on)
+      for (int e = 0; e < _host_block->events.notes.size(); e++)
+      {
+        auto const& event = _host_block->events.notes[e];
+        if (event.type == note_event_type::on)
         {
-          first_note_on_index = e;
-          break;
+          // mts-esp support
+          // in mono-mode + tuning-mode, we trigger the first key that is mapped
+          if (_current_block_retuning_timing == engine_retuning_timing_off ||
+            _current_block_tuning[event.id.key].is_mapped)
+          {
+            first_note_on_index = e;
+            break;
+          }
         }
+      }
 
       if(first_note_on_index != -1)
       {

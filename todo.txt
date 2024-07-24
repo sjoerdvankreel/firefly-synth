@@ -28,6 +28,7 @@ V fix the tab width
 V do mts mode in glbal settings section
 V fix the fx gui
 V do off/block/voice tuning
+V do NOT use the tuning table when "Off", or - make sure it gives the same results with lerp
 - show mts status in output section
 - fix the renoise demos
 - make note continuous
@@ -38,7 +39,6 @@ V do off/block/voice tuning
 - not forget to install the dynlib on mac/lin
 - deal with unmapped keys
 - fix the todos
-- do NOT use the tuning table when "Off", or - make sure it gives the same results with lerp
 - rename note_to_freq=>no_tuning, select version based on template params
 - ask oli about the possibility to do 1 IPC call for the entire tuning table
 - test the heck out of the clap threadpool
