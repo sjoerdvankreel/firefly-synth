@@ -30,15 +30,13 @@ V fix the fx gui
 V do off/block/voice tuning
 V do NOT use the tuning table when "Off", or - make sure it gives the same results with lerp
 V deal with monophonic modes
+- deal with unmapped keys
 - show mts status in output section
 - fix the renoise demos
-- make note continuous
-- check if it can be made a better mod source
 - refix all the patches
 - figure out how to interpolate/modulate
 - deal with kbdtrack and anything else that might be affected
 - not forget to install the dynlib on mac/lin
-- deal with unmapped keys
 - fix the todos
 - rename note_to_freq=>no_tuning, select version based on template params
 - ask oli about the possibility to do 1 IPC call for the entire tuning table

@@ -79,7 +79,7 @@ plugin_engine::get_current_retuning_timing()
 void
 plugin_engine::query_mts_esp_tuning(std::array<note_tuning, 128>& tuning, int channel)
 {
-  // TODO see if the IPC-friendly idea turns out to be good
+  // see if the IPC-friendly idea turns out to be good
   assert(channel >= -1);
   for (int i = 0; i < 128; i++)
   {
