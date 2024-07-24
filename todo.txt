@@ -48,6 +48,7 @@ V deal with monophonic modes
 - load mapping files within firefly itself yes/no?
 - check if fx still works without retuning support
 - fix rerender on param hover
+- check the alignment 
 
 wishlist:
 green-on-white UI

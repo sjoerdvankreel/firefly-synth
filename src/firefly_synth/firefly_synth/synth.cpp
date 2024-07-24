@@ -122,7 +122,7 @@ make_main_graph_section(plugin_gui* gui, lnf* lnf, component_store store)
   module_params.render_on_tab_change = false;
   module_params.render_on_module_mouse_enter = true;
   module_params.render_on_param_mouse_enter_modules = {
-    module_gcv_cv_matrix, module_master_in, module_vcv_cv_matrix, module_voice_in, module_osc_osc_matrix, 
+    module_gcv_cv_matrix, module_master_in, module_master_settings, module_vcv_cv_matrix, module_voice_in, module_osc_osc_matrix, 
     module_vaudio_audio_matrix, module_gaudio_audio_matrix, module_vcv_audio_matrix, module_gcv_audio_matrix };
   return store_component<module_graph>(store, gui, lnf, params, module_params);
 }

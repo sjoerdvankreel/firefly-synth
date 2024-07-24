@@ -31,8 +31,8 @@ retuning_timing_items()
 {
   std::vector<list_item> result;
   result.emplace_back("{CB268630-186C-46E0-9AAC-FC17923A0005}", "Off");
-  result.emplace_back("{30759FEC-C751-44DB-AFAE-F67681929F15}", "On Block");
-  result.emplace_back("{29DC68DD-B67A-45B0-A3DB-2B663FA875BC}", "On Voice");
+  result.emplace_back("{30759FEC-C751-44DB-AFAE-F67681929F15}", "Block");
+  result.emplace_back("{29DC68DD-B67A-45B0-A3DB-2B663FA875BC}", "Voice");
   return result;
 }
 
@@ -114,8 +114,8 @@ master_settings_topo(int section, bool is_fx, gui_position const& pos)
   result.force_rerender_on_param_hover = true;
   result.state_converter_factory = [](auto desc) { return std::make_unique<master_settings_state_converter>(desc); };
 
-  gui_label_edit_cell_split cell_split = gui_label_edit_cell_split::no_split;
   gui_dimension smooth_dimension({ 1, 1 }, { 1, 1 });
+  gui_label_edit_cell_split cell_split = gui_label_edit_cell_split::no_split;
   if (is_fx)
   {
     cell_split = gui_label_edit_cell_split::horizontal;
@@ -150,13 +150,13 @@ master_settings_topo(int section, bool is_fx, gui_position const& pos)
   result.sections.emplace_back(make_param_section(section_tuning,
     make_topo_tag_basic("{C163A47F-DC37-4D18-B21B-0B71D266B152}", "Tuning"), tuning_section_gui));
   auto& retuning_timing = result.params.emplace_back(make_param(
-    make_topo_info("{EC300412-5D8D-49B7-97DD-44C967A76ADC}", true, "Retuning Timing", "Retuning Timing", "Retuning Timing", param_retuning_timing, 1),
+    make_topo_info("{EC300412-5D8D-49B7-97DD-44C967A76ADC}", true, "Tuning Timing", "Tuning Timing", "Tuning Timing", param_retuning_timing, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_item(retuning_timing_items(), "Off"),
     make_param_gui_single(section_tuning, gui_edit_type::autofit_list, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   retuning_timing.info.description = "Selects MTS-ESP microtuning requery timing.";
   auto& tuning_mode = result.params.emplace_back(make_param(
-    make_topo_info("{6E19AC87-8958-42AC-8B4E-AB0A88B247C3}", true, "Tuning mode", "Tuning mode", "Tuning mode", param_tuning_mode, 1),
+    make_topo_info("{6E19AC87-8958-42AC-8B4E-AB0A88B247C3}", true, "Tuning Mode", "Tuning Mode", "Tuning Mode", param_tuning_mode, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_item(tuning_mode_items(), "Linear"),
     make_param_gui_single(section_tuning, gui_edit_type::autofit_list, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
