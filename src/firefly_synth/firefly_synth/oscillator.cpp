@@ -942,9 +942,7 @@ template <bool Graph, bool Sin, bool Saw, bool Tri, bool Sqr, bool DSF, bool Syn
 void
 osc_engine::process_unison(plugin_block& block, cv_audio_matrix_mixdown const* modulation)
 {
-  auto const& block_auto = block.state.all_block_automation;
-  engine_tuning_mode tuning_mode = (engine_tuning_mode)block_auto[module_master_settings][0][master_settings_param_tuning_mode][0].step();
-  switch (tuning_mode)
+  switch (block.current_tuning_mode)
   {
   case engine_tuning_mode_off:
     process_unison_tuning<Graph, Sin, Saw, Tri, Sqr, DSF, Sync, KPS, KPSAutoFdbk, Static, StaticSVFType, engine_tuning_mode_off>(block, modulation);

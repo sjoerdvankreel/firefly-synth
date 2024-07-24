@@ -34,7 +34,7 @@ struct note_tuning
 enum engine_tuning_mode {
   engine_tuning_mode_off, // no microtuning
   engine_tuning_mode_block, // requery at block start
-  engine_tuning_mode_voice // requery at voice start, but degrades to block for global stuff
+  engine_tuning_mode_voice // requery at voice start from current block, but degrades to block for global stuff
 };
 
 // for polyphonic synth
@@ -117,6 +117,7 @@ struct plugin_block final {
   // If per-block, points to a table populated at block start.
   // If per-voice, points to a table populated at voice start.
   std::array<note_tuning, 128>* current_tuning = nullptr;
+  engine_tuning_mode current_tuning_mode = (engine_tuning_mode)-1;
 
   int start_frame;
   int end_frame;

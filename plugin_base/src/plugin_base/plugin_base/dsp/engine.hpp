@@ -93,7 +93,9 @@ class plugin_engine final {
 
   // microtuning support
   std::array<note_tuning, 128> _current_block_tuning = {};
+  std::array<engine_tuning_mode, 128> _current_voice_tuning_modes = {};
   std::vector<std::array<note_tuning, 128>> _current_voice_tunings = {};
+  engine_tuning_mode _current_block_tuning_mode = (engine_tuning_mode)-1;
 
   block_filter _bpm_filter = {};
   std::vector<int> _midi_was_automated = {};
