@@ -45,7 +45,7 @@ public:
 static graph_data
 render_graph(plugin_state const& state, graph_engine* engine, int param, param_topo_mapping const& mapping)
 {
-  if (mapping.param_index == param_pb_range)
+  if (mapping.param_index == param_pb_range || mapping.param_index == param_glob_uni_voices)
     return graph_data(graph_data_type::na, {});
   float value = state.get_plain_at(mapping).real();
   bool bipolar = mapping.param_index == param_pb;

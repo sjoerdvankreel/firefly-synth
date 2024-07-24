@@ -47,6 +47,7 @@ V deal with monophonic modes
 => tuning -> retuning. reserve tuning for interpolation mode
 - load mapping files within firefly itself yes/no?
 - check if fx still works without retuning support
+- fix rerender on param hover
 
 wishlist:
 green-on-white UI
