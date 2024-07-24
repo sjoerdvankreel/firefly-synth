@@ -29,6 +29,7 @@ V do mts mode in glbal settings section
 V fix the fx gui
 V do off/block/voice tuning
 V do NOT use the tuning table when "Off", or - make sure it gives the same results with lerp
+V deal with monophonic modes
 - show mts status in output section
 - fix the renoise demos
 - make note continuous
