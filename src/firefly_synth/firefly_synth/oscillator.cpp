@@ -970,10 +970,10 @@ osc_engine::process_tuning_timing_mode(plugin_block& block, cv_audio_matrix_mixd
   switch (tuning_mode)
   {
   case engine_tuning_mode_linear:
-    process_tuning_timing_mode_unison<Graph, Sin, Saw, Tri, Sqr, DSF, Sync, KPS, KPSAutoFdbk, Static, StaticSVFType, engine_retuning_timing_voice, engine_tuning_mode_linear>(block, modulation);
+    process_tuning_timing_mode_unison<Graph, Sin, Saw, Tri, Sqr, DSF, Sync, KPS, KPSAutoFdbk, Static, StaticSVFType, RetuningTiming, engine_tuning_mode_linear>(block, modulation);
     break;
   case engine_tuning_mode_log:
-    process_tuning_timing_mode_unison<Graph, Sin, Saw, Tri, Sqr, DSF, Sync, KPS, KPSAutoFdbk, Static, StaticSVFType, engine_retuning_timing_voice, engine_tuning_mode_log>(block, modulation);
+    process_tuning_timing_mode_unison<Graph, Sin, Saw, Tri, Sqr, DSF, Sync, KPS, KPSAutoFdbk, Static, StaticSVFType, RetuningTiming, engine_tuning_mode_log>(block, modulation);
     break;
   default:
     assert(false);
