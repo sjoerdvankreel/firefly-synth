@@ -102,7 +102,7 @@ module_topo
 master_settings_topo(int section, bool is_fx, gui_position const& pos)
 {
   std::vector<int> row_distribution = { 1 };
-  std::vector<int> column_distribution = { 1, 1 };
+  std::vector<int> column_distribution = { 64, 26, 30, 38, 73, 53 };
   if (is_fx) column_distribution = { 1 };
   module_topo result(make_module(
     make_topo_info("{79A688D2-4223-489A-B2E4-3E78A7975C4D}", true, "Master Settings", "Master Settings", "Master Settings", module_master_settings, 1),
@@ -121,7 +121,7 @@ master_settings_topo(int section, bool is_fx, gui_position const& pos)
     cell_split = gui_label_edit_cell_split::horizontal;
     smooth_dimension = gui_dimension({ 1 }, { gui_dimension::auto_size_all, 1, gui_dimension::auto_size_all, 1, gui_dimension::auto_size_all, 1 });
   }
-  auto smooth_section_gui = make_param_section_gui({ 0, 0, 1, 1 }, smooth_dimension, cell_split);
+  auto smooth_section_gui = make_param_section_gui({ 0, 0, 1, is_fx? 1: 4 }, smooth_dimension, cell_split);
   result.sections.emplace_back(make_param_section(section_smooth,
     make_topo_tag_basic("{D02F55AF-1DC8-48F0-B12A-43B47AD6E392}", "Smoothing"), smooth_section_gui));
   auto& midi_smooth = result.params.emplace_back(make_param(
@@ -146,7 +146,7 @@ master_settings_topo(int section, bool is_fx, gui_position const& pos)
   if (is_fx) return result;
 
   gui_dimension tuning_dimension({ 1, 1 }, { gui_dimension::auto_size_all, 1 });
-  auto tuning_section_gui = make_param_section_gui({ 0, 1, 1, 1 }, tuning_dimension, gui_label_edit_cell_split::horizontal);
+  auto tuning_section_gui = make_param_section_gui({ 0, 4, 1, 2 }, tuning_dimension, gui_label_edit_cell_split::horizontal);
   result.sections.emplace_back(make_param_section(section_tuning,
     make_topo_tag_basic("{C163A47F-DC37-4D18-B21B-0B71D266B152}", "Tuning"), tuning_section_gui));
   auto& retuning_timing = result.params.emplace_back(make_param(

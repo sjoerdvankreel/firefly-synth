@@ -30,6 +30,7 @@ V fix the fx gui
 V do off/block/voice tuning
 V do NOT use the tuning table when "Off", or - make sure it gives the same results with lerp
 V deal with monophonic modes
+V check the alignment 
 - deal with unmapped keys
 - show mts status in output section
 - fix the renoise demos
@@ -48,7 +49,7 @@ V deal with monophonic modes
 - load mapping files within firefly itself yes/no?
 - check if fx still works without retuning support
 - fix rerender on param hover
-- check the alignment 
+
 
 wishlist:
 green-on-white UI
