@@ -86,7 +86,7 @@ plugin_engine::query_mts_esp_tuning(std::array<note_tuning, 128>& tuning, int ch
     tuning[i].is_mapped = !MTS_ShouldFilterNote(_host_block->mts_client, (char)i, (char)channel);
     if (!tuning[i].is_mapped)
     {
-      int zork = 6; // todo unzork
+      int zork = 6; // TODO why does it *never* get filtered out ?
       zork++;
     }
   }
