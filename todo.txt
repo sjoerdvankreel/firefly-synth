@@ -37,6 +37,7 @@ V fix the tuning table at block start, copy over the whole thing at voice start,
 V do NOT requery tuning mode anywhere else except where the actual table is filled !
 V tuning -> retuning. reserve tuning for interpolation mode
 V figure out how to interpolate/modulate
+V test the heck out of the clap threadpool
 - deal with unmapped keys
 - show mts status in output section
 - fix the renoise demos
@@ -44,7 +45,6 @@ V figure out how to interpolate/modulate
 - deal with kbdtrack and anything else that might be affected
 - not forget to install the dynlib on mac/lin
 - fix the todos
-- test the heck out of the clap threadpool
 - yes or no on per-channel retuning ?
 - load mapping files within firefly itself yes/no?
 - check if fx still works without retuning support
