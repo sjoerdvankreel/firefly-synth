@@ -13,7 +13,6 @@ static int const max_auto_smoothing_ms = 50;
 static int const max_other_smoothing_ms = 1000;
 
 enum { section_smooth, section_tuning }; 
-enum { tuning_mode_linear, tuning_mode_log };
 
 enum { 
   param_midi_smooth, param_tempo_smooth, param_auto_smooth, 
@@ -23,6 +22,8 @@ enum {
 extern int const master_settings_param_auto_smooth = param_auto_smooth;
 extern int const master_settings_param_midi_smooth = param_midi_smooth;
 extern int const master_settings_param_tempo_smooth = param_tempo_smooth;
+
+extern int const master_settings_param_tuning_mode = param_tuning_mode;
 extern int const master_settings_param_retuning_timing = param_retuning_timing;
 
 // must match engine_retuning_timing

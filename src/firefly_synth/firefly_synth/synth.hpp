@@ -39,9 +39,13 @@ extern int const master_in_param_glob_uni_osc_phase;
 extern int const master_in_param_glob_uni_env_dtn;
 extern int const master_in_param_glob_uni_lfo_phase;
 extern int const master_in_param_glob_uni_lfo_dtn;
+
 extern int const master_settings_param_auto_smooth;
 extern int const master_settings_param_midi_smooth;
 extern int const master_settings_param_tempo_smooth;
+
+enum { tuning_mode_linear, tuning_mode_log };
+extern int const master_settings_param_tuning_mode;
 extern int const master_settings_param_retuning_timing;
 
 // these are needed by the osc
