@@ -44,7 +44,6 @@ extern int const master_settings_param_auto_smooth;
 extern int const master_settings_param_midi_smooth;
 extern int const master_settings_param_tempo_smooth;
 
-enum { tuning_mode_linear, tuning_mode_log };
 extern int const master_settings_param_tuning_mode;
 extern int const master_settings_param_retuning_timing;
 

@@ -36,11 +36,11 @@ V ask oli about the possibility to do 1 IPC call for the entire tuning table
 V fix the tuning table at block start, copy over the whole thing at voice start, before threadpool kicks in -- and link it 1:1 to tuning mode.
 V do NOT requery tuning mode anywhere else except where the actual table is filled !
 V tuning -> retuning. reserve tuning for interpolation mode
+V figure out how to interpolate/modulate
 - deal with unmapped keys
 - show mts status in output section
 - fix the renoise demos
 - refix all the patches
-- figure out how to interpolate/modulate
 - deal with kbdtrack and anything else that might be affected
 - not forget to install the dynlib on mac/lin
 - fix the todos

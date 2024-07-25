@@ -37,6 +37,12 @@ enum engine_retuning_timing {
   engine_retuning_timing_voice // requery at voice start from current block, but degrades to block for global stuff
 };
 
+// needs cooperation from the plug
+enum engine_tuning_mode { 
+  engine_tuning_mode_linear, 
+  engine_tuning_mode_log 
+};
+
 // for polyphonic synth
 struct voice_state final {
   note_id note_id_ = {};
@@ -136,7 +142,7 @@ struct plugin_block final {
   jarray<float, 4> const& module_audio(int mod, int slot) const;
 
   // mts-esp support
-  template <engine_retuning_timing retuning_timing>
+  template <engine_retuning_timing retuning_timing, engine_tuning_mode tuning_mode>
   float pitch_to_freq_with_tuning(float pitch);
 
   void set_out_param(int param, int slot, double raw) const;
@@ -197,7 +203,8 @@ plugin_block::normalized_to_raw_block(int module_, int param_, jarray<float, 1> 
   param_topo.domain.normalized_to_raw_block<DomainType>(in, out, start_frame, end_frame);
 }
 
-template <engine_retuning_timing retuning_timing> inline float
+template <engine_retuning_timing retuning_timing, engine_tuning_mode tuning_mode>
+inline float
 plugin_block::pitch_to_freq_with_tuning(float pitch)
 {
   if constexpr (retuning_timing == engine_retuning_timing_off)
@@ -211,14 +218,16 @@ plugin_block::pitch_to_freq_with_tuning(float pitch)
     assert(current_tuning != nullptr);
     assert(retuning_timing == engine_retuning_timing_block || retuning_timing == engine_retuning_timing_voice);
 
-    // TODO it's just LERP for now, but look into log-interpolate, too
     pitch = std::clamp(pitch, 0.0f, 127.0f);
     int pitch_low = (int)std::floor(pitch);
     int pitch_high = (int)std::ceil(pitch);
     float pos = pitch - pitch_low;
     float freq_low = (*current_tuning)[pitch_low].frequency;
     float freq_high = (*current_tuning)[pitch_high].frequency;
-    return (1.0f - pos) * freq_low + pos * freq_high;
+    if constexpr (tuning_mode == engine_tuning_mode_linear)
+      return (1.0f - pos) * freq_low + pos * freq_high;
+    else
+      return std::powf(2.0f, 0.75f * std::log2(freq_low) + 0.25f * std::log2(freq_high));
   }
 }
 
