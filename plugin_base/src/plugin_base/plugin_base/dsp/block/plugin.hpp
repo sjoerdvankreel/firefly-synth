@@ -227,7 +227,7 @@ plugin_block::pitch_to_freq_with_tuning(float pitch)
     if constexpr (tuning_mode == engine_tuning_mode_linear)
       return (1.0f - pos) * freq_low + pos * freq_high;
     else
-      return std::powf(2.0f, (1.0f - pos) * std::log2(freq_low) + pos * std::log2(freq_high));
+      return std::pow(2.0f, (1.0f - pos) * std::log2(freq_low) + pos * std::log2(freq_high));
   }
 }
 
