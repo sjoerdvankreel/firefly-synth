@@ -52,6 +52,7 @@ V test the heck out of the clap threadpool
 - yes or no on per-channel retuning ?
 - load mapping files within firefly itself yes/no?
 - check if fx still works without retuning support
+- rename note-on/continuous
 
 wishlist:
 green-on-white UI
