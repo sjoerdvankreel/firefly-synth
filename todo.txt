@@ -53,6 +53,7 @@ V test the heck out of the clap threadpool
 - load mapping files within firefly itself yes/no?
 - check if fx still works without retuning support
 - rename note-on/continuous
+- do pitch-to-semi + before/after mod
 
 wishlist:
 green-on-white UI
