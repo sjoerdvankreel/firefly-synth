@@ -38,11 +38,11 @@ V do NOT requery tuning mode anywhere else except where the actual table is fill
 V tuning -> retuning. reserve tuning for interpolation mode
 V figure out how to interpolate/modulate
 V test the heck out of the clap threadpool
+V deal with unmapped keys
 - better defaults
 - disable tunmode when timing is off
 - do something with mts_hasmaster
 - no need to requery on inner block size, just outer
-- deal with unmapped keys
 - show mts status in output section
 - fix the renoise demos
 - refix all the patches
