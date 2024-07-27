@@ -54,6 +54,7 @@ V deal with unmapped keys
 - check if fx still works without retuning support
 - rename note-on/continuous
 - do pitch-to-semi + before/after mod
+- update the docs for micro
 
 wishlist:
 green-on-white UI
