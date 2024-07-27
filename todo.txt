@@ -38,6 +38,8 @@ V do NOT requery tuning mode anywhere else except where the actual table is fill
 V tuning -> retuning. reserve tuning for interpolation mode
 V figure out how to interpolate/modulate
 V test the heck out of the clap threadpool
+
+v1.8.4 beta 2
 V deal with unmapped keys
 V rename note-on/continuous
 - better defaults
