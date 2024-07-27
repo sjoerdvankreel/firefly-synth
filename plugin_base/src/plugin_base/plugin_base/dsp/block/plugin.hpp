@@ -33,8 +33,8 @@ struct note_tuning
 // needs cooperation from the plug
 enum engine_retuning_timing {
   engine_retuning_timing_off, // no microtuning
-  engine_retuning_timing_block, // requery at block start
-  engine_retuning_timing_voice // requery at voice start from current block, but degrades to block for global stuff
+  engine_retuning_timing_on_note, // requery at voice start from current block, but degrades to block for global stuff
+  engine_retuning_timing_continuous // requery at block start
 };
 
 // needs cooperation from the plug
@@ -216,7 +216,7 @@ plugin_block::pitch_to_freq_with_tuning(float pitch)
   {
     // plugin_engine stores a pointer to per-voice/per-block table here
     assert(current_tuning != nullptr);
-    assert(retuning_timing == engine_retuning_timing_block || retuning_timing == engine_retuning_timing_voice);
+    assert(retuning_timing == engine_retuning_timing_continuous || retuning_timing == engine_retuning_timing_on_note);
 
     pitch = std::clamp(pitch, 0.0f, 127.0f);
     int pitch_low = (int)std::floor(pitch);

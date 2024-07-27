@@ -32,8 +32,8 @@ retuning_timing_items()
 {
   std::vector<list_item> result;
   result.emplace_back("{CB268630-186C-46E0-9AAC-FC17923A0005}", "Off");
-  result.emplace_back("{30759FEC-C751-44DB-AFAE-F67681929F15}", "Block");
-  result.emplace_back("{29DC68DD-B67A-45B0-A3DB-2B663FA875BC}", "Voice");
+  result.emplace_back("{29DC68DD-B67A-45B0-A3DB-2B663FA875BC}", "On Note");
+  result.emplace_back("{30759FEC-C751-44DB-AFAE-F67681929F15}", "Continuous");
   return result;
 }
 

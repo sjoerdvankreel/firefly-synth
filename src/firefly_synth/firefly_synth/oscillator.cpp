@@ -949,11 +949,11 @@ osc_engine::process_tuning_timing(plugin_block& block, cv_audio_matrix_mixdown c
   case engine_retuning_timing_off:
     process_tuning_timing_mode<Graph, Sin, Saw, Tri, Sqr, DSF, Sync, KPS, KPSAutoFdbk, Static, StaticSVFType, engine_retuning_timing_off>(block, modulation);
     break;
-  case engine_retuning_timing_block:
-    process_tuning_timing_mode<Graph, Sin, Saw, Tri, Sqr, DSF, Sync, KPS, KPSAutoFdbk, Static, StaticSVFType, engine_retuning_timing_block>(block, modulation);
+  case engine_retuning_timing_continuous:
+    process_tuning_timing_mode<Graph, Sin, Saw, Tri, Sqr, DSF, Sync, KPS, KPSAutoFdbk, Static, StaticSVFType, engine_retuning_timing_continuous>(block, modulation);
     break;
-  case engine_retuning_timing_voice:
-    process_tuning_timing_mode<Graph, Sin, Saw, Tri, Sqr, DSF, Sync, KPS, KPSAutoFdbk, Static, StaticSVFType, engine_retuning_timing_voice>(block, modulation);
+  case engine_retuning_timing_on_note:
+    process_tuning_timing_mode<Graph, Sin, Saw, Tri, Sqr, DSF, Sync, KPS, KPSAutoFdbk, Static, StaticSVFType, engine_retuning_timing_on_note>(block, modulation);
     break;
   default:
     assert(false);

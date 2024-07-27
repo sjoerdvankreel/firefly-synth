@@ -39,6 +39,7 @@ V tuning -> retuning. reserve tuning for interpolation mode
 V figure out how to interpolate/modulate
 V test the heck out of the clap threadpool
 V deal with unmapped keys
+V rename note-on/continuous
 - better defaults
 - disable tunmode when timing is off
 - do something with mts_hasmaster
@@ -52,7 +53,6 @@ V deal with unmapped keys
 - yes or no on per-channel retuning ?
 - load mapping files within firefly itself yes/no?
 - check if fx still works without retuning support
-- rename note-on/continuous
 - do pitch-to-semi + before/after mod
 - update the docs for micro
 

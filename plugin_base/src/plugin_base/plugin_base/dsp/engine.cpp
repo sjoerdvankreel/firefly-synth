@@ -71,7 +71,7 @@ plugin_engine::get_current_retuning_timing()
   engine_retuning_timing result = (engine_retuning_timing)-1;
   if (topo.retuning_timing_module == -1 || topo.retuning_timing_param == -1) return engine_retuning_timing_off;
   result = (engine_retuning_timing)_state.get_plain_at(topo.retuning_timing_module, 0, topo.retuning_timing_param, 0).step();
-  assert(result == engine_retuning_timing_off || result == engine_retuning_timing_block || result == engine_retuning_timing_voice);
+  assert(result == engine_retuning_timing_off || result == engine_retuning_timing_continuous || result == engine_retuning_timing_on_note);
   return result;
 }
 
@@ -126,9 +126,9 @@ plugin_engine::make_plugin_block(
   // even for per-voice tuning we need to fallback to per-block tuning for global stuff
   // also note the correct per-block/per-voice tuning is already filled by querying mts-esp!
   std::array<note_tuning, 128>* current_tuning = nullptr;
-  if (retuning_timing == engine_retuning_timing_block || (retuning_timing == engine_retuning_timing_voice && voice < 0))
+  if (retuning_timing == engine_retuning_timing_continuous || (retuning_timing == engine_retuning_timing_on_note && voice < 0))
     current_tuning = &_current_block_tuning;
-  else if (retuning_timing == engine_retuning_timing_voice && voice >= 0)
+  else if (retuning_timing == engine_retuning_timing_on_note && voice >= 0)
     current_tuning = &_current_voice_tunings[voice];
   else assert(retuning_timing == engine_retuning_timing_off);
 
@@ -560,7 +560,7 @@ plugin_engine::activate_voice(
 #ifndef NDEBUG
   _current_voice_tunings[slot] = {};
 #endif
-  if (retuning_timing == engine_retuning_timing_voice)
+  if (retuning_timing == engine_retuning_timing_on_note)
     for (int i = 0; i < 128; i++)
     {
       _current_voice_tunings[slot][i].frequency = _current_block_tuning[i].frequency;
@@ -635,7 +635,7 @@ plugin_engine::process()
 #ifndef NDEBUG
   _current_block_tuning = {};
 #endif
-  if (_current_block_retuning_timing == engine_retuning_timing_block || _current_block_retuning_timing == engine_retuning_timing_voice)
+  if (_current_block_retuning_timing == engine_retuning_timing_continuous || _current_block_retuning_timing == engine_retuning_timing_on_note)
     query_mts_esp_tuning(_current_block_tuning, -1);
 
   // smoothing per-block bpm values
