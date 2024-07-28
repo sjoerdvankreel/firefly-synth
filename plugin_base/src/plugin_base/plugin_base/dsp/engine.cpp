@@ -68,8 +68,7 @@ plugin_engine::get_current_tuning_mode()
   engine_tuning_mode result = (engine_tuning_mode)-1;
   if (topo.tuning_mode_module == -1 || topo.tuning_mode_param == -1) return engine_tuning_mode_off;
   result = (engine_tuning_mode)_state.get_plain_at(topo.tuning_mode_module, 0, topo.tuning_mode_param, 0).step();
-  assert(result == engine_tuning_mode_off || result == engine_tuning_mode_continuous_linear || 
-    result == engine_tuning_mode_continuous_log || result == engine_tuning_mode_on_note);
+  assert(engine_tuning_mode_off <= result && result <= engine_tuning_mode_continuous_after_mod);
   return result;
 }
 
@@ -121,14 +120,6 @@ plugin_engine::make_plugin_block(
     ? _global_audio_state[module][slot] 
     : _voice_audio_state[voice][module][slot];
 
-  // even for per-voice tuning we need to fallback to per-block tuning for global stuff
-  // also note the correct per-block/per-voice tuning is already filled by querying mts-esp!
-  std::array<note_tuning, 128>* current_tuning = nullptr;
-  // todo check mts_hasmaster
-  // todo query retuninginsemis once if per_note and set current_tuning to null
-  if (tuning_mode != engine_tuning_mode_off)
-    current_tuning = &_current_block_tuning;
-
   // fix param_rate::voice values to voice start
   jarray<plain_value, 2> const& own_block_auto = voice < 0
     ? _block_automation.state()[module][slot]
@@ -149,7 +140,7 @@ plugin_engine::make_plugin_block(
   return {
     _graph,
     _host_block->mts_client,
-    current_tuning,
+    &_current_block_tuning,
     tuning_mode,
     start_frame, end_frame, slot,
     _sample_rate, state, nullptr, nullptr, 
@@ -621,10 +612,11 @@ plugin_engine::process()
   // microtuning mode
   auto const& topo = *_state.desc().plugin;
   _current_block_tuning_mode = get_current_tuning_mode();
-  
-  _current_block_tuning = {};
-  if (_current_block_tuning_mode == engine_tuning_mode_continuous_linear || _current_block_tuning_mode == engine_tuning_mode_continuous_log)
-    query_mts_esp_tuning(_current_block_tuning, -1);
+  if (!MTS_HasMaster(_host_block->mts_client)) _current_block_tuning_mode = engine_tuning_mode_off;
+  if (_current_block_tuning_mode == engine_tuning_mode_off)
+    _current_block_tuning = {};
+  else
+    query_mts_esp_tuning(_current_block_tuning, -1); // TODO all channels
 
   // smoothing per-block bpm values
   _bpm_filter.set(_host_block->shared.bpm);

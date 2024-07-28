@@ -16,13 +16,14 @@ enum { section_smooth, section_tuning };
 
 enum { 
   param_midi_smooth, param_tempo_smooth, param_auto_smooth, 
-  param_tuning_mode, param_mts_esp_status, param_count };
+  param_tuning_mode, param_tuning_interpolation, param_count };
 
 // we provide the buttons, everyone else needs to implement it
 extern int const master_settings_param_auto_smooth = param_auto_smooth;
 extern int const master_settings_param_midi_smooth = param_midi_smooth;
 extern int const master_settings_param_tempo_smooth = param_tempo_smooth;
 extern int const master_settings_param_tuning_mode = param_tuning_mode;
+extern int const master_settings_param_tuning_interpolation = param_tuning_interpolation;
 
 // must match engine_tuning_mode
 static std::vector<list_item>
@@ -30,9 +31,19 @@ tuning_mode_items()
 {
   std::vector<list_item> result;
   result.emplace_back("{CB268630-186C-46E0-9AAC-FC17923A0005}", "Off");
-  result.emplace_back("{0A4A5F76-33C4-417F-9282-4B3F54B940E7}", "On Note");
-  result.emplace_back("{7D47FA4A-7109-4C8F-ABDC-66826D8ED637}", "Continuous Linear");
-  result.emplace_back("{0343A26A-7D5D-4437-BDA7-33A617A2ECBF}", "Continuous Log");
+  result.emplace_back("{0A4A5F76-33C4-417F-9282-4B3F54B940E7}", "On Note Before Mod");
+  result.emplace_back("{7D47FA4A-7109-4C8F-ABDC-66826D8ED637}", "On Note After Mod");
+  result.emplace_back("{2FD02D1C-54F1-4588-A3A5-6C3E9BD8321F}", "Continuous Before Mod");
+  result.emplace_back("{E799343B-EBF5-41DF-B14F-7AE0C6B0F83D}", "Continuous After Mod");
+  return result;
+}
+
+static std::vector<list_item>
+tuning_interpolation_items()
+{
+  std::vector<list_item> result;
+  result.emplace_back("{4662F626-CAA3-4532-B528-5148CE8271DF}", "Linear");
+  result.emplace_back("{ADC63EB8-A597-4CC2-B3EF-0DC9F30C9F25}", "Log");
   return result;
 }
 
@@ -146,12 +157,12 @@ master_settings_topo(int section, bool is_fx, gui_position const& pos)
     make_param_gui_single(section_tuning, gui_edit_type::autofit_list, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   tuning_mode.info.description = "Selects MTS-ESP microtuning mode.";
-  auto& mts_esp_status = result.params.emplace_back(make_param(
-    make_topo_info("{801000F2-D2E5-41B8-BBE3-17435E9512CD}", true, "MTS-ESP Status", "MTS-ESP Status", "MTS-ESP Status", param_mts_esp_status, 1),
-    make_param_dsp_input(false, param_automate::none), make_domain_toggle(false),
-    make_param_gui_single(section_tuning, gui_edit_type::toggle, { 1, 0 },
+  auto& tuning_interpolation = result.params.emplace_back(make_param(
+    make_topo_info("{801000F2-D2E5-41B8-BBE3-17435E9512CD}", true, "Tuning Interpolation", "Tuning Interpolation", "Tuning Interpolation", param_tuning_interpolation, 1),
+    make_param_dsp_input(false, param_automate::none), make_domain_item(tuning_interpolation_items(), "Linear"),
+    make_param_gui_single(section_tuning, gui_edit_type::autofit_list, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  mts_esp_status.info.description = "MTS-ESP status indicator.";
+  tuning_interpolation.info.description = "Selects after-modulation tuning interpolation mode.";
 
   return result;
 }

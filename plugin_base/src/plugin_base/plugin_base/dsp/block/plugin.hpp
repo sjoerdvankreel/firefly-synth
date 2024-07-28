@@ -33,9 +33,16 @@ struct note_tuning
 // needs cooperation from the plug
 enum engine_tuning_mode {
   engine_tuning_mode_off, // no microtuning
-  engine_tuning_mode_on_note, // requery at voice start from current block, no need to interpolate, but degrades to block for global stuff
-  engine_tuning_mode_continuous_linear, // requery at block start + lerp pitch after modulation
-  engine_tuning_mode_continuous_log // requery at block start + lerp log freq after modulation
+  engine_tuning_mode_on_note_before_mod, // query at voice start, tune before modulation
+  engine_tuning_mode_on_note_after_mod, // query at voice start, tune after modulation
+  engine_tuning_mode_continuous_before_mod, // query each block, tune before modulation
+  engine_tuning_mode_continuous_after_mod // query each block, tune after modulation
+};
+
+// needs cooperation from the plug
+enum engine_tuning_interpolation { 
+  engine_tuning_interpolation_linear, // lerp pitch
+  engine_tuning_interpolation_log // lerp log2(frequency)
 };
 
 // for polyphonic synth
@@ -137,7 +144,7 @@ struct plugin_block final {
   jarray<float, 4> const& module_audio(int mod, int slot) const;
 
   // mts-esp support
-  template <engine_tuning_mode tuning_mode>
+  template <engine_tuning_mode TuningMode, engine_tuning_interpolation TuningInterpolation>
   float pitch_to_freq_with_tuning(float pitch);
 
   void set_out_param(int param, int slot, double raw) const;
@@ -198,38 +205,36 @@ plugin_block::normalized_to_raw_block(int module_, int param_, jarray<float, 1> 
   param_topo.domain.normalized_to_raw_block<DomainType>(in, out, start_frame, end_frame);
 }
 
-template <engine_tuning_mode tuning_mode>
+template <engine_tuning_mode TuningMode, engine_tuning_interpolation TuningInterpolation>
 inline float
 plugin_block::pitch_to_freq_with_tuning(float pitch)
 {
-  if constexpr (tuning_mode == engine_tuning_mode_off)
-  {
-    assert(current_tuning == nullptr);
+  if constexpr (TuningMode == engine_tuning_mode_off)
     return pitch_to_freq_no_tuning(pitch);
-  }
-  else if constexpr (tuning_mode == engine_tuning_mode_on_note)
-  {
-    // the table should be there, but we already tuned at voice activation
-    assert(current_tuning != nullptr);
-    return pitch_to_freq_no_tuning(pitch);
-  }
-  else
-  {
-    // plugin_engine stores a pointer to per-block table here
-    assert(current_tuning != nullptr);
-    assert(tuning_mode == engine_tuning_mode_continuous_log || tuning_mode == engine_tuning_mode_continuous_linear);
 
+  // these 2 cases are already tuned beforehand
+  else if constexpr (TuningMode == engine_tuning_mode_on_note_before_mod)
+    return pitch_to_freq_no_tuning(pitch);
+  else if constexpr (TuningMode == engine_tuning_mode_continuous_before_mod)
+    return pitch_to_freq_no_tuning(pitch);
+
+  else if constexpr (TuningMode == engine_tuning_mode_on_note_after_mod || TuningMode == engine_tuning_mode_continuous_after_mod)
+  {
     pitch = std::clamp(pitch, 0.0f, 127.0f);
     int pitch_low = (int)std::floor(pitch);
     int pitch_high = (int)std::ceil(pitch);
     float pos = pitch - pitch_low;
     float freq_low = (*current_tuning)[pitch_low].frequency;
     float freq_high = (*current_tuning)[pitch_high].frequency;
-    if constexpr (tuning_mode == engine_tuning_mode_continuous_linear)
+    if constexpr (TuningInterpolation == engine_tuning_interpolation_linear)
       return (1.0f - pos) * freq_low + pos * freq_high;
-    else
+    else if constexpr (TuningInterpolation == engine_tuning_interpolation_log)
       return std::pow(2.0f, (1.0f - pos) * std::log2(freq_low) + pos * std::log2(freq_high));
+    else
+      static_assert(false);
   }
+
+  else static_assert(false);
 }
 
 }

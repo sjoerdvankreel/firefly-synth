@@ -45,6 +45,7 @@ extern int const master_settings_param_midi_smooth;
 extern int const master_settings_param_tempo_smooth;
 
 extern int const master_settings_param_tuning_mode;
+extern int const master_settings_param_tuning_interpolation;
 
 // these are needed by the osc
 struct osc_osc_matrix_context
