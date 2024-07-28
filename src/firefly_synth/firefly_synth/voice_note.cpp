@@ -40,7 +40,7 @@ void
 voice_note_engine::process(plugin_block& block)
 {  
   block.state.own_cv[output_velo][0].fill(block.start_frame, block.end_frame, block.voice->state.velocity);
-  block.state.own_cv[output_key_pitch][0].fill(block.start_frame, block.end_frame, std::clamp(block.voice->state.note_id_.key / 127.0f, 0.0f, 1.0f));
+  block.state.own_cv[output_key_pitch][0].fill(block.start_frame, block.end_frame, std::clamp(block.voice->state.retuned_pitch / 127.0f, 0.0f, 1.0f));
 }
 
 }

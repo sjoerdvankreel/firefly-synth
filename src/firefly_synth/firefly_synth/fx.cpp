@@ -1347,6 +1347,7 @@ fx_engine::process_svf_uni_mode(plugin_block& block,
     glob_uni_dtn_curve = &block.state.all_accurate_automation[module_master_in][0][master_in_param_glob_uni_dtn][0];
 
   auto const& res_curve = *modulation[this_module][block.module_slot][param_svf_res][0];  
+  // todo microtuning
   double kbd_trk_base = _global ? (block.state.last_midi_note == -1 ? midi_middle_c : block.state.last_midi_note) : block.voice->state.note_id_.key;
 
   auto const& kbd_curve_norm = *modulation[this_module][block.module_slot][param_svf_kbd][0];

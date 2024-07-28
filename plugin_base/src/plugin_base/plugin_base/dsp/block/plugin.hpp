@@ -48,6 +48,8 @@ enum engine_tuning_interpolation {
 // for polyphonic synth
 struct voice_state final {
   note_id note_id_ = {};
+  float retuned_pitch = {};
+  
   // for mono mode
   note_id release_id = {};
 
@@ -61,6 +63,7 @@ struct voice_state final {
   // for portamento
   int last_note_key = -1;
   int last_note_channel = -1;
+  float last_retuned_pitch = {};
 
   // for global unison
   int sub_voice_count = -1;

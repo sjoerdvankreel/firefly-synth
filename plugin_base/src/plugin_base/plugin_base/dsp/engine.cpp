@@ -88,12 +88,13 @@ plugin_voice_block
 plugin_engine::make_voice_block(
   int v, int release_frame, note_id id, 
   int sub_voice_count, int sub_voice_index, 
-  int last_note_key, int last_note_channel)
+  int last_note_key, int last_note_channel, float last_retuned_pitch)
 {
   _voice_states[v].note_id_ = id;
   _voice_states[v].release_frame = release_frame;
   _voice_states[v].last_note_key = last_note_key;
   _voice_states[v].last_note_channel = last_note_channel;
+  _voice_states[v].last_retuned_pitch = last_retuned_pitch;
   _voice_states[v].sub_voice_count = sub_voice_count;
   _voice_states[v].sub_voice_index = sub_voice_index;
   return {
@@ -485,9 +486,9 @@ plugin_engine::process_voice(int v, bool threaded)
       {
         // state has already been copied from note event to 
         // _voice_states during voice stealing (to allow per-voice init)
-        plugin_voice_block voice_block(make_voice_block(v, _voice_states[v].release_frame, 
+        plugin_voice_block voice_block(make_voice_block(v, _voice_states[v].release_frame,
           _voice_states[v].note_id_, _voice_states[v].sub_voice_count, _voice_states[v].sub_voice_index,
-          _voice_states[v].last_note_key, _voice_states[v].last_note_channel));
+          _voice_states[v].last_note_key, _voice_states[v].last_note_channel, _voice_states[v].last_retuned_pitch));
         plugin_block block(make_plugin_block(v, _voice_states[v].note_id_.channel, m, mi, _current_block_tuning_mode, state.start_frame, state.end_frame));
         block.voice = &voice_block;
 
@@ -552,7 +553,11 @@ plugin_engine::activate_voice(
   state.sub_voice_index = sub_voice_index;
   assert(0 <= state.start_frame && state.start_frame <= state.end_frame && state.end_frame <= frame_count);
 
-  // TODO query mtsesp here once
+  // microtuning support
+  if (tuning_mode == engine_tuning_mode_on_note_before_mod || tuning_mode == engine_tuning_mode_continuous_before_mod)
+    state.retuned_pitch = MTS_RetuningInSemitones(_host_block->mts_client, (char)event.id.key, (char)event.id.channel);
+  else
+    state.retuned_pitch = event.id.key;
 
   // allow module engine to do once-per-voice init
   voice_block_params_snapshot(slot);
@@ -961,6 +966,9 @@ plugin_engine::process()
         // for portamento
         _last_note_key = event.id.key;
         _last_note_channel = event.id.channel;
+        _last_note_retuned_pitch = event.id.key;
+        if (_current_block_tuning_mode == engine_tuning_mode_on_note_before_mod || _current_block_tuning_mode == engine_tuning_mode_continuous_before_mod)
+          _last_note_retuned_pitch = MTS_RetuningInSemitones(_host_block->mts_client, (char)event.id.key, (char)event.id.channel);
       }
     }
     else
@@ -1041,6 +1049,9 @@ plugin_engine::process()
             auto const& event = _host_block->events.notes[e];
             _last_note_key = event.id.key;
             _last_note_channel = event.id.channel;
+            _last_note_retuned_pitch = event.id.key;
+            if (_current_block_tuning_mode == engine_tuning_mode_on_note_before_mod || _current_block_tuning_mode == engine_tuning_mode_continuous_before_mod)
+              _last_note_retuned_pitch = MTS_RetuningInSemitones(_host_block->mts_client, (char)event.id.key, (char)event.id.channel);
             std::fill(_mono_note_stream.begin() + event.frame, _mono_note_stream.end(), mono_note_state { event.id.key, false });
             _mono_note_stream[event.frame].note_on = true;
           }

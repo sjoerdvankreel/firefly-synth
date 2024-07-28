@@ -234,10 +234,10 @@ void
 voice_in_engine::reset(plugin_block const* block)
 {
   _position = 0;
-  _to_note_pitch = block->voice->state.note_id_.key;
-  _from_note_pitch = block->voice->state.note_id_.key;
+  _to_note_pitch = block->voice->state.retuned_pitch;
+  _from_note_pitch = block->voice->state.retuned_pitch;
   if (block->voice->state.note_id_.channel == block->voice->state.last_note_channel)
-    _from_note_pitch = block->voice->state.last_note_key;
+    _from_note_pitch = block->voice->state.last_retuned_pitch;
 
   auto const& block_auto = block->state.own_block_automation;
   int porta_mode = block_auto[param_porta][0].step();

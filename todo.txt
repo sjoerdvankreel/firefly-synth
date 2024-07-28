@@ -43,6 +43,8 @@ v1.8.4 beta 2
 V deal with unmapped keys
 V rename note-on/continuous
 V disable tunmode when timing is off
+- redo on-voice-after-mod
+- drop continuous-before-mod
 - better defaults
 - do something with mts_hasmaster
 - do pitch-to-semi + before/after mod
@@ -56,6 +58,7 @@ V disable tunmode when timing is off
 - yes or no on per-channel retuning ?
 - check if fx still works without retuning support
 - update the docs for micro
+- ask about (global) uni
 
 wishlist:
 green-on-white UI
