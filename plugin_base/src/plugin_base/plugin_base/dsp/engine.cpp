@@ -567,7 +567,7 @@ plugin_engine::activate_voice(
       {
         plugin_voice_block voice_block(make_voice_block(
           slot, _voice_states[slot].release_frame, event.id, _voice_states[slot].sub_voice_count, 
-          _voice_states[slot].sub_voice_index, _last_note_key, _last_note_channel));
+          _voice_states[slot].sub_voice_index, _last_note_key, _last_note_channel, _last_note_retuned_pitch));
         plugin_block block(make_plugin_block(slot, _voice_states[slot].note_id_.channel, m, mi, tuning_mode, state.start_frame, state.end_frame));
         block.voice = &voice_block;
         _voice_engines[slot][m][mi]->reset(&block);
