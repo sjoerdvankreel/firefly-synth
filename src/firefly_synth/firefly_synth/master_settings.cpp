@@ -16,14 +16,12 @@ enum { section_smooth, section_tuning };
 
 enum { 
   param_midi_smooth, param_tempo_smooth, param_auto_smooth, 
-  param_retuning_timing, param_tuning_mode, param_count };
+  param_retuning_timing, param_mts_esp_status, param_count };
 
 // we provide the buttons, everyone else needs to implement it
 extern int const master_settings_param_auto_smooth = param_auto_smooth;
 extern int const master_settings_param_midi_smooth = param_midi_smooth;
 extern int const master_settings_param_tempo_smooth = param_tempo_smooth;
-
-extern int const master_settings_param_tuning_mode = param_tuning_mode;
 extern int const master_settings_param_retuning_timing = param_retuning_timing;
 
 // must match engine_retuning_timing
@@ -34,15 +32,6 @@ retuning_timing_items()
   result.emplace_back("{CB268630-186C-46E0-9AAC-FC17923A0005}", "Off");
   result.emplace_back("{29DC68DD-B67A-45B0-A3DB-2B663FA875BC}", "On Note");
   result.emplace_back("{30759FEC-C751-44DB-AFAE-F67681929F15}", "Continuous");
-  return result;
-}
-
-static std::vector<list_item>
-tuning_mode_items()
-{
-  std::vector<list_item> result;
-  result.emplace_back("{BF8D8A4B-C688-42BE-BD0E-B5EC1276BBCC}", "Linear");
-  result.emplace_back("{5BD22294-074B-4569-AB4C-B27EFB473710}", "Logarithmic");
   return result;
 }
 
@@ -156,13 +145,12 @@ master_settings_topo(int section, bool is_fx, gui_position const& pos)
     make_param_gui_single(section_tuning, gui_edit_type::autofit_list, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   retuning_timing.info.description = "Selects MTS-ESP microtuning requery timing.";
-  auto& tuning_mode = result.params.emplace_back(make_param(
-    make_topo_info("{6E19AC87-8958-42AC-8B4E-AB0A88B247C3}", true, "Tuning Mode", "Tuning Mode", "Tuning Mode", param_tuning_mode, 1),
-    make_param_dsp_input(false, param_automate::none), make_domain_item(tuning_mode_items(), "Linear"),
-    make_param_gui_single(section_tuning, gui_edit_type::autofit_list, { 1, 0 },
+  auto& mts_esp_status = result.params.emplace_back(make_param(
+    make_topo_info("{801000F2-D2E5-41B8-BBE3-17435E9512CD}", true, "MTS-ESP Status", "MTS-ESP Status", "MTS-ESP Status", param_mts_esp_status, 1),
+    make_param_dsp_input(false, param_automate::none), make_domain_toggle(false),
+    make_param_gui_single(section_tuning, gui_edit_type::toggle, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  tuning_mode.info.description = "Selects MTS-ESP tuning interpolation.";
-  tuning_mode.gui.bindings.enabled.bind_params({ param_retuning_timing }, [](auto const& vs) { return vs[0] != engine_retuning_timing_off; });
+  mts_esp_status.info.description = "MTS-ESP status indicator.";
 
   return result;
 }

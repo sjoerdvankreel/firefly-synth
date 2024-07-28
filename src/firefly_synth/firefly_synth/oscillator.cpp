@@ -152,11 +152,9 @@ private:
   template <bool Graph, bool Sin, bool Saw, bool Tri, bool Sqr>
   void process_basic_sin_saw_tri_sqr(plugin_block& block, cv_audio_matrix_mixdown const* modulation);
   template <bool Graph, bool Sin, bool Saw, bool Tri, bool Sqr, bool DSF, bool Sync, bool KPS, bool KPSAutoFdbk, bool Static, int StaticSVFType>
-  void process_tuning_timing(plugin_block& block, cv_audio_matrix_mixdown const* modulation);
+  void process_tuning(plugin_block& block, cv_audio_matrix_mixdown const* modulation);
   template <bool Graph, bool Sin, bool Saw, bool Tri, bool Sqr, bool DSF, bool Sync, bool KPS, bool KPSAutoFdbk, bool Static, int StaticSVFType, engine_retuning_timing RetuningTiming>
-  void process_tuning_timing_mode(plugin_block& block, cv_audio_matrix_mixdown const* modulation);
-  template <bool Graph, bool Sin, bool Saw, bool Tri, bool Sqr, bool DSF, bool Sync, bool KPS, bool KPSAutoFdbk, bool Static, int StaticSVFType, engine_retuning_timing RetuningTiming, engine_tuning_mode TuningMode>
-  void process_tuning_timing_mode_unison(plugin_block& block, cv_audio_matrix_mixdown const* modulation);
+  void process_tuning_unison(plugin_block& block, cv_audio_matrix_mixdown const* modulation);
 };
 
 static void
@@ -855,7 +853,7 @@ osc_engine::process(plugin_block& block, cv_audio_matrix_mixdown const* modulati
   if (type == type_off)
   {
     // still need to process to clear out the buffer in case we are mod source
-    process_tuning_timing<Graph, false, false, false, false, false, false, false, false, false, -1>(block, modulation);
+    process_tuning<Graph, false, false, false, false, false, false, false, false, false, -1>(block, modulation);
     return;
   }
 
@@ -864,8 +862,8 @@ osc_engine::process(plugin_block& block, cv_audio_matrix_mixdown const* modulati
   case type_dsf: process_dsf<Graph>(block, modulation); break;
   case type_basic: process_basic<Graph>(block, modulation); break;
   case type_static: process_static<Graph>(block, modulation); break;
-  case type_kps1: process_tuning_timing<Graph, false, false, false, false, false, false, true, false, false, -1>(block, modulation); break;
-  case type_kps2: process_tuning_timing<Graph, false, false, false, false, false, false, true, true, false, -1>(block, modulation); break;
+  case type_kps1: process_tuning<Graph, false, false, false, false, false, false, true, false, false, -1>(block, modulation); break;
+  case type_kps2: process_tuning<Graph, false, false, false, false, false, false, true, true, false, -1>(block, modulation); break;
   default: assert(false); break;
   }
 }
@@ -874,9 +872,9 @@ template <bool Graph> void
 osc_engine::process_dsf(plugin_block& block, cv_audio_matrix_mixdown const* modulation)
 {
   if(block.state.own_block_automation[param_hard_sync][0].step())
-    process_tuning_timing<Graph, false, false, false, false, true, true, false, false, false, -1>(block, modulation);
+    process_tuning<Graph, false, false, false, false, true, true, false, false, false, -1>(block, modulation);
   else
-    process_tuning_timing<Graph, false, false, false, false, true, false, false, false, false, -1>(block, modulation);
+    process_tuning<Graph, false, false, false, false, true, false, false, false, false, -1>(block, modulation);
 }
 
 template <bool Graph> void
@@ -886,11 +884,11 @@ osc_engine::process_static(plugin_block& block, cv_audio_matrix_mixdown const* m
   int svf_mode = block_auto[param_rand_svf][0].step();
   switch (svf_mode)
   {
-  case rand_svf_lpf: process_tuning_timing<Graph, false, false, false, false, false, false, false, false, true, rand_svf_lpf>(block, modulation); break;
-  case rand_svf_hpf: process_tuning_timing<Graph, false, false, false, false, false, false, false, false, true, rand_svf_hpf>(block, modulation); break;
-  case rand_svf_bpf: process_tuning_timing<Graph, false, false, false, false, false, false, false, false, true, rand_svf_bpf>(block, modulation); break;
-  case rand_svf_bsf: process_tuning_timing<Graph, false, false, false, false, false, false, false, false, true, rand_svf_bsf>(block, modulation); break;
-  case rand_svf_peq: process_tuning_timing<Graph, false, false, false, false, false, false, false, false, true, rand_svf_peq>(block, modulation); break;
+  case rand_svf_lpf: process_tuning<Graph, false, false, false, false, false, false, false, false, true, rand_svf_lpf>(block, modulation); break;
+  case rand_svf_hpf: process_tuning<Graph, false, false, false, false, false, false, false, false, true, rand_svf_hpf>(block, modulation); break;
+  case rand_svf_bpf: process_tuning<Graph, false, false, false, false, false, false, false, false, true, rand_svf_bpf>(block, modulation); break;
+  case rand_svf_bsf: process_tuning<Graph, false, false, false, false, false, false, false, false, true, rand_svf_bsf>(block, modulation); break;
+  case rand_svf_peq: process_tuning<Graph, false, false, false, false, false, false, false, false, true, rand_svf_peq>(block, modulation); break;
   default: assert(false); break;
   }
 }
@@ -936,24 +934,24 @@ osc_engine::process_basic_sin_saw_tri_sqr(plugin_block& block, cv_audio_matrix_m
 {
   auto const& block_auto = block.state.own_block_automation;
   bool sync = block_auto[param_hard_sync][0].step() != 0;
-  if (sync) process_tuning_timing<Graph, Sin, Saw, Tri, Sqr, false, true, false, false, false, -1>(block, modulation);
-  else process_tuning_timing<Graph, Sin, Saw, Tri, Sqr, false, false, false, false, false, -1>(block, modulation);
+  if (sync) process_tuning<Graph, Sin, Saw, Tri, Sqr, false, true, false, false, false, -1>(block, modulation);
+  else process_tuning<Graph, Sin, Saw, Tri, Sqr, false, false, false, false, false, -1>(block, modulation);
 }
 
 template <bool Graph, bool Sin, bool Saw, bool Tri, bool Sqr, bool DSF, bool Sync, bool KPS, bool KPSAutoFdbk, bool Static, int StaticSVFType>
 void
-osc_engine::process_tuning_timing(plugin_block& block, cv_audio_matrix_mixdown const* modulation)
+osc_engine::process_tuning(plugin_block& block, cv_audio_matrix_mixdown const* modulation)
 {
   switch (block.current_retuning_timing)
   {
   case engine_retuning_timing_off:
-    process_tuning_timing_mode<Graph, Sin, Saw, Tri, Sqr, DSF, Sync, KPS, KPSAutoFdbk, Static, StaticSVFType, engine_retuning_timing_off>(block, modulation);
+    process_tuning_unison<Graph, Sin, Saw, Tri, Sqr, DSF, Sync, KPS, KPSAutoFdbk, Static, StaticSVFType, engine_retuning_timing_off>(block, modulation);
     break;
   case engine_retuning_timing_continuous:
-    process_tuning_timing_mode<Graph, Sin, Saw, Tri, Sqr, DSF, Sync, KPS, KPSAutoFdbk, Static, StaticSVFType, engine_retuning_timing_continuous>(block, modulation);
+    process_tuning_unison<Graph, Sin, Saw, Tri, Sqr, DSF, Sync, KPS, KPSAutoFdbk, Static, StaticSVFType, engine_retuning_timing_continuous>(block, modulation);
     break;
   case engine_retuning_timing_on_note:
-    process_tuning_timing_mode<Graph, Sin, Saw, Tri, Sqr, DSF, Sync, KPS, KPSAutoFdbk, Static, StaticSVFType, engine_retuning_timing_on_note>(block, modulation);
+    process_tuning_unison<Graph, Sin, Saw, Tri, Sqr, DSF, Sync, KPS, KPSAutoFdbk, Static, StaticSVFType, engine_retuning_timing_on_note>(block, modulation);
     break;
   default:
     assert(false);
@@ -963,27 +961,7 @@ osc_engine::process_tuning_timing(plugin_block& block, cv_audio_matrix_mixdown c
 
 template <bool Graph, bool Sin, bool Saw, bool Tri, bool Sqr, bool DSF, bool Sync, bool KPS, bool KPSAutoFdbk, bool Static, int StaticSVFType, engine_retuning_timing RetuningTiming>
 void
-osc_engine::process_tuning_timing_mode(plugin_block& block, cv_audio_matrix_mixdown const* modulation)
-{
-  auto const& block_auto = block.state.all_block_automation;
-  int tuning_mode = block_auto[module_master_settings][0][master_settings_param_tuning_mode][0].step();
-  switch (tuning_mode)
-  {
-  case engine_tuning_mode_linear:
-    process_tuning_timing_mode_unison<Graph, Sin, Saw, Tri, Sqr, DSF, Sync, KPS, KPSAutoFdbk, Static, StaticSVFType, RetuningTiming, engine_tuning_mode_linear>(block, modulation);
-    break;
-  case engine_tuning_mode_log:
-    process_tuning_timing_mode_unison<Graph, Sin, Saw, Tri, Sqr, DSF, Sync, KPS, KPSAutoFdbk, Static, StaticSVFType, RetuningTiming, engine_tuning_mode_log>(block, modulation);
-    break;
-  default:
-    assert(false);
-    break;
-  }
-}
-
-template <bool Graph, bool Sin, bool Saw, bool Tri, bool Sqr, bool DSF, bool Sync, bool KPS, bool KPSAutoFdbk, bool Static, int StaticSVFType, engine_retuning_timing RetuningTiming, engine_tuning_mode TuningMode>
-void
-osc_engine::process_tuning_timing_mode_unison(plugin_block& block, cv_audio_matrix_mixdown const* modulation)
+osc_engine::process_tuning_unison(plugin_block& block, cv_audio_matrix_mixdown const* modulation)
 {
   int generator_count = 0;
   if constexpr (Sin) generator_count++;
@@ -1025,7 +1003,7 @@ osc_engine::process_tuning_timing_mode_unison(plugin_block& block, cv_audio_matr
   
   int rand_seed = block_auto[param_rand_seed][0].step();
   int kps_mid_note = block_auto[param_kps_mid][0].step();
-  float kps_mid_freq = block.pitch_to_freq_with_tuning<RetuningTiming, TuningMode>(kps_mid_note);
+  float kps_mid_freq = block.pitch_to_freq_with_tuning<RetuningTiming>(kps_mid_note);
 
   float dsf_dist = block_auto[param_dsf_dist][0].real();
   float uni_voice_apply = uni_voices == 1 ? 0.0f : 1.0f;
@@ -1153,7 +1131,7 @@ osc_engine::process_tuning_timing_mode_unison(plugin_block& block, cv_audio_matr
     {
       float synced_sample = 0;
       float pitch_ref = min_pitch_ref + (max_pitch_ref - min_pitch_ref) * v / uni_voice_range;
-      float freq_ref = std::clamp(block.pitch_to_freq_with_tuning<RetuningTiming, TuningMode>(pitch_ref), 10.0f, oversampled_rate * 0.5f);
+      float freq_ref = std::clamp(block.pitch_to_freq_with_tuning<RetuningTiming>(pitch_ref), 10.0f, oversampled_rate * 0.5f);
       float inc_ref = freq_ref / oversampled_rate;
       float pitch_sync = pitch_ref;
       float freq_sync = freq_ref;
@@ -1166,7 +1144,7 @@ osc_engine::process_tuning_timing_mode_unison(plugin_block& block, cv_audio_matr
       if constexpr (Sync)
       {
         pitch_sync = min_pitch_sync + (max_pitch_sync - min_pitch_sync) * v / uni_voice_range;
-        freq_sync = std::clamp(block.pitch_to_freq_with_tuning<RetuningTiming, TuningMode>(pitch_sync), 10.0f, oversampled_rate * 0.5f);
+        freq_sync = std::clamp(block.pitch_to_freq_with_tuning<RetuningTiming>(pitch_sync), 10.0f, oversampled_rate * 0.5f);
         inc_sync = freq_sync / oversampled_rate;
       }
 

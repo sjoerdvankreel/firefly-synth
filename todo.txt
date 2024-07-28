@@ -47,7 +47,7 @@ V disable tunmode when timing is off
 - do something with mts_hasmaster
 - do pitch-to-semi + before/after mod
 
-- show mts status in output section
+- show mts status in output section (+ scale name)
 - fix the renoise demos
 - refix all the patches
 - deal with kbdtrack and anything else that might be affected

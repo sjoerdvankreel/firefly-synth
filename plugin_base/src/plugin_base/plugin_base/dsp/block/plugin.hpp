@@ -37,12 +37,6 @@ enum engine_retuning_timing {
   engine_retuning_timing_continuous // requery at block start
 };
 
-// needs cooperation from the plug
-enum engine_tuning_mode { 
-  engine_tuning_mode_linear, 
-  engine_tuning_mode_log 
-};
-
 // for polyphonic synth
 struct voice_state final {
   note_id note_id_ = {};
@@ -142,7 +136,7 @@ struct plugin_block final {
   jarray<float, 4> const& module_audio(int mod, int slot) const;
 
   // mts-esp support
-  template <engine_retuning_timing retuning_timing, engine_tuning_mode tuning_mode>
+  template <engine_retuning_timing retuning_timing>
   float pitch_to_freq_with_tuning(float pitch);
 
   void set_out_param(int param, int slot, double raw) const;
@@ -203,7 +197,7 @@ plugin_block::normalized_to_raw_block(int module_, int param_, jarray<float, 1> 
   param_topo.domain.normalized_to_raw_block<DomainType>(in, out, start_frame, end_frame);
 }
 
-template <engine_retuning_timing retuning_timing, engine_tuning_mode tuning_mode>
+template <engine_retuning_timing retuning_timing>
 inline float
 plugin_block::pitch_to_freq_with_tuning(float pitch)
 {
@@ -224,10 +218,10 @@ plugin_block::pitch_to_freq_with_tuning(float pitch)
     float pos = pitch - pitch_low;
     float freq_low = (*current_tuning)[pitch_low].frequency;
     float freq_high = (*current_tuning)[pitch_high].frequency;
-    if constexpr (tuning_mode == engine_tuning_mode_linear)
+    //if constexpr (tuning_mode == engine_tuning_mode_linear)
       return (1.0f - pos) * freq_low + pos * freq_high;
-    else
-      return std::pow(2.0f, (1.0f - pos) * std::log2(freq_low) + pos * std::log2(freq_high));
+    //else TODO
+      //return std::pow(2.0f, (1.0f - pos) * std::log2(freq_low) + pos * std::log2(freq_high));
   }
 }
 
