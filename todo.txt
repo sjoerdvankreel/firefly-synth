@@ -46,7 +46,7 @@ V disable tunmode when timing is off
 - better defaults
 - do something with mts_hasmaster
 - do pitch-to-semi + before/after mod
-
+- what to do with (global) uni ?
 - show mts status in output section (+ scale name)
 - fix the renoise demos
 - refix all the patches

@@ -59,19 +59,17 @@ _voice_processor_context(voice_processor_context)
   _automation_lerp_filters.resize(_dims.module_slot_param_slot);
   _automation_lp_filters.resize(_dims.module_slot_param_slot);
   _automation_state_last_round_end.resize(_dims.module_slot_param_slot);
-
-  // microtuning support
-  _current_voice_tunings.resize(_polyphony);
 }
 
-engine_retuning_timing 
-plugin_engine::get_current_retuning_timing()
+engine_tuning_mode 
+plugin_engine::get_current_tuning_mode()
 {
   auto const& topo = *_state.desc().plugin;
-  engine_retuning_timing result = (engine_retuning_timing)-1;
-  if (topo.retuning_timing_module == -1 || topo.retuning_timing_param == -1) return engine_retuning_timing_off;
-  result = (engine_retuning_timing)_state.get_plain_at(topo.retuning_timing_module, 0, topo.retuning_timing_param, 0).step();
-  assert(result == engine_retuning_timing_off || result == engine_retuning_timing_continuous || result == engine_retuning_timing_on_note);
+  engine_tuning_mode result = (engine_tuning_mode)-1;
+  if (topo.tuning_mode_module == -1 || topo.tuning_mode_param == -1) return engine_tuning_mode_off;
+  result = (engine_tuning_mode)_state.get_plain_at(topo.tuning_mode_module, 0, topo.tuning_mode_param, 0).step();
+  assert(result == engine_tuning_mode_off || result == engine_tuning_mode_continuous_linear || 
+    result == engine_tuning_mode_continuous_log || result == engine_tuning_mode_on_note);
   return result;
 }
 
@@ -108,7 +106,7 @@ plugin_engine::make_voice_block(
 plugin_block
 plugin_engine::make_plugin_block(
   int voice, int module, int slot, 
-  engine_retuning_timing retuning_timing, int start_frame, int end_frame)
+  engine_tuning_mode tuning_mode, int start_frame, int end_frame)
 {
   void** context_out = voice < 0
     ? &_global_context[module][slot]
@@ -126,11 +124,10 @@ plugin_engine::make_plugin_block(
   // even for per-voice tuning we need to fallback to per-block tuning for global stuff
   // also note the correct per-block/per-voice tuning is already filled by querying mts-esp!
   std::array<note_tuning, 128>* current_tuning = nullptr;
-  if (retuning_timing == engine_retuning_timing_continuous || (retuning_timing == engine_retuning_timing_on_note && voice < 0))
+  // todo check mts_hasmaster
+  // todo query retuninginsemis once if per_note and set current_tuning to null
+  if (tuning_mode != engine_tuning_mode_off)
     current_tuning = &_current_block_tuning;
-  else if (retuning_timing == engine_retuning_timing_on_note && voice >= 0)
-    current_tuning = &_current_voice_tunings[voice];
-  else assert(retuning_timing == engine_retuning_timing_off);
 
   // fix param_rate::voice values to voice start
   jarray<plain_value, 2> const& own_block_auto = voice < 0
@@ -153,7 +150,7 @@ plugin_engine::make_plugin_block(
     _graph,
     _host_block->mts_client,
     current_tuning,
-    retuning_timing,
+    tuning_mode,
     start_frame, end_frame, slot,
     _sample_rate, state, nullptr, nullptr, 
     _host_block->shared, *_state.desc().plugin, 
@@ -346,7 +343,7 @@ plugin_engine::activate_modules()
       auto& factory = _state.desc().plugin->modules[m].engine_factory;
       if (factory)
       {
-        plugin_block block(make_plugin_block(-1, m, mi, engine_retuning_timing_off, 0, 0));
+        plugin_block block(make_plugin_block(-1, m, mi, engine_tuning_mode_off, 0, 0));
         _input_engines[m][mi] = factory(*_state.desc().plugin, _sample_rate, _max_frame_count);
         _input_engines[m][mi]->reset(&block);
       }
@@ -367,7 +364,7 @@ plugin_engine::activate_modules()
       auto& factory = _state.desc().plugin->modules[m].engine_factory;
       if(factory)
       {
-        plugin_block block(make_plugin_block(-1, m, mi, engine_retuning_timing_off, 0, 0));
+        plugin_block block(make_plugin_block(-1, m, mi, engine_tuning_mode_off, 0, 0));
         _output_engines[m][mi] = factory(*_state.desc().plugin, _sample_rate, _max_frame_count);
         _output_engines[m][mi]->reset(&block);
       }
@@ -473,6 +470,10 @@ plugin_engine::process_voices_single_threaded()
 void
 plugin_engine::process_voice(int v, bool threaded)
 {
+  // matching release-fence before _voice_processor on the main thread
+  if (threaded) 
+    std::atomic_thread_fence(std::memory_order_acquire);
+
   // simplifies threadpool
   // so we can just push (polyphony) tasks each time
   if (_voice_states[v].stage == voice_stage::unused) return;
@@ -490,7 +491,7 @@ plugin_engine::process_voice(int v, bool threaded)
         plugin_voice_block voice_block(make_voice_block(v, _voice_states[v].release_frame, 
           _voice_states[v].note_id_, _voice_states[v].sub_voice_count, _voice_states[v].sub_voice_index,
           _voice_states[v].last_note_key, _voice_states[v].last_note_channel));
-        plugin_block block(make_plugin_block(v, m, mi, _current_voice_retuning_timings[v], state.start_frame, state.end_frame));
+        plugin_block block(make_plugin_block(v, m, mi, _current_block_tuning_mode, state.start_frame, state.end_frame));
         block.voice = &voice_block;
 
         double start_time = seconds_since_epoch();
@@ -538,7 +539,7 @@ plugin_engine::find_best_voice_slot()
 
 void 
 plugin_engine::activate_voice(
-  note_event const& event, int slot, engine_retuning_timing retuning_timing, 
+  note_event const& event, int slot, engine_tuning_mode tuning_mode, 
   int sub_voice_count, int sub_voice_index, int frame_count)
 {
   assert(slot >= 0);
@@ -554,18 +555,7 @@ plugin_engine::activate_voice(
   state.sub_voice_index = sub_voice_index;
   assert(0 <= state.start_frame && state.start_frame <= state.end_frame && state.end_frame <= frame_count);
 
-  // on voice start, get the mts-esp pitch remapping
-  // this might be made more efficient by getting it once per sample position in case of chords
-  _current_voice_retuning_timings[slot] = retuning_timing;
-#ifndef NDEBUG
-  _current_voice_tunings[slot] = {};
-#endif
-  if (retuning_timing == engine_retuning_timing_on_note)
-    for (int i = 0; i < 128; i++)
-    {
-      _current_voice_tunings[slot][i].frequency = _current_block_tuning[i].frequency;
-      _current_voice_tunings[slot][i].is_mapped = _current_block_tuning[i].is_mapped;
-    }
+  // TODO query mtsesp here once
 
   // allow module engine to do once-per-voice init
   voice_block_params_snapshot(slot);
@@ -576,7 +566,7 @@ plugin_engine::activate_voice(
         plugin_voice_block voice_block(make_voice_block(
           slot, _voice_states[slot].release_frame, event.id, _voice_states[slot].sub_voice_count, 
           _voice_states[slot].sub_voice_index, _last_note_key, _last_note_channel));
-        plugin_block block(make_plugin_block(slot, m, mi, retuning_timing, state.start_frame, state.end_frame));
+        plugin_block block(make_plugin_block(slot, m, mi, tuning_mode, state.start_frame, state.end_frame));
         block.voice = &voice_block;
         _voice_engines[slot][m][mi]->reset(&block);
       }
@@ -630,12 +620,10 @@ plugin_engine::process()
 
   // microtuning mode
   auto const& topo = *_state.desc().plugin;
-  _current_block_retuning_timing = get_current_retuning_timing();
+  _current_block_tuning_mode = get_current_tuning_mode();
   
-#ifndef NDEBUG
   _current_block_tuning = {};
-#endif
-  if (_current_block_retuning_timing == engine_retuning_timing_continuous || _current_block_retuning_timing == engine_retuning_timing_on_note)
+  if (_current_block_tuning_mode == engine_tuning_mode_continuous_linear || _current_block_tuning_mode == engine_tuning_mode_continuous_log)
     query_mts_esp_tuning(_current_block_tuning, -1);
 
   // smoothing per-block bpm values
@@ -909,7 +897,7 @@ plugin_engine::process()
     for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
       if(_input_engines[m][mi])
       {
-        plugin_block block(make_plugin_block(-1, m, mi, _current_block_retuning_timing, 0, frame_count));
+        plugin_block block(make_plugin_block(-1, m, mi, _current_block_tuning_mode, 0, frame_count));
         double start_time = seconds_since_epoch();
         _global_module_process_duration_sec[m][mi] = start_time;
         _input_engines[m][mi]->process(block);
@@ -936,12 +924,7 @@ plugin_engine::process()
         state.release_frame = frame_count;
       }
       else if (state.stage == voice_stage::finishing)
-      {
         state = voice_state();
-#ifndef NDEBUG
-        _current_voice_tunings[i] = {};
-#endif
-      }
     }
 
     int voice_mode = -1;
@@ -966,13 +949,13 @@ plugin_engine::process()
         if (event.type != note_event_type::on) continue;
 
         // mts-esp support
-        if (_current_block_retuning_timing != engine_retuning_timing_off && 
+        if (_current_block_tuning_mode != engine_tuning_mode_off && 
           !_current_block_tuning[event.id.key].is_mapped) continue;
 
         for(int sv = 0; sv < sub_voice_count; sv++)
         {
           int slot = find_best_voice_slot();
-          activate_voice(event, slot, _current_block_retuning_timing, sub_voice_count, sv, frame_count);
+          activate_voice(event, slot, _current_block_tuning_mode, sub_voice_count, sv, frame_count);
         }
          
         // for portamento
@@ -997,7 +980,7 @@ plugin_engine::process()
         {
           // mts-esp support
           // in mono-mode + tuning-mode, we trigger the first key that is mapped
-          if (_current_block_retuning_timing == engine_retuning_timing_off ||
+          if (_current_block_tuning_mode == engine_tuning_mode_off ||
             _current_block_tuning[event.id.key].is_mapped)
           {
             first_note_on_index = e;
@@ -1025,7 +1008,7 @@ plugin_engine::process()
           if(slot == -1)
           {
             slot = 0;
-            activate_voice(first_event, 0, _current_block_retuning_timing, 1, 0, frame_count);
+            activate_voice(first_event, 0, _current_block_tuning_mode, 1, 0, frame_count);
           }
           else 
           {
@@ -1041,7 +1024,7 @@ plugin_engine::process()
           if (slot == -1)
           {
             slot = find_best_voice_slot();
-            activate_voice(first_event, slot, _current_block_retuning_timing, 1, 0, frame_count);
+            activate_voice(first_event, slot, _current_block_tuning_mode, 1, 0, frame_count);
           }
           else
           {
@@ -1150,7 +1133,7 @@ plugin_engine::process()
           _cpu_usage, _high_cpu_module, _high_cpu_module_usage,
           _host_block->audio_out, _output_values[m][mi], _voices_mixdown
         };
-        plugin_block block(make_plugin_block(-1, m, mi, _current_block_retuning_timing, 0, frame_count));
+        plugin_block block(make_plugin_block(-1, m, mi, _current_block_tuning_mode, 0, frame_count));
         block.out = &out_block;
         double start_time = seconds_since_epoch();
         _global_module_process_duration_sec[m][mi] = start_time;

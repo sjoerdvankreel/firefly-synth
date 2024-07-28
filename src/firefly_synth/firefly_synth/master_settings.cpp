@@ -16,22 +16,23 @@ enum { section_smooth, section_tuning };
 
 enum { 
   param_midi_smooth, param_tempo_smooth, param_auto_smooth, 
-  param_retuning_timing, param_mts_esp_status, param_count };
+  param_tuning_mode, param_mts_esp_status, param_count };
 
 // we provide the buttons, everyone else needs to implement it
 extern int const master_settings_param_auto_smooth = param_auto_smooth;
 extern int const master_settings_param_midi_smooth = param_midi_smooth;
 extern int const master_settings_param_tempo_smooth = param_tempo_smooth;
-extern int const master_settings_param_retuning_timing = param_retuning_timing;
+extern int const master_settings_param_tuning_mode = param_tuning_mode;
 
-// must match engine_retuning_timing
+// must match engine_tuning_mode
 static std::vector<list_item>
-retuning_timing_items()
+tuning_mode_items()
 {
   std::vector<list_item> result;
   result.emplace_back("{CB268630-186C-46E0-9AAC-FC17923A0005}", "Off");
-  result.emplace_back("{29DC68DD-B67A-45B0-A3DB-2B663FA875BC}", "On Note");
-  result.emplace_back("{30759FEC-C751-44DB-AFAE-F67681929F15}", "Continuous");
+  result.emplace_back("{0A4A5F76-33C4-417F-9282-4B3F54B940E7}", "On Note");
+  result.emplace_back("{7D47FA4A-7109-4C8F-ABDC-66826D8ED637}", "Continuous Linear");
+  result.emplace_back("{0343A26A-7D5D-4437-BDA7-33A617A2ECBF}", "Continuous Log");
   return result;
 }
 
@@ -139,12 +140,12 @@ master_settings_topo(int section, bool is_fx, gui_position const& pos)
   auto tuning_section_gui = make_param_section_gui({ 0, 4, 1, 2 }, tuning_dimension, gui_label_edit_cell_split::horizontal);
   result.sections.emplace_back(make_param_section(section_tuning,
     make_topo_tag_basic("{C163A47F-DC37-4D18-B21B-0B71D266B152}", "Tuning"), tuning_section_gui));
-  auto& retuning_timing = result.params.emplace_back(make_param(
-    make_topo_info("{EC300412-5D8D-49B7-97DD-44C967A76ADC}", true, "Tuning Timing", "Tuning Timing", "Tuning Timing", param_retuning_timing, 1),
-    make_param_dsp_input(false, param_automate::none), make_domain_item(retuning_timing_items(), "Off"),
+  auto& tuning_mode = result.params.emplace_back(make_param(
+    make_topo_info("{EC300412-5D8D-49B7-97DD-44C967A76ADC}", true, "Tuning Mode", "Tuning Mode", "Tuning Mode", param_tuning_mode, 1),
+    make_param_dsp_input(false, param_automate::none), make_domain_item(tuning_mode_items(), "Off"),
     make_param_gui_single(section_tuning, gui_edit_type::autofit_list, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  retuning_timing.info.description = "Selects MTS-ESP microtuning requery timing.";
+  tuning_mode.info.description = "Selects MTS-ESP microtuning mode.";
   auto& mts_esp_status = result.params.emplace_back(make_param(
     make_topo_info("{801000F2-D2E5-41B8-BBE3-17435E9512CD}", true, "MTS-ESP Status", "MTS-ESP Status", "MTS-ESP Status", param_mts_esp_status, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_toggle(false),
