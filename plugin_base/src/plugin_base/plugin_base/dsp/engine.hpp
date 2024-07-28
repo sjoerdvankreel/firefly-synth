@@ -92,8 +92,9 @@ class plugin_engine final {
   jarray<float, 4> _current_modulation = {};
 
   // microtuning support
-  std::array<note_tuning, 128> _current_block_tuning = {};
   engine_tuning_mode _current_block_tuning_mode = (engine_tuning_mode)-1;
+  std::array<note_tuning, 128> _current_block_tuning_global = {};
+  std::array<std::array<note_tuning, 128>, 16> _current_block_tuning_channel = {};
 
   block_filter _bpm_filter = {};
   std::vector<int> _midi_was_automated = {};
@@ -137,7 +138,7 @@ public:
 
   // public for graph_engine
   plugin_block make_plugin_block(
-    int voice, int module, int slot,
+    int voice, int voice_channel, int module, int slot,
     engine_tuning_mode tuning_mode, int start_frame, int end_frame);
   plugin_voice_block make_voice_block(
     int v, int release_frame, note_id id, 

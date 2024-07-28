@@ -158,11 +158,12 @@ master_settings_topo(int section, bool is_fx, gui_position const& pos)
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   tuning_mode.info.description = "Selects MTS-ESP microtuning mode.";
   auto& tuning_interpolation = result.params.emplace_back(make_param(
-    make_topo_info("{801000F2-D2E5-41B8-BBE3-17435E9512CD}", true, "Tuning Interpolation", "Tuning Interpolation", "Tuning Interpolation", param_tuning_interpolation, 1),
+    make_topo_info("{801000F2-D2E5-41B8-BBE3-17435E9512CD}", true, "Tuning Interpolation", "Interpolation", "Interpolation", param_tuning_interpolation, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_item(tuning_interpolation_items(), "Linear"),
     make_param_gui_single(section_tuning, gui_edit_type::autofit_list, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   tuning_interpolation.info.description = "Selects after-modulation tuning interpolation mode.";
+  tuning_interpolation.gui.bindings.enabled.bind_params({ param_tuning_mode }, [](auto const& vs) { return vs[0] == engine_tuning_mode_on_note_after_mod || vs[0] == engine_tuning_mode_continuous_after_mod; });
 
   return result;
 }
