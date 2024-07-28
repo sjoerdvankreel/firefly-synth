@@ -162,6 +162,7 @@ master_settings_topo(int section, bool is_fx, gui_position const& pos)
     make_param_gui_single(section_tuning, gui_edit_type::autofit_list, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   tuning_mode.info.description = "Selects MTS-ESP tuning interpolation.";
+  tuning_mode.gui.bindings.enabled.bind_params({ param_retuning_timing }, [](auto const& vs) { return vs[0] != engine_retuning_timing_off; });
 
   return result;
 }

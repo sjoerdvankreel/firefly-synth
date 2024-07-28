@@ -42,10 +42,11 @@ V test the heck out of the clap threadpool
 v1.8.4 beta 2
 V deal with unmapped keys
 V rename note-on/continuous
+V disable tunmode when timing is off
 - better defaults
-- disable tunmode when timing is off
 - do something with mts_hasmaster
-- no need to requery on inner block size, just outer
+- do pitch-to-semi + before/after mod
+
 - show mts status in output section
 - fix the renoise demos
 - refix all the patches
@@ -53,9 +54,7 @@ V rename note-on/continuous
 - not forget to install the dynlib on mac/lin
 - fix the todos
 - yes or no on per-channel retuning ?
-- load mapping files within firefly itself yes/no?
 - check if fx still works without retuning support
-- do pitch-to-semi + before/after mod
 - update the docs for micro
 
 wishlist:
