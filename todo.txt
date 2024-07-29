@@ -43,6 +43,8 @@ v1.8.4 beta 2
 V deal with unmapped keys
 V rename note-on/continuous
 V disable tunmode when timing is off
+- check andreyas suggestion for porta gliding bug
+- build on ubuntu 18
 - redo on-voice-after-mod
 - drop continuous-before-mod
 - better defaults
