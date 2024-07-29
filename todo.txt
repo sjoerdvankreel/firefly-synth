@@ -44,6 +44,7 @@ V deal with unmapped keys
 V rename note-on/continuous
 V disable tunmode when timing is off
 - check andreyas suggestion for porta gliding bug
+- integrate https://github.com/surge-synthesizer/monique-monosynth/blob/main/.github/workflows/build-pr.yml
 - build on ubuntu 18
 - redo on-voice-after-mod
 - drop continuous-before-mod
