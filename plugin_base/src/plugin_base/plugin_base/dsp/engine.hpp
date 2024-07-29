@@ -95,6 +95,9 @@ class plugin_engine final {
   engine_tuning_mode _current_block_tuning_mode = (engine_tuning_mode)-1;
   std::array<note_tuning, 128> _current_block_tuning_global = {};
   std::array<std::array<note_tuning, 128>, 16> _current_block_tuning_channel = {};
+  std::vector<engine_tuning_mode> _current_voice_tuning_mode = {};
+  // this does NOT need a channel dimension since thats implied by the voice
+  std::vector<std::array<note_tuning, 128>> _current_voice_tuning_channel = {};
 
   block_filter _bpm_filter = {};
   std::vector<int> _midi_was_automated = {};

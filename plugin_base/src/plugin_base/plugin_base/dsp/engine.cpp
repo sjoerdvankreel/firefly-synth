@@ -59,6 +59,10 @@ _voice_processor_context(voice_processor_context)
   _automation_lerp_filters.resize(_dims.module_slot_param_slot);
   _automation_lp_filters.resize(_dims.module_slot_param_slot);
   _automation_state_last_round_end.resize(_dims.module_slot_param_slot);
+
+  // microtuning support
+  _current_voice_tuning_mode.resize(_polyphony);
+  _current_voice_tuning_channel.resize(_polyphony);
 }
 
 engine_tuning_mode 
@@ -141,13 +145,35 @@ plugin_engine::make_plugin_block(
     own_block_auto, all_block_auto
   };
 
-  std::array<note_tuning, 128>* tuning_table = &_current_block_tuning_global;
-  if (voice != -1) tuning_table = &_current_block_tuning_channel[voice_channel];
+  // even for per-voice tuning we need to fallback to per-block tuning for global stuff
+  // also note the correct per-block/per-voice tuning is already filled by querying mts-esp!
+  std::array<note_tuning, 128>* current_tuning = nullptr;
+  switch (tuning_mode)
+  {
+  case engine_tuning_mode_off:
+  // for these we don't need the tables -- does RetuningInSemis before after-mod interpolation
+  case engine_tuning_mode_on_note_before_mod:
+  case engine_tuning_mode_continuous_before_mod:
+    current_tuning = nullptr;
+    break;
+  // note! not only on_note_after needs the per-voice-per-channel tables,
+  // but also continuous_after needs them, because continuous_after may very well affect per-voice stuff
+  case engine_tuning_mode_on_note_after_mod:
+    if (voice < 0) current_tuning = &_current_block_tuning_global; // fallback -- global got no midi channel
+    else current_tuning = &_current_voice_tuning_channel[voice]; // here's the gist! per-voice-fixed-per-channel
+    break;
+  case engine_tuning_mode_continuous_after_mod:
+    if (voice < 0) current_tuning = &_current_block_tuning_global; // fallback -- global got no midi channel
+    else current_tuning = &_current_block_tuning_channel[voice_channel]; // here's the gist! continuous-per-channel
+    break;
+  default:
+    assert(false);
+  }
 
   return {
     _graph,
     _host_block->mts_client,
-    tuning_table,
+    current_tuning,
     tuning_mode,
     start_frame, end_frame, slot,
     _sample_rate, state, nullptr, nullptr, 
@@ -554,10 +580,19 @@ plugin_engine::activate_voice(
   assert(0 <= state.start_frame && state.start_frame <= state.end_frame && state.end_frame <= frame_count);
 
   // microtuning support
+  state.retuned_pitch = event.id.key;
   if (tuning_mode == engine_tuning_mode_on_note_before_mod || tuning_mode == engine_tuning_mode_continuous_before_mod)
     state.retuned_pitch = std::clamp(event.id.key + (float)MTS_RetuningInSemitones(_host_block->mts_client, (char)event.id.key, (char)event.id.channel), 0.0f, 127.0f);
-  else
-    state.retuned_pitch = event.id.key;
+  else if (tuning_mode == engine_tuning_mode_on_note_after_mod || tuning_mode == engine_tuning_mode_continuous_after_mod)
+  {
+    // for these cases we need to warp pitchmods after modulation, so need the entire mts table
+    _current_voice_tuning_mode[slot] = tuning_mode;
+    for (int i = 0; i < 128; i++)
+    {
+      _current_voice_tuning_channel[slot][i].frequency = _current_block_tuning_channel[event.id.channel][i].frequency;
+      _current_voice_tuning_channel[slot][i].is_mapped = _current_block_tuning_channel[event.id.channel][i].is_mapped;
+    }
+  }
 
   // allow module engine to do once-per-voice init
   voice_block_params_snapshot(slot);
@@ -1046,7 +1081,7 @@ plugin_engine::process()
         for(int e = 0; e < _host_block->events.notes.size(); e++)
           if(_host_block->events.notes[e].type == note_event_type::on)
           {
-            auto const& event = _host_block->events.notes[e];
+            auto const& event = _host_block->events.notes[e]; 
             _last_note_key = event.id.key;
             _last_note_channel = event.id.channel;
             _last_note_retuned_pitch = event.id.key;
