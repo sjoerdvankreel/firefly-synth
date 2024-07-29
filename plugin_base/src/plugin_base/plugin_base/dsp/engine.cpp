@@ -555,7 +555,7 @@ plugin_engine::activate_voice(
 
   // microtuning support
   if (tuning_mode == engine_tuning_mode_on_note_before_mod || tuning_mode == engine_tuning_mode_continuous_before_mod)
-    state.retuned_pitch = MTS_RetuningInSemitones(_host_block->mts_client, (char)event.id.key, (char)event.id.channel);
+    state.retuned_pitch = std::clamp(event.id.key + (float)MTS_RetuningInSemitones(_host_block->mts_client, (char)event.id.key, (char)event.id.channel), 0.0f, 127.0f);
   else
     state.retuned_pitch = event.id.key;
 
@@ -968,7 +968,7 @@ plugin_engine::process()
         _last_note_channel = event.id.channel;
         _last_note_retuned_pitch = event.id.key;
         if (_current_block_tuning_mode == engine_tuning_mode_on_note_before_mod || _current_block_tuning_mode == engine_tuning_mode_continuous_before_mod)
-          _last_note_retuned_pitch = MTS_RetuningInSemitones(_host_block->mts_client, (char)event.id.key, (char)event.id.channel);
+          _last_note_retuned_pitch = std::clamp(event.id.key + (float)MTS_RetuningInSemitones(_host_block->mts_client, (char)event.id.key, (char)event.id.channel), 0.0f, 127.0f);
       }
     }
     else
@@ -1051,7 +1051,7 @@ plugin_engine::process()
             _last_note_channel = event.id.channel;
             _last_note_retuned_pitch = event.id.key;
             if (_current_block_tuning_mode == engine_tuning_mode_on_note_before_mod || _current_block_tuning_mode == engine_tuning_mode_continuous_before_mod)
-              _last_note_retuned_pitch = MTS_RetuningInSemitones(_host_block->mts_client, (char)event.id.key, (char)event.id.channel);
+              _last_note_retuned_pitch = std::clamp(event.id.key + (float)MTS_RetuningInSemitones(_host_block->mts_client, (char)event.id.key, (char)event.id.channel), 0.0f, 127.0f);
             std::fill(_mono_note_stream.begin() + event.frame, _mono_note_stream.end(), mono_note_state { event.id.key, false });
             _mono_note_stream[event.frame].note_on = true;
           }
