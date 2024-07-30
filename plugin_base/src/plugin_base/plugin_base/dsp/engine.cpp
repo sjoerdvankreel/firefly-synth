@@ -515,7 +515,7 @@ plugin_engine::process_voice(int v, bool threaded)
         plugin_voice_block voice_block(make_voice_block(v, _voice_states[v].release_frame,
           _voice_states[v].note_id_, _voice_states[v].sub_voice_count, _voice_states[v].sub_voice_index,
           _voice_states[v].last_note_key, _voice_states[v].last_note_channel, _voice_states[v].last_retuned_pitch));
-        plugin_block block(make_plugin_block(v, _voice_states[v].note_id_.channel, m, mi, _current_block_tuning_mode, state.start_frame, state.end_frame));
+        plugin_block block(make_plugin_block(v, _voice_states[v].note_id_.channel, m, mi, _current_voice_tuning_mode[v], state.start_frame, state.end_frame));
         block.voice = &voice_block;
 
         double start_time = seconds_since_epoch();
