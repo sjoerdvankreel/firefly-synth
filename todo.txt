@@ -43,15 +43,16 @@ v1.8.4 beta 2
 V deal with unmapped keys
 V rename note-on/continuous
 V disable tunmode when timing is off
+V check andreyas suggestion for porta gliding bug ==> BREAKING CHANGE
+V redo on-voice-after-mod
+V do something with mts_hasmaster
+V do pitch-to-semi + before/after mod
+V yes or no on per-channel retuning ? => yes
 - deal with _mono_note_stream
-- check andreyas suggestion for porta gliding bug
 - integrate https://github.com/surge-synthesizer/monique-monosynth/blob/main/.github/workflows/build-pr.yml
 - build on ubuntu 18
-- redo on-voice-after-mod
-- drop continuous-before-mod
+- implement continuous-before-mod
 - better defaults
-- do something with mts_hasmaster
-- do pitch-to-semi + before/after mod
 - what to do with (global) uni ?
 - show mts status in output section (+ scale name)
 - fix the renoise demos
@@ -59,7 +60,6 @@ V disable tunmode when timing is off
 - deal with kbdtrack and anything else that might be affected
 - not forget to install the dynlib on mac/lin
 - fix the todos
-- yes or no on per-channel retuning ?
 - check if fx still works without retuning support
 - update the docs for micro
 - ask about (global) uni

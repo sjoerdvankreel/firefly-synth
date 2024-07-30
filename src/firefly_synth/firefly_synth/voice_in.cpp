@@ -82,11 +82,14 @@ public module_engine {
   float _from_note_pitch = -1;
   float _mono_porta_time = -1;
   int _mono_porta_samples = -1;
+  bool _first_note_in_mono_section = true;
+  bool _mono_section_finished_in_voice = false; // for release mode
   
-  template <bool Monophonic>
-  void process_mode(plugin_block& block);
-  template <bool Monophonic, bool GlobalUnison>
-  void process_mode_unison(plugin_block& block);
+  float calc_current_porta_pitch();
+  template <engine_voice_mode VoiceMode>
+  void process_mono_mode(plugin_block& block);
+  template <engine_voice_mode VoiceMode, bool GlobalUnison>
+  void process_mono_mode_unison(plugin_block& block);
 
 public:
   void reset(plugin_block const*) override;
@@ -230,6 +233,16 @@ voice_in_topo(int section, gui_position const& pos)
   return result;
 }
 
+inline float
+voice_in_engine::calc_current_porta_pitch()
+{
+  if (_porta_samples == 0) return _to_note_pitch;
+  float range = _to_note_pitch - _from_note_pitch;
+  float result = _from_note_pitch + (_position / (float)_porta_samples * range);
+  assert(!std::isnan(result));
+  return result;
+}
+
 void
 voice_in_engine::reset(plugin_block const* block)
 {
@@ -263,29 +276,45 @@ voice_in_engine::reset(plugin_block const* block)
     _mono_porta_samples = _porta_samples;
     _porta_samples = 0;
   }
+
+  // reset mono section info
+  _first_note_in_mono_section = true;
+  _mono_section_finished_in_voice = false;
 }
 
 void
 voice_in_engine::process(plugin_block& block)
 {
   auto const& block_auto = block.state.own_block_automation;
-  if(block_auto[param_mode][0].step() == engine_voice_mode_poly)
-    process_mode<false>(block);
-  else
-    process_mode<true>(block);
+  int voice_mode = block_auto[param_mode][0].step();
+  switch (voice_mode)
+  {
+  case engine_voice_mode_poly:
+    process_mono_mode<engine_voice_mode_poly>(block);
+    break;
+  case engine_voice_mode_mono:
+    process_mono_mode<engine_voice_mode_mono>(block);
+    break;
+  case engine_voice_mode_release:
+    process_mono_mode<engine_voice_mode_release>(block);
+    break;
+  default:
+    assert(false);
+    break;
+  }
 }
 
-template <bool Monophonic> void
-voice_in_engine::process_mode(plugin_block& block)
+template <engine_voice_mode VoiceMode> void
+voice_in_engine::process_mono_mode(plugin_block& block)
 {
   if (block.voice->state.sub_voice_count > 1)
-    process_mode_unison<Monophonic, true>(block);
+    process_mono_mode_unison<VoiceMode, true>(block);
   else
-    process_mode_unison<Monophonic, false>(block);
+    process_mono_mode_unison<VoiceMode, false>(block);
 }
 
-template <bool Monophonic, bool GlobalUnison> void
-voice_in_engine::process_mode_unison(plugin_block& block)
+template <engine_voice_mode VoiceMode, bool GlobalUnison> void
+voice_in_engine::process_mono_mode_unison(plugin_block& block)
 {  
   auto const& block_auto = block.state.own_block_automation;
   int note = block_auto[param_note][0].step();
@@ -309,9 +338,11 @@ voice_in_engine::process_mode_unison(plugin_block& block)
   
   for(int f = block.start_frame; f < block.end_frame; f++)
   {
-    if constexpr (Monophonic)
+    if constexpr (VoiceMode != engine_voice_mode_poly)
     {
-      if (block.state.mono_note_stream[f].note_on)
+      if (block.state.mono_note_stream[f].event_type == mono_note_stream_event::off && VoiceMode == engine_voice_mode_release)
+        _mono_section_finished_in_voice = true;
+      if (!_mono_section_finished_in_voice && block.state.mono_note_stream[f].event_type == mono_note_stream_event::on)
       {
         if (porta_mode == porta_off)
         {
@@ -323,22 +354,28 @@ voice_in_engine::process_mode_unison(plugin_block& block)
         }
         else 
         {
-          // start a new porta section within the current voice
-          _position = 0;
-          _from_note_pitch = _to_note_pitch;
+           // start a new porta section within the current voice
+          _from_note_pitch = calc_current_porta_pitch();
           _to_note_pitch = block.state.mono_note_stream[f].midi_key;
+          if (_first_note_in_mono_section)
+          {
+            _from_note_pitch = _to_note_pitch;
+            _first_note_in_mono_section = false;
+          }
+          _position = 0;
 
           // need to recalc total glide time
           if (porta_mode == porta_on)
             _porta_samples = _mono_porta_time * block.sample_rate * std::abs(_from_note_pitch - _to_note_pitch);
-          _porta_samples = _mono_porta_samples;
+          else
+            _porta_samples = _mono_porta_samples;
         }
       }
     }
 
     // global unison detuning for this voice
     float glob_uni_detune = 0;
-    if constexpr (!Monophonic && GlobalUnison)
+    if constexpr (VoiceMode == engine_voice_mode_poly && GlobalUnison)
     {
       float voice_pos = (float)block.voice->state.sub_voice_index / (block.voice->state.sub_voice_count - 1.0f);
       glob_uni_detune = (voice_pos - 0.5f) * glob_uni_dtn_curve[f];
@@ -346,7 +383,11 @@ voice_in_engine::process_mode_unison(plugin_block& block)
 
     float porta_note = 0;
     if(_position == _porta_samples) porta_note = _to_note_pitch;
-    else porta_note = _from_note_pitch + (_position++ / (float)_porta_samples * (_to_note_pitch - _from_note_pitch));
+    else
+    {
+      porta_note = calc_current_porta_pitch();
+      _position++;
+    }
     block.state.own_cv[output_pitch_offset][0][f] = 
       (note + cent_curve[f] + glob_uni_detune - midi_middle_c) + 
       (porta_note - midi_middle_c) + pitch_curve[f] + pb_curve[f] * master_pb_range;
