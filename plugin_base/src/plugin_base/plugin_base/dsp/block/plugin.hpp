@@ -17,13 +17,10 @@ struct plugin_topo;
 enum class voice_stage { unused, active, releasing, finishing };
 
 // for monophonic mode
-enum class mono_note_stream_event { none, on, off };
-
-// for monophonic mode
 struct mono_note_state
 {
   int midi_key = -1;
-  mono_note_stream_event event_type = mono_note_stream_event::none;
+  bool note_on = false;
 };
 
 // for MTS-ESP tuning

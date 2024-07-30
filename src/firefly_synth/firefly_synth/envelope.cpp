@@ -725,7 +725,7 @@ void env_engine::process_mono_type_sync_trigger_mode(plugin_block& block, cv_cv_
       // the last note in a monophonic section
       if constexpr (Trigger != trigger_legato)
       {
-        if(block.state.mono_note_stream[f].event_type == mono_note_stream_event::on)
+        if(block.state.mono_note_stream[f].note_on)
         {
           if(_stage < env_stage::release)
           {
