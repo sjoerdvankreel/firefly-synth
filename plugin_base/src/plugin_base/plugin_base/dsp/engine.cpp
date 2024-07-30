@@ -974,7 +974,7 @@ plugin_engine::process()
     assert(voice_mode == engine_voice_mode_mono || voice_mode == engine_voice_mode_poly || voice_mode == engine_voice_mode_release);
 
     // for mono mode
-    std::fill(_mono_note_stream.begin(), _mono_note_stream.end(), mono_note_state { _last_note_key, false });
+    std::fill(_mono_note_stream.begin(), _mono_note_stream.end(), mono_note_state { _last_note_key, mono_note_stream_event::none });
 
     if(voice_mode == engine_voice_mode_poly)
     {
@@ -1010,28 +1010,54 @@ plugin_engine::process()
     {
       // true mono mode: recycle the first active or releasing voice, or set up a new one
       // release mono mode: recycle the first active but not releasing voice, or set up a new one
-      // note: we do not account for triggering more than 1 voice per block
-      // note: need to play *all* incoming notes into this voice
-      // note: subvoice/global uni does NOT apply to mono mode!
+      // note 1: we do not account for triggering more than 1 note on/off per block
+      // note 2: need to play *all* incoming notes into this voice
+      // note 3: subvoice/global uni does NOT apply to mono mode!
       // because subvoices may have unequal length, then stuff becomes too complicated
 
-      int first_note_on_index = -1;
+      // set up note-off stream, plugin will have to do something with it
+      // so first check if there's a "real" note-off in there (not caused by an note-on at the same sample pos)
+      int first_note_off_index = -1;
       for (int e = 0; e < _host_block->events.notes.size(); e++)
-      {
-        auto const& event = _host_block->events.notes[e];
-        if (event.type == note_event_type::on)
+        if (_host_block->events.notes[e].type == note_event_type::off)
         {
-          // mts-esp support
-          // in mono-mode + tuning-mode, we trigger the first key that is mapped
-          if (_current_block_tuning_mode == engine_tuning_mode_off ||
-            _current_block_tuning_channel[event.id.channel][event.id.key].is_mapped)
+          // if a note off is caused by another note on at the same sample position, ignore it
+          auto const& event = _host_block->events.notes[e];
+          bool note_on_found_this_pos = false;
+          for (int e2 = 0; e2 < _host_block->events.notes.size(); e2++)
+            if (_host_block->events.notes[e2].type == note_event_type::on && _host_block->events.notes[e2].frame == event.frame)
+            {
+              note_on_found_this_pos = true;
+              break;
+            }
+          if (!note_on_found_this_pos)
           {
-            first_note_on_index = e;
-            break;
+            std::fill(_mono_note_stream.begin() + event.frame, _mono_note_stream.end(), mono_note_state{ event.id.key, mono_note_stream_event::none });
+            _mono_note_stream[event.frame].event_type = mono_note_stream_event::off;
+            first_note_off_index = event.frame;
           }
         }
-      }
 
+      // if there's no true note-off in this block, check for note-on
+      int first_note_on_index = -1;
+      if(first_note_off_index == -1)
+        for (int e = 0; e < _host_block->events.notes.size(); e++)
+        {
+          auto const& event = _host_block->events.notes[e];
+          if (event.type == note_event_type::on)
+          {
+            // mts-esp support
+            // in mono-mode + tuning-mode, we trigger the first key that is mapped
+            if (_current_block_tuning_mode == engine_tuning_mode_off ||
+              _current_block_tuning_channel[event.id.channel][event.id.key].is_mapped)
+            {
+              first_note_on_index = e;
+              break;
+            }
+          }
+        }
+
+      // and if it's there, proceed
       if(first_note_on_index != -1)
       {
         auto& first_event = _host_block->events.notes[first_note_on_index];
@@ -1041,6 +1067,8 @@ plugin_engine::process()
           if (_voice_states[v].stage == voice_stage::active ||
           (_voice_states[v].stage == voice_stage::releasing && voice_mode == engine_voice_mode::engine_voice_mode_mono))
           {
+            // even if released already, recycle voice slot for true mono
+            // i.e. just switch pitch within a running voice
             slot = v;
             break;
           }
@@ -1077,7 +1105,7 @@ plugin_engine::process()
           }
         }
 
-        // set up note stream, plugin will have to do something with it
+        // set up note-on stream, plugin will have to do something with it
         for(int e = 0; e < _host_block->events.notes.size(); e++)
           if(_host_block->events.notes[e].type == note_event_type::on)
           {
@@ -1087,8 +1115,8 @@ plugin_engine::process()
             _last_note_retuned_pitch = event.id.key;
             if (_current_block_tuning_mode == engine_tuning_mode_on_note_before_mod || _current_block_tuning_mode == engine_tuning_mode_continuous_before_mod)
               _last_note_retuned_pitch = std::clamp(event.id.key + (float)MTS_RetuningInSemitones(_host_block->mts_client, (char)event.id.key, (char)event.id.channel), 0.0f, 127.0f);
-            std::fill(_mono_note_stream.begin() + event.frame, _mono_note_stream.end(), mono_note_state { event.id.key, false });
-            _mono_note_stream[event.frame].note_on = true;
+            std::fill(_mono_note_stream.begin() + event.frame, _mono_note_stream.end(), mono_note_state { event.id.key, mono_note_stream_event::none });
+            _mono_note_stream[event.frame].event_type = mono_note_stream_event::on;
           }
       }
     }
