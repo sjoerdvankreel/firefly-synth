@@ -51,10 +51,10 @@ V yes or no on per-channel retuning ? => yes
 V deal with _mono_note_stream
 V implement continuous-before-mod
 V check if fx still works without retuning support
+V better defaults
 - deal with kbdtrack and anything else that might be affected
 - integrate https://github.com/surge-synthesizer/monique-monosynth/blob/main/.github/workflows/build-pr.yml
 - build on ubuntu 18
-- better defaults
 - show mts status in output section (+ scale name)
 - fix the renoise demos
 - refix all the patches
