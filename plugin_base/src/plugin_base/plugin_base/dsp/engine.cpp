@@ -580,19 +580,18 @@ plugin_engine::activate_voice(
   assert(0 <= state.start_frame && state.start_frame <= state.end_frame && state.end_frame <= frame_count);
 
   // microtuning support
+  _current_voice_tuning_mode[slot] = tuning_mode;
+
   state.retuned_pitch = event.id.key;
   if (tuning_mode == engine_tuning_mode_on_note_before_mod || tuning_mode == engine_tuning_mode_continuous_before_mod)
     state.retuned_pitch = std::clamp(event.id.key + (float)MTS_RetuningInSemitones(_host_block->mts_client, (char)event.id.key, (char)event.id.channel), 0.0f, 127.0f);
   else if (tuning_mode == engine_tuning_mode_on_note_after_mod || tuning_mode == engine_tuning_mode_continuous_after_mod)
-  {
-    // for these cases we need to warp pitchmods after modulation, so need the entire mts table
-    _current_voice_tuning_mode[slot] = tuning_mode;
     for (int i = 0; i < 128; i++)
     {
+      // for these cases we need to warp pitchmods after modulation, so need the entire mts table
       _current_voice_tuning_channel[slot][i].frequency = _current_block_tuning_channel[event.id.channel][i].frequency;
       _current_voice_tuning_channel[slot][i].is_mapped = _current_block_tuning_channel[event.id.channel][i].is_mapped;
     }
-  }
 
   // allow module engine to do once-per-voice init
   voice_block_params_snapshot(slot);
