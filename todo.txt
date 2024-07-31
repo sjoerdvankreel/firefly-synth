@@ -48,21 +48,19 @@ V redo on-voice-after-mod
 V do something with mts_hasmaster
 V do pitch-to-semi + before/after mod
 V yes or no on per-channel retuning ? => yes
-- deal with _mono_note_stream
+V deal with _mono_note_stream
+V implement continuous-before-mod
+V check if fx still works without retuning support
+- deal with kbdtrack and anything else that might be affected
 - integrate https://github.com/surge-synthesizer/monique-monosynth/blob/main/.github/workflows/build-pr.yml
 - build on ubuntu 18
-- implement continuous-before-mod
 - better defaults
-- what to do with (global) uni ?
 - show mts status in output section (+ scale name)
 - fix the renoise demos
 - refix all the patches
-- deal with kbdtrack and anything else that might be affected
 - not forget to install the dynlib on mac/lin
 - fix the todos
-- check if fx still works without retuning support
 - update the docs for micro
-- ask about (global) uni
 
 wishlist:
 green-on-white UI

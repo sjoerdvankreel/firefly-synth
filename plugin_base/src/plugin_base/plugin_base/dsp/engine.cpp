@@ -83,8 +83,9 @@ plugin_engine::query_mts_esp_tuning(std::array<note_tuning, 128>& tuning, int ch
   assert(channel >= -1);
   for (int i = 0; i < 128; i++)
   {
-    tuning[i].frequency = MTS_NoteToFrequency(_host_block->mts_client, (char)i, (char)channel);
     tuning[i].is_mapped = !MTS_ShouldFilterNote(_host_block->mts_client, (char)i, (char)channel);
+    tuning[i].retuned_frequency = MTS_NoteToFrequency(_host_block->mts_client, (char)i, (char)channel);
+    tuning[i].retuned_semis = std::clamp(i + (float)MTS_RetuningInSemitones(_host_block->mts_client, (char)i, (char)channel), 0.0f, 127.0f);
   }
 }
 
@@ -92,13 +93,12 @@ plugin_voice_block
 plugin_engine::make_voice_block(
   int v, int release_frame, note_id id, 
   int sub_voice_count, int sub_voice_index, 
-  int last_note_key, int last_note_channel, float last_retuned_pitch)
+  int last_note_key, int last_note_channel)
 {
   _voice_states[v].note_id_ = id;
   _voice_states[v].release_frame = release_frame;
   _voice_states[v].last_note_key = last_note_key;
   _voice_states[v].last_note_channel = last_note_channel;
-  _voice_states[v].last_retuned_pitch = last_retuned_pitch;
   _voice_states[v].sub_voice_count = sub_voice_count;
   _voice_states[v].sub_voice_index = sub_voice_index;
   return {
@@ -151,18 +151,16 @@ plugin_engine::make_plugin_block(
   switch (tuning_mode)
   {
   case engine_tuning_mode_off:
-  // for these we don't need the tables -- does RetuningInSemis before after-mod interpolation
-  case engine_tuning_mode_on_note_before_mod:
-  case engine_tuning_mode_continuous_before_mod:
-    current_tuning = nullptr;
     break;
   // note! not only on_note_after needs the per-voice-per-channel tables,
   // but also continuous_after needs them, because continuous_after may very well affect per-voice stuff
   case engine_tuning_mode_on_note_after_mod:
+  case engine_tuning_mode_on_note_before_mod:
     if (voice < 0) current_tuning = &_current_block_tuning_global; // fallback -- global got no midi channel
     else current_tuning = &_current_voice_tuning_channel[voice]; // here's the gist! per-voice-fixed-per-channel
     break;
   case engine_tuning_mode_continuous_after_mod:
+  case engine_tuning_mode_continuous_before_mod:
     if (voice < 0) current_tuning = &_current_block_tuning_global; // fallback -- global got no midi channel
     else current_tuning = &_current_block_tuning_channel[voice_channel]; // here's the gist! continuous-per-channel
     break;
@@ -514,7 +512,7 @@ plugin_engine::process_voice(int v, bool threaded)
         // _voice_states during voice stealing (to allow per-voice init)
         plugin_voice_block voice_block(make_voice_block(v, _voice_states[v].release_frame,
           _voice_states[v].note_id_, _voice_states[v].sub_voice_count, _voice_states[v].sub_voice_index,
-          _voice_states[v].last_note_key, _voice_states[v].last_note_channel, _voice_states[v].last_retuned_pitch));
+          _voice_states[v].last_note_key, _voice_states[v].last_note_channel));
         plugin_block block(make_plugin_block(v, _voice_states[v].note_id_.channel, m, mi, _current_voice_tuning_mode[v], state.start_frame, state.end_frame));
         block.voice = &voice_block;
 
@@ -582,15 +580,13 @@ plugin_engine::activate_voice(
   // microtuning support
   _current_voice_tuning_mode[slot] = tuning_mode;
 
-  state.retuned_pitch = event.id.key;
-  if (tuning_mode == engine_tuning_mode_on_note_before_mod || tuning_mode == engine_tuning_mode_continuous_before_mod)
-    state.retuned_pitch = std::clamp(event.id.key + (float)MTS_RetuningInSemitones(_host_block->mts_client, (char)event.id.key, (char)event.id.channel), 0.0f, 127.0f);
-  else if (tuning_mode == engine_tuning_mode_on_note_after_mod || tuning_mode == engine_tuning_mode_continuous_after_mod)
+  if (tuning_mode != engine_tuning_mode_off)
     for (int i = 0; i < 128; i++)
     {
       // for these cases we need to warp pitchmods after modulation, so need the entire mts table
-      _current_voice_tuning_channel[slot][i].frequency = _current_block_tuning_channel[event.id.channel][i].frequency;
       _current_voice_tuning_channel[slot][i].is_mapped = _current_block_tuning_channel[event.id.channel][i].is_mapped;
+      _current_voice_tuning_channel[slot][i].retuned_semis = _current_block_tuning_channel[event.id.channel][i].retuned_semis;
+      _current_voice_tuning_channel[slot][i].retuned_frequency = _current_block_tuning_channel[event.id.channel][i].retuned_frequency;
     }
 
   // allow module engine to do once-per-voice init
@@ -601,7 +597,7 @@ plugin_engine::activate_voice(
       {
         plugin_voice_block voice_block(make_voice_block(
           slot, _voice_states[slot].release_frame, event.id, _voice_states[slot].sub_voice_count, 
-          _voice_states[slot].sub_voice_index, _last_note_key, _last_note_channel, _last_note_retuned_pitch));
+          _voice_states[slot].sub_voice_index, _last_note_key, _last_note_channel));
         plugin_block block(make_plugin_block(slot, _voice_states[slot].note_id_.channel, m, mi, tuning_mode, state.start_frame, state.end_frame));
         block.voice = &voice_block;
         _voice_engines[slot][m][mi]->reset(&block);
@@ -1000,9 +996,6 @@ plugin_engine::process()
         // for portamento
         _last_note_key = event.id.key;
         _last_note_channel = event.id.channel;
-        _last_note_retuned_pitch = event.id.key;
-        if (_current_block_tuning_mode == engine_tuning_mode_on_note_before_mod || _current_block_tuning_mode == engine_tuning_mode_continuous_before_mod)
-          _last_note_retuned_pitch = std::clamp(event.id.key + (float)MTS_RetuningInSemitones(_host_block->mts_client, (char)event.id.key, (char)event.id.channel), 0.0f, 127.0f);
       }
     }
     else
@@ -1111,9 +1104,6 @@ plugin_engine::process()
             auto const& event = _host_block->events.notes[e]; 
             _last_note_key = event.id.key;
             _last_note_channel = event.id.channel;
-            _last_note_retuned_pitch = event.id.key;
-            if (_current_block_tuning_mode == engine_tuning_mode_on_note_before_mod || _current_block_tuning_mode == engine_tuning_mode_continuous_before_mod)
-              _last_note_retuned_pitch = std::clamp(event.id.key + (float)MTS_RetuningInSemitones(_host_block->mts_client, (char)event.id.key, (char)event.id.channel), 0.0f, 127.0f);
             std::fill(_mono_note_stream.begin() + event.frame, _mono_note_stream.end(), mono_note_state { event.id.key, mono_note_stream_event::none });
             _mono_note_stream[event.frame].event_type = mono_note_stream_event::on;
           }

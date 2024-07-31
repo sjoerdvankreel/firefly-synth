@@ -29,8 +29,9 @@ struct mono_note_state
 // for MTS-ESP tuning
 struct note_tuning
 {
-  float frequency = -1;
   bool is_mapped = false;
+  float retuned_semis = -1;
+  float retuned_frequency = -1;
 };
 
 // needs cooperation from the plug
@@ -51,7 +52,6 @@ enum engine_tuning_interpolation {
 // for polyphonic synth
 struct voice_state final {
   note_id note_id_ = {};
-  float retuned_pitch = {};
   
   // for mono mode
   note_id release_id = {};
@@ -66,7 +66,6 @@ struct voice_state final {
   // for portamento
   int last_note_key = -1;
   int last_note_channel = -1;
-  float last_retuned_pitch = {};
 
   // for global unison
   int sub_voice_count = -1;
@@ -230,8 +229,8 @@ plugin_block::pitch_to_freq_with_tuning(float pitch)
     int pitch_low = (int)std::floor(pitch);
     int pitch_high = (int)std::ceil(pitch);
     float pos = pitch - pitch_low;
-    float freq_low = (*current_tuning)[pitch_low].frequency;
-    float freq_high = (*current_tuning)[pitch_high].frequency;
+    float freq_low = (*current_tuning)[pitch_low].retuned_frequency;
+    float freq_high = (*current_tuning)[pitch_high].retuned_frequency;
     if constexpr (TuningInterpolation == engine_tuning_interpolation_linear)
       return (1.0f - pos) * freq_low + pos * freq_high;
     else if constexpr (TuningInterpolation == engine_tuning_interpolation_log)

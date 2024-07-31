@@ -153,7 +153,7 @@ master_settings_topo(int section, bool is_fx, gui_position const& pos)
     make_topo_tag_basic("{C163A47F-DC37-4D18-B21B-0B71D266B152}", "Tuning"), tuning_section_gui));
   auto& tuning_mode = result.params.emplace_back(make_param(
     make_topo_info("{EC300412-5D8D-49B7-97DD-44C967A76ADC}", true, "Tuning Mode", "Tuning Mode", "Tuning Mode", param_tuning_mode, 1),
-    make_param_dsp_input(false, param_automate::none), make_domain_item(tuning_mode_items(), "Off"),
+    make_param_dsp_input(false, param_automate::none), make_domain_item(tuning_mode_items(), "On Note Before Mod"),
     make_param_gui_single(section_tuning, gui_edit_type::autofit_list, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   tuning_mode.info.description = "Selects MTS-ESP microtuning mode.";

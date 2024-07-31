@@ -78,18 +78,20 @@ class voice_in_engine :
 public module_engine {
   int _position = -1;
   int _porta_samples = -1;
-  float _to_note_pitch = -1;
-  float _from_note_pitch = -1;
+  float _to_midi_note = -1;
+  float _from_midi_note = -1;
   float _mono_porta_time = -1;
   int _mono_porta_samples = -1;
   bool _first_note_in_mono_section = true;
   bool _mono_section_finished_in_voice = false; // for release mode
   
-  float calc_current_porta_pitch();
+  float calc_current_porta_midi_note();
   template <engine_voice_mode VoiceMode>
-  void process_mono_mode(plugin_block& block);
-  template <engine_voice_mode VoiceMode, bool GlobalUnison>
-  void process_mono_mode_unison(plugin_block& block);
+  void process_voice_mode(plugin_block& block);
+  template <engine_voice_mode VoiceMode, engine_tuning_mode TuningMode>
+  void process_voice_mode_tuning_mode(plugin_block& block);
+  template <engine_voice_mode VoiceMode, engine_tuning_mode TuningMode, bool GlobalUnison>
+  void process_voice_mode_tuning_mode_unison(plugin_block& block);
 
 public:
   void reset(plugin_block const*) override;
@@ -234,11 +236,11 @@ voice_in_topo(int section, gui_position const& pos)
 }
 
 inline float
-voice_in_engine::calc_current_porta_pitch()
+voice_in_engine::calc_current_porta_midi_note()
 {
-  if (_porta_samples == 0) return _to_note_pitch;
-  float range = _to_note_pitch - _from_note_pitch;
-  float result = _from_note_pitch + (_position / (float)_porta_samples * range);
+  if (_porta_samples == 0) return _to_midi_note;
+  float range = _to_midi_note - _from_midi_note;
+  float result = _from_midi_note + (_position / (float)_porta_samples * range);
   assert(!std::isnan(result));
   return result;
 }
@@ -247,10 +249,10 @@ void
 voice_in_engine::reset(plugin_block const* block)
 {
   _position = 0;
-  _to_note_pitch = block->voice->state.retuned_pitch;
-  _from_note_pitch = block->voice->state.retuned_pitch;
+  _to_midi_note = block->voice->state.note_id_.key;
+  _from_midi_note = block->voice->state.note_id_.key;
   if (block->voice->state.note_id_.channel == block->voice->state.last_note_channel)
-    _from_note_pitch = block->voice->state.last_retuned_pitch;
+    _from_midi_note = block->voice->state.last_note_key;
 
   auto const& block_auto = block->state.own_block_automation;
   int porta_mode = block_auto[param_porta][0].step();
@@ -262,7 +264,7 @@ voice_in_engine::reset(plugin_block const* block)
   {
   case porta_off: _porta_samples = 0; break;
   case porta_auto: _porta_samples = porta_time * block->sample_rate; break;
-  case porta_on: _porta_samples = porta_time * block->sample_rate * std::abs(_from_note_pitch - _to_note_pitch); break;
+  case porta_on: _porta_samples = porta_time * block->sample_rate * std::abs(_from_midi_note - _to_midi_note); break;
   default: assert(false); break;
   }
 
@@ -271,7 +273,7 @@ voice_in_engine::reset(plugin_block const* block)
   // and all subsequent notes in mono section apply portamento
   if(block_auto[param_mode][0].step() != engine_voice_mode_poly)
   {
-    _from_note_pitch = _to_note_pitch;
+    _from_midi_note = _to_midi_note;
     _mono_porta_time = porta_time;
     _mono_porta_samples = _porta_samples;
     _porta_samples = 0;
@@ -290,13 +292,13 @@ voice_in_engine::process(plugin_block& block)
   switch (voice_mode)
   {
   case engine_voice_mode_poly:
-    process_mono_mode<engine_voice_mode_poly>(block);
+    process_voice_mode<engine_voice_mode_poly>(block);
     break;
   case engine_voice_mode_mono:
-    process_mono_mode<engine_voice_mode_mono>(block);
+    process_voice_mode<engine_voice_mode_mono>(block);
     break;
   case engine_voice_mode_release:
-    process_mono_mode<engine_voice_mode_release>(block);
+    process_voice_mode<engine_voice_mode_release>(block);
     break;
   default:
     assert(false);
@@ -305,16 +307,42 @@ voice_in_engine::process(plugin_block& block)
 }
 
 template <engine_voice_mode VoiceMode> void
-voice_in_engine::process_mono_mode(plugin_block& block)
+voice_in_engine::process_voice_mode(plugin_block& block)
 {
-  if (block.voice->state.sub_voice_count > 1)
-    process_mono_mode_unison<VoiceMode, true>(block);
-  else
-    process_mono_mode_unison<VoiceMode, false>(block);
+  switch (block.current_tuning_mode)
+  {
+  case engine_tuning_mode_off:
+    process_voice_mode_tuning_mode<VoiceMode, engine_tuning_mode_off>(block);
+    break;
+  case engine_tuning_mode_on_note_after_mod:
+    process_voice_mode_tuning_mode<VoiceMode, engine_tuning_mode_on_note_after_mod>(block);
+    break;
+  case engine_tuning_mode_on_note_before_mod:
+    process_voice_mode_tuning_mode<VoiceMode, engine_tuning_mode_on_note_before_mod>(block);
+    break;
+  case engine_tuning_mode_continuous_after_mod:
+    process_voice_mode_tuning_mode<VoiceMode, engine_tuning_mode_continuous_after_mod>(block);
+    break;
+  case engine_tuning_mode_continuous_before_mod:
+    process_voice_mode_tuning_mode<VoiceMode, engine_tuning_mode_continuous_before_mod>(block);
+    break;
+  default:
+    assert(false);
+    break;
+  }
 }
 
-template <engine_voice_mode VoiceMode, bool GlobalUnison> void
-voice_in_engine::process_mono_mode_unison(plugin_block& block)
+template <engine_voice_mode VoiceMode, engine_tuning_mode TuningMode> void
+voice_in_engine::process_voice_mode_tuning_mode(plugin_block& block)
+{
+  if (block.voice->state.sub_voice_count > 1)
+    process_voice_mode_tuning_mode_unison<VoiceMode, TuningMode, true>(block);
+  else
+    process_voice_mode_tuning_mode_unison<VoiceMode, TuningMode, false>(block);
+}
+
+template <engine_voice_mode VoiceMode, engine_tuning_mode TuningMode, bool GlobalUnison> void
+voice_in_engine::process_voice_mode_tuning_mode_unison(plugin_block& block)
 {  
   auto const& block_auto = block.state.own_block_automation;
   int note = block_auto[param_note][0].step();
@@ -349,24 +377,24 @@ voice_in_engine::process_mono_mode_unison(plugin_block& block)
           // pitch switch, will be picked up by the oscs
           _position = 0;
           _porta_samples = 0;
-          _to_note_pitch = block.state.mono_note_stream[f].midi_key;
-          _from_note_pitch = _to_note_pitch;
+          _to_midi_note = block.state.mono_note_stream[f].midi_key;
+          _from_midi_note = _to_midi_note;
         }
         else 
         {
            // start a new porta section within the current voice
-          _from_note_pitch = calc_current_porta_pitch();
-          _to_note_pitch = block.state.mono_note_stream[f].midi_key;
+          _from_midi_note = calc_current_porta_midi_note();
+          _to_midi_note = block.state.mono_note_stream[f].midi_key;
           if (_first_note_in_mono_section)
           {
-            _from_note_pitch = _to_note_pitch;
+            _from_midi_note = _to_midi_note;
             _first_note_in_mono_section = false;
           }
           _position = 0;
 
           // need to recalc total glide time
           if (porta_mode == porta_on)
-            _porta_samples = _mono_porta_time * block.sample_rate * std::abs(_from_note_pitch - _to_note_pitch);
+            _porta_samples = _mono_porta_time * block.sample_rate * std::abs(_from_midi_note - _to_midi_note);
           else
             _porta_samples = _mono_porta_samples;
         }
@@ -382,15 +410,38 @@ voice_in_engine::process_mono_mode_unison(plugin_block& block)
     }
 
     float porta_note = 0;
-    if(_position == _porta_samples) porta_note = _to_note_pitch;
+    if(_position == _porta_samples) porta_note = _to_midi_note;
     else
     {
-      porta_note = calc_current_porta_pitch();
+      porta_note = calc_current_porta_midi_note();
       _position++;
     }
+
+    // microtuning support
+    // given out = a + b + c
+    // theres 3 possible options:
+    // out = retune(a + b + c)
+    // out = retune(a) + retune(b) + retune(c)
+    // out = retune(a) + b + c
+    // i believe the latter one to be correct for apply-before-mod
+    // since i think retuning a single pitch source here is equivalent to retuning the midi note-in
+    // as the sum of all values below amount to the very start of the pitch modulation chain
+    // i apply it to current portamento state but probably might be anything else
+    float retuned_porta_note = porta_note;
+
+    // off doesnt care, and after_mod goes with a premapped NoteToFreq later on
+    // im assuming LERP is okay here since we are still in midi-note domain
+    if constexpr (TuningMode == engine_tuning_mode_on_note_before_mod || TuningMode == engine_tuning_mode_continuous_before_mod)
+    {
+      int porta_note_hi = (int)std::ceil(porta_note);
+      int porta_note_low = (int)std::floor(porta_note);
+      float pos = porta_note - porta_note_low;
+      retuned_porta_note = (1.0f - pos) * (*block.current_tuning)[porta_note_low].retuned_semis + pos * (*block.current_tuning)[porta_note_hi].retuned_semis;
+    }
+
     block.state.own_cv[output_pitch_offset][0][f] = 
       (note + cent_curve[f] + glob_uni_detune - midi_middle_c) + 
-      (porta_note - midi_middle_c) + pitch_curve[f] + pb_curve[f] * master_pb_range;
+      (retuned_porta_note - midi_middle_c) + pitch_curve[f] + pb_curve[f] * master_pb_range;
   }
 }
 

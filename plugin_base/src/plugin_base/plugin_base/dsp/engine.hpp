@@ -107,7 +107,6 @@ class plugin_engine final {
   
   int _last_note_key = -1;
   int _last_note_channel = -1;
-  float _last_note_retuned_pitch = -1;
   void* _voice_processor_context = nullptr;
   std::vector<std::thread::id> _voice_thread_ids;
   thread_pool_voice_processor _voice_processor = {};
@@ -147,7 +146,7 @@ public:
   plugin_voice_block make_voice_block(
     int v, int release_frame, note_id id, 
     int sub_voice_count, int sub_voice_index,
-    int last_note_key, int last_note_channel, float last_retuned_pitch);
+    int last_note_key, int last_note_channel);
 
   void deactivate();
   void release_block();
