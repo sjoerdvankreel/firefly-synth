@@ -55,6 +55,7 @@ V better defaults
 
 v1.8.4 beta 3
 V build on ubuntu 18
+- do the credits
 - what makes sense for fx ? do mts or not ? and if not, be sure its disabled
 - deal with kbdtrack and anything else that might be affected
 - show mts status in output section (+ scale name)
