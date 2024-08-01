@@ -52,15 +52,20 @@ V deal with _mono_note_stream
 V implement continuous-before-mod
 V check if fx still works without retuning support
 V better defaults
+
+v1.8.4 beta 3
+V build on ubuntu 18
 - deal with kbdtrack and anything else that might be affected
-- integrate https://github.com/surge-synthesizer/monique-monosynth/blob/main/.github/workflows/build-pr.yml
-- build on ubuntu 18
 - show mts status in output section (+ scale name)
 - fix the renoise demos
 - refix all the patches
 - not forget to install the dynlib on mac/lin
 - fix the todos
 - update the docs for micro
+
+- autobuilds:
+- ask paul
+- integrate https://github.com/surge-synthesizer/monique-monosynth/blob/main/.github/workflows/build-pr.yml
 
 wishlist:
 green-on-white UI

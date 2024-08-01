@@ -236,10 +236,11 @@ plugin_block::pitch_to_freq_with_tuning(float pitch)
     else if constexpr (TuningInterpolation == engine_tuning_interpolation_log)
       return std::pow(2.0f, (1.0f - pos) * std::log2(freq_low) + pos * std::log2(freq_high));
     else
-      static_assert(false);
+      assert(false); // needs gcc13 for static_assert non-template-dependent expression
   }
 
-  else static_assert(false);
+  else
+    assert(false);
 }
 
 }
