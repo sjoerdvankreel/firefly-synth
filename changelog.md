@@ -1,5 +1,8 @@
-### ?, ? - Add Microtuning (MTS-ESP) support.
+### ?, ? - V1.8.4.
 
+- Add Microtuning (MTS-ESP) support.
+- Make binaries run on macOS 10 (was 11).
+- Make binaries run on Ubuntu 18 (was 22).
 - Moved smoothing parameters from Master In to new Master Settings module.
 - Conversion code will fix existing patches, but Renoise automation data will be broken.
 
