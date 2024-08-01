@@ -22,6 +22,7 @@ module_topo::validate(plugin_topo const& plugin, int index) const
 {
   assert(info.index == index);
   assert(!gui.visible || params.size());
+  assert(gui.show_tab_header || info.slot_count == 1);
   assert(midi_sources.size() == 0 || info.slot_count == 1);
   assert(midi_sources.size() == 0 || dsp.stage == module_stage::input);
   assert(0 <= gui.section && gui.section < plugin.gui.module_sections.size());

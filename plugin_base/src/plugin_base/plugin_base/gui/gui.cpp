@@ -672,23 +672,25 @@ Component&
 plugin_gui::make_modules(module_desc const* slots)
 {
   auto const& topo = *slots[0].module;
-  if (!topo.gui.param_sections_tabbed)
-  {
-    int index = topo.info.index;
-    auto const& tag = topo.info.tag;
-    auto& result = make_tab_component(tag.id, tag.display_name, index, false, slots);
-    for (int i = 0; i < topo.info.slot_count; i++)
-      add_component_tab(result, make_param_sections(slots[i]), slots[i].info.global, std::to_string(i + 1));
-    if (topo.info.slot_count > 1)
-      init_multi_tab_component(result, tag.id, index, -1);
-    return result;
-  }
-  else
+
+  // case tabbed param sections within single module or
+  // case single-slot module which doesnt need a tab header
+  if (topo.gui.param_sections_tabbed || !topo.gui.show_tab_header)
   {
     // tabbed param sections in multi-slot modules not supported
     assert(topo.info.slot_count == 1);
     return make_param_sections(slots[0]);
   }
+
+  // case the module itself is tabbed (osc 1 2 3 etc)
+  int index = topo.info.index;
+  auto const& tag = topo.info.tag;
+  auto& result = make_tab_component(tag.id, tag.display_name, index, false, slots);
+  for (int i = 0; i < topo.info.slot_count; i++)
+    add_component_tab(result, make_param_sections(slots[i]), slots[i].info.global, std::to_string(i + 1));
+  if (topo.info.slot_count > 1)
+    init_multi_tab_component(result, tag.id, index, -1);
+  return result;
 }
 
 Component&
