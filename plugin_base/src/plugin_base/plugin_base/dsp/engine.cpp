@@ -651,9 +651,14 @@ plugin_engine::process()
   /***************************************/
 
   // microtuning mode
+  bool mts_esp_status = true;
   auto const& topo = *_state.desc().plugin;
   _current_block_tuning_mode = get_current_tuning_mode();
-  if (!MTS_HasMaster(_host_block->mts_client)) _current_block_tuning_mode = engine_tuning_mode_off;
+  if (!MTS_HasMaster(_host_block->mts_client))
+  {
+    _current_block_tuning_mode = engine_tuning_mode_off;
+    mts_esp_status = false;
+  }
   if (_current_block_tuning_mode != engine_tuning_mode_off)
   {
     query_mts_esp_tuning(_current_block_tuning_global, -1);
@@ -1193,7 +1198,7 @@ plugin_engine::process()
         // output params are written to intermediate buffer first
         plugin_output_block out_block = {
           voice_count, thread_count,
-          _cpu_usage, _high_cpu_module, _high_cpu_module_usage,
+          _cpu_usage, _high_cpu_module, _high_cpu_module_usage, mts_esp_status,
           _host_block->audio_out, _output_values[m][mi], _voices_mixdown
         };
         plugin_block block(make_plugin_block(-1, -1, m, mi, _current_block_tuning_mode, 0, frame_count));

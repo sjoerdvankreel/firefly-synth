@@ -79,6 +79,7 @@ struct plugin_output_block final {
   double cpu_usage;
   int high_cpu_module;
   double high_cpu_module_usage;
+  bool mts_esp_status;
   float* const* host_audio;
   jarray<plain_value, 2>& params;
   jarray<float, 2> const& voice_mixdown;
