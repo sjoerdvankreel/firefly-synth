@@ -13,7 +13,7 @@ namespace firefly_synth {
 enum { section_main };
 enum { 
   param_gain, param_cpu, param_hi_mod_cpu, param_hi_mod, 
-  param_voices, param_threads, param_mts_status };
+  param_voices, param_threads, param_mts_status, param_mts_scale };
 
 class monitor_engine: 
 public module_engine {
@@ -38,11 +38,11 @@ monitor_topo(int section, gui_position const& pos, int polyphony, bool is_fx)
   result.gui.enable_tab_menu = false;
   result.engine_factory = [is_fx](auto const&, int, int) { return std::make_unique<monitor_engine>(is_fx); };
 
-  gui_dimension dimension = { { 1, 1 } , { 1, 1, 1, 2 } };
-  if (is_fx) dimension = { { 1 } , { 1, 1, 1, 2 } };
+  gui_dimension dimension = { { 1, 1 } , { 1, 1, 1, 1, 1, 1, 1, 1 } };
+  if (is_fx) dimension = { { 1 } , { 1, 1, 1, 1, 1, 1, 1, 1 } };
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag_basic("{988E6A84-A012-413C-B33B-80B8B135D203}", "Main"),
-    make_param_section_gui({ 0, 0 }, dimension)));
+    make_param_section_gui({ 0, 0 }, dimension, gui_label_edit_cell_split::horizontal)));
   auto& gain = result.params.emplace_back(make_param(
     make_topo_info_basic("{6AB939E0-62D0-4BA3-8692-7FD7B740ED74}", "Gain", param_gain, 1),
     make_param_dsp_output(), make_domain_percentage(0, 9.99, 0, 0, false),
@@ -52,20 +52,20 @@ monitor_topo(int section, gui_position const& pos, int polyphony, bool is_fx)
   auto& cpu = result.params.emplace_back(make_param(
     make_topo_info_basic("{55919A34-BF81-4EDF-8222-F0F0BE52DB8E}", "CPU", param_cpu, 1),
     make_param_dsp_output(), make_domain_percentage(0, 9.99, 0, 0, false),
-    make_param_gui_single(section_main, gui_edit_type::output, { 0, 1 },
+    make_param_gui_single(section_main, gui_edit_type::output, { 0, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   cpu.info.description = std::string("CPU usage relative to last processing block length. ") + 
     "For example, if it took 1 ms to render a 5 ms block, this will be 20%.";
   auto& hi_cpu = result.params.emplace_back(make_param(
     make_topo_info_basic("{2B13D43C-FFB5-4A66-9532-39B0F8258161}", "High CPU", param_hi_mod_cpu, 1),
     make_param_dsp_output(), make_domain_percentage(0, 0.99, 0, 0, false),
-    make_param_gui_single(section_main, gui_edit_type::output, { 0, 2 },
+    make_param_gui_single(section_main, gui_edit_type::output, { 0, 4 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   hi_cpu.info.description = "CPU usage of the most expensive module, relative to total CPU usage.";
   auto& hi_module = result.params.emplace_back(make_param(
     make_topo_info_basic("{BE8AF913-E888-4A0E-B674-8151AF1B7D65}", "High CPU Module", param_hi_mod, 1),
     make_param_dsp_output(), make_domain_step(0, 999, 0, 0),
-    make_param_gui_single(section_main, gui_edit_type::output_module_name, { 0, 3 },
+    make_param_gui_single(section_main, gui_edit_type::output_module_name, { 0, 6 },
     make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   hi_module.info.description = "Module that used the most CPU relative to total usage.";
   
@@ -80,15 +80,21 @@ monitor_topo(int section, gui_position const& pos, int polyphony, bool is_fx)
   auto& thrs = result.params.emplace_back(make_param(
     make_topo_info_basic("{FD7E410D-D4A6-4AA2-BDA0-5B5E6EC3E13A}", "Threads", param_threads, 1),
     make_param_dsp_output(), make_domain_step(0, polyphony, 0, 0),
-    make_param_gui_single(section_main, gui_edit_type::output, { 1, 1 },
+    make_param_gui_single(section_main, gui_edit_type::output, { 1, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   thrs.info.description = "Number of CLAP threadpool threads used to process voices in the last block. For VST3, this will always be 0 or 1.";
   auto& mts_status = result.params.emplace_back(make_param(
     make_topo_info_basic("{4388D544-4208-4839-A73C-2C641D915BD7}", "MTS-ESP Status", param_mts_status, 1),
     make_param_dsp_output(), make_domain_step(0, 1, 0, 0),
-    make_param_gui_single(section_main, gui_edit_type::output, { 1, 2, 1, 2 },
+    make_param_gui_single(section_main, gui_edit_type::output, { 1, 4 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   mts_status.info.description = "MTS-ESP master status.";
+  auto& mts_scale = result.params.emplace_back(make_param(
+    make_topo_info("{FB8C24B6-8678-45CA-B86B-234C52A575BF}", true, "MTS-ESP Scale", "Scale", "Scale", param_mts_scale, 1),
+    make_param_dsp_output(), make_domain_step(0, 1, 0, 0),
+    make_param_gui_single(section_main, gui_edit_type::output, { 1, 6 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
+  mts_scale.info.description = "MTS-ESP tuning scale.";
 
   return result;
 }
