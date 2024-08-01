@@ -672,7 +672,7 @@ Component&
 plugin_gui::make_modules(module_desc const* slots)
 {
   auto const& topo = *slots[0].module;
-  if (!topo.gui.tabbed)
+  if (!topo.gui.param_sections_tabbed)
   {
     int index = topo.info.index;
     auto const& tag = topo.info.tag;
@@ -695,7 +695,7 @@ Component&
 plugin_gui::make_param_sections(module_desc const& module)
 {
   auto const& topo = *module.module;
-  if (!topo.gui.tabbed)
+  if (!topo.gui.param_sections_tabbed)
   {
     auto& result = make_component<grid_component>(topo.gui.dimension, margin_vsection, 0, topo.gui.autofit_row, topo.gui.autofit_column);
     for (int s = 0; s < topo.sections.size(); s++)
