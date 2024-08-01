@@ -78,7 +78,7 @@ monitor_topo(int section, gui_position const& pos, int polyphony, bool is_fx)
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   voices.info.description = "Active voice count. Max 32, after that, recycling will occur.";
   auto& thrs = result.params.emplace_back(make_param(
-    make_topo_info_basic("{FD7E410D-D4A6-4AA2-BDA0-5B5E6EC3E13A}", "Threads", param_threads, 1),
+    make_topo_info_basic("{FD7E410D-D4A6-4AA2-BDA0-5B5E6EC3E13A}", "Thrds", param_threads, 1),
     make_param_dsp_output(), make_domain_step(0, polyphony, 0, 0),
     make_param_gui_single(section_main, gui_edit_type::output, { 1, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
