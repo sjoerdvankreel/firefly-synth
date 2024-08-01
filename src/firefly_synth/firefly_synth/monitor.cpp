@@ -38,8 +38,8 @@ monitor_topo(int section, gui_position const& pos, int polyphony, bool is_fx)
   result.gui.enable_tab_menu = false;
   result.engine_factory = [is_fx](auto const&, int, int) { return std::make_unique<monitor_engine>(is_fx); };
 
-  gui_dimension dimension = { { 1, 1 } , { 1, 1, 1, 1, 1, 1, 1, 1 } };
-  if (is_fx) dimension = { { 1 } , { 1, 1, 1, 1, 1, 1, 1, 1 } };
+  gui_dimension dimension = { { 1, 1 } , { 2, 1, 2, 1, 3, 1, 3, 5 } };
+  if (is_fx) dimension = { { 1 } , { 2, 1, 2, 1, 3, 1, 3, 5 } };
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag_basic("{988E6A84-A012-413C-B33B-80B8B135D203}", "Main"),
     make_param_section_gui({ 0, 0 }, dimension, gui_label_edit_cell_split::horizontal)));
@@ -57,13 +57,13 @@ monitor_topo(int section, gui_position const& pos, int polyphony, bool is_fx)
   cpu.info.description = std::string("CPU usage relative to last processing block length. ") + 
     "For example, if it took 1 ms to render a 5 ms block, this will be 20%.";
   auto& hi_cpu = result.params.emplace_back(make_param(
-    make_topo_info_basic("{2B13D43C-FFB5-4A66-9532-39B0F8258161}", "High CPU", param_hi_mod_cpu, 1),
+    make_topo_info_basic("{2B13D43C-FFB5-4A66-9532-39B0F8258161}", "Hi CPU", param_hi_mod_cpu, 1),
     make_param_dsp_output(), make_domain_percentage(0, 0.99, 0, 0, false),
     make_param_gui_single(section_main, gui_edit_type::output, { 0, 4 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   hi_cpu.info.description = "CPU usage of the most expensive module, relative to total CPU usage.";
   auto& hi_module = result.params.emplace_back(make_param(
-    make_topo_info_basic("{BE8AF913-E888-4A0E-B674-8151AF1B7D65}", "High CPU Module", param_hi_mod, 1),
+    make_topo_info_basic("{BE8AF913-E888-4A0E-B674-8151AF1B7D65}", "Hi Module", param_hi_mod, 1),
     make_param_dsp_output(), make_domain_step(0, 999, 0, 0),
     make_param_gui_single(section_main, gui_edit_type::output_module_name, { 0, 6 },
     make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
@@ -84,7 +84,7 @@ monitor_topo(int section, gui_position const& pos, int polyphony, bool is_fx)
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   thrs.info.description = "Number of CLAP threadpool threads used to process voices in the last block. For VST3, this will always be 0 or 1.";
   auto& mts_status = result.params.emplace_back(make_param(
-    make_topo_info_basic("{4388D544-4208-4839-A73C-2C641D915BD7}", "MTS-ESP Status", param_mts_status, 1),
+    make_topo_info_basic("{4388D544-4208-4839-A73C-2C641D915BD7}", "MTS-ESP", param_mts_status, 1),
     make_param_dsp_output(), make_domain_step(0, 1, 0, 0),
     make_param_gui_single(section_main, gui_edit_type::output, { 1, 4 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
