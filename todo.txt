@@ -64,6 +64,7 @@ V build on ubuntu 18
 - not forget to install the dynlib on mac/lin
 - fix the todos
 - update the docs for micro
+- do an mts demo tune
 
 - autobuilds:
 - ask paul
