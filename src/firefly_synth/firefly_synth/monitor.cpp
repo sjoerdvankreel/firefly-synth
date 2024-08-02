@@ -44,7 +44,7 @@ monitor_topo(int section, gui_position const& pos, int polyphony, bool is_fx)
     make_topo_tag_basic("{988E6A84-A012-413C-B33B-80B8B135D203}", "Left"),
     make_param_section_gui({ 0, 0 }, dimension_left, gui_label_edit_cell_split::horizontal)));
   gui_dimension dimension_right = { { 1, 1 } , { gui_dimension::auto_size_all, 2, gui_dimension::auto_size_all, 1 } };
-  if (is_fx)  dimension_right = { { 1 } , { gui_dimension::auto_size_all, 2, gui_dimension::auto_size_all, 1 } };
+  if (is_fx)  dimension_right = { { 1 } , { gui_dimension::auto_size_all, 1, gui_dimension::auto_size_all, 2 } };
   result.sections.emplace_back(make_param_section(section_right,
     make_topo_tag_basic("{B5BDB131-FADC-461E-B1BE-14E785886809}", "Right"),
     make_param_section_gui({ 0, 1 }, dimension_right, gui_label_edit_cell_split::horizontal)));
