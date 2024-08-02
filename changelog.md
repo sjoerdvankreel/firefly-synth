@@ -1,6 +1,7 @@
 ### ?, ? - V1.8.4.
 
 - Add Microtuning (MTS-ESP) support.
+- Add voice drain indicator to monitor.
 - Make binaries run on macOS 10 (was 11).
 - Make binaries run on Ubuntu 18 (was 22).
 - Moved smoothing parameters from Master In to new Master Settings module.
