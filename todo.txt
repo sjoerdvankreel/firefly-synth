@@ -66,6 +66,7 @@ V deal with kbdtrack
 - update the docs for micro
 - do an mts demo tune
 - mention the breaking change
+- dont do the param warnings when in release mode
 
 - autobuilds:
 - ask paul
