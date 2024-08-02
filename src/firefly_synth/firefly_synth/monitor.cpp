@@ -58,7 +58,7 @@ monitor_topo(int section, gui_position const& pos, int polyphony, bool is_fx)
   auto& cpu = result.params.emplace_back(make_param(
     make_topo_info_basic("{55919A34-BF81-4EDF-8222-F0F0BE52DB8E}", "CPU", param_cpu, 1),
     make_param_dsp_output(), make_domain_percentage(0, 9.99, 0, 0, false),
-    make_param_gui_single(section_left, gui_edit_type::output_label_center, { 1, 0 },
+    make_param_gui_single(section_left, gui_edit_type::output_label_left, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   cpu.info.description = std::string("CPU usage relative to last processing block length. ") +
     "For example, if it took 1 ms to render a 5 ms block, this will be 20%.";
@@ -81,7 +81,7 @@ monitor_topo(int section, gui_position const& pos, int polyphony, bool is_fx)
   auto& voices = result.params.emplace_back(make_param(
     make_topo_info_basic("{2827FB67-CF08-4785-ACB2-F9200D6B03FA}", "Voices", param_voices, 1),
     make_param_dsp_output(), make_domain_step(0, polyphony, 0, 0),
-    make_param_gui_single(section_left, gui_edit_type::output_label_left, { 0, 2 },
+    make_param_gui_single(section_left, gui_edit_type::output_label_center, { 0, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   voices.info.description = "Active voice count. Max 32, after that, recycling will occur.";
   auto& drained = result.params.emplace_back(make_param(
@@ -92,7 +92,7 @@ monitor_topo(int section, gui_position const& pos, int polyphony, bool is_fx)
   drained.info.description = "Voiced drained indicator.";
 
   auto& thrs = result.params.emplace_back(make_param(
-    make_topo_info_basic("{FD7E410D-D4A6-4AA2-BDA0-5B5E6EC3E13A}", "Thrds", param_threads, 1),
+    make_topo_info_basic("{FD7E410D-D4A6-4AA2-BDA0-5B5E6EC3E13A}", "Threads", param_threads, 1),
     make_param_dsp_output(), make_domain_step(0, polyphony, 0, 0),
     make_param_gui_single(section_right, gui_edit_type::output_label_center, { 0, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
