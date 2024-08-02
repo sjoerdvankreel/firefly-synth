@@ -65,6 +65,7 @@ V deal with kbdtrack
 - fix the todos
 - update the docs for micro
 - do an mts demo tune
+- mention the breaking change
 
 - autobuilds:
 - ask paul
