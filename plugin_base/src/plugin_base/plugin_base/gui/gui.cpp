@@ -922,6 +922,13 @@ plugin_gui::make_param_editor(module_desc const& module, param_desc const& param
     return result;
   }
 
+  if (param.param->gui.edit_type == gui_edit_type::output_toggle)
+  {
+    auto& result = make_component<param_toggle_button>(this, &module, &param, _module_lnfs[module.module->info.index].get());
+    result.setEnabled(false);
+    return result;
+  }
+
   if (param.param->gui.edit_type == gui_edit_type::output_module_name)
   {
     auto& result = make_component<module_name_label>(this, &module, &param, _module_lnfs[module.module->info.index].get());

@@ -25,15 +25,6 @@ public:
   PB_PREVENT_ACCIDENTAL_COPY(monitor_engine);
 };
 
-static std::vector<list_item>
-mts_status_items()
-{
-  std::vector<list_item> result;
-  result.emplace_back("{5903A2BD-E85E-4C76-8500-7525D40C6592}", "Off");
-  result.emplace_back("{C2E564BC-0377-4E83-A3FB-D7C4EC60BE0A}", "On");
-  return result;
-}
-
 module_topo
 monitor_topo(int section, gui_position const& pos, int polyphony, bool is_fx)
 {
@@ -100,14 +91,14 @@ monitor_topo(int section, gui_position const& pos, int polyphony, bool is_fx)
   thrs.info.description = "Number of CLAP threadpool threads used to process voices in the last block. For VST3, this will always be 0 or 1.";
   auto& mts_status = result.params.emplace_back(make_param(
     make_topo_info_basic("{4388D544-4208-4839-A73C-2C641D915BD7}", "MTS-ESP", param_mts_status, 1),
-    make_param_dsp_output(), make_domain_item(mts_status_items(), "Off"),
-    make_param_gui_single(section_right, gui_edit_type::output, { 1, 0 },
+    make_param_dsp_output(), make_domain_toggle(false),
+    make_param_gui_single(section_right, gui_edit_type::output_toggle, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   mts_status.info.description = "MTS-ESP master status.";
   auto& drained = result.params.emplace_back(make_param(
     make_topo_info("{C10AEC7B-A79D-4236-B65E-BBC444FAC854}", true, "Voices Drained", "Drain", "Drain", param_drain, 1),
-    make_param_dsp_output(), make_domain_step(0, 1, 0, 0),
-    make_param_gui_single(section_right, gui_edit_type::output, { 1, 2 },
+    make_param_dsp_output(), make_domain_toggle(false),
+    make_param_gui_single(section_right, gui_edit_type::output_toggle, { 1, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   drained.info.description = "Voiced drained indicator.";
 
