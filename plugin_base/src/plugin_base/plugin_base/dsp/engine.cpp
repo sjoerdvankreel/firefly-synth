@@ -245,6 +245,7 @@ plugin_engine::deactivate()
 
   _high_cpu_module = 0;
   _high_cpu_module_usage = 0;
+  _voices_drained = false;
 
   std::fill(_voice_states.begin(), _voice_states.end(), voice_state());
   for (int m = 0; m < _state.desc().plugin->modules.size(); m++)
@@ -294,6 +295,7 @@ plugin_engine::activate(int max_frame_count)
   _blocks_processed = 0;
   _last_note_key = -1;
   _last_note_channel = -1;
+  _voices_drained = false;
   _max_frame_count = max_frame_count;
   _output_updated_sec = seconds_since_epoch();
   std::fill(_voice_states.begin(), _voice_states.end(), voice_state());
@@ -540,16 +542,16 @@ plugin_engine::process_voice(int v, bool threaded)
 
 // recycle by age
 int
-plugin_engine::find_best_voice_slot(bool& was_drained)
+plugin_engine::find_best_voice_slot()
 {
   int slot = -1;
-  was_drained = true;
+  _voices_drained = true;
   std::int64_t min_time = std::numeric_limits<std::int64_t>::max();
   for (int i = 0; i < _voice_states.size(); i++)
     if (_voice_states[i].stage == voice_stage::unused)
     {
       slot = i;
-      was_drained = false;
+      _voices_drained = false;
       break;
     }
     else if (_voice_states[i].time < min_time)
@@ -950,7 +952,6 @@ plugin_engine::process()
   /* STEP 5: Voice management in case of polyphonic synth */
   /********************************************************/
 
-  bool voices_drained = false;
   if(_state.desc().plugin->type == plugin_type::synth)
   {
     // always take a voice for an entire block,
@@ -997,7 +998,7 @@ plugin_engine::process()
 
         for(int sv = 0; sv < sub_voice_count; sv++)
         {
-          int slot = find_best_voice_slot(voices_drained);
+          int slot = find_best_voice_slot();
           activate_voice(event, slot, _current_block_tuning_mode, sub_voice_count, sv, frame_count);
         }
          
@@ -1094,7 +1095,7 @@ plugin_engine::process()
         {
           if (slot == -1)
           {
-            slot = find_best_voice_slot(voices_drained);
+            slot = find_best_voice_slot();
             activate_voice(first_event, slot, _current_block_tuning_mode, 1, 0, frame_count);
           }
           else
@@ -1201,7 +1202,7 @@ plugin_engine::process()
         // output params are written to intermediate buffer first
         plugin_output_block out_block = {
           voice_count, thread_count,
-          _cpu_usage, _high_cpu_module, _high_cpu_module_usage, mts_esp_status, voices_drained,
+          _cpu_usage, _high_cpu_module, _high_cpu_module_usage, mts_esp_status, _voices_drained,
           _host_block->audio_out, _output_values[m][mi], _voices_mixdown
         };
         plugin_block block(make_plugin_block(-1, -1, m, mi, _current_block_tuning_mode, 0, frame_count));

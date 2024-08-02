@@ -63,6 +63,7 @@ class plugin_engine final {
   double _block_start_time_sec = {};
   std::int64_t _stream_time = {};
   std::int64_t _blocks_processed = {};
+  bool _voices_drained = false;
   int _high_cpu_module = {};
   double _high_cpu_module_usage = {};
   jarray<double, 3> _voice_module_process_duration_sec = {};
@@ -115,10 +116,10 @@ class plugin_engine final {
   jarray<std::unique_ptr<module_engine>, 2> _input_engines = {};
   jarray<std::unique_ptr<module_engine>, 2> _output_engines = {};
 
+  int find_best_voice_slot();
   void init_automation_from_state();
   void process_voices_single_threaded();
   void automation_sanity_check(int frame_count);
-  int find_best_voice_slot(bool& was_drained);
 
   // microtuning support
   engine_tuning_mode get_current_tuning_mode();
