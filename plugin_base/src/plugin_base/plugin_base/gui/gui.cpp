@@ -915,21 +915,24 @@ Component&
 plugin_gui::make_param_editor(module_desc const& module, param_desc const& param)
 {
   auto colors = _lnf->module_gui_colors(module.module->info.tag.full_name);
-  if(param.param->gui.edit_type == gui_edit_type::output)
+  auto edit_type = param.param->gui.edit_type;
+  if(edit_type == gui_edit_type::output_label_left || edit_type == gui_edit_type::output_label_center)
   {
     auto& result = make_param_label(module, param, gui_label_contents::value);
+    dynamic_cast<Label&>(result).setJustificationType(
+      edit_type == gui_edit_type::output_label_left? Justification::centredLeft: Justification::centred);
     result.setColour(Label::ColourIds::textColourId, colors.control_text);
     return result;
   }
 
-  if (param.param->gui.edit_type == gui_edit_type::output_toggle)
+  if (edit_type == gui_edit_type::output_toggle)
   {
     auto& result = make_component<param_toggle_button>(this, &module, &param, _module_lnfs[module.module->info.index].get());
     result.setEnabled(false);
     return result;
   }
 
-  if (param.param->gui.edit_type == gui_edit_type::output_module_name)
+  if (edit_type == gui_edit_type::output_module_name)
   {
     auto& result = make_component<module_name_label>(this, &module, &param, _module_lnfs[module.module->info.index].get());
     result.setColour(Label::ColourIds::textColourId, colors.control_text);
@@ -937,7 +940,7 @@ plugin_gui::make_param_editor(module_desc const& module, param_desc const& param
   }
 
   Component* result = nullptr;
-  switch (param.param->gui.edit_type)
+  switch (edit_type)
   {
   case gui_edit_type::knob:
   case gui_edit_type::hslider:
