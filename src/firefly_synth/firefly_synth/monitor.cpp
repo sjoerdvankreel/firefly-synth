@@ -13,7 +13,7 @@ namespace firefly_synth {
 enum { section_left, section_right };
 enum { 
   param_gain, param_cpu, param_hi_mod_cpu, param_hi_mod, 
-  param_voices, param_threads, param_mts_status, param_mts_scale };
+  param_voices, param_threads, param_mts_status, param_drain };
 
 class monitor_engine: 
 public module_engine {
@@ -104,12 +104,12 @@ monitor_topo(int section, gui_position const& pos, int polyphony, bool is_fx)
     make_param_gui_single(section_right, gui_edit_type::output, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   mts_status.info.description = "MTS-ESP master status.";
-  auto& mts_scale = result.params.emplace_back(make_param(
-    make_topo_info("{FB8C24B6-8678-45CA-B86B-234C52A575BF}", true, "MTS-ESP Scale", "Scale", "Scale", param_mts_scale, 1),
+  auto& drained = result.params.emplace_back(make_param(
+    make_topo_info("{C10AEC7B-A79D-4236-B65E-BBC444FAC854}", true, "Voices Drained", "Drain", "Drain", param_drain, 1),
     make_param_dsp_output(), make_domain_step(0, 1, 0, 0),
     make_param_gui_single(section_right, gui_edit_type::output, { 1, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  mts_scale.info.description = "MTS-ESP tuning scale.";
+  drained.info.description = "Voiced drained indicator.";
 
   return result;
 }
@@ -127,6 +127,7 @@ monitor_engine::process(plugin_block& block)
   {
     block.set_out_param(param_voices, 0, block.out->voice_count);
     block.set_out_param(param_threads, 0, block.out->thread_count);
+    block.set_out_param(param_drain, 0, block.out->voices_drained);
     block.set_out_param(param_mts_status, 0, block.out->mts_esp_status);
   }
   block.set_out_param(param_hi_mod, 0, block.out->high_cpu_module);

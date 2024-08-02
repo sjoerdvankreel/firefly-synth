@@ -115,10 +115,10 @@ class plugin_engine final {
   jarray<std::unique_ptr<module_engine>, 2> _input_engines = {};
   jarray<std::unique_ptr<module_engine>, 2> _output_engines = {};
 
-  int find_best_voice_slot();
   void init_automation_from_state();
   void process_voices_single_threaded();
   void automation_sanity_check(int frame_count);
+  int find_best_voice_slot(bool& was_drained);
 
   // microtuning support
   engine_tuning_mode get_current_tuning_mode();
