@@ -355,18 +355,18 @@ theme_button::
 theme_button(plugin_gui* gui) :
 _gui(gui), _themes(gui->gui_state()->desc().themes())
 { 
-  auto const& topo = *gui->gui_state()->desc().plugin;
-  std::string default_theme = topo.gui.default_theme;
-  std::string theme = user_io_load_list(topo, user_io::base, user_state_theme_key, default_theme, _themes);
+  auto const* topo = gui->gui_state()->desc().plugin;
+  std::string default_theme = topo->gui.default_theme;
+  std::string theme = user_io_load_list(topo->vendor, topo->full_name, user_io::base, user_state_theme_key, default_theme, _themes);
   set_items(vector_map(_themes, [](auto const& t) { return menu_button_item { t, ""}; }));
   setButtonText("Theme");
   for(int i = 0; i < _themes.size(); i++)
     if(_themes[i] == theme)
       set_selected_index(i);
-  _selected_index_changed = [this](int index) {
+  _selected_index_changed = [this, topo](int index) {
     index = std::clamp(index, 0, (int)get_items().size());
     // DONT run synchronously because theme_changed will destroy [this]!
-    user_io_save_list(*_gui->gui_state()->desc().plugin, user_io::base, user_state_theme_key, _themes[index]);
+    user_io_save_list(topo->vendor, topo->full_name, user_io::base, user_state_theme_key, _themes[index]);
     MessageManager::callAsync([gui = _gui, theme_name = _themes[index]]() { gui->theme_changed(theme_name); });
   };
 }
@@ -379,7 +379,7 @@ _gui(gui)
   std::vector<menu_button_item> button_items;
   auto mode_items = engine_tuning_mode_items();
   std::string default_tuning = mode_items[1].id;
-  auto const& topo = *gui->gui_state()->desc().plugin;
+  auto const* topo = gui->gui_state()->desc().plugin;
   for (int i = engine_tuning_mode_no_tuning; i < engine_tuning_mode_count; i++)
   {
     menu_button_item item;
@@ -389,14 +389,14 @@ _gui(gui)
     mode_ids.push_back(mode_items[i].id);
   }
   set_items(button_items);
-  std::string selected_tuning = user_io_load_list(topo, user_io::base, user_state_tuning_key, default_tuning, mode_ids);
+  std::string selected_tuning = user_io_load_list(topo->vendor, topo->full_name, user_io::base, user_state_tuning_key, default_tuning, mode_ids);
   setButtonText("Tuning");
   for(int i = 0; i < mode_items.size(); i++)
     if(mode_items[i].id == selected_tuning)
       set_selected_index(i);
-  _selected_index_changed = [this, mode_items](int index) {
+  _selected_index_changed = [this, topo, mode_items](int index) {
     index = std::clamp(index, 0, (int)get_items().size());
-    user_io_save_list(*_gui->gui_state()->desc().plugin, user_io::base, user_state_tuning_key, mode_items[index].id);
+    user_io_save_list(topo->vendor, topo->full_name, user_io::base, user_state_tuning_key, mode_items[index].id);
   };
 }
 

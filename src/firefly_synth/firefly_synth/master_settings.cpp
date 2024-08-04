@@ -2,6 +2,7 @@
 #include <plugin_base/topo/support.hpp>
 #include <plugin_base/dsp/graph_engine.hpp>
 #include <plugin_base/shared/io_plugin.hpp>
+#include <plugin_base/shared/tuning.hpp>
 
 #include <firefly_synth/synth.hpp>
 
@@ -90,7 +91,7 @@ master_settings_state_converter::post_process_always(load_handler const& handler
 }
 
 module_topo
-master_settings_topo(int section, bool is_fx, gui_position const& pos)
+master_settings_topo(std::string const& vendor, std::string const& full_name, int section, bool is_fx, gui_position const& pos)
 {
   std::vector<int> row_distribution = { 1 };
   std::vector<int> column_distribution = { 64, 26, 30, 38, 73, 53 };
@@ -153,9 +154,12 @@ master_settings_topo(int section, bool is_fx, gui_position const& pos)
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   override_tuning_mode.info.description = "Selects per-patch MTS-ESP microtuning mode override.";
   override_tuning_mode.gui.bindings.enabled.bind_params({ param_override_tuning }, [](auto const& vs) { return vs[0] != 0; });
+
+  // make sure we load the default from disk
+  std::string tuning_mode_name = get_per_user_engine_tuning_mode_name(vendor, full_name);
   auto& global_tuning_mode = result.params.emplace_back(make_param(
     make_topo_info("{28C619C2-C04E-4BD6-8D84-89667E1A5659}", true, "Global Tuning Mode", "Global Tuning Mode", "Global Tuning Mode", param_global_tuning_mode, 1),
-    make_param_dsp_input(false, param_automate::none), make_domain_item(engine_tuning_mode_items(), "No Tuning"),
+    make_param_dsp_input(false, param_automate::none), make_domain_item(engine_tuning_mode_items(), tuning_mode_name),
     make_param_gui_none()));
   global_tuning_mode.info.description = "Across-instance tuning parameter (readonly).";
 

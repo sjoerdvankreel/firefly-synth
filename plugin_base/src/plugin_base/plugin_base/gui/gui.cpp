@@ -340,7 +340,7 @@ _gui_state(gui_state), _undo_listener(this), _extra_state(extra_state)
   setOpaque(true);
   addMouseListener(&_undo_listener, true);
   auto const& topo = *gui_state->desc().plugin;
-  theme_changed(user_io_load_list(topo, user_io::base, user_state_theme_key, topo.gui.default_theme, gui_state->desc().themes()));
+  theme_changed(user_io_load_list(topo.vendor, topo.full_name, user_io::base, user_state_theme_key, topo.gui.default_theme, gui_state->desc().themes()));
 }
 
 void
@@ -385,7 +385,7 @@ plugin_gui::theme_changed(std::string const& theme_name)
   int default_width = _lnf->global_settings().get_default_width(is_fx);
   float ratio = _lnf->global_settings().get_aspect_ratio_height(is_fx) / (float)_lnf->global_settings().get_aspect_ratio_width(is_fx);
   getChildComponent(0)->setSize(default_width, default_width * ratio);
-  float user_scale = user_io_load_num(topo, user_io::base, user_state_scale_key, 1.0,
+  float user_scale = user_io_load_num(topo.vendor, topo.full_name, user_io::base, user_state_scale_key, 1.0,
     _lnf->global_settings().min_scale, _lnf->global_settings().max_scale);
   float w = default_width * user_scale * _system_dpi_scale;
   setSize(w, w * ratio);
@@ -547,10 +547,11 @@ void
 plugin_gui::resized()
 {
   float w = getLocalBounds().getWidth();
+  auto const& topo = *_gui_state->desc().plugin;
   bool is_fx = _gui_state->desc().plugin->type == plugin_type::fx;
   float user_scale = (w / _lnf->global_settings().get_default_width(is_fx)) / _system_dpi_scale;
   getChildComponent(0)->setTransform(AffineTransform::scale(user_scale * _system_dpi_scale));
-  user_io_save_num(*_gui_state->desc().plugin, user_io::base, user_state_scale_key, user_scale);
+  user_io_save_num(topo.vendor, topo.full_name, user_io::base, user_state_scale_key, user_scale);
 }
 
 graph_engine* 
@@ -596,7 +597,7 @@ plugin_gui::reloaded()
   bool is_fx = _gui_state->desc().plugin->type == plugin_type::fx;
   int default_width = settings.get_default_width(is_fx);
   float ratio = settings.get_aspect_ratio_height(is_fx) / (float)settings.get_aspect_ratio_width(is_fx);
-  float user_scale = user_io_load_num(topo, user_io::base, user_state_scale_key, 1.0,
+  float user_scale = user_io_load_num(topo.vendor, topo.full_name, user_io::base, user_state_scale_key, 1.0,
     settings.min_scale, settings.max_scale);
   float w = default_width * user_scale * _system_dpi_scale;
   setSize(w, (int)(w * ratio));

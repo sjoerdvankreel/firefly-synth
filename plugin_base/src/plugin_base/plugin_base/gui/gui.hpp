@@ -26,7 +26,6 @@ enum class gui_hover_type { param, module, custom };
 inline std::string const extra_state_tab_index = "tab";
 inline std::string const user_state_scale_key = "scale";
 inline std::string const user_state_theme_key = "theme";
-inline std::string const user_state_tuning_key = "tuning";
 
 // for serialization
 inline std::string const factory_preset_key = "factory_preset";
