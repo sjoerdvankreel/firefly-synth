@@ -370,6 +370,35 @@ _gui(gui), _themes(gui->gui_state()->desc().themes())
   };
 }
 
+tuning_mode_button::
+tuning_mode_button(plugin_gui* gui) :
+_gui(gui)
+{ 
+  std::vector<std::string> mode_ids;
+  std::vector<menu_button_item> button_items;
+  auto mode_items = engine_tuning_mode_items();
+  std::string default_tuning = mode_items[1].name;
+  auto const& topo = *gui->gui_state()->desc().plugin;
+  for (int i = engine_tuning_mode_no_tuning; i < engine_tuning_mode_count; i++)
+  {
+    menu_button_item item;
+    item.group = "";
+    item.name = mode_items[i].name;
+    button_items.push_back(item);
+    mode_ids.push_back(mode_items[i].id);
+  }
+  set_items(button_items);
+  std::string selected_tuning = user_io_load_list(topo, user_io::base, user_state_tuning_key, default_tuning, mode_ids);
+  setButtonText("Default Tuning");
+  for(int i = 0; i < mode_items.size(); i++)
+    if(mode_items[i].id == selected_tuning)
+      set_selected_index(i);
+  _selected_index_changed = [this, mode_items](int index) {
+    index = std::clamp(index, 0, (int)get_items().size());
+    user_io_save_list(*_gui->gui_state()->desc().plugin, user_io::base, user_state_tuning_key, mode_items[index].id);
+  };
+}
+
 image_component::
 image_component(
   format_config const* config, 

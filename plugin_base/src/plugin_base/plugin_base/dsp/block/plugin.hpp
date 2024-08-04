@@ -42,7 +42,8 @@ enum engine_tuning_mode {
   engine_tuning_mode_on_note_after_mod_log, // query at voice start, tune after modulation, lerp log2freq
   engine_tuning_mode_continuous_before_mod, // query each block, tune before modulation
   engine_tuning_mode_continuous_after_mod_linear, // query each block, tune after modulation, lerp freq
-  engine_tuning_mode_continuous_after_mod_log // query each block, tune after modulation, lerp log2freq
+  engine_tuning_mode_continuous_after_mod_log, // query each block, tune after modulation, lerp log2freq
+  engine_tuning_mode_count
 };
 
 std::vector<list_item>

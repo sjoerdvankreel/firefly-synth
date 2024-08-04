@@ -26,6 +26,7 @@ enum class gui_hover_type { param, module, custom };
 inline std::string const extra_state_tab_index = "tab";
 inline std::string const user_state_scale_key = "scale";
 inline std::string const user_state_theme_key = "theme";
+inline std::string const user_state_tuning_key = "tuning";
 
 // for serialization
 inline std::string const factory_preset_key = "factory_preset";
@@ -133,11 +134,6 @@ public:
   void init_patch();
   void clear_patch();
   void load_patch(std::string const& path, bool preset);
-
-  Component& make_load_button();
-  Component& make_save_button();
-  Component& make_init_button();
-  Component& make_clear_button();
 
   void param_mouse_exit(int param);
   void param_mouse_enter(int param);

@@ -73,7 +73,7 @@ plugin_engine::get_current_tuning_mode()
   // TODO take override into account
   if (topo.tuning_mode_module == -1 || topo.override_tuning_param == -1 || topo.override_tuning_mode_param == -1) return engine_tuning_mode_no_tuning;
   result = (engine_tuning_mode)_state.get_plain_at(topo.tuning_mode_module, 0, topo.override_tuning_mode_param, 0).step();
-  assert(engine_tuning_mode_no_tuning <= result && result <= engine_tuning_mode_continuous_after_mod_log);
+  assert(engine_tuning_mode_no_tuning <= result && result < engine_tuning_mode_count);
   return result;
 }
 

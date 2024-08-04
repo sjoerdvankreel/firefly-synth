@@ -166,7 +166,7 @@ public:
   ~preset_button() { _gui->extra_state_()->remove_listener(factory_preset_key, this); }
 };
 
-// binds theme selection preset to user config
+// binds theme preset to user config
 class theme_button:
 public menu_button
 {
@@ -174,6 +174,15 @@ public menu_button
   std::vector<std::string> _themes = {};
 public:
   theme_button(plugin_gui* gui);
+};
+
+// binds global tuning mode selection to user config
+class tuning_mode_button :
+public menu_button
+{
+  plugin_gui* const _gui;
+public:
+  tuning_mode_button(plugin_gui* gui);
 };
 
 // binding_component that is additionally bound to a single parameter value
