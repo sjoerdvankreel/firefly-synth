@@ -137,7 +137,7 @@ master_settings_topo(int section, bool is_fx, gui_position const& pos)
   override_tuning.info.description = "Enables per-patch MTS-ESP tuning mode override.";
   auto& override_tuning_mode = result.params.emplace_back(make_param(
     make_topo_info("{EC300412-5D8D-49B7-97DD-44C967A76ADC}", true, "Tuning Mode", "Tuning Mode", "Tuning Mode", param_override_tuning_mode, 1),
-    make_param_dsp_input(false, param_automate::none), make_domain_item(engine_tuning_mode_items(), "Off"),
+    make_param_dsp_input(false, param_automate::none), make_domain_item(engine_tuning_mode_items(), "No Tuning"),
     make_param_gui_single(section_tuning, gui_edit_type::autofit_list, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   override_tuning_mode.info.description = "Selects per-patch MTS-ESP microtuning mode override.";
