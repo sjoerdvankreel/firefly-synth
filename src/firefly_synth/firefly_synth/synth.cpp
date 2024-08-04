@@ -170,7 +170,7 @@ make_patch_controls_section(plugin_gui* gui, lnf* lnf, component_store store)
   result.add(gui->make_load_button(), { 0, 0 });
   result.add(gui->make_save_button(), { 0, 1 });
   result.add(gui->make_init_button(), { 1, 0 });
-  result.add(gui->make_clear_button(), { 1, 1 });
+  result.add(store_component<patch_menu>(store, gui), { 1, 1 });
   result.add(store_component<preset_button>(store, gui), { 0, 2 });
   result.add(store_component<theme_button>(store, gui), { 1, 2 });
   return result;
@@ -348,7 +348,8 @@ synth_topo(bool is_fx, std::string const& full_name)
   result->auto_smooth_module = module_master_settings;
   result->auto_smooth_param = master_settings_param_auto_smooth;
   result->tuning_mode_module = is_fx? -1: module_master_settings;
-  result->tuning_mode_param = is_fx ? -1 : master_settings_param_tuning_mode;
+  result->override_tuning_param = is_fx ? -1 : master_settings_param_override_tuning;
+  result->override_tuning_mode_param = is_fx ? -1 : master_settings_param_override_tuning_mode;
 
   // this is INCLUDING global unison!
   result->audio_polyphony = 64;

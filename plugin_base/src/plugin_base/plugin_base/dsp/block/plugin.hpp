@@ -36,18 +36,17 @@ struct note_tuning
 
 // needs cooperation from the plug
 enum engine_tuning_mode {
-  engine_tuning_mode_off, // no microtuning
+  engine_tuning_mode_no_tuning, // no microtuning
   engine_tuning_mode_on_note_before_mod, // query at voice start, tune before modulation
-  engine_tuning_mode_on_note_after_mod, // query at voice start, tune after modulation
+  engine_tuning_mode_on_note_after_mod_linear, // query at voice start, tune after modulation, lerp freq
+  engine_tuning_mode_on_note_after_mod_log, // query at voice start, tune after modulation, lerp log2freq
   engine_tuning_mode_continuous_before_mod, // query each block, tune before modulation
-  engine_tuning_mode_continuous_after_mod // query each block, tune after modulation
+  engine_tuning_mode_continuous_after_mod_linear, // query each block, tune after modulation, lerp freq
+  engine_tuning_mode_continuous_after_mod_log // query each block, tune after modulation, lerp log2freq
 };
 
-// needs cooperation from the plug
-enum engine_tuning_interpolation { 
-  engine_tuning_interpolation_linear, // lerp pitch
-  engine_tuning_interpolation_log // lerp log2(frequency)
-};
+std::vector<list_item>
+engine_tuning_mode_items();
 
 // for polyphonic synth
 struct voice_state final {
@@ -151,7 +150,7 @@ struct plugin_block final {
   jarray<float, 4> const& module_audio(int mod, int slot) const;
 
   // mts-esp support
-  template <engine_tuning_mode TuningMode, engine_tuning_interpolation TuningInterpolation>
+  template <engine_tuning_mode TuningMode>
   float pitch_to_freq_with_tuning(float pitch);
 
   void set_out_param(int param, int slot, double raw) const;
@@ -212,11 +211,11 @@ plugin_block::normalized_to_raw_block(int module_, int param_, jarray<float, 1> 
   param_topo.domain.normalized_to_raw_block<DomainType>(in, out, start_frame, end_frame);
 }
 
-template <engine_tuning_mode TuningMode, engine_tuning_interpolation TuningInterpolation>
+template <engine_tuning_mode TuningMode>
 inline float
 plugin_block::pitch_to_freq_with_tuning(float pitch)
 {
-  if constexpr (TuningMode == engine_tuning_mode_off)
+  if constexpr (TuningMode == engine_tuning_mode_no_tuning)
     return pitch_to_freq_no_tuning(pitch);
 
   // these 2 cases are already tuned beforehand
@@ -225,7 +224,10 @@ plugin_block::pitch_to_freq_with_tuning(float pitch)
   else if constexpr (TuningMode == engine_tuning_mode_continuous_before_mod)
     return pitch_to_freq_no_tuning(pitch);
 
-  else if constexpr (TuningMode == engine_tuning_mode_on_note_after_mod || TuningMode == engine_tuning_mode_continuous_after_mod)
+  else if constexpr (TuningMode == engine_tuning_mode_on_note_after_mod_linear || 
+    TuningMode == engine_tuning_mode_continuous_after_mod_linear ||
+    TuningMode == engine_tuning_mode_on_note_after_mod_log ||
+    TuningMode == engine_tuning_mode_continuous_after_mod_log)
   {
     pitch = std::clamp(pitch, 0.0f, 127.0f);
     int pitch_low = (int)std::floor(pitch);
@@ -233,9 +235,9 @@ plugin_block::pitch_to_freq_with_tuning(float pitch)
     float pos = pitch - pitch_low;
     float freq_low = (*current_tuning)[pitch_low].retuned_frequency;
     float freq_high = (*current_tuning)[pitch_high].retuned_frequency;
-    if constexpr (TuningInterpolation == engine_tuning_interpolation_linear)
+    if constexpr (TuningMode == engine_tuning_mode_on_note_after_mod_linear || TuningMode == engine_tuning_mode_continuous_after_mod_linear)
       return (1.0f - pos) * freq_low + pos * freq_high;
-    else if constexpr (TuningInterpolation == engine_tuning_interpolation_log)
+    else if constexpr (TuningMode == engine_tuning_mode_on_note_after_mod_log || TuningMode == engine_tuning_mode_continuous_after_mod_log)
       return std::pow(2.0f, (1.0f - pos) * std::log2(freq_low) + pos * std::log2(freq_high));
     else
       assert(false); // needs gcc13 for static_assert non-template-dependent expression

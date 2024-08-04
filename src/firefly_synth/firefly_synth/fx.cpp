@@ -1348,7 +1348,7 @@ fx_engine::process_svf_uni_mode(plugin_block& block,
 
   double kbd_trk_base;
   auto const& res_curve = *modulation[this_module][block.module_slot][param_svf_res][0];  
-  if(block.current_tuning_mode == engine_tuning_mode_off)
+  if(block.current_tuning_mode == engine_tuning_mode_no_tuning)
     kbd_trk_base = _global ? (block.state.last_midi_note == -1 ? midi_middle_c : block.state.last_midi_note) : block.voice->state.note_id_.key;
   else
     kbd_trk_base = _global ?

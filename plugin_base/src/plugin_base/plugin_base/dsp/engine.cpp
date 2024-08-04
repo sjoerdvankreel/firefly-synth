@@ -70,9 +70,10 @@ plugin_engine::get_current_tuning_mode()
 {
   auto const& topo = *_state.desc().plugin;
   engine_tuning_mode result = (engine_tuning_mode)-1;
-  if (topo.tuning_mode_module == -1 || topo.tuning_mode_param == -1) return engine_tuning_mode_off;
-  result = (engine_tuning_mode)_state.get_plain_at(topo.tuning_mode_module, 0, topo.tuning_mode_param, 0).step();
-  assert(engine_tuning_mode_off <= result && result <= engine_tuning_mode_continuous_after_mod);
+  // TODO take override into account
+  if (topo.tuning_mode_module == -1 || topo.override_tuning_param == -1 || topo.override_tuning_mode_param == -1) return engine_tuning_mode_no_tuning;
+  result = (engine_tuning_mode)_state.get_plain_at(topo.tuning_mode_module, 0, topo.override_tuning_mode_param, 0).step();
+  assert(engine_tuning_mode_no_tuning <= result && result <= engine_tuning_mode_continuous_after_mod_log);
   return result;
 }
 
@@ -150,17 +151,19 @@ plugin_engine::make_plugin_block(
   std::array<note_tuning, 128>* current_tuning = nullptr;
   switch (tuning_mode)
   {
-  case engine_tuning_mode_off:
+  case engine_tuning_mode_no_tuning:
     break;
   // note! not only on_note_after needs the per-voice-per-channel tables,
   // but also continuous_after needs them, because continuous_after may very well affect per-voice stuff
-  case engine_tuning_mode_on_note_after_mod:
   case engine_tuning_mode_on_note_before_mod:
+  case engine_tuning_mode_on_note_after_mod_linear:
+  case engine_tuning_mode_on_note_after_mod_log:
     if (voice < 0) current_tuning = &_current_block_tuning_global; // fallback -- global got no midi channel
     else current_tuning = &_current_voice_tuning_channel[voice]; // here's the gist! per-voice-fixed-per-channel
     break;
-  case engine_tuning_mode_continuous_after_mod:
   case engine_tuning_mode_continuous_before_mod:
+  case engine_tuning_mode_continuous_after_mod_linear:
+  case engine_tuning_mode_continuous_after_mod_log:
     if (voice < 0) current_tuning = &_current_block_tuning_global; // fallback -- global got no midi channel
     else current_tuning = &_current_block_tuning_channel[voice_channel]; // here's the gist! continuous-per-channel
     break;
@@ -367,7 +370,7 @@ plugin_engine::activate_modules()
       auto& factory = _state.desc().plugin->modules[m].engine_factory;
       if (factory)
       {
-        plugin_block block(make_plugin_block(-1, -1, m, mi, engine_tuning_mode_off, 0, 0));
+        plugin_block block(make_plugin_block(-1, -1, m, mi, engine_tuning_mode_no_tuning, 0, 0));
         _input_engines[m][mi] = factory(*_state.desc().plugin, _sample_rate, _max_frame_count);
         _input_engines[m][mi]->reset(&block);
       }
@@ -388,7 +391,7 @@ plugin_engine::activate_modules()
       auto& factory = _state.desc().plugin->modules[m].engine_factory;
       if(factory)
       {
-        plugin_block block(make_plugin_block(-1, -1, m, mi, engine_tuning_mode_off, 0, 0));
+        plugin_block block(make_plugin_block(-1, -1, m, mi, engine_tuning_mode_no_tuning, 0, 0));
         _output_engines[m][mi] = factory(*_state.desc().plugin, _sample_rate, _max_frame_count);
         _output_engines[m][mi]->reset(&block);
       }
@@ -584,7 +587,7 @@ plugin_engine::activate_voice(
   // microtuning support
   _current_voice_tuning_mode[slot] = tuning_mode;
 
-  if (tuning_mode != engine_tuning_mode_off)
+  if (tuning_mode != engine_tuning_mode_no_tuning)
     for (int i = 0; i < 128; i++)
     {
       // for these cases we need to warp pitchmods after modulation, so need the entire mts table
@@ -660,10 +663,10 @@ plugin_engine::process()
   _current_block_tuning_mode = get_current_tuning_mode();
   if (!MTS_HasMaster(_host_block->mts_client))
   {
-    _current_block_tuning_mode = engine_tuning_mode_off;
+    _current_block_tuning_mode = engine_tuning_mode_no_tuning;
     mts_esp_status = false;
   }
-  if (_current_block_tuning_mode != engine_tuning_mode_off)
+  if (_current_block_tuning_mode != engine_tuning_mode_no_tuning)
   {
     query_mts_esp_tuning(_current_block_tuning_global, -1);
     for(int i = 0; i < 16; i++)
@@ -993,7 +996,7 @@ plugin_engine::process()
         if (event.type != note_event_type::on) continue;
 
         // mts-esp support
-        if (_current_block_tuning_mode != engine_tuning_mode_off && 
+        if (_current_block_tuning_mode != engine_tuning_mode_no_tuning &&
           !_current_block_tuning_channel[event.id.channel][event.id.key].is_mapped) continue;
 
         for(int sv = 0; sv < sub_voice_count; sv++)
@@ -1049,7 +1052,7 @@ plugin_engine::process()
           {
             // mts-esp support
             // in mono-mode + tuning-mode, we trigger the first key that is mapped
-            if (_current_block_tuning_mode == engine_tuning_mode_off ||
+            if (_current_block_tuning_mode == engine_tuning_mode_no_tuning ||
               _current_block_tuning_channel[event.id.channel][event.id.key].is_mapped)
             {
               first_note_on_index = e;

@@ -58,6 +58,7 @@ V build on ubuntu 18
 V show mts status in output section
 V what makes sense for fx ? do mts or not ? and if not, be sure its disabled
 V deal with kbdtrack
+- drop the make_load_patch etc
 - do the global-settings-thing
 - do the credits
 - fix the renoise demos

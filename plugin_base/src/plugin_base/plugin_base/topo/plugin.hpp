@@ -157,8 +157,9 @@ struct plugin_topo final {
   sub_voice_counter_t sub_voice_counter = {};
 
   // microtuning is done by plugin_base so we need some cooperation
-  int tuning_mode_param = -1;
   int tuning_mode_module = -1;
+  int override_tuning_param = -1;
+  int override_tuning_mode_param = -1;
 
   void validate() const;
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(plugin_topo);
