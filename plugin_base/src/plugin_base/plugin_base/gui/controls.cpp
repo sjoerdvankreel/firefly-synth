@@ -389,7 +389,7 @@ _gui(gui)
   }
   set_items(button_items);
   std::string selected_tuning = user_io_load_list(topo, user_io::base, user_state_tuning_key, default_tuning, mode_ids);
-  setButtonText("Default Tuning");
+  setButtonText("Tuning");
   for(int i = 0; i < mode_items.size(); i++)
     if(mode_items[i].id == selected_tuning)
       set_selected_index(i);
