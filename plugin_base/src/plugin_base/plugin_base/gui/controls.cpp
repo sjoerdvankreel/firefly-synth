@@ -377,7 +377,7 @@ _gui(gui)
   std::vector<std::string> mode_ids;
   std::vector<menu_button_item> button_items;
   auto mode_items = engine_tuning_mode_items();
-  std::string default_tuning = mode_items[1].name;
+  std::string default_tuning = mode_items[1].id;
   auto const& topo = *gui->gui_state()->desc().plugin;
   for (int i = engine_tuning_mode_no_tuning; i < engine_tuning_mode_count; i++)
   {
