@@ -160,6 +160,7 @@ struct plugin_topo final {
   int tuning_mode_module = -1;
   int override_tuning_param = -1;
   int override_tuning_mode_param = -1;
+  int global_tuning_mode_param = -1;
 
   void validate() const;
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(plugin_topo);

@@ -17,7 +17,7 @@ enum { override_tuning_off, override_tuning_on };
 
 enum { 
   param_midi_smooth, param_tempo_smooth, param_auto_smooth, 
-  param_override_tuning, param_override_tuning_mode, param_count };
+  param_override_tuning, param_override_tuning_mode, param_global_tuning_mode, param_count };
 
 // we provide the buttons, everyone else needs to implement it
 extern int const master_settings_param_auto_smooth = param_auto_smooth;
@@ -25,6 +25,7 @@ extern int const master_settings_param_midi_smooth = param_midi_smooth;
 extern int const master_settings_param_tempo_smooth = param_tempo_smooth;
 extern int const master_settings_param_override_tuning = param_override_tuning;
 extern int const master_settings_param_override_tuning_mode = param_override_tuning_mode;
+extern int const master_settings_param_global_tuning_mode = param_global_tuning_mode;
 
 static std::vector<list_item>
 override_tuning_items()
@@ -152,6 +153,11 @@ master_settings_topo(int section, bool is_fx, gui_position const& pos)
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   override_tuning_mode.info.description = "Selects per-patch MTS-ESP microtuning mode override.";
   override_tuning_mode.gui.bindings.enabled.bind_params({ param_override_tuning }, [](auto const& vs) { return vs[0] != 0; });
+  auto& global_tuning_mode = result.params.emplace_back(make_param(
+    make_topo_info("{28C619C2-C04E-4BD6-8D84-89667E1A5659}", true, "Global Tuning Mode", "Global Tuning Mode", "Global Tuning Mode", param_global_tuning_mode, 1),
+    make_param_dsp_input(false, param_automate::none), make_domain_item(engine_tuning_mode_items(), "No Tuning"),
+    make_param_gui_none()));
+  global_tuning_mode.info.description = "Across-instance tuning parameter (readonly).";
 
   return result;
 }

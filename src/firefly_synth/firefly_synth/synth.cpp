@@ -347,6 +347,7 @@ synth_topo(bool is_fx, std::string const& full_name)
   result->auto_smooth_param = master_settings_param_auto_smooth;
   result->tuning_mode_module = is_fx? -1: module_master_settings;
   result->override_tuning_param = is_fx ? -1 : master_settings_param_override_tuning;
+  result->global_tuning_mode_param = is_fx ? -1 : master_settings_param_global_tuning_mode;
   result->override_tuning_mode_param = is_fx ? -1 : master_settings_param_override_tuning_mode;
 
   // this is INCLUDING global unison!
