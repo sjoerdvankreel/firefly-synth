@@ -13,6 +13,7 @@ static int const max_auto_smoothing_ms = 50;
 static int const max_other_smoothing_ms = 1000;
 
 enum { section_smooth, section_tuning }; 
+enum { override_tuning_off, override_tuning_on };
 
 enum { 
   param_midi_smooth, param_tempo_smooth, param_auto_smooth, 
@@ -24,6 +25,15 @@ extern int const master_settings_param_midi_smooth = param_midi_smooth;
 extern int const master_settings_param_tempo_smooth = param_tempo_smooth;
 extern int const master_settings_param_override_tuning = param_override_tuning;
 extern int const master_settings_param_override_tuning_mode = param_override_tuning_mode;
+
+static std::vector<list_item>
+override_tuning_items()
+{
+  std::vector<list_item> result;
+  result.emplace_back("{732C952A-B0B8-41D9-8983-0AC0EAC4127D}", "Off");
+  result.emplace_back("{0C55FF9C-B84F-4835-B803-7D0C152EF86C}", "On");
+  return result;
+}
 
 static graph_data
 render_graph(plugin_state const& state, graph_engine* engine, int param, param_topo_mapping const& mapping)
@@ -130,13 +140,13 @@ master_settings_topo(int section, bool is_fx, gui_position const& pos)
   result.sections.emplace_back(make_param_section(section_tuning,
     make_topo_tag_basic("{C163A47F-DC37-4D18-B21B-0B71D266B152}", "Tuning"), tuning_section_gui));
   auto& override_tuning = result.params.emplace_back(make_param(
-    make_topo_info("{801000F2-D2E5-41B8-BBE3-17435E9512CD}", true, "Override Tuning", "Override Tuning", "Override Tuning", param_override_tuning, 1),
-    make_param_dsp_input(false, param_automate::none), make_domain_toggle(false),
-    make_param_gui_single(section_tuning, gui_edit_type::toggle, { 0, 0 },
+    make_topo_info("{801000F2-D2E5-41B8-BBE3-17435E9512CD}", true, "Override Tuning For Patch", "Override Tuning", "Override Tuning", param_override_tuning, 1),
+    make_param_dsp_input(false, param_automate::none), make_domain_item(override_tuning_items(), "Off"),
+    make_param_gui_single(section_tuning, gui_edit_type::list, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   override_tuning.info.description = "Enables per-patch MTS-ESP tuning mode override.";
   auto& override_tuning_mode = result.params.emplace_back(make_param(
-    make_topo_info("{EC300412-5D8D-49B7-97DD-44C967A76ADC}", true, "Tuning Mode", "Tuning Mode", "Tuning Mode", param_override_tuning_mode, 1),
+    make_topo_info("{EC300412-5D8D-49B7-97DD-44C967A76ADC}", true, "Override Tuning Mode For Patch", "Tuning Mode", "Tuning Mode", param_override_tuning_mode, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_item(engine_tuning_mode_items(), "No Tuning"),
     make_param_gui_single(section_tuning, gui_edit_type::autofit_list, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
