@@ -124,6 +124,7 @@ menu_button::clicked()
   PopupMenu::Options options;
   options = options.withTargetComponent(this);
   menu.showMenuAsync(options, [this](int id) {
+    if (id == 0) return;
     int index = id - 1;
     if (index == _selected_index) return;
     _selected_index = index;

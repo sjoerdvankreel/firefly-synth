@@ -1,10 +1,11 @@
 ### ?, ? - V1.8.4.
 
-- Add Microtuning (MTS-ESP) support.
 - Add voice drain indicator to monitor.
 - Make binaries run on macOS 10 (was 11).
 - Make binaries run on Ubuntu 18 (was 22).
+- Add Microtuning (MTS-ESP) support (see manual).
 - Moved smoothing parameters from Master In to new Master Settings module.
+- Fixed bug w.r.t. discarding dropdown item (by clicking outside the menu).
 - Conversion code will fix existing patches, but Renoise automation data will be broken.
 
 ### July 17, 2024 - V1.8.3.
