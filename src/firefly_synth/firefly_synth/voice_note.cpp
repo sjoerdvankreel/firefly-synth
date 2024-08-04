@@ -41,7 +41,7 @@ voice_note_engine::process(plugin_block& block)
 {  
   block.state.own_cv[output_velo][0].fill(block.start_frame, block.end_frame, block.voice->state.velocity);
   // we don't have a default 12-tet tuning table
-  if(block.current_tuning_mode == engine_tuning_mode_off)
+  if(block.current_tuning_mode == engine_tuning_mode_no_tuning)
     block.state.own_cv[output_key_pitch][0].fill(block.start_frame, block.end_frame, block.voice->state.note_id_.key / 127.0f);
   else
     block.state.own_cv[output_key_pitch][0].fill(block.start_frame, block.end_frame, (*block.current_tuning)[block.voice->state.note_id_.key].retuned_semis / 127.0f);
