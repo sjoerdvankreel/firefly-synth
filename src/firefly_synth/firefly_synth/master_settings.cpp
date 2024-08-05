@@ -155,12 +155,9 @@ master_settings_topo(std::string const& vendor, std::string const& full_name, in
   override_tuning_mode.info.description = "Selects per-patch MTS-ESP microtuning mode override.";
   override_tuning_mode.gui.bindings.enabled.bind_params({ param_override_tuning }, [](auto const& vs) { return vs[0] != 0; });
 
-  // make sure we load the default from disk
-  engine_tuning_mode current_global_tuning_mode = get_global_tuning_mode(vendor, full_name);
-  std::string tuning_mode_name = engine_tuning_mode_items()[current_global_tuning_mode].name;
   auto& global_tuning_mode = result.params.emplace_back(make_param(
     make_topo_info("{28C619C2-C04E-4BD6-8D84-89667E1A5659}", true, "Global Tuning Mode", "Global Tuning Mode", "Global Tuning Mode", param_global_tuning_mode, 1),
-    make_param_dsp_input(false, param_automate::none), make_domain_item(engine_tuning_mode_items(), tuning_mode_name),
+    make_param_dsp_input(false, param_automate::none), make_domain_item(engine_tuning_mode_items(), "No Tuning"),
     make_param_gui_none()));
   global_tuning_mode.info.is_readonly = true;
   global_tuning_mode.info.description = "Across-instance tuning parameter (readonly).";

@@ -40,7 +40,13 @@ _extra_state(gui_extra_state_keyset(*_desc->plugin))
     [this](int param_index, plain_value mode) { 
       gui_param_changed(param_index, mode); 
     }));
+  
+  // deal with cross-instance tuning
   add_global_tuning_mode_changed_handler(_global_tuning_mode_changed_handler.get());
+  if (_desc->plugin->tuning_mode_module != -1 && _desc->plugin->global_tuning_mode_param != -1)
+    _gui_state.set_raw_at(
+      _desc->plugin->tuning_mode_module, 0, _desc->plugin->global_tuning_mode_param, 0,
+      get_global_tuning_mode(_gui_state.desc().plugin->vendor, _gui_state.desc().plugin->full_name));
 }
 
 void 

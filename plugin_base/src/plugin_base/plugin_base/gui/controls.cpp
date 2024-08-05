@@ -390,9 +390,9 @@ _gui(gui)
   }
   set_items(button_items);
 
-  // need to pick up the real value from the actual patch state (global tuning is loaded into patch as a parameter)
+  // need to pick up the real value from the user settings
   if (topo->tuning_mode_module != -1 && topo->global_tuning_mode_param != -1)
-    set_selected_index(gui->gui_state()->get_plain_at(topo->tuning_mode_module, 0, topo->global_tuning_mode_param, 0).step());
+    set_selected_index(get_global_tuning_mode(_gui->gui_state()->desc().plugin->vendor, _gui->gui_state()->desc().plugin->full_name));
 
   _selected_index_changed = [this, topo, mode_items](int selected_index) {
     selected_index = std::clamp(selected_index, 0, (int)get_items().size());
