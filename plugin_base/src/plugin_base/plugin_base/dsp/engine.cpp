@@ -69,11 +69,28 @@ engine_tuning_mode
 plugin_engine::get_current_tuning_mode()
 {
   auto const& topo = *_state.desc().plugin;
-  engine_tuning_mode result = (engine_tuning_mode)-1;
-  // TODO take override into account
-  if (topo.tuning_mode_module == -1 || topo.override_tuning_param == -1 || topo.override_tuning_mode_param == -1) return engine_tuning_mode_no_tuning;
-  result = (engine_tuning_mode)_state.get_plain_at(topo.tuning_mode_module, 0, topo.override_tuning_mode_param, 0).step();
-  assert(engine_tuning_mode_no_tuning <= result && result < engine_tuning_mode_count);
+  
+  engine_tuning_mode result = engine_tuning_mode_no_tuning;
+  if (topo.tuning_mode_module == -1) 
+    return engine_tuning_mode_no_tuning;
+  
+  if (topo.global_tuning_mode_param != -1)
+  {
+    result = (engine_tuning_mode)_state.get_plain_at(topo.tuning_mode_module, 0, topo.global_tuning_mode_param, 0).step();
+    assert(engine_tuning_mode_no_tuning <= result && result < engine_tuning_mode_count);
+  }
+
+  if (topo.override_tuning_param != -1)
+  {
+    assert(topo.override_tuning_mode_param != -1);
+    bool override_active = _state.get_plain_at(topo.tuning_mode_module, 0, topo.override_tuning_param, 0).step() != 0;
+    if (override_active)
+    {
+      result = (engine_tuning_mode)_state.get_plain_at(topo.tuning_mode_module, 0, topo.override_tuning_mode_param, 0).step();
+      assert(engine_tuning_mode_no_tuning <= result && result < engine_tuning_mode_count);
+    }
+  }
+
   return result;
 }
 
