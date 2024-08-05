@@ -57,6 +57,7 @@ pb_plugin::
 { 
   PB_LOG_FUNC_ENTRY_EXIT();
   stopTimer();
+  remove_global_tuning_mode_changed_handler(_global_tuning_mode_changed_handler.get());
   _gui_state.remove_any_listener(this);
   MTS_DeregisterClient(_mts_client);
 }
@@ -76,6 +77,11 @@ _to_audio_events(std::make_unique<event_queue>(default_q_size))
   PB_LOG_FUNC_ENTRY_EXIT();
   _gui_state.add_any_listener(this);
   _block_automation_seen.resize(_splice_engine.state().desc().param_count);
+  _global_tuning_mode_changed_handler.reset(new global_tuning_mode_changed_handler(
+    [this](int param_index, plain_value mode) { 
+      gui_param_changed(param_index, mode); 
+    }));
+  add_global_tuning_mode_changed_handler(_global_tuning_mode_changed_handler.get());
 }
 
 void

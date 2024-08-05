@@ -396,12 +396,9 @@ _gui(gui)
 
   _selected_index_changed = [this, topo, mode_items](int selected_index) {
     selected_index = std::clamp(selected_index, 0, (int)get_items().size());
-    user_io_save_list(topo->vendor, topo->full_name, user_io::base, user_state_tuning_key, mode_items[selected_index].id);
-    if (topo->tuning_mode_module != -1 && topo->global_tuning_mode_param != -1)
-    {
-      int param_index = _gui->gui_state()->desc().param_mappings.topo_to_index[topo->tuning_mode_module][0][topo->global_tuning_mode_param][0];
-      _gui->param_changed(param_index, _gui->gui_state()->desc().raw_to_plain_at_index(param_index, selected_index));
-    }
+    int param_index = _gui->gui_state()->desc().param_mappings.topo_to_index[topo->tuning_mode_module][0][topo->global_tuning_mode_param][0];
+    plain_value plain_mode = _gui->gui_state()->desc().raw_to_plain_at_index(param_index, selected_index);
+    set_global_tuning_mode(topo->vendor, topo->full_name, param_index, plain_mode);
   };
 }
 

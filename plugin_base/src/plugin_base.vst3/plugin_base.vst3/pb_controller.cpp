@@ -22,13 +22,25 @@ using namespace Steinberg::Vst;
 namespace plugin_base::vst3 {
 
 pb_controller::
+~pb_controller() 
+{ 
+  remove_global_tuning_mode_changed_handler(_global_tuning_mode_changed_handler.get());
+  _gui_state.remove_any_listener(this);
+}
+
+pb_controller::
 pb_controller(plugin_topo const* topo):
 _desc(std::make_unique<plugin_desc>(topo, this)),
 _gui_state(_desc.get(), true),
 _extra_state(gui_extra_state_keyset(*_desc->plugin))
 { 
   PB_LOG_FUNC_ENTRY_EXIT();
-  _gui_state.add_any_listener(this); 
+  _gui_state.add_any_listener(this);
+  _global_tuning_mode_changed_handler.reset(new global_tuning_mode_changed_handler(
+    [this](int param_index, plain_value mode) { 
+      gui_param_changed(param_index, mode); 
+    }));
+  add_global_tuning_mode_changed_handler(_global_tuning_mode_changed_handler.get());
 }
 
 void 

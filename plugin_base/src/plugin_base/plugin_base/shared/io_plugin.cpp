@@ -420,6 +420,11 @@ load_state_internal(
         if (param_iter == state.desc().param_mappings.id_to_index.at(module_id).end()) continue;
         var param_slots = json["state"][m]["slots"][mi]["params"][p]["slots"];
         auto const& new_param = state.desc().plugin->modules[module_iter->second].params[param_iter->second];
+
+        // readonly support for global microtuning
+        if (new_param.info.is_readonly) 
+          continue;
+
         for (int pi = 0; pi < param_slots.size() && pi < new_param.info.slot_count; pi++)
         {
           plain_value plain;

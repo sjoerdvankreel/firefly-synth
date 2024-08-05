@@ -28,6 +28,9 @@ public Steinberg::Vst::EditControllerEx1
   extra_state _extra_state;
   std::map<int, int> _midi_id_to_param = {};
 
+  // microtuning support
+  std::unique_ptr<plugin_base::global_tuning_mode_changed_handler> _global_tuning_mode_changed_handler = {};
+
   // see param_state_changed and setParamNormalized
   // when host comes at us with an automation value, that is
   // reported through setParamNormalized, which through a
@@ -41,8 +44,8 @@ public Steinberg::Vst::EditControllerEx1
   void param_state_changed(int index, plain_value plain);
 
 public: 
+  ~pb_controller();
   pb_controller(plugin_topo const* topo);
-  ~pb_controller() { _gui_state.remove_any_listener(this); }
 
   OBJ_METHODS(pb_controller, EditControllerEx1)
   DEFINE_INTERFACES

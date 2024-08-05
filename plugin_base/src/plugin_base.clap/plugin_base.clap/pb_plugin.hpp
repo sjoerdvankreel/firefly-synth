@@ -29,8 +29,9 @@ public gui_param_listener
 
   // MTS-ESP support
   MTSClient* _mts_client = {};
+  std::unique_ptr<plugin_base::global_tuning_mode_changed_handler> _global_tuning_mode_changed_handler = {};
 
-  // needs to be first, everyone else needs it
+  // needs to be early, everyone else needs it
   std::unique_ptr<plugin_desc> _desc;
   plugin_splice_engine _splice_engine;
   extra_state _extra_state;
