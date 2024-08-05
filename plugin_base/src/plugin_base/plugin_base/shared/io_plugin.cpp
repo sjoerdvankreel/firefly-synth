@@ -367,7 +367,9 @@ load_state_internal(
     auto module_iter = state.desc().module_id_to_index.find(module_id);
     if (module_iter == state.desc().module_id_to_index.end())
     {
+#ifndef NDEBUG
       result.warnings.push_back("Module '" + module_name + "' was deleted.");
+#endif
       continue;
     }
 
@@ -375,7 +377,11 @@ load_state_internal(
     var module_slot_count = json["modules"][m]["slot_count"];
     auto const& new_module = state.desc().plugin->modules[module_iter->second];
     if ((int)module_slot_count > new_module.info.slot_count)
+    {
+#ifndef NDEBUG
       result.warnings.push_back("Module '" + new_module.info.tag.full_name + "' decreased slot count.");
+#endif
+    }
 
     for (int p = 0; p < json["modules"][m]["params"].size(); p++)
     {
@@ -385,7 +391,9 @@ load_state_internal(
       auto param_iter = state.desc().param_mappings.id_to_index.at(module_id).find(param_id);
       if (param_iter == state.desc().param_mappings.id_to_index.at(module_id).end())
       {
+#ifndef NDEBUG
         result.warnings.push_back("Param '" + module_name + " " + param_name + "' was deleted.");
+#endif
         continue;
       }
 
@@ -393,7 +401,11 @@ load_state_internal(
       var param_slot_count = json["modules"][m]["params"][p]["slot_count"];
       auto const& new_param = state.desc().plugin->modules[module_iter->second].params[param_iter->second];
       if ((int)param_slot_count > new_param.info.slot_count)
+      {
+#ifndef NDEBUG
         result.warnings.push_back("Param '" + new_module.info.tag.full_name + " " + new_param.info.tag.full_name + "' decreased slot count.");
+#endif
+      }
     }
   }
 
@@ -439,7 +451,11 @@ load_state_internal(
             if(converter && converter->handle_invalid_param_value(new_module.info.tag.id, mi, new_param.info.tag.id, pi, text, handler, new_value))
               state.set_plain_at(new_module.info.index, mi, new_param.info.index, pi, new_value);
             else
+            {
+#ifndef NDEBUG
               result.warnings.push_back("Param '" + new_module.info.tag.full_name + " " + new_param.info.tag.full_name + "': invalid value '" + text + "'.");
+#endif
+            }
           }
         }
       }
