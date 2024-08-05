@@ -181,7 +181,9 @@ class tuning_mode_button :
 public menu_button
 {
   plugin_gui* const _gui;
+  std::unique_ptr<global_tuning_mode_changed_handler> _global_tuning_mode_changed_handler = {};
 public:
+  ~tuning_mode_button();
   tuning_mode_button(plugin_gui* gui);
 };
 
