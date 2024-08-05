@@ -677,17 +677,21 @@ plugin_engine::process()
   // microtuning mode
   bool mts_esp_status = true;
   auto const& topo = *_state.desc().plugin;
-  _current_block_tuning_mode = get_current_tuning_mode();
-  if (!MTS_HasMaster(_host_block->mts_client))
+  _current_block_tuning_mode = engine_tuning_mode_no_tuning;
+  if (!_graph)
   {
-    _current_block_tuning_mode = engine_tuning_mode_no_tuning;
-    mts_esp_status = false;
-  }
-  if (_current_block_tuning_mode != engine_tuning_mode_no_tuning)
-  {
-    query_mts_esp_tuning(_current_block_tuning_global, -1);
-    for(int i = 0; i < 16; i++)
-      query_mts_esp_tuning(_current_block_tuning_channel[i], i);
+    _current_block_tuning_mode = get_current_tuning_mode();
+    if (!MTS_HasMaster(_host_block->mts_client))
+    {
+      _current_block_tuning_mode = engine_tuning_mode_no_tuning;
+      mts_esp_status = false;
+    }
+    if (_current_block_tuning_mode != engine_tuning_mode_no_tuning)
+    {
+      query_mts_esp_tuning(_current_block_tuning_global, -1);
+      for (int i = 0; i < 16; i++)
+        query_mts_esp_tuning(_current_block_tuning_channel[i], i);
+    }
   }
 
   // smoothing per-block bpm values
