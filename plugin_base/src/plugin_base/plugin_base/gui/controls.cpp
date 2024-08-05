@@ -375,10 +375,11 @@ tuning_mode_button::
 tuning_mode_button(plugin_gui* gui) :
 _gui(gui)
 { 
-  std::vector<std::string> mode_ids;
+  setButtonText("Tuning");
+
+  // fill the list
   std::vector<menu_button_item> button_items;
   auto mode_items = engine_tuning_mode_items();
-  std::string default_tuning = mode_items[1].id;
   auto const* topo = gui->gui_state()->desc().plugin;
   for (int i = engine_tuning_mode_no_tuning; i < engine_tuning_mode_count; i++)
   {
@@ -386,17 +387,18 @@ _gui(gui)
     item.group = "";
     item.name = mode_items[i].name;
     button_items.push_back(item);
-    mode_ids.push_back(mode_items[i].id);
   }
   set_items(button_items);
-  std::string selected_tuning = user_io_load_list(topo->vendor, topo->full_name, user_io::base, user_state_tuning_key, default_tuning, mode_ids);
-  setButtonText("Tuning");
-  for(int i = 0; i < mode_items.size(); i++)
-    if(mode_items[i].id == selected_tuning)
-      set_selected_index(i);
+
+  // need to pick up the real value from the actual patch state (global tuning is loaded into patch as a parameter)
+  if (topo->tuning_mode_module != -1 && topo->global_tuning_mode_param != -1)
+    set_selected_index(gui->gui_state()->get_plain_at(topo->tuning_mode_module, 0, topo->global_tuning_mode_param, 0).step());
+
   _selected_index_changed = [this, topo, mode_items](int index) {
     index = std::clamp(index, 0, (int)get_items().size());
     user_io_save_list(topo->vendor, topo->full_name, user_io::base, user_state_tuning_key, mode_items[index].id);
+    if (topo->tuning_mode_module != -1 && topo->global_tuning_mode_param != -1)
+      _gui->gui_state()->set_raw_at(topo->tuning_mode_module, 0, topo->global_tuning_mode_param, 0, index);
   };
 }
 
