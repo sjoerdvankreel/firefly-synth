@@ -220,12 +220,12 @@ plugin_block::pitch_to_freq_with_tuning(float pitch)
     int pitch_low = (int)std::floor(pitch);
     int pitch_high = (int)std::ceil(pitch);
     float pos = pitch - pitch_low;
-    float freq_low = (*current_tuning)[pitch_low].retuned_frequency;
-    float freq_high = (*current_tuning)[pitch_high].retuned_frequency;
+    float retuned_low = (*current_tuning)[pitch_low].retuned_semis;
+    float retuned_high = (*current_tuning)[pitch_high].retuned_semis;
     if constexpr (TuningMode == engine_tuning_mode_on_note_after_mod_linear || TuningMode == engine_tuning_mode_continuous_after_mod_linear)
-      return (1.0f - pos) * freq_low + pos * freq_high;
+      return pitch_to_freq_no_tuning((1.0f - pos) * retuned_low + pos * retuned_high);
     else if constexpr (TuningMode == engine_tuning_mode_on_note_after_mod_log || TuningMode == engine_tuning_mode_continuous_after_mod_log)
-      return std::pow(2.0f, (1.0f - pos) * std::log2(freq_low) + pos * std::log2(freq_high));
+      return 1;// TODO std::pow(2.0f, (1.0f - pos) * std::log2(freq_low) + pos * std::log2(freq_high));
     else
       assert(false); // needs gcc13 for static_assert non-template-dependent expression
   }
