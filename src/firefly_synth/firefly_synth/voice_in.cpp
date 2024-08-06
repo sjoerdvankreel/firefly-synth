@@ -370,7 +370,7 @@ voice_in_engine::process_voice_mode_tuning_mode_unison(plugin_block& block)
   auto& pitch_curve = block.state.own_scratch[scratch_pitch];
   block.normalized_to_raw_block<domain_type::linear>(module_voice_in, param_pitch, pitch_curve_norm, pitch_curve);
   
-  for (int f = block.start_frame; f < block.end_frame; f++)
+  for(int f = block.start_frame; f < block.end_frame; f++)
   {
     if constexpr (VoiceMode != engine_voice_mode_poly)
     {
@@ -386,9 +386,9 @@ voice_in_engine::process_voice_mode_tuning_mode_unison(plugin_block& block)
           _to_midi_note = block.state.mono_note_stream[f].midi_key;
           _from_midi_note = _to_midi_note;
         }
-        else
+        else 
         {
-          // start a new porta section within the current voice
+           // start a new porta section within the current voice
           _from_midi_note = calc_current_porta_midi_note();
           _to_midi_note = block.state.mono_note_stream[f].midi_key;
           if (_first_note_in_mono_section)
@@ -416,26 +416,38 @@ voice_in_engine::process_voice_mode_tuning_mode_unison(plugin_block& block)
     }
 
     float porta_note = 0;
-    if (_position == _porta_samples) porta_note = _to_midi_note;
+    if(_position == _porta_samples) porta_note = _to_midi_note;
     else
     {
       porta_note = calc_current_porta_midi_note();
       _position++;
     }
 
-    float new_pitch_offset = note + cent_curve[f] + glob_uni_detune - midi_middle_c;
-    new_pitch_offset += porta_note - midi_middle_c;
-    new_pitch_offset += pitch_curve[f] + pb_curve[f] * master_pb_range;
-
     // microtuning support
-    float retuning_offset = 0;
+    // given out = a + b + c
+    // theres 3 possible options:
+    // out = retune(a + b + c)
+    // out = retune(a) + retune(b) + retune(c)
+    // out = retune(a) + b + c
+    // i believe the latter one to be correct for apply-before-mod
+    // since i think retuning a single pitch source here is equivalent to retuning the midi note-in
+    // as the sum of all values below amount to the very start of the pitch modulation chain
+    // i apply it to current portamento state but probably might be anything else
+    float retuned_porta_note = porta_note;
+
+    // off doesnt care, and after_mod goes with a premapped NoteToFreq later on
+    // im assuming LERP is okay here since we are still in midi-note domain
     if constexpr (TuningMode == engine_tuning_mode_on_note_before_mod || TuningMode == engine_tuning_mode_continuous_before_mod)
     {
-      retuning_offset = block.voice->state.note_id_.key - (*block.current_tuning)[block.voice->state.note_id_.key].retuned_semis;
-      new_pitch_offset -= retuning_offset;
+      int porta_note_hi = (int)std::ceil(porta_note);
+      int porta_note_low = (int)std::floor(porta_note);
+      float pos = porta_note - porta_note_low;
+      retuned_porta_note = (1.0f - pos) * (*block.current_tuning)[porta_note_low].retuned_semis + pos * (*block.current_tuning)[porta_note_hi].retuned_semis;
     }
 
-    block.state.own_cv[output_pitch_offset][0][f] = new_pitch_offset;
+    block.state.own_cv[output_pitch_offset][0][f] = 
+      (note + cent_curve[f] + glob_uni_detune - midi_middle_c) + 
+      (retuned_porta_note - midi_middle_c) + pitch_curve[f] + pb_curve[f] * master_pb_range;
   }
 }
 
