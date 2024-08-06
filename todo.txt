@@ -62,6 +62,7 @@ V reload tuning button + do the warning ==> no warning, just make it work within
 V drop the make_load_patch etc
 V do the global-settings-thing
 V dont do the param warnings when in release mode
+- global mode not always picked up
 - disable tuning button for fx
 - deal with kbdtrack -- do before/after mod with ktrk being the mod
 - do the credits

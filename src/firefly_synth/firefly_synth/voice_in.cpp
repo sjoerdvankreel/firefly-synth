@@ -428,10 +428,9 @@ voice_in_engine::process_voice_mode_tuning_mode_unison(plugin_block& block)
     new_pitch_offset += pitch_curve[f] + pb_curve[f] * master_pb_range;
 
     // microtuning support
-    float retuning_offset = 0;
     if constexpr (TuningMode == engine_tuning_mode_on_note_before_mod || TuningMode == engine_tuning_mode_continuous_before_mod)
     {
-      retuning_offset = block.voice->state.note_id_.key - (*block.current_tuning)[block.voice->state.note_id_.key].retuned_semis;
+      float retuning_offset = block.voice->state.note_id_.key - (*block.current_tuning)[block.voice->state.note_id_.key].retuned_semis;
       new_pitch_offset -= retuning_offset;
     }
 
