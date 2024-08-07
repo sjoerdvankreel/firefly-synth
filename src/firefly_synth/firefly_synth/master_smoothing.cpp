@@ -117,10 +117,6 @@ master_smoothing_topo(std::string const& vendor, std::string const& full_name, i
   auto_smooth.info.description = "Smoothing automation parameter changes.";
 
   if (is_fx) return result;
-  gui_dimension tuning_dimension({ 1, 1 }, { gui_dimension::auto_size_all, 1 });
-  auto tuning_section_gui = make_param_section_gui({ 0, 4, 1, 2 }, tuning_dimension, gui_label_edit_cell_split::horizontal);
-  result.sections.emplace_back(make_param_section(section_main,
-    make_topo_tag_basic("{C163A47F-DC37-4D18-B21B-0B71D266B152}", "Tuning"), tuning_section_gui));
   // todo rename and move
   auto& global_tuning_mode = result.params.emplace_back(make_param(
     make_topo_info("{28C619C2-C04E-4BD6-8D84-89667E1A5659}", true, "Global Tuning Mode", "Global Tuning Mode", "Global Tuning Mode", param_global_tuning_mode, 1),
