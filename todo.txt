@@ -68,6 +68,7 @@ V disable tuning button for fx
 V do per instance
 V retest smoothing
 V mention the breaking change
+- fix retuning for mono
 - deal with kbdtrack -- do before/after mod with ktrk being the mod
 - do the credits
 - fix the renoise demos
