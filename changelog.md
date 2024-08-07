@@ -5,7 +5,7 @@
 - Make binaries run on Ubuntu 18 (was 22).
 - Add Microtuning (MTS-ESP) support (see manual).
 - Moved load/save/init/clear patch into a single menu.
-- Moved smoothing parameters from Master In to new Master Settings module.
+- Moved smoothing parameters from Master In to new Smoothing module.
 - Fixed bug w.r.t. discarding dropdown item (by clicking outside the menu).
 - Conversion code will fix existing patches, but Renoise automation data will be broken (that's why it's still not supported).
 

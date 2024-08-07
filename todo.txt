@@ -66,7 +66,8 @@ V todo drop the global state and evt handlers
 V global mode not always picked up
 V disable tuning button for fx
 V do per instance
-- retest smoothing
+V retest smoothing
+V mention the breaking change
 - deal with kbdtrack -- do before/after mod with ktrk being the mod
 - do the credits
 - fix the renoise demos
@@ -75,7 +76,6 @@ V do per instance
 - fix the todos
 - update the docs for micro
 - do an mts demo tune
-- mention the breaking change
 
 - autobuilds:
 - ask paul
