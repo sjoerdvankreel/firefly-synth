@@ -424,9 +424,7 @@ voice_in_engine::process_voice_mode_tuning_mode_unison(plugin_block& block)
     // microtuning support
     if constexpr (TuningMode == engine_tuning_mode_on_note_before_mod || TuningMode == engine_tuning_mode_continuous_before_mod)
     {
-      // be sure to NOT take the midi note that started the voice here
-      // _to_midi_note takes voice recycling into account for mono mode
-      float retuning_offset = _to_midi_note - (*block.current_tuning)[_to_midi_note].retuned_semis;
+      float retuning_offset = block.voice->state.note_id_.key - (*block.current_tuning)[block.voice->state.note_id_.key].retuned_semis;
       new_pitch_offset -= retuning_offset;
     }
 
