@@ -8,7 +8,7 @@
 
 namespace plugin_base {
 
-inline std::string const user_state_tuning_key = "tuning"; // TODO extra_state
+inline std::string const extra_state_tuning_key = "tuning/mode";
 
 // needs cooperation from the plug
 enum engine_tuning_mode {

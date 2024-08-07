@@ -16,7 +16,7 @@ static int const max_other_smoothing_ms = 1000;
 enum { section_main }; 
 
 enum { 
-  param_midi_smooth, param_tempo_smooth, param_auto_smooth, param_count }; // todo instance and move to MIn
+  param_midi_smooth, param_tempo_smooth, param_auto_smooth, param_count };
 
 // we provide the buttons, everyone else needs to implement it
 extern int const master_smoothing_param_auto_smooth = param_auto_smooth;

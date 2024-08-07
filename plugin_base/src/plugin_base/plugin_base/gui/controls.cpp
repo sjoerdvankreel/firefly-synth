@@ -390,24 +390,18 @@ _gui(gui)
   }
   set_items(button_items);
 
-  // need to pick up the real value from the user settings
+  // need to pick up the real value from plugin state
   if (topo->tuning_mode_module != -1 && topo->tuning_mode_param != -1)
-  {
-    /*
-    set_selected_index(get_global_tuning_mode(_gui->gui_state()->desc().plugin->vendor, _gui->gui_state()->desc().plugin->full_name));
-    _global_tuning_mode_changed_handler.reset(new global_tuning_mode_changed_handler([this](int param_index, plain_value plain) {
-      set_selected_index(plain.step());
-    }));
-    add_global_tuning_mode_changed_handler(_global_tuning_mode_changed_handler.get());
-    */
-    // TODO
-  }
+    set_selected_index(_gui->gui_state()->get_plain_at(
+      topo->tuning_mode_module, 0, topo->tuning_mode_param, 0).step());
 
+  // need to push both to plugin state and extra state
   _selected_index_changed = [this, topo, mode_items](int selected_index) {
-    //selected_index = std::clamp(selected_index, 0, (int)get_items().size());
-    //int param_index = _gui->gui_state()->desc().param_mappings.topo_to_index[topo->tuning_mode_module][0][topo->global_tuning_mode_param][0];
-    //plain_value plain_mode = _gui->gui_state()->desc().raw_to_plain_at_index(param_index, selected_index);
-    // TODO set_global_tuning_mode(topo->vendor, topo->full_name, param_index, plain_mode);
+    selected_index = std::clamp(selected_index, 0, (int)get_items().size());
+    int param_index = _gui->gui_state()->desc().param_mappings.topo_to_index[topo->tuning_mode_module][0][topo->tuning_mode_param][0];
+    plain_value plain_mode = _gui->gui_state()->desc().raw_to_plain_at_index(param_index, selected_index);
+    _gui->param_changed(param_index, plain_mode);
+    _gui->extra_state_()->set_num(extra_state_tuning_key, selected_index);
   };
 }
 

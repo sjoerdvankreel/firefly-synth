@@ -76,6 +76,11 @@ _to_audio_events(std::make_unique<event_queue>(default_q_size))
   PB_LOG_FUNC_ENTRY_EXIT();
   _gui_state.add_any_listener(this);
   _block_automation_seen.resize(_splice_engine.state().desc().param_count);
+
+  // microtuning
+  if (topo->tuning_mode_module != -1 && topo->tuning_mode_param != -1)
+    _gui_state.set_raw_at(topo->tuning_mode_module, 0, topo->tuning_mode_param, 0,
+      std::clamp(0, engine_tuning_mode_count - 1, _extra_state.get_num(extra_state_tuning_key, engine_tuning_mode_on_note_before_mod)));
 }
 
 void

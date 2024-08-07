@@ -62,10 +62,10 @@ V reload tuning button + do the warning ==> no warning, just make it work within
 V drop the make_load_patch etc
 V do the global-settings-thing
 V dont do the param warnings when in release mode
-- todo drop the global state and evt handlers
-- global mode not always picked up
-- disable tuning button for fx
-- do per instance
+V todo drop the global state and evt handlers
+V global mode not always picked up
+V disable tuning button for fx
+V do per instance
 - deal with kbdtrack -- do before/after mod with ktrk being the mod
 - do the credits
 - fix the renoise demos
