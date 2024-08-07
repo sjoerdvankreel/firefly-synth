@@ -64,6 +64,7 @@ V do the global-settings-thing
 V dont do the param warnings when in release mode
 - global mode not always picked up
 - disable tuning button for fx
+- do per instance
 - deal with kbdtrack -- do before/after mod with ktrk being the mod
 - do the credits
 - fix the renoise demos
