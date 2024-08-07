@@ -22,7 +22,8 @@ enum { section_aux, section_linked, section_linked_pbrange, section_glob_uni_cou
 enum { 
   param_aux, param_mod, param_pb, param_pb_range, param_glob_uni_voices,
   param_glob_uni_dtn, param_glob_uni_sprd, param_glob_uni_lfo_phase, 
-  param_glob_uni_lfo_dtn, param_glob_uni_osc_phase, param_glob_uni_env_dtn, param_count };
+  param_glob_uni_lfo_dtn, param_glob_uni_osc_phase, param_glob_uni_env_dtn, 
+  param_instance_tuning_mode, param_count };
 
 // we provide the buttons, everyone else needs to implement it
 extern int const master_in_param_pb_range = param_pb_range;
@@ -33,6 +34,7 @@ extern int const master_in_param_glob_uni_env_dtn = param_glob_uni_env_dtn;
 extern int const master_in_param_glob_uni_lfo_dtn = param_glob_uni_lfo_dtn;
 extern int const master_in_param_glob_uni_lfo_phase = param_glob_uni_lfo_phase;
 extern int const master_in_param_glob_uni_osc_phase = param_glob_uni_osc_phase;
+extern int const master_in_param_instance_tuning_mode = param_instance_tuning_mode;
 
 class master_in_engine :
 public module_engine {
@@ -199,6 +201,15 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
   glob_uni_env_dtn.info.description = "Global unison voice envelope detune amount.";
   glob_uni_env_dtn.gui.bindings.enabled.bind_params({ param_glob_uni_voices }, [](auto const& vs) { return vs[0] > 1; });
   glob_uni_env_dtn.gui.bindings.global_enabled.bind_param(module_voice_in, voice_in_param_mode, [](int v) { return v == engine_voice_mode_poly; });
+
+  if (is_fx) return result;
+
+  auto& tuning_mode_audio_param = result.params.emplace_back(make_param(
+    make_topo_info("{28C619C2-C04E-4BD6-8D84-89667E1A5659}", true, "Tuning Mode", "Tuning Mode", "Tuning Mode", param_instance_tuning_mode, 1),
+    make_param_dsp_input(false, param_automate::none), make_domain_item(engine_tuning_mode_items(), "No Tuning"),
+    make_param_gui_none()));
+  tuning_mode_audio_param.info.is_readonly = true;
+  tuning_mode_audio_param.info.description = "Per-instance tuning parameter (readonly).";
 
   return result;
 }

@@ -8,7 +8,7 @@
 
 namespace plugin_base {
 
-inline std::string const user_state_tuning_key = "tuning";
+inline std::string const user_state_tuning_key = "tuning"; // TODO extra_state
 
 // needs cooperation from the plug
 enum engine_tuning_mode {
@@ -20,22 +20,7 @@ enum engine_tuning_mode {
   engine_tuning_mode_count
 };
 
-typedef std::function<void(int param_index, plain_value value)> global_tuning_mode_changed_handler;
-
 std::vector<list_item>
 engine_tuning_mode_items();
-
-// ok so this is new -
-// need to load per-user settings into the topo on startup
-// and deal with cross-instance stuff (no cross process for now)
-// note getters/setters take a lock, dont call on audio thread
-void
-add_global_tuning_mode_changed_handler(global_tuning_mode_changed_handler* handler);
-void
-remove_global_tuning_mode_changed_handler(global_tuning_mode_changed_handler* handler);
-engine_tuning_mode
-get_global_tuning_mode(std::string const& vendor, std::string const& full_name);
-void
-set_global_tuning_mode(std::string const& vendor, std::string const& full_name, int param_index, plain_value mode);
 
 }

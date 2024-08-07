@@ -40,10 +40,10 @@ extern int const master_in_param_glob_uni_env_dtn;
 extern int const master_in_param_glob_uni_lfo_phase;
 extern int const master_in_param_glob_uni_lfo_dtn;
 
+extern int const master_in_param_tuning_mode;
 extern int const master_smoothing_param_auto_smooth;
 extern int const master_smoothing_param_midi_smooth;
 extern int const master_smoothing_param_tempo_smooth;
-extern int const master_smoothing_param_global_tuning_mode; // todo instance
 
 // these are needed by the osc
 struct osc_osc_matrix_context

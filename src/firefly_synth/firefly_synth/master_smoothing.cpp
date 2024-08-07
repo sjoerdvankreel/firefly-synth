@@ -16,13 +16,12 @@ static int const max_other_smoothing_ms = 1000;
 enum { section_main }; 
 
 enum { 
-  param_midi_smooth, param_tempo_smooth, param_auto_smooth, param_global_tuning_mode, param_count }; // todo instance and move to MIn
+  param_midi_smooth, param_tempo_smooth, param_auto_smooth, param_count }; // todo instance and move to MIn
 
 // we provide the buttons, everyone else needs to implement it
 extern int const master_smoothing_param_auto_smooth = param_auto_smooth;
 extern int const master_smoothing_param_midi_smooth = param_midi_smooth;
 extern int const master_smoothing_param_tempo_smooth = param_tempo_smooth;
-extern int const master_smoothing_param_global_tuning_mode = param_global_tuning_mode;
 
 static graph_data
 render_graph(plugin_state const& state, graph_engine* engine, int param, param_topo_mapping const& mapping)
@@ -115,15 +114,6 @@ master_smoothing_topo(std::string const& vendor, std::string const& full_name, i
     make_param_gui_single(section_main, gui_edit_type::hslider, { is_fx? 0: 1, is_fx? 4: 0, 1, is_fx? 2: 6 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::far))));
   auto_smooth.info.description = "Smoothing automation parameter changes.";
-
-  if (is_fx) return result;
-  // todo rename and move
-  auto& global_tuning_mode = result.params.emplace_back(make_param(
-    make_topo_info("{28C619C2-C04E-4BD6-8D84-89667E1A5659}", true, "Global Tuning Mode", "Global Tuning Mode", "Global Tuning Mode", param_global_tuning_mode, 1),
-    make_param_dsp_input(false, param_automate::none), make_domain_item(engine_tuning_mode_items(), "No Tuning"),
-    make_param_gui_none()));
-  global_tuning_mode.info.is_readonly = true;
-  global_tuning_mode.info.description = "Per-instance tuning parameter (readonly).";
   return result;
 }
 
