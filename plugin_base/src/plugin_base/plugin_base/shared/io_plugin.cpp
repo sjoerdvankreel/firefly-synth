@@ -433,7 +433,7 @@ load_state_internal(
         var param_slots = json["state"][m]["slots"][mi]["params"][p]["slots"];
         auto const& new_param = state.desc().plugin->modules[module_iter->second].params[param_iter->second];
 
-        // readonly support for global microtuning
+        // readonly support for per-instance microtuning (outside of the patch)
         if (new_param.info.is_readonly) 
           continue;
 

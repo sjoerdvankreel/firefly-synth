@@ -33,11 +33,16 @@ _extra_state(set_join<std::string>({ gui_extra_state_keyset(*_desc->plugin), tun
 { 
   PB_LOG_FUNC_ENTRY_EXIT();
   _gui_state.add_any_listener(this);
+  init_tuning_from_extra_state();
+}
 
-  // microtuning
-  if (topo->tuning_mode_module != -1 && topo->tuning_mode_param != -1)
-    _gui_state.set_raw_at(topo->tuning_mode_module, 0, topo->tuning_mode_param, 0,
-      std::clamp(_extra_state.get_num(extra_state_tuning_key, engine_tuning_mode_on_note_before_mod), 0, engine_tuning_mode_count - 1));
+void
+pb_controller::init_tuning_from_extra_state()
+{
+  auto const* topo = _gui_state.desc().plugin;
+  if (topo->tuning_mode_module == -1 || topo->tuning_mode_param == -1) return;
+  auto tuning_mode = std::clamp(_extra_state.get_num(extra_state_tuning_key, engine_tuning_mode_on_note_before_mod), 0, engine_tuning_mode_count - 1);
+  _gui_state.set_raw_at(topo->tuning_mode_module, 0, topo->tuning_mode_param, 0, tuning_mode);
 }
 
 void 
@@ -76,6 +81,7 @@ pb_controller::setState(IBStream* state)
   PB_LOG_FUNC_ENTRY_EXIT();
   if (!plugin_io_load_extra(*_gui_state.desc().plugin, load_ibstream(state), _extra_state).ok())
     return kResultFalse;
+  init_tuning_from_extra_state();
   return kResultOk;
 }
 

@@ -77,11 +77,16 @@ _to_audio_events(std::make_unique<event_queue>(default_q_size))
   PB_LOG_FUNC_ENTRY_EXIT();
   _gui_state.add_any_listener(this);
   _block_automation_seen.resize(_splice_engine.state().desc().param_count);
+  init_tuning_from_extra_state();
+}
 
-  // microtuning
-  if (topo->tuning_mode_module != -1 && topo->tuning_mode_param != -1)
-    _gui_state.set_raw_at(topo->tuning_mode_module, 0, topo->tuning_mode_param, 0,
-      std::clamp(_extra_state.get_num(extra_state_tuning_key, engine_tuning_mode_on_note_before_mod), 0, engine_tuning_mode_count - 1));
+void
+pb_plugin::init_tuning_from_extra_state()
+{
+  auto const* topo = _gui_state.desc().plugin;
+  if (topo->tuning_mode_module == -1 || topo->tuning_mode_param == -1) return;
+  auto tuning_mode = std::clamp(_extra_state.get_num(extra_state_tuning_key, engine_tuning_mode_on_note_before_mod), 0, engine_tuning_mode_count - 1);
+  _gui_state.set_raw_at(topo->tuning_mode_module, 0, topo->tuning_mode_param, 0, tuning_mode);
 }
 
 void
@@ -167,6 +172,7 @@ pb_plugin::stateLoad(clap_istream const* stream) noexcept
     _gui_state.discard_undo_region();
     return false;
   }
+  init_tuning_from_extra_state();
   for (int p = 0; p < _splice_engine.state().desc().param_count; p++)
     gui_param_changed(p, _gui_state.get_plain_at_index(p));
   _gui_state.discard_undo_region();

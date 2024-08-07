@@ -239,8 +239,10 @@ plugin_state::init(state_init_type init_type)
     auto const& module = desc().plugin->modules[m];
     for (int mi = 0; mi < module.info.slot_count; mi++)
       for (int p = 0; p < module.params.size(); p++)
-        for (int pi = 0; pi < module.params[p].info.slot_count; pi++)
-          set_plain_at(m, mi, p, pi, module.params[p].domain.default_plain(mi, pi));
+        // readonly support for per-instance microtuning (outside of the patch)
+        if(!module.params[p].info.is_readonly)
+          for (int pi = 0; pi < module.params[p].info.slot_count; pi++)
+            set_plain_at(m, mi, p, pi, module.params[p].domain.default_plain(mi, pi));
   }
   for(int m = 0; m < desc().plugin->modules.size(); m++)
     if(init_type == state_init_type::minimal && desc().plugin->modules[m].minimal_initializer)
