@@ -32,7 +32,6 @@ struct note_tuning
 {
   bool is_mapped = false;
   float retuned_semis = -1;
-  float retuned_frequency = -1;
 };
 
 // for polyphonic synth

@@ -84,7 +84,6 @@ plugin_engine::query_mts_esp_tuning(std::array<note_tuning, 128>& tuning, int ch
   for (int i = 0; i < 128; i++)
   {
     tuning[i].is_mapped = !MTS_ShouldFilterNote(_host_block->mts_client, (char)i, (char)channel);
-    tuning[i].retuned_frequency = MTS_NoteToFrequency(_host_block->mts_client, (char)i, (char)channel);
     tuning[i].retuned_semis = std::clamp(i + (float)MTS_RetuningInSemitones(_host_block->mts_client, (char)i, (char)channel), 0.0f, 127.0f);
   }
 }
@@ -590,7 +589,6 @@ plugin_engine::activate_voice(
       // for these cases we need to warp pitchmods after modulation, so need the entire mts table
       _current_voice_tuning_channel[slot][i].is_mapped = _current_block_tuning_channel[event.id.channel][i].is_mapped;
       _current_voice_tuning_channel[slot][i].retuned_semis = _current_block_tuning_channel[event.id.channel][i].retuned_semis;
-      _current_voice_tuning_channel[slot][i].retuned_frequency = _current_block_tuning_channel[event.id.channel][i].retuned_frequency;
     }
 
   // allow module engine to do once-per-voice init
