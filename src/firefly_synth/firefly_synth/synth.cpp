@@ -345,7 +345,7 @@ synth_topo(bool is_fx, std::string const& full_name)
   result->midi_smooth_param = master_smoothing_param_midi_smooth;
   result->auto_smooth_module = module_master_smoothing;
   result->auto_smooth_param = master_smoothing_param_auto_smooth;
-  result->tuning_mode_module = is_fx? -1: module_master_smoothing;
+  result->tuning_mode_module = is_fx? -1: module_master_in;
   result->tuning_mode_param = is_fx ? -1 : master_in_param_tuning_mode;
 
   // this is INCLUDING global unison!
