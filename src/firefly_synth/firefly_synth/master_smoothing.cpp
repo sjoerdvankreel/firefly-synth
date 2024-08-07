@@ -100,13 +100,13 @@ master_smoothing_topo(std::string const& vendor, std::string const& full_name, i
   auto& midi_smooth = result.params.emplace_back(make_param(
     make_topo_info("{887D373C-D978-48F7-A9E7-70C03A58492A}", true, "MIDI Smoothing", "MIDI Smooth", "MIDI Smooth", param_midi_smooth, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_linear(1, max_other_smoothing_ms, 50, 0, "Ms"),
-    make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 0, 1, is_fx? 2: 3 },
+    make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 0, 1, is_fx? 2: 4 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   midi_smooth.info.description = "Smoothing MIDI controller changes.";
   auto& bpm_smooth = result.params.emplace_back(make_param(
     make_topo_info("{AA564CE1-4F1E-44F5-89D9-130F17F4185C}", true, "BPM Smoothing", "BPM Smooth", "BPM Smooth", param_tempo_smooth, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_linear(1, max_other_smoothing_ms, 200, 0, "Ms"),
-    make_param_gui_single(section_main, gui_edit_type::hslider, { 0, is_fx? 2: 3, 1, is_fx? 2: 3 },
+    make_param_gui_single(section_main, gui_edit_type::hslider, { 0, is_fx? 2: 4, 1, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   bpm_smooth.info.description = "Smoothing host BPM parameter changes. Affects tempo-synced delay lines.";
   auto& auto_smooth = result.params.emplace_back(make_param(
