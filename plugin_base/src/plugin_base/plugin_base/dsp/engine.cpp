@@ -69,7 +69,7 @@ engine_tuning_mode
 plugin_engine::get_current_tuning_mode()
 {
   auto const& topo = *_state.desc().plugin;
-  if (topo.tuning_mode_module == -1 || topo.tuning_mode_param != -1)
+  if (topo.tuning_mode_module == -1 || topo.tuning_mode_param == -1)
     return engine_tuning_mode_no_tuning;
   auto result = (engine_tuning_mode)_state.get_plain_at(topo.tuning_mode_module, 0, topo.tuning_mode_param, 0).step();
   assert(engine_tuning_mode_no_tuning <= result && result < engine_tuning_mode_count);
