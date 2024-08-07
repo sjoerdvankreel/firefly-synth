@@ -40,13 +40,10 @@ extern int const master_in_param_glob_uni_env_dtn;
 extern int const master_in_param_glob_uni_lfo_phase;
 extern int const master_in_param_glob_uni_lfo_dtn;
 
-extern int const master_settings_param_auto_smooth;
-extern int const master_settings_param_midi_smooth;
-extern int const master_settings_param_tempo_smooth;
-
-extern int const master_settings_param_override_tuning;
-extern int const master_settings_param_global_tuning_mode;
-extern int const master_settings_param_override_tuning_mode;
+extern int const master_smoothing_param_auto_smooth;
+extern int const master_smoothing_param_midi_smooth;
+extern int const master_smoothing_param_tempo_smooth;
+extern int const master_smoothing_param_global_tuning_mode; // todo instance
 
 // these are needed by the osc
 struct osc_osc_matrix_context
@@ -80,7 +77,7 @@ std::unique_ptr<plugin_base::plugin_topo> synth_topo(bool is_fx, std::string con
 // There's also a whole bunch of other implicit dependencies in here so mind the ordering.
 // For example env can modulate vlfo so env goes first.
 enum {
-  module_external_audio, module_midi, module_gcv_cv_matrix, module_master_in, module_master_settings,
+  module_external_audio, module_midi, module_gcv_cv_matrix, module_master_in, module_master_smoothing,
   module_glfo, module_gcv_audio_matrix, module_vcv_cv_matrix, module_voice_note, module_voice_on_note, 
   module_env, module_vlfo, module_vcv_audio_matrix, module_voice_in, module_vaudio_audio_matrix, 
   module_osc_osc_matrix, module_osc, module_vfx, module_voice_out, module_voice_mix, 
@@ -223,7 +220,7 @@ plugin_base::module_topo lfo_topo(int section, plugin_base::gui_position const& 
 plugin_base::module_topo monitor_topo(int section, plugin_base::gui_position const& pos, int polyphony, bool is_fx);
 plugin_base::module_topo audio_out_topo(int section, plugin_base::gui_position const& pos, bool global, bool is_fx);
 plugin_base::module_topo osc_osc_matrix_topo(int section, plugin_base::gui_position const& pos, plugin_base::plugin_topo const* plugin);
-plugin_base::module_topo master_settings_topo(std::string const& vendor, std::string const& full_name, int section, bool is_fx, plugin_base::gui_position const& pos);
+plugin_base::module_topo master_smoothing_topo(std::string const& vendor, std::string const& full_name, int section, bool is_fx, plugin_base::gui_position const& pos);
 plugin_base::module_topo audio_audio_matrix_topo(int section, plugin_base::gui_position const& pos, bool global, bool is_fx,
   std::vector<plugin_base::module_topo const*> const& sources, std::vector<plugin_base::module_topo const*> const& targets);
 plugin_base::module_topo cv_matrix_topo(int section, plugin_base::gui_position const& pos, bool cv, bool global, bool is_fx,

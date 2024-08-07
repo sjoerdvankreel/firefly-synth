@@ -158,9 +158,7 @@ struct plugin_topo final {
 
   // microtuning is done by plugin_base so we need some cooperation
   int tuning_mode_module = -1;
-  int override_tuning_param = -1;
-  int override_tuning_mode_param = -1;
-  int global_tuning_mode_param = -1;
+  int global_tuning_mode_param = -1; // todo instance, but just rename tuning_mode_param
 
   void validate() const;
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(plugin_topo);

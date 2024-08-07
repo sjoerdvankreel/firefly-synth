@@ -122,7 +122,7 @@ make_main_graph_section(plugin_gui* gui, lnf* lnf, component_store store)
   module_params.render_on_tab_change = false;
   module_params.render_on_module_mouse_enter = true;
   module_params.render_on_param_mouse_enter_modules = {
-    module_gcv_cv_matrix, module_master_in, module_master_settings, module_vcv_cv_matrix, module_voice_in, module_osc_osc_matrix, 
+    module_gcv_cv_matrix, module_master_in, module_master_smoothing, module_vcv_cv_matrix, module_voice_in, module_osc_osc_matrix, 
     module_vaudio_audio_matrix, module_gaudio_audio_matrix, module_vcv_audio_matrix, module_gcv_audio_matrix };
   return store_component<module_graph>(store, gui, lnf, params, module_params);
 }
@@ -339,16 +339,14 @@ synth_topo(bool is_fx, std::string const& full_name)
   result->version.patch = FF_SYNTH_VERSION_PATCH;
   result->voice_mode_module = module_voice_in;
   result->voice_mode_param = voice_in_param_mode;
-  result->bpm_smooth_module = module_master_settings;
-  result->bpm_smooth_param = master_settings_param_tempo_smooth;
-  result->midi_smooth_module = module_master_settings;
-  result->midi_smooth_param = master_settings_param_midi_smooth;
-  result->auto_smooth_module = module_master_settings;
-  result->auto_smooth_param = master_settings_param_auto_smooth;
-  result->tuning_mode_module = is_fx? -1: module_master_settings;
-  result->override_tuning_param = is_fx ? -1 : master_settings_param_override_tuning;
-  result->global_tuning_mode_param = is_fx ? -1 : master_settings_param_global_tuning_mode;
-  result->override_tuning_mode_param = is_fx ? -1 : master_settings_param_override_tuning_mode;
+  result->bpm_smooth_module = module_master_smoothing;
+  result->bpm_smooth_param = master_smoothing_param_tempo_smooth;
+  result->midi_smooth_module = module_master_smoothing;
+  result->midi_smooth_param = master_smoothing_param_midi_smooth;
+  result->auto_smooth_module = module_master_smoothing;
+  result->auto_smooth_param = master_smoothing_param_auto_smooth;
+  result->tuning_mode_module = is_fx? -1: module_master_smoothing;
+  result->global_tuning_mode_param = is_fx ? -1 : master_smoothing_param_global_tuning_mode; // todo instance AND move to master in
 
   // this is INCLUDING global unison!
   result->audio_polyphony = 64;
@@ -438,7 +436,7 @@ synth_topo(bool is_fx, std::string const& full_name)
   result->gui.module_sections[module_section_gfx] = make_module_section_gui(
     "{654B206B-27AE-4DFD-B885-772A8AD0A4F3}", module_section_gfx, { 2, 0, 1, 3 }, { 1, 1 });
   result->gui.module_sections[module_section_master_in] = make_module_section_gui_tabbed(
-    "{F9578AAA-66A4-4B0C-A941-4719B5F0E998}", module_section_master_in, { 1, 0, 1, 3 }, { module_master_in, module_master_settings });
+    "{F9578AAA-66A4-4B0C-A941-4719B5F0E998}", module_section_master_in, { 1, 0, 1, 3 }, { module_master_in, module_master_smoothing });
   result->gui.module_sections[module_section_master_in].auto_size_tab_headers = true;
   result->gui.module_sections[module_section_master_out] = make_module_section_gui(
     "{F77335AC-B701-40DA-B4C2-1F55DBCC29A4}", module_section_master_out, { 1, 3, 1, 1 }, { { 1 }, { 1 } });
@@ -488,7 +486,7 @@ synth_topo(bool is_fx, std::string const& full_name)
   result->modules[module_vlfo] = lfo_topo(is_fx ? module_section_hidden : module_section_vlfo, { 0, 0 }, false, is_fx);
   result->modules[module_osc] = osc_topo(is_fx ? module_section_hidden : module_section_osc, { 0, 0 });
   result->modules[module_master_in] = master_in_topo(module_section_master_in, is_fx, { 0, 0 });
-  result->modules[module_master_settings] = master_settings_topo(result->vendor, result->full_name, module_section_master_in, is_fx, { 0, 0 });
+  result->modules[module_master_smoothing] = master_smoothing_topo(result->vendor, result->full_name, module_section_master_in, is_fx, { 0, 0 });
   result->modules[module_voice_on_note] = voice_on_note_topo(result.get(), module_section_hidden); // must be after all global cv  
   result->modules[module_voice_in] = voice_in_topo(is_fx ? module_section_hidden : module_section_voice_in, { 0, 0 }); // must be after all cv
   result->modules[module_voice_out] = audio_out_topo(is_fx ? module_section_hidden : module_section_voice_out, { 0, 0 }, false, is_fx);
