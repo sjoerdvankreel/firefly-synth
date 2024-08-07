@@ -173,14 +173,12 @@ plugin_engine::make_plugin_block(
   // note! not only on_note_after needs the per-voice-per-channel tables,
   // but also continuous_after needs them, because continuous_after may very well affect per-voice stuff
   case engine_tuning_mode_on_note_before_mod:
-  case engine_tuning_mode_on_note_after_mod_linear:
-  case engine_tuning_mode_on_note_after_mod_log:
+  case engine_tuning_mode_on_note_after_mod:
     if (voice < 0) current_tuning = &_current_block_tuning_global; // fallback -- global got no midi channel
     else current_tuning = &_current_voice_tuning_channel[voice]; // here's the gist! per-voice-fixed-per-channel
     break;
   case engine_tuning_mode_continuous_before_mod:
-  case engine_tuning_mode_continuous_after_mod_linear:
-  case engine_tuning_mode_continuous_after_mod_log:
+  case engine_tuning_mode_continuous_after_mod:
     if (voice < 0) current_tuning = &_current_block_tuning_global; // fallback -- global got no midi channel
     else current_tuning = &_current_block_tuning_channel[voice_channel]; // here's the gist! continuous-per-channel
     break;

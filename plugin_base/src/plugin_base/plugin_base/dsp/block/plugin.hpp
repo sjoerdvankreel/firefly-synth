@@ -211,10 +211,8 @@ plugin_block::pitch_to_freq_with_tuning(float pitch)
   else if constexpr (TuningMode == engine_tuning_mode_continuous_before_mod)
     return pitch_to_freq_no_tuning(pitch);
 
-  else if constexpr (TuningMode == engine_tuning_mode_on_note_after_mod_linear || 
-    TuningMode == engine_tuning_mode_continuous_after_mod_linear ||
-    TuningMode == engine_tuning_mode_on_note_after_mod_log ||
-    TuningMode == engine_tuning_mode_continuous_after_mod_log)
+  else if constexpr (TuningMode == engine_tuning_mode_on_note_after_mod || 
+    TuningMode == engine_tuning_mode_continuous_after_mod)
   {
     pitch = std::clamp(pitch, 0.0f, 127.0f);
     int pitch_low = (int)std::floor(pitch);
@@ -222,12 +220,7 @@ plugin_block::pitch_to_freq_with_tuning(float pitch)
     float pos = pitch - pitch_low;
     float retuned_low = (*current_tuning)[pitch_low].retuned_semis;
     float retuned_high = (*current_tuning)[pitch_high].retuned_semis;
-    if constexpr (TuningMode == engine_tuning_mode_on_note_after_mod_linear || TuningMode == engine_tuning_mode_continuous_after_mod_linear)
-      return pitch_to_freq_no_tuning((1.0f - pos) * retuned_low + pos * retuned_high);
-    else if constexpr (TuningMode == engine_tuning_mode_on_note_after_mod_log || TuningMode == engine_tuning_mode_continuous_after_mod_log)
-      return 1;// TODO std::pow(2.0f, (1.0f - pos) * std::log2(freq_low) + pos * std::log2(freq_high));
-    else
-      assert(false); // needs gcc13 for static_assert non-template-dependent expression
+    return pitch_to_freq_no_tuning((1.0f - pos) * retuned_low + pos * retuned_high);
   }
 
   else

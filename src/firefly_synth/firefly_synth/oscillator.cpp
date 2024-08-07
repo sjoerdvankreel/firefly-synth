@@ -950,20 +950,14 @@ osc_engine::process_tuning_mode(plugin_block& block, cv_audio_matrix_mixdown con
   case engine_tuning_mode_on_note_before_mod:
     process_tuning_mode_unison<Graph, Sin, Saw, Tri, Sqr, DSF, Sync, KPS, KPSAutoFdbk, Static, StaticSVFType, engine_tuning_mode_on_note_before_mod>(block, modulation);
     break;
-  case engine_tuning_mode_on_note_after_mod_linear:
-    process_tuning_mode_unison<Graph, Sin, Saw, Tri, Sqr, DSF, Sync, KPS, KPSAutoFdbk, Static, StaticSVFType, engine_tuning_mode_on_note_after_mod_linear>(block, modulation);
-    break;
-  case engine_tuning_mode_on_note_after_mod_log:
-    process_tuning_mode_unison<Graph, Sin, Saw, Tri, Sqr, DSF, Sync, KPS, KPSAutoFdbk, Static, StaticSVFType, engine_tuning_mode_on_note_after_mod_log>(block, modulation);
+  case engine_tuning_mode_on_note_after_mod:
+    process_tuning_mode_unison<Graph, Sin, Saw, Tri, Sqr, DSF, Sync, KPS, KPSAutoFdbk, Static, StaticSVFType, engine_tuning_mode_on_note_after_mod>(block, modulation);
     break;
   case engine_tuning_mode_continuous_before_mod:
     process_tuning_mode_unison<Graph, Sin, Saw, Tri, Sqr, DSF, Sync, KPS, KPSAutoFdbk, Static, StaticSVFType, engine_tuning_mode_continuous_before_mod>(block, modulation);
     break;
-  case engine_tuning_mode_continuous_after_mod_linear:
-    process_tuning_mode_unison<Graph, Sin, Saw, Tri, Sqr, DSF, Sync, KPS, KPSAutoFdbk, Static, StaticSVFType, engine_tuning_mode_continuous_after_mod_linear>(block, modulation);
-    break;
-  case engine_tuning_mode_continuous_after_mod_log:
-    process_tuning_mode_unison<Graph, Sin, Saw, Tri, Sqr, DSF, Sync, KPS, KPSAutoFdbk, Static, StaticSVFType, engine_tuning_mode_continuous_after_mod_log>(block, modulation);
+  case engine_tuning_mode_continuous_after_mod:
+    process_tuning_mode_unison<Graph, Sin, Saw, Tri, Sqr, DSF, Sync, KPS, KPSAutoFdbk, Static, StaticSVFType, engine_tuning_mode_continuous_after_mod>(block, modulation);
     break;
   default:
     assert(false);

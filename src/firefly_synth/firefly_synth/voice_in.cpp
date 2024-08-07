@@ -317,20 +317,14 @@ voice_in_engine::process_voice_mode(plugin_block& block)
   case engine_tuning_mode_on_note_before_mod:
     process_voice_mode_tuning_mode<VoiceMode, engine_tuning_mode_on_note_before_mod>(block);
     break;
-  case engine_tuning_mode_on_note_after_mod_linear:
-    process_voice_mode_tuning_mode<VoiceMode, engine_tuning_mode_on_note_after_mod_linear>(block);
-    break;
-  case engine_tuning_mode_on_note_after_mod_log:
-    process_voice_mode_tuning_mode<VoiceMode, engine_tuning_mode_on_note_after_mod_log>(block);
+  case engine_tuning_mode_on_note_after_mod:
+    process_voice_mode_tuning_mode<VoiceMode, engine_tuning_mode_on_note_after_mod>(block);
     break;
   case engine_tuning_mode_continuous_before_mod:
     process_voice_mode_tuning_mode<VoiceMode, engine_tuning_mode_continuous_before_mod>(block);
     break;
-  case engine_tuning_mode_continuous_after_mod_linear:
-    process_voice_mode_tuning_mode<VoiceMode, engine_tuning_mode_continuous_after_mod_linear>(block);
-    break;
-  case engine_tuning_mode_continuous_after_mod_log:
-    process_voice_mode_tuning_mode<VoiceMode, engine_tuning_mode_continuous_after_mod_log>(block);
+  case engine_tuning_mode_continuous_after_mod:
+    process_voice_mode_tuning_mode<VoiceMode, engine_tuning_mode_continuous_after_mod>(block);
     break;
   default:
     assert(false);

@@ -14,11 +14,9 @@ inline std::string const user_state_tuning_key = "tuning";
 enum engine_tuning_mode {
   engine_tuning_mode_no_tuning, // no microtuning
   engine_tuning_mode_on_note_before_mod, // query at voice start, tune before modulation
-  engine_tuning_mode_on_note_after_mod_linear, // query at voice start, tune after modulation, lerp freq
-  engine_tuning_mode_on_note_after_mod_log, // query at voice start, tune after modulation, lerp log2freq
+  engine_tuning_mode_on_note_after_mod, // query at voice start, tune after modulation
   engine_tuning_mode_continuous_before_mod, // query each block, tune before modulation
-  engine_tuning_mode_continuous_after_mod_linear, // query each block, tune after modulation, lerp freq
-  engine_tuning_mode_continuous_after_mod_log, // query each block, tune after modulation, lerp log2freq
+  engine_tuning_mode_continuous_after_mod, // query each block, tune after modulation
   engine_tuning_mode_count
 };
 
