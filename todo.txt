@@ -66,6 +66,7 @@ V todo drop the global state and evt handlers
 V global mode not always picked up
 V disable tuning button for fx
 V do per instance
+- retest smoothing
 - deal with kbdtrack -- do before/after mod with ktrk being the mod
 - do the credits
 - fix the renoise demos
