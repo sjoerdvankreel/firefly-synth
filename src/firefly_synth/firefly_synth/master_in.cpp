@@ -23,7 +23,7 @@ enum {
   param_aux, param_mod, param_pb, param_pb_range, param_glob_uni_voices,
   param_glob_uni_dtn, param_glob_uni_sprd, param_glob_uni_lfo_phase, 
   param_glob_uni_lfo_dtn, param_glob_uni_osc_phase, param_glob_uni_env_dtn, 
-  param_instance_tuning_mode, param_count };
+  param_tuning_mode, param_count };
 
 // we provide the buttons, everyone else needs to implement it
 extern int const master_in_param_pb_range = param_pb_range;
@@ -34,7 +34,7 @@ extern int const master_in_param_glob_uni_env_dtn = param_glob_uni_env_dtn;
 extern int const master_in_param_glob_uni_lfo_dtn = param_glob_uni_lfo_dtn;
 extern int const master_in_param_glob_uni_lfo_phase = param_glob_uni_lfo_phase;
 extern int const master_in_param_glob_uni_osc_phase = param_glob_uni_osc_phase;
-extern int const master_in_param_instance_tuning_mode = param_instance_tuning_mode;
+extern int const master_in_param_tuning_mode = param_tuning_mode;
 
 class master_in_engine :
 public module_engine {
@@ -205,7 +205,7 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
   if (is_fx) return result;
 
   auto& tuning_mode_audio_param = result.params.emplace_back(make_param(
-    make_topo_info("{28C619C2-C04E-4BD6-8D84-89667E1A5659}", true, "Tuning Mode", "Tuning Mode", "Tuning Mode", param_instance_tuning_mode, 1),
+    make_topo_info("{28C619C2-C04E-4BD6-8D84-89667E1A5659}", true, "Tuning Mode", "Tuning Mode", "Tuning Mode", param_tuning_mode, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_item(engine_tuning_mode_items(), "No Tuning"),
     make_param_gui_none()));
   tuning_mode_audio_param.info.is_readonly = true;
