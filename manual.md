@@ -123,8 +123,8 @@ Please note that Tuning Mode is saved with the plugin instance as a whole, and i
 * Continuous After Modulation - keep retuning for the lifetime of the voice, and retune after modulation.
 
 "Before Mod" probably does what you want when playing the same MIDI notes against multiple tuned plugins.
-"After Mod" is the way to go when you expect "play C3 against and oscillator set to C5" to produce the same results
-as "play C5 against and oscillator set to C3". After-mod also takes all pitch modulators (cents, unison detuning, raw pitch etc) into account.
+"After Mod" is the way to go when you expect "play C3 against an oscillator set to C5" to produce the same results
+as "play C5 against an oscillator set to C3". After-mod also takes all pitch modulators (cents, unison detuning, raw pitch etc) into account.
 For monophonic mode, on-note really means on-voice-start. If you want note-by-note retuning for monophonic, continuous is the way to go.
 
 ## Feature overview
