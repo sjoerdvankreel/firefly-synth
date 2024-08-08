@@ -89,10 +89,11 @@ hence, not "true monophonic").
 ## Microtuning
 
 Firefly features basic microtuning support.<br/>
-"Basic" meaning it's microtuning features pertain to the oscillators only.
+"Basic" meaning it's microtuning features pertain to the oscillators only.<br/>
 There's no support for tuning effect types (Comb Filter/SV Filter/SV Filter inside distortion).
 
-Microtuning support is enabled by Firefly acting as an MTS-ESP client ([https://github.com/ODDSound/MTS-ESP](https://github.com/ODDSound/MTS-ESP)).
+Microtuning is implemented by Firefly acting as an MTS-ESP client ([https://github.com/ODDSound/MTS-ESP](https://github.com/ODDSound/MTS-ESP)).
+Firefly cannot load tuning scales on it's own, so you will need an MTS-ESP Master plugin such as [https://oddsound.com/mtsespsuite.php](https://oddsound.com/mtsespsuite.php) to use it.
 
 ## Per-voice random mod sources
 
