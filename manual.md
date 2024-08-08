@@ -86,6 +86,22 @@ Release-monophonic mode is much more easily understood as a series of
 independent monophonic sections (which may overlap in their envelope release section,
 hence, not "true monophonic").
 
+## Per-voice random mod sources
+
+Firefly features 3 random mod sources for each voice.
+These can be selected in the per-voice mod-matrices as "On Note->On Nt Rnd N".
+In this case each mod source will be a static/fixed value determined at the start of each voice.
+
+These 3 random values can also be used as seed-values for per-voice random LFOs (smooth 2/(free)-static 2).
+When used in this way it essentially allows you to draw a complete new random stream for each voice.
+This is especially useful when playing chords: although each note kicks in at the exact same sample
+position (assuming host data, not external midi), each of these notes/voices can use 3 entirely
+different random lfos. So 9 streams for a 3-note chord.
+
+It is also possible to select a used-defined seed value for per-voice LFO's
+in (smooth 1/(free)-static 1), in which case the modulation source is deterministic
+(even if random). However in this case each note in a chord will follow the exact same "random"  pattern.
+
 ## Microtuning
 
 Firefly features basic microtuning support.
@@ -111,26 +127,11 @@ Please note that Tuning Mode is saved with the plugin instance as a whole, and i
 as "play C5 against and oscillator set to C3". After-mod also takes all pitch modulators (cents, unison detuning, raw pitch etc) into account.
 For monophonic mode, on-note really means on-voice-start. If you want note-by-note retuning for monophonic, continuous is the way to go.
 
-## Per-voice random mod sources
-
-Firefly features 3 random mod sources for each voice.
-These can be selected in the per-voice mod-matrices as "On Note->On Nt Rnd N".
-In this case each mod source will be a static/fixed value determined at the start of each voice.
-
-These 3 random values can also be used as seed-values for per-voice random LFOs (smooth 2/(free)-static 2).
-When used in this way it essentially allows you to draw a complete new random stream for each voice.
-This is especially useful when playing chords: although each note kicks in at the exact same sample
-position (assuming host data, not external midi), each of these notes/voices can use 3 entirely
-different random lfos. So 9 streams for a 3-note chord.
-
-It is also possible to select a used-defined seed value for per-voice LFO's
-in (smooth 1/(free)-static 1), in which case the modulation source is deterministic
-(even if random). However in this case each note in a chord will follow the exact same "random"  pattern.
-
 ## Feature overview
 
 See the parameter reference document for details.
 
+- Microtuning support.
 - Envelope 1 hardwired to voice gain.
 - Per-voice and global audio routing matrices.
 - Per-voice and global cv-to-cv routing matrices.
