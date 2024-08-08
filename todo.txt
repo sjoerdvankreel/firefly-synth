@@ -75,7 +75,10 @@ V fix the todos
 V refix all the patches
 V update the docs for micro
 V recheck the mts demo tunes
-- fix the renoise demos
+V fix the renoise demos
+V test win
+- test Linux
+- test mac
 - do the credits
 - not forget to install the dynlib on mac/lin
 
