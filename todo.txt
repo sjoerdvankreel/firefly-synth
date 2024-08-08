@@ -71,11 +71,11 @@ V mention the breaking change
 V fix retuning for mono
 
 v1.8.4 beta 4
+V fix the todos
+V refix all the patches
 - do the credits
 - fix the renoise demos
-- refix all the patches
 - not forget to install the dynlib on mac/lin
-- fix the todos
 - update the docs for micro
 - recheck the mts demo tunes
 
