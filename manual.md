@@ -97,6 +97,20 @@ Firefly cannot load tuning scales on it's own, so you will need an MTS-ESP Maste
 Microtuning support is enabled by default, but it will only take effect once an MTS-ESP master plugin is loaded into the project.
 In which case, the MTS-ESP indicator will show as active in the monitor section.
 
+On the front panel (alongside Patch/Preset/Theme select) there's a Tuning menu that allows 5 options.
+Please note that Tuning Mode is saved with the plugin instance as a whole, and it is not part of the patch.
+
+* No Tuning - if an MTS-ESP Master is loaded into the DAW, ignore it.
+* On Note Before Modulation - fix the tuning at voice start and retune before modulation.
+* On Note After Modulation - fix the tuning at voice start and retune after modulation.
+* Continuous Before Modulation - keep retuning for the lifetime of the voice, and retune before modulation.
+* Continuous After Modulation - keep retuning for the lifetime of the voice, and retune after modulation.
+
+"Before Mod" probably does what you want when playing the same MIDI notes against multiple tuned plugins.
+"After Mod" is the way to go when you expect "play C3 against and oscillator set to C5" to produce the same results
+as "play C5 against and oscillator set to C3". After-mod also takes all pitch modulators (cents, unison detuning, raw pitch etc) into account.
+For monophonic mode, on-note really means on-voice-start. If you want note-by-note retuning for monophonic, continuous is the way to go.
+
 ## Per-voice random mod sources
 
 Firefly features 3 random mod sources for each voice.
