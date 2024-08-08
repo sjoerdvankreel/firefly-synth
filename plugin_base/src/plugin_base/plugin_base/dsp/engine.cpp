@@ -586,7 +586,7 @@ plugin_engine::activate_voice(
   if (tuning_mode != engine_tuning_mode_no_tuning)
     for (int i = 0; i < 128; i++)
     {
-      // for these cases we need to warp pitchmods after modulation, so need the entire mts table
+      // fix tables at voice start, needed for on-note tuning
       _current_voice_tuning_channel[slot][i].is_mapped = _current_block_tuning_channel[event.id.channel][i].is_mapped;
       _current_voice_tuning_channel[slot][i].retuned_semis = _current_block_tuning_channel[event.id.channel][i].retuned_semis;
     }

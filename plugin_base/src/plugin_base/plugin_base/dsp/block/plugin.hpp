@@ -113,7 +113,7 @@ struct plugin_block final {
 
   // MTS-ESP support
   MTSClient* mts_client = {};
-  // If disabled, unused (we go with pitch-to-freq without an intermediate table).
+  // If disabled, unused.
   // If per-block, points to a table populated at block start.
   // If per-voice, points to a table populated at voice start.
   std::array<note_tuning, 128>* current_tuning = nullptr;

@@ -41,7 +41,7 @@ pb_controller::init_tuning_from_extra_state()
 {
   auto const* topo = _gui_state.desc().plugin;
   if (topo->tuning_mode_module == -1 || topo->tuning_mode_param == -1) return;
-  auto tuning_mode = std::clamp(_extra_state.get_num(extra_state_tuning_key, engine_tuning_mode_on_note_before_mod), 0, engine_tuning_mode_count - 1);
+  auto tuning_mode = std::clamp(_extra_state.get_num(extra_state_tuning_mode_key, engine_tuning_mode_on_note_before_mod), 0, engine_tuning_mode_count - 1);
   int param_index = _gui_state.desc().param_mappings.topo_to_index[topo->tuning_mode_module][0][topo->tuning_mode_param][0];
   auto tuning_plain = _gui_state.desc().raw_to_plain_at_index(param_index, tuning_mode);
   _gui_state.set_plain_at_index(param_index, tuning_plain);

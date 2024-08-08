@@ -331,10 +331,10 @@ _gui(gui), _presets(gui->gui_state()->desc().presets())
   set_items(vector_map(_presets, [](auto const& p) { return menu_button_item { p.name, p.group }; }));
   extra_state_changed();
   setButtonText("Preset");
-  _gui->extra_state_()->add_listener(factory_preset_key, this);
+  _gui->extra_state_()->add_listener(extra_state_factory_preset_key, this);
   _selected_index_changed = [this](int index) {
     index = std::clamp(index, 0, (int)get_items().size());
-    _gui->extra_state_()->set_text(factory_preset_key, get_items()[index].name);
+    _gui->extra_state_()->set_text(extra_state_factory_preset_key, get_items()[index].name);
     _gui->load_patch(_presets[index].path, true);
   };
 }
@@ -342,7 +342,7 @@ _gui(gui), _presets(gui->gui_state()->desc().presets())
 void 
 preset_button::extra_state_changed()
 {
-  std::string selected_preset = _gui->extra_state_()->get_text(factory_preset_key, "");
+  std::string selected_preset = _gui->extra_state_()->get_text(extra_state_factory_preset_key, "");
   for(int i = 0; i < get_items().size(); i++)
     if(get_items()[i].name == selected_preset)
     {
@@ -401,7 +401,7 @@ _gui(gui)
     int param_index = _gui->gui_state()->desc().param_mappings.topo_to_index[topo->tuning_mode_module][0][topo->tuning_mode_param][0];
     plain_value plain_mode = _gui->gui_state()->desc().raw_to_plain_at_index(param_index, selected_index);
     _gui->param_changed(param_index, plain_mode);
-    _gui->extra_state_()->set_num(extra_state_tuning_key, selected_index);
+    _gui->extra_state_()->set_num(extra_state_tuning_mode_key, selected_index);
   };
 }
 

@@ -16,7 +16,7 @@ on release:
 10 make a github release
 11 update kvr
 
-1.8.4
+1.8.4 beta 1
 V split smoothing params to separate module
 V + do the conversion
 V pretty up the master module
@@ -69,13 +69,15 @@ V do per instance
 V retest smoothing
 V mention the breaking change
 V fix retuning for mono
+
+v1.8.4 beta 4
 - do the credits
 - fix the renoise demos
 - refix all the patches
 - not forget to install the dynlib on mac/lin
 - fix the todos
 - update the docs for micro
-- do an mts demo tune
+- recheck the mts demo tunes
 
 - autobuilds:
 - ask paul

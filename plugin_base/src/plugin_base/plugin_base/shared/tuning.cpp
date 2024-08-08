@@ -1,14 +1,6 @@
 #include <plugin_base/shared/tuning.hpp>
-#include <plugin_base/shared/io_user.hpp>
-#include <plugin_base/shared/utility.hpp>
-
-#include <mutex>
-#include <thread>
-#include <cassert>
 
 namespace plugin_base {
-
-static std::mutex _mutex = {};
 
 // must match engine_tuning_mode
 std::vector<list_item>

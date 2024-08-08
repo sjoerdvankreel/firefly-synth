@@ -163,7 +163,7 @@ public extra_state_listener
 public:
   preset_button(plugin_gui* gui);
   void extra_state_changed() override;
-  ~preset_button() { _gui->extra_state_()->remove_listener(factory_preset_key, this); }
+  ~preset_button() { _gui->extra_state_()->remove_listener(extra_state_factory_preset_key, this); }
 };
 
 // binds theme preset to user config

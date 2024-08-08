@@ -8,7 +8,7 @@
 
 namespace plugin_base {
 
-inline std::string const extra_state_tuning_key = "tuning/mode";
+inline std::string const extra_state_tuning_mode_key = "tuning_mode";
 
 // needs cooperation from the plug
 enum engine_tuning_mode {
@@ -23,6 +23,6 @@ enum engine_tuning_mode {
 std::vector<list_item>
 engine_tuning_mode_items();
 inline std::set<std::string>
-tuning_extra_state_keyset() { return { extra_state_tuning_key }; }
+tuning_extra_state_keyset() { return { extra_state_tuning_mode_key }; }
 
 }
