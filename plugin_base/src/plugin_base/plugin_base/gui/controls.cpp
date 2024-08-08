@@ -376,6 +376,7 @@ tuning_mode_button(plugin_gui* gui) :
 _gui(gui)
 { 
   setButtonText("Tuning");
+  setEnabled(gui->gui_state()->desc().plugin->type == plugin_type::synth);
 
   // fill the list
   std::vector<menu_button_item> button_items;
