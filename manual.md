@@ -86,6 +86,14 @@ Release-monophonic mode is much more easily understood as a series of
 independent monophonic sections (which may overlap in their envelope release section,
 hence, not "true monophonic").
 
+## Microtuning
+
+Firefly features basic microtuning support.<br/>
+"Basic" meaning it's microtuning features pertain to the oscillators only.
+There's no support for tuning effect types (Comb Filter/SV Filter/SV Filter inside distortion).
+
+Microtuning support is enabled by Firefly acting as an MTS-ESP client ([https://github.com/ODDSound/MTS-ESP](https://github.com/ODDSound/MTS-ESP)).
+
 ## Per-voice random mod sources
 
 Firefly features 3 random mod sources for each voice.
