@@ -7,6 +7,7 @@
 - Moved load/save/init/clear patch into a single menu.
 - Moved smoothing parameters from Master In to new Smoothing module.
 - Fixed bug w.r.t. discarding dropdown item (by clicking outside the menu).
+- Bugfix + breaking change: portamento would glide from last note instead of current position.
 - Conversion code will fix existing patches, but Renoise automation data will be broken (that's why it's still not supported).
 
 ### July 17, 2024 - V1.8.3.
