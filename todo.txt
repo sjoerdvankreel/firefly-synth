@@ -68,8 +68,7 @@ V disable tuning button for fx
 V do per instance
 V retest smoothing
 V mention the breaking change
-- fix retuning for mono
-- deal with kbdtrack -- do before/after mod with ktrk being the mod
+V fix retuning for mono
 - do the credits
 - fix the renoise demos
 - refix all the patches
@@ -84,6 +83,7 @@ V mention the breaking change
 
 wishlist:
 green-on-white UI
+filter microtuning
 DSF falloff to the left
 clap polyphonic modulation
 full-blown renoise support
