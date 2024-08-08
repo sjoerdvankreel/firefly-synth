@@ -74,10 +74,10 @@ v1.8.4 beta 4
 V fix the todos
 V refix all the patches
 V update the docs for micro
-- do the credits
 - fix the renoise demos
-- not forget to install the dynlib on mac/lin
 - recheck the mts demo tunes
+- do the credits
+- not forget to install the dynlib on mac/lin
 
 - autobuilds:
 - ask paul

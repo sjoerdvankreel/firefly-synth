@@ -117,7 +117,7 @@ On the front panel (alongside Patch/Preset/Theme select) there's a Tuning menu t
 Please note that Tuning Mode is saved with the plugin instance as a whole, and it is not part of the patch.
 
 * No Tuning - if an MTS-ESP Master is loaded into the DAW, ignore it.
-* On Note Before Modulation - fix the tuning at voice start and retune before modulation.
+* On Note Before Modulation (Default) - fix the tuning at voice start and retune before modulation.
 * On Note After Modulation - fix the tuning at voice start and retune after modulation.
 * Continuous Before Modulation - keep retuning for the lifetime of the voice, and retune before modulation.
 * Continuous After Modulation - keep retuning for the lifetime of the voice, and retune after modulation.
