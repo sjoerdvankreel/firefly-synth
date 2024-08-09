@@ -208,7 +208,7 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
     make_topo_info("{28C619C2-C04E-4BD6-8D84-89667E1A5659}", true, "Tuning Mode", "Tuning Mode", "Tuning Mode", param_tuning_mode, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_item(engine_tuning_mode_items(), "On Note Before Mod"), // default must be same as extra_state
     make_param_gui_none()));
-  tuning_mode_audio_param.info.is_readonly = true;
+  tuning_mode_audio_param.info.is_per_instance = true;
   tuning_mode_audio_param.info.description = "Per-instance tuning parameter (readonly).";
 
   return result;

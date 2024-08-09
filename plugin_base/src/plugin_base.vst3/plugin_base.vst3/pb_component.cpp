@@ -42,7 +42,7 @@ tresult PLUGIN_API
 pb_component::getState(IBStream* state)
 {
   PB_LOG_FUNC_ENTRY_EXIT();
-  std::vector<char> data(plugin_io_save_state(_splice_engine.state()));
+  std::vector<char> data(plugin_io_save_patch_state(_splice_engine.state()));
   return state->write(data.data(), data.size());
 }
 
@@ -50,7 +50,7 @@ tresult PLUGIN_API
 pb_component::setState(IBStream* state)
 {
   PB_LOG_FUNC_ENTRY_EXIT();
-  if (!plugin_io_load_state(load_ibstream(state), _splice_engine.state()).ok())
+  if (!plugin_io_load_patch_state(load_ibstream(state), _splice_engine.state()).ok())
     return kResultFalse;
   _splice_engine.automation_state_dirty();
   return kResultOk;

@@ -142,7 +142,7 @@ pb_plugin::stateSave(clap_ostream const* stream) noexcept
   // don't bother with that and just write byte-for-byte
   int written = 1;
   int total_written = 0;
-  std::vector<char> data(plugin_io_save_all(_gui_state, _extra_state));
+  std::vector<char> data(plugin_io_save_all_state(_gui_state, _extra_state));
   while(written == 1 && total_written < data.size())
   {
     written = stream->write(stream, data.data() + total_written, 1);
@@ -167,7 +167,7 @@ pb_plugin::stateLoad(clap_istream const* stream) noexcept
   } while(true);
 
   _gui_state.begin_undo_region();
-  if (!plugin_io_load_all(data, _gui_state, _extra_state).ok()) 
+  if (!plugin_io_load_all_state(data, _gui_state, _extra_state).ok())
   {
     _gui_state.discard_undo_region();
     return false;

@@ -74,7 +74,7 @@ tresult PLUGIN_API
 pb_controller::getState(IBStream* state)
 {
   PB_LOG_FUNC_ENTRY_EXIT();
-  std::vector<char> data(plugin_io_save_extra(*_gui_state.desc().plugin, _extra_state));
+  std::vector<char> data(plugin_io_save_extra_state(*_gui_state.desc().plugin, _extra_state));
   return state->write(data.data(), data.size());
 }
 
@@ -82,7 +82,7 @@ tresult PLUGIN_API
 pb_controller::setState(IBStream* state)
 {
   PB_LOG_FUNC_ENTRY_EXIT();
-  if (!plugin_io_load_extra(*_gui_state.desc().plugin, load_ibstream(state), _extra_state).ok())
+  if (!plugin_io_load_extra_state(*_gui_state.desc().plugin, load_ibstream(state), _extra_state).ok())
     return kResultFalse;
   init_tuning_from_extra_state();
   return kResultOk;
@@ -93,7 +93,7 @@ pb_controller::setComponentState(IBStream* state)
 {
   PB_LOG_FUNC_ENTRY_EXIT();
   gui_state().begin_undo_region();
-  if (!plugin_io_load_state(load_ibstream(state), gui_state()).ok())
+  if (!plugin_io_load_patch_state(load_ibstream(state), gui_state()).ok())
   {
     gui_state().discard_undo_region();
     return kResultFalse;

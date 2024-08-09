@@ -182,7 +182,7 @@ plugin_engine::make_plugin_block(
 void
 plugin_engine::init_from_state(plugin_state const* state)
 {
-  _state.copy_from(state->state());
+  _state.copy_from(state->state(), true);
   automation_state_dirty();
   init_automation_from_state();
 }        

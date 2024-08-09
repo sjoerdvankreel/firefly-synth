@@ -71,6 +71,7 @@ V mention the breaking change
 V fix retuning for mono
 
 v1.8.4 beta 4
+V wrong default value (gui would show ok but would be not ok)
 V fix the todos
 V refix all the patches
 V update the docs for micro
