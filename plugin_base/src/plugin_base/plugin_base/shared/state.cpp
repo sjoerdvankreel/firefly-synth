@@ -25,9 +25,9 @@ plugin_state::state_changed(int index, plain_value plain) const
 {
   assert(_notify);
   auto iter = _listeners.find(index);
-  if (iter == _listeners.end()) return;
-  for (int i = 0; i < iter->second.size(); i++)
-    iter->second[i]->state_changed(index, plain);
+  if (iter != _listeners.end())
+    for (int i = 0; i < iter->second.size(); i++)
+      iter->second[i]->state_changed(index, plain);
   for(int i = 0; i < _any_listeners.size(); i++)
     _any_listeners[i]->any_state_changed(index, plain);
 }
