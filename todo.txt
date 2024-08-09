@@ -80,7 +80,7 @@ V refix all the patches
 V recheck the mts demo tunes
 V fix the renoise demos
 V test win
-- test Linux
+V test lin
 - test mac
 - do the credits
 - not forget to install the dynlib on mac/lin
