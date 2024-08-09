@@ -74,16 +74,18 @@ v1.8.4 beta 4
 V update the docs for micro
 V wrong default value (gui would show ok but would be not ok)
 V make tuning mode work with undo/redo
-
 V fix the todos
 V refix all the patches
 V recheck the mts demo tunes
 V fix the renoise demos
 V test win
 V test lin
-- test mac
+V test mac
+V not forget to install the dynlib on mac/lin
+
+V1.8.4 beta 5/final
 - do the credits
-- not forget to install the dynlib on mac/lin
+- + do the full release (screenshots, kvr, etc)
 
 - autobuilds:
 - ask paul
