@@ -178,11 +178,14 @@ public:
 
 // binds per-instance tuning mode selection to user config
 class tuning_mode_button :
-public menu_button
+public menu_button,
+public state_listener
 {
   plugin_gui* const _gui;
 public:
+  ~tuning_mode_button();
   tuning_mode_button(plugin_gui* gui);
+  void state_changed(int index, plain_value plain) override { set_selected_index(plain.step()); }
 };
 
 // binding_component that is additionally bound to a single parameter value

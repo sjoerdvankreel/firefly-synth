@@ -372,6 +372,17 @@ _gui(gui), _themes(gui->gui_state()->desc().themes())
 }
 
 tuning_mode_button::
+~tuning_mode_button()
+{
+  auto const* topo = _gui->gui_state()->desc().plugin;
+  if (topo->tuning_mode_module != -1 && topo->tuning_mode_param != -1)
+  {
+    int param_index = _gui->gui_state()->desc().param_mappings.topo_to_index[topo->tuning_mode_module][0][topo->tuning_mode_param][0];
+    _gui->gui_state()->remove_listener(param_index, this);
+  }
+}
+
+tuning_mode_button::
 tuning_mode_button(plugin_gui* gui) :
 _gui(gui)
 { 
@@ -391,10 +402,16 @@ _gui(gui)
   }
   set_items(button_items);
 
-  // need to pick up the real value from plugin state
   if (topo->tuning_mode_module != -1 && topo->tuning_mode_param != -1)
+  {
+    // need to pick up the real value from plugin state
     set_selected_index(_gui->gui_state()->get_plain_at(
       topo->tuning_mode_module, 0, topo->tuning_mode_param, 0).step());
+
+    // and also react to it
+    int param_index = _gui->gui_state()->desc().param_mappings.topo_to_index[topo->tuning_mode_module][0][topo->tuning_mode_param][0];
+    _gui->gui_state()->add_listener(param_index, this);
+  }
 
   // need to push both to plugin state and extra state
   _selected_index_changed = [this, topo, mode_items](int selected_index) {
