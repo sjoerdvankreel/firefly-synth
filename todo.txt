@@ -81,6 +81,7 @@ V test win
 - test Linux
 - test mac
 - do the credits
+- make tuning mode work with undo/redo
 - not forget to install the dynlib on mac/lin
 
 - autobuilds:
