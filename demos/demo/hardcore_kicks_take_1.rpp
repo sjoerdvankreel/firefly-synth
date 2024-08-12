@@ -1,4 +1,4 @@
-<REAPER_PROJECT 0.1 "7.16/win64" 1723495591
+<REAPER_PROJECT 0.1 "7.16/win64" 1723495709
   <NOTES 0 2
   >
   RIPPLE 0
@@ -19,7 +19,7 @@
   PANMODE 3
   PANLAWFLAGS 3
   CURSOR 0.46153846153846
-  ZOOM 100 0 0
+  ZOOM 23.2568039361378 0 0
   VZOOMEX 6 0
   USE_REC_CFG 0
   RECMODE 1
@@ -120,8 +120,8 @@
     MIDIOUT -1
     MAINSEND 1 0
     <FXCHAIN
-      WNDRECT 220 218 1507 763
-      SHOW 1
+      WNDRECT 208 403 1507 763
+      SHOW 0
       LASTSEL 0
       DOCKED 0
       BYPASS 0 0 0
@@ -2915,6 +2915,42 @@
       >
       FLOATPOS 0 0 0 0
       FXID {9DE272BC-9CAF-4446-8841-2BC72AB7A3FB}
+      <PARMENV 114:282745195 0 1 0.5 "MIn Aux 3 / Firefly Synth 1.8.3 VST3"
+        EGUID {606060CA-EAF0-487F-AE81-59B40C4FCCFF}
+        ACT 1 -1
+        VIS 1 1 1
+        LANEHEIGHT 0 0
+        ARM 1
+        DEFSHAPE 0 -1 -1
+        PT 0 0.5 0
+      >
+      <PARMENV 112:282745197 0 1 0.5 "MIn Aux 1 / Firefly Synth 1.8.3 VST3"
+        EGUID {3471DDF3-90CE-40F8-9AC2-DFD152C60945}
+        ACT 1 -1
+        VIS 1 1 1
+        LANEHEIGHT 0 0
+        ARM 1
+        DEFSHAPE 0 -1 -1
+        PT 0 1 0
+      >
+      <PARMENV 113:282745196 0 1 0.5 "MIn Aux 2 / Firefly Synth 1.8.3 VST3"
+        EGUID {89E8A938-AF6C-47E0-92F7-212C9B9F023D}
+        ACT 1 -1
+        VIS 1 1 1
+        LANEHEIGHT 0 0
+        ARM 1
+        DEFSHAPE 0 -1 -1
+        PT 0 0.50400001 0
+      >
+      <PARMENV 1390:568408069 0 1 0.5 "Osc 4 Unison Phase / Firefly Synth 1.8.3 VST3"
+        EGUID {EA43AE69-9855-40A1-B8D0-F65F94CCE6C4}
+        ACT 1 -1
+        VIS 1 1 1
+        LANEHEIGHT 0 0
+        ARM 1
+        DEFSHAPE 0 -1 -1
+        PT 0 0.62 0
+      >
       WAK 0 0
       BYPASS 0 0 0
       <VST "VST: ReaComp (Cockos)" reacomp.dll 0 "" 1919247213<5653547265636D726561636F6D700000> ""
@@ -2929,7 +2965,7 @@
     <ITEM
       POSITION 0
       SNAPOFFS 0
-      LENGTH 14.76923076923077
+      LENGTH 59.07692307692308
       LOOP 1
       ALLTAKES 0
       FADEIN 1 0 0 1 0 0 0
