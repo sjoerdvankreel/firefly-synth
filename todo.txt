@@ -17,6 +17,8 @@ on release:
 11 update kvr
 
 wishlist:
+fix the undo history
+do the 5eq thing with serial/parallel bell filters
 DSF falloff to the left
 clap polyphonic modulation
 full-blown renoise support
@@ -26,7 +28,6 @@ Feedback FM - but needs per-sample processing, not block
 arpeggiator - hard - but easy -> play multiple octaves on-note. or maybe allow 3/s, 5/s, whatever selection
 
 wishlist sometime:
-fix the undo history
 mseg
 midi mpe
 microtonal
