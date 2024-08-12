@@ -94,9 +94,7 @@ Demo tunes:
 - Renoise test (sort of trance melody hard edit) (Rave Synth Preset): [renoise_test_sort_of_trance_melody_hard_edit.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/renoise_test_sort_of_trance_melody_hard_edit.mp3)
 - Renoise test (sort of goa trance) (Trance Pad 2 Preset + Goa Bass Preset + Some more): [renoise_test_sort_of_goa_trance.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/renoise_test_sort_of_goa_trance.mp3)
 - Downtempo ambient psy (Bass 3 Preset + Closed Hat 3 + Distorted Bells 2 + FM Bells + Kick 6 + Open Hat 3): [downtempo_ambient_psy.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/downtempo_ambient_psy.mp3)
-
-- Hardcore kicks take 1: [demo_track_3.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/hardcore_kicks_take_1.mp3)
-* TODO make this a preset. It's based on a Serum tutorial that unfortunately I cannot find anymore.
+- Hardcore kicks take 1: [hardcore_kicks_take_1.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/hardcore_kicks_take_1.mp3) TODO make this a preset. It's based on a Serum tutorial that unfortunately I cannot find anymore.
 
 Other:
 - FX Demo: [fx_demo_reaper_clap.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/fx_demo_reaper_clap.mp3)
