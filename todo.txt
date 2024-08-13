@@ -94,6 +94,9 @@ V1.8.4 beta 5/final
 wishlist:
 green-on-white UI
 filter microtuning
+make osc phase a mod target
+fix the undo history
+do the 5eq thing with serial/parallel bell filters
 DSF falloff to the left
 clap polyphonic modulation
 full-blown renoise support
