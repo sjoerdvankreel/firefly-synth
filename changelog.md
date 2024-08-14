@@ -1,4 +1,4 @@
-?, ? - V1.8.5.
+### August 14, 2024 - V1.8.5.
 
 - Add basic multiband EQ.
 - Make binaries run on macOS 10 (was 11).
