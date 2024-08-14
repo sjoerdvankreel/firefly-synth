@@ -17,6 +17,8 @@ using namespace plugin_base;
 
 namespace firefly_synth {
 
+static float const max_phase_mod = 0.1f;
+
 enum { type_off, type_basic, type_dsf, type_kps1, type_kps2, type_static };
 enum { rand_svf_lpf, rand_svf_hpf, rand_svf_bpf, rand_svf_bsf, rand_svf_peq };
 enum { section_type, section_sync_params, section_sync_on, section_uni, section_basic, section_basic_pw, section_dsf, section_rand };
@@ -34,7 +36,7 @@ enum {
   param_dsf_parts, param_dsf_dist, param_dsf_dcy,
   param_rand_svf, param_rand_rate, param_rand_freq, param_rand_res, param_rand_seed, // shared k+s/noise
   param_kps_fdbk, param_kps_mid, param_kps_stretch,
-  param_pitch, param_pb };
+  param_pitch, param_pb, param_phase };
 
 extern int const voice_in_output_pitch_offset;
 extern int const osc_param_type = param_type;
@@ -575,6 +577,12 @@ osc_topo(int section, gui_position const& pos)
     make_param_gui_none()));
   pb.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return can_do_pitch(vs[0]); });
   pb.info.description = "Pitch-bend modulation target. Also reacts to Voice-in PB modulation and master pitchbend range.";
+  auto& pm = result.params.emplace_back(make_param(
+    make_topo_info("{EDBD2257-6582-4438-8EEA-7464B06FB37F}", true, "Phase", "Phase", "Phase", param_phase, 1),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0, 1, true),
+    make_param_gui_none()));
+  pm.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return can_do_phase(vs[0]); });
+  pm.info.description = "Phase modulation target.";
 
   return result;
 }
@@ -1008,6 +1016,7 @@ osc_engine::process_unison(plugin_block& block, cv_audio_matrix_mixdown const* m
   auto& cent_curve = block.state.own_scratch[scratch_cent];
   auto& pitch_curve = block.state.own_scratch[scratch_pitch];
   auto& sync_semis_curve = block.state.own_scratch[scratch_sync_semi];
+  auto const& pm_curve = *(*modulation)[module_osc][block.module_slot][param_phase][0];
   auto const& pb_curve_norm = *(*modulation)[module_osc][block.module_slot][param_pb][0];
   auto const& cent_curve_norm = *(*modulation)[module_osc][block.module_slot][param_cent][0];
   auto const& pitch_curve_norm = *(*modulation)[module_osc][block.module_slot][param_pitch][0];
@@ -1111,7 +1120,7 @@ osc_engine::process_unison(plugin_block& block, cv_audio_matrix_mixdown const* m
       float synced_sample = 0;
       float pitch_ref = min_pitch_ref + (max_pitch_ref - min_pitch_ref) * v / uni_voice_range;
       float freq_ref = std::clamp(pitch_to_freq(pitch_ref), 10.0f, oversampled_rate * 0.5f);
-      float inc_ref = freq_ref / oversampled_rate;
+      float inc_ref = freq_ref / oversampled_rate + pm_curve[mod_index] * max_phase_mod / oversmp_factor;
       float pitch_sync = pitch_ref;
       float freq_sync = freq_ref;
       float inc_sync = inc_ref;
@@ -1124,7 +1133,7 @@ osc_engine::process_unison(plugin_block& block, cv_audio_matrix_mixdown const* m
       {
         pitch_sync = min_pitch_sync + (max_pitch_sync - min_pitch_sync) * v / uni_voice_range;
         freq_sync = std::clamp(pitch_to_freq(pitch_sync), 10.0f, oversampled_rate * 0.5f);
-        inc_sync = freq_sync / oversampled_rate;
+        inc_sync = freq_sync / oversampled_rate + pm_curve[mod_index] * max_phase_mod / oversmp_factor;
       }
 
       float pan = min_pan + (max_pan - min_pan) * v / uni_voice_range;
