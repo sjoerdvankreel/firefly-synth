@@ -23,6 +23,7 @@ static float const log_half = std::log(0.5f);
 
 static double const comb_max_ms = 5;
 static double const comb_min_ms = 0.1;
+static double const flt_max_res = 0.99;
 static double const flt_min_freq = 20;
 static double const flt_max_freq = 20000;
 static double const dly_max_sec = 10;
@@ -36,6 +37,7 @@ static float const reverb_room_scale = 0.28f;
 static float const reverb_room_offset = 0.7f;
 static float const reverb_spread = 23.0f / 44100.0f;
 
+static int const meq_flt_count = 5;
 static int const reverb_comb_count = 8;
 static int const reverb_allpass_count = 4;
 static float const reverb_allpass_length[reverb_allpass_count] = {
@@ -45,14 +47,16 @@ static float const reverb_comb_length[reverb_comb_count] = {
   1422.0f / 44100.0f, 1491.0f / 44100.0f, 1557.0f / 44100.0f, 1617.0f / 44100.0f };
 
 enum { dly_mode_fdbk, dly_mode_multi };
+enum { meq_mode_serial, meq_mode_parallel };
 enum { dist_mode_a, dist_mode_b, dist_mode_c };
 enum { dist_over_1, dist_over_2, dist_over_4 };
 enum { comb_mode_feedforward, comb_mode_feedback, comb_mode_both };
-enum { type_off, type_svf, type_cmb, type_dst, type_delay, type_reverb };
+enum { type_off, type_svf, type_cmb, type_dst, type_meq, type_delay, type_reverb };
 enum { dist_clip_hard, dist_clip_tanh, dist_clip_sin, dist_clip_exp, dist_clip_tsq, dist_clip_cube, dist_clip_inv };
 enum { svf_mode_lpf, svf_mode_hpf, svf_mode_bpf, svf_mode_bsf, svf_mode_apf, svf_mode_peq, svf_mode_bll, svf_mode_lsh, svf_mode_hsh };
+enum { meq_flt_mode_off, meq_flt_mode_lpf, meq_flt_mode_hpf, meq_flt_mode_bpf, meq_flt_mode_bsf, meq_flt_mode_apf, meq_flt_mode_peq, meq_flt_mode_bll, meq_flt_mode_lsh, meq_flt_mode_hsh };
 enum { section_main, section_svf_left, section_svf_right, section_comb_left, section_comb_right, section_dist_flt, section_dist_skew, 
-  section_dist_right, section_delay_sync, section_delay_left, section_delay_right, section_reverb_left, section_reverb_right };
+  section_dist_right, section_meq, section_delay_sync, section_delay_left, section_delay_right, section_reverb_left, section_reverb_right };
 
 enum { scratch_dly_fdbk_l, scratch_dly_fdbk_r, scratch_dly_fdbk_count };
 enum { scratch_reverb_damp, scratch_reverb_size, scratch_reverb_in, scratch_reverb_count };
@@ -60,8 +64,9 @@ enum { scratch_dly_multi_hold, scratch_dly_multi_time, scratch_dly_multi_sprd, s
 enum { scratch_dist_x, scratch_dist_y, scratch_dist_gain_raw, scratch_dist_svf_freq, scratch_dist_clip_exp, scratch_dist_count };
 enum { scratch_flt_stvar_freq, scratch_flt_stvar_kbd, scratch_flt_stvar_gain, scratch_flt_stvar_count };
 enum { scratch_flt_comb_dly_plus, scratch_flt_comb_gain_plus, scratch_flt_comb_dly_min, scratch_flt_comb_gain_min, scratch_flt_comb_gain_count };
+enum { scratch_meq_freq, scratch_meq_gain = meq_flt_count, scratch_meq_audio_l = meq_flt_count * 2, scratch_meq_audio_r, scratch_meq_count };
 static int constexpr scratch_count = std::max({ 
-  (int)scratch_dly_fdbk_count, (int)scratch_dly_multi_count, (int)scratch_dist_count, 
+  (int)scratch_dly_fdbk_count, (int)scratch_dly_multi_count, (int)scratch_dist_count, (int)scratch_meq_count,
   (int)scratch_reverb_count, (int)scratch_flt_comb_gain_count, (int)scratch_flt_stvar_count });
 
 enum { param_type,
@@ -69,6 +74,7 @@ enum { param_type,
   param_comb_mode, param_comb_dly_plus, param_comb_gain_plus, param_comb_dly_min, param_comb_gain_min,
   param_dist_mode, param_dist_lp_frq, param_dist_lp_res, param_dist_skew_x, param_dist_skew_x_amt, param_dist_skew_y, param_dist_skew_y_amt, 
   param_dist_shaper, param_dist_over, param_dist_clip, param_dist_clip_exp, param_dist_gain, param_dist_mix,
+  param_meq_mode, param_meq_flt_mode, param_meq_gain, param_meq_freq, param_meq_res,
   param_dly_mode, param_dly_sync, param_dly_amt, param_dly_mix, param_dly_sprd, param_dly_hold_time, param_dly_hold_tempo,
   param_dly_fdbk_time_l, param_dly_fdbk_tempo_l, param_dly_fdbk_time_r, param_dly_fdbk_tempo_r,
   param_dly_multi_taps, param_dly_multi_time, param_dly_multi_tempo,
@@ -76,6 +82,7 @@ enum { param_type,
 };
 
 static bool svf_has_gain(int svf_mode) { return svf_mode >= svf_mode_bll; }
+static constexpr bool meq_has_gain(int meq_flt_mode) { return meq_flt_mode >= meq_flt_mode_bll; }
 static bool comb_has_feedback(int comb_mode) { return comb_mode == comb_mode_feedback || comb_mode == comb_mode_both; }
 static bool comb_has_feedforward(int comb_mode) { return comb_mode == comb_mode_feedforward || comb_mode == comb_mode_both; }
 
@@ -87,6 +94,7 @@ type_items(bool global)
   result.emplace_back("{9CB55AC0-48CB-43ED-B81E-B97C08771815}", "SV Filter");
   result.emplace_back("{8140F8BC-E4FD-48A1-B147-CD63E9616450}", "Comb Filter");
   result.emplace_back("{277BDD6B-C1F8-4C33-90DB-F4E144FE06A6}", "Distortion");
+  result.emplace_back("{FED71DAA-343D-4B50-8891-B0474901D109}", "Multi EQ");
   if(!global) return result;
   result.emplace_back("{789D430C-9636-4FFF-8C75-11B839B9D80D}", "Delay");
   result.emplace_back("{7BB990E6-9A61-4C9F-BDAC-77D1CC260017}", "Reverb");
@@ -126,6 +134,32 @@ svf_mode_items()
   result.emplace_back("{463BAD99-6E33-4052-B6EF-31D6D781F002}", "Bell");
   result.emplace_back("{0ECA44F9-57AD-44F4-A066-60A166F4BD86}", "Low Shelf");
   result.emplace_back("{D28FA8B1-3D45-4C80-BAA3-C6735FA4A5E2}", "High Shelf");
+  return result;
+}
+
+static std::vector<list_item>
+meq_mode_items()
+{
+  std::vector<list_item> result;
+  result.emplace_back("{6B5B4553-FE42-43B5-856D-535F8EE57DD0}", "Serial");
+  result.emplace_back("{4F21519B-32CA-49C4-8C24-ED4168E03AFC}", "Parallel");
+  return result;
+}
+
+static std::vector<list_item>
+meq_flt_mode_items()
+{
+  std::vector<list_item> result;
+  result.emplace_back("{D375AAEB-461A-43B4-A09A-83D57C80EEDB}", "Off");
+  result.emplace_back("{59611761-EE2B-47B9-8400-6AA86A4D6B2E}", "LP");
+  result.emplace_back("{B5B8C797-6CA9-4822-B906-3DEECEB75237}", "HP");
+  result.emplace_back("{55DB2D11-F20E-4284-A3F7-06A66BF292F1}", "BP");
+  result.emplace_back("{E27BDD78-02A1-495D-9EDE-B3E9ABFE34F6}", "BS");
+  result.emplace_back("{05A53330-ED0A-4E33-95DD-F8A509A4DD7E}", "AP");
+  result.emplace_back("{634D6AC1-889D-4128-B1C0-8B734494E47F}", "PQ");
+  result.emplace_back("{0D6B841F-CF91-4D2D-9EFD-E12CD4427363}", "BL");
+  result.emplace_back("{CC57B060-4B05-44F6-AAFA-4CFD43E5CCC7}", "LS");
+  result.emplace_back("{393EE610-F904-4BAF-A66E-0BB0A39EA5E7}", "HS");
   return result;
 }
 
@@ -203,6 +237,9 @@ public module_engine {
   state_var_filter _dst_svf;
   oversampler<1> _dst_oversampler;
 
+  // multi-band eq
+  std::array<state_var_filter, meq_flt_count> _meq_filters;
+
   // reverb
   // https://github.com/sinshu/freeverb
   std::array<std::array<float, reverb_comb_count>, 2> _rev_comb_filter = {};
@@ -261,6 +298,16 @@ public module_engine {
   void process_dist_mode_clip_shape_xy(plugin_block& block,
     jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation, Clip clip, Shape shape, SkewX skew_x, SkewY skew_y);
   void dist_svf_next(plugin_block const& block, int oversmp_factor, double freq_hz, double res, float& left, float& right);
+
+  // https://cytomic.com/files/dsp/SvfLinearTrapOptimised2.pdf
+  // cannot template out all the filter types because 10^5 is slow compile times
+  void process_meq(plugin_block& block,
+    jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation);
+  template <int N, int MeqFltMode>
+  void process_meq_single_filter(
+    plugin_block& block, cv_audio_matrix_mixdown const& modulation,
+    jarray<float, 1> const& audio_in_l, jarray<float, 1> const& audio_in_r,
+    jarray<float, 1>& audio_out_l, jarray<float, 1>& audio_out_r);
 
 public:
   PB_PREVENT_ACCIDENTAL_COPY(fx_engine);
@@ -333,7 +380,7 @@ render_graph(
       for (int j = 0; j < shp_cycle_length; j++)
         audio_in[0][i * shp_cycle_length + j] = audio_in[1][i * shp_cycle_length + j] 
           = unipolar_to_bipolar((float)j / (shp_cycle_length - 1));
-  } else if(type == type_svf || type == type_cmb)
+  } else if(type == type_svf || type == type_cmb || type == type_meq)
   {
     // need many samples for fft to work
     frame_count = 4800;
@@ -386,14 +433,14 @@ render_graph(
 
   auto const& audio = block->state.own_audio[0][0];
 
-  // comb / svf plot FR
-  if (type == type_cmb || type == type_svf)
+  // comb / filter plot FR
+  if (type == type_cmb || type == type_svf || type == type_meq)
   {
     auto response = fft(audio[0].data());
     if (type == type_cmb)
       return graph_data(jarray<float, 1>(response), false, 1.0f, false, { "24 kHz" });
 
-    // SVF remaps over 0.8 just to look pretty
+    // SVF/MEQ remaps over 0.8 just to look pretty
     std::vector<float> response_mapped(log_remap_series_x(response, 0.8f));
     return graph_data(jarray<float, 1>(response_mapped), false, 1.0f, false, { "24 kHz" });
   }
@@ -625,12 +672,13 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
   type.gui.submenu->indices.push_back(type_svf);
   type.gui.submenu->indices.push_back(type_cmb);
   type.gui.submenu->indices.push_back(type_dst);
+  type.gui.submenu->indices.push_back(type_meq);
   if (global) type.gui.submenu->indices.push_back(type_delay);
   if (global) type.gui.submenu->indices.push_back(type_reverb);
   type.info.description = "Selects the effect type.";
 
   auto& svf_mode = result.params.emplace_back(make_param(
-    make_topo_info("{784282D2-89DB-4053-9206-E11C01F37754}", true, "SV Filter Mode", "Mode", "SVF.Mode", param_svf_mode, 1),
+    make_topo_info("{784282D2-89DB-4053-9206-E11C01F37754}", true, "SV Filter Mode", "Mode", "SVF Mode", param_svf_mode, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(svf_mode_items(), ""),
     make_param_gui_single(section_main, gui_edit_type::autofit_list, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
@@ -841,6 +889,68 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
   dist_mix.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   dist_mix.info.description = "Dry/wet mix between input and output signal.";
 
+  auto& meq_mode = result.params.emplace_back(make_param(
+    make_topo_info("{178BC16A-0AC1-435F-9972-ADF4E50393CA}", true, "Multi EQ Mode", "Mode", "MEQ Mode", param_meq_mode, 1),
+    make_param_dsp_automate_if_voice(!global), make_domain_item(meq_mode_items(), ""),
+    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 1, 0 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
+  meq_mode.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_meq; });
+  meq_mode.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_meq; });
+  meq_mode.info.description = "Selects the multi-equalizer mode.";
+  auto& meq_section = result.sections.emplace_back(make_param_section(section_meq,
+    make_topo_tag_basic("{1DF23465-C416-44DA-A318-0266B5A58217}", "Multi EQ"),
+    make_param_section_gui({ 0, 1, 2, 4 }, { { 1, 1 }, { 1, 1, 1, 1 } })));
+  meq_section.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_meq; });
+  meq_section.gui.wrap_in_container = false;
+  auto& meq_flt_mode = result.params.emplace_back(make_param(
+    make_topo_info("{AFA9AC65-FC61-4F87-8298-9274C470E159}", true, "Multi EQ Filter Mode", "Mode", "MEQ Filter Mode", param_meq_flt_mode, meq_flt_count),
+    make_param_dsp_automate_if_voice(!global), make_domain_item(meq_flt_mode_items(), "Off"),
+    make_param_gui(section_meq, gui_edit_type::autofit_list, param_layout::own_grid, { 0, 0, 2, 1 },
+      make_label_none())));
+  meq_flt_mode.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_meq; });
+  meq_flt_mode.info.description = "Multi EQ filter mode.";
+  meq_flt_mode.gui.multi_own_grid = { { 1, 1 }, { 1, 1, 1 } };
+  meq_flt_mode.gui.multi_own_grid_label = "Mode";
+  meq_flt_mode.domain.default_selector_ = [](int, int s) { 
+    if (s == 0) return "HP"; 
+    if (s == meq_flt_count - 1) return "LP"; 
+    return "BL"; };
+  auto& meq_gain = result.params.emplace_back(make_param(
+    make_topo_info("{C0FCE489-AC0C-408A-8D42-E154FD609E28}", true, "Multi EQ Gain", "Gain", "MEQ Gain", param_meq_gain, meq_flt_count),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_linear(-24, 24, 12, 1, "dB"),
+    make_param_gui(section_meq, gui_edit_type::knob, param_layout::own_grid, { 0, 3, 2, 1 },
+      make_label(gui_label_contents::drag, gui_label_align::left, gui_label_justify::near))));
+  meq_gain.gui.multi_own_grid = { { 1, 1 }, { 1, 1, 1 } };
+  meq_gain.gui.multi_own_grid_label = "Gain";
+  meq_gain.gui.bindings.enabled.bind_params({ param_type, param_meq_flt_mode }, [](auto const& vs) { return vs[0] == type_meq && meq_has_gain(vs[1]); });
+  meq_gain.info.description = "Controls filter gain for shelving filters.";
+  auto& meq_freq = result.params.emplace_back(make_param(
+    make_topo_info("{B2F07A92-51EE-4C95-9A81-DF62D2EC3D17}", true, "Multi EQ Freq", "Freq", "MEQ Freq", param_meq_freq, meq_flt_count),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_log(flt_min_freq, flt_max_freq, 1000, 1000, 0, "Hz"),
+    make_param_gui(section_meq, gui_edit_type::knob, param_layout::own_grid, { 0, 1, 2, 1 },
+      make_label(gui_label_contents::drag, gui_label_align::left, gui_label_justify::near))));
+  meq_freq.gui.bindings.enabled.bind_params({ param_type, param_meq_flt_mode }, [](auto const& vs) { return vs[0] == type_meq && vs[1] != meq_flt_mode_off; });
+  meq_freq.info.description = "Controls filter frequency.";
+  meq_freq.gui.multi_own_grid = { { 1, 1 }, { 1, 1, 1 } };
+  meq_freq.gui.multi_own_grid_label = "Freq";
+  meq_freq.domain.default_selector_ = [](int, int s) { return std::to_string(100 * std::pow(3, s)); };
+  meq_freq.domain.default_selector_ = [](int, int s) { 
+    if (s == 0) return std::string("50"); 
+    if (s == meq_flt_count - 1) return std::string("10000"); 
+    return std::to_string(250 * std::pow(4, s - 1)); };
+  auto& meq_res = result.params.emplace_back(make_param(
+    make_topo_info("{1E344731-7793-46B7-99D0-E7061515FB63}", true, "Multi EQ Reso", "Reso", "MEQ Reso", param_meq_res, meq_flt_count),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0, 0, true),
+    make_param_gui(section_meq, gui_edit_type::knob, param_layout::own_grid, { 0, 2, 2, 1 },
+      make_label(gui_label_contents::drag, gui_label_align::left, gui_label_justify::near))));
+  meq_res.gui.bindings.enabled.bind_params({ param_type, param_meq_flt_mode }, [](auto const& vs) { return vs[0] == type_meq && vs[1] != meq_flt_mode_off; });
+  meq_res.info.description = "Controls filter resonance.";
+  meq_res.gui.multi_own_grid = { { 1, 1 }, { 1, 1, 1 } };
+  meq_res.gui.multi_own_grid_label = "Reso";
+  meq_res.domain.default_selector_ = [](int, int s) {
+    if (s == 0 || s == meq_flt_count - 1) return "50";
+    return "90"; };
+
   // delay lines and reverb global only, per-voice uses too much memory
   if(!global) return result;
 
@@ -1024,6 +1134,21 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
   return result;
 }
 
+template <int SVFMode>
+static void init_svf(state_var_filter& flt, double w, double res, double gn)
+{
+  if constexpr (SVFMode == svf_mode_lpf) flt.init_lpf(w, res);
+  else if constexpr (SVFMode == svf_mode_hpf) flt.init_hpf(w, res);
+  else if constexpr (SVFMode == svf_mode_bpf) flt.init_bpf(w, res);
+  else if constexpr (SVFMode == svf_mode_bsf) flt.init_bsf(w, res);
+  else if constexpr (SVFMode == svf_mode_apf) flt.init_apf(w, res);
+  else if constexpr (SVFMode == svf_mode_peq) flt.init_peq(w, res);
+  else if constexpr (SVFMode == svf_mode_bll) flt.init_bll(w, res, gn);
+  else if constexpr (SVFMode == svf_mode_lsh) flt.init_lsh(w, res, gn);
+  else if constexpr (SVFMode == svf_mode_hsh) flt.init_hsh(w, res, gn);
+  else static_assert(false);
+}
+
 fx_engine::
 fx_engine(bool global, int sample_rate, int max_frame_count) :
 _global(global), _dly_capacity(sample_rate * dly_max_sec), 
@@ -1059,10 +1184,12 @@ fx_engine::reset(plugin_block const* block)
   _svf.clear();
   _dly_pos = 0;
   _comb_pos = 0;
-
   _dst_svf.clear();
   _dst_dc.init(block->sample_rate, 20);
   
+  for (int i = 0; i < meq_flt_count; i++)
+    _meq_filters[i].clear();
+
   auto const& block_auto = block->state.own_block_automation;
   int type = block_auto[param_type][0].step();
   if (type == type_cmb)
@@ -1120,6 +1247,7 @@ fx_engine::process(plugin_block& block,
 
   switch (type)
   {
+  case type_meq: process_meq(block, *audio_in, *modulation); break;
   case type_svf: process_svf(block, *audio_in, *modulation); break;
   case type_cmb: process_comb(block, *audio_in, *modulation); break;
   case type_delay: process_delay(block, *audio_in, *modulation); break;
@@ -1319,15 +1447,15 @@ fx_engine::process_svf_uni(plugin_block& block,
   int svf_mode = block_auto[param_svf_mode][0].step();
   switch (svf_mode)
   {
-  case svf_mode_lpf: process_svf_uni_mode<GlobalUnison>(block, audio_in, modulation, [this](double w, double res, double gn) { _svf.init_lpf(w, res); }); break;
-  case svf_mode_hpf: process_svf_uni_mode<GlobalUnison>(block, audio_in, modulation, [this](double w, double res, double gn) { _svf.init_hpf(w, res); }); break;
-  case svf_mode_bpf: process_svf_uni_mode<GlobalUnison>(block, audio_in, modulation, [this](double w, double res, double gn) { _svf.init_bpf(w, res); }); break;
-  case svf_mode_bsf: process_svf_uni_mode<GlobalUnison>(block, audio_in, modulation, [this](double w, double res, double gn) { _svf.init_bsf(w, res); }); break;
-  case svf_mode_apf: process_svf_uni_mode<GlobalUnison>(block, audio_in, modulation, [this](double w, double res, double gn) { _svf.init_apf(w, res); }); break;
-  case svf_mode_peq: process_svf_uni_mode<GlobalUnison>(block, audio_in, modulation, [this](double w, double res, double gn) { _svf.init_peq(w, res); }); break;
-  case svf_mode_bll: process_svf_uni_mode<GlobalUnison>(block, audio_in, modulation, [this](double w, double res, double gn) { _svf.init_bll(w, res, gn); }); break;
-  case svf_mode_lsh: process_svf_uni_mode<GlobalUnison>(block, audio_in, modulation, [this](double w, double res, double gn) { _svf.init_lsh(w, res, gn); }); break;
-  case svf_mode_hsh: process_svf_uni_mode<GlobalUnison>(block, audio_in, modulation, [this](double w, double res, double gn) { _svf.init_hsh(w, res, gn); }); break;
+  case svf_mode_lpf: process_svf_uni_mode<GlobalUnison>(block, audio_in, modulation, [this](double w, double res, double gn) { init_svf<svf_mode_lpf>(_svf, w, res, gn); }); break;
+  case svf_mode_hpf: process_svf_uni_mode<GlobalUnison>(block, audio_in, modulation, [this](double w, double res, double gn) { init_svf<svf_mode_hpf>(_svf, w, res, gn); }); break;
+  case svf_mode_bpf: process_svf_uni_mode<GlobalUnison>(block, audio_in, modulation, [this](double w, double res, double gn) { init_svf<svf_mode_bpf>(_svf, w, res, gn); }); break;
+  case svf_mode_bsf: process_svf_uni_mode<GlobalUnison>(block, audio_in, modulation, [this](double w, double res, double gn) { init_svf<svf_mode_bsf>(_svf, w, res, gn); }); break;
+  case svf_mode_apf: process_svf_uni_mode<GlobalUnison>(block, audio_in, modulation, [this](double w, double res, double gn) { init_svf<svf_mode_apf>(_svf, w, res, gn); }); break;
+  case svf_mode_peq: process_svf_uni_mode<GlobalUnison>(block, audio_in, modulation, [this](double w, double res, double gn) { init_svf<svf_mode_peq>(_svf, w, res, gn); }); break;
+  case svf_mode_bll: process_svf_uni_mode<GlobalUnison>(block, audio_in, modulation, [this](double w, double res, double gn) { init_svf<svf_mode_bll>(_svf, w, res, gn); }); break;
+  case svf_mode_lsh: process_svf_uni_mode<GlobalUnison>(block, audio_in, modulation, [this](double w, double res, double gn) { init_svf<svf_mode_lsh>(_svf, w, res, gn); }); break;
+  case svf_mode_hsh: process_svf_uni_mode<GlobalUnison>(block, audio_in, modulation, [this](double w, double res, double gn) { init_svf<svf_mode_hsh>(_svf, w, res, gn); }); break;
   default: assert(false); break;
   }
 }
@@ -1337,7 +1465,6 @@ fx_engine::process_svf_uni_mode(plugin_block& block,
   jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation, Init init)
 {
   double w, hz, gain, kbd;
-  double const max_res = 0.99;
   int const kbd_pivot = midi_middle_c;
   int this_module = _global ? module_gfx : module_vfx;
 
@@ -1377,10 +1504,179 @@ fx_engine::process_svf_uni_mode(plugin_block& block,
     hz *= std::pow(2.0, (kbd_trk - kbd_pivot) / 12.0 * kbd);
     hz = std::clamp(hz, flt_min_freq, flt_max_freq);
     w = pi64 * hz / block.sample_rate;
-    init(w, res_curve[f] * max_res, gain);
+    init(w, res_curve[f] * flt_max_res, gain);
     for (int c = 0; c < 2; c++)
       block.state.own_audio[0][0][c][f] = _svf.next(c, audio_in[c][f]);
   }
+}
+
+template <int N, int MeqFltMode>
+void fx_engine::process_meq_single_filter(
+  plugin_block& block, cv_audio_matrix_mixdown const& modulation,
+  jarray<float, 1> const& audio_in_l, jarray<float, 1> const& audio_in_r,
+  jarray<float, 1>& audio_out_l, jarray<float, 1>& audio_out_r)
+{
+  static_assert(MeqFltMode != meq_flt_mode_off);
+  int this_module = _global ? module_gfx : module_vfx;
+  jarray<float, 1> const& res_curve = *modulation[this_module][block.module_slot][param_meq_res][N];
+
+  auto const& freq_curve_norm = *modulation[this_module][block.module_slot][param_meq_freq][N];
+  auto& freq_curve = block.state.own_scratch[scratch_meq_freq + N];
+  block.normalized_to_raw_block<domain_type::log>(this_module, param_meq_freq, freq_curve_norm, freq_curve);
+
+  auto const& gain_curve_norm = *modulation[this_module][block.module_slot][param_meq_gain][N];
+  auto& gain_curve = block.state.own_scratch[scratch_meq_gain + N];
+  if constexpr (meq_has_gain(MeqFltMode))
+    block.normalized_to_raw_block<domain_type::linear>(this_module, param_meq_gain, gain_curve_norm, gain_curve);
+
+  for (int f = block.start_frame; f < block.end_frame; f++)
+  {
+    double res = res_curve[f];
+    double gain = gain_curve[f];
+    double hz = std::clamp((double)freq_curve[f], flt_min_freq, flt_max_freq);
+    double w = pi64 * hz / block.sample_rate;
+    init_svf<MeqFltMode - 1>(_meq_filters[N], w, res * flt_max_res, gain);
+    audio_out_l[f] = _meq_filters[N].next(0, audio_in_l[f]);
+    audio_out_r[f] = _meq_filters[N].next(1, audio_in_r[f]);
+  }
+}
+
+void
+fx_engine::process_meq(plugin_block& block,
+  jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation)
+{
+  int active_filters = 5;
+  auto const& block_auto = block.state.own_block_automation;
+  bool is_parallel = block_auto[param_meq_mode][0].step() == meq_mode_parallel;
+
+  jarray<float, 1> const* audio_in_l = &block.state.own_audio[0][0][0];
+  jarray<float, 1> const* audio_in_r = &block.state.own_audio[0][0][1];
+  jarray<float, 1>* audio_out_l = &block.state.own_audio[0][0][0];
+  jarray<float, 1>* audio_out_r = &block.state.own_audio[0][0][1];
+
+  if (is_parallel)
+  {
+    audio_in_l = &audio_in[0];
+    audio_in_r = &audio_in[1];
+    audio_out_l = &block.state.own_scratch[scratch_meq_audio_l];
+    audio_out_r = &block.state.own_scratch[scratch_meq_audio_r];
+    block.state.own_audio[0][0][0].fill(0.0f);
+    block.state.own_audio[0][0][1].fill(0.0f);
+  } else
+    for (int c = 0; c < 2; c++)
+      audio_in[c].copy_to(block.start_frame, block.end_frame, block.state.own_audio[0][0][c]);
+
+  int meq_flt_mode0 = block_auto[param_meq_flt_mode][0].step();
+  switch (meq_flt_mode0)
+  {
+  case meq_flt_mode_off: active_filters--;  break;
+  case meq_flt_mode_lpf: process_meq_single_filter<0, meq_flt_mode_lpf>(block, modulation, *audio_in_l, *audio_in_r, *audio_out_l, *audio_out_r); break;
+  case meq_flt_mode_hpf: process_meq_single_filter<0, meq_flt_mode_hpf>(block, modulation, *audio_in_l, *audio_in_r, *audio_out_l, *audio_out_r); break;
+  case meq_flt_mode_bpf: process_meq_single_filter<0, meq_flt_mode_bpf>(block, modulation, *audio_in_l, *audio_in_r, *audio_out_l, *audio_out_r); break;
+  case meq_flt_mode_bsf: process_meq_single_filter<0, meq_flt_mode_bsf>(block, modulation, *audio_in_l, *audio_in_r, *audio_out_l, *audio_out_r); break;
+  case meq_flt_mode_apf: process_meq_single_filter<0, meq_flt_mode_apf>(block, modulation, *audio_in_l, *audio_in_r, *audio_out_l, *audio_out_r); break;
+  case meq_flt_mode_peq: process_meq_single_filter<0, meq_flt_mode_peq>(block, modulation, *audio_in_l, *audio_in_r, *audio_out_l, *audio_out_r); break;
+  case meq_flt_mode_bll: process_meq_single_filter<0, meq_flt_mode_bll>(block, modulation, *audio_in_l, *audio_in_r, *audio_out_l, *audio_out_r); break;
+  case meq_flt_mode_lsh: process_meq_single_filter<0, meq_flt_mode_lsh>(block, modulation, *audio_in_l, *audio_in_r, *audio_out_l, *audio_out_r); break;
+  case meq_flt_mode_hsh: process_meq_single_filter<0, meq_flt_mode_hsh>(block, modulation, *audio_in_l, *audio_in_r, *audio_out_l, *audio_out_r); break;
+  }
+  if(is_parallel && meq_flt_mode0 != meq_flt_mode_off)
+    for (int f = block.start_frame; f < block.end_frame; f++)
+    {
+      block.state.own_audio[0][0][0][f] += (*audio_out_l)[f];
+      block.state.own_audio[0][0][1][f] += (*audio_out_r)[f];
+    }
+
+  int meq_flt_mode1 = block_auto[param_meq_flt_mode][1].step();
+  switch (meq_flt_mode1)
+  {
+  case meq_flt_mode_off: active_filters--;  break;
+  case meq_flt_mode_lpf: process_meq_single_filter<1, meq_flt_mode_lpf>(block, modulation, *audio_in_l, *audio_in_r, *audio_out_l, *audio_out_r); break;
+  case meq_flt_mode_hpf: process_meq_single_filter<1, meq_flt_mode_hpf>(block, modulation, *audio_in_l, *audio_in_r, *audio_out_l, *audio_out_r); break;
+  case meq_flt_mode_bpf: process_meq_single_filter<1, meq_flt_mode_bpf>(block, modulation, *audio_in_l, *audio_in_r, *audio_out_l, *audio_out_r); break;
+  case meq_flt_mode_bsf: process_meq_single_filter<1, meq_flt_mode_bsf>(block, modulation, *audio_in_l, *audio_in_r, *audio_out_l, *audio_out_r); break;
+  case meq_flt_mode_apf: process_meq_single_filter<1, meq_flt_mode_apf>(block, modulation, *audio_in_l, *audio_in_r, *audio_out_l, *audio_out_r); break;
+  case meq_flt_mode_peq: process_meq_single_filter<1, meq_flt_mode_peq>(block, modulation, *audio_in_l, *audio_in_r, *audio_out_l, *audio_out_r); break;
+  case meq_flt_mode_bll: process_meq_single_filter<1, meq_flt_mode_bll>(block, modulation, *audio_in_l, *audio_in_r, *audio_out_l, *audio_out_r); break;
+  case meq_flt_mode_lsh: process_meq_single_filter<1, meq_flt_mode_lsh>(block, modulation, *audio_in_l, *audio_in_r, *audio_out_l, *audio_out_r); break;
+  case meq_flt_mode_hsh: process_meq_single_filter<1, meq_flt_mode_hsh>(block, modulation, *audio_in_l, *audio_in_r, *audio_out_l, *audio_out_r); break;
+  }
+  if (is_parallel && meq_flt_mode1 != meq_flt_mode_off)
+    for (int f = block.start_frame; f < block.end_frame; f++)
+    {
+      block.state.own_audio[0][0][0][f] += (*audio_out_l)[f];
+      block.state.own_audio[0][0][1][f] += (*audio_out_r)[f];
+    }
+
+  int meq_flt_mode2 = block_auto[param_meq_flt_mode][2].step();
+  switch (meq_flt_mode2)
+  {
+  case meq_flt_mode_off: active_filters--;  break;
+  case meq_flt_mode_lpf: process_meq_single_filter<2, meq_flt_mode_lpf>(block, modulation, *audio_in_l, *audio_in_r, *audio_out_l, *audio_out_r); break;
+  case meq_flt_mode_hpf: process_meq_single_filter<2, meq_flt_mode_hpf>(block, modulation, *audio_in_l, *audio_in_r, *audio_out_l, *audio_out_r); break;
+  case meq_flt_mode_bpf: process_meq_single_filter<2, meq_flt_mode_bpf>(block, modulation, *audio_in_l, *audio_in_r, *audio_out_l, *audio_out_r); break;
+  case meq_flt_mode_bsf: process_meq_single_filter<2, meq_flt_mode_bsf>(block, modulation, *audio_in_l, *audio_in_r, *audio_out_l, *audio_out_r); break;
+  case meq_flt_mode_apf: process_meq_single_filter<2, meq_flt_mode_apf>(block, modulation, *audio_in_l, *audio_in_r, *audio_out_l, *audio_out_r); break;
+  case meq_flt_mode_peq: process_meq_single_filter<2, meq_flt_mode_peq>(block, modulation, *audio_in_l, *audio_in_r, *audio_out_l, *audio_out_r); break;
+  case meq_flt_mode_bll: process_meq_single_filter<2, meq_flt_mode_bll>(block, modulation, *audio_in_l, *audio_in_r, *audio_out_l, *audio_out_r); break;
+  case meq_flt_mode_lsh: process_meq_single_filter<2, meq_flt_mode_lsh>(block, modulation, *audio_in_l, *audio_in_r, *audio_out_l, *audio_out_r); break;
+  case meq_flt_mode_hsh: process_meq_single_filter<2, meq_flt_mode_hsh>(block, modulation, *audio_in_l, *audio_in_r, *audio_out_l, *audio_out_r); break;
+  }
+  if (is_parallel && meq_flt_mode2 != meq_flt_mode_off)
+    for (int f = block.start_frame; f < block.end_frame; f++)
+    {
+      block.state.own_audio[0][0][0][f] += (*audio_out_l)[f];
+      block.state.own_audio[0][0][1][f] += (*audio_out_r)[f];
+    }
+
+  int meq_flt_mode3 = block_auto[param_meq_flt_mode][3].step();
+  switch (meq_flt_mode3)
+  {
+  case meq_flt_mode_off: active_filters--;  break;
+  case meq_flt_mode_lpf: process_meq_single_filter<3, meq_flt_mode_lpf>(block, modulation, *audio_in_l, *audio_in_r, *audio_out_l, *audio_out_r); break;
+  case meq_flt_mode_hpf: process_meq_single_filter<3, meq_flt_mode_hpf>(block, modulation, *audio_in_l, *audio_in_r, *audio_out_l, *audio_out_r); break;
+  case meq_flt_mode_bpf: process_meq_single_filter<3, meq_flt_mode_bpf>(block, modulation, *audio_in_l, *audio_in_r, *audio_out_l, *audio_out_r); break;
+  case meq_flt_mode_bsf: process_meq_single_filter<3, meq_flt_mode_bsf>(block, modulation, *audio_in_l, *audio_in_r, *audio_out_l, *audio_out_r); break;
+  case meq_flt_mode_apf: process_meq_single_filter<3, meq_flt_mode_apf>(block, modulation, *audio_in_l, *audio_in_r, *audio_out_l, *audio_out_r); break;
+  case meq_flt_mode_peq: process_meq_single_filter<3, meq_flt_mode_peq>(block, modulation, *audio_in_l, *audio_in_r, *audio_out_l, *audio_out_r); break;
+  case meq_flt_mode_bll: process_meq_single_filter<3, meq_flt_mode_bll>(block, modulation, *audio_in_l, *audio_in_r, *audio_out_l, *audio_out_r); break;
+  case meq_flt_mode_lsh: process_meq_single_filter<3, meq_flt_mode_lsh>(block, modulation, *audio_in_l, *audio_in_r, *audio_out_l, *audio_out_r); break;
+  case meq_flt_mode_hsh: process_meq_single_filter<3, meq_flt_mode_hsh>(block, modulation, *audio_in_l, *audio_in_r, *audio_out_l, *audio_out_r); break;
+  }
+  if (is_parallel && meq_flt_mode3 != meq_flt_mode_off)
+    for (int f = block.start_frame; f < block.end_frame; f++)
+    {
+      block.state.own_audio[0][0][0][f] += (*audio_out_l)[f];
+      block.state.own_audio[0][0][1][f] += (*audio_out_r)[f];
+    }
+
+  int meq_flt_mode4 = block_auto[param_meq_flt_mode][4].step();
+  switch (meq_flt_mode4)
+  {
+  case meq_flt_mode_off: active_filters--;  break;
+  case meq_flt_mode_lpf: process_meq_single_filter<4, meq_flt_mode_lpf>(block, modulation, *audio_in_l, *audio_in_r, *audio_out_l, *audio_out_r); break;
+  case meq_flt_mode_hpf: process_meq_single_filter<4, meq_flt_mode_hpf>(block, modulation, *audio_in_l, *audio_in_r, *audio_out_l, *audio_out_r); break;
+  case meq_flt_mode_bpf: process_meq_single_filter<4, meq_flt_mode_bpf>(block, modulation, *audio_in_l, *audio_in_r, *audio_out_l, *audio_out_r); break;
+  case meq_flt_mode_bsf: process_meq_single_filter<4, meq_flt_mode_bsf>(block, modulation, *audio_in_l, *audio_in_r, *audio_out_l, *audio_out_r); break;
+  case meq_flt_mode_apf: process_meq_single_filter<4, meq_flt_mode_apf>(block, modulation, *audio_in_l, *audio_in_r, *audio_out_l, *audio_out_r); break;
+  case meq_flt_mode_peq: process_meq_single_filter<4, meq_flt_mode_peq>(block, modulation, *audio_in_l, *audio_in_r, *audio_out_l, *audio_out_r); break;
+  case meq_flt_mode_bll: process_meq_single_filter<4, meq_flt_mode_bll>(block, modulation, *audio_in_l, *audio_in_r, *audio_out_l, *audio_out_r); break;
+  case meq_flt_mode_lsh: process_meq_single_filter<4, meq_flt_mode_lsh>(block, modulation, *audio_in_l, *audio_in_r, *audio_out_l, *audio_out_r); break;
+  case meq_flt_mode_hsh: process_meq_single_filter<4, meq_flt_mode_hsh>(block, modulation, *audio_in_l, *audio_in_r, *audio_out_l, *audio_out_r); break;
+  }
+  if (is_parallel && meq_flt_mode4 != meq_flt_mode_off)
+    for (int f = block.start_frame; f < block.end_frame; f++)
+    {
+      block.state.own_audio[0][0][0][f] += (*audio_out_l)[f];
+      block.state.own_audio[0][0][1][f] += (*audio_out_r)[f];
+    }
+
+  if(is_parallel && active_filters > 1)
+    for (int f = block.start_frame; f < block.end_frame; f++)
+    {
+      block.state.own_audio[0][0][0][f] /= active_filters;
+      block.state.own_audio[0][0][1][f] /= active_filters;
+    }
 }
 
 void
