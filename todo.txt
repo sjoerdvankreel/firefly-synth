@@ -17,10 +17,10 @@ on release:
 11 make a github release
 12 update kvr
 
-V1.8.4:
+V1.8.6:
 - fix the undo history for tuning mode
 
-1.8.4 beta 1
+1.8.6 beta 1
 V split smoothing params to separate module
 V + do the conversion
 V pretty up the master module
@@ -43,7 +43,7 @@ V tuning -> retuning. reserve tuning for interpolation mode
 V figure out how to interpolate/modulate
 V test the heck out of the clap threadpool
 
-v1.8.4 beta 2
+v1.8.6 beta 2
 V deal with unmapped keys
 V rename note-on/continuous
 V disable tunmode when timing is off
@@ -57,7 +57,7 @@ V implement continuous-before-mod
 V check if fx still works without retuning support
 V better defaults
 
-v1.8.4 beta 3
+v1.8.6 beta 3
 V build on ubuntu 18
 V show mts status in output section
 V what makes sense for fx ? do mts or not ? and if not, be sure its disabled
@@ -74,7 +74,7 @@ V retest smoothing
 V mention the breaking change
 V fix retuning for mono
 
-v1.8.4 beta 4
+v1.8.6 beta 4
 V update the docs for micro
 V wrong default value (gui would show ok but would be not ok)
 V make tuning mode work with undo/redo
@@ -87,7 +87,7 @@ V test lin
 V test mac
 V not forget to install the dynlib on mac/lin
 
-V1.8.4 beta 5/final
+V1.8.6 beta 5/final
 - do the credits
 - + do the full release (screenshots, kvr, etc)
 
