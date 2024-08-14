@@ -27,10 +27,10 @@ V do the multi-eq thing
 V retest the svfs 
 V fix the mod grids
 V fix the meq graphs for db vertical
+V make osc unison phase a mod target
 - make hckick a preset
 - do new hckick demo with meq
 - make osc phase a mod target
-- make osc unison phase a mod target
 - drop the manual releases, go with GH only, find a place for the mac warning text
 
 wishlist:

@@ -115,11 +115,14 @@ public module_engine {
 
   // kps
   int _kps_max_length = {};
-  bool _kps_initialized = false;
+  bool _first_process_call = true;
   std::array<int, max_osc_unison_voices> _kps_freqs = {};
   std::array<int, max_osc_unison_voices> _kps_lengths = {};
   std::array<int, max_osc_unison_voices> _kps_positions = {};
   std::array<std::vector<float>, max_osc_unison_voices> _kps_lines = {};
+
+  // needs modulation
+  void real_reset(plugin_block& block, cv_audio_matrix_mixdown const* modulation);
 
 public:
   PB_PREVENT_ACCIDENTAL_COPY(osc_engine);
@@ -138,7 +141,6 @@ private:
   template <bool AutoFdbk>
   float generate_kps(int voice, float sr, float freq, float fdbk, float stretch, float mid_freq);
 
-  void init_kps(plugin_block& block, cv_audio_matrix_mixdown const* modulation);
   template <bool Graph> void process_dsf(plugin_block& block, cv_audio_matrix_mixdown const* modulation);
   template <bool Graph> void process_basic(plugin_block& block, cv_audio_matrix_mixdown const* modulation);
   template <bool Graph> void process_static(plugin_block& block, cv_audio_matrix_mixdown const* modulation);
@@ -382,7 +384,7 @@ osc_topo(int section, gui_position const& pos)
   uni_dtn.info.description = "Detune unison voices. Only applicable to Basic and DSF generators.";
   auto& uni_phase = result.params.emplace_back(make_param(
     make_topo_info("{8F1098B6-64F9-407E-A8A3-8C3637D59A26}", true, "Unison Phase", "Phs", "Uni Phs", param_uni_phase, 1),
-    make_param_dsp_voice(param_automate::automate), make_domain_percentage_identity(0.5, 0, true),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
     make_param_gui_single(section_uni, gui_edit_type::knob, { 1, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   uni_phase.gui.bindings.enabled.bind_params({ param_type, param_uni_voices }, [](auto const& vs) { return can_do_phase(vs[0]) && vs[1] > 1; });
@@ -683,10 +685,27 @@ _oversampler(max_frame_count)
 void
 osc_engine::reset(plugin_block const* block)
 {
-  _kps_initialized = false;
-  auto const& block_auto = block->state.own_block_automation;
-  float uni_phase = block_auto[param_uni_phase][0].real();
+  // publish the oversampler ptrs
+  // note: it is important to do this during reset() rather than process()
+  // because we have a circular dependency osc<>osc_fm
+  // and the call order is reset_osc, reset_osc_fm, process_osc, process_osc_fm
+  // luckily the fm matrix only needs the oversampler ptrs in the process() call
+  *block->state.own_context = &_context;
+  _first_process_call = true;
+}
+
+// Cant be in the reset call because we need access to modulation.
+void
+osc_engine::real_reset(plugin_block& block, cv_audio_matrix_mixdown const* modulation)
+{
+  assert(_first_process_call);
+
+  auto const& block_auto = block.state.own_block_automation;
   int uni_voices = block_auto[param_uni_voices][0].step();
+
+  // Not a continuous param but we fake it this way so it can participate in modulation.
+  float uni_phase = (*(*modulation)[module_osc][block.module_slot][param_uni_phase][0])[0];
+
   for (int v = 0; v < uni_voices; v++)
   {
     _static_svfs[v].clear();
@@ -695,16 +714,16 @@ osc_engine::reset(plugin_block const* block)
     _static_noises[v].reset(block_auto[param_rand_seed][0].step() + v);
 
     // Block below 20hz, certain param combinations generate very low frequency content
-    _random_dcs[v].init(block->sample_rate, 20);
+    _random_dcs[v].init(block.sample_rate, 20);
 
     // Adjust phase for osc unison.
     _ref_phases[v] = (float)v / uni_voices * (uni_voices == 1 ? 0.0f : uni_phase);
 
     // Adjust phase for global unison.
-    if (block->voice->state.sub_voice_count > 1)
+    if (block.voice->state.sub_voice_count > 1)
     {
-      float glob_uni_phs_offset = block->state.all_block_automation[module_master_in][0][master_in_param_glob_uni_osc_phase][0].real();
-      float voice_pos = (float)block->voice->state.sub_voice_index / (block->voice->state.sub_voice_count - 1.0f);
+      float glob_uni_phs_offset = block.state.all_block_automation[module_master_in][0][master_in_param_glob_uni_osc_phase][0].real();
+      float voice_pos = (float)block.voice->state.sub_voice_index / (block.voice->state.sub_voice_count - 1.0f);
       _ref_phases[v] += voice_pos * glob_uni_phs_offset;
       _ref_phases[v] -= (int)_ref_phases[v];
     }
@@ -714,21 +733,8 @@ osc_engine::reset(plugin_block const* block)
     _unsync_samples[v] = 0;
   }
 
-  // publish the oversampler ptrs
-  // note: it is important to do this during reset() rather than process()
-  // because we have a circular dependency osc<>osc_fm
-  // and the call order is reset_osc, reset_osc_fm, process_osc, process_osc_fm
-  // luckily the fm matrix only needs the oversampler ptrs in the process() call
-  *block->state.own_context = &_context;
-}
-
-// Cant be in the reset call because we need access to modulation.
-void
-osc_engine::init_kps(plugin_block& block, cv_audio_matrix_mixdown const* modulation)
-{
-  assert(!_kps_initialized);
-
-  auto const& block_auto = block.state.own_block_automation;
+  int type = block_auto[param_type][0].step();
+  if (!is_kps(type)) return;
 
   // Initial kps excite using static noise + res svf filter.
   double const kps_max_res = 0.99;
@@ -1035,13 +1041,9 @@ osc_engine::process_unison(plugin_block& block, cv_audio_matrix_mixdown const* m
   }
 
   // Fill the initial buffers.
-  if constexpr (KPS)
-    if (!_kps_initialized)
-    {
-      init_kps(block, modulation);
-      _kps_initialized = true;
-    }
-
+  if (_first_process_call)
+    real_reset(block, modulation);
+  _first_process_call = false;
   assert(can_do_phase(type) || oversmp_stages == 0);
 
   // dont oversample for graphs

@@ -1,3 +1,8 @@
+?, ? - V1.8.5.
+
+- Add multiband EQ.
+- Make osc unison phase a modulatable parameter.
+
 ### July 17, 2024 - V1.8.3.
 
 - Add drag-and-drop to mod matrix support.
