@@ -29,11 +29,11 @@ V fix the mod grids
 V fix the meq graphs for db vertical
 V make osc unison phase a mod target
 V make osc phase a mod target
-- document osc phase mod target
 - make hckick a preset
 - do new hckick demo with meq
 - drop the manual releases, go with GH only, find a place for the mac warning text
 - cherry pick the build stuff from 1.8.4
+- drop the manual from kvr
 
 wishlist:
 DSF falloff to the left

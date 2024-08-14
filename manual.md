@@ -120,10 +120,10 @@ See the parameter reference document for details.
 - Up to 64 voices in polyphonic mode. Global unison voices also count towards this limit.
 - Global unison with pitch, lfo and envelope detuning, stereo spread and osc/lfo phase offset.
 - Per-voice DAHDSR envelopes with tempo syncing, linear and exponential slopes and 3 envelope modes.
-- Oscillators with classic waveforms, DSF synthesis, 2 Karplus-Strong modes, noise generator, unison and hard-sync.
 - Per-voice and global LFO's with tempo syncing, one-shot mode, various waveforms and horizontal and vertical skewing.
 - Per-voice random as mod source + per-voice random mod source as seed-value for per-voice random lfo generators.
 - Per-voice and global FX modules with state variable filter, comb filter, distortion and (global only) reverb, feedback- and multitap delay.
+- Oscillators with classic waveforms, DSF synthesis, 2 Karplus-Strong modes, noise generator, unison and hard-sync, pitch and phase modulation.
 
 ## Routing overview
 ![Routing overview](static/routing.png)
