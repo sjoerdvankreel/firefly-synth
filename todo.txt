@@ -20,21 +20,6 @@ on release:
 V1.8.4:
 - fix the undo history for tuning mode
 
-V1.8.5:
-V check the vfx target dropdown enabled
-V make slot 1 enabled
-V do the multi-eq thing
-V retest the svfs 
-V fix the mod grids
-V fix the meq graphs for db vertical
-V make osc unison phase a mod target
-V make osc phase a mod target
-V cherry pick the build stuff from 1.8.4
-V make hckick a preset
-V do new hckick demo with meq
-V drop the manual releases, go with GH only, find a place for the mac warning text
-- drop the manual from kvr
-
 wishlist:
 green-on-white UI
 DSF falloff to the left
