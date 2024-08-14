@@ -32,7 +32,7 @@ V make osc phase a mod target
 V cherry pick the build stuff from 1.8.4
 V make hckick a preset
 V do new hckick demo with meq
-- drop the manual releases, go with GH only, find a place for the mac warning text
+V drop the manual releases, go with GH only, find a place for the mac warning text
 - drop the manual from kvr
 
 wishlist:
