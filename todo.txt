@@ -29,6 +29,7 @@ V fix the meq graphs for db vertical
 - make osc phase a mod target
 - make osc unison phase a mod target
 - fix the undo history for tuning mode
+- drop the manual releases, go with GH only, find a place for the mac warning text
 
 wishlist:
 DSF falloff to the left
