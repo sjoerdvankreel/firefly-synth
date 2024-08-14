@@ -143,6 +143,16 @@ public:
   void any_state_changed(int index, plain_value plain) override;
 };
 
+// load/save/init/clear patch
+class patch_menu :
+public text_button
+{
+  plugin_gui* const _gui;
+public:
+  void clicked() override;
+  patch_menu(plugin_gui* gui);
+};
+
 // binds factory preset to extra_state
 class preset_button:
 public menu_button,
@@ -153,10 +163,10 @@ public extra_state_listener
 public:
   preset_button(plugin_gui* gui);
   void extra_state_changed() override;
-  ~preset_button() { _gui->extra_state_()->remove_listener(factory_preset_key, this); }
+  ~preset_button() { _gui->extra_state_()->remove_listener(extra_state_factory_preset_key, this); }
 };
 
-// binds theme selection preset to user config
+// binds theme preset to user config
 class theme_button:
 public menu_button
 {
@@ -164,6 +174,18 @@ public menu_button
   std::vector<std::string> _themes = {};
 public:
   theme_button(plugin_gui* gui);
+};
+
+// binds per-instance tuning mode selection to user config
+class tuning_mode_button :
+public menu_button,
+public state_listener
+{
+  plugin_gui* const _gui;
+public:
+  ~tuning_mode_button();
+  tuning_mode_button(plugin_gui* gui);
+  void state_changed(int index, plain_value plain) override { set_selected_index(plain.step()); }
 };
 
 // binding_component that is additionally bound to a single parameter value

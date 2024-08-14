@@ -22,7 +22,7 @@ enum class gui_label_justify { near, far, center };
 enum class gui_label_align { top, bottom, left, right };
 enum class gui_label_contents { none, name, value, drag, no_drag }; // no drag = none, but be explicit about it
 enum class gui_label_edit_cell_split { no_split, horizontal, vertical };
-enum class gui_edit_type { none, toggle, list, autofit_list, knob, hslider, vslider, output, output_module_name };
+enum class gui_edit_type { none, toggle, list, autofit_list, knob, hslider, vslider, output_label_left, output_label_center, output_toggle, output_module_name };
 
 typedef std::function<bool(int module_slot)>
 gui_slot_binding_selector;
@@ -70,6 +70,9 @@ struct topo_info final {
   int index;
   int slot_count;
   topo_tag tag;
+
+  // if this is set, value doesn't get copied into the plug state on patch load
+  bool is_per_instance = false;
 
   // for reference generator
   std::string description;

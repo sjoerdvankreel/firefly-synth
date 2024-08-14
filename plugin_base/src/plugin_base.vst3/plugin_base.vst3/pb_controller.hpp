@@ -38,11 +38,12 @@ public Steinberg::Vst::EditControllerEx1
   // a reentrancy flag
   bool _inside_set_param_normalized = false;
 
+  void init_tuning_from_extra_state();
   void param_state_changed(int index, plain_value plain);
 
 public: 
+  ~pb_controller();
   pb_controller(plugin_topo const* topo);
-  ~pb_controller() { _gui_state.remove_any_listener(this); }
 
   OBJ_METHODS(pb_controller, EditControllerEx1)
   DEFINE_INTERFACES

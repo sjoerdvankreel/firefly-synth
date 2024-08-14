@@ -7,6 +7,7 @@
 #include <plugin_base.clap/utility.hpp>
 
 #include <clap/helpers/plugin.hh>
+#include <Client/libMTSClient.h>
 #include <readerwriterqueue.h>
 
 #include <memory>
@@ -26,7 +27,10 @@ public gui_param_listener
 {
   typedef moodycamel::ReaderWriterQueue<sync_event, default_q_size> event_queue;
 
-  // needs to be first, everyone else needs it
+  // MTS-ESP support
+  MTSClient* _mts_client = {};
+
+  // needs to be early, everyone else needs it
   std::unique_ptr<plugin_desc> _desc;
   plugin_splice_engine _splice_engine;
   extra_state _extra_state;
@@ -49,6 +53,8 @@ public gui_param_listener
   void push_to_gui(int index, clap_value clap);
   void push_to_audio(int index, plain_value plain);
   void push_to_audio(int index, sync_event_type type);
+
+  void init_tuning_from_extra_state();
   void process_gui_to_audio_events(clap_output_events_t const* out);
 
 public:

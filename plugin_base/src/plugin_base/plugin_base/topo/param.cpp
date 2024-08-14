@@ -60,7 +60,10 @@ param_topo_gui::validate(plugin_topo const& plugin, module_topo const& module, p
   assert(!item_enabled.is_bound() || is_list());
   bindings.validate(plugin, module, param.info.slot_count);
   position.validate(module.sections[section].gui.dimension);
-  assert((param.gui.edit_type == gui_edit_type::output) == (param.dsp.direction == param_direction::output));
+  if (param.dsp.direction == param_direction::output)
+    assert(param.gui.edit_type >= gui_edit_type::output_label_left);
+  else
+    assert(param.gui.edit_type < gui_edit_type::output_label_left);
 
   if (submenu.get())
     submenu->validate();

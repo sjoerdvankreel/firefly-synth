@@ -70,7 +70,8 @@ public state_converter
   plugin_desc const* const _desc;
 public:
   env_state_converter(plugin_desc const* const desc) : _desc(desc) {}
-  void post_process(load_handler const& handler, plugin_state& new_state) override;
+  void post_process_always(load_handler const& handler, plugin_state& new_state) override {}
+  void post_process_existing(load_handler const& handler, plugin_state& new_state) override;
 
   bool handle_invalid_param_value(
     std::string const& new_module_id, int new_module_slot,
@@ -246,7 +247,7 @@ env_state_converter::handle_invalid_param_value(
 }
 
 void
-env_state_converter::post_process(load_handler const& handler, plugin_state& new_state)
+env_state_converter::post_process_existing(load_handler const& handler, plugin_state& new_state)
 {
   std::string old_value;
   auto const& modules = new_state.desc().plugin->modules;
@@ -724,7 +725,7 @@ void env_engine::process_mono_type_sync_trigger_mode(plugin_block& block, cv_cv_
       // the last note in a monophonic section
       if constexpr (Trigger != trigger_legato)
       {
-        if(block.state.mono_note_stream[f].note_on)
+        if(block.state.mono_note_stream[f].event_type == mono_note_stream_event::on)
         {
           if(_stage < env_stage::release)
           {

@@ -20,8 +20,84 @@ on release:
 V1.8.4:
 - fix the undo history for tuning mode
 
+1.8.4 beta 1
+V split smoothing params to separate module
+V + do the conversion
+V pretty up the master module
+V make it a settings tab
+V and hopefully get the nfr
+V drop mstin params
+V fix the stylesheets
+V fix the tab width
+V do mts mode in glbal settings section
+V fix the fx gui
+V do off/block/voice tuning
+V do NOT use the tuning table when "Off", or - make sure it gives the same results with lerp
+V deal with monophonic modes
+V check the alignment 
+V rename note_to_freq=>no_tuning, select version based on template params
+V ask oli about the possibility to do 1 IPC call for the entire tuning table
+V fix the tuning table at block start, copy over the whole thing at voice start, before threadpool kicks in -- and link it 1:1 to tuning mode.
+V do NOT requery tuning mode anywhere else except where the actual table is filled !
+V tuning -> retuning. reserve tuning for interpolation mode
+V figure out how to interpolate/modulate
+V test the heck out of the clap threadpool
+
+v1.8.4 beta 2
+V deal with unmapped keys
+V rename note-on/continuous
+V disable tunmode when timing is off
+V check andreyas suggestion for porta gliding bug ==> BREAKING CHANGE
+V redo on-voice-after-mod
+V do something with mts_hasmaster
+V do pitch-to-semi + before/after mod
+V yes or no on per-channel retuning ? => yes
+V deal with _mono_note_stream
+V implement continuous-before-mod
+V check if fx still works without retuning support
+V better defaults
+
+v1.8.4 beta 3
+V build on ubuntu 18
+V show mts status in output section
+V what makes sense for fx ? do mts or not ? and if not, be sure its disabled
+V retest all tuning
+V reload tuning button + do the warning ==> no warning, just make it work within sandbox
+V drop the make_load_patch etc
+V do the global-settings-thing
+V dont do the param warnings when in release mode
+V todo drop the global state and evt handlers
+V global mode not always picked up
+V disable tuning button for fx
+V do per instance
+V retest smoothing
+V mention the breaking change
+V fix retuning for mono
+
+v1.8.4 beta 4
+V update the docs for micro
+V wrong default value (gui would show ok but would be not ok)
+V make tuning mode work with undo/redo
+V fix the todos
+V refix all the patches
+V recheck the mts demo tunes
+V fix the renoise demos
+V test win
+V test lin
+V test mac
+V not forget to install the dynlib on mac/lin
+
+V1.8.4 beta 5/final
+- do the credits
+- + do the full release (screenshots, kvr, etc)
+
+- autobuilds:
+- ask paul
+- integrate https://github.com/surge-synthesizer/monique-monosynth/blob/main/.github/workflows/build-pr.yml
+
 wishlist:
 green-on-white UI
+filter microtuning
 DSF falloff to the left
 clap polyphonic modulation
 full-blown renoise support

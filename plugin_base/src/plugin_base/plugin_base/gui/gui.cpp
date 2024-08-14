@@ -212,7 +212,7 @@ gui_undo_listener::mouseUp(MouseEvent const& event)
       _gui->gui_state()->redo(result - 1001);
     else if (2001 == result)
     {
-      auto state = plugin_io_save_state(*_gui->gui_state());
+      auto state = plugin_io_save_patch_state(*_gui->gui_state());
       state.push_back('\0');
       juce::SystemClipboard::copyTextToClipboard(juce::String(state.data()));
     }
@@ -221,11 +221,11 @@ gui_undo_listener::mouseUp(MouseEvent const& event)
       plugin_state new_state(&_gui->gui_state()->desc(), false);
       auto clip_contents = juce::SystemClipboard::getTextFromClipboard().toStdString();
       std::vector<char> clip_data(clip_contents.begin(), clip_contents.end());
-      auto load_result = plugin_io_load_state(clip_data, new_state);
+      auto load_result = plugin_io_load_patch_state(clip_data, new_state);
       if (load_result.ok() && !load_result.warnings.size())
       {
         _gui->gui_state()->begin_undo_region();
-        _gui->gui_state()->copy_from(new_state.state());
+        _gui->gui_state()->copy_from(new_state.state(), true);
         _gui->gui_state()->end_undo_region("Paste", "Patch");
       }
       else
@@ -314,7 +314,7 @@ std::set<std::string>
 gui_extra_state_keyset(plugin_topo const& topo)
 {
   std::set<std::string> result = {};
-  result.insert(factory_preset_key);
+  result.insert(extra_state_factory_preset_key);
   for (int i = 0; i < topo.modules.size(); i++)
     if (topo.modules[i].info.slot_count > 1)
       result.insert(topo.modules[i].info.tag.id + "/" + extra_state_tab_index);
@@ -340,7 +340,7 @@ _gui_state(gui_state), _undo_listener(this), _extra_state(extra_state)
   setOpaque(true);
   addMouseListener(&_undo_listener, true);
   auto const& topo = *gui_state->desc().plugin;
-  theme_changed(user_io_load_list(topo, user_io::base, user_state_theme_key, topo.gui.default_theme, gui_state->desc().themes()));
+  theme_changed(user_io_load_list(topo.vendor, topo.full_name, user_io::base, user_state_theme_key, topo.gui.default_theme, gui_state->desc().themes()));
 }
 
 void
@@ -385,7 +385,7 @@ plugin_gui::theme_changed(std::string const& theme_name)
   int default_width = _lnf->global_settings().get_default_width(is_fx);
   float ratio = _lnf->global_settings().get_aspect_ratio_height(is_fx) / (float)_lnf->global_settings().get_aspect_ratio_width(is_fx);
   getChildComponent(0)->setSize(default_width, default_width * ratio);
-  float user_scale = user_io_load_num(topo, user_io::base, user_state_scale_key, 1.0,
+  float user_scale = user_io_load_num(topo.vendor, topo.full_name, user_io::base, user_state_scale_key, 1.0,
     _lnf->global_settings().min_scale, _lnf->global_settings().max_scale);
   float w = default_width * user_scale * _system_dpi_scale;
   setSize(w, w * ratio);
@@ -547,10 +547,11 @@ void
 plugin_gui::resized()
 {
   float w = getLocalBounds().getWidth();
+  auto const& topo = *_gui_state->desc().plugin;
   bool is_fx = _gui_state->desc().plugin->type == plugin_type::fx;
   float user_scale = (w / _lnf->global_settings().get_default_width(is_fx)) / _system_dpi_scale;
   getChildComponent(0)->setTransform(AffineTransform::scale(user_scale * _system_dpi_scale));
-  user_io_save_num(*_gui_state->desc().plugin, user_io::base, user_state_scale_key, user_scale);
+  user_io_save_num(topo.vendor, topo.full_name, user_io::base, user_state_scale_key, user_scale);
 }
 
 graph_engine* 
@@ -596,7 +597,7 @@ plugin_gui::reloaded()
   bool is_fx = _gui_state->desc().plugin->type == plugin_type::fx;
   int default_width = settings.get_default_width(is_fx);
   float ratio = settings.get_aspect_ratio_height(is_fx) / (float)settings.get_aspect_ratio_width(is_fx);
-  float user_scale = user_io_load_num(topo, user_io::base, user_state_scale_key, 1.0,
+  float user_scale = user_io_load_num(topo.vendor, topo.full_name, user_io::base, user_state_scale_key, 1.0,
     settings.min_scale, settings.max_scale);
   float w = default_width * user_scale * _system_dpi_scale;
   setSize(w, (int)(w * ratio));
@@ -672,30 +673,32 @@ Component&
 plugin_gui::make_modules(module_desc const* slots)
 {
   auto const& topo = *slots[0].module;
-  if (!topo.gui.tabbed)
-  {
-    int index = topo.info.index;
-    auto const& tag = topo.info.tag;
-    auto& result = make_tab_component(tag.id, tag.display_name, index, false, slots);
-    for (int i = 0; i < topo.info.slot_count; i++)
-      add_component_tab(result, make_param_sections(slots[i]), slots[i].info.global, std::to_string(i + 1));
-    if (topo.info.slot_count > 1)
-      init_multi_tab_component(result, tag.id, index, -1);
-    return result;
-  }
-  else
+
+  // case tabbed param sections within single module or
+  // case single-slot module which doesnt need a tab header
+  if (topo.gui.param_sections_tabbed || !topo.gui.show_tab_header)
   {
     // tabbed param sections in multi-slot modules not supported
     assert(topo.info.slot_count == 1);
     return make_param_sections(slots[0]);
   }
+
+  // case the module itself is tabbed (osc 1 2 3 etc)
+  int index = topo.info.index;
+  auto const& tag = topo.info.tag;
+  auto& result = make_tab_component(tag.id, tag.display_name, index, false, slots);
+  for (int i = 0; i < topo.info.slot_count; i++)
+    add_component_tab(result, make_param_sections(slots[i]), slots[i].info.global, std::to_string(i + 1));
+  if (topo.info.slot_count > 1)
+    init_multi_tab_component(result, tag.id, index, -1);
+  return result;
 }
 
 Component&
 plugin_gui::make_param_sections(module_desc const& module)
 {
   auto const& topo = *module.module;
-  if (!topo.gui.tabbed)
+  if (!topo.gui.param_sections_tabbed)
   {
     auto& result = make_component<grid_component>(topo.gui.dimension, margin_vsection, 0, topo.gui.autofit_row, topo.gui.autofit_column);
     for (int s = 0; s < topo.sections.size(); s++)
@@ -948,14 +951,24 @@ Component&
 plugin_gui::make_param_editor(module_desc const& module, param_desc const& param)
 {
   auto colors = _lnf->module_gui_colors(module.module->info.tag.full_name);
-  if(param.param->gui.edit_type == gui_edit_type::output)
+  auto edit_type = param.param->gui.edit_type;
+  if(edit_type == gui_edit_type::output_label_left || edit_type == gui_edit_type::output_label_center)
   {
     auto& result = make_param_label(module, param, gui_label_contents::value);
+    dynamic_cast<Label&>(result).setJustificationType(
+      edit_type == gui_edit_type::output_label_left? Justification::centredLeft: Justification::centred);
     result.setColour(Label::ColourIds::textColourId, colors.control_text);
     return result;
   }
 
-  if (param.param->gui.edit_type == gui_edit_type::output_module_name)
+  if (edit_type == gui_edit_type::output_toggle)
+  {
+    auto& result = make_component<param_toggle_button>(this, &module, &param, _module_lnfs[module.module->info.index].get());
+    result.setEnabled(false);
+    return result;
+  }
+
+  if (edit_type == gui_edit_type::output_module_name)
   {
     auto& result = make_component<module_name_label>(this, &module, &param, _module_lnfs[module.module->info.index].get());
     result.setColour(Label::ColourIds::textColourId, colors.control_text);
@@ -963,7 +976,7 @@ plugin_gui::make_param_editor(module_desc const& module, param_desc const& param
   }
 
   Component* result = nullptr;
-  switch (param.param->gui.edit_type)
+  switch (edit_type)
   {
   case gui_edit_type::knob:
   case gui_edit_type::hslider:
@@ -1022,42 +1035,6 @@ plugin_gui::make_param_label_edit(module_desc const& module, param_desc const& p
   return result;
 }
 
-Component&
-plugin_gui::make_init_button()
-{
-  auto& result = make_component<text_button>();
-  result.setButtonText("Init");
-  result.onClick = [this] { init_patch(); };
-  return result;
-}
-
-Component&
-plugin_gui::make_clear_button()
-{
-  auto& result = make_component<text_button>();
-  result.setButtonText("Clear");
-  result.onClick = [this] { clear_patch(); };
-  return result;
-}
-
-Component&
-plugin_gui::make_load_button()
-{
-  auto& result = make_component<text_button>();
-  result.setButtonText("Load");
-  result.onClick = [this] { load_patch(); };
-  return result;
-}
-
-Component&
-plugin_gui::make_save_button()
-{
-  auto& result = make_component<text_button>();
-  result.setButtonText("Save");
-  result.onClick = [this] { save_patch(); };
-  return result;
-}
-
 void 
 plugin_gui::init_patch()
 {
@@ -1069,7 +1046,7 @@ plugin_gui::init_patch()
     {
       _extra_state->clear();
       _gui_state->begin_undo_region();
-      _gui_state->init(state_init_type::default_);
+      _gui_state->init(state_init_type::default_, true);
       fire_state_loaded();
       _gui_state->end_undo_region("Init", "Patch");
     }
@@ -1087,7 +1064,7 @@ plugin_gui::clear_patch()
     {
       _extra_state->clear();
       _gui_state->begin_undo_region();
-      _gui_state->init(state_init_type::minimal);
+      _gui_state->init(state_init_type::minimal, true);
       fire_state_loaded();
       _gui_state->end_undo_region("Clear", "Patch");
     }
@@ -1104,7 +1081,7 @@ plugin_gui::save_patch()
     auto path = chooser.getResult().getFullPathName();
     delete& chooser;
     if (path.length() == 0) return;
-    plugin_io_save_file_all(path.toStdString(), *_gui_state, *_extra_state);
+    plugin_io_save_file_all_state(path.toStdString(), *_gui_state, *_extra_state);
   });
 }
 
@@ -1128,7 +1105,7 @@ plugin_gui::load_patch(std::string const& path, bool preset)
   PB_LOG_FUNC_ENTRY_EXIT();  
   _gui_state->begin_undo_region();
   auto icon = MessageBoxIconType::WarningIcon;
-  auto result = plugin_io_load_file_all(path, *_gui_state, *_extra_state);
+  auto result = plugin_io_load_file_all_state(path, *_gui_state, *_extra_state);
   if (result.error.size())
   {
     auto options = MessageBoxOptions::makeOptionsOk(icon, "Error", result.error, String(), this);
