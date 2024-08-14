@@ -17,6 +17,9 @@ on release:
 11 make a github release
 12 update kvr
 
+V1.8.4:
+- fix the undo history for tuning mode
+
 V1.8.5:
 V check the vfx target dropdown enabled
 V make slot 1 enabled
@@ -28,7 +31,6 @@ V fix the meq graphs for db vertical
 - do new hckick demo with meq
 - make osc phase a mod target
 - make osc unison phase a mod target
-- fix the undo history for tuning mode
 - drop the manual releases, go with GH only, find a place for the mac warning text
 
 wishlist:
