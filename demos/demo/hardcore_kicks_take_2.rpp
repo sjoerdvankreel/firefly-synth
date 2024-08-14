@@ -1,4 +1,4 @@
-<REAPER_PROJECT 0.1 "7.16/win64" 1723659759
+<REAPER_PROJECT 0.1 "7.16/win64" 1723659882
   <NOTES 0 2
   >
   RIPPLE 0
@@ -121,7 +121,7 @@
     MAINSEND 1 0
     <FXCHAIN
       WNDRECT 290 213 1520 780
-      SHOW 1
+      SHOW 0
       LASTSEL 0
       DOCKED 0
       BYPASS 0 0 0
@@ -4015,11 +4015,15 @@
         E 0 90 30 7f
         E 960 80 30 00
         E 0 90 30 7f
-        E 480 80 30 00
+        E 960 80 30 00
+        E 0 90 30 7f
+        E 720 80 30 00
+        E 0 90 30 7f
+        E 240 80 30 00
         E 0 90 30 7f
         E 480 80 30 00
-        E 0 90 30 7f
-        E 1920 80 30 00
+        e 0 90 30 7f
+        e 480 80 30 00
         E 3840 b0 7b 00
         CCINTERP 32
         CHASE_CC_TAKEOFFS 1
@@ -4151,19 +4155,19 @@
       FADEIN 1 0 0 1 0 0 0
       FADEOUT 1 0 0 1 0 0 0
       MUTE 0 0
-      SEL 0
-      IGUID {33F99C1C-668B-4248-A293-D4003D0CFCFD}
+      SEL 1
+      IGUID {84D1F2AC-BBAB-45AF-92A0-63FC686FA808}
       IID 4
       NAME 01-MIDI
       VOLPAN 1 0 1 -1
       SOFFS 0 0
       PLAYRATE 1 1 0 -1 0 0.0025
       CHANMODE 0
-      GUID {08F0A9AE-2550-43C5-9ADB-F4FC991AA002}
+      GUID {F932E0DF-967F-410D-878D-025175BA8AE1}
       <SOURCE MIDI
         HASDATA 1 960 QN
         CCINTERP 32
-        POOLEDEVTS {577E1004-1702-4987-A190-D6DF5041F3D3}
+        POOLEDEVTS {0B248D2D-F99E-4257-9A7D-5EBF8B329C51}
         E 0 90 30 7f
         E 960 80 30 00
         E 0 90 30 7f
@@ -4231,11 +4235,15 @@
         E 0 90 30 7f
         E 960 80 30 00
         E 0 90 30 7f
-        E 480 80 30 00
+        E 960 80 30 00
+        E 0 90 30 7f
+        E 720 80 30 00
+        E 0 90 30 7f
+        E 240 80 30 00
         E 0 90 30 7f
         E 480 80 30 00
-        E 0 90 30 7f
-        E 1920 80 30 00
+        e 0 90 30 7f
+        e 480 80 30 00
         E 3840 b0 7b 00
         CCINTERP 32
         CHASE_CC_TAKEOFFS 1
@@ -4259,7 +4267,7 @@
       FADEIN 1 0 0 1 0 0 0
       FADEOUT 1 0 0 1 0 0 0
       MUTE 0 0
-      SEL 1
+      SEL 0
       IGUID {58A7EA28-3AAC-4360-BA1F-4814C428E867}
       IID 4
       NAME 01-MIDI
