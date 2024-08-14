@@ -1146,7 +1146,7 @@ static void init_svf(state_var_filter& flt, double w, double res, double gn)
   else if constexpr (SVFMode == svf_mode_bll) flt.init_bll(w, res, gn);
   else if constexpr (SVFMode == svf_mode_lsh) flt.init_lsh(w, res, gn);
   else if constexpr (SVFMode == svf_mode_hsh) flt.init_hsh(w, res, gn);
-  else static_assert(false);
+  else assert(false);
 }
 
 fx_engine::
