@@ -8,23 +8,33 @@ on release:
 2 drop all conversion code on breaking plugin id
 3 run some debug builds
 4 add missing presets from demos
-5 upload new binaries
-6 update screenshots
-7 update the history
-8 check if need update github social preview
-9 dont forget to tag
-10 make a github release
-11 update kvr
+5 update all renoise stuff
+6 upload new binaries
+7 update screenshots
+8 update the history
+9 check if need update github social preview
+10 dont forget to tag
+11 make a github release
+12 update kvr
+
+V1.8.5:
+V check the vfx target dropdown enabled
+V make slot 1 enabled
+V do the multi-eq thing
+V retest the svfs 
+V fix the mod grids
+V fix the meq graphs for db vertical
+- make hckick a preset
+- do new hckick demo with meq
+- make osc phase a mod target
+- make osc unison phase a mod target
+- fix the undo history for tuning mode
 
 wishlist:
-make osc phase a mod target
-fix the undo history
-do the 5eq thing with serial/parallel bell filters
 DSF falloff to the left
 clap polyphonic modulation
 full-blown renoise support
 fix global unison for mono mode
-fixed random at voice start as mod source
 Feedback FM - but needs per-sample processing, not block
 arpeggiator - hard - but easy -> play multiple octaves on-note. or maybe allow 3/s, 5/s, whatever selection
 

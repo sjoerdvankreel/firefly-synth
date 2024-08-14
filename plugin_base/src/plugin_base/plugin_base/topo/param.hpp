@@ -21,9 +21,10 @@ class plugin_state;
 enum class param_direction { input, output };
 enum class param_rate { block, voice, accurate };
 enum class param_automate { none, midi, automate, modulate };
-enum class param_layout { 
-  single, horizontal, vertical, 
-  single_grid // must be single child in parent container
+enum class param_layout {
+  single, horizontal, vertical,
+  parent_grid, // must be single child in parent container, dimensions taken from param section
+  own_grid // can be multiple multi-slot params in single param section, must manually specify dimensions
 };
 
 // allows to extend right-click menu on parameters
@@ -72,6 +73,8 @@ struct param_topo_gui final {
   gui_position position;
   gui_bindings bindings;
   gui_edit_type edit_type;
+  gui_dimension multi_own_grid; // multi-slot param, own grid dims
+  std::string multi_own_grid_label; // optional, but counts against top left grid corner
 
   // autosize to these if not empty
   std::string label_reference_text; 

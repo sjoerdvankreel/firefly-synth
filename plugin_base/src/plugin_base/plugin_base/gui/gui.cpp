@@ -718,12 +718,12 @@ plugin_gui::make_param_sections(module_desc const& module)
 }
 
 Component&
-plugin_gui::make_params(module_desc const& module, param_desc const* params)
+plugin_gui::make_params(module_desc const& module, param_section const& section, param_desc const* params)
 {
   if (params[0].param->info.slot_count == 1)
     return make_single_param(module, params[0]);
   else
-    return make_multi_param(module, params);
+    return make_multi_param(module, section, params);
 }
 
 Component&
@@ -740,14 +740,17 @@ plugin_gui::make_single_param(module_desc const& module, param_desc const& param
 }
 
 Component&
-plugin_gui::make_multi_param(module_desc const& module, param_desc const* slots)
+plugin_gui::make_multi_param(module_desc const& module, param_section const& section, param_desc const* slots)
 {
   auto const& param = slots[0].param;
-  assert(param->gui.layout != param_layout::single_grid);
+  assert(param->gui.layout != param_layout::parent_grid);
   bool vertical = param->gui.layout == param_layout::vertical;
   int autofit_row = param->gui.tabular && vertical ? 1 : 0;
   int autofit_column = param->gui.tabular && !vertical ? 1 : 0;
-  auto& result = make_component<grid_component>(vertical, param->info.slot_count + (param->gui.tabular? 1: 0), 0, 0, autofit_row, autofit_column);
+  auto& result = param->gui.layout == param_layout::own_grid ?
+    make_component<grid_component>(param->gui.multi_own_grid, margin_param, margin_param, 0, 0) :
+    make_component<grid_component>(vertical, param->info.slot_count + (param->gui.tabular ? 1 : 0), 0, 0, autofit_row, autofit_column);
+  
   if (param->gui.tabular)
   {
     std::string display_name = param->info.tag.display_name;
@@ -758,28 +761,56 @@ plugin_gui::make_multi_param(module_desc const& module, param_desc const* slots)
     header.setColour(Label::ColourIds::textColourId, colors.table_header);
     result.add(header, vertical, 0);
   }
+
+  if (param->gui.layout != param_layout::own_grid)
+  {
+    for (int i = 0; i < param->info.slot_count; i++)
+      result.add(make_single_param(module, slots[i]), vertical, i + (param->gui.tabular ? 1 : 0));
+    return result;
+  }
+
+  gui_position pos = {};
+  pos.row = 0;
+  pos.column = 0;
+  pos.row_span = 1;
+  pos.column_span = 1;
+  if (param->gui.multi_own_grid_label.size())
+  {
+    auto& label = make_component<Label>();
+    label.setText(param->gui.multi_own_grid_label, juce::dontSendNotification);
+    result.add(label, { 0, 0 });
+    pos.column++;
+  }
   for (int i = 0; i < param->info.slot_count; i++)
-    result.add(make_single_param(module, slots[i]), vertical, i + (param->gui.tabular? 1: 0));
-  return result;
+  {
+    if (pos.column == param->gui.multi_own_grid.column_sizes.size())
+    {
+      pos.column = 0;
+      pos.row++;
+    }
+    result.add(make_single_param(module, slots[i]), pos);
+    pos.column++;
+  }
+  return make_component<param_section_container>(this, _lnf.get(), &module, &section, &result, false ? 0 : margin_hsection);
 }
 
 Component&
 plugin_gui::make_param_section(module_desc const& module, param_section const& section, bool first_horizontal)
 {
   auto const& params = module.params;
-  bool is_single_grid_param = false; 
+  bool is_parent_grid_param = false;
   grid_component& grid = make_component<grid_component>(section.gui.dimension, margin_param, margin_param, 0, 0);
   
   for(int p = 0; p < module.module->params.size(); p++)
     if(module.module->params[p].gui.section == section.index)
-      if (module.module->params[p].gui.layout == param_layout::single_grid)
+      if (module.module->params[p].gui.layout == param_layout::parent_grid)
       {
-        assert(!is_single_grid_param);
-        is_single_grid_param = true;
+        assert(!is_parent_grid_param);
+        is_parent_grid_param = true;
       }
   
   // multi-slot param being only param in section
-  if (is_single_grid_param)
+  if (is_parent_grid_param)
   {
     int slot = 0;
     for(int r = 0; r < section.gui.dimension.row_sizes.size(); r++)
@@ -795,7 +826,7 @@ plugin_gui::make_param_section(module_desc const& module, param_section const& s
   for (auto iter = params.begin(); iter != params.end(); iter += iter->param->info.slot_count)
     if(iter->param->gui.edit_type != gui_edit_type::none && iter->param->gui.section == section.index)
       if(section.gui.cell_split == gui_label_edit_cell_split::no_split)
-        grid.add(make_params(module, &(*iter)), iter->param->gui.position);
+        grid.add(make_params(module, section, &(*iter)), iter->param->gui.position);
       else
       {
         assert(iter->param->info.slot_count == 1);
@@ -819,8 +850,12 @@ plugin_gui::make_param_section(module_desc const& module, param_section const& s
         } else assert(false);
       }
         
-  if(section.gui.scroll_mode == gui_scroll_mode::none)
-    return make_component<param_section_container>(this, _lnf.get(), &module, &section, &grid, first_horizontal? 0: margin_hsection);
+  if (section.gui.scroll_mode == gui_scroll_mode::none)
+  {
+    if (section.gui.wrap_in_container)
+      return make_component<param_section_container>(this, _lnf.get(), &module, &section, &grid, first_horizontal ? 0 : margin_hsection);
+    return grid;
+  }
 
   auto& viewer = make_component<autofit_viewport>(module_lnf(module.module->info.index));
   viewer.setViewedComponent(&grid, false);

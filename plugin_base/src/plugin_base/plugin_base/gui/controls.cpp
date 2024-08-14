@@ -661,6 +661,16 @@ param_combobox::update_all_items_enabled_state()
         {
           param_topo_mapping m = that_param;
           m.param_index = that_topo.gui.bindings.enabled.params[j];
+
+          // dealing with "this param" against "that param" against "that bound param"
+          // if "that param" and "that bound param" have equal slot count, go with it
+          // otherwise "that bound param" should have slot count 1 
+          auto const& that_bound_topo = topo.modules[that_param.module_index].params[m.param_index];
+          if (that_bound_topo.info.slot_count == 1)
+            m.param_slot = 0;
+          else
+            assert(that_bound_topo.info.slot_count == that_topo.info.slot_count);
+
           that_values.push_back(_gui->gui_state()->get_plain_at(m).step());
         }
         enabled &= that_topo.gui.bindings.enabled.param_selector(that_values);
@@ -672,6 +682,16 @@ param_combobox::update_all_items_enabled_state()
         {
           param_topo_mapping m = that_param;
           m.param_index = that_topo.gui.bindings.visible.params[j];
+
+          // dealing with "this param" against "that param" against "that bound param"
+          // if "that param" and "that bound param" have equal slot count, go with it
+          // otherwise "that bound param" should have slot count 1 
+          auto const& that_bound_topo = topo.modules[that_param.module_index].params[m.param_index];
+          if (that_bound_topo.info.slot_count == 1)
+            m.param_slot = 0;
+          else
+            assert(that_bound_topo.info.slot_count == that_topo.info.slot_count);
+
           that_values.push_back(_gui->gui_state()->get_plain_at(m).step());
         }
         enabled &= that_topo.gui.bindings.visible.param_selector(that_values);
