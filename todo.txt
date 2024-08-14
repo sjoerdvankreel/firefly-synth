@@ -30,8 +30,8 @@ V fix the meq graphs for db vertical
 V make osc unison phase a mod target
 V make osc phase a mod target
 V cherry pick the build stuff from 1.8.4
-- make hckick a preset
-- do new hckick demo with meq
+V make hckick a preset
+V do new hckick demo with meq
 - drop the manual releases, go with GH only, find a place for the mac warning text
 - drop the manual from kvr
 
