@@ -7,7 +7,7 @@ The only downside is that there are so many features, it's difficult to cram the
 
 # Download
 
-Downloads have moved to the [releases](releases) section.
+Downloads have moved to the [releases](https://github.com/sjoerdvankreel/firefly-synth/releases) section.
 
 MacOS Note: if you get a warning like "archive damaged" or "failed to open" etc, it's probably this:
 [https://syntheway.com/fix-au-vst-vst3-macos.htm](https://syntheway.com/fix-au-vst-vst3-macos.htm)
