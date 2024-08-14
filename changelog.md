@@ -1,6 +1,7 @@
 ?, ? - V1.8.5.
 
 - Add multiband EQ.
+- Add osc phase as a modulatable parameter (PM).
 - Make osc unison phase a modulatable parameter.
 
 ### July 17, 2024 - V1.8.3.
