@@ -210,13 +210,13 @@ private:
   void init_multi_tab_component(tab_component& tab, std::string const& id, int module_index, int section_index);
 
   Component& make_param_sections(module_desc const& module);
-  Component& make_params(module_desc const& module, param_desc const* params);
-  Component& make_multi_param(module_desc const& module, param_desc const* params);
   Component& make_param_editor(module_desc const& module, param_desc const& param);
   Component& make_single_param(module_desc const& module, param_desc const& param);
   Component& make_param_label_edit(module_desc const& module, param_desc const& param);
-  Component& make_param_section(module_desc const& module, param_section const& section, bool first_horizontal);
+  Component& make_params(module_desc const& module, param_section const& section, param_desc const* params);
   Component& make_param_label(module_desc const& module, param_desc const& param, gui_label_contents contents);
+  Component& make_param_section(module_desc const& module, param_section const& section, bool first_horizontal);
+  Component& make_multi_param(module_desc const& module, param_section const& section, param_desc const* params);
 
   Component& make_modules(module_desc const* slots);
   Component& make_module_section(module_section_gui const& section);

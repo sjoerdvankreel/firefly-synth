@@ -19,7 +19,7 @@ param_section::validate(plugin_topo const& plugin, module_topo const& module, in
   for(int p = 0; p < module.params.size(); p++)
     if (include(p))
     {
-      if (module.params[p].gui.layout == param_layout::single_grid)
+      if (module.params[p].gui.layout == param_layout::parent_grid)
       {
         assert(!is_one_grid_param);
         is_one_grid_param = true;

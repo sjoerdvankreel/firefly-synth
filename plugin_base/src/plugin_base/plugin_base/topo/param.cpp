@@ -95,11 +95,17 @@ param_topo::validate(plugin_topo const& plugin, module_topo const& module, int i
   assert(dsp.direction != param_direction::output || module.dsp.stage == module_stage::output);
   assert(gui.alternate_drag_output_id.size() == 0 || gui.alternate_drag_param_id.size() == 0);
 
-  if (gui.layout == param_layout::single_grid)
+  if (gui.layout == param_layout::parent_grid)
   {
     // assert * 2 is for the labels
     auto dimension = module.sections[gui.section].gui.dimension;
     assert(dimension.row_sizes.size() * dimension.column_sizes.size() == info.slot_count * 2);
+  }
+
+  if (gui.layout == param_layout::own_grid)
+  {
+    auto dimension = gui.multi_own_grid;
+    assert(dimension.row_sizes.size() * dimension.column_sizes.size() == info.slot_count + (gui.multi_own_grid_label.size() ? 1 : 0));
   }
 
   // if we are set to be explicitly modulatable in the gui, make sure we can modulate

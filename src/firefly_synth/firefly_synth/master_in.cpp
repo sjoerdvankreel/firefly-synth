@@ -105,7 +105,7 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
   auto& aux = result.params.emplace_back(make_param(
     make_topo_info_basic("{9EC93CE9-6BD6-4D17-97A6-403ED34BBF38}", "Aux", param_aux, aux_count),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0, 0, true),
-    make_param_gui(section_aux, gui_edit_type::knob, param_layout::single_grid, { 0, 0 },
+    make_param_gui(section_aux, gui_edit_type::knob, param_layout::parent_grid, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   aux.info.description = "Auxilliary controls to be used through automation and the CV matrices.";
   aux.gui.alternate_drag_output_id = result.dsp.outputs[output_aux].info.tag.id;

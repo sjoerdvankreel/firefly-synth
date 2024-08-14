@@ -4,28 +4,46 @@ update submodules
 cpu/mem profiling
 
 on release: 
-1 dont forget to update the version nr in code and cmake and mac bundle and build/zip scripts and downloads and studiorack
+1 dont forget to update the version nr in code and cmake and mac bundle and build/zip scripts and studiorack
 2 drop all conversion code on breaking plugin id
 3 run some debug builds
 4 add missing presets from demos
-5 upload new binaries
-6 update screenshots
-7 update the history
-8 check if need update github social preview
-9 dont forget to tag
-10 make a github release
-11 update kvr
+5 update all renoise stuff
+6 upload new binaries
+7 update screenshots
+8 update the history
+9 check if need update github social preview
+10 dont forget to tag
+11 make a github release
+12 update kvr
+
+V1.8.4:
+- fix the undo history for tuning mode
+
+V1.8.5:
+V check the vfx target dropdown enabled
+V make slot 1 enabled
+V do the multi-eq thing
+V retest the svfs 
+V fix the mod grids
+V fix the meq graphs for db vertical
+V make osc unison phase a mod target
+V make osc phase a mod target
+V cherry pick the build stuff from 1.8.4
+V make hckick a preset
+V do new hckick demo with meq
+V drop the manual releases, go with GH only, find a place for the mac warning text
+- drop the manual from kvr
 
 wishlist:
-make osc phase a mod target
-fix the undo history
-do the 5eq thing with serial/parallel bell filters
+green-on-white UI
 DSF falloff to the left
 clap polyphonic modulation
 full-blown renoise support
 fix global unison for mono mode
-fixed random at voice start as mod source
+bugfix: rerender graph on master in param hover
 Feedback FM - but needs per-sample processing, not block
+turn on stuff when dragging (e.g. basic sin, dist skew etc)
 arpeggiator - hard - but easy -> play multiple octaves on-note. or maybe allow 3/s, 5/s, whatever selection
 
 wishlist sometime:
