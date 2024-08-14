@@ -1,6 +1,7 @@
 ### August 14, 2024 - V1.8.5.
 
 - Add basic multiband EQ.
+- Add another preset + demo tune.
 - Make binaries run on Ubuntu 18 (was 22).
 - Make binaries run on macOS 10.15 (was 14.x).
 - Add osc phase as a modulatable parameter (PM).
