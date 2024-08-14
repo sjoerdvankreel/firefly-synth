@@ -1,6 +1,8 @@
 ?, ? - V1.8.5.
 
 - Add multiband EQ.
+- Make binaries run on macOS 10 (was 11).
+- Make binaries run on Ubuntu 18 (was 22).
 - Add osc phase as a modulatable parameter (PM).
 - Make osc unison phase a modulatable parameter.
 

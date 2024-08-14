@@ -29,18 +29,21 @@ V fix the mod grids
 V fix the meq graphs for db vertical
 V make osc unison phase a mod target
 V make osc phase a mod target
+V cherry pick the build stuff from 1.8.4
 - make hckick a preset
 - do new hckick demo with meq
 - drop the manual releases, go with GH only, find a place for the mac warning text
-- cherry pick the build stuff from 1.8.4
 - drop the manual from kvr
 
 wishlist:
+green-on-white UI
 DSF falloff to the left
 clap polyphonic modulation
 full-blown renoise support
 fix global unison for mono mode
+bugfix: rerender graph on master in param hover
 Feedback FM - but needs per-sample processing, not block
+turn on stuff when dragging (e.g. basic sin, dist skew etc)
 arpeggiator - hard - but easy -> play multiple octaves on-note. or maybe allow 3/s, 5/s, whatever selection
 
 wishlist sometime:
