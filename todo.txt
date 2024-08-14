@@ -32,6 +32,7 @@ V make osc unison phase a mod target
 - do new hckick demo with meq
 - make osc phase a mod target
 - drop the manual releases, go with GH only, find a place for the mac warning text
+- cherry pick the build stuff from 1.8.4
 
 wishlist:
 DSF falloff to the left
