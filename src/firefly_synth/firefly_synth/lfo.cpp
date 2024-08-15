@@ -639,6 +639,16 @@ lfo_engine::process(plugin_block& block, cv_cv_matrix_mixdown const* modulation)
     process_uni<true>(block, modulation);
   else
     process_uni<false>(block, modulation);
+
+  custom_out_state out_state = {};
+  out_state.data.user = -1;
+  out_state.data.param = -1;
+  out_state.data.param_slot = -1;
+  out_state.data.module_slot = block.module_slot;
+  out_state.data.module = _global ? module_glfo : module_vlfo;
+  out_state.data.voice = _global ? -1 : block.voice->state.slot;
+  out_state.data.value = (std::uint16_t)(_phase * std::numeric_limits<std::uint16_t>::max());
+  block.push_custom_out_state(out_state);
 }
 
 template <bool GlobalUnison> void

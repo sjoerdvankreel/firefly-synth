@@ -119,7 +119,8 @@ plugin_engine::make_plugin_block(
     start_frame, end_frame, slot,
     _sample_rate, state, nullptr, nullptr, 
     _host_block->shared, *_state.desc().plugin, 
-    _state.desc().plugin->modules[module]
+    _state.desc().plugin->modules[module],
+    &_host_block->events.custom_out_states // TODO this dont cut it for clap
   };
 }
 
@@ -255,7 +256,9 @@ plugin_engine::activate(int max_frame_count)
   _accurate_automation.resize(frame_dims.accurate_automation);
   _bpm_automation.resize(max_frame_count);
   _mono_note_stream.resize(max_frame_count);
-  _host_block->events.activate(_graph, _state.desc().param_count, _state.desc().midi_count, _polyphony, max_frame_count);
+  _host_block->events.activate(_graph, 
+    _state.desc().module_count, _state.desc().param_count, 
+    _state.desc().midi_count, _polyphony, max_frame_count);
 
   // set automation values to current state, events may overwrite
   automation_state_dirty();
@@ -502,6 +505,7 @@ plugin_engine::activate_voice(note_event const& event, int slot, int sub_voice_c
 {
   assert(slot >= 0);
   auto& state = _voice_states[slot];
+  state.slot = slot;
   state.note_id_ = event.id;
   state.release_id = event.id;
   state.end_frame = frame_count;
@@ -565,6 +569,7 @@ plugin_engine::process()
   int frame_count = _host_block->frame_count;
 
   _host_block->events.output_params.clear();
+  _host_block->events.custom_out_states.clear();
   std::pair<std::uint32_t, std::uint32_t> denormal_state = disable_denormals();  
 
   // set automation values to current state, events may overwrite
@@ -1112,6 +1117,9 @@ plugin_engine::process()
           }
     }
   }
+
+  // Note: custom output events are already filled here.
+  // It's up to the plugin bindings to communicate them back to the gui.
 
   /*******************/
   /* STEP 9: Wrap-up */

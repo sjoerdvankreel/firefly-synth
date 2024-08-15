@@ -113,7 +113,9 @@ plugin_splice_engine::activate(int max_frame_count)
   else _splice_block_size = 128;
 
   _engine.activate(_splice_block_size);
-  _host_block.events.activate(false, state().desc().param_count, state().desc().midi_count, state().desc().plugin->audio_polyphony, max_frame_count);
+  _host_block.events.activate(false, 
+    state().desc().module_count, state().desc().param_count, 
+    state().desc().midi_count, state().desc().plugin->audio_polyphony, max_frame_count);
 
   // make some room for the block boundary / interpolation events
   int fill_guess = (int)std::ceil(max_frame_count / 32.0f);
@@ -134,6 +136,8 @@ plugin_splice_engine::process()
   int total_block_count = spliced_block_count + (rest_block_frames == 0? 0: 1);
 
   _host_block.events.output_params.clear();
+  _host_block.events.custom_out_states.clear();
+
   splice_accurate_events(
     _host_block.events.accurate_automation, _spliced_accurate_automation_events, 
     _host_block.frame_count, spliced_block_count, spliced_block_frames, rest_block_frames);
@@ -212,11 +216,15 @@ plugin_splice_engine::process()
         inner_block.events.accurate_modulation.push_back(e);
       }
 
-    _engine.process();
+    _engine.process();  
     _host_block.events.output_params.insert(
       _host_block.events.output_params.begin(), 
       inner_block.events.output_params.begin(), 
       inner_block.events.output_params.end());
+    _host_block.events.custom_out_states.insert(
+      _host_block.events.custom_out_states.begin(),
+      inner_block.events.custom_out_states.begin(),
+      inner_block.events.custom_out_states.end());
     _engine.release_block();
   }
 }
