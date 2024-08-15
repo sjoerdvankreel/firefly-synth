@@ -26,6 +26,7 @@ DSF falloff to the left
 clap polyphonic modulation
 full-blown renoise support
 fix global unison for mono mode
+show effective modulation in the ui
 bugfix: rerender graph on master in param hover
 Feedback FM - but needs per-sample processing, not block
 turn on stuff when dragging (e.g. basic sin, dist skew etc)
