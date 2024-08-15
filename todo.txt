@@ -20,16 +20,18 @@ on release:
 V1.8.4:
 - fix the undo history for tuning mode
 
+More-small-stuff-again:
+- green-on-white UI
+- show effective modulation in the ui
+- bugfix: rerender graph on master in param hover?
+- turn on stuff when dragging (e.g. basic sin, dist skew etc)
+
 wishlist:
-green-on-white UI
 DSF falloff to the left
 clap polyphonic modulation
 full-blown renoise support
 fix global unison for mono mode
-show effective modulation in the ui
-bugfix: rerender graph on master in param hover
 Feedback FM - but needs per-sample processing, not block
-turn on stuff when dragging (e.g. basic sin, dist skew etc)
 arpeggiator - hard - but easy -> play multiple octaves on-note. or maybe allow 3/s, 5/s, whatever selection
 
 wishlist sometime:
@@ -38,11 +40,9 @@ midi mpe
 microtonal
 .com website 
 cheby shaper
-incorporate mts-esp
 phaser/flanger/chorus
 vst3 note expressions
 flstudio clap support
 visual routing indicators
 automated regression tests
 better studiorack integration
-do async clear delay lines etc on patch select
