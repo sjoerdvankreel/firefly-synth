@@ -187,6 +187,14 @@ graph::paint_series(
   g.strokePath(pStroke, PathStrokeType(stroke_thickness));
 }
 
+void 
+graph::paint_indicators(
+  juce::Graphics& g, jarray<float, 1> const& series, jarray<int, 1> const& indicators)
+{
+  g.setColour(Colours::green);
+  g.fillEllipse(10, 10, 10, 10);
+}
+
 void
 graph::paint(Graphics& g)
 {
@@ -304,6 +312,7 @@ graph::paint(Graphics& g)
     for(int i = 0; i < series.size(); i++)
       series[i] = bipolar_to_unipolar(series[i]);
   paint_series(g, series, _data.bipolar(), _data.stroke_thickness(), 0.5f);
+  paint_indicators(g, series, _data.indicators());
 }
 
 }

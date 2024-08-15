@@ -439,11 +439,11 @@ render_graph(
   {
     auto response = fft(audio[0].data());
     if (type == type_cmb)
-      return graph_data(jarray<float, 1>(response), false, 1.0f, false, { "24 kHz" });
+      return graph_data(jarray<float, 1>(response), {}, false, 1.0f, false, { "24 kHz" });
 
     // SVF/MEQ remaps over 0.8 just to look pretty
     std::vector<float> response_mapped(log_remap_series_x(response, 0.8f));
-    return graph_data(jarray<float, 1>(response_mapped), false, 1.0f, false, { "24 kHz" });
+    return graph_data(jarray<float, 1>(response_mapped), {}, false, 1.0f, false, { "24 kHz" });
   }
   
   // distortion - pick result of the last cycle (after filters kick in)
@@ -451,7 +451,7 @@ render_graph(
   {
     int last_cycle_start = (shp_cycle_count - 1) * shp_cycle_length;
     std::vector<float> series(audio[0].cbegin() + last_cycle_start, audio[0].cbegin() + frame_count);
-    return graph_data(jarray<float, 1>(series), true, 1.0f, false, { "Distortion" });
+    return graph_data(jarray<float, 1>(series), {}, true, 1.0f, false, { "Distortion" });
   }
 
   // delay or reverb - do some autosizing so it looks pretty

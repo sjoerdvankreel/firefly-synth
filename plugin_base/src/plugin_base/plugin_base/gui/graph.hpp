@@ -25,9 +25,12 @@ public juce::Component
   lnf* const _lnf;
   graph_data _data;  
   graph_params const _params;
+  
   void paint_series(
     juce::Graphics& g, jarray<float, 1> const& series, 
     bool bipolar, float stroke_thickness, float midpoint);
+  void paint_indicators(
+    juce::Graphics& g, jarray<float, 1> const& series, jarray<int, 1> const& indicators);
 
 public:
   void render(graph_data const& data);

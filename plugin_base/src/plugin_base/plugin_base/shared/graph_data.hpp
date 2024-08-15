@@ -17,6 +17,7 @@ class graph_data {
   float _scalar = {};
   jarray<float, 2> _audio = {};
   jarray<float, 1> _series = {};
+  jarray<int, 1> _indicators = {}; // special markers along x-axis, follow y-value
   std::vector<std::pair<float, float>> _multi_stereo = {};
 
   void init(graph_data const& rhs);
@@ -34,6 +35,10 @@ public:
   { assert(_type == graph_data_type::series); return _series; }
   jarray<float, 1> const& series() const
   { assert(_type == graph_data_type::series); return _series; }
+  jarray<int, 1>& indicators() 
+  { assert(_type == graph_data_type::series); return _indicators; }
+  jarray<int, 1> const& indicators() const
+  { assert(_type == graph_data_type::series); return _indicators; }
   
   std::vector<std::pair<float, float>>& multi_stereo() 
   { assert(_type == graph_data_type::multi_stereo); return _multi_stereo; }
@@ -57,8 +62,8 @@ public:
   _partitions(partitions), _bipolar(false), _type(graph_data_type::multi_stereo), _multi_stereo(multi_stereo) {}
   graph_data(jarray<float, 2> const& audio, float stroke_thickness, bool stroke_with_area, std::vector<std::string> const& partitions) :
   _partitions(partitions), _stroke_thickness(stroke_thickness), _stroke_with_area(stroke_with_area), _bipolar(true), _type(graph_data_type::audio), _audio(audio) {}
-  graph_data(jarray<float, 1> const& series, bool bipolar, float stroke_thickness, bool stroke_with_area, std::vector<std::string> const& partitions) :
-  _partitions(partitions), _stroke_thickness(stroke_thickness), _stroke_with_area(stroke_with_area), _bipolar(bipolar), _type(graph_data_type::series), _series(series) {}
+  graph_data(jarray<float, 1> const& series, jarray<int, 1> const& indicators, bool bipolar, float stroke_thickness, bool stroke_with_area, std::vector<std::string> const& partitions) :
+  _partitions(partitions), _stroke_thickness(stroke_thickness), _stroke_with_area(stroke_with_area), _bipolar(bipolar), _type(graph_data_type::series), _series(series), _indicators(indicators) {}
 };
 
 }

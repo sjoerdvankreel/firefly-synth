@@ -165,8 +165,8 @@ lfo_frequency_from_state(plugin_state const& state, int module_index, int module
 
 static graph_data
 render_graph(
-  plugin_state const& state, graph_engine* engine, 
-  int param, param_topo_mapping const& mapping)
+  plugin_state const& state, std::vector<custom_out_state> const& custom_out_states,
+  graph_engine* engine, int param, param_topo_mapping const& mapping)
 {
   int type = state.get_plain_at(mapping.module_index, mapping.module_slot, param_type, mapping.param_slot).step();
   bool sync = state.get_plain_at(mapping.module_index, mapping.module_slot, param_sync, mapping.param_slot).step() != 0;
@@ -225,7 +225,12 @@ render_graph(
   });
   engine->process_end();
   jarray<float, 1> series(block->state.own_cv[0][0]);
-  return graph_data(series, false, 1.0f, false, { partition });
+
+  std::vector<int> indicators = {};
+  for (int i = 0; i < custom_out_states.size(); i++)
+    if (custom_out_states[i].data.module == mapping.module_index && custom_out_states[i].data.module_slot == mapping.module_slot)
+      indicators.push_back(custom_out_states[i].data.value / (float)std::numeric_limits<std::uint16_t>::max() * series.size()); // todo account for multicycle
+  return graph_data(series, {}, false, 1.0f, false, { partition });
 }
 
 bool
@@ -375,10 +380,9 @@ lfo_topo(int section, gui_position const& pos, bool global, bool is_fx)
   
   result.graph_engine_factory = make_graph_engine;
   if(global && !is_fx) result.default_initializer = init_global_default;
+  result.graph_renderer = render_graph;
   result.gui.menu_handler_factory = make_cv_routing_menu_handler;
   result.engine_factory = [global](auto const&, int, int) { return std::make_unique<lfo_engine>(global); };
-  result.graph_renderer = [](auto const& state, auto const& custom_out_states, auto* engine, int param, auto const& mapping) {
-    return render_graph(state, engine, param, mapping); };
   result.state_converter_factory = [global](auto desc) { return std::make_unique<lfo_state_converter>(desc, global); };
 
   result.sections.emplace_back(make_param_section(section_left,
