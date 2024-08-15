@@ -126,7 +126,7 @@ public juce::Component
 public:
   PB_PREVENT_ACCIDENTAL_COPY(plugin_gui);
   ~plugin_gui();
-  plugin_gui(plugin_state* gui_state, plugin_base::extra_state* extra_state);
+  plugin_gui(plugin_state* gui_state, plugin_base::extra_state* extra_state, std::vector<plugin_base::custom_out_state>* custom_out_states);
 
   void save_patch();
   void init_patch();
@@ -182,6 +182,7 @@ private:
   int _last_mouse_enter_module = -1;
   int _last_mouse_enter_custom = -1;
   plugin_base::extra_state* const _extra_state;
+  std::vector<plugin_base::custom_out_state>* _custom_out_states = {};
   std::unique_ptr<juce::TooltipWindow> _tooltip = {};
   std::map<int, std::unique_ptr<lnf>> _module_lnfs = {};
   std::map<int, std::unique_ptr<lnf>> _custom_lnfs = {};

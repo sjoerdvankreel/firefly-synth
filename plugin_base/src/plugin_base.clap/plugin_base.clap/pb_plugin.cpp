@@ -69,10 +69,12 @@ _desc(std::make_unique<plugin_desc>(topo, this)),
 _splice_engine(_desc.get(), false, forward_thread_pool_voice_processor, this),
 _extra_state(gui_extra_state_keyset(*_desc->plugin)), _gui_state(_desc.get(), true),
 _to_gui_events(std::make_unique<event_queue>(default_q_size)), 
-_to_audio_events(std::make_unique<event_queue>(default_q_size))
+_to_audio_events(std::make_unique<event_queue>(default_q_size)),
+_custom_out_queue(std::make_unique<custom_out_queue>(default_q_size))
 { 
   PB_LOG_FUNC_ENTRY_EXIT();
   _gui_state.add_any_listener(this);
+  _custom_out_states.reserve(default_q_size);
   _block_automation_seen.resize(_splice_engine.state().desc().param_count);
 }
 
@@ -113,10 +115,16 @@ pb_plugin::init() noexcept
 void 
 pb_plugin::timerCallback()
 {
-  sync_event e;
+  sync_event sevent;
   _inside_timer_callback = true;
-  while (_to_gui_events->try_dequeue(e))
-    _gui_state.set_plain_at_index(e.index, e.plain);
+  while (_to_gui_events->try_dequeue(sevent))
+    _gui_state.set_plain_at_index(sevent.index, sevent.plain);
+  
+  custom_out_state costate;
+  _custom_out_states.clear();
+  while (_custom_out_queue->try_dequeue(costate))
+    _custom_out_states.push_back(costate);
+
   _inside_timer_callback = false;
 }
 
@@ -257,7 +265,7 @@ bool
 pb_plugin::guiCreate(char const* api, bool is_floating) noexcept
 {
   PB_LOG_FUNC_ENTRY_EXIT();
-  _gui = std::make_unique<plugin_gui>(&_gui_state, &_extra_state);
+  _gui = std::make_unique<plugin_gui>(&_gui_state, &_extra_state, &_custom_out_states);
   return true;
 }
 
@@ -754,6 +762,8 @@ pb_plugin::process(clap_process const* process) noexcept
   }
 
   _splice_engine.process();
+
+  // regular output params
   for (int e = 0; e < block.events.output_params.size(); e++)
   {
     sync_event to_gui_event = {};
@@ -762,6 +772,11 @@ pb_plugin::process(clap_process const* process) noexcept
     to_gui_event.plain = _splice_engine.state().desc().normalized_to_plain_at_index(out_event.param, out_event.normalized);
     _to_gui_events->enqueue(to_gui_event);
   }
+
+  // custom anything-goes stuff
+  for (int e = 0; e < block.events.custom_out_states.size(); e++)
+    _custom_out_queue->enqueue(block.events.custom_out_states[e]);
+
   _splice_engine.release_block();
   return CLAP_PROCESS_CONTINUE;
 }
