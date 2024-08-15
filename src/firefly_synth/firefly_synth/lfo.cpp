@@ -377,7 +377,7 @@ lfo_topo(int section, gui_position const& pos, bool global, bool is_fx)
   if(global && !is_fx) result.default_initializer = init_global_default;
   result.gui.menu_handler_factory = make_cv_routing_menu_handler;
   result.engine_factory = [global](auto const&, int, int) { return std::make_unique<lfo_engine>(global); };
-  result.graph_renderer = [](auto const& state, auto* engine, int param, auto const& mapping) {
+  result.graph_renderer = [](auto const& state, auto const& custom_out_states, auto* engine, int param, auto const& mapping) {
     return render_graph(state, engine, param, mapping); };
   result.state_converter_factory = [global](auto desc) { return std::make_unique<lfo_state_converter>(desc, global); };
 

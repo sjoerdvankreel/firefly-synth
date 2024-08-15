@@ -333,7 +333,9 @@ plugin_gui::
 }
 
 plugin_gui::
-plugin_gui(plugin_state* gui_state, plugin_base::extra_state* extra_state, std::vector<plugin_base::custom_out_state>* custom_out_states):
+plugin_gui(
+  plugin_state* gui_state, plugin_base::extra_state* extra_state, 
+  std::vector<plugin_base::custom_out_state> const* custom_out_states):
 _gui_state(gui_state), _undo_listener(this), _extra_state(extra_state), _custom_out_states(custom_out_states)
 {
   PB_LOG_FUNC_ENTRY_EXIT();

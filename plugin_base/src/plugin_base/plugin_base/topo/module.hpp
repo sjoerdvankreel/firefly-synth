@@ -7,6 +7,7 @@
 #include <plugin_base/shared/jarray.hpp>
 #include <plugin_base/shared/utility.hpp>
 #include <plugin_base/shared/graph_data.hpp>
+#include <plugin_base/dsp/block/shared.hpp>
 
 #include <memory>
 #include <vector>
@@ -81,7 +82,8 @@ typedef std::function<std::unique_ptr<module_engine>(
   plugin_topo const& topo, int sample_rate, int max_frame_count)> 
 module_engine_factory;
 typedef std::function<graph_data(
-  plugin_state const& state, graph_engine* engine, int param, param_topo_mapping const& mapping)>
+  plugin_state const& state, std::vector<custom_out_state> const& custom_out_states, 
+  graph_engine* engine, int param, param_topo_mapping const& mapping)>
 module_graph_renderer;
 
 // module topo mapping

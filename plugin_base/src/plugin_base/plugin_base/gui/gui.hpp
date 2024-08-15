@@ -126,7 +126,9 @@ public juce::Component
 public:
   PB_PREVENT_ACCIDENTAL_COPY(plugin_gui);
   ~plugin_gui();
-  plugin_gui(plugin_state* gui_state, plugin_base::extra_state* extra_state, std::vector<plugin_base::custom_out_state>* custom_out_states);
+  plugin_gui(
+    plugin_state* gui_state, plugin_base::extra_state* extra_state, 
+    std::vector<plugin_base::custom_out_state> const* custom_out_states);
 
   void save_patch();
   void init_patch();
@@ -161,9 +163,11 @@ public:
   float get_system_dpi_scale() const { return _system_dpi_scale; }
 
   lnf const* get_lnf() const { return _lnf.get(); }
+  void paint(juce::Graphics& g) override { g.fillAll(juce::Colours::black); }
+
   plugin_state* gui_state() const { return _gui_state; }
   extra_state* extra_state_() const { return _extra_state; }
-  void paint(juce::Graphics& g) override { g.fillAll(juce::Colours::black); }
+  std::vector<plugin_base::custom_out_state> const* custom_out_states() const { return _custom_out_states; }
   
   void remove_param_listener(gui_param_listener* listener);
   void remove_gui_mouse_listener(gui_mouse_listener* listener);
@@ -182,7 +186,7 @@ private:
   int _last_mouse_enter_module = -1;
   int _last_mouse_enter_custom = -1;
   plugin_base::extra_state* const _extra_state;
-  std::vector<plugin_base::custom_out_state>* _custom_out_states = {};
+  std::vector<plugin_base::custom_out_state> const* _custom_out_states = {};
   std::unique_ptr<juce::TooltipWindow> _tooltip = {};
   std::map<int, std::unique_ptr<lnf>> _module_lnfs = {};
   std::map<int, std::unique_ptr<lnf>> _custom_lnfs = {};

@@ -49,7 +49,9 @@ public:
 };
 
 static graph_data
-render_graph(plugin_state const& state, graph_engine* engine, int param, param_topo_mapping const& mapping)
+render_graph(
+  plugin_state const& state, std::vector<custom_out_state> const& custom_out_states, 
+  graph_engine* engine, int param, param_topo_mapping const& mapping)
 {
   if (mapping.param_index == param_pb_range)
     return graph_data(graph_data_type::na, {});
