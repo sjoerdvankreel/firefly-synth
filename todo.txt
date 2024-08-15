@@ -25,6 +25,7 @@ More-small-stuff-again:
 - show effective modulation in the ui + clap mod
 - bugfix: rerender graph on master in param hover?
 - turn on stuff when dragging (e.g. basic sin, dist skew etc)
+- drop some ugly-ass themes
 
 wishlist:
 DSF falloff to the left
