@@ -7,10 +7,10 @@ void
 host_block::prepare()
 {
   audio_out = nullptr;
-  events.out.clear();
+  events.midi.clear();
   events.notes.clear();
   events.block.clear();
-  events.midi.clear();
+  events.output_params.clear();
   events.accurate_automation.clear();
   events.accurate_modulation.clear();
   events.accurate_automation_and_modulation.clear();
@@ -23,10 +23,10 @@ host_block::prepare()
 void 
 host_events::deactivate()
 {
-  notes = {};
-  out = {};
-  block = {};
   midi = {};
+  notes = {};
+  block = {};
+  output_params = {};
   accurate_automation = {};
   accurate_modulation = {};
   accurate_automation_and_modulation = {};
@@ -44,10 +44,10 @@ host_events::activate(bool graph, int param_count, int midi_count, int polyphony
   int midi_events_guess = midi_count * fill_guess;
   int accurate_events_guess = param_count * fill_guess;
 
-  notes.reserve(note_limit_guess);
-  out.reserve(block_events_guess);
-  block.reserve(block_events_guess);
   midi.reserve(midi_events_guess);
+  notes.reserve(note_limit_guess);
+  block.reserve(block_events_guess);
+  output_params.reserve(block_events_guess);
   accurate_automation.reserve(accurate_events_guess);
   accurate_modulation.reserve(accurate_events_guess);
   accurate_automation_and_modulation.reserve(accurate_events_guess);

@@ -213,9 +213,9 @@ pb_component::process(ProcessData& data)
   _splice_engine.process();
   int unused_index = 0;
   if(data.outputParameterChanges)
-    for (int e = 0; e < block.events.out.size(); e++)
+    for (int e = 0; e < block.events.output_params.size(); e++)
     {
-      auto const& event = block.events.out[e];
+      auto const& event = block.events.output_params[e];
       int tag = _splice_engine.state().desc().param_mappings.index_to_tag[event.param];
       queue = data.outputParameterChanges->addParameterData(tag, unused_index);
       queue->addPoint(0, event.normalized.value(), unused_index);

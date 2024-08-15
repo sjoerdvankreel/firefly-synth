@@ -43,9 +43,9 @@ struct note_event final {
 // these are translated to curves/values
 struct host_events final {
   std::vector<midi_event> midi;
-  std::vector<block_event> out;
   std::vector<note_event> notes;
   std::vector<block_event> block;
+  std::vector<block_event> output_params;
   std::vector<accurate_event> accurate_automation;
   std::vector<accurate_event> accurate_modulation;
 

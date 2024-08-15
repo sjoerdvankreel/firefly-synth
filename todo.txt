@@ -22,7 +22,7 @@ V1.8.4:
 
 More-small-stuff-again:
 - green-on-white UI
-- show effective modulation in the ui
+- show effective modulation in the ui + clap mod
 - bugfix: rerender graph on master in param hover?
 - turn on stuff when dragging (e.g. basic sin, dist skew etc)
 
@@ -46,3 +46,4 @@ flstudio clap support
 visual routing indicators
 automated regression tests
 better studiorack integration
+do async clear delay lines etc on patch select

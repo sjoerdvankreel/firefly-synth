@@ -564,7 +564,7 @@ plugin_engine::process()
   int voice_count = 0;
   int frame_count = _host_block->frame_count;
 
-  _host_block->events.out.clear();
+  _host_block->events.output_params.clear();
   std::pair<std::uint32_t, std::uint32_t> denormal_state = disable_denormals();  
 
   // set automation values to current state, events may overwrite
@@ -833,7 +833,7 @@ plugin_engine::process()
       block_event out_event;
       out_event.param = param_index;
       out_event.normalized = normalized_value(last_value);
-      _host_block->events.out.push_back(out_event);
+      _host_block->events.output_params.push_back(out_event);
     }
   }
 
@@ -1106,7 +1106,7 @@ plugin_engine::process()
               block_event out_event;
               out_event.param = param_global;
               out_event.normalized = _state.get_normalized_at(m, mi, p, pi);
-              _host_block->events.out.push_back(out_event);
+              _host_block->events.output_params.push_back(out_event);
             }
             param_global++;
           }

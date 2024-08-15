@@ -754,10 +754,10 @@ pb_plugin::process(clap_process const* process) noexcept
   }
 
   _splice_engine.process();
-  for (int e = 0; e < block.events.out.size(); e++)
+  for (int e = 0; e < block.events.output_params.size(); e++)
   {
     sync_event to_gui_event = {};
-    auto const& out_event = block.events.out[e];
+    auto const& out_event = block.events.output_params[e];
     to_gui_event.index = out_event.param;
     to_gui_event.plain = _splice_engine.state().desc().normalized_to_plain_at_index(out_event.param, out_event.normalized);
     _to_gui_events->enqueue(to_gui_event);

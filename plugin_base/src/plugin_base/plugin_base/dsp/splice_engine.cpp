@@ -133,7 +133,7 @@ plugin_splice_engine::process()
   assert(spliced_block_count * spliced_block_frames + rest_block_frames == _host_block.frame_count);
   int total_block_count = spliced_block_count + (rest_block_frames == 0? 0: 1);
 
-  _host_block.events.out.clear();
+  _host_block.events.output_params.clear();
   splice_accurate_events(
     _host_block.events.accurate_automation, _spliced_accurate_automation_events, 
     _host_block.frame_count, spliced_block_count, spliced_block_frames, rest_block_frames);
@@ -213,7 +213,10 @@ plugin_splice_engine::process()
       }
 
     _engine.process();
-    _host_block.events.out.insert(_host_block.events.out.begin(), inner_block.events.out.begin(), inner_block.events.out.end());
+    _host_block.events.output_params.insert(
+      _host_block.events.output_params.begin(), 
+      inner_block.events.output_params.begin(), 
+      inner_block.events.output_params.end());
     _engine.release_block();
   }
 }
