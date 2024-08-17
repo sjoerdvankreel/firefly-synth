@@ -19,24 +19,39 @@ struct graph_params
   partition_scale_type scale_type = {};
 };
 
-class graph:
+// draw on top of graph to prevent repaint the whole component in realtime
+class graph_indicator:
 public juce::Component
 {
   lnf* const _lnf;
-  graph_data _data;  
+
+public:
+  graph_indicator(lnf* lnf);
+  void paint(juce::Graphics& g) override;
+};
+
+class graph:
+public juce::Component
+{
+private:
+  lnf* const _lnf;
   graph_params const _params;
   
   void paint_series(
     juce::Graphics& g, jarray<float, 1> const& series, 
     bool bipolar, float stroke_thickness, float midpoint);
-  void paint_indicators(
-    juce::Graphics& g, jarray<float, 1> const& series, jarray<int, 1> const& indicators);
+
+protected:
+  static int const max_indicators = 32;
+
+  graph_data _data;
+  std::vector<std::unique_ptr<graph_indicator>> _indicators = {};
 
 public:
   void render(graph_data const& data);
   void paint(juce::Graphics& g) override;
-  graph(lnf* lnf, graph_params const& params) :
-  _lnf(lnf), _data(graph_data_type::na, {}), _params(params) {}
+
+  graph(lnf* lnf, graph_params const& params);
 };
 
 struct module_graph_params
@@ -69,7 +84,6 @@ public juce::SettableTooltipClient
 
   plugin_gui* const _gui;
   module_graph_params const _module_params;
-  std::vector<custom_out_state> _custom_out_states = {};
 
   bool render_if_dirty();
   void request_rerender(int param);

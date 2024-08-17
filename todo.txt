@@ -32,6 +32,7 @@ V todo figure out why costate is all 255
 - fix vst3
 - fix clap threadpool
 - it doesn't repaint smooth
+- rename custom_out_state
 
 wishlist:
 DSF falloff to the left

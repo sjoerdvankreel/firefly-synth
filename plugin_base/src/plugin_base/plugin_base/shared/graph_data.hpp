@@ -17,7 +17,7 @@ class graph_data {
   float _scalar = {};
   jarray<float, 2> _audio = {};
   jarray<float, 1> _series = {};
-  jarray<int, 1> _indicators = {}; // special markers along x-axis, follow y-value
+  jarray<int, 1> _indicators = {}; // special markers along x-axis, follow y-value TODO remove
   std::vector<std::pair<float, float>> _multi_stereo = {};
 
   void init(graph_data const& rhs);

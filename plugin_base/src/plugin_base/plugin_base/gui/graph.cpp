@@ -56,11 +56,29 @@ module_graph::timerCallback()
 void 
 module_graph::custom_out_state_changed(std::vector<custom_out_state> const& states)
 {
+  if (_data.type() != graph_data_type::series)
+    return;
+
   // called with stuff for current module only
-  _custom_out_states = states;
-  for (int i = 0; i < states.size(); i++)
-    if (states[i].data.module_slot == _activated_module_slot)
-      _render_dirty = true;
+  for (int i = 0; i < max_indicators; i++)
+    _indicators[i]->setVisible(false);
+
+  float w = getWidth();
+  float h = getHeight();
+  int count = _data.series().size();
+
+  int current_indicator = 0;
+  for (int i = 0; i < states.size() && current_indicator < max_indicators; i++, current_indicator++)
+    if (states[i].data.module_slot == _activated_module_slot )
+      {
+        check_unipolar(states[i].data.value);
+        float x = states[i].data.value * w;
+        int point = std::clamp((int)(states[i].data.value * (count - 1)), 0, count - 1);
+        float y = (1 - std::clamp(_data.series()[point], 0.0f, 1.0f)) * h;
+        _indicators[current_indicator]->setVisible(true);
+        _indicators[current_indicator]->setBounds(x - 3, y - 3, 6, 6);
+        _indicators[current_indicator]->repaint();
+      }
 }
 
 void 
@@ -155,10 +173,36 @@ module_graph::render_if_dirty()
   auto const& module = _gui->gui_state()->desc().plugin->modules[mapping.module_index];
   if(module.graph_renderer != nullptr)
     render(module.graph_renderer(
-      *_gui->gui_state(), _custom_out_states, 
+      *_gui->gui_state(), {}, // TODO drop the arg
       _gui->get_module_graph_engine(module), _hovered_or_tweaked_param, mapping));
   _render_dirty = false;
   return true;
+}
+
+graph_indicator::
+graph_indicator(lnf* lnf) : _lnf(lnf)
+{
+  setSize(6, 6);
+  setVisible(false);
+}
+
+void
+graph_indicator::paint(Graphics& g)
+{
+  g.setColour(_lnf->colors().graph_mod_indicator);
+  g.fillEllipse(0, 0, 6, 6);
+}
+
+graph::
+graph(lnf* lnf, graph_params const& params) :
+  _lnf(lnf), _data(graph_data_type::na, {}), _params(params)
+{
+  _indicators.resize(max_indicators);
+  for (int i = 0; i < max_indicators; i++)
+  {
+    _indicators[i] = std::make_unique<graph_indicator>(_lnf);
+    addChildComponent(_indicators[i].get());
+  }
 }
 
 void 
@@ -197,24 +241,6 @@ graph::paint_series(
   if (!_data.stroke_with_area())
     g.setColour(_lnf->colors().graph_line);
   g.strokePath(pStroke, PathStrokeType(stroke_thickness));
-}
-
-void 
-graph::paint_indicators(
-  juce::Graphics& g, jarray<float, 1> const& series, jarray<int, 1> const& indicators)
-{
-  float w = getWidth();
-  float h = getHeight();
-  float count = series.size();
-
-  g.setColour(_lnf->colors().graph_mod_indicator);
-  for (int i = 0; i < indicators.size(); i++)
-    if(indicators[i] >= 0 && indicators[i] < series.size())
-    {
-      float x = indicators[i] / (float)count * w;
-      float y = (1 - std::clamp(series[indicators[i]], 0.0f, 1.0f)) * h;
-      g.fillEllipse(x - 3, y - 3, 6, 6);
-    }
 }
 
 void
@@ -334,7 +360,6 @@ graph::paint(Graphics& g)
     for(int i = 0; i < series.size(); i++)
       series[i] = bipolar_to_unipolar(series[i]);
   paint_series(g, series, _data.bipolar(), _data.stroke_thickness(), 0.5f);
-  paint_indicators(g, series, _data.indicators());
 }
 
 }
