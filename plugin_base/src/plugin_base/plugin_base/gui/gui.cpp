@@ -547,9 +547,14 @@ plugin_gui::mod_indicator_states_changed()
     [compare](auto const& l, auto const& r) { return !compare(l, r) && !compare(r, l); });
   _mod_indicator_states->erase(unique_it, _mod_indicator_states->end());
 
+  std::set<int> empty_indicator_modules = {};
+  for (auto i : _mod_indicator_state_listeners)
+    empty_indicator_modules.insert(i.first);
+
   std::vector<mod_indicator_state> this_module_states;
   for (int i = 0; i < _mod_indicator_states->size(); i++)
   {
+    empty_indicator_modules.erase((*_mod_indicator_states)[i].data.module);
     this_module_states.push_back((*_mod_indicator_states)[i]);
     int this_module = (*_mod_indicator_states)[i].data.module;
     for (auto listener_it = _mod_indicator_state_listeners[this_module].begin();
@@ -559,6 +564,12 @@ plugin_gui::mod_indicator_states_changed()
     if(i < _mod_indicator_states->size() - 1 && this_module != (*_mod_indicator_states)[i + 1].data.module)
       this_module_states.clear();
   }
+
+  // notify in case all mod state is gone
+  for(int module: empty_indicator_modules)
+    for (auto listener_it = _mod_indicator_state_listeners[module].begin();
+      listener_it != _mod_indicator_state_listeners[module].end(); ++listener_it)
+      (*listener_it)->mod_indicator_state_changed({});
 }
 
 void
