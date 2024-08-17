@@ -124,6 +124,7 @@ pb_plugin::timerCallback()
   _custom_out_states.clear();
   while (_custom_out_queue->try_dequeue(costate))
     _custom_out_states.push_back(costate);
+  if (_gui) _gui->custom_out_states_changed();
 
   _inside_timer_callback = false;
 }

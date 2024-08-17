@@ -117,6 +117,13 @@ public:
   _gui(gui), _global_index(global_index), _type(type), _component(component) { _component->addMouseListener(this, true); }
 };
 
+class custom_out_state_listener
+{
+public:
+  virtual void 
+  custom_out_state_changed(std::vector<custom_out_state> const& states) = 0;
+};
+
 class plugin_gui:
 public juce::Component
 {
@@ -128,7 +135,7 @@ public:
   ~plugin_gui();
   plugin_gui(
     plugin_state* gui_state, plugin_base::extra_state* extra_state, 
-    std::vector<plugin_base::custom_out_state> const* custom_out_states);
+    std::vector<plugin_base::custom_out_state>* custom_out_states);
 
   void save_patch();
   void init_patch();
@@ -152,6 +159,9 @@ public:
   void reloaded();
   void resized() override;
   void theme_changed(std::string const& theme_name);
+  
+  // for anyone who wants to repaint on this stuff
+  void custom_out_states_changed();
 
   void param_end_changes(int index);
   void param_begin_changes(int index);
@@ -168,6 +178,9 @@ public:
   plugin_state* gui_state() const { return _gui_state; }
   extra_state* extra_state_() const { return _extra_state; }
   std::vector<plugin_base::custom_out_state> const* custom_out_states() const { return _custom_out_states; }
+
+  void add_custom_out_state_listener(int module, custom_out_state_listener* listener);
+  void remove_custom_out_state_listener(int module, custom_out_state_listener* listener);
   
   void remove_param_listener(gui_param_listener* listener);
   void remove_gui_mouse_listener(gui_mouse_listener* listener);
@@ -175,7 +188,7 @@ public:
   void add_param_listener(gui_param_listener* listener) { _param_listeners.push_back(listener); }
   void add_gui_mouse_listener(gui_mouse_listener* listener) { _gui_mouse_listeners.push_back(listener); }
   void add_tab_selection_listener(gui_tab_selection_listener* listener) { _tab_selection_listeners.push_back(listener); }
-
+  
 private:
 
   float _system_dpi_scale = 1.0f;
@@ -186,7 +199,7 @@ private:
   int _last_mouse_enter_module = -1;
   int _last_mouse_enter_custom = -1;
   plugin_base::extra_state* const _extra_state;
-  std::vector<plugin_base::custom_out_state> const* _custom_out_states = {};
+  std::vector<plugin_base::custom_out_state>* _custom_out_states = {};
   std::unique_ptr<juce::TooltipWindow> _tooltip = {};
   std::map<int, std::unique_ptr<lnf>> _module_lnfs = {};
   std::map<int, std::unique_ptr<lnf>> _custom_lnfs = {};
@@ -194,6 +207,7 @@ private:
   std::vector<gui_param_listener*> _param_listeners = {};
   std::vector<gui_mouse_listener*> _gui_mouse_listeners = {};
   std::vector<gui_tab_selection_listener*> _tab_selection_listeners = {};
+  std::map<int, std::vector<custom_out_state_listener*>> _custom_out_state_listeners = {};
   // must be destructed first, will unregister listeners, mind order
   std::vector<std::unique_ptr<juce::Component>> _components = {};
   std::vector<std::unique_ptr<gui_hover_listener>> _hover_listeners = {};

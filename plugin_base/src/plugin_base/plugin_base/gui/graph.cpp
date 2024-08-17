@@ -11,6 +11,7 @@ module_graph::
 { 
   _done = true;
   stopTimer();
+  _gui->remove_custom_out_state_listener(_module_params.module_index, this);
   if(_module_params.render_on_tweak) _gui->gui_state()->remove_any_listener(this);
   if(_module_params.render_on_tab_change) _gui->remove_tab_selection_listener(this);
   if (_module_params.render_on_module_mouse_enter || _module_params.render_on_param_mouse_enter_modules.size())
@@ -33,6 +34,7 @@ graph(lnf, params), _gui(gui), _module_params(module_params)
     gui->add_tab_selection_listener(this);
     module_tab_changed(_module_params.module_index, 0);
   }
+  _gui->add_custom_out_state_listener(module_params.module_index, this);
   startTimerHz(_module_params.fps);
 }
 
@@ -49,6 +51,16 @@ module_graph::timerCallback()
   if(_done || !_render_dirty) return;
   if(render_if_dirty())
     repaint();
+}
+
+void 
+module_graph::custom_out_state_changed(std::vector<custom_out_state> const& states)
+{
+  // called with stuff for current module only
+  _custom_out_states = states;
+  for (int i = 0; i < states.size(); i++)
+    if (states[i].data.module_slot == _activated_module_slot)
+      _render_dirty = true;
 }
 
 void 
@@ -143,7 +155,7 @@ module_graph::render_if_dirty()
   auto const& module = _gui->gui_state()->desc().plugin->modules[mapping.module_index];
   if(module.graph_renderer != nullptr)
     render(module.graph_renderer(
-      *_gui->gui_state(), *_gui->custom_out_states(), 
+      *_gui->gui_state(), _custom_out_states, 
       _gui->get_module_graph_engine(module), _hovered_or_tweaked_param, mapping));
   _render_dirty = false;
   return true;
@@ -191,8 +203,17 @@ void
 graph::paint_indicators(
   juce::Graphics& g, jarray<float, 1> const& series, jarray<int, 1> const& indicators)
 {
+  float w = getWidth();
+  float h = getHeight();
+  float count = series.size();
+
   g.setColour(Colours::green);
-  g.fillEllipse(10, 10, 10, 10);
+  for (int i = 0; i < indicators.size(); i++)
+  {
+    float x = indicators[i] / (float)count * w;
+    float y = (1 - std::clamp(series[indicators[i]], 0.0f, 1.0f)) * h;
+    g.fillEllipse(x, y, 4, 4);
+  }
 }
 
 void

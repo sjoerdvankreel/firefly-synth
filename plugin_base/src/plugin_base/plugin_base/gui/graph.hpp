@@ -57,6 +57,7 @@ public graph,
 public any_state_listener,
 public gui_mouse_listener,
 public gui_tab_selection_listener,
+public custom_out_state_listener,
 public juce::Timer,
 public juce::SettableTooltipClient
 {
@@ -68,6 +69,7 @@ public juce::SettableTooltipClient
 
   plugin_gui* const _gui;
   module_graph_params const _module_params;
+  std::vector<custom_out_state> _custom_out_states = {};
 
   bool render_if_dirty();
   void request_rerender(int param);
@@ -85,6 +87,7 @@ public:
   void module_mouse_enter(int module) override;
   void module_tab_changed(int module, int slot) override;
   void any_state_changed(int param, plain_value plain) override;  
+  void custom_out_state_changed(std::vector<custom_out_state> const& states) override;
 };
 
 }
