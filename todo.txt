@@ -21,14 +21,14 @@ V1.8.4:
 - fix the undo history for tuning mode
 
 More-small-stuff-again:
+V todo consolidate last custom out state in splice_engine
+V todo figure out why costate is all 255
 - up the vno
 - green-on-white UI
 - show effective modulation in the ui + clap mod
 - bugfix: rerender graph on master in param hover?
 - turn on stuff when dragging (e.g. basic sin, dist skew etc)
 - drop some ugly-ass themes
-- todo consolidate last custom out state in splice_engine
-- todo figure out why costate is all 255
 - fix vst3
 - fix clap threadpool
 
