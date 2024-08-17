@@ -26,6 +26,7 @@ V todo figure out why costate is all 255
 V it doesn't repaint smooth
 V rename custom_out_state
 V fix the env stuff drop stn
+V fix the global/top graph
 - up the vno
 - green-on-white UI
 - show effective modulation in the ui + clap mod
@@ -34,7 +35,6 @@ V fix the env stuff drop stn
 - drop some ugly-ass themes
 - fix vst3
 - fix clap threadpool
-- fix the global/top graph
 
 wishlist:
 DSF falloff to the left

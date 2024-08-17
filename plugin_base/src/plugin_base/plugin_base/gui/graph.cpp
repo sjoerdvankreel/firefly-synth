@@ -56,29 +56,40 @@ module_graph::timerCallback()
 void 
 module_graph::mod_indicator_state_changed(std::vector<mod_indicator_state> const& states)
 {
-  if (_data.type() != graph_data_type::series)
-    return;
-
-  // called with stuff for current module only
   for (int i = 0; i < max_indicators; i++)
     _indicators[i]->setVisible(false);
+
+  if (_data.type() != graph_data_type::series)
+    return;
 
   float w = getWidth();
   float h = getHeight();
   int count = _data.series().size();
 
   int current_indicator = 0;
+  int hovered_or_tweaked_mod_slot = -1;
+  int hovered_or_tweaked_mod_index = -1;
+  if (_hovered_or_tweaked_param != -1)
+  {
+    hovered_or_tweaked_mod_slot = _gui->gui_state()->desc().param_mappings.params[_hovered_or_tweaked_param].topo.module_slot;
+    hovered_or_tweaked_mod_index = _gui->gui_state()->desc().param_mappings.params[_hovered_or_tweaked_param].topo.module_index;
+  }
   for (int i = 0; i < states.size() && current_indicator < max_indicators; i++, current_indicator++)
-    if (states[i].data.module_slot == _activated_module_slot )
-      {
-        check_unipolar(states[i].data.value);
-        float x = states[i].data.value * w;
-        int point = std::clamp((int)(states[i].data.value * (count - 1)), 0, count - 1);
-        float y = (1 - std::clamp(_data.series()[point], 0.0f, 1.0f)) * h;
-        _indicators[current_indicator]->setVisible(true);
-        _indicators[current_indicator]->setBounds(x - 3, y - 3, 6, 6);
-        _indicators[current_indicator]->repaint();
-      }
+    if ((_module_params.module_index != -1 && 
+      states[i].data.module_slot == _activated_module_slot && 
+      states[i].data.module == _module_params.module_index) ||
+      (_module_params.module_index == -1 && 
+        hovered_or_tweaked_mod_index == states[i].data.module &&
+        hovered_or_tweaked_mod_slot == states[i].data.module_slot))
+    {
+      check_unipolar(states[i].data.value);
+      float x = states[i].data.value * w;
+      int point = std::clamp((int)(states[i].data.value * (count - 1)), 0, count - 1);
+      float y = (1 - std::clamp(_data.series()[point], 0.0f, 1.0f)) * h;
+      _indicators[current_indicator]->setVisible(true);
+      _indicators[current_indicator]->setBounds(x - 3, y - 3, 6, 6);
+      _indicators[current_indicator]->repaint();
+    }
 }
 
 void 

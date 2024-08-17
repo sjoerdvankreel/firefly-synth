@@ -570,6 +570,11 @@ plugin_gui::mod_indicator_states_changed()
     for (auto listener_it = _mod_indicator_state_listeners[module].begin();
       listener_it != _mod_indicator_state_listeners[module].end(); ++listener_it)
       (*listener_it)->mod_indicator_state_changed({});
+
+  // notify "any" listeners registered as -1
+  for (auto listener_it = _mod_indicator_state_listeners[-1].begin();
+    listener_it != _mod_indicator_state_listeners[-1].end(); ++listener_it)
+    (*listener_it)->mod_indicator_state_changed(*_mod_indicator_states);
 }
 
 void
