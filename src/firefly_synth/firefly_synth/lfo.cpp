@@ -228,7 +228,9 @@ render_graph(
 
   jarray<int, 1> indicators = {};
   for (int i = 0; i < custom_out_states.size(); i++)
-    indicators.push_back(custom_out_states[i].data.current_value / (float)std::numeric_limits<std::uint8_t>::max() * series.size()); // todo account for multicycle
+    if(custom_out_states[i].data.module_slot == mapping.module_slot)
+      indicators.push_back(custom_out_states[i].data.current_value / 
+        (float)std::numeric_limits<std::uint8_t>::max() * series.size()); // todo account for multicycle
   return graph_data(series, indicators, false, 1.0f, false, { partition });
 }
 

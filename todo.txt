@@ -29,6 +29,8 @@ More-small-stuff-again:
 - drop some ugly-ass themes
 - todo consolidate last custom out state in splice_engine
 - todo figure out why costate is all 255
+- fix vst3
+- fix clap threadpool
 
 wishlist:
 DSF falloff to the left
