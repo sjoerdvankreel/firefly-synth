@@ -179,36 +179,16 @@ render_graph(
   bool global = mapping.module_index == module_glfo;
   float freq = lfo_frequency_from_state(state, mapping.module_index, mapping.module_slot, 120);
 
+  // make sure we exactly plot 1 cycle otherwise
+  // we cannot not where to put the mod indicators
+  sample_rate = params.max_frame_count * freq;
   if (!sync)
-  {
-    // 1 second, or the minimum that shows 1 cycle
-    if (freq >= 1)
-    {
-      partition = "1 Sec";
-      sample_rate = params.max_frame_count;
-    }
-    else
-    {
-      sample_rate = params.max_frame_count * freq;
-      partition = float_to_string(1 / freq, 2) + " Sec";
-    }
-  }
-  
-  // draw synced 1/1 as full cycle
-  if (sync)
+    partition = float_to_string(1 / freq, 2) + " Sec";
+  else
   {
     // 1 bar, or the minimum that shows 1 cycle
     float one_bar_freq = timesig_to_freq(120, { 1, 1 });
-    if(freq >= one_bar_freq)
-    {
-      partition = "1 Bar";
-      sample_rate = one_bar_freq * params.max_frame_count;
-    }
-    else
-    {
-      sample_rate = params.max_frame_count * freq;
-      partition = float_to_string(one_bar_freq / freq, 2) + " Bar";
-    }
+    partition = float_to_string(one_bar_freq / freq, 2) + " Bar";
   }
 
   engine->process_begin(&state, sample_rate, params.max_frame_count, -1);
@@ -230,7 +210,7 @@ render_graph(
   jarray<int, 1> indicators = {};
   for (int i = 0; i < custom_out_states.size(); i++)
     if (custom_out_states[i].data.module_slot == mapping.module_slot)
-      indicators.push_back(custom_out_states[i].data.value * (series.size() - 1)); // todo multicycle
+      indicators.push_back(custom_out_states[i].data.value * (series.size() - 1));
   return graph_data(series, indicators, false, 1.0f, false, { partition });
 }
 

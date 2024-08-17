@@ -31,6 +31,7 @@ V todo figure out why costate is all 255
 - drop some ugly-ass themes
 - fix vst3
 - fix clap threadpool
+- it doesn't repaint smooth
 
 wishlist:
 DSF falloff to the left

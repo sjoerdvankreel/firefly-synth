@@ -218,14 +218,14 @@ plugin_splice_engine::process()
 
     _engine.process();  
 
+    _host_block.events.output_params.insert(
+      _host_block.events.output_params.begin(),
+      inner_block.events.output_params.begin(),
+      inner_block.events.output_params.end());
+
     // only care about the last one
     if (i == total_block_count - 1)
     {
-      _host_block.events.output_params.insert(
-        _host_block.events.output_params.begin(),
-        inner_block.events.output_params.begin(),
-        inner_block.events.output_params.end());
-
       _host_block.events.custom_out_states.insert(
         _host_block.events.custom_out_states.begin(),
         inner_block.events.custom_out_states.begin(),
