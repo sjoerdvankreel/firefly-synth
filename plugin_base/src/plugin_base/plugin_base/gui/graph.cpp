@@ -71,7 +71,7 @@ module_graph::mod_indicator_state_changed(std::vector<mod_indicator_state> const
   for (int i = 0; i < states.size() && current_indicator < max_indicators; i++, current_indicator++)
     if (states[i].data.module_slot == _activated_module_slot )
       {
-        // TODO check_unipolar(states[i].data.value);
+        check_unipolar(states[i].data.value);
         float x = states[i].data.value * w;
         int point = std::clamp((int)(states[i].data.value * (count - 1)), 0, count - 1);
         float y = (1 - std::clamp(_data.series()[point], 0.0f, 1.0f)) * h;

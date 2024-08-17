@@ -61,7 +61,7 @@ lfo_frequency_from_state(
   plugin_state const& state, int module_index, int module_slot, int bpm);
 extern void
 env_plot_length_seconds(
-  plugin_state const& state, int slot, float& dly, float& att, float& hld, float& dcy, float& stn, float& rls, float& flt);
+  plugin_state const& state, int slot, float& dly, float& att, float& hld, float& dcy, float& rls, float& flt);
 
 static std::vector<list_item>
 type_items()
@@ -279,13 +279,13 @@ render_graph(
   }
 
   // scale to longest env or lfo
-  float dahds = 0.1f;
-  float dahdsrf = 0.1f;
+  float dahd = 0.1f;
+  float dahdrf = 0.1f;
   float max_total = 0.1f;
-  float max_dahds = 0.1f;
-  float max_dahdsrf = 0.1f;
+  float max_dahd = 0.1f;
+  float max_dahdrf = 0.1f;
   
-  float dly, att, hld, dcy, stn, rls, flt;
+  float dly, att, hld, dcy, rls, flt;
   int ti = state.get_plain_at(map.module_index, map.module_slot, param_target, map.param_slot).step();
 
   for(int r = 0; r < route_count; r++)
@@ -295,14 +295,14 @@ render_graph(
         int si = state.get_plain_at(map.module_index, map.module_slot, param_source, r).step();
         if (sources[si].module_index == module_env)
         {
-          env_plot_length_seconds(state, sources[si].module_slot, dly, att, hld, dcy, stn, rls, flt);
-          dahds = dly + att + hld + dcy + stn;
-          dahdsrf = dahds + rls + flt;
-          if (dahdsrf > max_dahdsrf)
+          env_plot_length_seconds(state, sources[si].module_slot, dly, att, hld, dcy, rls, flt);
+          dahd = dly + att + hld + dcy;
+          dahdrf = dahd + rls + flt;
+          if (dahdrf > max_dahdrf)
           {
-            max_dahds = dahds;
-            max_dahdsrf = dahdsrf;
-            max_total = dahdsrf;
+            max_dahd = dahd;
+            max_dahdrf = dahdrf;
+            max_total = dahdrf;
           }
         }
         else if (sources[si].module_index == module_glfo || sources[si].module_index == module_vlfo)
@@ -314,7 +314,7 @@ render_graph(
 
   auto const params = make_graph_engine_params();
   int sample_rate = params.max_frame_count / max_total;
-  int voice_release_at = max_dahds / max_dahdsrf * params.max_frame_count;
+  int voice_release_at = max_dahd / max_dahdrf * params.max_frame_count;
 
   engine->process_begin(&state, sample_rate, params.max_frame_count, voice_release_at);  
   std::vector<int> relevant_modules({ module_gcv_cv_matrix, module_master_in, module_glfo });
