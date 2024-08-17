@@ -81,6 +81,7 @@ class lfo_engine :
 public module_engine {
   float _phase;
   float _ref_phase;
+  float _graph_phase;
   float _lfo_end_value;
   float _filter_end_value;
   
@@ -228,8 +229,8 @@ render_graph(
 
   jarray<int, 1> indicators = {};
   for (int i = 0; i < custom_out_states.size(); i++)
-    if(custom_out_states[i].data.module_slot == mapping.module_slot)
-      indicators.push_back(custom_out_states[i].data.value * series.size()); // todo account for multicycle
+    if (custom_out_states[i].data.module_slot == mapping.module_slot)
+      indicators.push_back(custom_out_states[i].data.value * (series.size() - 1)); // todo multicycle
   return graph_data(series, indicators, false, 1.0f, false, { partition });
 }
 
@@ -554,6 +555,7 @@ void
 lfo_engine::reset(plugin_block const* block) 
 { 
   _ref_phase = 0;
+  _graph_phase = 0;
   _lfo_end_value = 0;
   _end_filter_pos = 0;
   _filter_end_value = 0;
@@ -594,6 +596,17 @@ lfo_engine::process(plugin_block& block, cv_cv_matrix_mixdown const* modulation)
   {
     block.state.own_cv[0][0].fill(block.start_frame, block.end_frame, 0.0f);
     return;
+  }
+
+  // only want the indicators for the actual audio engine
+  if (!block.graph)
+  {
+    custom_out_state out_state = {};
+    out_state.data.module_slot = block.module_slot;
+    out_state.data.module = _global ? module_glfo : module_vlfo;
+    out_state.data.voice = _global ? 0 : block.voice->state.slot;
+    out_state.data.value = type == type_repeat ? _ref_phase : _graph_phase;
+    block.push_custom_out_state(out_state);
   }
 
   if(_stage == lfo_stage::end)
@@ -643,16 +656,6 @@ lfo_engine::process(plugin_block& block, cv_cv_matrix_mixdown const* modulation)
     process_uni<true>(block, modulation);
   else
     process_uni<false>(block, modulation);
-
-  // only want the indicators for the actual audio engine
-  if (block.graph) return;
-
-  custom_out_state out_state = {};
-  out_state.data.value = _phase;
-  out_state.data.module_slot = block.module_slot;
-  out_state.data.module = _global ? module_glfo : module_vlfo;
-  out_state.data.voice = _global ? 0 : block.voice->state.slot;
-  block.push_custom_out_state(out_state);
 }
 
 template <bool GlobalUnison> void
@@ -840,6 +843,9 @@ void lfo_engine::process_loop(plugin_block& block, cv_cv_matrix_mixdown const* m
       block.state.own_cv[0][0][f] = _filter_end_value;
       continue;
     }
+
+    if (_graph_phase < 1.0f)
+      _graph_phase += rate_curve[f] / block.sample_rate;
 
     if (_stage == lfo_stage::filter)
     {

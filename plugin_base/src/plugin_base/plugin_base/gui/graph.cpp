@@ -209,7 +209,7 @@ graph::paint_indicators(
 
   g.setColour(_lnf->colors().graph_mod_indicator);
   for (int i = 0; i < indicators.size(); i++)
-    if(indicators[i] < series.size())
+    if(indicators[i] >= 0 && indicators[i] < series.size())
     {
       float x = indicators[i] / (float)count * w;
       float y = (1 - std::clamp(series[indicators[i]], 0.0f, 1.0f)) * h;
