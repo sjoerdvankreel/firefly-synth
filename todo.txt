@@ -33,6 +33,7 @@ V todo figure out why costate is all 255
 - fix clap threadpool
 - it doesn't repaint smooth
 - rename custom_out_state
+- fix the env stuff drop stn
 
 wishlist:
 DSF falloff to the left
