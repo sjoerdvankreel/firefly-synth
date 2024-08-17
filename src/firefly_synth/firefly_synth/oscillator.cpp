@@ -259,7 +259,7 @@ render_osc_graphs(plugin_state const& state, graph_engine* engine, int slot, boo
 
 static graph_data
 render_osc_graph(
-  plugin_state const& state, std::vector<custom_out_state> const& custom_out_states, 
+  plugin_state const& state, std::vector<mod_indicator_state> const& mod_indicator_states,
   graph_engine* engine, int param, param_topo_mapping const& mapping)
 {
   graph_engine_params params = {};

@@ -72,7 +72,7 @@ public graph,
 public any_state_listener,
 public gui_mouse_listener,
 public gui_tab_selection_listener,
-public custom_out_state_listener,
+public mod_indicator_state_listener,
 public juce::Timer,
 public juce::SettableTooltipClient
 {
@@ -101,7 +101,7 @@ public:
   void module_mouse_enter(int module) override;
   void module_tab_changed(int module, int slot) override;
   void any_state_changed(int param, plain_value plain) override;  
-  void custom_out_state_changed(std::vector<custom_out_state> const& states) override;
+  void mod_indicator_state_changed(std::vector<mod_indicator_state> const& states) override;
 };
 
 }

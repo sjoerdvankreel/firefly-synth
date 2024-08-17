@@ -17,7 +17,7 @@ struct shared_block final {
   float const* const* audio_in;
 };
 
-struct custom_out_state_data final {
+struct mod_indicator_state_data final {
   std::uint8_t module;
   std::uint8_t module_slot;
   std::uint8_t voice;
@@ -25,11 +25,10 @@ struct custom_out_state_data final {
   float value;
 };
 
-// can be anything, but currently used for visual modulation indication
-// note this is really state not event-stream! pushed once per-block, cleared on each round
-union custom_out_state final {
+// visual modulation indication
+union mod_indicator_state final {
   std::uint64_t packed;
-  custom_out_state_data data;
+  mod_indicator_state_data data;
 };
 
 }

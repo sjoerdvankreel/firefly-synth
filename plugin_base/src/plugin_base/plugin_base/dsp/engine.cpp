@@ -120,7 +120,7 @@ plugin_engine::make_plugin_block(
     _sample_rate, state, nullptr, nullptr, 
     _host_block->shared, *_state.desc().plugin, 
     _state.desc().plugin->modules[module],
-    &_host_block->events.custom_out_states // TODO this dont cut it for clap
+    &_host_block->events.mod_indicator_states // TODO this dont cut it for clap
   };
 }
 
@@ -569,7 +569,7 @@ plugin_engine::process()
   int frame_count = _host_block->frame_count;
 
   _host_block->events.output_params.clear();
-  _host_block->events.custom_out_states.clear();
+  _host_block->events.mod_indicator_states.clear();
   std::pair<std::uint32_t, std::uint32_t> denormal_state = disable_denormals();  
 
   // set automation values to current state, events may overwrite

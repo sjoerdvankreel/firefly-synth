@@ -24,8 +24,8 @@ public format_config,
 public any_state_listener,
 public gui_param_listener
 {
-  typedef moodycamel::ReaderWriterQueue<custom_out_state> custom_out_queue;
   typedef moodycamel::ReaderWriterQueue<sync_event, default_q_size> event_queue;
+  typedef moodycamel::ReaderWriterQueue<mod_indicator_state> mod_indicator_queue;
 
   // needs to be first, everyone else needs it
   std::unique_ptr<plugin_desc> _desc;
@@ -37,8 +37,8 @@ public gui_param_listener
   std::vector<int> _block_automation_seen = {};
   std::unique_ptr<event_queue> _to_gui_events = {};
   std::unique_ptr<event_queue> _to_audio_events = {};
-  std::unique_ptr<custom_out_queue> _custom_out_queue = {};
-  std::vector<custom_out_state> _custom_out_states = {};
+  std::unique_ptr<mod_indicator_queue> _mod_indicator_queue = {};
+  std::vector<mod_indicator_state> _mod_indicator_states = {};
 
   // see param_state_changed and timerCallback()
   // and vst3 pb_controller _inside_set_param_normalized

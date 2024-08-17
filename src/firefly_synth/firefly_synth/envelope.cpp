@@ -169,7 +169,7 @@ make_graph_engine(plugin_desc const* desc)
 
 static graph_data
 render_graph(
-  plugin_state const& state, std::vector<custom_out_state> const& custom_out_states, 
+  plugin_state const& state, std::vector<mod_indicator_state> const& mod_indicator_states,
   graph_engine* engine, int param, param_topo_mapping const& mapping)
 {
   if (state.get_plain_at(module_env, mapping.module_slot, param_on, 0).step() == 0) 
@@ -201,11 +201,11 @@ render_graph(
 
   jarray<int, 1> indicators = {};
   jarray<float, 1> series(block->state.own_cv[0][0]);
-  for (int i = 0; i < custom_out_states.size(); i++)
-    if (custom_out_states[i].data.module_slot == mapping.module_slot)
+  for (int i = 0; i < mod_indicator_states.size(); i++)
+    if (mod_indicator_states[i].data.module_slot == mapping.module_slot)
     {
-      env_stage stage = (env_stage)custom_out_states[i].data.user;
-      float env_pos_sec = custom_out_states[i].data.value;
+      env_stage stage = (env_stage)mod_indicator_states[i].data.user;
+      float env_pos_sec = mod_indicator_states[i].data.value;
       if (stage > env_stage::delay) env_pos_sec += dly;
       if (stage > env_stage::attack) env_pos_sec += att;
       if (stage > env_stage::hold) env_pos_sec += hld;
@@ -594,13 +594,13 @@ env_engine::process(plugin_block& block, cv_cv_matrix_mixdown const* modulation)
   if (block.graph) return;
 
   if (_stage == env_stage::end) return;
-  custom_out_state out_state = {};
-  out_state.data.value = _stage_pos;
-  out_state.data.user = (std::uint8_t)_stage;
-  out_state.data.module = module_env;
-  out_state.data.module_slot = block.module_slot;
-  out_state.data.voice = block.voice->state.slot;
-  block.push_custom_out_state(out_state);
+  mod_indicator_state indicator_state = {};
+  indicator_state.data.value = _stage_pos;
+  indicator_state.data.user = (std::uint8_t)_stage;
+  indicator_state.data.module = module_env;
+  indicator_state.data.module_slot = block.module_slot;
+  indicator_state.data.voice = block.voice->state.slot;
+  block.push_mod_indicator_state(indicator_state);
 }
 
 template <bool Monophonic>

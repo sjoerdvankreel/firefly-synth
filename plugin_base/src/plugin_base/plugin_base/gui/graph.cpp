@@ -11,7 +11,7 @@ module_graph::
 { 
   _done = true;
   stopTimer();
-  _gui->remove_custom_out_state_listener(_module_params.module_index, this);
+  _gui->remove_mod_indicator_state_listener(_module_params.module_index, this);
   if(_module_params.render_on_tweak) _gui->gui_state()->remove_any_listener(this);
   if(_module_params.render_on_tab_change) _gui->remove_tab_selection_listener(this);
   if (_module_params.render_on_module_mouse_enter || _module_params.render_on_param_mouse_enter_modules.size())
@@ -34,7 +34,7 @@ graph(lnf, params), _gui(gui), _module_params(module_params)
     gui->add_tab_selection_listener(this);
     module_tab_changed(_module_params.module_index, 0);
   }
-  _gui->add_custom_out_state_listener(module_params.module_index, this);
+  _gui->add_mod_indicator_state_listener(module_params.module_index, this);
   startTimerHz(_module_params.fps);
 }
 
@@ -54,7 +54,7 @@ module_graph::timerCallback()
 }
 
 void 
-module_graph::custom_out_state_changed(std::vector<custom_out_state> const& states)
+module_graph::mod_indicator_state_changed(std::vector<mod_indicator_state> const& states)
 {
   if (_data.type() != graph_data_type::series)
     return;

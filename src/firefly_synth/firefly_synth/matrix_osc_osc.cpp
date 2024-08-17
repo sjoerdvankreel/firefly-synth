@@ -76,7 +76,7 @@ public:
 
 static graph_data
 render_graph(
-  plugin_state const& state, std::vector<custom_out_state> const& custom_out_states,
+  plugin_state const& state, std::vector<mod_indicator_state> const& mod_indicator_states,
   graph_engine* engine, int param, param_topo_mapping const& mapping)
 {
   int max_osc = 0;

@@ -335,8 +335,8 @@ plugin_gui::
 plugin_gui::
 plugin_gui(
   plugin_state* gui_state, plugin_base::extra_state* extra_state, 
-  std::vector<plugin_base::custom_out_state>* custom_out_states):
-_gui_state(gui_state), _undo_listener(this), _extra_state(extra_state), _custom_out_states(custom_out_states)
+  std::vector<plugin_base::mod_indicator_state>* mod_indicator_states):
+_gui_state(gui_state), _undo_listener(this), _extra_state(extra_state), _mod_indicator_states(mod_indicator_states)
 {
   PB_LOG_FUNC_ENTRY_EXIT();
   setOpaque(true);
@@ -515,48 +515,48 @@ plugin_gui::module_mouse_enter(int module)
 }
 
 void 
-plugin_gui::add_custom_out_state_listener(int module, custom_out_state_listener* listener)
+plugin_gui::add_mod_indicator_state_listener(int module, mod_indicator_state_listener* listener)
 {
-  auto& listeners = _custom_out_state_listeners[module];
+  auto& listeners = _mod_indicator_state_listeners[module];
   assert(std::find(listeners.begin(), listeners.end(), listener) == listeners.end());
   listeners.push_back(listener);
 }
 
 void 
-plugin_gui::remove_custom_out_state_listener(int module, custom_out_state_listener* listener)
+plugin_gui::remove_mod_indicator_state_listener(int module, mod_indicator_state_listener* listener)
 {
-  auto& listeners = _custom_out_state_listeners[module];
+  auto& listeners = _mod_indicator_state_listeners[module];
   auto iter = std::find(listeners.begin(), listeners.end(), listener);
   assert(iter != listeners.end());
   listeners.erase(iter);
 }
 
 void 
-plugin_gui::custom_out_states_changed()
+plugin_gui::mod_indicator_states_changed()
 {
   // filter duplicates since this might be the accumulation of a couple audio processing rounds
-  auto compare = [](custom_out_state const& l, custom_out_state const& r) {
+  auto compare = [](mod_indicator_state const& l, mod_indicator_state const& r) {
     if (l.data.module < r.data.module) return false;
     if (l.data.module > r.data.module) return true;
     if (l.data.module_slot < r.data.module_slot) return false;
     if (l.data.module_slot > r.data.module_slot) return true;
     return l.data.voice < r.data.voice;
   };
-  std::sort(_custom_out_states->begin(), _custom_out_states->end(), compare);
-  auto unique_it = std::unique(_custom_out_states->begin(), _custom_out_states->end(), 
+  std::sort(_mod_indicator_states->begin(), _mod_indicator_states->end(), compare);
+  auto unique_it = std::unique(_mod_indicator_states->begin(), _mod_indicator_states->end(),
     [compare](auto const& l, auto const& r) { return !compare(l, r) && !compare(r, l); });
-  _custom_out_states->erase(unique_it, _custom_out_states->end());
+  _mod_indicator_states->erase(unique_it, _mod_indicator_states->end());
 
-  std::vector<custom_out_state> this_module_states;
-  for (int i = 0; i < _custom_out_states->size(); i++)
+  std::vector<mod_indicator_state> this_module_states;
+  for (int i = 0; i < _mod_indicator_states->size(); i++)
   {
-    this_module_states.push_back((*_custom_out_states)[i]);
-    int this_module = (*_custom_out_states)[i].data.module;
-    for (auto listener_it = _custom_out_state_listeners[this_module].begin(); 
-      listener_it != _custom_out_state_listeners[this_module].end(); ++listener_it)
-      (*listener_it)->custom_out_state_changed(this_module_states);
+    this_module_states.push_back((*_mod_indicator_states)[i]);
+    int this_module = (*_mod_indicator_states)[i].data.module;
+    for (auto listener_it = _mod_indicator_state_listeners[this_module].begin();
+      listener_it != _mod_indicator_state_listeners[this_module].end(); ++listener_it)
+      (*listener_it)->mod_indicator_state_changed(this_module_states);
 
-    if(i < _custom_out_states->size() - 1 && this_module != (*_custom_out_states)[i + 1].data.module)
+    if(i < _mod_indicator_states->size() - 1 && this_module != (*_mod_indicator_states)[i + 1].data.module)
       this_module_states.clear();
   }
 }

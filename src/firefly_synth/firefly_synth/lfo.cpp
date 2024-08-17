@@ -166,7 +166,7 @@ lfo_frequency_from_state(plugin_state const& state, int module_index, int module
 
 static graph_data
 render_graph(
-  plugin_state const& state, std::vector<custom_out_state> const& custom_out_states,
+  plugin_state const& state, std::vector<mod_indicator_state> const& mod_indicator_states,
   graph_engine* engine, int param, param_topo_mapping const& mapping)
 {
   int type = state.get_plain_at(mapping.module_index, mapping.module_slot, param_type, mapping.param_slot).step();
@@ -208,9 +208,9 @@ render_graph(
   jarray<float, 1> series(block->state.own_cv[0][0]);
 
   jarray<int, 1> indicators = {};
-  for (int i = 0; i < custom_out_states.size(); i++)
-    if (custom_out_states[i].data.module_slot == mapping.module_slot)
-      indicators.push_back(custom_out_states[i].data.value * (series.size() - 1));
+  for (int i = 0; i < mod_indicator_states.size(); i++)
+    if (mod_indicator_states[i].data.module_slot == mapping.module_slot)
+      indicators.push_back(mod_indicator_states[i].data.value * (series.size() - 1));
   return graph_data(series, indicators, false, 1.0f, false, { partition });
 }
 
@@ -581,12 +581,12 @@ lfo_engine::process(plugin_block& block, cv_cv_matrix_mixdown const* modulation)
   // only want the indicators for the actual audio engine
   if (!block.graph)
   {
-    custom_out_state out_state = {};
-    out_state.data.module_slot = block.module_slot;
-    out_state.data.module = _global ? module_glfo : module_vlfo;
-    out_state.data.voice = _global ? 0 : block.voice->state.slot;
-    out_state.data.value = type == type_repeat ? _ref_phase : _graph_phase;
-    block.push_custom_out_state(out_state);
+    mod_indicator_state indicator_state = {};
+    indicator_state.data.module_slot = block.module_slot;
+    indicator_state.data.module = _global ? module_glfo : module_vlfo;
+    indicator_state.data.voice = _global ? 0 : block.voice->state.slot;
+    indicator_state.data.value = type == type_repeat ? _ref_phase : _graph_phase;
+    block.push_mod_indicator_state(indicator_state);
   }
 
   if(_stage == lfo_stage::end)

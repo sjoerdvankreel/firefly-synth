@@ -50,8 +50,8 @@ struct host_events final {
   std::vector<accurate_event> accurate_modulation;
   // regular output params eg cpu usage, needs registering output params by the module
   std::vector<block_event> output_params;
-  // anything-goes output state. any module process() call can fill these
-  std::vector<custom_out_state> custom_out_states;
+  // lfo / env modulator indicators
+  std::vector<mod_indicator_state> mod_indicator_states;
 
   // plugin_engine interpolates these as one
   std::vector<accurate_event> accurate_automation_and_modulation;

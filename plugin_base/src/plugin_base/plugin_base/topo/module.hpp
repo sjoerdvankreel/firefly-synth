@@ -82,7 +82,7 @@ typedef std::function<std::unique_ptr<module_engine>(
   plugin_topo const& topo, int sample_rate, int max_frame_count)> 
 module_engine_factory;
 typedef std::function<graph_data(
-  plugin_state const& state, std::vector<custom_out_state> const& custom_out_states, 
+  plugin_state const& state, std::vector<mod_indicator_state> const& mod_indicator_states,
   graph_engine* engine, int param, param_topo_mapping const& mapping)>
 module_graph_renderer;
 

@@ -11,7 +11,7 @@ host_block::prepare()
   events.notes.clear();
   events.block.clear();
   events.output_params.clear();
-  events.custom_out_states.clear();
+  events.mod_indicator_states.clear();
   events.accurate_automation.clear();
   events.accurate_modulation.clear();
   events.accurate_automation_and_modulation.clear();
@@ -28,7 +28,7 @@ host_events::deactivate()
   notes = {};
   block = {};
   output_params = {};
-  custom_out_states = {};
+  mod_indicator_states = {};
   accurate_automation = {};
   accurate_modulation = {};
   accurate_automation_and_modulation = {};
@@ -45,13 +45,13 @@ host_events::activate(bool graph, int module_count, int param_count, int midi_co
   int note_limit_guess = polyphony * fill_guess;
   int midi_events_guess = midi_count * fill_guess;
   int accurate_events_guess = param_count * fill_guess;
-  int custom_states_guess = module_count * polyphony;
+  int mod_indicator_states_guess = module_count * polyphony;
 
   midi.reserve(midi_events_guess);
   notes.reserve(note_limit_guess);
   block.reserve(block_events_guess);
   output_params.reserve(block_events_guess);
-  custom_out_states.reserve(custom_states_guess);
+  mod_indicator_states.reserve(mod_indicator_states_guess);
   accurate_automation.reserve(accurate_events_guess);
   accurate_modulation.reserve(accurate_events_guess);
   accurate_automation_and_modulation.reserve(accurate_events_guess);
