@@ -23,6 +23,9 @@ V1.8.4:
 More-small-stuff-again:
 V todo consolidate last custom out state in splice_engine
 V todo figure out why costate is all 255
+V it doesn't repaint smooth
+V rename custom_out_state
+V fix the env stuff drop stn
 - up the vno
 - green-on-white UI
 - show effective modulation in the ui + clap mod
@@ -31,9 +34,6 @@ V todo figure out why costate is all 255
 - drop some ugly-ass themes
 - fix vst3
 - fix clap threadpool
-- it doesn't repaint smooth
-- rename custom_out_state
-- fix the env stuff drop stn
 
 wishlist:
 DSF falloff to the left
