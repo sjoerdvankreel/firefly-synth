@@ -71,7 +71,7 @@ module_graph::mod_indicator_state_changed(std::vector<mod_indicator_state> const
   for (int i = 0; i < states.size() && current_indicator < max_indicators; i++, current_indicator++)
     if (states[i].data.module_slot == _activated_module_slot )
       {
-        check_unipolar(states[i].data.value);
+        // TODO check_unipolar(states[i].data.value);
         float x = states[i].data.value * w;
         int point = std::clamp((int)(states[i].data.value * (count - 1)), 0, count - 1);
         float y = (1 - std::clamp(_data.series()[point], 0.0f, 1.0f)) * h;
@@ -173,8 +173,7 @@ module_graph::render_if_dirty()
   auto const& module = _gui->gui_state()->desc().plugin->modules[mapping.module_index];
   if(module.graph_renderer != nullptr)
     render(module.graph_renderer(
-      *_gui->gui_state(), {}, // TODO drop the arg
-      _gui->get_module_graph_engine(module), _hovered_or_tweaked_param, mapping));
+      *_gui->gui_state(), _gui->get_module_graph_engine(module), _hovered_or_tweaked_param, mapping));
   _render_dirty = false;
   return true;
 }

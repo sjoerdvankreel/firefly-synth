@@ -332,7 +332,7 @@ render_graph(
     // plotting cv->audio
     auto const& modulation = get_cv_audio_matrix_mixdown(*block, map.module_index == module_gcv_audio_matrix);
     jarray<float, 1> stacked = jarray<float, 1>(*targets.mappings[ti].value_at(modulation));
-    return graph_data(stacked, {}, false, 1.0f, false, { partition });
+    return graph_data(stacked, false, 1.0f, false, { partition });
   } else
   {
     // plotting cv->cv
@@ -340,7 +340,7 @@ render_graph(
     auto& mixer = get_cv_cv_matrix_mixer(*block, map.module_index == module_gcv_cv_matrix);
     auto const& modulation = mixer.mix(*block, target_map.module_index, target_map.module_slot);
     jarray<float, 1> const* stacked = modulation[target_map.param_index][target_map.param_slot];
-    return graph_data(*stacked, {}, false, 1.0f, false, { partition });
+    return graph_data(*stacked, false, 1.0f, false, { partition });
   }
 }
 
@@ -387,8 +387,7 @@ cv_matrix_topo(
   result.graph_engine_factory = make_graph_engine;
   if(!cv && !is_fx) result.default_initializer = global ? init_audio_global_default : init_audio_voice_default;
   result.graph_renderer = [sm = source_matrix.mappings, tm = target_matrix](
-    auto const& state, auto const& mod_indicator_states,
-    auto* engine, int param, auto const& mapping) {
+    auto const& state, auto* engine, int param, auto const& mapping) {
       return render_graph(state, engine, param, mapping, sm, tm);
     };
   result.gui.menu_handler_factory = [](plugin_state* state) {

@@ -169,8 +169,7 @@ make_graph_engine(plugin_desc const* desc)
 
 static graph_data
 render_graph(
-  plugin_state const& state, std::vector<mod_indicator_state> const& mod_indicator_states,
-  graph_engine* engine, int param, param_topo_mapping const& mapping)
+  plugin_state const& state, graph_engine* engine, int param, param_topo_mapping const& mapping)
 {
   if (state.get_plain_at(module_env, mapping.module_slot, param_on, 0).step() == 0) 
     return graph_data(graph_data_type::off, {});
@@ -199,23 +198,8 @@ render_graph(
   });
   engine->process_end();
 
-  jarray<int, 1> indicators = {};
   jarray<float, 1> series(block->state.own_cv[0][0]);
-  for (int i = 0; i < mod_indicator_states.size(); i++)
-    if (mod_indicator_states[i].data.module_slot == mapping.module_slot)
-    {
-      env_stage stage = (env_stage)mod_indicator_states[i].data.user;
-      float env_pos_sec = mod_indicator_states[i].data.value;
-      if (stage > env_stage::delay) env_pos_sec += dly;
-      if (stage > env_stage::attack) env_pos_sec += att;
-      if (stage > env_stage::hold) env_pos_sec += hld;
-      if (stage > env_stage::decay) env_pos_sec += dcy;
-      if (stage > env_stage::sustain) env_pos_sec += stn;
-      if (stage > env_stage::release) env_pos_sec += rls;
-      if (stage > env_stage::filter) env_pos_sec += flt;
-      indicators.push_back(env_pos_sec / dahdsrf * series.size());
-    }
-  return graph_data(series, indicators, false, 1.0f, false, { partition });
+  return graph_data(series, false, 1.0f, false, { partition });
 }
 
 bool
