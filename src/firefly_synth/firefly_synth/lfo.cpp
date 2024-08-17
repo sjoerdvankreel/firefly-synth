@@ -229,8 +229,7 @@ render_graph(
   jarray<int, 1> indicators = {};
   for (int i = 0; i < custom_out_states.size(); i++)
     if(custom_out_states[i].data.module_slot == mapping.module_slot)
-      indicators.push_back(custom_out_states[i].data.current_value / 
-        (float)std::numeric_limits<std::uint8_t>::max() * series.size()); // todo account for multicycle
+      indicators.push_back(custom_out_states[i].data.value * series.size()); // todo account for multicycle
   return graph_data(series, indicators, false, 1.0f, false, { partition });
 }
 
@@ -649,10 +648,10 @@ lfo_engine::process(plugin_block& block, cv_cv_matrix_mixdown const* modulation)
   if (block.graph) return;
 
   custom_out_state out_state = {};
+  out_state.data.value = _phase;
   out_state.data.module_slot = block.module_slot;
   out_state.data.module = _global ? module_glfo : module_vlfo;
   out_state.data.voice = _global ? 0 : block.voice->state.slot;
-  out_state.data.current_value = (std::uint8_t)(_phase * std::numeric_limits<std::uint8_t>::max());
   block.push_custom_out_state(out_state);
 }
 

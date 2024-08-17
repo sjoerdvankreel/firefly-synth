@@ -137,20 +137,18 @@ init_default(plugin_state& state)
 { state.set_text_at(module_env, 1, param_on, 0, "On"); }
 
 void
-env_plot_length_seconds(plugin_state const& state, int slot, float& dahds, float& dahdsrf)
+env_plot_length_seconds(plugin_state const& state, int slot, float& dly, float& att, float& hld, float& dcy, float& stn, float& rls, float& flt)
 {
   float const bpm = 120;
   bool sync = state.get_plain_at(module_env, slot, param_sync, 0).step() != 0;
   int type = state.get_plain_at(module_env, slot, param_type, 0).step();
-  float filter = state.get_plain_at(module_env, slot, param_filter, 0).real() / 1000.0f;
-  float hold = sync_or_time_from_state(state, bpm, sync, module_env, slot, param_hold_time, param_hold_tempo);
-  float delay = sync_or_time_from_state(state, bpm, sync, module_env, slot, param_delay_time, param_delay_tempo);
-  float decay = sync_or_time_from_state(state, bpm, sync, module_env, slot, param_decay_time, param_decay_tempo);
-  float attack = sync_or_time_from_state(state, bpm, sync, module_env, slot, param_attack_time, param_attack_tempo);
-  float release = sync_or_time_from_state(state, bpm, sync, module_env, slot, param_release_time, param_release_tempo);
-  float sustain = type != type_sustain? 0.0f : std::max((delay + attack + hold + decay + release + filter) / 5, 0.01f);
-  dahds = delay + attack + hold + decay + sustain;
-  dahdsrf = dahds + release + filter;
+  flt = state.get_plain_at(module_env, slot, param_filter, 0).real() / 1000.0f;
+  hld = sync_or_time_from_state(state, bpm, sync, module_env, slot, param_hold_time, param_hold_tempo);
+  dly = sync_or_time_from_state(state, bpm, sync, module_env, slot, param_delay_time, param_delay_tempo);
+  dcy = sync_or_time_from_state(state, bpm, sync, module_env, slot, param_decay_time, param_decay_tempo);
+  att = sync_or_time_from_state(state, bpm, sync, module_env, slot, param_attack_time, param_attack_tempo);
+  rls = sync_or_time_from_state(state, bpm, sync, module_env, slot, param_release_time, param_release_tempo);
+  stn = type != type_sustain? 0.0f : std::max((dly + att + hld + dcy + rls + flt) / 5, 0.01f);
 }
 
 static graph_engine_params
@@ -177,9 +175,11 @@ render_graph(
   if (state.get_plain_at(module_env, mapping.module_slot, param_on, 0).step() == 0) 
     return graph_data(graph_data_type::off, {});
 
-  float dahds;
-  float dahdsrf;
-  env_plot_length_seconds(state, mapping.module_slot, dahds, dahdsrf);
+  float dly, att, hld, dcy, stn, rls, flt;
+  env_plot_length_seconds(state, mapping.module_slot, dly, att, hld, dcy, stn, rls, flt);
+  float dahds = dly + att + hld + dcy + stn;
+  float dahdsrf = dahds + rls + flt;
+
   if(dahdsrf < 1e-5) return graph_data({}, false, {"0 Sec"});
   
   std::string partition = float_to_string(dahdsrf, 2) + " Sec";
@@ -199,8 +199,23 @@ render_graph(
   });
   engine->process_end();
 
+  jarray<int, 1> indicators = {};
   jarray<float, 1> series(block->state.own_cv[0][0]);
-  return graph_data(series, {}, false, 1.0f, false, { partition });
+  for (int i = 0; i < custom_out_states.size(); i++)
+    if (custom_out_states[i].data.module_slot == mapping.module_slot)
+    {
+      env_stage stage = (env_stage)custom_out_states[i].data.user;
+      float env_pos_sec = custom_out_states[i].data.value;
+      if (stage > env_stage::delay) env_pos_sec += dly;
+      if (stage > env_stage::attack) env_pos_sec += att;
+      if (stage > env_stage::hold) env_pos_sec += hld;
+      if (stage > env_stage::decay) env_pos_sec += dcy;
+      if (stage > env_stage::sustain) env_pos_sec += stn;
+      if (stage > env_stage::release) env_pos_sec += rls;
+      if (stage > env_stage::filter) env_pos_sec += flt;
+      indicators.push_back(env_pos_sec / dahdsrf * series.size());
+    }
+  return graph_data(series, indicators, false, 1.0f, false, { partition });
 }
 
 bool
@@ -574,6 +589,18 @@ env_engine::process(plugin_block& block, cv_cv_matrix_mixdown const* modulation)
     process_mono<false>(block, modulation);
   else
     process_mono<true>(block, modulation);
+
+  // only want the indicators for the actual audio engine
+  if (block.graph) return;
+
+  if (_stage == env_stage::end) return;
+  custom_out_state out_state = {};
+  out_state.data.value = _stage_pos;
+  out_state.data.user = (std::uint8_t)_stage;
+  out_state.data.module = module_env;
+  out_state.data.module_slot = block.module_slot;
+  out_state.data.voice = block.voice->state.slot;
+  block.push_custom_out_state(out_state);
 }
 
 template <bool Monophonic>
@@ -707,6 +734,7 @@ void env_engine::process_mono_type_sync_trigger_mode(plugin_block& block, cv_cv_
     {
       _current_level = 0;
       _multitrig_level = 0;
+      _stage_pos += 1.0 / block.sample_rate;
       float level = _filter.next(0);
       block.state.own_cv[0][0][f] = level;
       if (level < 1e-5)

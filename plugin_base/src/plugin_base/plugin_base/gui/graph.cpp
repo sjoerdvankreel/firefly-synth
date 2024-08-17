@@ -209,11 +209,12 @@ graph::paint_indicators(
 
   g.setColour(_lnf->colors().graph_mod_indicator);
   for (int i = 0; i < indicators.size(); i++)
-  {
-    float x = indicators[i] / (float)count * w;
-    float y = (1 - std::clamp(series[indicators[i]], 0.0f, 1.0f)) * h;
-    g.fillEllipse(x - 3, y - 3, 6, 6);
-  }
+    if(indicators[i] < series.size())
+    {
+      float x = indicators[i] / (float)count * w;
+      float y = (1 - std::clamp(series[indicators[i]], 0.0f, 1.0f)) * h;
+      g.fillEllipse(x - 3, y - 3, 6, 6);
+    }
 }
 
 void

@@ -21,13 +21,14 @@ struct custom_out_state_data final {
   std::uint8_t module;
   std::uint8_t module_slot;
   std::uint8_t voice;
-  std::uint8_t current_value;
+  std::uint8_t user;
+  float value;
 };
 
 // can be anything, but currently used for visual modulation indication
 // note this is really state not event-stream! pushed once per-block, cleared on each round
 union custom_out_state final {
-  std::uint32_t packed;
+  std::uint64_t packed;
   custom_out_state_data data;
 };
 

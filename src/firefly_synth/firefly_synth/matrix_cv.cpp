@@ -56,12 +56,12 @@ module_from_matrix_type(bool cv, bool global)
   return global? module_gcv_audio_matrix: module_vcv_audio_matrix;
 }
 
-extern void
-env_plot_length_seconds(
-  plugin_state const& state, int slot, float& dahds, float& dahdsrf);
 extern float
 lfo_frequency_from_state(
   plugin_state const& state, int module_index, int module_slot, int bpm);
+extern void
+env_plot_length_seconds(
+  plugin_state const& state, int slot, float& dly, float& att, float& hld, float& dcy, float& stn, float& rls, float& flt);
 
 static std::vector<list_item>
 type_items()
@@ -284,7 +284,10 @@ render_graph(
   float max_total = 0.1f;
   float max_dahds = 0.1f;
   float max_dahdsrf = 0.1f;
+  
+  float dly, att, hld, dcy, stn, rls, flt;
   int ti = state.get_plain_at(map.module_index, map.module_slot, param_target, map.param_slot).step();
+
   for(int r = 0; r < route_count; r++)
     if (state.get_plain_at(map.module_index, map.module_slot, param_type, r).step() != type_off)
       if (state.get_plain_at(map.module_index, map.module_slot, param_target, r).step() == ti)
@@ -292,7 +295,9 @@ render_graph(
         int si = state.get_plain_at(map.module_index, map.module_slot, param_source, r).step();
         if (sources[si].module_index == module_env)
         {
-          env_plot_length_seconds(state, sources[si].module_slot, dahds, dahdsrf);
+          env_plot_length_seconds(state, sources[si].module_slot, dly, att, hld, dcy, stn, rls, flt);
+          dahds = dly + att + hld + dcy + stn;
+          dahdsrf = dahds + rls + flt;
           if (dahdsrf > max_dahdsrf)
           {
             max_dahds = dahds;
