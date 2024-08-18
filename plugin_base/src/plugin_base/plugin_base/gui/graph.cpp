@@ -87,13 +87,7 @@ module_graph::mod_indicator_state_changed(std::vector<mod_indicator_state> const
   for (int i = 0; i < states.size() && current_indicator < max_indicators; i++, current_indicator++)
     if (current_module_index == states[i].data.module && current_module_slot == states[i].data.module_slot)
     {
-      float indicator_pos = states[i].data.value;
-      auto const& topo = *_gui->gui_state()->desc().plugin;
-      auto const& mappings = _gui->gui_state()->desc().param_mappings.params;
-      param_topo_mapping mapping = mappings[_hovered_or_tweaked_param].topo;
-      if (topo.modules[current_module_index].mod_indicator_translator != nullptr)
-        indicator_pos = topo.modules[current_module_index].mod_indicator_translator(*_gui->gui_state(), mapping, indicator_pos);
-      
+      float indicator_pos = states[i].data.value;      
       check_unipolar(indicator_pos);
       float x = indicator_pos * w;
       int point = std::clamp((int)(indicator_pos * (count - 1)), 0, count - 1);

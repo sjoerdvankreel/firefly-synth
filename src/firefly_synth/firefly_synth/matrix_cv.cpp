@@ -306,19 +306,6 @@ scale_to_longest_mod_source(
   return result;
 }
 
-// mod indicator is continuous increasing in seconds
-static float
-translate_mod_indicator(
-  plugin_state const& state, param_topo_mapping const& mapping,
-  float indicator, std::vector<module_output_mapping> const& sources)
-{
-  float max_dahd;
-  float max_dahdrf;
-  float max_total = scale_to_longest_mod_source(state, mapping, sources, max_dahd, max_dahdrf);
-  float result = indicator / max_total;
-  return result - std::floor(result);
-}
-
 static graph_data
 render_graph(
   plugin_state const& state, graph_engine* engine, int param, param_topo_mapping const& mapping, 
@@ -419,10 +406,6 @@ cv_matrix_topo(
   result.graph_renderer = [sm = source_matrix.mappings, tm = target_matrix](
     auto const& state, auto* engine, int param, auto const& mapping) {
       return render_graph(state, engine, param, mapping, sm, tm);
-    };
-  result.mod_indicator_translator = [sm = source_matrix.mappings](
-    auto const& state, auto const& mapping, float indicator) {
-      return translate_mod_indicator(state, mapping, indicator, sm);
     };
   result.gui.menu_handler_factory = [](plugin_state* state) {
     return std::make_unique<tidy_matrix_menu_handler>(

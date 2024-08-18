@@ -85,10 +85,6 @@ typedef std::function<graph_data(
   plugin_state const& state, graph_engine* engine, 
   int param, param_topo_mapping const& mapping)>
 module_graph_renderer;
-typedef std::function<float(
-  plugin_state const& state, 
-  param_topo_mapping const& mapping, float indicator)>
-module_mod_indicator_translator;
 
 // module topo mapping
 struct module_topo_mapping final {
@@ -176,7 +172,6 @@ struct module_topo final {
   module_engine_factory engine_factory;
   module_graph_engine_factory graph_engine_factory;
   module_state_converter_factory state_converter_factory;
-  module_mod_indicator_translator mod_indicator_translator;
 
   state_initializer minimal_initializer;
   state_initializer default_initializer;
