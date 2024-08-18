@@ -179,8 +179,8 @@ public:
   extra_state* extra_state_() const { return _extra_state; }
   std::vector<plugin_base::mod_indicator_state> const* mod_indicator_states() const { return _mod_indicator_states; }
 
-  void add_mod_indicator_state_listener(int module, mod_indicator_state_listener* listener);
-  void remove_mod_indicator_state_listener(int module, mod_indicator_state_listener* listener);
+  void add_mod_indicator_state_listener(mod_indicator_state_listener* listener);
+  void remove_mod_indicator_state_listener(mod_indicator_state_listener* listener);
   
   void remove_param_listener(gui_param_listener* listener);
   void remove_gui_mouse_listener(gui_mouse_listener* listener);
@@ -207,7 +207,7 @@ private:
   std::vector<gui_param_listener*> _param_listeners = {};
   std::vector<gui_mouse_listener*> _gui_mouse_listeners = {};
   std::vector<gui_tab_selection_listener*> _tab_selection_listeners = {};
-  std::map<int, std::vector<mod_indicator_state_listener*>> _mod_indicator_state_listeners = {};
+  std::vector<mod_indicator_state_listener*> _mod_indicator_state_listeners = {};
   // must be destructed first, will unregister listeners, mind order
   std::vector<std::unique_ptr<juce::Component>> _components = {};
   std::vector<std::unique_ptr<gui_hover_listener>> _hover_listeners = {};

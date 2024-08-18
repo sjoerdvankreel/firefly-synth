@@ -515,17 +515,17 @@ plugin_gui::module_mouse_enter(int module)
 }
 
 void 
-plugin_gui::add_mod_indicator_state_listener(int module, mod_indicator_state_listener* listener)
+plugin_gui::add_mod_indicator_state_listener(mod_indicator_state_listener* listener)
 {
-  auto& listeners = _mod_indicator_state_listeners[module];
+  auto& listeners = _mod_indicator_state_listeners;
   assert(std::find(listeners.begin(), listeners.end(), listener) == listeners.end());
   listeners.push_back(listener);
 }
 
 void 
-plugin_gui::remove_mod_indicator_state_listener(int module, mod_indicator_state_listener* listener)
+plugin_gui::remove_mod_indicator_state_listener(mod_indicator_state_listener* listener)
 {
-  auto& listeners = _mod_indicator_state_listeners[module];
+  auto& listeners = _mod_indicator_state_listeners;
   auto iter = std::find(listeners.begin(), listeners.end(), listener);
   assert(iter != listeners.end());
   listeners.erase(iter);
@@ -547,43 +547,8 @@ plugin_gui::mod_indicator_states_changed()
     [compare](auto const& l, auto const& r) { return !compare(l, r) && !compare(r, l); });
   _mod_indicator_states->erase(unique_it, _mod_indicator_states->end());
 
-  for (auto listener_key_it = _mod_indicator_state_listeners.begin();
-    listener_key_it != _mod_indicator_state_listeners.end(); ++listener_key_it)
-    for(auto listener_it: listener_key_it->second)
-      listener_it->mod_indicator_state_changed(*_mod_indicator_states);
-
-#if 0
-
-  std::set<int> empty_indicator_modules = {};
-  for (auto i : _mod_indicator_state_listeners)
-    empty_indicator_modules.insert(i.first);
-
-  std::vector<mod_indicator_state> this_module_states;
-  for (int i = 0; i < _mod_indicator_states->size(); i++)
-  {
-    empty_indicator_modules.erase((*_mod_indicator_states)[i].data.module);
-    this_module_states.push_back((*_mod_indicator_states)[i]);
-    int this_module = (*_mod_indicator_states)[i].data.module;
-    for (auto listener_it = _mod_indicator_state_listeners[this_module].begin();
-      listener_it != _mod_indicator_state_listeners[this_module].end(); ++listener_it)
-      (*listener_it)->mod_indicator_state_changed(this_module_states);
-
-    if(i < _mod_indicator_states->size() - 1 && this_module != (*_mod_indicator_states)[i + 1].data.module)
-      this_module_states.clear();
-  }
-
-  // notify in case all mod state is gone
-  for(int module: empty_indicator_modules)
-    for (auto listener_it = _mod_indicator_state_listeners[module].begin();
-      listener_it != _mod_indicator_state_listeners[module].end(); ++listener_it)
-      (*listener_it)->mod_indicator_state_changed({});
-
-  // notify "any" listeners registered as -1
-  for (auto listener_it = _mod_indicator_state_listeners[-1].begin();
-    listener_it != _mod_indicator_state_listeners[-1].end(); ++listener_it)
-    (*listener_it)->mod_indicator_state_changed(*_mod_indicator_states);
-
-#endif
+  for(auto listener_it: _mod_indicator_state_listeners)
+    listener_it->mod_indicator_state_changed(*_mod_indicator_states);
 }
 
 void
