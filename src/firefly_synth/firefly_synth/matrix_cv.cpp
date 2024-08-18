@@ -87,6 +87,7 @@ protected:
 
   bool const _cv;
   bool const _global;
+  float _processed_seconds = 0;
   cv_matrix_mixdown _mixdown = {};
   jarray<int, 4> _modulation_indices = {};
   std::vector<param_topo_mapping> const _targets;
@@ -106,6 +107,9 @@ protected:
   // module/slot:-1 is all (for cv->audio)
   // or specific module (for cv->cv)
   void perform_mixdown(plugin_block const& block, int module, int slot);
+
+  // just reports current processed time in seconds
+  void push_mod_indicator_state(plugin_block& block);
 
 public:
   void reset(plugin_block const*) override;
@@ -528,7 +532,10 @@ _cv(cv), _global(global), _sources(sources), _targets(targets)
 
 void 
 cv_cv_matrix_engine::process(plugin_block& block)
-{ *block.state.own_context = &_mixer; }
+{ 
+  *block.state.own_context = &_mixer; 
+  push_mod_indicator_state(block);
+}
 
 cv_cv_matrix_mixdown const& 
 cv_cv_matrix_mixer::mix(plugin_block const& block, int module, int slot)
@@ -546,6 +553,21 @@ cv_audio_matrix_engine::process(plugin_block& block)
 {
   perform_mixdown(block, -1, -1);
   *block.state.own_context = &_mixdown;
+  push_mod_indicator_state(block);
+}
+
+void 
+cv_matrix_engine_base::push_mod_indicator_state(plugin_block& block)
+{
+  // only want the indicators for the actual audio engine
+  if (block.graph) return;
+  _processed_seconds += (block.end_frame - block.start_frame) / block.sample_rate;
+  mod_indicator_state indicator_state = {};
+  indicator_state.data.module_slot = block.module_slot;
+  indicator_state.data.module = module_from_matrix_type(_cv, _global);
+  indicator_state.data.voice = _global ? 0 : block.voice->state.slot;
+  indicator_state.data.value = _processed_seconds;
+  block.push_mod_indicator_state(indicator_state);
 }
 
 void 
@@ -558,6 +580,7 @@ cv_matrix_engine_base::reset(plugin_block const* block)
   _own_scratch = &block->state.own_scratch;
   _own_block_automation = &block->state.own_block_automation;
   _own_accurate_automation = &block->state.own_accurate_automation;
+  _processed_seconds = 0;
 }
 
 void
