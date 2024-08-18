@@ -265,64 +265,6 @@ make_graph_engine(plugin_desc const* desc)
   return std::make_unique<graph_engine>(desc, params);
 }
 
-static float
-scale_to_longest_mod_source(
-  plugin_state const& state, param_topo_mapping const& mapping,
-  std::vector<module_output_mapping> const& sources, float& max_dahd, float& max_dahdrf)
-{
-  auto const& map = mapping;
-  int route_count = route_count_from_module(map.module_index);
-
-  // scale to longest env or lfo
-  float dahd = 0.1f;
-  float dahdrf = 0.1f;
-  float result = 0.1f;
-  max_dahd = 0.1f;
-  max_dahdrf = 0.1f;
-
-  float dly, att, hld, dcy, rls, flt;
-  int ti = state.get_plain_at(map.module_index, map.module_slot, param_target, map.param_slot).step();
-
-  for (int r = 0; r < route_count; r++)
-    if (state.get_plain_at(map.module_index, map.module_slot, param_type, r).step() != type_off)
-      if (state.get_plain_at(map.module_index, map.module_slot, param_target, r).step() == ti)
-      {
-        int si = state.get_plain_at(map.module_index, map.module_slot, param_source, r).step();
-        if (sources[si].module_index == module_env)
-        {
-          env_plot_length_seconds(state, sources[si].module_slot, dly, att, hld, dcy, rls, flt);
-          dahd = dly + att + hld + dcy;
-          dahdrf = dahd + rls + flt;
-          if (dahdrf > max_dahdrf)
-          {
-            max_dahd = dahd;
-            max_dahdrf = dahdrf;
-            result = dahdrf;
-          }
-        }
-        else if (sources[si].module_index == module_glfo || sources[si].module_index == module_vlfo)
-        {
-          float freq = lfo_frequency_from_state(state, sources[si].module_index, sources[si].module_slot, 120);
-          result = std::max(result, 1 / freq);
-        }
-      }
-
-  return result;
-}
-
-// mod indicator is continuous increasing in seconds
-static float
-translate_mod_indicator(
-  plugin_state const& state, param_topo_mapping const& mapping,
-  float indicator, std::vector<module_output_mapping> const& sources)
-{
-  float max_dahd;
-  float max_dahdrf;
-  float max_total = scale_to_longest_mod_source(state, mapping, sources, max_dahd, max_dahdrf);
-  float result = indicator / max_total;
-  return result - std::floor(result);
-}
-
 static graph_data
 render_graph(
   plugin_state const& state, graph_engine* engine, int param, param_topo_mapping const& mapping, 
@@ -341,14 +283,42 @@ render_graph(
   }
 
   // scale to longest env or lfo
-  float max_dahd;
-  float max_dahdrf;
-  float max_total = scale_to_longest_mod_source(state, mapping, sources, max_dahd, max_dahdrf);
+  float dahd = 0.1f;
+  float dahdrf = 0.1f;
+  float max_total = 0.1f;
+  float max_dahd = 0.1f;
+  float max_dahdrf = 0.1f;
+  
+  float dly, att, hld, dcy, rls, flt;
+  int ti = state.get_plain_at(map.module_index, map.module_slot, param_target, map.param_slot).step();
+
+  for(int r = 0; r < route_count; r++)
+    if (state.get_plain_at(map.module_index, map.module_slot, param_type, r).step() != type_off)
+      if (state.get_plain_at(map.module_index, map.module_slot, param_target, r).step() == ti)
+      {
+        int si = state.get_plain_at(map.module_index, map.module_slot, param_source, r).step();
+        if (sources[si].module_index == module_env)
+        {
+          env_plot_length_seconds(state, sources[si].module_slot, dly, att, hld, dcy, rls, flt);
+          dahd = dly + att + hld + dcy;
+          dahdrf = dahd + rls + flt;
+          if (dahdrf > max_dahdrf)
+          {
+            max_dahd = dahd;
+            max_dahdrf = dahdrf;
+            max_total = dahdrf;
+          }
+        }
+        else if (sources[si].module_index == module_glfo || sources[si].module_index == module_vlfo)
+        {
+          float freq = lfo_frequency_from_state(state, sources[si].module_index, sources[si].module_slot, 120);
+          max_total = std::max(max_total, 1 / freq);
+        }
+      }
 
   auto const params = make_graph_engine_params();
   int sample_rate = params.max_frame_count / max_total;
   int voice_release_at = max_dahd / max_dahdrf * params.max_frame_count;
-  int ti = state.get_plain_at(map.module_index, map.module_slot, param_target, map.param_slot).step();
 
   engine->process_begin(&state, sample_rate, params.max_frame_count, voice_release_at);  
   std::vector<int> relevant_modules({ module_gcv_cv_matrix, module_master_in, module_glfo });
@@ -423,10 +393,6 @@ cv_matrix_topo(
   result.graph_renderer = [sm = source_matrix.mappings, tm = target_matrix](
     auto const& state, auto* engine, int param, auto const& mapping) {
       return render_graph(state, engine, param, mapping, sm, tm);
-    };
-  result.mod_indicator_translator = [sm = source_matrix.mappings](
-    auto const& state, auto const& mapping, float indicator) {
-      return translate_mod_indicator(state, mapping, indicator, sm);
     };
   result.gui.menu_handler_factory = [](plugin_state* state) {
     return std::make_unique<tidy_matrix_menu_handler>(

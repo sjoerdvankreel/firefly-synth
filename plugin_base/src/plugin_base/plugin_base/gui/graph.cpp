@@ -62,41 +62,29 @@ module_graph::mod_indicator_state_changed(std::vector<mod_indicator_state> const
   if (_data.type() != graph_data_type::series)
     return;
 
-  if (_hovered_or_tweaked_param == -1)
-    return;
-
   float w = getWidth();
   float h = getHeight();
   int count = _data.series().size();
 
   int current_indicator = 0;
-  int current_module_slot = -1;
-  int current_module_index = -1;
-
-  if (_module_params.module_index != -1)
+  int hovered_or_tweaked_mod_slot = -1;
+  int hovered_or_tweaked_mod_index = -1;
+  if (_hovered_or_tweaked_param != -1)
   {
-    current_module_slot = _activated_module_slot;
-    current_module_index = _module_params.module_index;
+    hovered_or_tweaked_mod_slot = _gui->gui_state()->desc().param_mappings.params[_hovered_or_tweaked_param].topo.module_slot;
+    hovered_or_tweaked_mod_index = _gui->gui_state()->desc().param_mappings.params[_hovered_or_tweaked_param].topo.module_index;
   }
-  else
-  {
-    current_module_slot = _gui->gui_state()->desc().param_mappings.params[_hovered_or_tweaked_param].topo.module_slot;
-    current_module_index = _gui->gui_state()->desc().param_mappings.params[_hovered_or_tweaked_param].topo.module_index;
-  }
-
   for (int i = 0; i < states.size() && current_indicator < max_indicators; i++, current_indicator++)
-    if (current_module_index == states[i].data.module && current_module_slot == states[i].data.module_slot)
+    if ((_module_params.module_index != -1 && 
+      states[i].data.module_slot == _activated_module_slot && 
+      states[i].data.module == _module_params.module_index) ||
+      (_module_params.module_index == -1 && 
+        hovered_or_tweaked_mod_index == states[i].data.module &&
+        hovered_or_tweaked_mod_slot == states[i].data.module_slot))
     {
-      float indicator_pos = states[i].data.value;
-      auto const& topo = *_gui->gui_state()->desc().plugin;
-      auto const& mappings = _gui->gui_state()->desc().param_mappings.params;
-      param_topo_mapping mapping = mappings[_hovered_or_tweaked_param].topo;
-      if (topo.modules[current_module_index].mod_indicator_translator != nullptr)
-        indicator_pos = topo.modules[current_module_index].mod_indicator_translator(*_gui->gui_state(), mapping, indicator_pos);
-      
-      check_unipolar(indicator_pos);
-      float x = indicator_pos * w;
-      int point = std::clamp((int)(indicator_pos * (count - 1)), 0, count - 1);
+      check_unipolar(states[i].data.value);
+      float x = states[i].data.value * w;
+      int point = std::clamp((int)(states[i].data.value * (count - 1)), 0, count - 1);
       float y = (1 - std::clamp(_data.series()[point], 0.0f, 1.0f)) * h;
       _indicators[current_indicator]->setVisible(true);
       _indicators[current_indicator]->setBounds(x - 3, y - 3, 6, 6);
@@ -192,7 +180,7 @@ module_graph::render_if_dirty()
   if (_hovered_or_tweaked_param == -1) return false;
 
   auto const& mappings = _gui->gui_state()->desc().param_mappings.params;
-  param_topo_mapping mapping = mappings[_hovered_or_tweaked_param].topo;
+  param_topo_mapping mapping = mapping = mappings[_hovered_or_tweaked_param].topo;
   auto const& module = _gui->gui_state()->desc().plugin->modules[mapping.module_index];
   if(module.graph_renderer != nullptr)
     render(module.graph_renderer(
