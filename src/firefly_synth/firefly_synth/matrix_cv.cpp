@@ -272,18 +272,19 @@ scale_to_longest_mod_source(
   auto const& map = mapping;
   int route_count = route_count_from_module(map.module_index);
 
-  // scale to longest env or lfo
-  float dahd = 0.1f;
-  float dahdrf = 0.1f;
-  float result = 0.1f;
-  max_dahd = 0.1f;
-  max_dahdrf = 0.1f;
+  // scale to longest env or lfo, prefer env
+  float dahd = 0.01f;
+  float dahdrf = 0.01f;
+  float result = 0.01f;
+  max_dahd = 0.01f;
+  max_dahdrf = 0.01f;
   module_slot = -1;
   module_index = -1;
 
   float dly, att, hld, dcy, rls, flt;
   int ti = state.get_plain_at(map.module_index, map.module_slot, param_target, map.param_slot).step();
 
+  // first check the envelopes, longest wins
   for (int r = 0; r < route_count; r++)
     if (state.get_plain_at(map.module_index, map.module_slot, param_type, r).step() != type_off)
       if (state.get_plain_at(map.module_index, map.module_slot, param_target, r).step() == ti)
@@ -303,18 +304,27 @@ scale_to_longest_mod_source(
             module_index = sources[si].module_index;
           }
         }
-        else if (sources[si].module_index == module_glfo || sources[si].module_index == module_vlfo)
-        {
-          float freq = lfo_frequency_from_state(state, sources[si].module_index, sources[si].module_slot, 120);
-          if (1 / freq > result)
-          {
-            result = 1 / freq;
-            module_slot = sources[si].module_slot;
-            module_index = sources[si].module_index;
-          }
-          result = std::max(result, 1 / freq);
-        }
       }
+
+  // then check the lfos, longest wins
+  if(module_index == -1)
+    for (int r = 0; r < route_count; r++)
+      if (state.get_plain_at(map.module_index, map.module_slot, param_type, r).step() != type_off)
+        if (state.get_plain_at(map.module_index, map.module_slot, param_target, r).step() == ti)
+        {
+          int si = state.get_plain_at(map.module_index, map.module_slot, param_source, r).step();
+          if (sources[si].module_index == module_glfo || sources[si].module_index == module_vlfo)
+          {
+            float freq = lfo_frequency_from_state(state, sources[si].module_index, sources[si].module_slot, 120);
+            if (1 / freq > result)
+            {
+              result = 1 / freq;
+              module_slot = sources[si].module_slot;
+              module_index = sources[si].module_index;
+            }
+            result = std::max(result, 1 / freq);
+          }
+        }
 
   return result;
 }

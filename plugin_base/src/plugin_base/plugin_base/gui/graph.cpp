@@ -102,7 +102,6 @@ module_graph::mod_indicator_state_changed(std::vector<mod_indicator_state> const
     if (current_module_index == states[i].data.module && current_module_slot == states[i].data.module_slot)
     {
       float indicator_pos = states[i].data.value;      
-      check_unipolar(indicator_pos);
       float x = indicator_pos * w;
       int point = std::clamp((int)(indicator_pos * (count - 1)), 0, count - 1);
       float y = (1 - std::clamp(_data.series()[point], 0.0f, 1.0f)) * h;
