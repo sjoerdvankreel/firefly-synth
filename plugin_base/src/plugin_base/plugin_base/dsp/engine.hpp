@@ -102,6 +102,10 @@ class plugin_engine final {
   std::vector<std::thread::id> _voice_thread_ids;
   thread_pool_voice_processor _voice_processor = {};
 
+  // strictly only need for clap threadpool, but used also for vst3
+  std::vector<mod_indicator_state> _global_mod_indicator_states = {};
+  std::vector<std::vector<mod_indicator_state>> _voice_mod_indicator_states = {};
+
   jarray<std::unique_ptr<module_engine>, 3> _voice_engines = {};
   jarray<std::unique_ptr<module_engine>, 2> _input_engines = {};
   jarray<std::unique_ptr<module_engine>, 2> _output_engines = {};

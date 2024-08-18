@@ -51,7 +51,10 @@ host_events::activate(bool graph, int module_count, int param_count, int midi_co
   notes.reserve(note_limit_guess);
   block.reserve(block_events_guess);
   output_params.reserve(block_events_guess);
+
+  // see also plugin_engine::ctor
   mod_indicator_states.reserve(mod_indicator_states_guess);
+
   accurate_automation.reserve(accurate_events_guess);
   accurate_modulation.reserve(accurate_events_guess);
   accurate_automation_and_modulation.reserve(accurate_events_guess);

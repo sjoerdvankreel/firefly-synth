@@ -59,6 +59,12 @@ _voice_processor_context(voice_processor_context)
   _automation_lerp_filters.resize(_dims.module_slot_param_slot);
   _automation_lp_filters.resize(_dims.module_slot_param_slot);
   _automation_state_last_round_end.resize(_dims.module_slot_param_slot);
+
+  // see also host_events::activate
+  _global_mod_indicator_states.resize(desc->module_count);
+  _voice_mod_indicator_states.resize(_polyphony);
+  for(int i = 0; i < _polyphony; i++)
+    _voice_mod_indicator_states[i].resize(desc->module_count);
 }
 
 plugin_voice_block 
@@ -105,6 +111,10 @@ plugin_engine::make_plugin_block(
     ? _block_automation.state()
     : _voice_automation[voice].state();
 
+  std::vector<mod_indicator_state>* mod_indicator_states = voice < 0 
+    ? &_global_mod_indicator_states 
+    : &_voice_mod_indicator_states[voice];
+
   plugin_block_state state = {
     _last_note_key, context_out, _mono_note_stream,
     cv_out, audio_out, scratch, _bpm_automation,
@@ -120,7 +130,7 @@ plugin_engine::make_plugin_block(
     _sample_rate, state, nullptr, nullptr, 
     _host_block->shared, *_state.desc().plugin, 
     _state.desc().plugin->modules[module],
-    &_host_block->events.mod_indicator_states // TODO this dont cut it for clap
+    mod_indicator_states
   };
 }
 
@@ -438,6 +448,10 @@ plugin_engine::process_voices_single_threaded()
 void
 plugin_engine::process_voice(int v, bool threaded)
 {
+  // process() call will release
+  if (threaded)
+    std::atomic_thread_fence(std::memory_order_acquire);
+
   // simplifies threadpool
   // so we can just push (polyphony) tasks each time
   if (_voice_states[v].stage == voice_stage::unused) return;
@@ -570,6 +584,9 @@ plugin_engine::process()
 
   _host_block->events.output_params.clear();
   _host_block->events.mod_indicator_states.clear();
+  _global_mod_indicator_states.clear();
+  for (int i = 0; i < _polyphony; i++)
+    _voice_mod_indicator_states[i].clear();
   std::pair<std::uint32_t, std::uint32_t> denormal_state = disable_denormals();  
 
   // set automation values to current state, events may overwrite
@@ -1117,6 +1134,14 @@ plugin_engine::process()
           }
     }
   }
+
+  // fill output mod indicators
+  // these are proteced by mfence in case of clap threadpool
+  for (int i = 0; i < _global_mod_indicator_states.size(); i++)
+    _host_block->events.mod_indicator_states.push_back(_global_mod_indicator_states[i]);
+  for (int i = 0; i < _polyphony; i++)
+    for (int j = 0; j < _voice_mod_indicator_states[i].size(); j++)
+      _host_block->events.mod_indicator_states.push_back(_voice_mod_indicator_states[i][j]);
 
   // Note: custom output events are already filled here.
   // It's up to the plugin bindings to communicate them back to the gui.
