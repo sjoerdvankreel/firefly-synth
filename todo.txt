@@ -35,6 +35,7 @@ V fix the global/top graph
 - drop some ugly-ass themes
 - fix vst3
 - fix clap threadpool
+- add mod indicators to params ?
 
 wishlist:
 DSF falloff to the left
