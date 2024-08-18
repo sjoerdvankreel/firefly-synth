@@ -73,6 +73,10 @@ module_graph::mod_indicator_state_changed(std::vector<mod_indicator_state> const
   int current_module_slot = -1;
   int current_module_index = -1;
 
+  auto const& topo = *_gui->gui_state()->desc().plugin;
+  auto const& mappings = _gui->gui_state()->desc().param_mappings.params;
+  param_topo_mapping mapping = mappings[_hovered_or_tweaked_param].topo;
+
   if (_module_params.module_index != -1)
   {
     current_module_slot = _activated_module_slot;
@@ -82,6 +86,16 @@ module_graph::mod_indicator_state_changed(std::vector<mod_indicator_state> const
   {
     current_module_slot = _gui->gui_state()->desc().param_mappings.params[_hovered_or_tweaked_param].topo.module_slot;
     current_module_index = _gui->gui_state()->desc().param_mappings.params[_hovered_or_tweaked_param].topo.module_index;
+  }
+
+  if (topo.modules[current_module_index].mod_indicator_source_selector != nullptr)
+  {
+    auto selected = topo.modules[current_module_index].mod_indicator_source_selector(*_gui->gui_state(), mapping);
+    if (selected.module_index != -1 && selected.module_slot != -1)
+    {
+      current_module_slot = selected.module_slot;
+      current_module_index = selected.module_index;
+    }
   }
 
   for (int i = 0; i < states.size() && current_indicator < max_indicators; i++, current_indicator++)

@@ -261,10 +261,13 @@ make_graph_engine(plugin_desc const* desc)
   return std::make_unique<graph_engine>(desc, params);
 }
 
+// mapping to longest mod source for graph
 static float
 scale_to_longest_mod_source(
   plugin_state const& state, param_topo_mapping const& mapping,
-  std::vector<module_output_mapping> const& sources, float& max_dahd, float& max_dahdrf)
+  std::vector<module_output_mapping> const& sources, 
+  float& max_dahd, float& max_dahdrf,
+  int& module_index, int& module_slot)
 {
   auto const& map = mapping;
   int route_count = route_count_from_module(map.module_index);
@@ -275,6 +278,8 @@ scale_to_longest_mod_source(
   float result = 0.1f;
   max_dahd = 0.1f;
   max_dahdrf = 0.1f;
+  module_slot = -1;
+  module_index = -1;
 
   float dly, att, hld, dcy, rls, flt;
   int ti = state.get_plain_at(map.module_index, map.module_slot, param_target, map.param_slot).step();
@@ -294,16 +299,36 @@ scale_to_longest_mod_source(
             max_dahd = dahd;
             max_dahdrf = dahdrf;
             result = dahdrf;
+            module_slot = sources[si].module_slot;
+            module_index = sources[si].module_index;
           }
         }
         else if (sources[si].module_index == module_glfo || sources[si].module_index == module_vlfo)
         {
           float freq = lfo_frequency_from_state(state, sources[si].module_index, sources[si].module_slot, 120);
+          if (1 / freq > result)
+          {
+            result = 1 / freq;
+            module_slot = sources[si].module_slot;
+            module_index = sources[si].module_index;
+          }
           result = std::max(result, 1 / freq);
         }
       }
 
   return result;
+}
+
+// mapping to longest mod source, prefer envelope
+static mod_indicator_source
+select_mod_indicator_source(
+  plugin_state const& state, param_topo_mapping const& mapping,
+  std::vector<module_output_mapping> const& sources)
+{
+  float max_dahd, max_dahdrf;
+  int module_index, module_slot;
+  scale_to_longest_mod_source(state, mapping, sources, max_dahd, max_dahdrf, module_index, module_slot);
+  return { module_index, module_slot };
 }
 
 static graph_data
@@ -326,7 +351,9 @@ render_graph(
   // scale to longest env or lfo
   float max_dahd;
   float max_dahdrf;
-  float max_total = scale_to_longest_mod_source(state, mapping, sources, max_dahd, max_dahdrf);
+  int module_index;
+  int module_slot;
+  float max_total = scale_to_longest_mod_source(state, mapping, sources, max_dahd, max_dahdrf, module_index, module_slot);
 
   auto const params = make_graph_engine_params();
   int sample_rate = params.max_frame_count / max_total;
@@ -406,6 +433,10 @@ cv_matrix_topo(
   result.graph_renderer = [sm = source_matrix.mappings, tm = target_matrix](
     auto const& state, auto* engine, int param, auto const& mapping) {
       return render_graph(state, engine, param, mapping, sm, tm);
+    };
+  result.mod_indicator_source_selector = [sm = source_matrix.mappings](
+    auto const& state, auto const& mapping) {
+      return select_mod_indicator_source(state, mapping, sm);
     };
   result.gui.menu_handler_factory = [](plugin_state* state) {
     return std::make_unique<tidy_matrix_menu_handler>(
