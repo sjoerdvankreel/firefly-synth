@@ -333,8 +333,10 @@ plugin_gui::
 }
 
 plugin_gui::
-plugin_gui(plugin_state* gui_state, plugin_base::extra_state* extra_state):
-_gui_state(gui_state), _undo_listener(this), _extra_state(extra_state)
+plugin_gui(
+  plugin_state* gui_state, plugin_base::extra_state* extra_state, 
+  std::vector<plugin_base::mod_indicator_state>* mod_indicator_states):
+_gui_state(gui_state), _undo_listener(this), _extra_state(extra_state), _mod_indicator_states(mod_indicator_states)
 {
   PB_LOG_FUNC_ENTRY_EXIT();
   setOpaque(true);
@@ -510,6 +512,30 @@ plugin_gui::module_mouse_enter(int module)
   for(int i = 0; i < _gui_mouse_listeners.size(); i++)
     _gui_mouse_listeners[i]->module_mouse_enter(module);
   _last_mouse_enter_module = module;
+}
+
+void 
+plugin_gui::add_mod_indicator_state_listener(mod_indicator_state_listener* listener)
+{
+  auto& listeners = _mod_indicator_state_listeners;
+  assert(std::find(listeners.begin(), listeners.end(), listener) == listeners.end());
+  listeners.push_back(listener);
+}
+
+void 
+plugin_gui::remove_mod_indicator_state_listener(mod_indicator_state_listener* listener)
+{
+  auto& listeners = _mod_indicator_state_listeners;
+  auto iter = std::find(listeners.begin(), listeners.end(), listener);
+  assert(iter != listeners.end());
+  listeners.erase(iter);
+}
+
+void 
+plugin_gui::mod_indicator_states_changed()
+{
+  for(auto listener_it: _mod_indicator_state_listeners)
+    listener_it->mod_indicator_state_changed(*_mod_indicator_states);
 }
 
 void

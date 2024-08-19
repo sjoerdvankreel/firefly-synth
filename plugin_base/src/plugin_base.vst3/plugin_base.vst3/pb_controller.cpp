@@ -29,6 +29,15 @@ _extra_state(gui_extra_state_keyset(*_desc->plugin))
 { 
   PB_LOG_FUNC_ENTRY_EXIT();
   _gui_state.add_any_listener(this); 
+
+  // fetch mod indicator param tags
+  _mod_indicator_states_to_gui.resize(mod_indicator_output_param_count);
+  _mod_indicator_count_param_tag = desc_id_hash(mod_indicator_count_param_guid);
+  for (int i = 0; i < mod_indicator_output_param_count; i++)
+  {
+    _mod_indicator_param_tags[i] = desc_id_hash(mod_indicator_param_guids[i]);
+    _tag_to_mod_indicator_index[_mod_indicator_param_tags[i]] = i;
+  }
 }
 
 void 
@@ -50,7 +59,7 @@ pb_controller::createView(char const* name)
 {
   PB_LOG_FUNC_ENTRY_EXIT();
   if (ConstString(name) != ViewType::kEditor) return nullptr;
-  return _editor = new pb_editor(this);
+  return _editor = new pb_editor(this, &_mod_indicator_states_to_gui);
 }
 
 tresult PLUGIN_API
@@ -95,10 +104,52 @@ pb_controller::setParamNormalized(ParamID tag, ParamValue value)
     _inside_set_param_normalized = false;
     return kResultFalse;
   }
+  
   // fake midi params are not mapped
-  auto iter = gui_state().desc().param_mappings.tag_to_index.find(tag);
-  if(iter != gui_state().desc().param_mappings.tag_to_index.end())
-    _gui_state.set_normalized_at_index(iter->second, normalized_value(value));
+  auto mapping_iter = gui_state().desc().param_mappings.tag_to_index.find(tag);
+  if(mapping_iter != gui_state().desc().param_mappings.tag_to_index.end())
+    _gui_state.set_normalized_at_index(mapping_iter->second, normalized_value(value));
+
+  // mod indicator support
+  // this is a bit of a cop out but at least it should be working without resorting to messaging
+  // upon receiving the "count" param, update the count
+  // upon receiving any other param, set the fill bit
+  // whenever the first N consecutive fill bits >= count, repaint and reset
+  bool needs_mod_indicator_rescan = false;
+  if (tag == _mod_indicator_count_param_tag)
+  {
+    _mod_indicator_count = *reinterpret_cast<std::size_t*>(&value);
+    needs_mod_indicator_rescan = true;
+  }
+  auto mod_ind_iter = _tag_to_mod_indicator_index.find(tag);
+  if (mod_ind_iter != _tag_to_mod_indicator_index.end())
+  {
+    _mod_indicator_param_set[mod_ind_iter->second] = true;
+    _mod_indicator_states_from_audio[mod_ind_iter->second].packed = *reinterpret_cast<std::uint64_t*>(&value);
+    needs_mod_indicator_rescan = true;
+  }
+  if (needs_mod_indicator_rescan)
+  {
+    bool filled_to_count = true;
+    for (int i = 0; i < _mod_indicator_count; i++)
+      if (!_mod_indicator_param_set[i])
+      {
+        filled_to_count = false;
+        break;
+      }
+    if (filled_to_count)
+    {
+      _mod_indicator_param_set.fill(false);
+      _mod_indicator_states_to_gui.clear();
+      _mod_indicator_states_to_gui.insert(
+        _mod_indicator_states_to_gui.begin(), 
+        _mod_indicator_states_from_audio.begin(), 
+        _mod_indicator_states_from_audio.begin() + _mod_indicator_count);
+      _mod_indicator_count = 0;
+      if (_editor) _editor->mod_indicator_states_changed();
+    }
+  }
+
   _inside_set_param_normalized = false;
   return kResultTrue;
 }
@@ -231,13 +282,40 @@ pb_controller::initialize(FUnknown* context)
       ParameterInfo param_info = {};
       auto const& source = module.midi_sources[ms];
       param_info.stepCount = 0;
+      param_info.unitId = kRootUnitId;
       param_info.id = source.info.id_hash;
-      param_info.flags = ParameterInfo::kIsHidden;
+      param_info.flags = ParameterInfo::kIsHidden | ParameterInfo::kIsHidden;
       parameters.addParameter(new Parameter(param_info));
       param_info.defaultNormalizedValue = source.source->default_;
       _midi_id_to_param[source.source->id] = param_info.id;
     }
   }
+
+  // add fake mod indicator parameters
+  ParameterInfo mod_indicator_count_param = {};
+  mod_indicator_count_param.unitId = kRootUnitId;
+  mod_indicator_count_param.defaultNormalizedValue = 0;
+  mod_indicator_count_param.stepCount = mod_indicator_output_param_count + 1;
+  mod_indicator_count_param.id = desc_id_hash(mod_indicator_count_param_guid);
+  mod_indicator_count_param.flags = ParameterInfo::kIsReadOnly | ParameterInfo::kIsHidden;
+  parameters.addParameter(new Parameter(mod_indicator_count_param));
+
+  for (int i = 0; i < mod_indicator_output_param_count; i++)
+  {
+    ParameterInfo mod_indicator_param = {};
+    mod_indicator_param.stepCount = 0;
+    mod_indicator_param.unitId = kRootUnitId;
+    mod_indicator_param.defaultNormalizedValue = 0;
+    mod_indicator_param.id = desc_id_hash(mod_indicator_param_guids[i]);
+    mod_indicator_param.flags = ParameterInfo::kIsReadOnly | ParameterInfo::kIsHidden;
+    parameters.addParameter(new Parameter(mod_indicator_param));
+  }
+
+  // make sure no clashes
+  std::set<int> hashes = {};
+  (void)hashes;
+  for (int i = 0; i < parameters.getParameterCount(); i++)
+    assert(hashes.insert(parameters.getParameterByIndex(i)->getInfo().id).second);
 
   return kResultTrue;
 }

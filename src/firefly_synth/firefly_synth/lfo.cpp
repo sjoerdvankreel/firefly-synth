@@ -81,6 +81,7 @@ class lfo_engine :
 public module_engine {
   float _phase;
   float _ref_phase;
+  float _graph_phase;
   float _lfo_end_value;
   float _filter_end_value;
   
@@ -165,8 +166,7 @@ lfo_frequency_from_state(plugin_state const& state, int module_index, int module
 
 static graph_data
 render_graph(
-  plugin_state const& state, graph_engine* engine, 
-  int param, param_topo_mapping const& mapping)
+  plugin_state const& state, graph_engine* engine, int param, param_topo_mapping const& mapping)
 {
   int type = state.get_plain_at(mapping.module_index, mapping.module_slot, param_type, mapping.param_slot).step();
   bool sync = state.get_plain_at(mapping.module_index, mapping.module_slot, param_sync, mapping.param_slot).step() != 0;
@@ -178,36 +178,16 @@ render_graph(
   bool global = mapping.module_index == module_glfo;
   float freq = lfo_frequency_from_state(state, mapping.module_index, mapping.module_slot, 120);
 
+  // make sure we exactly plot 1 cycle otherwise
+  // we cannot not where to put the mod indicators
+  sample_rate = params.max_frame_count * freq;
   if (!sync)
-  {
-    // 1 second, or the minimum that shows 1 cycle
-    if (freq >= 1)
-    {
-      partition = "1 Sec";
-      sample_rate = params.max_frame_count;
-    }
-    else
-    {
-      sample_rate = params.max_frame_count * freq;
-      partition = float_to_string(1 / freq, 2) + " Sec";
-    }
-  }
-  
-  // draw synced 1/1 as full cycle
-  if (sync)
+    partition = float_to_string(1 / freq, 2) + " Sec";
+  else
   {
     // 1 bar, or the minimum that shows 1 cycle
     float one_bar_freq = timesig_to_freq(120, { 1, 1 });
-    if(freq >= one_bar_freq)
-    {
-      partition = "1 Bar";
-      sample_rate = one_bar_freq * params.max_frame_count;
-    }
-    else
-    {
-      sample_rate = params.max_frame_count * freq;
-      partition = float_to_string(one_bar_freq / freq, 2) + " Bar";
-    }
+    partition = float_to_string(one_bar_freq / freq, 2) + " Bar";
   }
 
   engine->process_begin(&state, sample_rate, params.max_frame_count, -1);
@@ -375,10 +355,9 @@ lfo_topo(int section, gui_position const& pos, bool global, bool is_fx)
   
   result.graph_engine_factory = make_graph_engine;
   if(global && !is_fx) result.default_initializer = init_global_default;
+  result.graph_renderer = render_graph;
   result.gui.menu_handler_factory = make_cv_routing_menu_handler;
   result.engine_factory = [global](auto const&, int, int) { return std::make_unique<lfo_engine>(global); };
-  result.graph_renderer = [](auto const& state, auto* engine, int param, auto const& mapping) {
-    return render_graph(state, engine, param, mapping); };
   result.state_converter_factory = [global](auto desc) { return std::make_unique<lfo_state_converter>(desc, global); };
 
   result.sections.emplace_back(make_param_section(section_left,
@@ -550,6 +529,7 @@ void
 lfo_engine::reset(plugin_block const* block) 
 { 
   _ref_phase = 0;
+  _graph_phase = 0;
   _lfo_end_value = 0;
   _end_filter_pos = 0;
   _filter_end_value = 0;
@@ -590,6 +570,17 @@ lfo_engine::process(plugin_block& block, cv_cv_matrix_mixdown const* modulation)
   {
     block.state.own_cv[0][0].fill(block.start_frame, block.end_frame, 0.0f);
     return;
+  }
+
+  // only want the indicators for the actual audio engine
+  if (!block.graph)
+  {
+    mod_indicator_state indicator_state = {};
+    indicator_state.data.module_slot = block.module_slot;
+    indicator_state.data.module = _global ? module_glfo : module_vlfo;
+    indicator_state.data.voice = _global ? 0 : block.voice->state.slot;
+    indicator_state.data.value = type == type_repeat ? _ref_phase : _graph_phase;
+    block.push_mod_indicator_state(indicator_state);
   }
 
   if(_stage == lfo_stage::end)
@@ -826,6 +817,9 @@ void lfo_engine::process_loop(plugin_block& block, cv_cv_matrix_mixdown const* m
       block.state.own_cv[0][0][f] = _filter_end_value;
       continue;
     }
+
+    if (_graph_phase < 1.0f)
+      _graph_phase += rate_curve[f] / block.sample_rate;
 
     if (_stage == lfo_stage::filter)
     {

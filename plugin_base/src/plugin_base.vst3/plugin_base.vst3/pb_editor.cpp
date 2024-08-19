@@ -10,9 +10,9 @@ using namespace Steinberg;
 namespace plugin_base::vst3 {
 
 pb_editor::
-pb_editor(pb_controller* controller) :
+pb_editor(pb_controller* controller, std::vector<mod_indicator_state>* mod_indicator_states) :
 EditorView(controller), _controller(controller),
-_gui(std::make_unique<plugin_gui>(&controller->gui_state(), &controller->extra_state_())) {}
+_gui(std::make_unique<plugin_gui>(&controller->gui_state(), &controller->extra_state_(), mod_indicator_states)) {}
 
 tresult PLUGIN_API
 pb_editor::getSize(ViewRect* new_size)

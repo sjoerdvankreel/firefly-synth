@@ -26,6 +26,7 @@ struct voice_state final {
   // for mono mode
   note_id release_id = {};
 
+  int slot = -1;
   int end_frame = -1;
   int start_frame = -1;
   int release_frame = -1;
@@ -106,11 +107,17 @@ struct plugin_block final {
   plugin_topo const& plugin;
   module_topo const& module;
 
+  // for vst3 this is just the host block out events
+  // but for clap threadpool we will have to consolidate after voice stage
+  std::vector<mod_indicator_state>* mod_indicator_states = {};
+
   void* module_context(int mod, int slot) const;
   jarray<float, 3> const& module_cv(int mod, int slot) const;
   jarray<float, 4> const& module_audio(int mod, int slot) const;
 
   void set_out_param(int param, int slot, double raw) const;
+  void push_mod_indicator_state(mod_indicator_state const& indicator_state) 
+  { mod_indicator_states->push_back(indicator_state); }
   
   template <domain_type DomainType>
   float normalized_to_raw_fast(int module_, int param_, float normalized) const;

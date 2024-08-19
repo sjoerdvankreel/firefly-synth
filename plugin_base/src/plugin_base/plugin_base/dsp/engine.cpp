@@ -59,6 +59,12 @@ _voice_processor_context(voice_processor_context)
   _automation_lerp_filters.resize(_dims.module_slot_param_slot);
   _automation_lp_filters.resize(_dims.module_slot_param_slot);
   _automation_state_last_round_end.resize(_dims.module_slot_param_slot);
+
+  // see also host_events::activate
+  _global_mod_indicator_states.resize(desc->module_count);
+  _voice_mod_indicator_states.resize(_polyphony);
+  for(int i = 0; i < _polyphony; i++)
+    _voice_mod_indicator_states[i].resize(desc->module_count);
 }
 
 plugin_voice_block 
@@ -105,6 +111,10 @@ plugin_engine::make_plugin_block(
     ? _block_automation.state()
     : _voice_automation[voice].state();
 
+  std::vector<mod_indicator_state>* mod_indicator_states = voice < 0 
+    ? &_global_mod_indicator_states 
+    : &_voice_mod_indicator_states[voice];
+
   plugin_block_state state = {
     _last_note_key, context_out, _mono_note_stream,
     cv_out, audio_out, scratch, _bpm_automation,
@@ -119,7 +129,8 @@ plugin_engine::make_plugin_block(
     start_frame, end_frame, slot,
     _sample_rate, state, nullptr, nullptr, 
     _host_block->shared, *_state.desc().plugin, 
-    _state.desc().plugin->modules[module]
+    _state.desc().plugin->modules[module],
+    mod_indicator_states
   };
 }
 
@@ -255,7 +266,9 @@ plugin_engine::activate(int max_frame_count)
   _accurate_automation.resize(frame_dims.accurate_automation);
   _bpm_automation.resize(max_frame_count);
   _mono_note_stream.resize(max_frame_count);
-  _host_block->events.activate(_graph, _state.desc().param_count, _state.desc().midi_count, _polyphony, max_frame_count);
+  _host_block->events.activate(_graph, 
+    _state.desc().module_count, _state.desc().param_count, 
+    _state.desc().midi_count, _polyphony, max_frame_count);
 
   // set automation values to current state, events may overwrite
   automation_state_dirty();
@@ -435,6 +448,10 @@ plugin_engine::process_voices_single_threaded()
 void
 plugin_engine::process_voice(int v, bool threaded)
 {
+  // process() call will release
+  if (threaded)
+    std::atomic_thread_fence(std::memory_order_acquire);
+
   // simplifies threadpool
   // so we can just push (polyphony) tasks each time
   if (_voice_states[v].stage == voice_stage::unused) return;
@@ -502,6 +519,7 @@ plugin_engine::activate_voice(note_event const& event, int slot, int sub_voice_c
 {
   assert(slot >= 0);
   auto& state = _voice_states[slot];
+  state.slot = slot;
   state.note_id_ = event.id;
   state.release_id = event.id;
   state.end_frame = frame_count;
@@ -564,7 +582,11 @@ plugin_engine::process()
   int voice_count = 0;
   int frame_count = _host_block->frame_count;
 
-  _host_block->events.out.clear();
+  _host_block->events.output_params.clear();
+  _host_block->events.mod_indicator_states.clear();
+  _global_mod_indicator_states.clear();
+  for (int i = 0; i < _polyphony; i++)
+    _voice_mod_indicator_states[i].clear();
   std::pair<std::uint32_t, std::uint32_t> denormal_state = disable_denormals();  
 
   // set automation values to current state, events may overwrite
@@ -833,7 +855,7 @@ plugin_engine::process()
       block_event out_event;
       out_event.param = param_index;
       out_event.normalized = normalized_value(last_value);
-      _host_block->events.out.push_back(out_event);
+      _host_block->events.output_params.push_back(out_event);
     }
   }
 
@@ -1106,12 +1128,23 @@ plugin_engine::process()
               block_event out_event;
               out_event.param = param_global;
               out_event.normalized = _state.get_normalized_at(m, mi, p, pi);
-              _host_block->events.out.push_back(out_event);
+              _host_block->events.output_params.push_back(out_event);
             }
             param_global++;
           }
     }
   }
+
+  // fill output mod indicators
+  // these are proteced by mfence in case of clap threadpool
+  for (int i = 0; i < _global_mod_indicator_states.size(); i++)
+    _host_block->events.mod_indicator_states.push_back(_global_mod_indicator_states[i]);
+  for (int i = 0; i < _polyphony; i++)
+    for (int j = 0; j < _voice_mod_indicator_states[i].size(); j++)
+      _host_block->events.mod_indicator_states.push_back(_voice_mod_indicator_states[i][j]);
+
+  // Note: custom output events are already filled here.
+  // It's up to the plugin bindings to communicate them back to the gui.
 
   /*******************/
   /* STEP 9: Wrap-up */

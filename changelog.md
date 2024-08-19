@@ -1,3 +1,8 @@
+### August 20, 2024 - V1.8.6.
+
+- Small changes and bugfixes to graphs.
+- Add visual modulation indicators to graphs (small dots that follow the envelopes and lfo's. No visuals for parameter modulation yet).
+
 ### August 14, 2024 - V1.8.5.
 
 - Add basic multiband EQ.

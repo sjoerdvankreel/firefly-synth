@@ -183,6 +183,7 @@ struct gui_colors final {
   juce::Colour graph_background = juce::Colour(0xFF000000);
   juce::Colour graph_area = juce::Colour(0x80FF8844);
   juce::Colour graph_line = juce::Colour(0xFFFF8844);
+  juce::Colour graph_mod_indicator = juce::Colour(0xC0FFFFFF);
   juce::Colour bubble_outline = juce::Colour(0xFFFF8844);
   juce::Colour knob_thumb = juce::Colour(0xFFFF8844);
   juce::Colour knob_track1 = juce::Colour(0xFF222222);

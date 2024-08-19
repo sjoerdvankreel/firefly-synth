@@ -56,12 +56,12 @@ module_from_matrix_type(bool cv, bool global)
   return global? module_gcv_audio_matrix: module_vcv_audio_matrix;
 }
 
-extern void
-env_plot_length_seconds(
-  plugin_state const& state, int slot, float& dahds, float& dahdsrf);
 extern float
 lfo_frequency_from_state(
   plugin_state const& state, int module_index, int module_slot, int bpm);
+extern void
+env_plot_length_seconds(
+  plugin_state const& state, int slot, float& dly, float& att, float& hld, float& dcy, float& rls, float& flt);
 
 static std::vector<list_item>
 type_items()
@@ -261,6 +261,86 @@ make_graph_engine(plugin_desc const* desc)
   return std::make_unique<graph_engine>(desc, params);
 }
 
+// mapping to longest mod source for graph
+static float
+scale_to_longest_mod_source(
+  plugin_state const& state, param_topo_mapping const& mapping,
+  std::vector<module_output_mapping> const& sources, 
+  float& max_dahd, float& max_dahdrf,
+  int& module_index, int& module_slot)
+{
+  auto const& map = mapping;
+  int route_count = route_count_from_module(map.module_index);
+
+  // scale to longest env or lfo, prefer env
+  float dahd = 0.01f;
+  float dahdrf = 0.01f;
+  float result = 0.01f;
+  max_dahd = 0.01f;
+  max_dahdrf = 0.01f;
+  module_slot = -1;
+  module_index = -1;
+
+  float dly, att, hld, dcy, rls, flt;
+  int ti = state.get_plain_at(map.module_index, map.module_slot, param_target, map.param_slot).step();
+
+  // first check the envelopes, longest wins
+  for (int r = 0; r < route_count; r++)
+    if (state.get_plain_at(map.module_index, map.module_slot, param_type, r).step() != type_off)
+      if (state.get_plain_at(map.module_index, map.module_slot, param_target, r).step() == ti)
+      {
+        int si = state.get_plain_at(map.module_index, map.module_slot, param_source, r).step();
+        if (sources[si].module_index == module_env)
+        {
+          env_plot_length_seconds(state, sources[si].module_slot, dly, att, hld, dcy, rls, flt);
+          dahd = dly + att + hld + dcy;
+          dahdrf = dahd + rls + flt;
+          if (dahdrf > max_dahdrf)
+          {
+            max_dahd = dahd;
+            max_dahdrf = dahdrf;
+            result = dahdrf;
+            module_slot = sources[si].module_slot;
+            module_index = sources[si].module_index;
+          }
+        }
+      }
+
+  // then check the lfos, longest wins
+  if(module_index == -1)
+    for (int r = 0; r < route_count; r++)
+      if (state.get_plain_at(map.module_index, map.module_slot, param_type, r).step() != type_off)
+        if (state.get_plain_at(map.module_index, map.module_slot, param_target, r).step() == ti)
+        {
+          int si = state.get_plain_at(map.module_index, map.module_slot, param_source, r).step();
+          if (sources[si].module_index == module_glfo || sources[si].module_index == module_vlfo)
+          {
+            float freq = lfo_frequency_from_state(state, sources[si].module_index, sources[si].module_slot, 120);
+            if (1 / freq > result)
+            {
+              result = 1 / freq;
+              module_slot = sources[si].module_slot;
+              module_index = sources[si].module_index;
+            }
+            result = std::max(result, 1 / freq);
+          }
+        }
+
+  return result;
+}
+
+// mapping to longest mod source, prefer envelope
+static mod_indicator_source
+select_mod_indicator_source(
+  plugin_state const& state, param_topo_mapping const& mapping,
+  std::vector<module_output_mapping> const& sources)
+{
+  float max_dahd, max_dahdrf;
+  int module_index, module_slot;
+  scale_to_longest_mod_source(state, mapping, sources, max_dahd, max_dahdrf, module_index, module_slot);
+  return { module_index, module_slot };
+}
+
 static graph_data
 render_graph(
   plugin_state const& state, graph_engine* engine, int param, param_topo_mapping const& mapping, 
@@ -279,37 +359,16 @@ render_graph(
   }
 
   // scale to longest env or lfo
-  float dahds = 0.1f;
-  float dahdsrf = 0.1f;
-  float max_total = 0.1f;
-  float max_dahds = 0.1f;
-  float max_dahdsrf = 0.1f;
-  int ti = state.get_plain_at(map.module_index, map.module_slot, param_target, map.param_slot).step();
-  for(int r = 0; r < route_count; r++)
-    if (state.get_plain_at(map.module_index, map.module_slot, param_type, r).step() != type_off)
-      if (state.get_plain_at(map.module_index, map.module_slot, param_target, r).step() == ti)
-      {
-        int si = state.get_plain_at(map.module_index, map.module_slot, param_source, r).step();
-        if (sources[si].module_index == module_env)
-        {
-          env_plot_length_seconds(state, sources[si].module_slot, dahds, dahdsrf);
-          if (dahdsrf > max_dahdsrf)
-          {
-            max_dahds = dahds;
-            max_dahdsrf = dahdsrf;
-            max_total = dahdsrf;
-          }
-        }
-        else if (sources[si].module_index == module_glfo || sources[si].module_index == module_vlfo)
-        {
-          float freq = lfo_frequency_from_state(state, sources[si].module_index, sources[si].module_slot, 120);
-          max_total = std::max(max_total, 1 / freq);
-        }
-      }
+  float max_dahd;
+  float max_dahdrf;
+  int module_index;
+  int module_slot;
+  float max_total = scale_to_longest_mod_source(state, mapping, sources, max_dahd, max_dahdrf, module_index, module_slot);
 
   auto const params = make_graph_engine_params();
   int sample_rate = params.max_frame_count / max_total;
-  int voice_release_at = max_dahds / max_dahdsrf * params.max_frame_count;
+  int voice_release_at = max_dahd / max_dahdrf * params.max_frame_count;
+  int ti = state.get_plain_at(map.module_index, map.module_slot, param_target, map.param_slot).step();
 
   engine->process_begin(&state, sample_rate, params.max_frame_count, voice_release_at);  
   std::vector<int> relevant_modules({ module_gcv_cv_matrix, module_master_in, module_glfo });
@@ -384,7 +443,11 @@ cv_matrix_topo(
   result.graph_renderer = [sm = source_matrix.mappings, tm = target_matrix](
     auto const& state, auto* engine, int param, auto const& mapping) {
       return render_graph(state, engine, param, mapping, sm, tm);
-  };
+    };
+  result.mod_indicator_source_selector = [sm = source_matrix.mappings](
+    auto const& state, auto const& mapping) {
+      return select_mod_indicator_source(state, mapping, sm);
+    };
   result.gui.menu_handler_factory = [](plugin_state* state) {
     return std::make_unique<tidy_matrix_menu_handler>(
       state, 1, param_type, type_off, std::vector<std::vector<int>>({{ param_target, param_source }})); 

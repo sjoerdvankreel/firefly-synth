@@ -19,7 +19,9 @@ _desc(std::make_unique<plugin_desc>(topo, nullptr)),
 _splice_engine(_desc.get(), false, nullptr, nullptr)
 {
   PB_LOG_FUNC_ENTRY_EXIT();
+
   setControllerClass(controller_id);
+
   processContextRequirements.needTempo();
   processContextRequirements.needFrameRate();
   processContextRequirements.needContinousTimeSamples();
@@ -35,6 +37,11 @@ _splice_engine(_desc.get(), false, nullptr, nullptr)
       _param_to_midi_id[source.info.id_hash] = source.source->id;
     }
   }
+
+  // fetch mod indicator param tags
+  _mod_indicator_count_param_tag = desc_id_hash(mod_indicator_count_param_guid);
+  for (int i = 0; i < mod_indicator_output_param_count; i++)
+    _mod_indicator_param_tags[i] = desc_id_hash(mod_indicator_param_guids[i]);
 }
 
 tresult PLUGIN_API
@@ -211,17 +218,36 @@ pb_component::process(ProcessData& data)
       }
   
   _splice_engine.process();
+
+  // regular output params
   int unused_index = 0;
   if(data.outputParameterChanges)
-    for (int e = 0; e < block.events.out.size(); e++)
+    for (int e = 0; e < block.events.output_params.size(); e++)
     {
-      auto const& event = block.events.out[e];
+      auto const& event = block.events.output_params[e];
       int tag = _splice_engine.state().desc().param_mappings.index_to_tag[event.param];
       queue = data.outputParameterChanges->addParameterData(tag, unused_index);
       queue->addPoint(0, event.normalized.value(), unused_index);
     }
 
+  // module modulation indicators
+  unused_index = 0;
+  if (data.outputParameterChanges)
+  {
+    auto num_mod_indicators = block.events.mod_indicator_states.size();
+    num_mod_indicators = std::min((int)num_mod_indicators, mod_indicator_output_param_count);
+    queue = data.outputParameterChanges->addParameterData(_mod_indicator_count_param_tag, unused_index);
+    queue->addPoint(0, *reinterpret_cast<double*>(&num_mod_indicators), unused_index);
+    for (int e = 0; e < block.events.mod_indicator_states.size(); e++)
+    {
+      auto const& this_mod_indicator_state = block.events.mod_indicator_states[e];
+      queue = data.outputParameterChanges->addParameterData(_mod_indicator_param_tags[e], unused_index);
+      queue->addPoint(0, *reinterpret_cast<double const*>(&this_mod_indicator_state.packed), unused_index);
+    }
+  }
+
   _splice_engine.release_block();
+
   return kResultOk;
 }
 

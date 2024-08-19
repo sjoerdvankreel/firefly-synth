@@ -5,6 +5,7 @@
 #include <plugin_base/dsp/block/shared.hpp>
 
 #include <vector>
+#include <cstdint>
 
 namespace plugin_base {
 
@@ -43,17 +44,20 @@ struct note_event final {
 // these are translated to curves/values
 struct host_events final {
   std::vector<midi_event> midi;
-  std::vector<block_event> out;
   std::vector<note_event> notes;
   std::vector<block_event> block;
   std::vector<accurate_event> accurate_automation;
   std::vector<accurate_event> accurate_modulation;
+  // regular output params eg cpu usage, needs registering output params by the module
+  std::vector<block_event> output_params;
+  // lfo / env modulator indicators
+  std::vector<mod_indicator_state> mod_indicator_states;
 
   // plugin_engine interpolates these as one
   std::vector<accurate_event> accurate_automation_and_modulation;
 
   void deactivate();
-  void activate(bool graph, int param_count, int midi_count, int polyphony, int max_frame_count);
+  void activate(bool graph, int module_count, int param_count, int midi_count, int polyphony, int max_frame_count);
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(host_events);
 };
 

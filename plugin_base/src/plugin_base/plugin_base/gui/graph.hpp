@@ -19,21 +19,39 @@ struct graph_params
   partition_scale_type scale_type = {};
 };
 
-class graph:
+// draw on top of graph to prevent repaint the whole component in realtime
+class graph_indicator:
 public juce::Component
 {
   lnf* const _lnf;
-  graph_data _data;  
+
+public:
+  graph_indicator(lnf* lnf);
+  void paint(juce::Graphics& g) override;
+};
+
+class graph:
+public juce::Component
+{
+private:
+  lnf* const _lnf;
   graph_params const _params;
+  
   void paint_series(
     juce::Graphics& g, jarray<float, 1> const& series, 
     bool bipolar, float stroke_thickness, float midpoint);
 
+protected:
+  static int const max_indicators = 64;
+
+  graph_data _data;
+  std::vector<std::unique_ptr<graph_indicator>> _indicators = {};
+
 public:
   void render(graph_data const& data);
   void paint(juce::Graphics& g) override;
-  graph(lnf* lnf, graph_params const& params) :
-  _lnf(lnf), _data(graph_data_type::na, {}), _params(params) {}
+
+  graph(lnf* lnf, graph_params const& params);
 };
 
 struct module_graph_params
@@ -54,6 +72,7 @@ public graph,
 public any_state_listener,
 public gui_mouse_listener,
 public gui_tab_selection_listener,
+public mod_indicator_state_listener,
 public juce::Timer,
 public juce::SettableTooltipClient
 {
@@ -82,6 +101,7 @@ public:
   void module_mouse_enter(int module) override;
   void module_tab_changed(int module, int slot) override;
   void any_state_changed(int param, plain_value plain) override;  
+  void mod_indicator_state_changed(std::vector<mod_indicator_state> const& states) override;
 };
 
 }
