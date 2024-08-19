@@ -42,7 +42,7 @@ private:
     bool bipolar, float stroke_thickness, float midpoint);
 
 protected:
-  static int const max_indicators = 32;
+  static int const max_indicators = 64;
 
   graph_data _data;
   std::vector<std::unique_ptr<graph_indicator>> _indicators = {};
