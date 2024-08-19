@@ -25,7 +25,7 @@ public any_state_listener,
 public gui_param_listener
 {
   typedef moodycamel::ReaderWriterQueue<sync_event, default_q_size> event_queue;
-  typedef moodycamel::ReaderWriterQueue<mod_indicator_state> mod_indicator_queue;
+  typedef moodycamel::ReaderWriterQueue<mod_indicator_state, default_q_size> mod_indicator_queue;
 
   // needs to be first, everyone else needs it
   std::unique_ptr<plugin_desc> _desc;
