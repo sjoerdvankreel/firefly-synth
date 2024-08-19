@@ -18,7 +18,7 @@ param_desc(
   full_name = desc_name(module_.info, module_.info.tag.menu_display_name, module_slot) + " " + info.name;
   info.id = desc_id(module_.info, module_slot) + "-" + desc_id(param_.info, slot);
   info.id_hash = desc_id_hash(info.id.c_str());
-}
+} 
 
 void
 param_desc::validate(module_desc const& module, int index) const

@@ -27,17 +27,16 @@ V it doesn't repaint smooth
 V rename custom_out_state
 V fix the env stuff drop stn
 V fix the global/top graph
+V fix vst3
+V fix clap threadpool
 - up the vno
-- green-on-white UI
-- show effective modulation in the ui + clap mod
-- bugfix: rerender graph on master in param hover?
-- turn on stuff when dragging (e.g. basic sin, dist skew etc)
-- drop some ugly-ass themes
-- fix vst3
-- fix clap threadpool
-- add mod indicators to params ?
 
 wishlist:
+green-on-white UI
+show effective modulation in the ui for params + clap mod
+bugfix: rerender graph on master in param hover?
+turn on stuff when dragging (e.g. basic sin, dist skew etc)
+drop some ugly-ass themes
 DSF falloff to the left
 clap polyphonic modulation
 full-blown renoise support
