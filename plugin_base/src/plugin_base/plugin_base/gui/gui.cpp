@@ -534,19 +534,6 @@ plugin_gui::remove_mod_indicator_state_listener(mod_indicator_state_listener* li
 void 
 plugin_gui::mod_indicator_states_changed()
 {
-  // filter duplicates since this might be the accumulation of a couple audio processing rounds
-  auto compare = [](mod_indicator_state const& l, mod_indicator_state const& r) {
-    if (l.data.module < r.data.module) return false;
-    if (l.data.module > r.data.module) return true;
-    if (l.data.module_slot < r.data.module_slot) return false;
-    if (l.data.module_slot > r.data.module_slot) return true;
-    return l.data.voice < r.data.voice;
-  };
-  std::sort(_mod_indicator_states->begin(), _mod_indicator_states->end(), compare);
-  auto unique_it = std::unique(_mod_indicator_states->begin(), _mod_indicator_states->end(),
-    [compare](auto const& l, auto const& r) { return !compare(l, r) && !compare(r, l); });
-  _mod_indicator_states->erase(unique_it, _mod_indicator_states->end());
-
   for(auto listener_it: _mod_indicator_state_listeners)
     listener_it->mod_indicator_state_changed(*_mod_indicator_states);
 }
