@@ -1,3 +1,7 @@
+### ?, ? - V1.8.6.
+
+- Add visual modulation indicators.
+
 ### August 14, 2024 - V1.8.5.
 
 - Add basic multiband EQ.

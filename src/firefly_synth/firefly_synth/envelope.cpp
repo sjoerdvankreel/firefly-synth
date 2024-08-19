@@ -155,7 +155,7 @@ make_graph_engine_params()
 {
   graph_engine_params result = {};
   result.bpm = 120;
-  result.max_frame_count = 200;
+  result.max_frame_count = 2000; // need to spot outliers
   return result;
 }
 
