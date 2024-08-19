@@ -19,8 +19,9 @@ public Steinberg::IPlugViewContentScaleSupport
 {
   std::unique_ptr<plugin_gui> _gui = {};
   pb_controller* const _controller = {};
+
 public: 
-  pb_editor(pb_controller* controller);
+  pb_editor(pb_controller* controller, std::vector<mod_indicator_state>* mod_indicator_states);
   PB_PREVENT_ACCIDENTAL_COPY(pb_editor);
 
 #if (defined __linux__) || (defined  __FreeBSD__)
@@ -39,6 +40,8 @@ public:
   Steinberg::uint32 PLUGIN_API addRef() override { return EditorView::addRef(); }
   Steinberg::uint32 PLUGIN_API release() override { return EditorView::release(); }
   Steinberg::tresult PLUGIN_API queryInterface(Steinberg::TUID const iid, void** obj) override;
+
+  void mod_indicator_states_changed() { if (_gui) _gui->mod_indicator_states_changed(); }
 };
 
 }

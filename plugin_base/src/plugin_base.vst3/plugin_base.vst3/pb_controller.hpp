@@ -3,6 +3,7 @@
 #include <plugin_base/gui/gui.hpp>
 #include <plugin_base/shared/state.hpp>
 #include <plugin_base/shared/utility.hpp>
+#include <plugin_base.vst3/utility.hpp>
 
 #include <pluginterfaces/gui/iplugview.h>
 #include <public.sdk/source/vst/vsteditcontroller.h>
@@ -27,6 +28,15 @@ public Steinberg::Vst::EditControllerEx1
   plugin_state _gui_state = {};
   extra_state _extra_state;
   std::map<int, int> _midi_id_to_param = {};
+
+  // module modulation indicator states
+  int _mod_indicator_count = 0;
+  int _mod_indicator_count_param_tag = -1;
+  std::map<int, int> _tag_to_mod_indicator_index = {};
+  std::array<bool, mod_indicator_output_param_count> _mod_indicator_param_set = {};
+  std::array<int, mod_indicator_output_param_count> _mod_indicator_param_tags = {};
+  std::vector<mod_indicator_state> _mod_indicator_states_to_gui = {};
+  std::array<mod_indicator_state, mod_indicator_output_param_count> _mod_indicator_states_from_audio = {};
 
   // see param_state_changed and setParamNormalized
   // when host comes at us with an automation value, that is

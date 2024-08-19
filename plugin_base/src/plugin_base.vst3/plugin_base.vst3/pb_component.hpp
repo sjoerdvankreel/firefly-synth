@@ -23,6 +23,10 @@ public Steinberg::Vst::AudioEffect {
   std::vector<float> _scratch_out_l;
   std::vector<float> _scratch_out_r;
 
+  // for modulation indicators
+  int _mod_indicator_count_param_tag = -1;
+  std::array<int, mod_indicator_output_param_count> _mod_indicator_param_tags = {};
+
 public:
   PB_PREVENT_ACCIDENTAL_COPY(pb_component);
   pb_component(plugin_topo const* topo, Steinberg::FUID const& controller_id);

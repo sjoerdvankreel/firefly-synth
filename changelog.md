@@ -1,6 +1,7 @@
 ### ?, ? - V1.8.6.
 
-- Add visual modulation indicators.
+- Small changes and bugfixes to graphs.
+- Add visual modulation indicators to graphs.
 
 ### August 14, 2024 - V1.8.5.
 
