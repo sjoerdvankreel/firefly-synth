@@ -39,7 +39,7 @@
     "graph_background": "FF000000",
     "graph_area": "80CC0000",
     "graph_line": "FFCC0000",
-    "graph_mod_indicator": "80FFFFFF",
+    "graph_mod_indicator": "20FFFFFF",
     "bubble_outline": "FFCC0000",
     "knob_thumb": "FFCC0000",
     "knob_track1": "FF111111",
