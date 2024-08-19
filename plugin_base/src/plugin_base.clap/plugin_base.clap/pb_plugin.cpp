@@ -774,7 +774,7 @@ pb_plugin::process(clap_process const* process) noexcept
     _to_gui_events->enqueue(to_gui_event);
   }
 
-  // custom anything-goes stuff
+  // module modulation indicators
   for (int e = 0; e < block.events.mod_indicator_states.size(); e++)
     _mod_indicator_queue->enqueue(block.events.mod_indicator_states[e]);
 
