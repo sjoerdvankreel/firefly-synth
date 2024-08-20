@@ -25,9 +25,10 @@ V speed up the graph mod ind
 V deal with uni/bipolar
 V do the adjustable theme color
 V show effective modulation in the ui for params
-- up the vno
+V up the vno
+V deal with per-voice
 - deal with sliders/knobs
-- deal with per-voice
+- do a video
 
 wishlist:
 green-on-white UI
