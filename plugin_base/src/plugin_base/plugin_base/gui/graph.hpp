@@ -24,10 +24,14 @@ class graph_indicator:
 public juce::Component
 {
   lnf* const _lnf;
+  double _activated_time_seconds;
 
 public:
   graph_indicator(lnf* lnf);
+  
+  void activate();
   void paint(juce::Graphics& g) override;
+  double activated_time_seconds() const { return _activated_time_seconds; }
 };
 
 class graph:
