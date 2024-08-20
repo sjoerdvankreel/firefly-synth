@@ -823,7 +823,10 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
     // current modulation indicator
     if (ps->min_mod_indicator() >= 0.0f)
     {
-      draw_conic_arc(g, left, top, size, start_angle, start_angle + ps->min_mod_indicator() * angle_range, Colours::white, Colours::white, conic_count, 0, pos, stroke);
+      Path path;
+      g.setColour(Colours::white); // todo
+      path.addArc(left - 3, top - 3, size + 6, size + 6, start_angle, start_angle + ps->min_mod_indicator() * angle_range, true);
+      g.strokePath(path, PathStrokeType(2));
     }
   }
 

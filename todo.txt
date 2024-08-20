@@ -31,9 +31,16 @@ V fix vst3
 V fix clap threadpool
 - up the vno
 
+1.8.7:
+V speed up the graph mod ind
+- up the vno
+- show effective modulation in the ui for params + clap mod
+- deal with uni/bipolar
+- deal with sliders/knobs
+- do the adjustable theme color
+
 wishlist:
 green-on-white UI
-show effective modulation in the ui for params + clap mod
 bugfix: rerender graph on master in param hover?
 turn on stuff when dragging (e.g. basic sin, dist skew etc)
 drop some ugly-ass themes
