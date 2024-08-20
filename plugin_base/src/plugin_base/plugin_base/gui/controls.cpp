@@ -608,6 +608,9 @@ param_slider::fixed_width(int parent_w, int parent_h) const
 void 
 param_slider::mod_indicator_state_changed(std::vector<mod_indicator_state> const& states)
 {
+  float prev_min = _min_mod_indicator;
+  float prev_max = _max_mod_indicator;
+
   if (states.size() > 0)
   {
     _min_mod_indicator = -1.0f;
@@ -615,9 +618,6 @@ param_slider::mod_indicator_state_changed(std::vector<mod_indicator_state> const
   }
 
   bool any_indicator_found = false;
-  float prev_min = _min_mod_indicator;
-  float prev_max = _max_mod_indicator;
-
   for(int i = 0; i < states.size(); i++)
     if (states[i].data.param_global == _param->info.global)
     {
@@ -630,7 +630,7 @@ param_slider::mod_indicator_state_changed(std::vector<mod_indicator_state> const
     }
 
   // check if we expired
-  if (!any_indicator_found && _min_mod_indicator != -1.0f && _max_mod_indicator != -1.0f)
+  if (!any_indicator_found)
   {
     double invalidate_after = 0.05;
     double time_now = seconds_since_epoch();
