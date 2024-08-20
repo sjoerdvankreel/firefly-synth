@@ -565,7 +565,7 @@ param_slider::
 {
   // parameter modulation indicators
   if (_param->param->dsp.can_modulate(_param->info.slot))
-    _gui->add_mod_indicator_state_listener(this);
+    _gui->remove_mod_indicator_state_listener(this);
 }
 
 param_slider::
