@@ -22,9 +22,10 @@ It's basically [InfernalSynth](https://github.com/sjoerdvankreel/infernal-synth)
 - KVR: [https://www.kvraudio.com/product/firefly-synth-by-sjoerdvankreel](https://www.kvraudio.com/product/firefly-synth-by-sjoerdvankreel)
 - Manual: [https://github.com/sjoerdvankreel/firefly-synth/blob/main/manual.md](https://github.com/sjoerdvankreel/firefly-synth/blob/main/manual.md)
 
-# Screenshot
+# Screenshot / Demo video
 
-See below for some built-in themes.
+See at the bottom for some built-in themes. <br/>
+See [modulation_visualization_demo.mp4](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/video/modulation_visualization_demo.mp4) for an example of real-time modulation visualizers.
 
 ![Screenshot](static/screenshot_instrument_firefly_default.png)
 ![Screenshot](static/screenshot_fx_firefly_default.png)

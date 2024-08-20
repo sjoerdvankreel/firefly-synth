@@ -20,16 +20,6 @@ on release:
 V1.8.4:
 - fix the undo history for tuning mode
 
-1.8.7:
-V speed up the graph mod ind
-V deal with uni/bipolar
-V do the adjustable theme color
-V show effective modulation in the ui for params
-V up the vno
-V deal with per-voice
-V deal with sliders/knobs
-- do a video
-
 wishlist:
 green-on-white UI
 bugfix: rerender graph on master in param hover?
