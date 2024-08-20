@@ -924,15 +924,33 @@ lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, f
     g.drawRoundedRectangle(left, top, width, height, 2, 1);
   } else
   {
-    if (pos >= 0.5)
+    if (max_mod_pos < 0.0f)
     {
-      g.setGradientFill(ColourGradient(track1, centerx, 0, track2, width, 0, false));
-      g.fillRoundedRectangle(centerx, top, (pos - 0.5f) * 2 * width / 2, height, 2);
-    } else
+      if (pos >= 0.5)
+      {
+        g.setGradientFill(ColourGradient(track1, centerx, 0, track2, width, 0, false));
+        g.fillRoundedRectangle(centerx, top, (pos - 0.5f) * 2 * width / 2, height, 2);
+      }
+      else
+      {
+        float trackw = (0.5f - pos) * 2 * width / 2;
+        g.setGradientFill(ColourGradient(track2, left, 0, track1, centerx, 0, false));
+        g.fillRoundedRectangle(centerx - trackw, top, trackw, height, 2);
+      }
+    }
+    else
     {
-      float trackw = (0.5f - pos) * 2 * width / 2;
-      g.setGradientFill(ColourGradient(track2, left, 0, track1, centerx, 0, false));
-      g.fillRoundedRectangle(centerx - trackw, top, trackw, height, 2);
+      if (max_mod_pos >= 0.5f)
+      {
+        g.setGradientFill(ColourGradient(track1.brighter(), centerx, 0, track2.brighter(), width, 0, false));
+        g.fillRoundedRectangle(centerx, top, (max_mod_pos - 0.5f) * 2 * width / 2, height, 2);
+      }
+      if(min_mod_pos < 0.5f)
+      {
+        float trackw = (0.5f - min_mod_pos) * 2 * width / 2;
+        g.setGradientFill(ColourGradient(track2.brighter(), left, 0, track1.brighter(), centerx, 0, false));
+        g.fillRoundedRectangle(centerx - trackw, top, trackw, height, 2);
+      }
     }
 
     Path pl;

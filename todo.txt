@@ -27,7 +27,7 @@ V do the adjustable theme color
 V show effective modulation in the ui for params
 V up the vno
 V deal with per-voice
-- deal with sliders/knobs
+V deal with sliders/knobs
 - do a video
 
 wishlist:
