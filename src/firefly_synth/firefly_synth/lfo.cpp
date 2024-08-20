@@ -577,7 +577,7 @@ lfo_engine::process(plugin_block& block, cv_cv_matrix_mixdown const* modulation)
   {
     mod_indicator_state indicator_state = {};
     indicator_state.data.param_global = -1;
-    indicator_state.data.module_global = block.module_global;
+    indicator_state.data.module_global = block.module_desc_.info.global;
     indicator_state.data.voice_index = _global ? 0 : block.voice->state.slot;
     indicator_state.data.value = type == type_repeat ? _ref_phase : _graph_phase;
     block.push_mod_indicator_state(indicator_state);

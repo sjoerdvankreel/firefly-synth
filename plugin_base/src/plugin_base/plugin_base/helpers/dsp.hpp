@@ -11,7 +11,7 @@ inline timesig
 get_timesig_param_value(plugin_block const& block, int module, int timesig_p)
 {
   int sig_index = block.state.own_block_automation[timesig_p][0].step();
-  return block.plugin.modules[module].params[timesig_p].domain.timesigs[sig_index];
+  return block.plugin_desc_.plugin->modules[module].params[timesig_p].domain.timesigs[sig_index];
 }
 
 inline float 

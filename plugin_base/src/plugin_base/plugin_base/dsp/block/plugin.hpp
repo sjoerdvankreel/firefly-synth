@@ -98,15 +98,14 @@ struct plugin_block final {
   int start_frame;
   int end_frame;
   int module_slot;
-  int module_global;
   float sample_rate;
   plugin_block_state state;
 
   plugin_output_block* out;
   plugin_voice_block* voice;
   shared_block const& host;
-  plugin_topo const& plugin;
-  module_topo const& module;
+  plugin_desc const& plugin_desc_;
+  module_desc const& module_desc_;
 
   // for vst3 this is just the host block out events
   // but for clap threadpool we will have to consolidate after voice stage
@@ -129,7 +128,7 @@ struct plugin_block final {
 inline void*
 plugin_block::module_context(int mod, int slot) const
 {
-  if (plugin.modules[mod].dsp.stage == module_stage::voice)
+  if (plugin_desc_.plugin->modules[mod].dsp.stage == module_stage::voice)
     return voice->all_context[mod][slot];
   else
     return state.all_global_context[mod][slot];
@@ -138,7 +137,7 @@ plugin_block::module_context(int mod, int slot) const
 inline jarray<float, 3> const& 
 plugin_block::module_cv(int mod, int slot) const
 {
-  if(plugin.modules[mod].dsp.stage == module_stage::voice)
+  if(plugin_desc_.plugin->modules[mod].dsp.stage == module_stage::voice)
     return voice->all_cv[mod][slot];
   else
     return state.all_global_cv[mod][slot];
@@ -147,7 +146,7 @@ plugin_block::module_cv(int mod, int slot) const
 inline jarray<float, 4> const& 
 plugin_block::module_audio(int mod, int slot) const
 {
-  if (plugin.modules[mod].dsp.stage == module_stage::voice)
+  if (plugin_desc_.plugin->modules[mod].dsp.stage == module_stage::voice)
     return voice->all_audio[mod][slot];
   else
     return state.all_global_audio[mod][slot];
@@ -156,15 +155,15 @@ plugin_block::module_audio(int mod, int slot) const
 inline void 
 plugin_block::set_out_param(int param, int slot, double raw) const
 {
-  assert(module.params[param].dsp.direction == param_direction::output);
-  out->params[param][slot] = module.params[param].domain.raw_to_plain(raw);
+  assert(module_desc_.module->params[param].dsp.direction == param_direction::output);
+  out->params[param][slot] = module_desc_.module->params[param].domain.raw_to_plain(raw);
 }
 
 template <domain_type DomainType> inline float
 plugin_block::normalized_to_raw_fast(int module_, int param_, float normalized) const
 {
   check_unipolar(normalized);
-  auto const& param_topo = plugin.modules[module_].params[param_];
+  auto const& param_topo = plugin_desc_.plugin->modules[module_].params[param_];
   return param_topo.domain.normalized_to_raw_fast<DomainType>(normalized_value(normalized));
 }
 
@@ -172,7 +171,7 @@ template <domain_type DomainType> inline void
 plugin_block::normalized_to_raw_block(int module_, int param_, jarray<float, 1> const& in, jarray<float, 1>& out) const
 {
   for(int f = start_frame; f < end_frame; f++) check_unipolar(in[f]);
-  auto const& param_topo = plugin.modules[module_].params[param_];
+  auto const& param_topo = plugin_desc_.plugin->modules[module_].params[param_];
   param_topo.domain.normalized_to_raw_block<DomainType>(in, out, start_frame, end_frame);
 }
 

@@ -241,11 +241,12 @@ cv_audio_matrix_mixdown
 make_static_cv_matrix_mixdown(plugin_block& block)
 {
   cv_audio_matrix_mixdown result;
-  plugin_dims dims(block.plugin, block.plugin.audio_polyphony);
+  auto const& topo = *block.plugin_desc_.plugin;
+  plugin_dims dims(topo, topo.audio_polyphony);
   result.resize(dims.module_slot_param_slot);
-  for (int m = 0; m < block.plugin.modules.size(); m++)
+  for (int m = 0; m < topo.modules.size(); m++)
   {
-    auto const& module = block.plugin.modules[m];
+    auto const& module = topo.modules[m];
     for (int mi = 0; mi < module.info.slot_count; mi++)
       for (int p = 0; p < module.params.size(); p++)
       {
