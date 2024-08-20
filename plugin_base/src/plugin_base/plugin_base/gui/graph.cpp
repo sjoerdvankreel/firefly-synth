@@ -12,9 +12,9 @@ module_graph::
 { 
   _done = true;
   stopTimer();
-  _gui->remove_mod_indicator_state_listener(this);
   if(_module_params.render_on_tweak) _gui->gui_state()->remove_any_listener(this);
   if(_module_params.render_on_tab_change) _gui->remove_tab_selection_listener(this);
+  if (_module_params.render_on_mod_indicator_change) _gui->remove_mod_indicator_state_listener(this);
   if (_module_params.render_on_module_mouse_enter || _module_params.render_on_param_mouse_enter_modules.size())
     _gui->remove_gui_mouse_listener(this);
 }
@@ -30,12 +30,13 @@ graph(lnf, params), _gui(gui), _module_params(module_params)
   if (_module_params.render_on_tweak) gui->gui_state()->add_any_listener(this);
   if(_module_params.render_on_module_mouse_enter || _module_params.render_on_param_mouse_enter_modules.size())
     gui->add_gui_mouse_listener(this);
+  if (_module_params.render_on_mod_indicator_change)
+    _gui->add_mod_indicator_state_listener(this);
   if (_module_params.render_on_tab_change)
   {
     gui->add_tab_selection_listener(this);
     module_tab_changed(_module_params.module_index, 0);
   }
-  _gui->add_mod_indicator_state_listener(this);
   startTimerHz(_module_params.fps);
 }
 

@@ -65,6 +65,7 @@ struct module_graph_params
   bool render_on_tweak = false;
   bool render_on_tab_change = false;
   bool render_on_module_mouse_enter = false;
+  bool render_on_mod_indicator_change = false;
   std::vector<int> render_on_param_mouse_enter_modules = {};
   // trigger also on changes in these
   std::vector<int> dependent_module_indices = {};
