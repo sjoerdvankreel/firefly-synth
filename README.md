@@ -24,7 +24,7 @@ It's basically [InfernalSynth](https://github.com/sjoerdvankreel/infernal-synth)
 
 # Screenshot / Demo video
 
-See at the bottom for some built-in themes. <br/>
+See bottom of the page for some built-in themes. <br/>
 See [modulation_visualization_demo.mp4](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/video/modulation_visualization_demo.mp4) for an example of real-time modulation visualizers.
 
 ![Screenshot](static/screenshot_instrument_firefly_default.png)
