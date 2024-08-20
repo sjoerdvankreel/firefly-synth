@@ -821,11 +821,11 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
     }
 
     // current modulation indicator
-    if (ps->min_mod_indicator() >= 0.0f)
+    if (ps->max_mod_indicator() >= 0.0f)
     {
       Path path;
       g.setColour(Colours::white); // todo
-      path.addArc(left - 3, top - 3, size + 6, size + 6, start_angle, start_angle + ps->min_mod_indicator() * angle_range, true);
+      path.addArc(left - 3, top - 3, size + 6, size + 6, start_angle, start_angle + ps->max_mod_indicator() * angle_range, true);
       g.strokePath(path, PathStrokeType(2));
     }
   }
