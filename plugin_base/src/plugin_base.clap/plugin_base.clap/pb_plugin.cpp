@@ -282,7 +282,7 @@ pb_plugin::guiGetSize(uint32_t* width, uint32_t* height) noexcept
 bool
 pb_plugin::guiAdjustSize(uint32_t* width, uint32_t* height) noexcept
 {
-  assert(_gui.get());
+  if (!_gui.get()) return true;
   auto const& topo = *_splice_engine.state().desc().plugin;
   bool is_fx = topo.type == plugin_type::fx;
   auto settings = _gui->get_lnf()->global_settings();

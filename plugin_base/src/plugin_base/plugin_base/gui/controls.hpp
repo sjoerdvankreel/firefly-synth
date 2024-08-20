@@ -274,20 +274,34 @@ public:
 class param_slider:
 public param_component,
 public juce::Slider,
-public autofit_component
+public autofit_component,
+public mod_indicator_state_listener
 {
+  float _min_mod_indicator = -1.0f;
+  float _max_mod_indicator = -1.0f;
+  double _mod_indicator_activated_time_seconds = {};
+
 protected:
   void own_param_changed(plain_value plain) override final
   { setValue(_param->param->domain.plain_to_raw(plain), juce::dontSendNotification); }
 
 public: 
+  ~param_slider();
   param_slider(plugin_gui* gui, module_desc const* module, param_desc const* param);
+
+  // param modulation indicators
+  void mod_indicator_state_changed(std::vector<mod_indicator_state> const& states) override;
+  float min_mod_indicator() const { return _min_mod_indicator; }
+  float max_mod_indicator() const { return _max_mod_indicator; }
+  double mod_indicator_activated_time_seconds() const { return _mod_indicator_activated_time_seconds; }
 
   int fixed_width(int parent_w, int parent_h) const override;
   int fixed_height(int parent_w, int parent_h) const override { return -1; }
+
   void stoppedDragging() override { _gui->param_end_changes(_param->info.global); }
   void startedDragging() override { _gui->param_begin_changes(_param->info.global); }
   void valueChanged() override { _gui->param_changing(_param->info.global, _param->param->domain.raw_to_plain(getValue())); }
+
   juce::String getTextFromValue(double value) override 
   { return juce::String(_param->info.name + ": ") + juce::Slider::getTextFromValue(value * (_param->param->domain.display == domain_display::percentage ? 100 : 1)); }
 };

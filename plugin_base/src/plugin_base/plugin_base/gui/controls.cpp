@@ -561,6 +561,14 @@ param_component(gui, module, param), autofit_togglebutton(lnf, param->param->gui
 }
 
 param_slider::
+~param_slider()
+{
+  // parameter modulation indicators
+  if (_param->param->dsp.can_modulate(_param->info.slot))
+    _gui->add_mod_indicator_state_listener(this);
+}
+
+param_slider::
 param_slider(plugin_gui* gui, module_desc const* module, param_desc const* param) :
 param_component(gui, module, param), Slider()
 {
@@ -572,6 +580,10 @@ param_component(gui, module, param), Slider()
   case gui_edit_type::hslider: setSliderStyle(Slider::LinearHorizontal); break;
   default: assert(false); break;
   }
+
+  // parameter modulation indicators
+  if (param->param->dsp.can_modulate(param->info.slot))
+    gui->add_mod_indicator_state_listener(this);
 
   setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
   if(param->param->domain.unit.size())
@@ -591,6 +603,40 @@ param_slider::fixed_width(int parent_w, int parent_h) const
 {
   if(_param->param->gui.edit_type != gui_edit_type::knob) return -1;
   return parent_h;
+}
+
+void 
+param_slider::mod_indicator_state_changed(std::vector<mod_indicator_state> const& states)
+{
+  float prev_min = _min_mod_indicator;
+  float prev_max = _max_mod_indicator;
+
+  bool any_indicator_found = false;
+  for(int i = 0; i < states.size(); i++)
+    if (states[i].data.param_global == _param->info.global)
+    {
+      any_indicator_found = true;
+      if (_min_mod_indicator < 0.0f) _min_mod_indicator = states[i].data.value;
+      if (_max_mod_indicator < 0.0f) _min_mod_indicator = states[i].data.value;
+      _min_mod_indicator = std::min(_min_mod_indicator, states[i].data.value);
+      _max_mod_indicator = std::max(_max_mod_indicator, states[i].data.value);
+      _mod_indicator_activated_time_seconds = seconds_since_epoch();
+    }
+
+  // check if we expired
+  if (!any_indicator_found)
+  {
+    double invalidate_after = 0.05;
+    double time_now = seconds_since_epoch();
+    if (_mod_indicator_activated_time_seconds < time_now - invalidate_after)
+    {
+      _min_mod_indicator = -1.0f;
+      _max_mod_indicator = -1.0f;
+    }
+  }
+
+  if (prev_min != _min_mod_indicator || prev_max != _max_mod_indicator)
+    repaint();
 }
 
 param_combobox::
