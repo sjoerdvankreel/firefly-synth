@@ -1,3 +1,8 @@
+### August 21, 2024 - V1.8.7.
+
+- Speed up rendering of modulation visualizers for graphs.
+- Add modulation visualizers for parameters.
+
 ### August 20, 2024 - V1.8.6.
 
 - Small changes and bugfixes to graphs.
