@@ -826,7 +826,14 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
     { 
       Path path;
       g.setColour(colors().slider_mod_indicator);
-      path.addArc(left - 3, top - 3, size + 6, size + 6, start_angle, start_angle + ps->max_mod_indicator() * angle_range, true);
+
+      if(!bipolar)
+        path.addArc(left - 3, top - 3, size + 6, size + 6, start_angle, start_angle + ps->max_mod_indicator() * angle_range, true);
+      else if(ps->max_mod_indicator() >= 0.5f)
+        path.addArc(left - 3, top - 3, size + 6, size + 6, start_angle + 0.5f * angle_range, start_angle + ps->max_mod_indicator() * angle_range, true);
+      else
+        path.addArc(left - 3, top - 3, size + 6, size + 6, start_angle + ps->max_mod_indicator() * angle_range, start_angle + 0.5f * angle_range, true);
+
       g.strokePath(path, PathStrokeType(2));
     }
   }
