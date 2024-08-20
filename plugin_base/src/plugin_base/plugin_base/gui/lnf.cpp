@@ -832,12 +832,12 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
       float max_mod_angle = start_angle + ps->max_mod_indicator() * angle_range;
       if (!bipolar)
       {
-        if(ps->max_mod_indicator() == ps->min_mod_indicator())
+        if(ps->max_mod_indicator() - ps->min_mod_indicator() <= 0.05f)
           path.addArc(left - 3, top - 3, size + 6, size + 6, start_angle, max_mod_angle, true);
         else
           path.addArc(left - 3, top - 3, size + 6, size + 6, min_mod_angle, max_mod_angle, true);
       }
-      else if(ps->max_mod_indicator() != ps->min_mod_indicator())
+      else if(ps->max_mod_indicator() - ps->min_mod_indicator() > 0.05f)
         path.addArc(left - 3, top - 3, size + 6, size + 6, min_mod_angle, max_mod_angle, true);
       else if(ps->max_mod_indicator() >= 0.5f)
         path.addArc(left - 3, top - 3, size + 6, size + 6, half_mod_angle, max_mod_angle, true);
@@ -909,7 +909,7 @@ lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, f
       g.setGradientFill(ColourGradient(track1, left, 0, track2, width, 0, false));
       g.fillRoundedRectangle(left, top, pos * width, height, 2);
     }
-    else if (max_mod_pos == min_mod_pos)
+    else if (max_mod_pos - min_mod_pos <= 0.05f)
     {
       g.setGradientFill(ColourGradient(track1.brighter(), left, 0, track2.brighter(), width, 0, false));
       g.fillRoundedRectangle(left, top, max_mod_pos * width, height, 2);
