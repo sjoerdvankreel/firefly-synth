@@ -91,7 +91,7 @@ monitor_engine::process(plugin_block& block)
     for(int f = block.start_frame; f < block.end_frame; f++)
       max_out = std::max(max_out, block.out->host_audio[c][f]);
 
-  auto const& params = block.plugin.modules[module_monitor].params;
+  auto const& params = block.plugin_desc_.plugin->modules[module_monitor].params;
   if(!_is_fx)
   {
     block.set_out_param(param_voices, 0, block.out->voice_count);

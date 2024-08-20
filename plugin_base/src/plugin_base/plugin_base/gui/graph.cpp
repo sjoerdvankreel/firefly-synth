@@ -1,6 +1,7 @@
 #include <plugin_base/gui/graph.hpp>
 #include <plugin_base/dsp/utility.hpp>
 #include <plugin_base/dsp/graph_engine.hpp>
+#include <plugin_base/shared/utility.hpp>
 
 using namespace juce;
 
@@ -11,9 +12,9 @@ module_graph::
 { 
   _done = true;
   stopTimer();
-  _gui->remove_mod_indicator_state_listener(this);
   if(_module_params.render_on_tweak) _gui->gui_state()->remove_any_listener(this);
   if(_module_params.render_on_tab_change) _gui->remove_tab_selection_listener(this);
+  if (_module_params.render_on_mod_indicator_change) _gui->remove_mod_indicator_state_listener(this);
   if (_module_params.render_on_module_mouse_enter || _module_params.render_on_param_mouse_enter_modules.size())
     _gui->remove_gui_mouse_listener(this);
 }
@@ -29,12 +30,13 @@ graph(lnf, params), _gui(gui), _module_params(module_params)
   if (_module_params.render_on_tweak) gui->gui_state()->add_any_listener(this);
   if(_module_params.render_on_module_mouse_enter || _module_params.render_on_param_mouse_enter_modules.size())
     gui->add_gui_mouse_listener(this);
+  if (_module_params.render_on_mod_indicator_change)
+    _gui->add_mod_indicator_state_listener(this);
   if (_module_params.render_on_tab_change)
   {
     gui->add_tab_selection_listener(this);
     module_tab_changed(_module_params.module_index, 0);
   }
-  _gui->add_mod_indicator_state_listener(this);
   startTimerHz(_module_params.fps);
 }
 
@@ -56,9 +58,6 @@ module_graph::timerCallback()
 void 
 module_graph::mod_indicator_state_changed(std::vector<mod_indicator_state> const& states)
 {
-  for (int i = 0; i < max_indicators; i++)
-    _indicators[i]->setVisible(false);
-
   if (_data.type() != graph_data_type::series)
     return;
 
@@ -69,12 +68,12 @@ module_graph::mod_indicator_state_changed(std::vector<mod_indicator_state> const
   float h = getHeight();
   int count = _data.series().size();
 
-  int current_indicator = 0;
   int current_module_slot = -1;
   int current_module_index = -1;
 
-  auto const& topo = *_gui->gui_state()->desc().plugin;
-  auto const& mappings = _gui->gui_state()->desc().param_mappings.params;
+  auto const& desc = _gui->gui_state()->desc();
+  auto const& topo = *desc.plugin;
+  auto const& mappings = desc.param_mappings.params;
   param_topo_mapping mapping = mappings[_hovered_or_tweaked_param].topo;
 
   if (_module_params.module_index != -1)
@@ -84,8 +83,8 @@ module_graph::mod_indicator_state_changed(std::vector<mod_indicator_state> const
   }
   else
   {
-    current_module_slot = _gui->gui_state()->desc().param_mappings.params[_hovered_or_tweaked_param].topo.module_slot;
-    current_module_index = _gui->gui_state()->desc().param_mappings.params[_hovered_or_tweaked_param].topo.module_index;
+    current_module_slot = desc.param_mappings.params[_hovered_or_tweaked_param].topo.module_slot;
+    current_module_index = desc.param_mappings.params[_hovered_or_tweaked_param].topo.module_index;
   }
 
   if (topo.modules[current_module_index].mod_indicator_source_selector != nullptr)
@@ -98,17 +97,36 @@ module_graph::mod_indicator_state_changed(std::vector<mod_indicator_state> const
     }
   }
 
-  for (int i = 0; i < states.size() && current_indicator < max_indicators; i++, current_indicator++)
-    if (current_module_index == states[i].data.module && current_module_slot == states[i].data.module_slot)
+  int current_indicator = 0;
+  int current_module_global = desc.module_topo_to_index.at(current_module_index) + current_module_slot;
+  for (int i = 0; i < states.size() && current_indicator < max_indicators; i++)
+    if (current_module_global == states[i].data.module_global && states[i].data.param_global == -1)
     {
       float indicator_pos = states[i].data.value;      
       float x = indicator_pos * w;
       int point = std::clamp((int)(indicator_pos * (count - 1)), 0, count - 1);
       float y = (1 - std::clamp(_data.series()[point], 0.0f, 1.0f)) * h;
-      _indicators[current_indicator]->setVisible(true);
+      _indicators[current_indicator]->activate();
       _indicators[current_indicator]->setBounds(x - 3, y - 3, 6, 6);
       _indicators[current_indicator]->repaint();
+      current_indicator++;
     }
+
+  if (current_indicator > 0)
+  {
+    // if any data found for this round, invalidate stuff from the previous round
+    for (int i = current_indicator; i < max_indicators; i++)
+      _indicators[i]->setVisible(false);
+  }
+  else
+  {
+    // if no data found for this round, invalidate stuff that expired 
+    double invalidate_after = 0.05;
+    double time_now = seconds_since_epoch();
+    for (int i = 0; i < max_indicators; i++)
+      if (_indicators[i]->activated_time_seconds() < time_now - invalidate_after)
+        _indicators[i]->setVisible(false);
+  }
 }
 
 void 
@@ -220,6 +238,13 @@ graph_indicator::paint(Graphics& g)
 {
   g.setColour(_lnf->colors().graph_mod_indicator);
   g.fillEllipse(0, 0, 6, 6);
+}
+
+void 
+graph_indicator::activate()
+{
+  setVisible(true);
+  _activated_time_seconds = seconds_since_epoch();
 }
 
 graph::

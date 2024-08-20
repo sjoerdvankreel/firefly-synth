@@ -534,6 +534,23 @@ plugin_gui::remove_mod_indicator_state_listener(mod_indicator_state_listener* li
 void 
 plugin_gui::mod_indicator_states_changed()
 {
+  auto compare = [](auto const& l, auto const& r) {
+    if (l.data.module_global < r.data.module_global) return false;
+    if (l.data.module_global > r.data.module_global) return true;
+    if (l.data.param_global < r.data.param_global) return false;
+    if (l.data.param_global > r.data.param_global) return true;
+    return l.data.voice_index < r.data.voice_index;
+  };
+  std::sort(_mod_indicator_states->begin(), _mod_indicator_states->end(), compare);
+
+  auto pred = [](auto const& l, auto const& r) {
+    if (l.data.module_global != r.data.module_global) return false;
+    if (l.data.param_global != r.data.param_global) return false;
+    return l.data.voice_index == r.data.voice_index;
+  };
+  auto it = std::unique(_mod_indicator_states->begin(), _mod_indicator_states->end(), pred);
+  _mod_indicator_states->erase(it, _mod_indicator_states->end());
+
   for(auto listener_it: _mod_indicator_state_listeners)
     listener_it->mod_indicator_state_changed(*_mod_indicator_states);
 }

@@ -29,6 +29,16 @@ enum { scratch_transform_source, scratch_offset, scratch_scale, scratch_count };
 enum { param_type, param_source, param_target, param_offset, param_scale, param_min, param_max };
 enum { type_off, type_mul_abs, type_mul_rel, type_mul_stk, type_add_abs, type_add_rel, type_add_stk, type_ab_abs, type_ab_rel, type_ab_stk };
 
+// for every param that gets modulated by the cv matrix,
+// we output the final value per block as parameter modulation indicator
+struct mod_indicator_usage
+{
+  bool in_use;
+  int param_global;
+  int module_global;
+  jarray<float, 1>* modulated_curve_ptr;
+};
+
 static int
 route_count_from_module(int module)
 {
@@ -105,7 +115,7 @@ protected:
 
   // module/slot:-1 is all (for cv->audio)
   // or specific module (for cv->cv)
-  void perform_mixdown(plugin_block const& block, int module, int slot);
+  void perform_mixdown(plugin_block& block, int module, int slot);
 
 public:
   void reset(plugin_block const*) override;
@@ -125,7 +135,7 @@ public:
 
   PB_PREVENT_ACCIDENTAL_COPY(cv_cv_matrix_engine);
   void process(plugin_block& block) override;
-  cv_cv_matrix_mixdown const& mix(plugin_block const& block, int module, int slot);
+  cv_cv_matrix_mixdown const& mix(plugin_block& block, int module, int slot);
 };
 
 // mixes down all cv to audio targets at once
@@ -589,11 +599,11 @@ cv_cv_matrix_engine::process(plugin_block& block)
 { *block.state.own_context = &_mixer; }
 
 cv_cv_matrix_mixdown const& 
-cv_cv_matrix_mixer::mix(plugin_block const& block, int module, int slot)
+cv_cv_matrix_mixer::mix(plugin_block& block, int module, int slot)
 { return _engine->mix(block, module, slot); }
 
 cv_cv_matrix_mixdown const&
-cv_cv_matrix_engine::mix(plugin_block const& block, int module, int slot)
+cv_cv_matrix_engine::mix(plugin_block& block, int module, int slot)
 {
   perform_mixdown(block, module, slot);
   return _mixdown[module][slot];
@@ -619,7 +629,7 @@ cv_matrix_engine_base::reset(plugin_block const* block)
 }
 
 void
-cv_matrix_engine_base::perform_mixdown(plugin_block const& block, int module, int slot)
+cv_matrix_engine_base::perform_mixdown(plugin_block& block, int module, int slot)
 {
   // cv->cv matrix can modulate the cv->audio matrix
   cv_cv_matrix_mixer* mixer = nullptr;
@@ -650,6 +660,9 @@ cv_matrix_engine_base::perform_mixdown(plugin_block const& block, int module, in
   int modulation_index = 0;
   int route_count = _global ? gcv_route_count : vcv_route_count;
   jarray<float, 1>* modulated_curve_ptrs[max_cv_route_count] = { nullptr };
+  mod_indicator_usage mod_indicator_usages[max_cv_route_count];
+  std::memset(&mod_indicator_usages, 0, sizeof(mod_indicator_usages));
+
   for (int r = 0; r < route_count; r++)
   {
     jarray<float, 1>* modulated_curve_ptr = nullptr;
@@ -678,7 +691,14 @@ cv_matrix_engine_base::perform_mixdown(plugin_block const& block, int module, in
       target_automation.copy_to(block.start_frame, block.end_frame, *modulated_curve_ptr);
       modulated_curve_ptrs[r] = modulated_curve_ptr;
       _mixdown[tm][tmi][tp][tpi] = modulated_curve_ptr;
-      _modulation_indices[tm][tmi][tp][tpi] = modulation_index++;
+      _modulation_indices[tm][tmi][tp][tpi] = modulation_index;
+      
+      // set up for the visuals
+      mod_indicator_usages[modulation_index].in_use = true;
+      mod_indicator_usages[modulation_index].modulated_curve_ptr = modulated_curve_ptr;
+      mod_indicator_usages[modulation_index].module_global = block.plugin_desc_.module_topo_to_index.at(tm) + tmi;
+      mod_indicator_usages[modulation_index].param_global = block.plugin_desc_.param_mappings.topo_to_index[tm][tmi][tp][tpi];
+      modulation_index++;
     }
 
     assert(modulated_curve_ptr != nullptr);
@@ -783,6 +803,19 @@ cv_matrix_engine_base::perform_mixdown(plugin_block const& block, int module, in
   for (int r = 0; r < route_count; r++)
     if (modulated_curve_ptrs[r] != nullptr)
       modulated_curve_ptrs[r]->transform(block.start_frame, block.end_frame, [](float v) { return std::clamp(v, 0.0f, 1.0f); });
+
+  // push param mod indicators
+  if(!block.graph)
+    for(int r = 0; r < route_count; r++)
+      if (mod_indicator_usages[r].in_use)
+      {
+        mod_indicator_state indicator_state;
+        indicator_state.data.voice_index = _global ? 0 : block.voice->state.slot;
+        indicator_state.data.param_global = mod_indicator_usages[r].param_global;
+        indicator_state.data.module_global = mod_indicator_usages[r].module_global;
+        indicator_state.data.value = (*mod_indicator_usages[r].modulated_curve_ptr)[block.end_frame - 1];
+        block.push_mod_indicator_state(indicator_state);
+    }
 }
 
 }

@@ -56,6 +56,7 @@
     "slider_outline1": "FF444444",
     "slider_outline2": "FFBBBBBB",
     "slider_background": "FF000000",
+    "slider_mod_indicator": "B0FFFFFF",
     "edit_text": "FFFFFFFF",
     "table_header": "FFC46834",
     "label_text": "FFDDDDDD",

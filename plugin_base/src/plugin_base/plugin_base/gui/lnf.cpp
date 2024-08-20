@@ -83,6 +83,7 @@ override_colors(gui_colors const& base, var const& json)
   result.graph_grid = override_color_if_present(json, "graph_grid", result.graph_grid);
   result.graph_text = override_color_if_present(json, "graph_text", result.graph_text);
   result.graph_mod_indicator = override_color_if_present(json, "graph_mod_indicator", result.graph_mod_indicator);
+  result.slider_mod_indicator = override_color_if_present(json, "slider_mod_indicator", result.slider_mod_indicator);
   result.graph_background = override_color_if_present(json, "graph_background", result.graph_background);
   result.graph_area = override_color_if_present(json, "graph_area", result.graph_area);
   result.graph_line = override_color_if_present(json, "graph_line", result.graph_line);
@@ -809,15 +810,41 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
     else draw_conic_arc(g, left, top, size, start_angle, start_angle + angle_range / 2, track2, track1, conic_count / 2, pos * 2, 1, stroke);
   }
 
-  // modulatable indicator
   if(auto ps = dynamic_cast<param_slider*>(&s))
   {
+    // modulatable indicator
     if(ps->param()->param->dsp.can_modulate(ps->param()->info.slot))
     {
       auto indicator = background1.interpolatedWith(background2, 0.33);
       if(!s.isEnabled()) indicator = indicator.darker();
       g.setColour(indicator);
       g.fillEllipse(left + size / 4, top + size / 4, size / 2, size / 2);
+    }
+
+    // current modulation indicator
+    if (ps->max_mod_indicator() >= 0.0f)
+    { 
+      Path path;
+      g.setColour(colors().slider_mod_indicator);
+
+      float half_mod_angle = start_angle + 0.5f * angle_range;
+      float min_mod_angle = start_angle + ps->min_mod_indicator() * angle_range;
+      float max_mod_angle = start_angle + ps->max_mod_indicator() * angle_range;
+      if (!bipolar)
+      {
+        if(ps->max_mod_indicator() - ps->min_mod_indicator() <= 0.05f)
+          path.addArc(left - 3, top - 3, size + 6, size + 6, start_angle, max_mod_angle, true);
+        else
+          path.addArc(left - 3, top - 3, size + 6, size + 6, min_mod_angle, max_mod_angle, true);
+      }
+      else if(ps->max_mod_indicator() - ps->min_mod_indicator() > 0.05f)
+        path.addArc(left - 3, top - 3, size + 6, size + 6, min_mod_angle, max_mod_angle, true);
+      else if(ps->max_mod_indicator() >= 0.5f)
+        path.addArc(left - 3, top - 3, size + 6, size + 6, half_mod_angle, max_mod_angle, true);
+      else
+        path.addArc(left - 3, top - 3, size + 6, size + 6, max_mod_angle, half_mod_angle, true);
+
+      g.strokePath(path, PathStrokeType(2));
     }
   }
 
@@ -850,13 +877,11 @@ lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, f
   // in table mode dont align right against the next one
   // normally thats not a point because theres labels in between
   int padh = 0;
-  if(auto ps = dynamic_cast<param_slider*>(&s))
+  auto ps = dynamic_cast<param_slider*>(&s);
+  if(ps != nullptr && ps->param()->param->gui.tabular)
   {
-    if(ps->param()->param->gui.tabular)
-    {
-      padh = 2;
-      draw_tabular_cell_bg(g, &s, global_settings().table_cell_radius);
-    }
+    padh = 2;
+    draw_tabular_cell_bg(g, &s, global_settings().table_cell_radius);
   }
 
   float left = slider_thumb_width / 2 + padh / 2;
@@ -871,25 +896,61 @@ lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, f
   auto outline2 = colors().slider_outline2;
 
   bool bipolar = s.getMinimum() < 0;
+  float min_mod_pos = ps ? ps->min_mod_indicator() : -1.0f;
+  float max_mod_pos = ps ? ps->max_mod_indicator() : -1.0f;
+  
   g.setColour(colors().slider_background);
   g.fillRoundedRectangle(left, top, width, height, 2);
+
   if(!bipolar)
   {
-    g.setGradientFill(ColourGradient(track1, left, 0, track2, width, 0, false));
-    g.fillRoundedRectangle(left, top, pos * width, height, 2);
+    if (max_mod_pos < 0.0f)
+    {
+      g.setGradientFill(ColourGradient(track1, left, 0, track2, width, 0, false));
+      g.fillRoundedRectangle(left, top, pos * width, height, 2);
+    }
+    else if (max_mod_pos - min_mod_pos <= 0.05f)
+    {
+      g.setGradientFill(ColourGradient(track1.brighter(), left, 0, track2.brighter(), width, 0, false));
+      g.fillRoundedRectangle(left, top, max_mod_pos * width, height, 2);
+    }
+    else
+    {
+      g.setGradientFill(ColourGradient(track1.brighter(), left, 0, track2.brighter(), width, 0, false));
+      g.fillRoundedRectangle(left + min_mod_pos * width, top, (max_mod_pos - min_mod_pos) * width, height, 2);
+    }
+
     g.setGradientFill(ColourGradient(outline1, left, 0, outline2, width, 0, false));
     g.drawRoundedRectangle(left, top, width, height, 2, 1);
   } else
   {
-    if (pos >= 0.5)
+    if (max_mod_pos < 0.0f)
     {
-      g.setGradientFill(ColourGradient(track1, centerx, 0, track2, width, 0, false));
-      g.fillRoundedRectangle(centerx, top, (pos - 0.5f) * 2 * width / 2, height, 2);
-    } else
+      if (pos >= 0.5)
+      {
+        g.setGradientFill(ColourGradient(track1, centerx, 0, track2, width, 0, false));
+        g.fillRoundedRectangle(centerx, top, (pos - 0.5f) * 2 * width / 2, height, 2);
+      }
+      else
+      {
+        float trackw = (0.5f - pos) * 2 * width / 2;
+        g.setGradientFill(ColourGradient(track2, left, 0, track1, centerx, 0, false));
+        g.fillRoundedRectangle(centerx - trackw, top, trackw, height, 2);
+      }
+    }
+    else
     {
-      float trackw = (0.5f - pos) * 2 * width / 2;
-      g.setGradientFill(ColourGradient(track2, left, 0, track1, centerx, 0, false));
-      g.fillRoundedRectangle(centerx - trackw, top, trackw, height, 2);
+      if (max_mod_pos >= 0.5f)
+      {
+        g.setGradientFill(ColourGradient(track1.brighter(), centerx, 0, track2.brighter(), width, 0, false));
+        g.fillRoundedRectangle(centerx, top, (max_mod_pos - 0.5f) * 2 * width / 2, height, 2);
+      }
+      if(min_mod_pos < 0.5f)
+      {
+        float trackw = (0.5f - min_mod_pos) * 2 * width / 2;
+        g.setGradientFill(ColourGradient(track2.brighter(), left, 0, track1.brighter(), centerx, 0, false));
+        g.fillRoundedRectangle(centerx - trackw, top, trackw, height, 2);
+      }
     }
 
     Path pl;
@@ -906,15 +967,12 @@ lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, f
   if (!s.isEnabled()) thumb_color = color_to_grayscale(thumb_color);
 
   // modulatable indicator
-  if (auto ps = dynamic_cast<param_slider*>(&s))
+  if (ps != nullptr && ps->param()->param->dsp.can_modulate(ps->param()->info.slot))
   {
-    if (ps->param()->param->dsp.can_modulate(ps->param()->info.slot))
-    {
-      auto indicator = outline1.interpolatedWith(outline2, 0.33);
-      if (!s.isEnabled()) indicator = indicator.darker();
-      g.setColour(thumb_color);
-      g.fillEllipse(left + width / 2 - height / 2 + 1, top + 1, height - 2, height - 2);
-    }
+    auto indicator = outline1.interpolatedWith(outline2, 0.33);
+    if (!s.isEnabled()) indicator = indicator.darker();
+    g.setColour(thumb_color);
+    g.fillEllipse(left + width / 2 - height / 2 + 1, top + 1, height - 2, height - 2);
   }
 
   Path thumb;

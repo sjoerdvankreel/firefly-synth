@@ -45,7 +45,7 @@ host_events::activate(bool graph, int module_count, int param_count, int midi_co
   int note_limit_guess = polyphony * fill_guess;
   int midi_events_guess = midi_count * fill_guess;
   int accurate_events_guess = param_count * fill_guess;
-  int mod_indicator_states_guess = module_count * polyphony;
+  int mod_indicator_states_guess = param_count * polyphony;
 
   midi.reserve(midi_events_guess);
   notes.reserve(note_limit_guess);

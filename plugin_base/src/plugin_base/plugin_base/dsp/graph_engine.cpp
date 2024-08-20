@@ -41,7 +41,7 @@ graph_engine::process_begin(plugin_state const* state, int sample_rate, int fram
   _engine.init_from_state(state);
 }
 
-plugin_block const*
+plugin_block*
 graph_engine::process_default(int module_index, int module_slot)
 {
   assert(_sample_rate > 0);
@@ -63,7 +63,7 @@ graph_engine::process_default(int module_index, int module_slot)
   });
 }
 
-plugin_block const*
+plugin_block*
 graph_engine::process(int module_index, int module_slot, graph_processor processor)
 {
   int voice = _desc->plugin->modules[module_index].dsp.stage == module_stage::voice ? 0 : -1;

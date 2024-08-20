@@ -20,20 +20,18 @@ on release:
 V1.8.4:
 - fix the undo history for tuning mode
 
-More-small-stuff-again:
-V todo consolidate last custom out state in splice_engine
-V todo figure out why costate is all 255
-V it doesn't repaint smooth
-V rename custom_out_state
-V fix the env stuff drop stn
-V fix the global/top graph
-V fix vst3
-V fix clap threadpool
-- up the vno
+1.8.7:
+V speed up the graph mod ind
+V deal with uni/bipolar
+V do the adjustable theme color
+V show effective modulation in the ui for params
+V up the vno
+V deal with per-voice
+V deal with sliders/knobs
+- do a video
 
 wishlist:
 green-on-white UI
-show effective modulation in the ui for params + clap mod
 bugfix: rerender graph on master in param hover?
 turn on stuff when dragging (e.g. basic sin, dist skew etc)
 drop some ugly-ass themes
@@ -41,6 +39,7 @@ DSF falloff to the left
 clap polyphonic modulation
 full-blown renoise support
 fix global unison for mono mode
+show effective modulation in the ui for clap param mod
 Feedback FM - but needs per-sample processing, not block
 arpeggiator - hard - but easy -> play multiple octaves on-note. or maybe allow 3/s, 5/s, whatever selection
 

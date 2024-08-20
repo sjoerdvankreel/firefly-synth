@@ -124,12 +124,14 @@ plugin_engine::make_plugin_block(
     _accurate_automation[module][slot], _accurate_automation,
     own_block_auto, all_block_auto
   };
+
+  int module_global = _state.desc().module_topo_to_index.at(module) + slot;
   return {
-    _graph,
+    _graph, 
     start_frame, end_frame, slot,
     _sample_rate, state, nullptr, nullptr, 
-    _host_block->shared, *_state.desc().plugin, 
-    _state.desc().plugin->modules[module],
+    _host_block->shared, _state.desc(), 
+    _state.desc().modules[module_global],
     mod_indicator_states
   };
 }
