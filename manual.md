@@ -116,6 +116,7 @@ See the parameter reference document for details.
 - Portamento with tempo syncing and regular/automatic glide mode.
 - Responds to MIDI pitchbend, modwheel and all 128 CC parameters.
 - Monitor module with active voice count, cpu and threadpool usage.
+- Modulation visualization for graphs (lfo, envelope, cv matrix) and parameters.
 - Smoothing controls for parameter automation, MIDI input and host BPM changes.
 - Up to 64 voices in polyphonic mode. Global unison voices also count towards this limit.
 - Global unison with pitch, lfo and envelope detuning, stereo spread and osc/lfo phase offset.
