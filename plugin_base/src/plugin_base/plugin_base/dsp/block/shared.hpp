@@ -18,10 +18,9 @@ struct shared_block final {
 };
 
 struct mod_indicator_state_data final {
-  std::uint8_t module;
-  std::uint8_t module_slot;
-  std::uint8_t voice;
-  std::uint8_t user;
+  std::uint8_t voice_index;
+  std::uint8_t module_global;
+  std::int16_t param_global;
   float value;
 };
 

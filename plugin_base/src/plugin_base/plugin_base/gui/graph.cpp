@@ -70,8 +70,9 @@ module_graph::mod_indicator_state_changed(std::vector<mod_indicator_state> const
   int current_module_slot = -1;
   int current_module_index = -1;
 
-  auto const& topo = *_gui->gui_state()->desc().plugin;
-  auto const& mappings = _gui->gui_state()->desc().param_mappings.params;
+  auto const& desc = _gui->gui_state()->desc();
+  auto const& topo = *desc.plugin;
+  auto const& mappings = desc.param_mappings.params;
   param_topo_mapping mapping = mappings[_hovered_or_tweaked_param].topo;
 
   if (_module_params.module_index != -1)
@@ -81,8 +82,8 @@ module_graph::mod_indicator_state_changed(std::vector<mod_indicator_state> const
   }
   else
   {
-    current_module_slot = _gui->gui_state()->desc().param_mappings.params[_hovered_or_tweaked_param].topo.module_slot;
-    current_module_index = _gui->gui_state()->desc().param_mappings.params[_hovered_or_tweaked_param].topo.module_index;
+    current_module_slot = desc.param_mappings.params[_hovered_or_tweaked_param].topo.module_slot;
+    current_module_index = desc.param_mappings.params[_hovered_or_tweaked_param].topo.module_index;
   }
 
   if (topo.modules[current_module_index].mod_indicator_source_selector != nullptr)
@@ -96,8 +97,9 @@ module_graph::mod_indicator_state_changed(std::vector<mod_indicator_state> const
   }
 
   int current_indicator = 0;
+  int current_module_global = desc.module_topo_to_index.at(current_module_index) + current_module_slot;
   for (int i = 0; i < states.size() && current_indicator < max_indicators; i++)
-    if (current_module_index == states[i].data.module && current_module_slot == states[i].data.module_slot)
+    if (current_module_global == states[i].data.module_global && states[i].data.param_global == -1)
     {
       float indicator_pos = states[i].data.value;      
       float x = indicator_pos * w;

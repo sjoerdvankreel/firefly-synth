@@ -535,18 +535,18 @@ void
 plugin_gui::mod_indicator_states_changed()
 {
   auto compare = [](auto const& l, auto const& r) {
-    if (l.data.module < r.data.module) return false;
-    if (l.data.module > r.data.module) return true;
-    if (l.data.module_slot < r.data.module_slot) return false;
-    if (l.data.module_slot > r.data.module_slot) return true;
-    return l.data.voice < r.data.voice;
+    if (l.data.module_global < r.data.module_global) return false;
+    if (l.data.module_global > r.data.module_global) return true;
+    if (l.data.param_global < r.data.param_global) return false;
+    if (l.data.param_global > r.data.param_global) return true;
+    return l.data.voice_index < r.data.voice_index;
   };
   std::sort(_mod_indicator_states->begin(), _mod_indicator_states->end(), compare);
 
   auto pred = [](auto const& l, auto const& r) {
-    if (l.data.module != r.data.module) return false;
-    if (l.data.module_slot != r.data.module_slot) return false;
-    return l.data.voice == r.data.voice;
+    if (l.data.module_global != r.data.module_global) return false;
+    if (l.data.param_global != r.data.param_global) return false;
+    return l.data.voice_index == r.data.voice_index;
   };
   auto it = std::unique(_mod_indicator_states->begin(), _mod_indicator_states->end(), pred);
   _mod_indicator_states->erase(it, _mod_indicator_states->end());
