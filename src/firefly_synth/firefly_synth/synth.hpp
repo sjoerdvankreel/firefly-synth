@@ -154,7 +154,7 @@ class cv_cv_matrix_mixer
 public:
   PB_PREVENT_ACCIDENTAL_COPY(cv_cv_matrix_mixer);
   cv_cv_matrix_mixer(cv_cv_matrix_engine* engine) : _engine(engine) {}
-  cv_cv_matrix_mixdown const& mix(plugin_base::plugin_block const& block, int module, int slot);
+  cv_cv_matrix_mixdown const& mix(plugin_base::plugin_block& block, int module, int slot);
 };
 
 inline cv_cv_matrix_mixer&

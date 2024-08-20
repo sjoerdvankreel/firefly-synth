@@ -43,8 +43,8 @@ public:
 
   void process_end();
   void process_begin(plugin_state const* state, int sample_rate, int frame_count, int voice_release_at);
-  plugin_block const* process_default(int module_index, int module_slot);
-  plugin_block const* process(int module_index, int module_slot, graph_processor processor);
+  plugin_block* process_default(int module_index, int module_slot);
+  plugin_block* process(int module_index, int module_slot, graph_processor processor);
 };
 
 }

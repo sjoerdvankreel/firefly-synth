@@ -115,7 +115,7 @@ protected:
 
   // module/slot:-1 is all (for cv->audio)
   // or specific module (for cv->cv)
-  void perform_mixdown(plugin_block const& block, int module, int slot);
+  void perform_mixdown(plugin_block& block, int module, int slot);
 
 public:
   void reset(plugin_block const*) override;
@@ -135,7 +135,7 @@ public:
 
   PB_PREVENT_ACCIDENTAL_COPY(cv_cv_matrix_engine);
   void process(plugin_block& block) override;
-  cv_cv_matrix_mixdown const& mix(plugin_block const& block, int module, int slot);
+  cv_cv_matrix_mixdown const& mix(plugin_block& block, int module, int slot);
 };
 
 // mixes down all cv to audio targets at once
@@ -599,11 +599,11 @@ cv_cv_matrix_engine::process(plugin_block& block)
 { *block.state.own_context = &_mixer; }
 
 cv_cv_matrix_mixdown const& 
-cv_cv_matrix_mixer::mix(plugin_block const& block, int module, int slot)
+cv_cv_matrix_mixer::mix(plugin_block& block, int module, int slot)
 { return _engine->mix(block, module, slot); }
 
 cv_cv_matrix_mixdown const&
-cv_cv_matrix_engine::mix(plugin_block const& block, int module, int slot)
+cv_cv_matrix_engine::mix(plugin_block& block, int module, int slot)
 {
   perform_mixdown(block, module, slot);
   return _mixdown[module][slot];
@@ -629,7 +629,7 @@ cv_matrix_engine_base::reset(plugin_block const* block)
 }
 
 void
-cv_matrix_engine_base::perform_mixdown(plugin_block const& block, int module, int slot)
+cv_matrix_engine_base::perform_mixdown(plugin_block& block, int module, int slot)
 {
   // cv->cv matrix can modulate the cv->audio matrix
   cv_cv_matrix_mixer* mixer = nullptr;
@@ -696,8 +696,8 @@ cv_matrix_engine_base::perform_mixdown(plugin_block const& block, int module, in
       // set up for the visuals
       mod_indicator_usages[modulation_index].in_use = true;
       mod_indicator_usages[modulation_index].modulated_curve_ptr = modulated_curve_ptr;
-      
-      
+      mod_indicator_usages[modulation_index].module_global = block.plugin_desc_.module_topo_to_index.at(tm) + tmi;
+      mod_indicator_usages[modulation_index].param_global = block.plugin_desc_.param_mappings.topo_to_index[tm][tmi][tp][tpi];
       modulation_index++;
     }
 
@@ -803,6 +803,19 @@ cv_matrix_engine_base::perform_mixdown(plugin_block const& block, int module, in
   for (int r = 0; r < route_count; r++)
     if (modulated_curve_ptrs[r] != nullptr)
       modulated_curve_ptrs[r]->transform(block.start_frame, block.end_frame, [](float v) { return std::clamp(v, 0.0f, 1.0f); });
+
+  // push param mod indicators
+  if(!block.graph)
+    for(int r = 0; r < route_count; r++)
+      if (mod_indicator_usages[r].in_use)
+      {
+        mod_indicator_state indicator_state;
+        indicator_state.data.voice_index = _global ? 0 : block.voice->state.slot;
+        indicator_state.data.param_global = mod_indicator_usages[r].param_global;
+        indicator_state.data.module_global = mod_indicator_usages[r].module_global;
+        indicator_state.data.value = (*mod_indicator_usages[r].modulated_curve_ptr)[block.end_frame - 1];
+        block.push_mod_indicator_state(indicator_state);
+    }
 }
 
 }
