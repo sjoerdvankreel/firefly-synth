@@ -76,9 +76,8 @@
     { "graph": "Envelope Graph", "image": "" },
     { "graph": "Oscillator Graph", "image": "" },
     { "graph": "Osc Mod Graph", "image": "" },
-    { "graph": "CV Matrix Graphs", "image": "" },
-    { "graph": "Audio Matrix Graphs", "image": "" },
-    { "graph": "FX Only Matrix Graphs", "image": "" }
+    { "graph": "Voice Matrix Graphs", "image": "" },
+    { "graph": "Global Matrix Graphs", "image": "" }
   ],
   "overrides": [
     {
@@ -99,8 +98,8 @@
       }
     },
     {
-      "custom_sections": ["Global FX Graph", "Global LFO Graph"],
-      "module_sections": ["Global", "Global Smoothing", "Global Out", "Global FX", "Global LFO"],
+      "custom_sections": ["Global FX Graph", "Global LFO Graph", "Global Matrix Graphs"],
+      "module_sections": ["Global", "Global Smoothing", "Global Out", "Global FX", "Global LFO", "GAudio", "GCV-A", "GCV-CV"],
       "colors": {
         "tab_text": "FFFF0040",
         "knob_thumb": "FFFF0040",
@@ -136,8 +135,8 @@
       }
     },
     {
-      "custom_sections": ["Oscillator Graph", "Voice FX Graph", "Voice LFO Graph", "Envelope Graph"],
-      "module_sections": ["Voice", "Voice Out", "Voice FX", "Voice LFO", "Env"],
+      "custom_sections": ["Oscillator Graph", "Osc Mod Graph", "Voice FX Graph", "Voice LFO Graph", "Envelope Graph", "Voice Matrix Graphs"],
+      "module_sections": ["Voice", "Voice Out", "Voice FX", "Voice LFO", "Env", "Osc Mod", "VAudio", "VCV-A", "VCV-CV"],
       "colors": {
         "tab_text": "FFFFA040",
         "knob_thumb": "FFFFA040",
@@ -150,22 +149,6 @@
         "graph_area": "80FFA040",
         "graph_line": "FFFFA040",
         "table_header": "FF00FF00"
-      }
-    },
-    {
-      "custom_sections": ["Osc Mod Graph", "Audio Matrix Graphs", "CV Matrix Graphs", "FX Only Matrix Graphs"],
-      "module_sections": ["Osc Mod", "VAudio", "GAudio", "VCV-A", "VCV-CV", "GCV-A", "GCV-CV"],
-      "colors": {
-        "tab_text": "FF8888FF",
-        "knob_thumb": "FF8888FF",
-        "knob_track2": "FF8888FF",
-        "slider_thumb": "FF8888FF",
-        "control_tick": "FF8888FF",
-        "bubble_outline": "FF8888FF",
-        "scrollbar_thumb": "FF8888FF",
-        "graph_area": "808888FF",
-        "graph_line": "FF8888FF",
-        "table_header": "FF6868C4"
       }
     }
   ]
