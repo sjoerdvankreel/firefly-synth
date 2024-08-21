@@ -729,7 +729,7 @@ plugin_gui::make_modules(module_desc const* slots)
   // case the module itself is tabbed (osc 1 2 3 etc)
   int index = topo.info.index;
   auto const& tag = topo.info.tag;
-  auto& result = make_tab_component(tag.id, tag.display_name, index, false, slots);
+  auto& result = make_tab_component(tag.id, topo.gui.tabbed_name.size()? topo.gui.tabbed_name: tag.display_name, index, false, slots);
   for (int i = 0; i < topo.info.slot_count; i++)
     add_component_tab(result, make_param_sections(slots[i]), slots[i].info.global, std::to_string(i + 1));
   if (topo.info.slot_count > 1)

@@ -59,6 +59,7 @@ audio_out_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_module_gui(section, pos, { 1, 1 })));
   result.gui.alternate_drag_source_id = info.tag.id;
   result.gui.is_drag_mod_source = true;
+  result.gui.tabbed_name = "OUT";
 
   result.graph_renderer = render_graph;
   result.gui.menu_handler_factory = [global](plugin_state* state) {
