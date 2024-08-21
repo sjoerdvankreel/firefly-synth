@@ -18,6 +18,8 @@ on release:
 12 update kvr
 
 ui-fixes-again:
+* move smoothing to somewhere else
+* have the main graph take on the active color
 * show clap mod indicator
 * repaint on waveform change (free running or random-per-voice)
 * some bolletjes don't go away
