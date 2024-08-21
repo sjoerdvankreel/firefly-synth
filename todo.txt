@@ -17,14 +17,6 @@ on release:
 11 make a github release
 12 update kvr
 
-finish up microtuning:
-V do the credits
-V retest modulation
-V retest per-instance loading
-V test drain indicator
-V retest all demo stuff + fix renoise
-* do the full release (screenshots, kvr, etc)
-
 ui-fixes-again:
 * show clap mod indicator
 * repaint on waveform change (free running or random-per-voice)
