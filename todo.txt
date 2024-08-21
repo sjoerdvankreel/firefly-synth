@@ -21,7 +21,7 @@ finish up microtuning:
 V do the credits
 V retest modulation
 V retest per-instance loading
-* test drain indicator
+V test drain indicator
 * retest all demo stuff + fix renoise
 * do the full release (screenshots, kvr, etc)
 
