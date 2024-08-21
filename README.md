@@ -138,7 +138,7 @@ Windows: the build scripts assume 7zip is installed. It will build fine without,
 - Special thanks to host vendors who have set me up with an NFR license.
 - Special thanks to [oddyolynx](https://github.com/tank-trax) for supporting the project early-on.
 - Special thanks to [BaconPaul](https://baconpaul.org/) for helping out with CLAP support.
-- Special thanks to everyone from [Surge Synth Team](https://surge-synth-team.org/) microtuning discord channel for helping out with MTS-ESP support.
+- Special thanks to [Surge Synth Team](https://surge-synth-team.org/) microtuning discord channel for helping out with MTS-ESP support.
 - Infernal theme artwork by Dante Cyberman: [https://www.deviantart.com/dantecyberman](https://www.deviantart.com/dantecyberman).
 - Contains soft clippers by [Sean Enderby and Zlatko Baracskai](https://dafx.de/paper-archive/2012/papers/dafx12_submission_45.pdf).
 - Contains a slightly adapted implementation of [Jezar's Freeverb](https://github.com/sinshu/freeverb).
