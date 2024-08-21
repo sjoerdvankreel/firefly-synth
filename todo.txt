@@ -18,6 +18,9 @@ on release:
 12 update kvr
 
 ui-fixes-again:
+* uppercase some stuff in the menus to match the main gui
+* extend " voice"/"global" tab headers to 100%
+* re-check all the names in menus and hosts and matrices
 * move smoothing to somewhere else
 * have the main graph take on the active color
 * show clap mod indicator
