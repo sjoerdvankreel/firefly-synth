@@ -232,7 +232,7 @@ voice_in_topo(int section, gui_position const& pos)
     make_topo_info("{BF20BA77-A162-401B-9F32-92AE34841AB2}", true, "Pitch Bend", "PB", "PB", param_pb, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 0, 0, true),
     make_param_gui_none()));
-  pb.info.description = "Pitch-bend modulation target for all Oscs. Reacts to master pitchbend range.";
+  pb.info.description = "Pitch-bend modulation target for all Oscs. Reacts to global pitchbend range.";
   return result;
 }
 
@@ -350,8 +350,8 @@ voice_in_engine::process_voice_mode_tuning_mode_unison(plugin_block& block)
   int porta_mode = block_auto[param_porta][0].step();
 
   auto const& modulation = get_cv_audio_matrix_mixdown(block, false);
-  int master_pb_range = block.state.all_block_automation[module_master_in][0][master_in_param_pb_range][0].step();
-  auto const& glob_uni_dtn_curve = block.state.all_accurate_automation[module_master_in][0][master_in_param_glob_uni_dtn][0];
+  int global_pb_range = block.state.all_block_automation[module_global_in][0][global_in_param_pb_range][0].step();
+  auto const& glob_uni_dtn_curve = block.state.all_accurate_automation[module_global_in][0][global_in_param_uni_dtn][0];
 
   auto const& pb_curve_norm = *(modulation)[module_voice_in][0][param_pb][0];
   auto& pb_curve = block.state.own_scratch[scratch_pb];
@@ -420,7 +420,7 @@ voice_in_engine::process_voice_mode_tuning_mode_unison(plugin_block& block)
 
     float new_pitch_offset = note + cent_curve[f] + glob_uni_detune - midi_middle_c;
     new_pitch_offset += porta_note - midi_middle_c;
-    new_pitch_offset += pitch_curve[f] + pb_curve[f] * master_pb_range;
+    new_pitch_offset += pitch_curve[f] + pb_curve[f] * global_pb_range;
 
     // microtuning support
     if constexpr (TuningMode == engine_tuning_mode_on_note_before_mod || TuningMode == engine_tuning_mode_continuous_before_mod)

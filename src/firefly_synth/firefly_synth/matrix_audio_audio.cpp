@@ -57,7 +57,7 @@ init_global_minimal(plugin_state& state)
   bool is_fx = state.desc().plugin->type == plugin_type::fx;
   state.set_text_at(module_gaudio_audio_matrix, 0, param_on, 0, "On");
   state.set_text_at(module_gaudio_audio_matrix, 0, param_source, 0, is_fx ? "Ext" : "VOut");
-  state.set_text_at(module_gaudio_audio_matrix, 0, param_target, 0, "MOut");
+  state.set_text_at(module_gaudio_audio_matrix, 0, param_target, 0, "GOut");
 }
 
 static void
@@ -85,14 +85,14 @@ init_global_default(plugin_state& state)
   state.set_text_at(module_gaudio_audio_matrix, 0, param_source, 1, "GFX 1");
   if (is_fx)
   {
-    state.set_text_at(module_gaudio_audio_matrix, 0, param_target, 1, "MOut");
+    state.set_text_at(module_gaudio_audio_matrix, 0, param_target, 1, "GOut");
     return;
   }
 
   state.set_text_at(module_gaudio_audio_matrix, 0, param_target, 1, "GFX 2");
   state.set_text_at(module_gaudio_audio_matrix, 0, param_on, 2, "On");
   state.set_text_at(module_gaudio_audio_matrix, 0, param_source, 2, "GFX 2");
-  state.set_text_at(module_gaudio_audio_matrix, 0, param_target, 2, "MOut");
+  state.set_text_at(module_gaudio_audio_matrix, 0, param_target, 2, "GOut");
 }
 
 static graph_data
@@ -150,7 +150,7 @@ audio_audio_matrix_topo(
   auto voice_info = make_topo_info_basic("{6EDEA9FD-901E-4B5D-9CDE-724AC5538B35}", "VAudio", module_vaudio_audio_matrix, 1);
   voice_info.description = "Audio routing matrix with gain/balance control to route from oscillators to fx modules to voice mixdown.";
   auto global_info = make_topo_info_basic("{787CDC52-0F59-4855-A7B6-ECC1FB024742}", "GAudio", module_gaudio_audio_matrix, 1);
-  global_info.description = "Audio routing matrix with gain/balance control to route from voice mixdown to fx modules to master output.";
+  global_info.description = "Audio routing matrix with gain/balance control to route from voice mixdown to fx modules to global output.";
   module_stage stage = global ? module_stage::output : module_stage::voice;
   auto const info = topo_info(global ? global_info : voice_info);
 
@@ -212,7 +212,7 @@ audio_audio_matrix_topo(
         return sm[self].slot < tm[other].slot;
       return true; });
   source.info.description = "Selects audio route source. Note that you can only route FX 'upwards', so not FX2 -> FX1.";
-  auto default_target = global? "MOut": "VOut";
+  auto default_target = global? "GOut": "VOut";
   auto& target = result.params.emplace_back(make_param(
     make_topo_info_basic("{F05208C5-F8D3-4418-ACFE-85CE247F222A}", "Target", param_target, route_count),
     make_param_dsp_input(!global, param_automate::automate), make_domain_item(target_matrix.items, default_target),

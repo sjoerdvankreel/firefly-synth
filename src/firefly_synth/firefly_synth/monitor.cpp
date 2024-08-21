@@ -33,7 +33,7 @@ monitor_topo(int section, gui_position const& pos, int polyphony, bool is_fx)
     make_module_dsp(module_stage::output, module_output::none, 0, {}),
     make_module_gui(section, pos, { { 1 } , { -159, 1 } })));
   result.gui.show_tab_header = false;
-  result.info.description = "Monitor module with active voice count, CLAP threadpool thread count, master gain, overall CPU usage and highest-module CPU usage.";
+  result.info.description = "Monitor module with active voice count, CLAP threadpool thread count, global output gain, overall CPU usage and highest-module CPU usage.";
   
   result.gui.enable_tab_menu = false;
   result.engine_factory = [is_fx](auto const&, int, int) { return std::make_unique<monitor_engine>(is_fx); };
@@ -54,7 +54,7 @@ monitor_topo(int section, gui_position const& pos, int polyphony, bool is_fx)
     make_param_dsp_output(), make_domain_percentage(0, 9.99, 0, 0, false),
     make_param_gui_single(section_left, gui_edit_type::output_label_left, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  gain.info.description = "Master output gain. Nothing is clipped, so this may well exceed 100%.";
+  gain.info.description = "Global output gain. Nothing is clipped, so this may well exceed 100%.";
   auto& cpu = result.params.emplace_back(make_param(
     make_topo_info_basic("{55919A34-BF81-4EDF-8222-F0F0BE52DB8E}", "CPU", param_cpu, 1),
     make_param_dsp_output(), make_domain_percentage(0, 9.99, 0, 0, false),

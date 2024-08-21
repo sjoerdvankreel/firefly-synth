@@ -46,8 +46,8 @@ enum {
 
 enum { 
   module_section_hidden, 
-  module_section_master_in, 
-  module_section_master_out,
+  module_section_global_in,
+  module_section_global_out,
   module_section_gfx, 
   module_section_glfo,
   module_section_monitor, 
@@ -125,7 +125,7 @@ make_main_graph_section(plugin_gui* gui, lnf* lnf, component_store store)
   module_params.render_on_module_mouse_enter = true;
   module_params.render_on_mod_indicator_change = true;
   module_params.render_on_param_mouse_enter_modules = {
-    module_gcv_cv_matrix, module_master_in, module_master_smoothing, module_vcv_cv_matrix, module_voice_in, module_osc_osc_matrix, 
+    module_gcv_cv_matrix, module_global_in, module_global_smoothing, module_vcv_cv_matrix, module_voice_in, module_osc_osc_matrix,
     module_vaudio_audio_matrix, module_gaudio_audio_matrix, module_vcv_audio_matrix, module_gcv_audio_matrix };
   return store_component<module_graph>(store, gui, lnf, params, module_params);
 }
@@ -145,21 +145,21 @@ make_matrix_graphs_section(
       {
         assert(module_section == module_section_fx_only_matrices);
         return std::make_unique<module_graph>(gui, lnf, params, make_module_graph_params(module_index, false, true, true,
-          { module_master_in, module_glfo, module_gfx, module_gaudio_audio_matrix, module_master_out, module_gcv_audio_matrix }));
+          { module_global_in, module_glfo, module_gfx, module_gaudio_audio_matrix, module_global_out, module_gcv_audio_matrix }));
       }
       switch (module_index)
       {
       case module_vaudio_audio_matrix: return std::make_unique<module_graph>(gui, lnf, params, make_module_graph_params(module_index, false, true, false, { }));
       case module_gaudio_audio_matrix: return std::make_unique<module_graph>(gui, lnf, params, make_module_graph_params(module_index, false, true, false, { }));
       case module_vcv_audio_matrix: return std::make_unique<module_graph>(gui, lnf, params, make_module_graph_params(module_index, false, true, true,
-        { module_master_in, module_glfo, module_vlfo, module_env, module_voice_in, module_voice_out,
+        { module_global_in, module_glfo, module_vlfo, module_env, module_voice_in, module_voice_out,
         module_osc, module_osc_osc_matrix, module_vfx, module_vaudio_audio_matrix }));
       case module_gcv_audio_matrix: return std::make_unique<module_graph>(gui, lnf, params, make_module_graph_params(module_index, false, true, true,
-        { module_master_in, module_glfo, module_gfx, module_gaudio_audio_matrix, module_master_out }));
+        { module_global_in, module_glfo, module_gfx, module_gaudio_audio_matrix, module_global_out }));
       case module_vcv_cv_matrix: return std::make_unique<module_graph>(gui, lnf, params, make_module_graph_params(module_index, false, true, true,
-        { module_master_in, module_glfo, module_gcv_audio_matrix, module_vlfo, module_env, module_vcv_audio_matrix }));
+        { module_global_in, module_glfo, module_gcv_audio_matrix, module_vlfo, module_env, module_vcv_audio_matrix }));
       case module_gcv_cv_matrix: return std::make_unique<module_graph>(gui, lnf, params, make_module_graph_params(module_index, false, true, true,
-        { module_master_in, module_glfo, module_gcv_audio_matrix }));
+        { module_global_in, module_glfo, module_gcv_audio_matrix }));
       default: assert(false); return std::make_unique<Component>();
       }
     });
@@ -272,7 +272,7 @@ make_audio_audio_matrix_sources(plugin_topo const* topo, bool global)
 std::vector<module_topo const*>
 make_audio_audio_matrix_targets(plugin_topo const* topo, bool global)
 {
-  if (global) return { &topo->modules[module_gfx], &topo->modules[module_master_out] };
+  if (global) return { &topo->modules[module_gfx], &topo->modules[module_global_out] };
   else return { &topo->modules[module_vfx], &topo->modules[module_voice_out] };
 }
 
@@ -297,7 +297,7 @@ make_cv_audio_matrix_targets(plugin_topo const* topo, bool global)
     return {
       &topo->modules[module_gfx], 
       &topo->modules[module_gaudio_audio_matrix],
-      &topo->modules[module_master_out] };
+      &topo->modules[module_global_out] };
   else
     return { 
       &topo->modules[module_voice_in],
@@ -313,13 +313,13 @@ make_cv_matrix_sources(plugin_topo const* topo, bool global)
 {
   if(global)
     return { 
-      { "", &topo->modules[module_master_in]},
+      { "", &topo->modules[module_global_in]},
       { "", &topo->modules[module_glfo] },
       { "", &topo->modules[module_midi] } };
   else
     return { 
       { "Global", nullptr }, 
-      { "", &topo->modules[module_master_in]},
+      { "", &topo->modules[module_global_in]},
       { "", &topo->modules[module_glfo] },
       { "", &topo->modules[module_midi] },
       { "Voice", nullptr }, 
@@ -343,14 +343,14 @@ synth_topo(bool is_fx, std::string const& full_name)
   result->version.patch = FF_SYNTH_VERSION_PATCH;
   result->voice_mode_module = module_voice_in;
   result->voice_mode_param = voice_in_param_mode;
-  result->bpm_smooth_module = module_master_smoothing;
-  result->bpm_smooth_param = master_smoothing_param_tempo_smooth;
-  result->midi_smooth_module = module_master_smoothing;
-  result->midi_smooth_param = master_smoothing_param_midi_smooth;
-  result->auto_smooth_module = module_master_smoothing;
-  result->auto_smooth_param = master_smoothing_param_auto_smooth;
-  result->tuning_mode_module = is_fx? -1: module_master_in;
-  result->tuning_mode_param = is_fx ? -1 : master_in_param_tuning_mode;
+  result->bpm_smooth_module = module_global_smoothing;
+  result->bpm_smooth_param = global_smoothing_param_tempo_smooth;
+  result->midi_smooth_module = module_global_smoothing;
+  result->midi_smooth_param = global_smoothing_param_midi_smooth;
+  result->auto_smooth_module = module_global_smoothing;
+  result->auto_smooth_param = global_smoothing_param_auto_smooth;
+  result->tuning_mode_module = is_fx? -1: module_global_in;
+  result->tuning_mode_param = is_fx ? -1 : global_in_param_tuning_mode;
 
   // this is INCLUDING global unison!
   result->audio_polyphony = 64;
@@ -361,7 +361,7 @@ synth_topo(bool is_fx, std::string const& full_name)
     // those voices just like regular polyphonic voices.
     if (graph) return 1;
     if(state.get_plain_at(module_voice_in, 0, voice_in_param_mode, 0).step() != engine_voice_mode_poly) return 1;
-    return state.get_plain_at(module_master_in, 0, master_in_param_glob_uni_voices, 0).step();
+    return state.get_plain_at(module_global_in, 0, global_in_param_uni_voices, 0).step();
   };
 
   if(is_fx)
@@ -439,11 +439,11 @@ synth_topo(bool is_fx, std::string const& full_name)
     "{96C75EE5-577E-4508-A85A-E92FF9FD8A4D}", module_section_glfo, { 3, 0, 1, 3 }, { 1, 1 });
   result->gui.module_sections[module_section_gfx] = make_module_section_gui(
     "{654B206B-27AE-4DFD-B885-772A8AD0A4F3}", module_section_gfx, { 2, 0, 1, 3 }, { 1, 1 });
-  result->gui.module_sections[module_section_master_in] = make_module_section_gui_tabbed(
-    "{F9578AAA-66A4-4B0C-A941-4719B5F0E998}", module_section_master_in, { 1, 0, 1, 3 }, { module_master_in, module_master_smoothing });
-  result->gui.module_sections[module_section_master_in].auto_size_tab_headers = true;
-  result->gui.module_sections[module_section_master_out] = make_module_section_gui(
-    "{F77335AC-B701-40DA-B4C2-1F55DBCC29A4}", module_section_master_out, { 1, 3, 1, 1 }, { { 1 }, { 1 } });
+  result->gui.module_sections[module_section_global_in] = make_module_section_gui_tabbed(
+    "{F9578AAA-66A4-4B0C-A941-4719B5F0E998}", module_section_global_in, { 1, 0, 1, 3 }, { module_global_in, module_global_smoothing });
+  result->gui.module_sections[module_section_global_in].auto_size_tab_headers = true;
+  result->gui.module_sections[module_section_global_out] = make_module_section_gui(
+    "{F77335AC-B701-40DA-B4C2-1F55DBCC29A4}", module_section_global_out, { 1, 3, 1, 1 }, { { 1 }, { 1 } });
   result->gui.module_sections[module_section_monitor] = make_module_section_gui(
     "{8FDAEB21-8876-4A90-A8E1-95A96FB98FD8}", module_section_monitor, { 0, 2, 1, 1 }, { { 1 }, { 1 } });
 
@@ -489,12 +489,12 @@ synth_topo(bool is_fx, std::string const& full_name)
   result->modules[module_glfo] = lfo_topo(module_section_glfo, { 0, 0 }, true, is_fx);
   result->modules[module_vlfo] = lfo_topo(is_fx ? module_section_hidden : module_section_vlfo, { 0, 0 }, false, is_fx);
   result->modules[module_osc] = osc_topo(is_fx ? module_section_hidden : module_section_osc, { 0, 0 });
-  result->modules[module_master_in] = master_in_topo(module_section_master_in, is_fx, { 0, 0 });
-  result->modules[module_master_smoothing] = master_smoothing_topo(result->vendor, result->full_name, module_section_master_in, is_fx, { 0, 0 });
+  result->modules[module_global_in] = global_in_topo(module_section_global_in, is_fx, { 0, 0 });
+  result->modules[module_global_smoothing] = global_smoothing_topo(result->vendor, result->full_name, module_section_global_in, is_fx, { 0, 0 });
   result->modules[module_voice_on_note] = voice_on_note_topo(result.get(), module_section_hidden); // must be after all global cv  
   result->modules[module_voice_in] = voice_in_topo(is_fx ? module_section_hidden : module_section_voice_in, { 0, 0 }); // must be after all cv
   result->modules[module_voice_out] = audio_out_topo(is_fx ? module_section_hidden : module_section_voice_out, { 0, 0 }, false, is_fx);
-  result->modules[module_master_out] = audio_out_topo(module_section_master_out, { 0, 0 }, true, is_fx);
+  result->modules[module_global_out] = audio_out_topo(module_section_global_out, { 0, 0 }, true, is_fx);
   result->modules[module_monitor] = monitor_topo(module_section_monitor, { 0, 0 }, result->audio_polyphony, is_fx);
   result->modules[module_osc_osc_matrix] = osc_osc_matrix_topo(is_fx ? module_section_hidden : module_section_osc_osc_matrix, { 0, 0 }, result.get());
   result->modules[module_gaudio_audio_matrix] = audio_audio_matrix_topo(is_fx ? module_section_fx_only_matrices: module_section_audio_matrices, { 0, 0 }, true, is_fx,

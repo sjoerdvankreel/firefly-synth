@@ -1,3 +1,8 @@
+### ?, ? - ?, ?.
+
+- Rename master->global (trying to get a consistent terminology, voice vs global. "Master" and "Global" were interchangeable everywhere).
+-
+
 ### August 21, 2024 - V1.8.8.
 
 - Add voice drain indicator to monitor.

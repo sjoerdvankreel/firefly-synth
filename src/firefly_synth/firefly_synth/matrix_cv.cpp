@@ -164,8 +164,8 @@ init_audio_voice_default(plugin_state& state)
   state.set_text_at(module_vcv_audio_matrix, 0, param_source, 1, "GLFO 2");
   state.set_text_at(module_vcv_audio_matrix, 0, param_target, 1, "VAudio Bal 1");
   state.set_text_at(module_vcv_audio_matrix, 0, param_type, 2, "AB Abs");
-  state.set_text_at(module_vcv_audio_matrix, 0, param_source, 2, "MIn PB");
-  state.set_text_at(module_vcv_audio_matrix, 0, param_target, 2, "VIn PB");
+  state.set_text_at(module_vcv_audio_matrix, 0, param_source, 2, "Global PB");
+  state.set_text_at(module_vcv_audio_matrix, 0, param_target, 2, "VIn PB"); // TODO Voice PB
   state.set_text_at(module_vcv_audio_matrix, 0, param_type, 3, "Mul Abs");
   state.set_text_at(module_vcv_audio_matrix, 0, param_source, 3, "Note Velo");
   state.set_text_at(module_vcv_audio_matrix, 0, param_target, 3, "VOut Gain");
@@ -180,7 +180,7 @@ init_audio_global_default(plugin_state& state)
   state.set_text_at(module_gcv_audio_matrix, 0, param_source, 0, "GLFO 1");
   state.set_text_at(module_gcv_audio_matrix, 0, param_target, 0, "GFX 1 SVF Freq");
   state.set_text_at(module_gcv_audio_matrix, 0, param_type, 1, "Add Abs");
-  state.set_text_at(module_gcv_audio_matrix, 0, param_source, 1, "MIn Mod");
+  state.set_text_at(module_gcv_audio_matrix, 0, param_source, 1, "Global Mod");
   state.set_text_at(module_gcv_audio_matrix, 0, param_target, 1, "GFX 1 SVF Freq");
 }
 
@@ -381,7 +381,7 @@ render_graph(
   int ti = state.get_plain_at(map.module_index, map.module_slot, param_target, map.param_slot).step();
 
   engine->process_begin(&state, sample_rate, params.max_frame_count, voice_release_at);  
-  std::vector<int> relevant_modules({ module_gcv_cv_matrix, module_master_in, module_glfo });
+  std::vector<int> relevant_modules({ module_gcv_cv_matrix, module_global_in, module_glfo });
   if(map.module_index == module_vcv_audio_matrix || map.module_index == module_vcv_cv_matrix)
     relevant_modules.insert(relevant_modules.end(), { module_vcv_cv_matrix, module_voice_on_note, module_vlfo, module_env });
   for(int m = 0; m < relevant_modules.size(); m++)

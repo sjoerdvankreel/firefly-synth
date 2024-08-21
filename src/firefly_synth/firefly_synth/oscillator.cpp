@@ -579,7 +579,7 @@ osc_topo(int section, gui_position const& pos)
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 0, 0, true),
     make_param_gui_none()));
   pb.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return can_do_pitch(vs[0]); });
-  pb.info.description = "Pitch-bend modulation target. Also reacts to Voice-in PB modulation and master pitchbend range.";
+  pb.info.description = "Pitch-bend modulation target. Also reacts to Voice-in PB modulation and global pitchbend range.";
   auto& pm = result.params.emplace_back(make_param(
     make_topo_info("{EDBD2257-6582-4438-8EEA-7464B06FB37F}", true, "Phase", "Phase", "Phase", param_phase, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0, 1, true),
@@ -733,7 +733,7 @@ osc_engine::real_reset(plugin_block& block, cv_audio_matrix_mixdown const* modul
     // Adjust phase for global unison.
     if (block.voice->state.sub_voice_count > 1)
     {
-      float glob_uni_phs_offset = block.state.all_block_automation[module_master_in][0][master_in_param_glob_uni_osc_phase][0].real();
+      float glob_uni_phs_offset = block.state.all_block_automation[module_global_in][0][global_in_param_uni_osc_phase][0].real();
       float voice_pos = (float)block.voice->state.sub_voice_index / (block.voice->state.sub_voice_count - 1.0f);
       _ref_phases[v] += voice_pos * glob_uni_phs_offset;
       _ref_phases[v] -= (int)_ref_phases[v];
@@ -1020,7 +1020,7 @@ osc_engine::process_tuning_mode_unison(plugin_block& block, cv_audio_matrix_mixd
   (void)type;
 
   int dsf_parts = (int)std::round(block_auto[param_dsf_parts][0].real());
-  int master_pb_range = block.state.all_block_automation[module_master_in][0][master_in_param_pb_range][0].step();
+  int global_pb_range = block.state.all_block_automation[module_global_in][0][global_in_param_pb_range][0].step();
   
   int rand_seed = block_auto[param_rand_seed][0].step();
   int kps_mid_note = block_auto[param_kps_mid][0].step();
@@ -1119,7 +1119,7 @@ osc_engine::process_tuning_mode_unison(plugin_block& block, cv_audio_matrix_mixd
     float base_pb = pb_curve[mod_index];
     float base_cent = cent_curve[mod_index];
     float base_pitch_auto = pitch_curve[mod_index];
-    float base_pitch_ref = note + base_cent + base_pitch_auto + base_pb * master_pb_range + voice_pitch_offset_curve[mod_index];
+    float base_pitch_ref = note + base_cent + base_pitch_auto + base_pb * global_pb_range + voice_pitch_offset_curve[mod_index];
     float base_pitch_sync = base_pitch_ref;
     (void)base_pitch_sync;
 
