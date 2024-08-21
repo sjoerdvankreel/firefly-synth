@@ -276,7 +276,7 @@ module_topo
 osc_topo(int section, gui_position const& pos)
 { 
   module_topo result(make_module(
-    make_topo_info("{45C2CCFE-48D9-4231-A327-319DAE5C9366}", true, "Osc", "OSC", "Osc", module_osc, 5),
+    make_topo_info("{45C2CCFE-48D9-4231-A327-319DAE5C9366}", true, "Oscillator", "Oscillator", "Osc", module_osc, 5),
     make_module_dsp(module_stage::voice, module_output::audio, scratch_count, {
       make_module_dsp_output(false, make_topo_info_basic("{FA702356-D73E-4438-8127-0FDD01526B7E}", "Output", 0, 1 + max_osc_unison_voices)) }),
     make_module_gui(section, pos, { { 1, 1 }, { 32, 13, 8, 26, 55, 8 } })));

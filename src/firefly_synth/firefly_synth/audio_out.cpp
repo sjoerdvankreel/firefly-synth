@@ -47,9 +47,9 @@ render_graph(
 module_topo
 audio_out_topo(int section, gui_position const& pos, bool global, bool is_fx)
 {
-  auto voice_info(make_topo_info("{D5E1D8AF-8263-4976-BF68-B52A5CB82774}", true, "Voice Out", "OUT", "VOUT", module_voice_out, 1));
+  auto voice_info(make_topo_info("{D5E1D8AF-8263-4976-BF68-B52A5CB82774}", true, "Voice Out", "Voice Out", "VOut", module_voice_out, 1));
   voice_info.description = "Controls gain and balance of individual voices.";
-  auto global_info(make_topo_info("{3EEB56AB-FCBC-4C15-B6F3-536DB0D93E67}", true, "Global Out", "OUT", "GOUT", module_global_out, 1));
+  auto global_info(make_topo_info("{3EEB56AB-FCBC-4C15-B6F3-536DB0D93E67}", true, "Global Out", "Global Out", "GOut", module_global_out, 1));
   global_info.description = "Controls gain and balance of global audio output.";
   module_stage stage = global ? module_stage::output : module_stage::voice;
   auto const info = topo_info(global ? global_info : voice_info);
@@ -59,7 +59,6 @@ audio_out_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_module_gui(section, pos, { 1, 1 })));
   result.gui.alternate_drag_source_id = info.tag.id;
   result.gui.is_drag_mod_source = true;
-  result.gui.tabbed_name = "Out";
 
   result.graph_renderer = render_graph;
   result.gui.menu_handler_factory = [global](plugin_state* state) {

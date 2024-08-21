@@ -48,7 +48,7 @@ init_voice_minimal(plugin_state& state)
 {
   state.set_text_at(module_vaudio_audio_matrix, 0, param_on, 0, "On");
   state.set_text_at(module_vaudio_audio_matrix, 0, param_source, 0, "Osc 1");
-  state.set_text_at(module_vaudio_audio_matrix, 0, param_target, 0, "VOUT");
+  state.set_text_at(module_vaudio_audio_matrix, 0, param_target, 0, "VOut");
 }
 
 static void
@@ -56,7 +56,7 @@ init_global_minimal(plugin_state& state)
 {
   bool is_fx = state.desc().plugin->type == plugin_type::fx;
   state.set_text_at(module_gaudio_audio_matrix, 0, param_on, 0, "On");
-  state.set_text_at(module_gaudio_audio_matrix, 0, param_source, 0, is_fx ? "Ext" : "VOUT");
+  state.set_text_at(module_gaudio_audio_matrix, 0, param_source, 0, is_fx ? "Ext" : "VOut");
   state.set_text_at(module_gaudio_audio_matrix, 0, param_target, 0, "GOut");
 }
 
@@ -71,7 +71,7 @@ init_voice_default(plugin_state& state)
   state.set_text_at(module_vaudio_audio_matrix, 0, param_source, 1, "Osc 2");
   state.set_text_at(module_vaudio_audio_matrix, 0, param_target, 1, "VFX 1");
   state.set_text_at(module_vaudio_audio_matrix, 0, param_source, 2, "VFX 1");
-  state.set_text_at(module_vaudio_audio_matrix, 0, param_target, 2, "VOUT");
+  state.set_text_at(module_vaudio_audio_matrix, 0, param_target, 2, "VOut");
 }
 
 static void
