@@ -134,11 +134,14 @@ Windows: the build scripts assume 7zip is installed. It will build fine without,
 - Steinberg VST3 SDK: [https://github.com/steinbergmedia/vst3sdk](https://github.com/steinbergmedia/vst3sdk)
 - Readerwriterqueue: [https://github.com/cameron314/readerwriterqueue](https://github.com/cameron314/readerwriterqueue)
 
+# Special thanks
+- ODDSound for providing an MTS-ESP NFR.
+- Host vendors who have set me up with an NFR license.
+- [BaconPaul](https://baconpaul.org/) for helping out with CLAP support.
+- [oddyolynx](https://github.com/tank-trax) for supporting the project early-on.
+- Everyone from [Surge Synth Team](https://surge-synth-team.org/) microtuning discord channel for helping out with MTS-ESP support.
+
 # Credits
-- Special thanks to host vendors who have set me up with an NFR license.
-- Special thanks to [oddyolynx](https://github.com/tank-trax) for supporting the project early-on.
-- Special thanks to [BaconPaul](https://baconpaul.org/) for helping out with CLAP support.
-- Special thanks to [Surge Synth Team](https://surge-synth-team.org/) microtuning discord channel for helping out with MTS-ESP support.
 - Infernal theme artwork by Dante Cyberman: [https://www.deviantart.com/dantecyberman](https://www.deviantart.com/dantecyberman).
 - Contains soft clippers by [Sean Enderby and Zlatko Baracskai](https://dafx.de/paper-archive/2012/papers/dafx12_submission_45.pdf).
 - Contains a slightly adapted implementation of [Jezar's Freeverb](https://github.com/sinshu/freeverb).
