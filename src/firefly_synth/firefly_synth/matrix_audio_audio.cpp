@@ -164,18 +164,17 @@ audio_audio_matrix_topo(
       make_module_dsp_output(false, make_topo_info_basic("{3EFFD54D-440A-4C91-AD4F-B1FA290208EB}", "Mixed", output_mixed, route_count)) }),
     make_module_gui(section, pos, { 1, 1 })));
 
+  result.gui.tabbed_name = "Audio";
   result.graph_renderer = [tm = target_matrix.items](
     auto const& state, auto* engine, int param, auto const& mapping) {
       return render_graph(state, engine, param, mapping, tm); };
   if (global)
   {
-    result.gui.tabbed_name = "GAudio Matrix";
     result.default_initializer = init_global_default;
     result.minimal_initializer = init_global_minimal;
   }
   else
   {
-    result.gui.tabbed_name = "VAudio Matrix";
     result.default_initializer = init_voice_default;
     result.minimal_initializer = init_voice_minimal;
   }

@@ -18,6 +18,8 @@ on release:
 12 update kvr
 
 ui-fixes-again:
+* fix the osc mod text size in graph
+* less ugly audio graphs
 * uppercase some stuff in the menus to match the main gui
 * extend " voice"/"global" tab headers to 100%
 * re-check all the names in menus and hosts and matrices

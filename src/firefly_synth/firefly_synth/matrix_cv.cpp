@@ -468,7 +468,7 @@ cv_matrix_topo(
   };
   if(cv)
   {
-    result.gui.tabbed_name = global? "GCV-CV Matrix": "VCV-CV Matrix";
+    result.gui.tabbed_name = "CV-CV";
     result.engine_factory = [global, sm = source_matrix.mappings, tm = target_matrix.mappings](
       auto const& topo, int, int) {
         return std::make_unique<cv_cv_matrix_engine>(global, topo, sm, tm);
@@ -476,7 +476,7 @@ cv_matrix_topo(
   }
   else
   {
-    result.gui.tabbed_name = global ? "GCV-Audio Matrix" : "VCV-Audio Matrix";
+    result.gui.tabbed_name = "CV-Audio";
     result.engine_factory = [global, sm = source_matrix.mappings, tm = target_matrix.mappings](
       auto const& topo, int, int) { 
         return std::make_unique<cv_audio_matrix_engine>(global, topo, sm, tm);

@@ -19,8 +19,7 @@ static std::string const env_graph_name = "Envelope Graph";
 static std::string const gfx_graph_name = "Global FX Graph";
 static std::string const osc_graph_name = "Oscillator Graph";
 static std::string const vlfo_graph_name = "Voice LFO Graph";
-static std::string const glfo_graph_name = "Global LFO Graph";
-static std::string const osc_mod_graph_name = "Osc Mod Graph";
+static std::string const glfo_graph_name = "Global LFO Graph"; 
 static std::string const voice_matrix_graphs_name = "Voice Matrix Graphs";
 static std::string const global_matrix_graphs_name = "Global Matrix Graphs";
 
