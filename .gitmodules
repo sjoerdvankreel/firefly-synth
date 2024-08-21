@@ -25,3 +25,6 @@
 [submodule "lib/sse2neon"]
 	path = lib/sse2neon
 	url = https://github.com/sjoerdvankreel/sse2neon
+[submodule "lib/MTS-ESP"]
+	path = lib/MTS-ESP
+	url = https://github.com/sjoerdvankreel/MTS-ESP.git

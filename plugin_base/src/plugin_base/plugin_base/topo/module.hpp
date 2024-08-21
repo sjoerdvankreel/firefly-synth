@@ -117,8 +117,11 @@ struct module_topo_gui final {
   bool visible;
   
   // indicates if content (param sections) are tabbed
-  bool tabbed;
+  bool param_sections_tabbed;
   std::vector<int> tab_order;
+
+  // show my own tab header yes/no (if no slot count must be 1)
+  bool show_tab_header;
 
   gui_position position;
   gui_dimension dimension;

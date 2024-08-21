@@ -17,10 +17,8 @@ on release:
 11 make a github release
 12 update kvr
 
-V1.8.4:
-- fix the undo history for tuning mode
-
 ui-fixes-again:
+* fix the undo history for tuning mode
 * color-on-gray not gray-on-color
 * vertical textboxes main / global/voice audio/cv to the left
 * drop the header text ?
@@ -38,17 +36,29 @@ ui-fixes-again:
 * make matrix tab headers match new section colors
 * do mod-free themes
 
+
+finish up microtuning:
+- do the credits
+- + do the full release (screenshots, kvr, etc)
+
+- autobuilds:
+- ask paul
+- integrate https://github.com/surge-synthesizer/monique-monosynth/blob/main/.github/workflows/build-pr.yml
+
+
 wishlist:
 green-on-white UI
 bugfix: rerender graph on master in param hover?
 turn on stuff when dragging (e.g. basic sin, dist skew etc)
 drop some ugly-ass themes
+filter microtuning
 DSF falloff to the left
 clap polyphonic modulation
 full-blown renoise support
 fix global unison for mono mode
 show effective modulation in the ui for clap param mod
 Feedback FM - but needs per-sample processing, not block
+turn on stuff when dragging (e.g. basic sin, dist skew etc)
 arpeggiator - hard - but easy -> play multiple octaves on-note. or maybe allow 3/s, 5/s, whatever selection
 
 wishlist sometime:

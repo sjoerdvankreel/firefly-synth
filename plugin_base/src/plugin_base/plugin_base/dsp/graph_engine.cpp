@@ -34,6 +34,7 @@ graph_engine::process_begin(plugin_state const* state, int sample_rate, int fram
   _sample_rate = sample_rate;
   _voice_release_at = voice_release_at;
   _host_block = &_engine.prepare_block();
+  _host_block->mts_client = nullptr;
   _host_block->frame_count = frame_count;
   _host_block->shared.bpm = _params.bpm;
   _host_block->audio_out = _audio_out_ptrs;
@@ -68,7 +69,7 @@ graph_engine::process(int module_index, int module_slot, graph_processor process
 {
   int voice = _desc->plugin->modules[module_index].dsp.stage == module_stage::voice ? 0 : -1;
   _last_block = std::make_unique<plugin_block>(
-    _engine.make_plugin_block(voice, module_index, module_slot, 0, _host_block->frame_count));
+    _engine.make_plugin_block(voice, voice, module_index, module_slot, engine_tuning_mode_no_tuning, 0, _host_block->frame_count));
   if(voice == -1)
     processor(*_last_block.get());
   else

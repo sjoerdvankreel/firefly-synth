@@ -66,10 +66,11 @@ public:
   void discard_undo_region();
   void end_undo_region(std::string const& action, std::string const& item);
 
-  void init(state_init_type init_type);
-  void copy_from(jarray<plain_value, 4> const& other);
   plugin_desc const& desc() const { return *_desc; }
   jarray<plain_value, 4> const& state() const { return _state; }
+
+  void init(state_init_type init_type, bool patch_only);
+  void copy_from(jarray<plain_value, 4> const& other, bool patch_only);
 
   void add_any_listener(any_state_listener* listener) const;
   void remove_any_listener(any_state_listener* listener) const;

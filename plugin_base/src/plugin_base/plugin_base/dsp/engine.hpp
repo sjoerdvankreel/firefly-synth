@@ -33,6 +33,7 @@ typedef bool (*
 thread_pool_voice_processor)(
   plugin_engine& engine, void* context);
 
+// needs cooperation from the plug
 enum engine_voice_mode {
   engine_voice_mode_poly, // always pick a new voice for new note
   engine_voice_mode_mono, // only pick a new voice when voice count is 0
@@ -62,6 +63,7 @@ class plugin_engine final {
   double _block_start_time_sec = {};
   std::int64_t _stream_time = {};
   std::int64_t _blocks_processed = {};
+  bool _voices_drained = false;
   int _high_cpu_module = {};
   double _high_cpu_module_usage = {};
   jarray<double, 3> _voice_module_process_duration_sec = {};
@@ -90,6 +92,14 @@ class plugin_engine final {
   // offset wrt _state
   jarray<float, 4> _current_modulation = {};
 
+  // microtuning support
+  engine_tuning_mode _current_block_tuning_mode = (engine_tuning_mode)-1;
+  std::array<note_tuning, 128> _current_block_tuning_global = {};
+  std::array<std::array<note_tuning, 128>, 16> _current_block_tuning_channel = {};
+  std::vector<engine_tuning_mode> _current_voice_tuning_mode = {};
+  // this does NOT need a channel dimension since thats implied by the voice
+  std::vector<std::array<note_tuning, 128>> _current_voice_tuning_channel = {};
+
   block_filter _bpm_filter = {};
   std::vector<int> _midi_was_automated = {};
   std::vector<block_filter> _midi_filters = {};
@@ -115,11 +125,17 @@ class plugin_engine final {
   void process_voices_single_threaded();
   void automation_sanity_check(int frame_count);
 
+  // microtuning support
+  engine_tuning_mode get_current_tuning_mode();
+  void query_mts_esp_tuning(std::array<note_tuning, 128>& tuning, int channel);
+
   // Subvoice stuff is for global unison support.
   // In plugin_base we treat global unison voices just like regular polyphonic voices.
   // Or in other words, a polyphonic voice is a global unison voice with subvoice count 1.
   // Subvoice count and index should be used by the plugin to apply detuning etc.
-  void activate_voice(note_event const& event, int slot, int sub_voice_count, int sub_voice_index, int frame_count);
+  void activate_voice(
+    note_event const& event, int slot, engine_tuning_mode tuning_mode, 
+    int sub_voice_count, int sub_voice_index, int frame_count);
 
 public:
   PB_PREVENT_ACCIDENTAL_COPY(plugin_engine);
@@ -130,8 +146,8 @@ public:
 
   // public for graph_engine
   plugin_block make_plugin_block(
-    int voice, int module, int slot,
-    int start_frame, int end_frame);
+    int voice, int voice_channel, int module, int slot,
+    engine_tuning_mode tuning_mode, int start_frame, int end_frame);
   plugin_voice_block make_voice_block(
     int v, int release_frame, note_id id, 
     int sub_voice_count, int sub_voice_index,

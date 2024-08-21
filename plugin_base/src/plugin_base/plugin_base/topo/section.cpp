@@ -10,7 +10,7 @@ param_section::validate(plugin_topo const& plugin, module_topo const& module, in
   tag.validate();
   gui.bindings.validate(plugin, module, 1);
   gui.position.validate(module.gui.dimension);
-
+   
   assert(this->index == index_);
   auto always_visible = [&module](int p) { return !module.params[p].gui.bindings.visible.is_bound(); };
   auto include = [this, &module](int p) { return module.params[p].gui.visible && module.params[p].gui.section == this->index; };
