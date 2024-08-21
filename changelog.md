@@ -1,4 +1,4 @@
-### August 22, 2024 - V1.8.8 (No binaries).
+### August 21, 2024 - V1.8.8.
 
 - Add voice drain indicator to monitor.
 - Moved load/save/init/clear patch into a single menu.
@@ -6,7 +6,7 @@
 - Moved smoothing parameters from Master In to new Smoothing module.
 - Fixed bug w.r.t. discarding dropdown items (by clicking outside the menu).
 - Bugfix + breaking change: portamento would glide from last note instead of current position.
-- Conversion code will fix existing patches, but Renoise automation data will be broken (that's why it's still not supported).
+- Conversion code will fix existing patches, but Renoise automation data may be broken (that's why it's still not supported).
 
 ### August 21, 2024 - V1.8.7.
 

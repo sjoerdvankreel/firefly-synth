@@ -38,21 +38,20 @@ ui-fixes-again:
 * gmatrix to the top, vmatrix to the bottom
 * make matrix tab headers match new section colors
 * do mod-free themes
+* bugfix: rerender graph on master in param hover?
+* drop some ugly-ass themes
+* show effective modulation in the ui for clap param mod
 
 autobuilds:
 * ask paul
 * integrate https://github.com/surge-synthesizer/monique-monosynth/blob/main/.github/workflows/build-pr.yml
 
 wishlist:
-bugfix: rerender graph on master in param hover?
-turn on stuff when dragging (e.g. basic sin, dist skew etc)
-drop some ugly-ass themes
 filter microtuning
 DSF falloff to the left
 clap polyphonic modulation
 full-blown renoise support
 fix global unison for mono mode
-show effective modulation in the ui for clap param mod
 Feedback FM - but needs per-sample processing, not block
 turn on stuff when dragging (e.g. basic sin, dist skew etc)
 arpeggiator - hard - but easy -> play multiple octaves on-note. or maybe allow 3/s, 5/s, whatever selection
@@ -60,7 +59,6 @@ arpeggiator - hard - but easy -> play multiple octaves on-note. or maybe allow 3
 wishlist sometime:
 mseg
 midi mpe
-microtonal
 .com website 
 cheby shaper
 phaser/flanger/chorus
