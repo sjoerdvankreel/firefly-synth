@@ -73,7 +73,7 @@ global_in_topo(int section, bool is_fx, gui_position const& pos)
       make_module_dsp_output(true, make_topo_info("{91B915D6-0DCA-4F59-A396-6AF31DA28DBB}", true, "Mod Wheel", "Mod", "Mod", output_mod, 1)),
       make_module_dsp_output(true, make_topo_info("{EB8CBA31-212A-42EA-956E-69063BF93C58}", true, "Pitch Bend", "PB", "PB", output_pb, 1)) }),
       make_module_gui(section, pos, { row_distribution, column_distribution } )));
-  result.gui.tabbed_name = "Global";
+  result.gui.tabbed_name = "Global";  
   result.info.description = "Global CV module with MIDI-linked modwheel and pitchbend, some additional freely-assignable parameters and unison support.";
 
   result.graph_renderer = render_graph;

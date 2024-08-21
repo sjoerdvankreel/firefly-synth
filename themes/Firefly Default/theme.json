@@ -24,8 +24,8 @@
     "aspect_ratio_height_instrument": "60"
   },
   "default_settings": {
-    "tab_width": "29",
-    "header_width": "80"
+    "tab_width": "33",
+    "header_width": "40"
   },
   "default_colors": {
     "tab_text": "FFFF8844",
@@ -100,7 +100,7 @@
     },
     {
       "custom_sections": ["Global FX Graph", "Global LFO Graph"],
-      "module_sections": ["Master In", "Master Smoothing", "Master Out", "Global FX", "Global LFO"],
+      "module_sections": ["Global", "Global Smoothing", "Global Out", "Global FX", "Global LFO"],
       "colors": {
         "tab_text": "FFFF0040",
         "knob_thumb": "FFFF0040",
@@ -116,10 +116,10 @@
       }
     },
     {
-      "module_sections": ["Oscillator"],
+      "module_sections": ["Osc"],
       "settings": {
-        "tab_width": "59",
-        "header_width": "80"
+        "tab_width": "67",
+        "header_width": "40"
       },
       "colors": {
         "tab_text": "FFFFA040",
@@ -137,7 +137,7 @@
     },
     {
       "custom_sections": ["Oscillator Graph", "Voice FX Graph", "Voice LFO Graph", "Envelope Graph"],
-      "module_sections": ["Voice In", "Voice Out", "Voice FX", "Voice LFO", "Envelope"],
+      "module_sections": ["Voice", "Voice Out", "Voice FX", "Voice LFO", "Env"],
       "colors": {
         "tab_text": "FFFFA040",
         "knob_thumb": "FFFFA040",
