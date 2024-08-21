@@ -58,6 +58,7 @@ pb_plugin::
   PB_LOG_FUNC_ENTRY_EXIT();
   stopTimer();
   _gui_state.remove_any_listener(this);
+  MTS_DeregisterClient(_mts_client);
 }
 
 pb_plugin::
@@ -65,9 +66,11 @@ pb_plugin(
   clap_plugin_descriptor const* clap_desc, 
   clap_host const* host, plugin_topo const* topo):
 Plugin(clap_desc, host), 
+_mts_client(MTS_RegisterClient()),
 _desc(std::make_unique<plugin_desc>(topo, this)),
 _splice_engine(_desc.get(), false, forward_thread_pool_voice_processor, this),
-_extra_state(gui_extra_state_keyset(*_desc->plugin)), _gui_state(_desc.get(), true),
+_extra_state(set_join<std::string>({ gui_extra_state_keyset(*_desc->plugin), tuning_extra_state_keyset() })),
+_gui_state(_desc.get(), true),
 _to_gui_events(std::make_unique<event_queue>(default_q_size)), 
 _to_audio_events(std::make_unique<event_queue>(default_q_size)),
 _mod_indicator_queue(std::make_unique<mod_indicator_queue>(default_q_size))
@@ -76,6 +79,16 @@ _mod_indicator_queue(std::make_unique<mod_indicator_queue>(default_q_size))
   _gui_state.add_any_listener(this);
   _mod_indicator_states.reserve(default_q_size);
   _block_automation_seen.resize(_splice_engine.state().desc().param_count);
+  init_tuning_from_extra_state();
+}
+
+void
+pb_plugin::init_tuning_from_extra_state()
+{
+  auto const* topo = _gui_state.desc().plugin;
+  if (topo->tuning_mode_module == -1 || topo->tuning_mode_param == -1) return;
+  auto tuning_mode = std::clamp(_extra_state.get_num(extra_state_tuning_mode_key, engine_tuning_mode_on_note_before_mod), 0, engine_tuning_mode_count - 1);
+  _gui_state.set_raw_at(topo->tuning_mode_module, 0, topo->tuning_mode_param, 0, tuning_mode);
 }
 
 void
@@ -138,7 +151,7 @@ pb_plugin::stateSave(clap_ostream const* stream) noexcept
   // don't bother with that and just write byte-for-byte
   int written = 1;
   int total_written = 0;
-  std::vector<char> data(plugin_io_save_all(_gui_state, _extra_state));
+  std::vector<char> data(plugin_io_save_all_state(_gui_state, _extra_state));
   while(written == 1 && total_written < data.size())
   {
     written = stream->write(stream, data.data() + total_written, 1);
@@ -163,11 +176,12 @@ pb_plugin::stateLoad(clap_istream const* stream) noexcept
   } while(true);
 
   _gui_state.begin_undo_region();
-  if (!plugin_io_load_all(data, _gui_state, _extra_state).ok()) 
+  if (!plugin_io_load_all_state(data, _gui_state, _extra_state).ok())
   {
     _gui_state.discard_undo_region();
     return false;
   }
+  init_tuning_from_extra_state();
   for (int p = 0; p < _splice_engine.state().desc().param_count; p++)
     gui_param_changed(p, _gui_state.get_plain_at_index(p));
   _gui_state.discard_undo_region();
@@ -640,6 +654,7 @@ clap_process_status
 pb_plugin::process(clap_process const* process) noexcept
 {
   host_block& block = _splice_engine.prepare_block();
+  block.mts_client = _mts_client;
   block.frame_count = process->frames_count;
   block.audio_out = process->audio_outputs[0].data32;
   block.shared.bpm = process->transport? process->transport->tempo: 0;

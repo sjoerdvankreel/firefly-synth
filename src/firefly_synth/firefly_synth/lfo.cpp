@@ -68,7 +68,8 @@ public state_converter
   plugin_desc const* const _desc;
 public:
   lfo_state_converter(plugin_desc const* const desc, bool global) : _desc(desc), _global(global) {}
-  void post_process(load_handler const& handler, plugin_state& new_state) override;
+  void post_process_always(load_handler const& handler, plugin_state& new_state) override {}
+  void post_process_existing(load_handler const& handler, plugin_state& new_state) override;
 
   bool handle_invalid_param_value(
     std::string const& new_module_id, int new_module_slot,
@@ -283,7 +284,7 @@ lfo_state_converter::handle_invalid_param_value(
 }
 
 void
-lfo_state_converter::post_process(load_handler const& handler, plugin_state& new_state)
+lfo_state_converter::post_process_existing(load_handler const& handler, plugin_state& new_state)
 {
   std::string old_value;
   int this_module = _global ? module_glfo : module_vlfo;

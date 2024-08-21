@@ -4,6 +4,7 @@
 #include <plugin_base/shared/utility.hpp>
 #include <plugin_base/dsp/block/shared.hpp>
 
+#include <Client/libMTSClient.h>
 #include <vector>
 #include <cstdint>
 
@@ -67,6 +68,9 @@ struct host_block final {
   host_events events;
   shared_block shared;
   float* const* audio_out;
+
+  // MTS-ESP support
+  MTSClient* mts_client = {};
 
   void prepare();
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(host_block);

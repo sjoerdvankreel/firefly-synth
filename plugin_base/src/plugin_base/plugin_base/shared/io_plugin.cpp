@@ -16,10 +16,10 @@ namespace plugin_base {
 static int const file_version = 1;
 static std::string const file_magic = "{296BBDE2-6411-4A85-BFAF-A9A7B9703DF0}";
 
-static std::unique_ptr<DynamicObject> save_extra_internal(extra_state const& state);
-static std::unique_ptr<DynamicObject> save_state_internal(plugin_state const& state);
-static load_result load_extra_internal(var const& json, extra_state& state);
-static load_result load_state_internal(var const& json, plugin_version const& old_version, plugin_state& state);
+static std::unique_ptr<DynamicObject> save_extra_state_internal(extra_state const& state);
+static std::unique_ptr<DynamicObject> save_patch_state_internal(plugin_state const& state);
+static load_result load_extra_state_internal(var const& json, extra_state& state);
+static load_result load_patch_state_internal(var const& json, plugin_version const& old_version, plugin_state& state);
 
 load_handler::
 load_handler(juce::var const* json, plugin_version const& old_version):
@@ -149,23 +149,23 @@ unwrap_json_from_meta(
 }
 
 std::vector<char>
-plugin_io_save_extra(plugin_topo const& topo, extra_state const& state)
+plugin_io_save_extra_state(plugin_topo const& topo, extra_state const& state)
 {
   PB_LOG_FUNC_ENTRY_EXIT();
-  auto json = wrap_json_with_meta(topo, var(save_extra_internal(state).release()));
+  auto json = wrap_json_with_meta(topo, var(save_extra_state_internal(state).release()));
   return release_json_to_buffer(std::move(json));
 }
 
 std::vector<char>
-plugin_io_save_state(plugin_state const& state)
+plugin_io_save_patch_state(plugin_state const& state)
 {
   PB_LOG_FUNC_ENTRY_EXIT();
-  auto json = wrap_json_with_meta(*state.desc().plugin, var(save_state_internal(state).release()));
+  auto json = wrap_json_with_meta(*state.desc().plugin, var(save_patch_state_internal(state).release()));
   return release_json_to_buffer(std::move(json));
 }
 
 load_result
-plugin_io_load_state(std::vector<char> const& data, plugin_state& state)
+plugin_io_load_patch_state(std::vector<char> const& data, plugin_state& state)
 {
   var json;
   var content;
@@ -175,11 +175,11 @@ plugin_io_load_state(std::vector<char> const& data, plugin_state& state)
   auto result = load_json_from_buffer(data, json);
   if (!result.ok()) return result;
   result = unwrap_json_from_meta(*state.desc().plugin, json, content, old_version);
-  return load_state_internal(content, old_version, state);
+  return load_patch_state_internal(content, old_version, state);
 }
 
 load_result
-plugin_io_load_extra(plugin_topo const& topo, std::vector<char> const& data, extra_state& state)
+plugin_io_load_extra_state(plugin_topo const& topo, std::vector<char> const& data, extra_state& state)
 {
   var json;
   var content;
@@ -189,45 +189,45 @@ plugin_io_load_extra(plugin_topo const& topo, std::vector<char> const& data, ext
   auto result = load_json_from_buffer(data, json);
   if (!result.ok()) return result;
   result = unwrap_json_from_meta(topo, json, content, old_version);
-  return load_extra_internal(content, state);
+  return load_extra_state_internal(content, state);
 }
 
 load_result
-plugin_io_load_file_all(
+plugin_io_load_file_all_state(
   std::filesystem::path const& path, plugin_state& plugin, extra_state& extra)
 {
   PB_LOG_FUNC_ENTRY_EXIT();
   load_result failed("Could not read file.");
   std::vector<char> data = file_load(path);
   if(data.size() == 0) return failed;
-  return plugin_io_load_all(data, plugin, extra);
+  return plugin_io_load_all_state(data, plugin, extra);
 };
 
 bool
-plugin_io_save_file_all(
+plugin_io_save_file_all_state(
   std::filesystem::path const& path, plugin_state const& plugin, extra_state const& extra)
 {
   PB_LOG_FUNC_ENTRY_EXIT();
   std::ofstream stream(path, std::ios::out | std::ios::binary);
   if (stream.bad()) return false;
-  auto data(plugin_io_save_all(plugin, extra));
+  auto data(plugin_io_save_all_state(plugin, extra));
   stream.write(data.data(), data.size());
   return !stream.bad();
 }
 
 std::vector<char> 
-plugin_io_save_all(plugin_state const& plugin, extra_state const& extra)
+plugin_io_save_all_state(plugin_state const& plugin, extra_state const& extra)
 {
   PB_LOG_FUNC_ENTRY_EXIT();
   auto const& topo = *plugin.desc().plugin;
   auto root = std::make_unique<DynamicObject>();
-  root->setProperty("extra", var(wrap_json_with_meta(topo, var(save_extra_internal(extra).release())).release()));
-  root->setProperty("plugin", var(wrap_json_with_meta(topo, var(save_state_internal(plugin).release())).release()));
+  root->setProperty("extra", var(wrap_json_with_meta(topo, var(save_extra_state_internal(extra).release())).release()));
+  root->setProperty("plugin", var(wrap_json_with_meta(topo, var(save_patch_state_internal(plugin).release())).release()));
   return release_json_to_buffer(wrap_json_with_meta(topo, var(root.release())));
 }
 
 load_result 
-plugin_io_load_all(std::vector<char> const& data, plugin_state& plugin, extra_state& extra)
+plugin_io_load_all_state(std::vector<char> const& data, plugin_state& plugin, extra_state& extra)
 {
   var json;
   var content;
@@ -244,13 +244,13 @@ plugin_io_load_all(std::vector<char> const& data, plugin_state& plugin, extra_st
   result = unwrap_json_from_meta(*plugin.desc().plugin, content["extra"], extra_content, old_version);
   if (!result.ok()) return result;
   auto extra_state_load = extra_state(extra.keyset());
-  result = load_extra_internal(extra_content, extra_state_load);
+  result = load_extra_state_internal(extra_content, extra_state_load);
   if (!result.ok()) return result;
 
   var plugin_content;
   result = unwrap_json_from_meta(*plugin.desc().plugin, content["plugin"], plugin_content, old_version);
   if (!result.ok()) return result;
-  result = load_state_internal(plugin_content, old_version, plugin);
+  result = load_patch_state_internal(plugin_content, old_version, plugin);
   if(!result.ok()) return result;
   for(auto k: extra_state_load.keyset())
     if(extra_state_load.contains_key(k))
@@ -259,7 +259,7 @@ plugin_io_load_all(std::vector<char> const& data, plugin_state& plugin, extra_st
 }
 
 std::unique_ptr<DynamicObject>
-save_extra_internal(extra_state const& state)
+save_extra_state_internal(extra_state const& state)
 {
   auto root = std::make_unique<DynamicObject>();
   for(auto k: state.keyset())
@@ -269,7 +269,7 @@ save_extra_internal(extra_state const& state)
 }
 
 load_result 
-load_extra_internal(var const& json, extra_state& state)
+load_extra_state_internal(var const& json, extra_state& state)
 {
   state.clear();
   for(auto k: state.keyset())
@@ -279,7 +279,7 @@ load_extra_internal(var const& json, extra_state& state)
 }
 
 std::unique_ptr<DynamicObject>
-save_state_internal(plugin_state const& state)
+save_patch_state_internal(plugin_state const& state)
 {
   var modules;
   auto plugin = std::make_unique<DynamicObject>();
@@ -344,7 +344,7 @@ save_state_internal(plugin_state const& state)
 }
 
 load_result
-load_state_internal(
+load_patch_state_internal(
   var const& json, plugin_version const& old_version, plugin_state& state)
 {
   if(!json.hasProperty("state"))
@@ -356,7 +356,7 @@ load_state_internal(
   // set up handler for loading old state
   // in case plugin wants to do conversion
   load_result result;
-  state.init(state_init_type::empty);
+  state.init(state_init_type::empty, true);
   load_handler handler(&json, old_version);
 
   for(int m = 0; m < json["modules"].size(); m++)
@@ -367,7 +367,9 @@ load_state_internal(
     auto module_iter = state.desc().module_id_to_index.find(module_id);
     if (module_iter == state.desc().module_id_to_index.end())
     {
+#ifndef NDEBUG
       result.warnings.push_back("Module '" + module_name + "' was deleted.");
+#endif
       continue;
     }
 
@@ -375,7 +377,11 @@ load_state_internal(
     var module_slot_count = json["modules"][m]["slot_count"];
     auto const& new_module = state.desc().plugin->modules[module_iter->second];
     if ((int)module_slot_count > new_module.info.slot_count)
+    {
+#ifndef NDEBUG
       result.warnings.push_back("Module '" + new_module.info.tag.full_name + "' decreased slot count.");
+#endif
+    }
 
     for (int p = 0; p < json["modules"][m]["params"].size(); p++)
     {
@@ -385,7 +391,9 @@ load_state_internal(
       auto param_iter = state.desc().param_mappings.id_to_index.at(module_id).find(param_id);
       if (param_iter == state.desc().param_mappings.id_to_index.at(module_id).end())
       {
+#ifndef NDEBUG
         result.warnings.push_back("Param '" + module_name + " " + param_name + "' was deleted.");
+#endif
         continue;
       }
 
@@ -393,7 +401,11 @@ load_state_internal(
       var param_slot_count = json["modules"][m]["params"][p]["slot_count"];
       auto const& new_param = state.desc().plugin->modules[module_iter->second].params[param_iter->second];
       if ((int)param_slot_count > new_param.info.slot_count)
+      {
+#ifndef NDEBUG
         result.warnings.push_back("Param '" + new_module.info.tag.full_name + " " + new_param.info.tag.full_name + "' decreased slot count.");
+#endif
+      }
     }
   }
 
@@ -420,6 +432,11 @@ load_state_internal(
         if (param_iter == state.desc().param_mappings.id_to_index.at(module_id).end()) continue;
         var param_slots = json["state"][m]["slots"][mi]["params"][p]["slots"];
         auto const& new_param = state.desc().plugin->modules[module_iter->second].params[param_iter->second];
+
+        // readonly support for per-instance microtuning (outside of the patch)
+        if (new_param.info.is_per_instance) 
+          continue;
+
         for (int pi = 0; pi < param_slots.size() && pi < new_param.info.slot_count; pi++)
         {
           plain_value plain;
@@ -434,14 +451,31 @@ load_state_internal(
             if(converter && converter->handle_invalid_param_value(new_module.info.tag.id, mi, new_param.info.tag.id, pi, text, handler, new_value))
               state.set_plain_at(new_module.info.index, mi, new_param.info.index, pi, new_value);
             else
+            {
+#ifndef NDEBUG
               result.warnings.push_back("Param '" + new_module.info.tag.full_name + " " + new_param.info.tag.full_name + "': invalid value '" + text + "'.");
+#endif
+            }
           }
         }
       }
 
       // all params are set, do optional post-process conversion
       if(converter) 
-        converter->post_process(handler, state);
+        converter->post_process_existing(handler, state);
+    }
+  }
+
+  // run unconditional postprocessors
+  // this is mainly meant to allow completely new stuff to copy over old stuff
+  for (int m = 0; m < state.desc().plugin->modules.size(); m++)
+  {
+    std::unique_ptr<state_converter> converter = {};
+    auto const& mod_topo = state.desc().plugin->modules[m];
+    if (mod_topo.state_converter_factory != nullptr)
+    {
+      auto always_converter = mod_topo.state_converter_factory(&state.desc());
+      if (always_converter) always_converter->post_process_always(handler, state);
     }
   }
 

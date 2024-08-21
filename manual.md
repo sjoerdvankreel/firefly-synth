@@ -102,10 +102,36 @@ It is also possible to select a used-defined seed value for per-voice LFO's
 in (smooth 1/(free)-static 1), in which case the modulation source is deterministic
 (even if random). However in this case each note in a chord will follow the exact same "random"  pattern.
 
+## Microtuning
+
+Firefly features basic microtuning support.
+"Basic" meaning it's microtuning features pertain to the oscillators only.
+There's no support for tuning effect types (Comb Filter/SV Filter/SV Filter inside distortion).
+
+Microtuning is implemented by Firefly acting as an MTS-ESP client ([https://github.com/ODDSound/MTS-ESP](https://github.com/ODDSound/MTS-ESP)).
+Firefly cannot load tuning scales on it's own, so you will need an MTS-ESP Master plugin such as [https://oddsound.com/mtsespsuite.php](https://oddsound.com/mtsespsuite.php) to use it.
+Microtuning support is enabled by default, but it will only take effect once an MTS-ESP master plugin is loaded into the project.
+In which case, the MTS-ESP indicator will show as active in the monitor section.
+
+On the front panel (alongside Patch/Preset/Theme select) there's a Tuning menu that allows 5 options.
+Please note that Tuning Mode is saved with the plugin instance as a whole, and it is not part of the patch.
+
+* No Tuning - if an MTS-ESP Master is loaded into the DAW, ignore it.
+* On Note Before Modulation (Default) - fix the tuning at voice start and retune before modulation.
+* On Note After Modulation - fix the tuning at voice start and retune after modulation.
+* Continuous Before Modulation - keep retuning for the lifetime of the voice, and retune before modulation.
+* Continuous After Modulation - keep retuning for the lifetime of the voice, and retune after modulation.
+
+"Before Mod" probably does what you want when playing the same MIDI notes against multiple tuned plugins.
+"After Mod" is the way to go when you expect "play C3 against an oscillator set to C5" to produce the same results
+as "play C5 against an oscillator set to C3". After-mod also takes all pitch modulators (cents, unison detuning, raw pitch etc) into account.
+For monophonic mode, on-note really means on-voice-start. If you want note-by-note retuning for monophonic, continuous is the way to go.
+
 ## Feature overview
 
 See the parameter reference document for details.
 
+- Microtuning support.
 - Envelope 1 hardwired to voice gain.
 - Per-voice and global audio routing matrices.
 - Per-voice and global cv-to-cv routing matrices.

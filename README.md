@@ -129,14 +129,19 @@ Windows: the build scripts assume 7zip is installed. It will build fine without,
 # Dependencies
 - CLAP SDK: [https://github.com/free-audio/clap](https://github.com/free-audio/clap)
 - JUCE: [https://github.com/juce-framework/JUCE](https://github.com/juce-framework/JUCE)
+- MTS-ESP: [https://github.com/ODDSound/MTS-ESP](https://github.com/ODDSound/MTS-ESP)
 - sse2neon: [https://github.com/DLTcollab/sse2neon](https://github.com/DLTcollab/sse2neon)
 - Steinberg VST3 SDK: [https://github.com/steinbergmedia/vst3sdk](https://github.com/steinbergmedia/vst3sdk)
 - Readerwriterqueue: [https://github.com/cameron314/readerwriterqueue](https://github.com/cameron314/readerwriterqueue)
 
+# Special thanks to
+- [ODDSound](https://oddsound.com/) for providing an MTS-ESP NFR.
+- [BaconPaul](https://baconpaul.org/) for helping out with CLAP support.
+- [oddyolynx](https://github.com/tank-trax) for supporting the project early-on.
+- Host vendors who have set me up with an NFR license.
+- Everyone from [Surge Synth Team](https://surge-synth-team.org/) microtuning discord channel for helping out with MTS-ESP support.
+
 # Credits
-- Special thanks to [oddyolynx](https://github.com/tank-trax) for supporting the project early-on.
-- Special thanks to [BaconPaul](https://baconpaul.org/) for helping me out with CLAP support.
-- Special thanks to host vendors who have set me up with an NFR license.
 - Infernal theme artwork by Dante Cyberman: [https://www.deviantart.com/dantecyberman](https://www.deviantart.com/dantecyberman).
 - Contains soft clippers by [Sean Enderby and Zlatko Baracskai](https://dafx.de/paper-archive/2012/papers/dafx12_submission_45.pdf).
 - Contains a slightly adapted implementation of [Jezar's Freeverb](https://github.com/sinshu/freeverb).

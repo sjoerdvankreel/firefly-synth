@@ -207,6 +207,7 @@ make_module_gui_none(int section)
   module_topo_gui result = {};
   result.visible = false;
   result.section = section;
+  result.show_tab_header = true;
   return result;
 }
 
@@ -214,11 +215,12 @@ module_topo_gui
 make_module_gui(int section, gui_position const& position, gui_dimension const& dimension)
 {
   module_topo_gui result = {};
-  result.tabbed = false;
   result.visible = true;
   result.section = section;
   result.position = position;
   result.dimension = dimension;
+  result.show_tab_header = true;
+  result.param_sections_tabbed = false;
   return result;
 }
 
@@ -226,12 +228,13 @@ module_topo_gui
 make_module_gui_tabbed(int section, gui_position const& position, std::vector<int> const& tab_order)
 {
   module_topo_gui result = {};
-  result.tabbed = true;
   result.visible = true;
   result.section = section;
   result.position = position;
   result.tab_order = tab_order;
   result.dimension = { 1, 1 };
+  result.show_tab_header = true;
+  result.param_sections_tabbed = true;
   return result;
 }
 

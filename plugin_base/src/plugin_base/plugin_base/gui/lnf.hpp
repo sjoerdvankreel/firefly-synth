@@ -28,6 +28,7 @@ public juce::LookAndFeel_V4 {
   std::map<std::string, section_topo_gui_theme_settings> _section_settings = {};
 
   int tab_width() const;
+  module_section_gui const& get_module_section_gui() const;
   void init_theme(std::filesystem::path const& theme_folder, juce::var const& json);
 
 public:

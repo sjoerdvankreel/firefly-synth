@@ -13,6 +13,7 @@ include(plugin_base.vst3)
 include(plugin_base.juce)
 include(plugin_base.config)
 include(plugin_base.utility)
+include(plugin_base.mts_esp)
 
 add_subdirectory(plugin_base)
 declare_local_target(FALSE STATIC firefly_synth firefly_synth)

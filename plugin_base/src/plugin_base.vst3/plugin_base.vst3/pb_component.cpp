@@ -15,6 +15,7 @@ namespace plugin_base::vst3 {
 
 pb_component::
 pb_component(plugin_topo const* topo, FUID const& controller_id) :
+_mts_client(MTS_RegisterClient()),
 _desc(std::make_unique<plugin_desc>(topo, nullptr)),
 _splice_engine(_desc.get(), false, nullptr, nullptr)
 {
@@ -48,7 +49,7 @@ tresult PLUGIN_API
 pb_component::getState(IBStream* state)
 {
   PB_LOG_FUNC_ENTRY_EXIT();
-  std::vector<char> data(plugin_io_save_state(_splice_engine.state()));
+  std::vector<char> data(plugin_io_save_patch_state(_splice_engine.state()));
   return state->write(data.data(), data.size());
 }
 
@@ -56,7 +57,7 @@ tresult PLUGIN_API
 pb_component::setState(IBStream* state)
 {
   PB_LOG_FUNC_ENTRY_EXIT();
-  if (!plugin_io_load_state(load_ibstream(state), _splice_engine.state()).ok())
+  if (!plugin_io_load_patch_state(load_ibstream(state), _splice_engine.state()).ok())
     return kResultFalse;
   _splice_engine.automation_state_dirty();
   return kResultOk;
@@ -109,6 +110,7 @@ tresult PLUGIN_API
 pb_component::process(ProcessData& data)
 {
   host_block& block = _splice_engine.prepare_block();
+  block.mts_client = _mts_client;
   block.frame_count = data.numSamples;
   block.shared.bpm = data.processContext ? data.processContext->tempo : 0;
 

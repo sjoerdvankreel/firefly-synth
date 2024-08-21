@@ -9,7 +9,7 @@ _desc(desc), _notify(notify)
 {
   plugin_dims dims(*_desc->plugin, desc->plugin->audio_polyphony);
   _state.resize(dims.module_slot_param_slot);
-  init(state_init_type::default_);
+  init(state_init_type::default_, false);
 }
 
 void 
@@ -25,9 +25,9 @@ plugin_state::state_changed(int index, plain_value plain) const
 {
   assert(_notify);
   auto iter = _listeners.find(index);
-  if (iter == _listeners.end()) return;
-  for (int i = 0; i < iter->second.size(); i++)
-    iter->second[i]->state_changed(index, plain);
+  if (iter != _listeners.end())
+    for (int i = 0; i < iter->second.size(); i++)
+      iter->second[i]->state_changed(index, plain);
   for(int i = 0; i < _any_listeners.size(); i++)
     _any_listeners[i]->any_state_changed(index, plain);
 }
@@ -94,7 +94,7 @@ plugin_state::undo(int index)
   assert(_undo_entries.size() > 0);
   assert(0 < _undo_position - index && _undo_position - index <= _undo_entries.size());
   _undo_position -= index + 1;
-  copy_from(_undo_entries[_undo_position]->state_before);
+  copy_from(_undo_entries[_undo_position]->state_before, false);
 }
 
 void 
@@ -102,7 +102,7 @@ plugin_state::redo(int index)
 {
   assert(_undo_entries.size() > 0);
   assert(0 <= _undo_position + index && _undo_position + index < _undo_entries.size());
-  copy_from(_undo_entries[_undo_position + index]->state_after);
+  copy_from(_undo_entries[_undo_position + index]->state_after, false);
   _undo_position += index + 1;
 }
 
@@ -216,31 +216,35 @@ plugin_state::swap_module_with(int index, int source_slot, int target_slot)
 }
 
 void 
-plugin_state::copy_from(jarray<plain_value, 4> const& other)
+plugin_state::copy_from(jarray<plain_value, 4> const& other, bool patch_only)
 {
   for (int m = 0; m < desc().plugin->modules.size(); m++)
   {
     auto const& module = desc().plugin->modules[m];
     for (int mi = 0; mi < module.info.slot_count; mi++)
       for (int p = 0; p < module.params.size(); p++)
-      {
-        auto const& param = module.params[p];
-        for (int pi = 0; pi < param.info.slot_count; pi++)
-          set_plain_at(m, mi, p, pi, other[m][mi][p][pi]);
-      }
+        // readonly support for per-instance microtuning (outside of the patch)
+        if (!patch_only || !module.params[p].info.is_per_instance)
+        {
+          auto const& param = module.params[p];
+          for (int pi = 0; pi < param.info.slot_count; pi++)
+            set_plain_at(m, mi, p, pi, other[m][mi][p][pi]);
+        }
   }
 }
 
 void
-plugin_state::init(state_init_type init_type)
+plugin_state::init(state_init_type init_type, bool patch_only)
 {
   for (int m = 0; m < desc().plugin->modules.size(); m++)
   {
     auto const& module = desc().plugin->modules[m];
     for (int mi = 0; mi < module.info.slot_count; mi++)
       for (int p = 0; p < module.params.size(); p++)
-        for (int pi = 0; pi < module.params[p].info.slot_count; pi++)
-          set_plain_at(m, mi, p, pi, module.params[p].domain.default_plain(mi, pi));
+        // readonly support for per-instance microtuning (outside of the patch)
+        if(!patch_only || !module.params[p].info.is_per_instance)
+          for (int pi = 0; pi < module.params[p].info.slot_count; pi++)
+            set_plain_at(m, mi, p, pi, module.params[p].domain.default_plain(mi, pi));
   }
   for(int m = 0; m < desc().plugin->modules.size(); m++)
     if(init_type == state_init_type::minimal && desc().plugin->modules[m].minimal_initializer)

@@ -28,7 +28,7 @@ inline std::string const user_state_scale_key = "scale";
 inline std::string const user_state_theme_key = "theme";
 
 // for serialization
-inline std::string const factory_preset_key = "factory_preset";
+inline std::string const extra_state_factory_preset_key = "factory_preset";
 std::set<std::string> gui_extra_state_keyset(plugin_topo const& topo);
 std::string module_section_tab_key(plugin_topo const& topo, int section_index);
 
@@ -137,17 +137,11 @@ public:
     plugin_state* gui_state, plugin_base::extra_state* extra_state, 
     std::vector<plugin_base::mod_indicator_state>* mod_indicator_states);
 
+  void load_patch();
   void save_patch();
   void init_patch();
   void clear_patch();
-
-  void load_patch();
   void load_patch(std::string const& path, bool preset);
-
-  Component& make_load_button();
-  Component& make_save_button();
-  Component& make_init_button();
-  Component& make_clear_button();
 
   void param_mouse_exit(int param);
   void param_mouse_enter(int param);

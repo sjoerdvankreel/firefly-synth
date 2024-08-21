@@ -3,26 +3,41 @@
 #include <plugin_base/desc/plugin.hpp>
 #include <plugin_base/shared/value.hpp>
 #include <plugin_base/shared/jarray.hpp>
+#include <plugin_base/shared/tuning.hpp>
 #include <plugin_base/dsp/utility.hpp>
 #include <plugin_base/dsp/block/shared.hpp>
+
+#include <Client/libMTSClient.h>
 
 #include <cassert>
 
 namespace plugin_base {
 
 struct plugin_topo;
+
 enum class voice_stage { unused, active, releasing, finishing };
+
+// for monophonic mode
+enum class mono_note_stream_event { none, on, off };
 
 // for monophonic mode
 struct mono_note_state
 {
   int midi_key = -1;
-  bool note_on = false;
+  mono_note_stream_event event_type = mono_note_stream_event::none;
+};
+
+// for MTS-ESP tuning
+struct note_tuning
+{
+  bool is_mapped = false;
+  float retuned_semis = -1;
 };
 
 // for polyphonic synth
 struct voice_state final {
   note_id note_id_ = {};
+  
   // for mono mode
   note_id release_id = {};
 
@@ -50,6 +65,8 @@ struct plugin_output_block final {
   double cpu_usage;
   int high_cpu_module;
   double high_cpu_module_usage;
+  bool mts_esp_status;
+  bool voices_drained;
   float* const* host_audio;
   jarray<plain_value, 2>& params;
   jarray<float, 2> const& voice_mixdown;
@@ -95,6 +112,14 @@ struct plugin_block final {
   // are we graphing?
   bool graph;
 
+  // MTS-ESP support
+  MTSClient* mts_client = {};
+  // If disabled, unused.
+  // If per-block, points to a table populated at block start.
+  // If per-voice, points to a table populated at voice start.
+  std::array<note_tuning, 128>* current_tuning = nullptr;
+  engine_tuning_mode current_tuning_mode = (engine_tuning_mode)-1;
+
   int start_frame;
   int end_frame;
   int module_slot;
@@ -114,6 +139,10 @@ struct plugin_block final {
   void* module_context(int mod, int slot) const;
   jarray<float, 3> const& module_cv(int mod, int slot) const;
   jarray<float, 4> const& module_audio(int mod, int slot) const;
+
+  // mts-esp support
+  template <engine_tuning_mode TuningMode>
+  float pitch_to_freq_with_tuning(float pitch);
 
   void set_out_param(int param, int slot, double raw) const;
   void push_mod_indicator_state(mod_indicator_state const& indicator_state) 
@@ -173,6 +202,35 @@ plugin_block::normalized_to_raw_block(int module_, int param_, jarray<float, 1> 
   for(int f = start_frame; f < end_frame; f++) check_unipolar(in[f]);
   auto const& param_topo = plugin_desc_.plugin->modules[module_].params[param_];
   param_topo.domain.normalized_to_raw_block<DomainType>(in, out, start_frame, end_frame);
+}
+
+template <engine_tuning_mode TuningMode>
+inline float
+plugin_block::pitch_to_freq_with_tuning(float pitch)
+{
+  if constexpr (TuningMode == engine_tuning_mode_no_tuning)
+    return pitch_to_freq_no_tuning(pitch);
+
+  // these 2 cases are already tuned beforehand
+  else if constexpr (TuningMode == engine_tuning_mode_on_note_before_mod)
+    return pitch_to_freq_no_tuning(pitch);
+  else if constexpr (TuningMode == engine_tuning_mode_continuous_before_mod)
+    return pitch_to_freq_no_tuning(pitch);
+
+  else if constexpr (TuningMode == engine_tuning_mode_on_note_after_mod || 
+    TuningMode == engine_tuning_mode_continuous_after_mod)
+  {
+    pitch = std::clamp(pitch, 0.0f, 127.0f);
+    int pitch_low = (int)std::floor(pitch);
+    int pitch_high = (int)std::ceil(pitch);
+    float pos = pitch - pitch_low;
+    float retuned_low = (*current_tuning)[pitch_low].retuned_semis;
+    float retuned_high = (*current_tuning)[pitch_high].retuned_semis;
+    return pitch_to_freq_no_tuning((1.0f - pos) * retuned_low + pos * retuned_high);
+  }
+
+  else
+    assert(false);
 }
 
 }
