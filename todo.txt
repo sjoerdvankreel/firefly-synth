@@ -23,9 +23,11 @@ finish up microtuning:
 * test drain indicator
 * retest modulation
 * retest all demo stuff + fix renoise
-* 
+* retest per-instance loading
 
 ui-fixes-again:
+* show clap mod indicator
+* repaint on waveform change (free running or random-per-voice)
 * some bolletjes don't go away
 * fix the undo history for tuning mode
 * color-on-gray not gray-on-color
