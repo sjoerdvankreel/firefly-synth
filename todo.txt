@@ -18,12 +18,12 @@ on release:
 12 update kvr
 
 finish up microtuning:
-* do the credits
-* do the full release (screenshots, kvr, etc)
+V do the credits
+V retest modulation
+V retest per-instance loading
 * test drain indicator
-* retest modulation
 * retest all demo stuff + fix renoise
-* retest per-instance loading
+* do the full release (screenshots, kvr, etc)
 
 ui-fixes-again:
 * show clap mod indicator
