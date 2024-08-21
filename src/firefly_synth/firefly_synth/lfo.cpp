@@ -338,8 +338,8 @@ lfo_state_converter::post_process_existing(load_handler const& handler, plugin_s
 module_topo
 lfo_topo(int section, gui_position const& pos, bool global, bool is_fx)
 {
-  auto const voice_info = make_topo_info("{58205EAB-FB60-4E46-B2AB-7D27F069CDD3}", true, "Voice LFO", "Voice LFO", "VLFO", module_vlfo, 10);
-  auto const global_info = make_topo_info("{FAF92753-C6E4-4D78-BD7C-584EF473E29F}", true, "Global LFO", "Global LFO", "GLFO", module_glfo, 10);
+  auto const voice_info = make_topo_info("{58205EAB-FB60-4E46-B2AB-7D27F069CDD3}", true, "Voice LFO", "LFO", "VLFO", module_vlfo, 10);
+  auto const global_info = make_topo_info("{FAF92753-C6E4-4D78-BD7C-584EF473E29F}", true, "Global LFO", "LFO", "GLFO", module_glfo, 10);
   module_stage stage = global ? module_stage::input : module_stage::voice;
   auto info = topo_info(global ? global_info : voice_info);
   info.description = std::string("Optional tempo-synced LFO with repeating and one-shot types, various periodic waveforms, smooth noise, ") +  
