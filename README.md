@@ -135,10 +135,10 @@ Windows: the build scripts assume 7zip is installed. It will build fine without,
 - Readerwriterqueue: [https://github.com/cameron314/readerwriterqueue](https://github.com/cameron314/readerwriterqueue)
 
 # Special thanks to
+- [ODDSound](https://oddsound.com/) for providing an MTS-ESP NFR.
 - [BaconPaul](https://baconpaul.org/) for helping out with CLAP support.
 - [oddyolynx](https://github.com/tank-trax) for supporting the project early-on.
 - Host vendors who have set me up with an NFR license.
-- [ODDSound](https://oddsound.com/) for providing an MTS-ESP NFR.
 - Everyone from [Surge Synth Team](https://surge-synth-team.org/) microtuning discord channel for helping out with MTS-ESP support.
 
 # Credits
