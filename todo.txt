@@ -17,7 +17,16 @@ on release:
 11 make a github release
 12 update kvr
 
+finish up microtuning:
+* do the credits
+* do the full release (screenshots, kvr, etc)
+* test drain indicator
+* retest modulation
+* retest all demo stuff + fix renoise
+* 
+
 ui-fixes-again:
+* some bolletjes don't go away
 * fix the undo history for tuning mode
 * color-on-gray not gray-on-color
 * vertical textboxes main / global/voice audio/cv to the left
@@ -27,7 +36,7 @@ ui-fixes-again:
 * do master in like 1.8.4
 * smaller font ?
 * do big knobs not sliders some places
-* prettify knobs, sliders, combos, toggles
+* prettify knobs, sliders, combos, toggles, menus
 * make the bolletjes work in case of automation
 * show active modulation for the other graphs
 * rethink section colors global red/orange voice blue/cyan main gray
@@ -36,18 +45,11 @@ ui-fixes-again:
 * make matrix tab headers match new section colors
 * do mod-free themes
 
-
-finish up microtuning:
-- do the credits
-- + do the full release (screenshots, kvr, etc)
-
-- autobuilds:
-- ask paul
-- integrate https://github.com/surge-synthesizer/monique-monosynth/blob/main/.github/workflows/build-pr.yml
-
+autobuilds:
+* ask paul
+* integrate https://github.com/surge-synthesizer/monique-monosynth/blob/main/.github/workflows/build-pr.yml
 
 wishlist:
-green-on-white UI
 bugfix: rerender graph on master in param hover?
 turn on stuff when dragging (e.g. basic sin, dist skew etc)
 drop some ugly-ass themes
