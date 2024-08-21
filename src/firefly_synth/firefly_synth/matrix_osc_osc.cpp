@@ -130,7 +130,7 @@ osc_osc_matrix_topo(int section, gui_position const& pos, plugin_topo const* plu
   module_topo result(make_module(
     make_topo_info_basic("{8024F4DC-5BFC-4C3D-8E3E-C9D706787362}", "Osc Mod", module_osc_osc_matrix, 1),
     make_module_dsp(module_stage::voice, module_output::audio, scratch_count, outputs),
-    make_module_gui_tabbed(section, pos, { section_am, section_fm })));
+    make_module_gui(section, pos, { { 1 }, { 1, 1 } })));
   result.info.description = "Oscillator routing matrices that allow for Osc-to-Osc AM, RM and FM.";
 
   result.graph_renderer = render_graph;
@@ -145,7 +145,7 @@ osc_osc_matrix_topo(int section, gui_position const& pos, plugin_topo const* plu
     make_param_section_gui({ 0, 0 }, { { 1 }, { -25, gui_dimension::auto_size, gui_dimension::auto_size, 1, 1 } })));
   am.gui.scroll_mode = gui_scroll_mode::vertical;  
   auto& am_on = result.params.emplace_back(make_param(
-    make_topo_info_tabular("{13B61F71-161B-40CE-BF7F-5022F48D60C7}", "AM On", "On", param_am_on, route_count),
+    make_topo_info_tabular("{13B61F71-161B-40CE-BF7F-5022F48D60C7}", "AM On", "AM", param_am_on, route_count),
     make_param_dsp_voice(param_automate::automate), make_domain_toggle(false),
     make_param_gui(section_am, gui_edit_type::toggle, param_layout::vertical, { 0, 0 }, make_label_none())));
   am_on.gui.tabular = true;
@@ -196,10 +196,10 @@ osc_osc_matrix_topo(int section, gui_position const& pos, plugin_topo const* plu
 
   auto& fm = result.sections.emplace_back(make_param_section(section_fm,
     make_topo_tag_basic("{1B39A828-3429-4245-BF07-551C17A78341}", "FM"),
-    make_param_section_gui({ 0, 0 }, { { 1 }, { -25, -55, -55, -45, 1 } })));
+    make_param_section_gui({ 0, 1 }, { { 1 }, { -25, -55, -55, -45, 1 } })));
   fm.gui.scroll_mode = gui_scroll_mode::vertical;
   auto& fm_on = result.params.emplace_back(make_param(
-    make_topo_info_tabular("{02112C80-D1E9-409E-A9FB-6DCA34F5CABA}", "FM On", "On", param_fm_on, route_count),
+    make_topo_info_tabular("{02112C80-D1E9-409E-A9FB-6DCA34F5CABA}", "FM On", "FM", param_fm_on, route_count),
     make_param_dsp_voice(param_automate::automate), make_domain_toggle(false),
     make_param_gui(section_fm, gui_edit_type::toggle, param_layout::vertical, { 0, 0 }, make_label_none())));
   fm_on.gui.tabular = true;
