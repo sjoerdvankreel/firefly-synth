@@ -828,18 +828,13 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
   float dot_x = left + size / 2.0f + size / 2.0f * std::cos(start_angle - pi32 * 0.25f + angle_gap + pos * angle_range) - 2.0f;
   g.fillEllipse(dot_x, dot_y, 4.0f, 4.0f);
 
-  int x = 1;
-  if (x == 1)return;
-
   if(auto ps = dynamic_cast<param_slider*>(&s))
   {
     // modulatable indicator
     if(ps->param()->param->dsp.can_modulate(ps->param()->info.slot))
     {
-      auto indicator = background1.interpolatedWith(background2, 0.33);
-      if(!s.isEnabled()) indicator = indicator.darker();
-      g.setColour(indicator);
-      g.fillEllipse(left + size / 4, top + size / 4, size / 2, size / 2);
+      g.setColour(Colour(0xFF666666)); // todo the color
+      g.fillEllipse(left + size / 3, top + size / 3, size / 3, size / 3);
     }
 
     // current modulation indicator
@@ -868,24 +863,6 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
       g.strokePath(path, PathStrokeType(2));
     }
   }
-
-  Path thumb;
-  float thumb_end_angle = 340 * pi32 / 180;
-  float thumb_start_angle = 20 * pi32 / 180;
-  float thum_angle_range = thumb_end_angle - thumb_start_angle;
-  thumb_color = colors().slider_thumb;
-  if (!s.isEnabled()) thumb_color = color_to_grayscale(thumb_color);
-  g.setColour(thumb_color);
-
-  float thumb_top = top + size - knob_thumb_height * scale_factor * 1.25;
-  float thumb_left = left + size / 2 - knob_thumb_width * scale_factor / 2;
-  thumb.startNewSubPath(thumb_left, thumb_top);
-  thumb.lineTo(thumb_left + knob_thumb_width * scale_factor / 2, thumb_top + knob_thumb_height * scale_factor);
-  thumb.lineTo(thumb_left + knob_thumb_width * scale_factor, thumb_top);
-  thumb.closeSubPath();
-  auto transform = AffineTransform::rotation(thumb_start_angle + pos * thum_angle_range, left + size / 2, top + size / 2);
-  thumb.applyTransform(transform);
-  g.fillPath(thumb);
 }
 
 void 	
