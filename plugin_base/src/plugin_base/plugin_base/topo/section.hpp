@@ -17,6 +17,7 @@ struct param_section_gui final {
   gui_scroll_mode scroll_mode;
   gui_label_edit_cell_split cell_split = gui_label_edit_cell_split::no_split;
   bool wrap_in_container = true; // see multi_own_grid
+  int merge_with_section = -1;
 
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(param_section_gui);
 };

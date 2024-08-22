@@ -108,6 +108,7 @@ global_in_topo(int section, bool is_fx, gui_position const& pos)
     { 0, 3, 2, 1 }, gui_dimension({ 1, 1 }, { gui_dimension::auto_size_all, 1 }), gui_label_edit_cell_split::horizontal);
   if(is_fx) linked_gui = make_param_section_gui(
     { 0, 4, 1, 2 }, gui_dimension({ 1 }, { 1, 1 }), gui_label_edit_cell_split::no_split);
+  linked_gui.merge_with_section = section_linked_pbrange;
   result.sections.emplace_back(make_param_section(section_linked,
     make_topo_tag_basic("{56FD2FEB-3084-4E28-B56C-06D31406EB42}", "Linked"), linked_gui));
   auto& mod_wheel = result.params.emplace_back(make_param(
@@ -125,12 +126,13 @@ global_in_topo(int section, bool is_fx, gui_position const& pos)
   pitch_bend.info.description = "Linked to MIDI pitch bend, updates on incoming MIDI events.";
   pitch_bend.gui.alternate_drag_output_id = result.dsp.outputs[output_pb].info.tag.id;
 
-  if(is_fx) return result;
+  // if(is_fx) return result; TODO cannot bc merge section
 
-  result.sections.emplace_back(make_param_section(section_linked_pbrange,
+  auto& pb_range_section = result.sections.emplace_back(make_param_section(section_linked_pbrange,
     make_topo_tag_basic("{12EAD382-DF92-486C-A451-E19EC1C009BD}", "Linked PB Range"),
     make_param_section_gui({ 0, 4, is_fx? 1: 2, 1}, gui_dimension({1, 1}, {1}),
       gui_label_edit_cell_split::vertical)));
+  pb_range_section.gui.merge_with_section = section_linked;
   auto& pb_range = result.params.emplace_back(make_param(
     make_topo_info("{79B7592A-4911-4B04-8F71-5DD4B2733F4F}", true, "Pitch Bend Range", "PB Rng", "PB Rng", param_pb_range, 1),
     make_param_dsp_block(param_automate::automate), make_domain_step(1, 24, 12, 0),

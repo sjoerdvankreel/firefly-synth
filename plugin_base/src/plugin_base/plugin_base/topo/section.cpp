@@ -26,6 +26,21 @@ param_section::validate(plugin_topo const& plugin, module_topo const& module, in
       }
     }
 
+  // blend/merge should be 2-way to simplify the ui code
+  if (gui.merge_with_section != -1)
+  {
+    auto const& that_gui = module.sections[gui.merge_with_section].gui;
+    assert(that_gui.merge_with_section == index);
+    if (gui.position.row == that_gui.position.row)
+      assert(gui.position.column + gui.position.column_span == that_gui.position.column ||
+        that_gui.position.column + that_gui.position.column_span == gui.position.column);
+    else if (gui.position.column == that_gui.position.column)
+      assert(gui.position.row + gui.position.row_span == that_gui.position.row ||
+        that_gui.position.row + that_gui.position.row_span == gui.position.row);
+    else
+      assert(false);
+  }
+
   // validation is handled elsewhere
   if(is_one_grid_param) return;
 
