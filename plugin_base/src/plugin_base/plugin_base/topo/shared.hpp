@@ -188,11 +188,12 @@ struct gui_colors final {
   juce::Colour graph_line = juce::Colour(0xFFFF8844);
   juce::Colour graph_mod_indicator = juce::Colour(0x50FFFFFF);
   juce::Colour bubble_outline = juce::Colour(0xFFFF8844);
-  juce::Colour knob_thumb = juce::Colour(0xFFFF8844);
-  juce::Colour knob_track1 = juce::Colour(0xFF222222);
-  juce::Colour knob_track2 = juce::Colour(0xFFFF8844);
-  juce::Colour knob_background1 = juce::Colour(0xFF222222);
-  juce::Colour knob_background2 = juce::Colour(0xFF999999);
+  juce::Colour knob_background = juce::Colour(0xFF333333);
+  juce::Colour knob_highlight = juce::Colour(0xFFFFFFFF);
+  juce::Colour knob_shadow = juce::Colour(0xFF000000);
+  juce::Colour knob_automation = juce::Colour(0xFFFF0040);
+  juce::Colour knob_modulation = juce::Colour(0xC0FF0040);
+  juce::Colour knob_can_modulate = juce::Colour(0xFF666666);
   juce::Colour section_outline1 = juce::Colour(0xFF884422);
   juce::Colour section_outline2 = juce::Colour(0xFF444444);
   juce::Colour section_background1 = juce::Colour(0xFF884422).darker(1.75f);

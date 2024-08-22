@@ -87,13 +87,14 @@ override_colors(gui_colors const& base, var const& json)
   result.graph_background = override_color_if_present(json, "graph_background", result.graph_background);
   result.graph_area = override_color_if_present(json, "graph_area", result.graph_area);
   result.graph_line = override_color_if_present(json, "graph_line", result.graph_line);
-  result.bubble_outline = override_color_if_present(json, "bubble_outline", result.bubble_outline);
-  result.knob_thumb = override_color_if_present(json, "knob_thumb", result.knob_thumb);
-  result.knob_track1 = override_color_if_present(json, "knob_track1", result.knob_track1);
-  result.knob_track2 = override_color_if_present(json, "knob_track2", result.knob_track2);
-  result.knob_background1 = override_color_if_present(json, "knob_background1", result.knob_background1);
-  result.knob_background2 = override_color_if_present(json, "knob_background2", result.knob_background2);
-  result.section_outline1 = override_color_if_present(json, "section_outline1", result.section_outline1);
+  result.bubble_outline = override_color_if_present(json, "bubble_outline", result.bubble_outline);  
+  result.knob_background = override_color_if_present(json, "knob_background", result.knob_background);
+  result.knob_highlight = override_color_if_present(json, "knob_highlight", result.knob_highlight);
+  result.knob_shadow = override_color_if_present(json, "knob_shadow", result.knob_shadow);
+  result.knob_automation = override_color_if_present(json, "knob_automation", result.knob_automation);
+  result.knob_modulation = override_color_if_present(json, "knob_modulation", result.knob_modulation);
+  result.knob_can_modulate = override_color_if_present(json, "knob_can_modulate", result.knob_can_modulate);
+  result.section_outline1 = override_color_if_present(json, "section_outline1", result.section_outline1);   
   result.section_outline2 = override_color_if_present(json, "section_outline2", result.section_outline2);
   result.section_background1 = override_color_if_present(json, "section_background1", result.section_background1);
   result.section_background2 = override_color_if_present(json, "section_background2", result.section_background2);
@@ -757,24 +758,21 @@ lnf::drawTabButton(TabBarButton& button, Graphics& g, bool isMouseOver, bool isM
 void 
 lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, Slider& s)
 {
-  bool tabular = false;
   int conic_count = 256;
-
-  if (auto ps = dynamic_cast<param_slider*>(&s))
-    if (ps->param()->param->gui.tabular)
-      tabular = true;
-  if(tabular)
-    draw_tabular_cell_bg(g, &s, global_settings().table_cell_radius);
-
   float scale_factor = 1;
   float size_base = s.getHeight();
+  auto ps = dynamic_cast<param_slider*>(&s);
+  bool tabular = ps && ps->param()->param->gui.tabular;
+  float padding = tabular ? _global_settings.tabular_knob_padding : _global_settings.knob_padding;
+
+  // cell background
   if(tabular) 
   {
     size_base = 0.9 * std::min(s.getHeight(), s.getWidth());
     scale_factor = size_base / s.getHeight();
+    draw_tabular_cell_bg(g, &s, global_settings().table_cell_radius);
   }
-
-  float padding = tabular? _global_settings.tabular_knob_padding: _global_settings.knob_padding;
+  
   float size = size_base - padding;
   float left = (s.getWidth() - size) / 2;
   float top = (s.getHeight() - size) / 2;
@@ -791,78 +789,67 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
   float start_angle = (180 + 20) * pi32 / 180;
   float angle_gap = end_angle - start_angle;
   float angle_range = end_angle - start_angle;
-  auto track1 = colors().knob_track1;
-  auto track2 = colors().knob_track2;
-  auto background1 = colors().knob_background1;
-  auto background2 = colors().knob_background2;
 
-  if (!s.isEnabled())
-  {
-    track1 = color_to_grayscale(track1);
-    track2 = color_to_grayscale(track2);
-    background1 = color_to_grayscale(background1);
-    background2 = color_to_grayscale(background2);
-  }
-
-  // todo the color
-  g.setColour(Colour(0xFF333333));
+  // background, shadow, highlight
+  g.setColour(colors().knob_background);
   g.fillEllipse(left + 1, top + 1, size - 2, size - 2);
-  draw_conic_arc(g, left, top, size, pi32, 2.0f * pi32, Colours::black, Colours::white, conic_count / 2, 0.0f, 1.0f, 1.0f);
-  draw_conic_arc(g, left, top, size, 0.0f, pi32, Colours::white, Colours::black, conic_count / 2, 0.0f, 1.0f, 1.0f);
+  draw_conic_arc(g, left, top, size, pi32, 2.0f * pi32, 
+    colors().knob_shadow, colors().knob_highlight, conic_count / 2, 0.0f, 1.0f, 1.0f);
+  draw_conic_arc(g, left, top, size, 0.0f, pi32, 
+    colors().knob_highlight, colors().knob_shadow, conic_count / 2, 0.0f, 1.0f, 1.0f);
 
   left += 3;
   top += 3;
   size -= 6;
   int stroke = 2;
-  background1 = Colours::green;
-  background2 = Colours::green;
 
-  auto thumb_color = colors().slider_thumb;
-  if(!bipolar) draw_conic_arc(g, left, top, size, start_angle, end_angle, thumb_color, thumb_color, conic_count, 0, pos, stroke);
-  else if (pos >= 0.5f) draw_conic_arc(g, left, top, size, start_angle + angle_range / 2, end_angle, thumb_color, thumb_color, conic_count / 2, 0, (pos - 0.5f) * 2, stroke);
-  else draw_conic_arc(g, left, top, size, start_angle, start_angle + angle_range / 2, thumb_color, thumb_color, conic_count / 2, pos * 2, 1, stroke);
+  // automation indication
+  auto automation_color = colors().knob_automation;
+  if(!bipolar) draw_conic_arc(g, left, top, size, start_angle, end_angle,
+    automation_color, automation_color, conic_count, 0, pos, stroke);
+  else if (pos >= 0.5f) draw_conic_arc(g, left, top, size, start_angle + angle_range / 2, end_angle, 
+    automation_color, automation_color, conic_count / 2, 0, (pos - 0.5f) * 2, stroke);
+  else draw_conic_arc(g, left, top, size, start_angle, start_angle + angle_range / 2, 
+    automation_color, automation_color, conic_count / 2, pos * 2, 1, stroke);
 
-  if(!bipolar) g.setColour(thumb_color.withAlpha(std::max(0.0f, 1.0f - pos * 10.0f)));
-  else g.setColour(thumb_color.withAlpha(1.0f - std::max(0.0f, std::abs(0.5f - pos) * 20.0f)));
+  // automation indication
+  if(!bipolar) g.setColour(automation_color.withAlpha(std::max(0.0f, 1.0f - pos * 10.0f)));
+  else g.setColour(automation_color.withAlpha(1.0f - std::max(0.0f, std::abs(0.5f - pos) * 20.0f)));
   float dot_y = top + size / 2.0f + size / 2.0f * std::sin(start_angle - pi32 * 0.25f + angle_gap + pos * angle_range) - 2.0f;
   float dot_x = left + size / 2.0f + size / 2.0f * std::cos(start_angle - pi32 * 0.25f + angle_gap + pos * angle_range) - 2.0f;
   g.fillEllipse(dot_x, dot_y, 4.0f, 4.0f);
 
-  if(auto ps = dynamic_cast<param_slider*>(&s))
+  if (!ps) return;
+    
+  // modulatable indicator
+  if(ps->param()->param->dsp.can_modulate(ps->param()->info.slot))
   {
-    // modulatable indicator
-    if(ps->param()->param->dsp.can_modulate(ps->param()->info.slot))
-    {
-      g.setColour(Colour(0xFF666666)); // todo the color
-      g.fillEllipse(left + size / 3, top + size / 3, size / 3, size / 3);
-    }
-
-    // current modulation indicator
-    if (ps->max_mod_indicator() >= 0.0f)
-    { 
-      Path path;
-      g.setColour(thumb_color.withAlpha(0.5f)); // todo
-
-      float half_mod_angle = start_angle + 0.5f * angle_range;
-      float min_mod_angle = start_angle + ps->min_mod_indicator() * angle_range;
-      float max_mod_angle = start_angle + ps->max_mod_indicator() * angle_range;
-      if (!bipolar)
-      {
-        if(ps->max_mod_indicator() - ps->min_mod_indicator() <= 0.05f)
-          path.addArc(left - 3, top - 3, size + 6, size + 6, start_angle, max_mod_angle, true);
-        else
-          path.addArc(left - 3, top - 3, size + 6, size + 6, min_mod_angle, max_mod_angle, true);
-      }
-      else if(ps->max_mod_indicator() - ps->min_mod_indicator() > 0.05f)
-        path.addArc(left - 3, top - 3, size + 6, size + 6, min_mod_angle, max_mod_angle, true);
-      else if(ps->max_mod_indicator() >= 0.5f)
-        path.addArc(left - 3, top - 3, size + 6, size + 6, half_mod_angle, max_mod_angle, true);
-      else
-        path.addArc(left - 3, top - 3, size + 6, size + 6, max_mod_angle, half_mod_angle, true);
-
-      g.strokePath(path, PathStrokeType(2));
-    }
+    g.setColour(colors().knob_can_modulate);
+    g.fillEllipse(left + size / 3, top + size / 3, size / 3, size / 3);
   }
+
+  if (ps->max_mod_indicator() < 0.0f) return;
+
+  // modulation indication
+  Path path;
+  g.setColour(colors().knob_modulation); 
+  float half_mod_angle = start_angle + 0.5f * angle_range;
+  float min_mod_angle = start_angle + ps->min_mod_indicator() * angle_range;
+  float max_mod_angle = start_angle + ps->max_mod_indicator() * angle_range;
+  if (!bipolar)
+  {
+    if(ps->max_mod_indicator() - ps->min_mod_indicator() <= 0.05f)
+      path.addArc(left - 3, top - 3, size + 6, size + 6, start_angle, max_mod_angle, true);
+    else
+      path.addArc(left - 3, top - 3, size + 6, size + 6, min_mod_angle, max_mod_angle, true);
+  }
+  else if(ps->max_mod_indicator() - ps->min_mod_indicator() > 0.05f)
+    path.addArc(left - 3, top - 3, size + 6, size + 6, min_mod_angle, max_mod_angle, true);
+  else if(ps->max_mod_indicator() >= 0.5f)
+    path.addArc(left - 3, top - 3, size + 6, size + 6, half_mod_angle, max_mod_angle, true);
+  else
+    path.addArc(left - 3, top - 3, size + 6, size + 6, max_mod_angle, half_mod_angle, true);
+   g.strokePath(path, PathStrokeType(2));
 }
 
 void 	
