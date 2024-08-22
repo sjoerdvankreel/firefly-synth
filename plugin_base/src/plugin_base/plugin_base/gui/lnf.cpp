@@ -83,27 +83,21 @@ override_colors(gui_colors const& base, var const& json)
   result.graph_grid = override_color_if_present(json, "graph_grid", result.graph_grid);
   result.graph_text = override_color_if_present(json, "graph_text", result.graph_text);
   result.graph_mod_indicator = override_color_if_present(json, "graph_mod_indicator", result.graph_mod_indicator);
-  result.slider_mod_indicator = override_color_if_present(json, "slider_mod_indicator", result.slider_mod_indicator);
   result.graph_background = override_color_if_present(json, "graph_background", result.graph_background);
   result.graph_area = override_color_if_present(json, "graph_area", result.graph_area);
   result.graph_line = override_color_if_present(json, "graph_line", result.graph_line);
   result.bubble_outline = override_color_if_present(json, "bubble_outline", result.bubble_outline);  
-  result.knob_background = override_color_if_present(json, "knob_background", result.knob_background);
-  result.knob_highlight = override_color_if_present(json, "knob_highlight", result.knob_highlight);
-  result.knob_shadow = override_color_if_present(json, "knob_shadow", result.knob_shadow);
-  result.knob_automation = override_color_if_present(json, "knob_automation", result.knob_automation);
-  result.knob_modulation = override_color_if_present(json, "knob_modulation", result.knob_modulation);
-  result.knob_can_modulate = override_color_if_present(json, "knob_can_modulate", result.knob_can_modulate);
+  result.slider_background = override_color_if_present(json, "slider_background", result.slider_background);
+  result.slider_highlight = override_color_if_present(json, "slider_highlight", result.slider_highlight);
+  result.slider_shadow = override_color_if_present(json, "slider_shadow", result.slider_shadow);
+  result.slider_automation = override_color_if_present(json, "slider_automation", result.slider_automation);
+  result.slider_can_modulate = override_color_if_present(json, "slider_can_modulate", result.slider_can_modulate);
+  result.slider_linear_modulation = override_color_if_present(json, "slider_linear_modulation", result.slider_linear_modulation);
+  result.slider_rotary_modulation = override_color_if_present(json, "slider_rotary_modulation", result.slider_rotary_modulation);
   result.section_outline1 = override_color_if_present(json, "section_outline1", result.section_outline1);   
   result.section_outline2 = override_color_if_present(json, "section_outline2", result.section_outline2);
   result.section_background1 = override_color_if_present(json, "section_background1", result.section_background1);
   result.section_background2 = override_color_if_present(json, "section_background2", result.section_background2);
-  result.slider_thumb = override_color_if_present(json, "slider_thumb", result.slider_thumb);
-  result.slider_track1 = override_color_if_present(json, "slider_track1", result.slider_track1);
-  result.slider_track2 = override_color_if_present(json, "slider_track2", result.slider_track2);
-  result.slider_outline1 = override_color_if_present(json, "slider_outline1", result.slider_outline1);
-  result.slider_outline2 = override_color_if_present(json, "slider_outline2", result.slider_outline2);
-  result.slider_background = override_color_if_present(json, "slider_background", result.slider_background);
   result.edit_text = override_color_if_present(json, "edit_text", result.edit_text);
   result.label_text = override_color_if_present(json, "label_text", result.label_text);
   result.table_header = override_color_if_present(json, "table_header", result.table_header);
@@ -791,12 +785,12 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
   float angle_range = end_angle - start_angle;
 
   // background, shadow, highlight
-  g.setColour(colors().knob_background);
+  g.setColour(colors().slider_background);
   g.fillEllipse(left + 1, top + 1, size - 2, size - 2);
   draw_conic_arc(g, left, top, size, pi32, 2.0f * pi32, 
-    colors().knob_shadow, colors().knob_highlight, conic_count / 2, 0.0f, 1.0f, 1.0f);
+    colors().slider_shadow, colors().slider_highlight, conic_count / 2, 0.0f, 1.0f, 1.0f);
   draw_conic_arc(g, left, top, size, 0.0f, pi32, 
-    colors().knob_highlight, colors().knob_shadow, conic_count / 2, 0.0f, 1.0f, 1.0f);
+    colors().slider_highlight, colors().slider_shadow, conic_count / 2, 0.0f, 1.0f, 1.0f);
 
   left += 3;
   top += 3;
@@ -804,7 +798,7 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
   int stroke = 2;
 
   // automation indication
-  auto automation_color = colors().knob_automation;
+  auto automation_color = colors().slider_automation;
   if (!s.isEnabled()) automation_color = color_to_grayscale(automation_color);
   if(!bipolar) draw_conic_arc(g, left, top, size, start_angle, end_angle,
     automation_color, automation_color, conic_count, 0, pos, stroke);
@@ -825,7 +819,7 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
   // modulatable indicator
   if(ps->param()->param->dsp.can_modulate(ps->param()->info.slot))
   {
-    g.setColour(colors().knob_can_modulate);
+    g.setColour(colors().slider_can_modulate);
     g.fillEllipse(left + size / 3, top + size / 3, size / 3, size / 3);
   }
 
@@ -833,7 +827,7 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
 
   // modulation indication
   Path path;
-  g.setColour(colors().knob_modulation); 
+  g.setColour(colors().slider_rotary_modulation);
   float half_mod_angle = start_angle + 0.5f * angle_range;
   float min_mod_angle = start_angle + ps->min_mod_indicator() * angle_range;
   float max_mod_angle = start_angle + ps->max_mod_indicator() * angle_range;
@@ -876,25 +870,20 @@ lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, f
   float centerx = left + width / 2;
   float height = fixedHeight;
 
-  auto track1 = colors().slider_track1;
-  auto track2 = colors().slider_track2;
-  auto outline1 = colors().slider_outline1;
-  auto outline2 = colors().slider_outline2;
-
   bool bipolar = s.getMinimum() < 0;
   float min_mod_pos = ps ? ps->min_mod_indicator() : -1.0f;
   float max_mod_pos = ps ? ps->max_mod_indicator() : -1.0f;
   
   // highlight
-  g.setGradientFill(ColourGradient(colors().knob_highlight.withAlpha(0.0f), left, 0, colors().knob_highlight, width, 0, false));
+  g.setGradientFill(ColourGradient(colors().slider_highlight.withAlpha(0.0f), left, 0, colors().slider_highlight, width, 0, false));
   g.fillRoundedRectangle(left, top, width, height, 2);
 
   // background
-  g.setColour(colors().knob_background);
+  g.setColour(colors().slider_background);
   g.fillRoundedRectangle(left + 1, top + 1, width - 2, height - 2, 2);
 
   // modulation indicator
-  g.setColour(colors().knob_modulation);
+  g.setColour(colors().slider_linear_modulation);
   if(max_mod_pos >= 0.0f)
     if(!bipolar)
     {
@@ -923,7 +912,7 @@ lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, f
       }
     }
 
-  auto automation_color = colors().knob_automation;
+  auto automation_color = colors().slider_automation;
   if (!s.isEnabled()) automation_color = color_to_grayscale(automation_color);
 
   // automation indication
@@ -953,7 +942,7 @@ lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, f
   // modulatable indicator
   if (ps->param()->param->dsp.can_modulate(ps->param()->info.slot))
   {
-    g.setColour(colors().knob_can_modulate.withAlpha(0.75f));
+    g.setColour(colors().slider_can_modulate.withAlpha(0.75f));
     g.fillEllipse(left + width - (height - 4) - 2, top + (height - 4) / 2, (height - 4), (height - 4));
   }
 }
