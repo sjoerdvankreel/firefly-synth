@@ -12,6 +12,9 @@ using namespace juce;
 using namespace plugin_base;
 
 namespace firefly_synth {
+
+static int const synth_first_column_size = 42;
+static int const synth_second_column_size = 17;
   
 static std::string const main_graph_name = "Main Graph";
 static std::string const vfx_graph_name = "Voice FX Graph";
@@ -24,8 +27,7 @@ static std::string const voice_matrix_graphs_name = "Voice Matrix Graphs";
 static std::string const global_matrix_graphs_name = "Global Matrix Graphs";
 
 enum { 
-  custom_section_title_text,
-  custom_section_title_image,
+  custom_section_title,
   custom_section_main_graph,
   custom_section_patch_controls,
   custom_section_edit_controls,
@@ -62,7 +64,7 @@ static gui_dimension
 make_plugin_dimension(bool is_fx, plugin_topo_gui_theme_settings const& settings)
 {
   gui_dimension result;
-  result.column_sizes = { 42, 17, 127, 34, 64, 64 };
+  result.column_sizes = { synth_first_column_size, synth_second_column_size, 127, 34, 64, 64 };
   int height = settings.get_default_width(is_fx) * settings.get_aspect_ratio_height(is_fx) / settings.get_aspect_ratio_width(is_fx);
   std::vector<gui_vertical_section_size> section_vsizes = { { true, 1 }, { true, is_fx? 1.0f: 2.0f }, { true, 2 }, { true, 2 } };
   if (!is_fx) section_vsizes.insert(section_vsizes.end(), { { true, 1 }, { true, 2 }, { true, 2 }, { true, 2 }, { true, 2 } });
@@ -197,15 +199,15 @@ make_edit_controls_section(plugin_gui* gui, lnf* lnf, component_store store)
 } 
 
 static Component&
-make_title_text_section(plugin_gui* gui, lnf* lnf, component_store store, bool is_fx)
+make_title_section(plugin_gui* gui, lnf* lnf, component_store store, bool is_fx)
 {
   auto colors = lnf->section_gui_colors("Title Text");
   std::string name = is_fx? FF_SYNTH_FX_NAME: FF_SYNTH_INST_NAME;
   for(int i = 0; i < name.size(); i++) name[i] = std::toupper(name[i]);
-  auto& grid = store_component<grid_component>(store, gui_dimension({ { 2, 1 }, { 1 } }), 2, 2, 0, 1);
+  auto& grid = store_component<grid_component>(store, gui_dimension({ { 2, 1 }, { synth_first_column_size, synth_second_column_size } }), 2, 2, 0, 1);
   auto& title_label = store_component<autofit_label>(store, lnf, name, true, is_fx? 14: 15);
   title_label.setColour(Label::ColourIds::textColourId, colors.control_text);
-  title_label.setJustificationType(Justification::centredRight);
+  title_label.setJustificationType(Justification::left);
   grid.add(title_label, { 0, 0, 1, 1 });
   std::string version_text = std::string(FF_SYNTH_VERSION_TEXT) + " " + gui->gui_state()->desc().config->format_name() + " ";
 #ifdef __aarch64__
@@ -214,18 +216,13 @@ make_title_text_section(plugin_gui* gui, lnf* lnf, component_store store, bool i
   version_text += "X64"; 
 #endif
   auto& version_label = store_component<autofit_label>(store, lnf, version_text, false, 10);
-  version_label.setJustificationType(Justification::centredRight);
+  version_label.setJustificationType(Justification::right);
   version_label.setColour(Label::ColourIds::textColourId, colors.control_text);
   grid.add(version_label, { 1, 0, 1, 1 });
+  grid.add(store_component<image_component>(
+    store, gui->gui_state()->desc().config,
+    lnf->theme(), "header.png", RectanglePlacement::xRight), { 0, 1, 2, 1 });
   return grid;
-}
-
-static Component&
-make_title_image_section(plugin_gui* gui, lnf* lnf, component_store store, bool is_fx)
-{
-  return store_component<image_component>(
-    store, gui->gui_state()->desc().config, 
-    lnf->theme(), "header.png", RectanglePlacement::centred);
 }
 
 std::unique_ptr<module_tab_menu_handler>
@@ -376,14 +373,10 @@ synth_topo(bool is_fx, std::string const& full_name)
   result->gui.default_theme = "Firefly Default";                                   
   result->gui.custom_sections.resize(is_fx? custom_section_fx_count: custom_section_synth_count);
   result->gui.dimension_factory = [is_fx](auto const& settings) { return make_plugin_dimension(is_fx, settings); };
-  auto make_title_text_section_ui = [is_fx](plugin_gui* gui, lnf* lnf, auto store) -> Component& {
-    return make_title_text_section(gui, lnf, store, is_fx); };
-  auto make_title_image_section_ui = [is_fx](plugin_gui* gui, lnf* lnf, auto store) -> Component& {
-    return make_title_image_section(gui, lnf, store, is_fx); };
-  result->gui.custom_sections[custom_section_title_text] = make_custom_section_gui(
-    custom_section_title_text, "Title Text", { 0, 0, 1, 1 }, make_title_text_section_ui);
-  result->gui.custom_sections[custom_section_title_image] = make_custom_section_gui(
-    custom_section_title_image, "Title Image", { 0, 1, 1, 1 }, make_title_image_section_ui);
+  auto make_title_section_ui = [is_fx](plugin_gui* gui, lnf* lnf, auto store) -> Component& {
+    return make_title_section(gui, lnf, store, is_fx); };
+  result->gui.custom_sections[custom_section_title] = make_custom_section_gui(
+    custom_section_title, "Title", { 0, 0, 1, 2 }, make_title_section_ui);
   result->gui.custom_sections[custom_section_patch_controls] = make_custom_section_gui(
     custom_section_patch_controls, "Patch", { 0, 5, 1, 1 }, 
       [](auto gui, auto lnf, auto store) -> juce::Component& { return make_patch_controls_section(gui, lnf, store); });

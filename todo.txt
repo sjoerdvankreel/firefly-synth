@@ -28,6 +28,8 @@ V rethink section colors global red/orange voice blue/cyan main gray
 V do load/save like 1.8.4
 V gmatrix to the top, vmatrix to the bottom
 V make matrix tab headers match new section colors
+* change multi eq drag handle
+* check all the module ui
 * rename ff fx to firefly fx not firefly synth fx (in the header)
 * not colored text in de matrix combos
 * drop the old themes
