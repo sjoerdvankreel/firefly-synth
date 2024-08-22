@@ -966,6 +966,7 @@ lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, f
   }
 #endif
 
+  // automation indication
   g.setColour(automation_color);
   float trackw = (0.5f - pos) * 2 * (width - 2) / 2;
   if (!bipolar)
@@ -974,6 +975,18 @@ lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, f
     g.fillRoundedRectangle(centerx, top + 1, (pos - 0.5f) * 2 * (width - 2) / 2, height - 2, 2);
   else
     g.fillRoundedRectangle(centerx - trackw, top + 1, trackw, height - 2, 2);
+
+  // automation indication
+  if (!bipolar)
+  {
+    g.setColour(automation_color.withAlpha(std::max(0.0f, 1.0f - pos * 10.0f)));
+    g.fillEllipse(left, top, height, height);
+  }
+  else
+  {
+    g.setColour(automation_color.withAlpha(1.0f - std::max(0.0f, std::abs(0.5f - pos) * 20.0f)));
+    g.fillEllipse(left + width / 2 - height / 2, top, height, height);
+  }
 }
 
 }
