@@ -878,6 +878,26 @@ lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, f
 
   assert(style == Slider::SliderStyle::LinearHorizontal);
 
+  // output meter
+  auto const& param_topo = *ps->param()->param;
+  if (ps && ps->param()->param->gui.edit_type == gui_edit_type::output_meter)
+  {
+    int block_pad = 2;
+    int block_count = 20;
+    float block_width_base = width / block_count;
+    float actual_block_width = (int)(block_width_base - block_pad);
+    float actual_cell_width = actual_block_width + block_pad;
+    int block_count_off = block_count * pos * (param_topo.domain.max - param_topo.domain.min);
+
+    g.setColour(colors().control_background);
+    for (int i = 0; i < block_count_off; i++)
+      g.fillRect(left + i * actual_cell_width, top, actual_block_width, height);
+    g.setColour(colors().control_background.brighter());
+    for (int i = block_count_off; i < block_count; i++)
+      g.fillRect(left + i * actual_cell_width, top, actual_block_width, height);
+    return;
+  }
+
   // in table mode dont align right against the next one
   // normally thats not a point because theres labels in between
   if(ps != nullptr && ps->param()->param->gui.tabular)
