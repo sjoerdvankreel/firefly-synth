@@ -606,7 +606,6 @@ lnf::drawComboBox(Graphics& g, int width, int height, bool, int, int, int, int, 
     }
   }
 
-  Path path;
   int arrowPad = 4;
   int arrowWidth = 6;
   int arrowHeight = 4;
@@ -614,13 +613,18 @@ lnf::drawComboBox(Graphics& g, int width, int height, bool, int, int, int, int, 
   int const comboTop = height < fixedHeight ? 0 : (height - fixedHeight) / 2;
   auto cornerSize = box.findParentComponentOfClass<ChoicePropertyComponent>() != nullptr ? 0.0f : global_settings().combo_radius;
   Rectangle<int> boxBounds(tabular? 3: 1, comboTop, box_width - 2 - (tabular? 4: 0), fixedHeight);
-  g.setColour(Colours::white.withAlpha(0.125f));
+  g.setColour(colors().control_background); 
   g.fillRoundedRectangle(boxBounds.toFloat(), cornerSize);
+
+  Path path;
   path.startNewSubPath(box_width - arrowWidth - arrowPad, height / 2 - arrowHeight / 2 + 1);
   path.lineTo(box_width - arrowWidth / 2 - arrowPad, height / 2 + arrowHeight / 2 + 1);
   path.lineTo(box_width - arrowPad, height / 2 - arrowHeight / 2 + 1);
   path.closeSubPath();  
-  g.setColour(box.findColour(ComboBox::arrowColourId).withAlpha((box.isEnabled() ? 0.9f : 0.2f)));
+
+  Colour tick = colors().control_tick;
+  if (!box.isEnabled()) tick = color_to_grayscale(tick);
+  g.setColour(tick);
   g.fillPath(path);
 
   if (!param_cb || drop_action == drop_target_action::none) return;
