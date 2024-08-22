@@ -945,7 +945,7 @@ lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, f
   }
   else
   {
-    g.setColour(automation_color.withAlpha(1.0f - std::max(0.0f, std::abs(0.5f - pos) * 20.0f)));
+    g.setColour(automation_color.withAlpha(std::clamp(1.0f - std::max(0.0f, std::abs(0.5f - pos) * 20.0f), 0.0f, 1.0f)));
     g.fillEllipse(left + 1 + width / 2 - (height - 2) / 2, top + 1, (height - 2), (height - 2));
   }
 

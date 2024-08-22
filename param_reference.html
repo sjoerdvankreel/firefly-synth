@@ -49,7 +49,7 @@
 </tr>
 <tr>
 <td><a href='#5'>5</a></td>
-<td>Global Smoothing</td>
+<td>Glob Smt</td>
 <td>Yes</td>
 <td>Before voice</td>
 <td>1</td>
@@ -548,7 +548,7 @@
 </tr>
 </table>
 <a name='5'/>
-<h3>Global Smoothing</h3>
+<h3>Glob Smt</h3>
 <table>
 <tr>
 <th>Name</th>
@@ -4292,88 +4292,24 @@
 <th>Log Midpoint</th>
 </tr>
 <tr>
-<td rowspan='2'>Gain</td>
-<td>Left</td>
+<td rowspan='2'>MTS-ESP</td>
+<td>Main</td>
 <td>Yes</td>
 <td>1</td>
 <td>Output</td>
 <td>Block</td>
 <td>None</td>
-<td>0</td>
-<td>999</td>
-<td>0</td>
+<td>Off</td>
+<td>On</td>
+<td>Off</td>
 <td>N/A</td>
 </tr>
 <tr>
-<td colspan='11' class='description'>Global output gain. Nothing is clipped, so this may well exceed 100%.</td>
-</tr>
-<tr>
-<td rowspan='2'>CPU</td>
-<td>Left</td>
-<td>Yes</td>
-<td>1</td>
-<td>Output</td>
-<td>Block</td>
-<td>None</td>
-<td>0</td>
-<td>999</td>
-<td>0</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>CPU usage relative to last processing block length. For example, if it took 1 ms to render a 5 ms block, this will be 20%.</td>
-</tr>
-<tr>
-<td rowspan='2'>Hi CPU</td>
-<td>Right</td>
-<td>Yes</td>
-<td>1</td>
-<td>Output</td>
-<td>Block</td>
-<td>None</td>
-<td>0</td>
-<td>99</td>
-<td>0</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>CPU usage of the most expensive module, relative to total CPU usage.</td>
-</tr>
-<tr>
-<td rowspan='2'>Hi Module</td>
-<td>Right</td>
-<td>Yes</td>
-<td>1</td>
-<td>Output</td>
-<td>Block</td>
-<td>None</td>
-<td>0</td>
-<td>999</td>
-<td>0</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Module that used the most CPU relative to total usage.</td>
-</tr>
-<tr>
-<td rowspan='2'>Voices</td>
-<td>Left</td>
-<td>Yes</td>
-<td>1</td>
-<td>Output</td>
-<td>Block</td>
-<td>None</td>
-<td>0</td>
-<td>64</td>
-<td>0</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Active voice count. Max 32, after that, recycling will occur.</td>
+<td colspan='11' class='description'>MTS-ESP master status.</td>
 </tr>
 <tr>
 <td rowspan='2'>Voices Drained</td>
-<td>Left</td>
+<td>Main</td>
 <td>Yes</td>
 <td>1</td>
 <td>Output</td>
@@ -4389,7 +4325,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Threads</td>
-<td>Right</td>
+<td>Main</td>
 <td>Yes</td>
 <td>1</td>
 <td>Output</td>
@@ -4404,20 +4340,84 @@
 <td colspan='11' class='description'>Number of CLAP threadpool threads used to process voices in the last block. For VST3, this will always be 0 or 1.</td>
 </tr>
 <tr>
-<td rowspan='2'>MTS-ESP</td>
-<td>Right</td>
+<td rowspan='2'>Voices</td>
+<td>Main</td>
 <td>Yes</td>
 <td>1</td>
 <td>Output</td>
 <td>Block</td>
 <td>None</td>
-<td>Off</td>
-<td>On</td>
-<td>Off</td>
+<td>0</td>
+<td>64</td>
+<td>0</td>
 <td>N/A</td>
 </tr>
 <tr>
-<td colspan='11' class='description'>MTS-ESP master status.</td>
+<td colspan='11' class='description'>Active voice count. Max 32, after that, recycling will occur.</td>
+</tr>
+<tr>
+<td rowspan='2'>Hi CPU</td>
+<td>Main</td>
+<td>Yes</td>
+<td>1</td>
+<td>Output</td>
+<td>Block</td>
+<td>None</td>
+<td>0</td>
+<td>99</td>
+<td>0</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>CPU usage of the most expensive module, relative to total CPU usage.</td>
+</tr>
+<tr>
+<td rowspan='2'>Hi Module</td>
+<td>Main</td>
+<td>Yes</td>
+<td>1</td>
+<td>Output</td>
+<td>Block</td>
+<td>None</td>
+<td>0</td>
+<td>999</td>
+<td>0</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Module that used the most CPU relative to total usage.</td>
+</tr>
+<tr>
+<td rowspan='2'>Gain</td>
+<td>Main</td>
+<td>Yes</td>
+<td>1</td>
+<td>Output</td>
+<td>Block</td>
+<td>None</td>
+<td>0</td>
+<td>999</td>
+<td>0</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Global output gain. Nothing is clipped, so this may well exceed 100%.</td>
+</tr>
+<tr>
+<td rowspan='2'>CPU</td>
+<td>Main</td>
+<td>Yes</td>
+<td>1</td>
+<td>Output</td>
+<td>Block</td>
+<td>None</td>
+<td>0</td>
+<td>999</td>
+<td>0</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>CPU usage relative to last processing block length. For example, if it took 1 ms to render a 5 ms block, this will be 20%.</td>
 </tr>
 </table>
 </body>

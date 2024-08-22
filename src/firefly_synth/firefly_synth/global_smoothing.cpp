@@ -82,7 +82,7 @@ global_smoothing_topo(std::string const& vendor, std::string const& full_name, i
   std::vector<int> row_distribution = { 1 };
   std::vector<int> column_distribution = { 1 };
   module_topo result(make_module(
-    make_topo_info("{79A688D2-4223-489A-B2E4-3E78A7975C4D}", true, "Global Smoothing", "Smoothing", "Smoothing", module_global_smoothing, 1),
+    make_topo_info("{79A688D2-4223-489A-B2E4-3E78A7975C4D}", true, "Glob Smt", "Glob Smt", "Glob Smt", module_global_smoothing, 1), // TODO Glob Smt
     make_module_dsp(module_stage::input, module_output::none, 0, {}),
       make_module_gui(section, pos, { row_distribution, column_distribution } )));
   result.info.description = "Automation, MIDI and BPM smoothing control.";

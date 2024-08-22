@@ -578,10 +578,48 @@ param_component::mouseUp(MouseEvent const& evt)
   });
 }
 
+static void
+get_module_output_label_names(
+  module_desc const& desc, std::string& full_name, std::string& display_name)
+{
+  full_name = desc.module->info.tag.full_name;
+  display_name = desc.module->info.tag.menu_display_name;
+  if (desc.module->info.slot_count > 1)
+  {
+    std::string slot = std::to_string(desc.info.slot + 1);
+    full_name += " " + slot;
+    display_name += " " + slot;
+  }
+}
+
+static std::string
+get_longest_module_name(plugin_gui* gui)
+{
+  float w = 0;
+  juce::Font font;
+  std::string result;
+  std::string full_name;
+  std::string display_name;
+  auto const& desc = gui->gui_state()->desc();
+
+  for (int i = 0; i < desc.modules.size(); i++)
+    if(desc.modules[i].module->gui.visible)
+    {
+      get_module_output_label_names(desc.modules[i], full_name, display_name);
+      float name_w = font.getStringWidth(display_name);
+      if (name_w > w)
+      {
+        w = name_w;
+        result = display_name;
+      }
+    }
+  return result;
+}
+
 module_name_label::
 module_name_label(plugin_gui* gui, module_desc const* module, param_desc const* param, lnf* lnf) :
 param_component(gui, module, param), 
-autofit_label(lnf, param->param->gui.label_reference_text)
+autofit_label(lnf, get_longest_module_name(gui))
 { init(); }
 
 void
@@ -594,14 +632,9 @@ module_name_label::own_param_changed(plain_value plain)
     setText("", dontSendNotification);
     return;
   }
-  std::string full_name = desc.module->info.tag.full_name;
-  std::string display_name = desc.module->info.tag.display_name;
-  if(desc.module->info.slot_count > 1)
-  {
-    std::string slot = std::to_string(desc.info.slot + 1);
-    full_name += " " + slot;
-    display_name += " " + slot;
-  }
+  std::string full_name;
+  std::string display_name;
+  get_module_output_label_names(desc, full_name, display_name);
   setTooltip(full_name);
   setText(display_name, dontSendNotification);
 }

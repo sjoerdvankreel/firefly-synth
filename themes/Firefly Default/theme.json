@@ -85,7 +85,7 @@
     },
     {
       "custom_sections": ["Global FX Graph", "Global LFO Graph", "Global Matrix Graphs"],
-      "module_sections": ["Global", "Global Smoothing", "Global Out", "Global FX", "Global LFO", "GAudio", "GCV-A", "GCV-CV"],
+      "module_sections": ["Global", "Glob Smt", "Global Out", "Global FX", "Global LFO", "GAudio", "GCV-A", "GCV-CV"],
       "colors": {
         "tab_text": "FFFF0040",
         "slider_automation": "FFFF0040",
