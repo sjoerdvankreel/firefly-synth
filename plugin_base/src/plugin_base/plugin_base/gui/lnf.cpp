@@ -92,8 +92,6 @@ override_colors(gui_colors const& base, var const& json)
   result.slider_shadow = override_color_if_present(json, "slider_shadow", result.slider_shadow);
   result.slider_automation = override_color_if_present(json, "slider_automation", result.slider_automation);
   result.slider_can_modulate = override_color_if_present(json, "slider_can_modulate", result.slider_can_modulate);
-  result.slider_linear_modulation = override_color_if_present(json, "slider_linear_modulation", result.slider_linear_modulation);
-  result.slider_rotary_modulation = override_color_if_present(json, "slider_rotary_modulation", result.slider_rotary_modulation);
   result.section_outline1 = override_color_if_present(json, "section_outline1", result.section_outline1);   
   result.section_outline2 = override_color_if_present(json, "section_outline2", result.section_outline2);
   result.section_background1 = override_color_if_present(json, "section_background1", result.section_background1);
@@ -827,7 +825,7 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
 
   // modulation indication
   Path path;
-  g.setColour(colors().slider_rotary_modulation);
+  g.setColour(colors().slider_automation.darker());
   float half_mod_angle = start_angle + 0.5f * angle_range;
   float min_mod_angle = start_angle + ps->min_mod_indicator() * angle_range;
   float max_mod_angle = start_angle + ps->max_mod_indicator() * angle_range;
@@ -850,29 +848,28 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
 void 	
 lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, float, Slider::SliderStyle style, Slider& s)
 {
+  int padh = 0;
+  float height = 8;
   float pos = (p - x) / w;
-  int const fixedHeight = 8;
+  bool bipolar = s.getMinimum() < 0;
+  float left = slider_thumb_width / 2 + padh / 2;
+  float top = (s.getHeight() - height) / 2;
+  float width = s.getWidth() - slider_thumb_width - padh;
+  float centerx = left + width / 2;
+
+  auto ps = dynamic_cast<param_slider*>(&s);
+  float min_mod_pos = ps ? ps->min_mod_indicator() : -1.0f;
+  float max_mod_pos = ps ? ps->max_mod_indicator() : -1.0f;
+
   assert(style == Slider::SliderStyle::LinearHorizontal);
 
   // in table mode dont align right against the next one
   // normally thats not a point because theres labels in between
-  int padh = 0;
-  auto ps = dynamic_cast<param_slider*>(&s);
   if(ps != nullptr && ps->param()->param->gui.tabular)
   {
     padh = 2;
     draw_tabular_cell_bg(g, &s, global_settings().table_cell_radius);
   }
-
-  float left = slider_thumb_width / 2 + padh / 2;
-  float top = (s.getHeight() - fixedHeight) / 2;
-  float width = s.getWidth() - slider_thumb_width - padh;
-  float centerx = left + width / 2;
-  float height = fixedHeight;
-
-  bool bipolar = s.getMinimum() < 0;
-  float min_mod_pos = ps ? ps->min_mod_indicator() : -1.0f;
-  float max_mod_pos = ps ? ps->max_mod_indicator() : -1.0f;
   
   // highlight
   g.setGradientFill(ColourGradient(colors().slider_highlight.withAlpha(0.0f), left, 0, colors().slider_highlight, width, 0, false));
@@ -883,7 +880,7 @@ lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, f
   g.fillRoundedRectangle(left + 1, top + 1, width - 2, height - 2, 2);
 
   // modulation indicator
-  g.setColour(colors().slider_linear_modulation);
+  g.setColour(colors().slider_background);
   if(max_mod_pos >= 0.0f)
     if(!bipolar)
     {

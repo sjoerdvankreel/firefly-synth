@@ -193,8 +193,6 @@ struct gui_colors final {
   juce::Colour slider_shadow = juce::Colour(0xFF000000);
   juce::Colour slider_automation = juce::Colour(0xFFFF0040);
   juce::Colour slider_can_modulate = juce::Colour(0xFF666666);
-  juce::Colour slider_linear_modulation = juce::Colour(0xFF333333);
-  juce::Colour slider_rotary_modulation = juce::Colour(0x80FF0040);
   juce::Colour section_outline1 = juce::Colour(0xFF884422);
   juce::Colour section_outline2 = juce::Colour(0xFF444444);
   juce::Colour section_background1 = juce::Colour(0xFF884422).darker(1.75f);

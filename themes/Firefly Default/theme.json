@@ -46,8 +46,6 @@
     "slider_shadow": "FF000000",
     "slider_automation": "FFFF0040",
     "slider_can_modulate": "FF666666",
-    "slider_rotary_modulation": "80FF0040",
-    "slider_linear_modulation": "FF333333",
     "section_outline1": "00000000",
     "section_outline2": "00000000",
     "section_background1": "FFCCCCCC",
@@ -80,7 +78,6 @@
       "colors": {
         "tab_text": "FF333333",
         "slider_automation": "FF333333",
-        "slider_rotary_modulation": "80333333",
         "control_text": "FF333333",
         "control_tick": "FF333333",
         "bubble_outline": "FF333333",
@@ -96,7 +93,6 @@
       "colors": {
         "tab_text": "FFFF0040",
         "slider_automation": "FFFF0040",
-        "slider_rotary_modulation": "80FF0040",
         "control_text": "FFFF0040",
         "control_tick": "FFFF0040",
         "bubble_outline": "FFFF0040",
@@ -115,7 +111,6 @@
       "colors": {
         "tab_text": "FFFFA040",
         "slider_automation": "FFFFA040",
-        "slider_rotary_modulation": "80FFA040",
         "control_text": "FFFFA040",
         "control_tick": "FFFFA040",
         "bubble_outline": "FFFFA040",
@@ -131,7 +126,6 @@
       "colors": {
         "tab_text": "FFFFA040",
         "slider_automation": "FFFFA040",
-        "slider_rotary_modulation": "80FFA040",
         "control_text": "FFFFA040",
         "control_tick": "FFFFA040",
         "bubble_outline": "FFFFA040",
