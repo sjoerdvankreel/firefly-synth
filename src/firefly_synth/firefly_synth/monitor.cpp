@@ -64,13 +64,13 @@ monitor_topo(int section, gui_position const& pos, int polyphony, bool is_fx)
   auto& thrs = result.params.emplace_back(make_param(
     make_topo_info_basic("{FD7E410D-D4A6-4AA2-BDA0-5B5E6EC3E13A}", "Threads", param_threads, 1),
     make_param_dsp_output(), make_domain_step(0, polyphony, 0, 0),
-    make_param_gui_single(section_main, gui_edit_type::output_label_center, { 1, 2 },
+    make_param_gui_single(section_main, gui_edit_type::output_label_center, { 0, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   thrs.info.description = "Number of CLAP threadpool threads used to process voices in the last block. For VST3, this will always be 0 or 1.";
   auto& voices = result.params.emplace_back(make_param(
     make_topo_info_basic("{2827FB67-CF08-4785-ACB2-F9200D6B03FA}", "Voices", param_voices, 1),
     make_param_dsp_output(), make_domain_step(0, polyphony, 0, 0),
-    make_param_gui_single(section_main, gui_edit_type::output_label_center, { 0, 2 },
+    make_param_gui_single(section_main, gui_edit_type::output_label_center, { 1, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   voices.info.description = "Active voice count. Max 32, after that, recycling will occur.";
 
