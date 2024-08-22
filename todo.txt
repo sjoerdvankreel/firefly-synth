@@ -19,6 +19,7 @@ on release:
 
 ui-fixes-again:
 * hot/cold + light/dark
+* do not do label disabled color
 * deal with disabled sliders
 * fix the osc mod text size in graph
 * less ugly audio graphs

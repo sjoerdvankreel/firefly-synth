@@ -805,6 +805,7 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
 
   // automation indication
   auto automation_color = colors().knob_automation;
+  if (!s.isEnabled()) automation_color = color_to_grayscale(automation_color);
   if(!bipolar) draw_conic_arc(g, left, top, size, start_angle, end_angle,
     automation_color, automation_color, conic_count, 0, pos, stroke);
   else if (pos >= 0.5f) draw_conic_arc(g, left, top, size, start_angle + angle_range / 2, end_angle, 
