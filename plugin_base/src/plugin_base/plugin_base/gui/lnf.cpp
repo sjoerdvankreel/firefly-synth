@@ -984,7 +984,7 @@ lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, f
   if (ps->param()->param->dsp.can_modulate(ps->param()->info.slot))
   {
     g.setColour(colors().knob_can_modulate.withAlpha(0.75f));
-    g.fillEllipse(left + width / 2 - (height - 2) / 2, top + (height - 2) / 2 - 1, (height - 2), (height - 2));
+    g.fillEllipse(left + width - (height - 2) - 1, top + (height - 2) / 2 - 1, (height - 2), (height - 2));
   }
 }
 
