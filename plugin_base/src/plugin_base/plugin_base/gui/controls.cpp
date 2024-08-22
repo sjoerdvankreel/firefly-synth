@@ -685,8 +685,9 @@ param_component(gui, module, param), Slider()
   case gui_edit_type::knob: setSliderStyle(Slider::RotaryVerticalDrag); break;
   case gui_edit_type::vslider: setSliderStyle(Slider::LinearVertical); break;
   case gui_edit_type::hslider: setSliderStyle(Slider::LinearHorizontal); break;
+  case gui_edit_type::output_meter: setSliderStyle(Slider::LinearHorizontal); break;
   default: assert(false); break;
-  }
+  }  
 
   // parameter modulation indicators
   if (param->param->dsp.can_modulate(param->info.slot))

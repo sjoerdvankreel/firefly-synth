@@ -90,13 +90,13 @@ monitor_topo(int section, gui_position const& pos, int polyphony, bool is_fx)
   auto& gain = result.params.emplace_back(make_param(
     make_topo_info_basic("{6AB939E0-62D0-4BA3-8692-7FD7B740ED74}", "Gain", param_gain, 1),
     make_param_dsp_output(), make_domain_percentage(0, 9.99, 0, 0, false),
-    make_param_gui_single(section_main, gui_edit_type::output_label_left, { 0, 6 },
+    make_param_gui_single(section_main, gui_edit_type::output_meter, { 0, 6 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   gain.info.description = "Global output gain. Nothing is clipped, so this may well exceed 100%.";
   auto& cpu = result.params.emplace_back(make_param(
     make_topo_info_basic("{55919A34-BF81-4EDF-8222-F0F0BE52DB8E}", "CPU", param_cpu, 1),
     make_param_dsp_output(), make_domain_percentage(0, 9.99, 0, 0, false),
-    make_param_gui_single(section_main, gui_edit_type::output_label_left, { 1, 6 }, // todo fx
+    make_param_gui_single(section_main, gui_edit_type::output_meter, { 1, 6 }, // todo fx
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   cpu.info.description = std::string("CPU usage relative to last processing block length. ") +
     "For example, if it took 1 ms to render a 5 ms block, this will be 20%.";

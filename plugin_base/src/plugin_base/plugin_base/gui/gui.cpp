@@ -1016,6 +1016,13 @@ plugin_gui::make_param_editor(module_desc const& module, param_desc const& param
     return result;
   }
 
+  if (edit_type == gui_edit_type::output_meter)
+  {
+    auto& result = make_component<param_slider>(this, &module, &param);
+    result.setEnabled(false);
+    return result;
+  }
+
   Component* result = nullptr;
   switch (edit_type)
   {
