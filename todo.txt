@@ -18,6 +18,9 @@ on release:
 12 update kvr
 
 ui-fixes-again:
+* make some of the param sections darker ?
+* check all the other colors / remove the gradients
+* make all green defaults
 * hot/cold + light/dark
 * do not do label disabled color
 * deal with disabled sliders

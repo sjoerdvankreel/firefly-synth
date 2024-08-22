@@ -9,10 +9,7 @@ using namespace juce;
 
 namespace plugin_base {
 
-static int const knob_thumb_width = 6;
-static int const knob_thumb_height = 7;
-static int const slider_thumb_width = 9;
-static int const slider_thumb_height = 6;
+static int const conic_count = 256;
 
 static void
 draw_tabular_cell_bg(Graphics& g, Component* c, int radius)
@@ -663,13 +660,18 @@ lnf::drawToggleButton(Graphics& g, ToggleButton& tb, bool highlighted, bool down
   int const fixedHeight = toggle_height(tabular);
   int const toggleTop = height < fixedHeight ? 0 : (height - fixedHeight) / 2;
   Rectangle<int> boxBounds(left + pad, toggleTop + pad, fixedHeight - pad * 2, fixedHeight - pad * 2);
-  g.setColour(Colours::black.withAlpha(0.167f));
+  
+  // background, shadow, highlight
+  g.setColour(colors().slider_background);
   g.fillEllipse(boxBounds.toFloat());
-  g.setColour(findColour(ComboBox::outlineColourId).darker());
-  g.drawEllipse(boxBounds.toFloat(), 1);
+  draw_conic_arc(g, boxBounds.getTopLeft().x, boxBounds.getTopLeft().y, boxBounds.getWidth(), 
+    pi32, 2.0f * pi32, colors().slider_shadow, colors().slider_automation, conic_count / 2, 0.0f, 1.0f, 1.0f);
+  draw_conic_arc(g, boxBounds.getTopLeft().x, boxBounds.getTopLeft().y, boxBounds.getWidth(),
+    0.0f, pi32, colors().slider_automation, colors().slider_shadow, conic_count / 2, 0.0f, 1.0f, 1.0f);
+  
   if (!tb.getToggleState()) return;
-  if (tb.isEnabled()) g.setColour(tb.findColour(ToggleButton::tickColourId));
-  else g.setColour(tb.findColour(ToggleButton::tickDisabledColourId));
+  if (tb.isEnabled()) g.setColour(colors().slider_automation);
+  else g.setColour(color_to_grayscale(colors().slider_automation));
   g.fillEllipse(boxBounds.toFloat().reduced(5.0f, 5.0f));
 }
 
@@ -750,7 +752,6 @@ lnf::drawTabButton(TabBarButton& button, Graphics& g, bool isMouseOver, bool isM
 void 
 lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, Slider& s)
 {
-  int conic_count = 256;
   float scale_factor = 1;
   float size_base = s.getHeight();
   auto ps = dynamic_cast<param_slider*>(&s);
@@ -848,13 +849,13 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
 void 	
 lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, float, Slider::SliderStyle style, Slider& s)
 {
-  int padh = 0;
+  int padh = 2;
   float height = 8;
   float pos = (p - x) / w;
   bool bipolar = s.getMinimum() < 0;
-  float left = slider_thumb_width / 2 + padh / 2;
+  float left = padh / 2;
   float top = (s.getHeight() - height) / 2;
-  float width = s.getWidth() - slider_thumb_width - padh;
+  float width = s.getWidth() - padh;
   float centerx = left + width / 2;
 
   auto ps = dynamic_cast<param_slider*>(&s);
