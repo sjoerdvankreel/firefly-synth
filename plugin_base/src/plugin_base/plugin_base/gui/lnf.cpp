@@ -494,7 +494,14 @@ lnf::drawLabel(Graphics& g, Label& label)
   {
     auto area = getLabelBorderSize(label).subtractedFrom(label.getLocalBounds());
     g.setFont(getLabelFont(label));
-    g.setColour(label.findColour(Label::textColourId));
+
+    // if we are part of a disabled combobox, paint with a grayscale control_text
+    auto parent_param_combo = dynamic_cast<param_combobox*>(label.getParentComponent());
+    if (parent_param_combo && !parent_param_combo->isEnabled())
+      g.setColour(color_to_grayscale(colors().control_text));
+    else
+      g.setColour(label.findColour(Label::textColourId));
+
     g.drawText(label.getText(), area, label.getJustificationType(), false);
     g.setColour(label.findColour(Label::outlineColourId));
   }
