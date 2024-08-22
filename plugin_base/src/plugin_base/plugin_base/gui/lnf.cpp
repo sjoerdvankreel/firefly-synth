@@ -882,12 +882,14 @@ lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, f
   auto outline2 = colors().slider_outline2;
 
   bool bipolar = s.getMinimum() < 0;
-  float min_mod_pos = ps ? ps->min_mod_indicator() : -1.0f;
-  float max_mod_pos = ps ? ps->max_mod_indicator() : -1.0f;
+  //float min_mod_pos = ps ? ps->min_mod_indicator() : -1.0f;
+  //float max_mod_pos = ps ? ps->max_mod_indicator() : -1.0f;
   
-  g.setColour(colors().slider_background);
+  g.setColour(colors().knob_background);
   g.fillRoundedRectangle(left, top, width, height, 2);
 
+
+#if 0
   if(!bipolar)
   {
     if (max_mod_pos < 0.0f)
@@ -949,27 +951,29 @@ lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, f
     g.strokePath(pr, PathStrokeType(1.0f));
   }
 
-  auto thumb_color = colors().slider_thumb;
-  if (!s.isEnabled()) thumb_color = color_to_grayscale(thumb_color);
+#endif
 
+  auto automation_color = colors().knob_automation;
+  if (!s.isEnabled()) automation_color = color_to_grayscale(automation_color);
+
+#if 0
   // modulatable indicator
   if (ps != nullptr && ps->param()->param->dsp.can_modulate(ps->param()->info.slot))
   {
-    auto indicator = outline1.interpolatedWith(outline2, 0.33);
-    if (!s.isEnabled()) indicator = indicator.darker();
-    g.setColour(thumb_color);
+    // TODO
+    g.setColour(colors().knob_can_modulate);
     g.fillEllipse(left + width / 2 - height / 2 + 1, top + 1, height - 2, height - 2);
   }
+#endif
 
-  Path thumb;
-  float thumb_left = width * pos;
-  float thumb_top = s.getHeight() / 2;
-  g.setColour(thumb_color);
-  thumb.startNewSubPath(thumb_left, thumb_top + slider_thumb_height);
-  thumb.lineTo(thumb_left + slider_thumb_width / 2, thumb_top);
-  thumb.lineTo(thumb_left + slider_thumb_width, thumb_top + slider_thumb_height);
-  thumb.closeSubPath();
-  g.fillPath(thumb);
+  g.setColour(automation_color);
+  float trackw = (0.5f - pos) * 2 * (width - 2) / 2;
+  if (!bipolar)
+    g.fillRoundedRectangle(left + 1, top + 1, pos * (width - 2), height - 2, 2);
+  else if (pos >= 0.5)
+    g.fillRoundedRectangle(centerx, top + 1, (pos - 0.5f) * 2 * (width - 2) / 2, height - 2, 2);
+  else
+    g.fillRoundedRectangle(centerx - trackw, top + 1, trackw, height - 2, 2);
 }
 
 }
