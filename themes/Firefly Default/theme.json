@@ -53,7 +53,8 @@
     "control_outline": "FFAAAAAA",
     "control_background": "FF333333",
     "scrollbar_thumb": "FFFF8844",
-    "scrollbar_background": "FF444444"
+    "scrollbar_background": "FF444444",
+    "popup_text": "FFCCCCCC"
   },
   "graph_background_images": [
     { "graph": "Main Graph", "image": "" },

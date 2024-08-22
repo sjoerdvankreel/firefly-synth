@@ -98,6 +98,7 @@ override_colors(gui_colors const& base, var const& json)
   result.control_background = override_color_if_present(json, "control_background", result.control_background);
   result.scrollbar_thumb = override_color_if_present(json, "scrollbar_thumb", result.scrollbar_thumb);
   result.scrollbar_background = override_color_if_present(json, "scrollbar_background", result.scrollbar_background);
+  result.popup_text = override_color_if_present(json, "popup_text", result.popup_text);
   return gui_colors(result); 
 }
 
@@ -157,9 +158,9 @@ _theme(theme), _desc(desc), _custom_section(custom_section), _module_section(mod
   setColour(ScrollBar::ColourIds::thumbColourId, colors().scrollbar_thumb);
   setColour(ScrollBar::ColourIds::backgroundColourId, colors().scrollbar_background);
 
-  setColour(PopupMenu::ColourIds::textColourId, colors().label_text);  
+  setColour(PopupMenu::ColourIds::textColourId, colors().popup_text);
+  setColour(PopupMenu::ColourIds::highlightedTextColourId, colors().control_text);
   setColour(PopupMenu::ColourIds::backgroundColourId, colors().control_background);
-  setColour(PopupMenu::ColourIds::highlightedTextColourId, colors().label_text.brighter(_global_settings.lighten));
   setColour(PopupMenu::ColourIds::highlightedBackgroundColourId, colors().control_background.brighter(_global_settings.lighten));
 }
 

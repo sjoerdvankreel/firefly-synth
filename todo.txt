@@ -28,6 +28,7 @@ V rethink section colors global red/orange voice blue/cyan main gray
 V do load/save like 1.8.4
 V gmatrix to the top, vmatrix to the bottom
 V make matrix tab headers match new section colors
+* not colored text in de matrix combos
 * drop the old themes
 * what about graph bg images?
 * make some of the param sections darker ?
