@@ -661,17 +661,24 @@ lnf::drawToggleButton(Graphics& g, ToggleButton& tb, bool highlighted, bool down
   int const toggleTop = height < fixedHeight ? 0 : (height - fixedHeight) / 2;
   Rectangle<int> boxBounds(left + pad, toggleTop + pad, fixedHeight - pad * 2, fixedHeight - pad * 2);
   
+  auto automation_color = colors().slider_automation;
+  if (!tb.isEnabled()) automation_color = color_to_grayscale(automation_color);
+
   // background, shadow, highlight
   g.setColour(colors().slider_background);
   g.fillEllipse(boxBounds.toFloat());
   draw_conic_arc(g, boxBounds.getTopLeft().x, boxBounds.getTopLeft().y, boxBounds.getWidth(), 
-    pi32, 2.0f * pi32, colors().slider_shadow, colors().slider_automation, conic_count / 2, 0.0f, 1.0f, 1.0f);
+    pi32, 1.5f * pi32, colors().slider_shadow, automation_color, conic_count / 2, 0.0f, 1.0f, 1.0f);
   draw_conic_arc(g, boxBounds.getTopLeft().x, boxBounds.getTopLeft().y, boxBounds.getWidth(),
-    0.0f, pi32, colors().slider_automation, colors().slider_shadow, conic_count / 2, 0.0f, 1.0f, 1.0f);
-  
+    1.5f * pi32, 2.0f * pi32, automation_color, colors().slider_highlight, conic_count / 2, 0.0f, 1.0f, 1.0f);
+  draw_conic_arc(g, boxBounds.getTopLeft().x, boxBounds.getTopLeft().y, boxBounds.getWidth(),
+    0.0f, 0.5f * pi32, colors().slider_highlight, automation_color, conic_count / 2, 0.0f, 1.0f, 1.0f);
+  draw_conic_arc(g, boxBounds.getTopLeft().x, boxBounds.getTopLeft().y, boxBounds.getWidth(),
+    0.5f * pi32, pi32, automation_color, colors().slider_shadow, conic_count / 2, 0.0f, 1.0f, 1.0f);
+
+  // toggle
   if (!tb.getToggleState()) return;
-  if (tb.isEnabled()) g.setColour(colors().slider_automation);
-  else g.setColour(color_to_grayscale(colors().slider_automation));
+  g.setColour(automation_color);
   g.fillEllipse(boxBounds.toFloat().reduced(5.0f, 5.0f));
 }
 
