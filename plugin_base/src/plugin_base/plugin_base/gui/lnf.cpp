@@ -857,7 +857,7 @@ void
 lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, float, Slider::SliderStyle style, Slider& s)
 {
   float pos = (p - x) / w;
-  int const fixedHeight = 5;
+  int const fixedHeight = 6;
   assert(style == Slider::SliderStyle::LinearHorizontal);
 
   // in table mode dont align right against the next one
@@ -956,16 +956,6 @@ lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, f
   auto automation_color = colors().knob_automation;
   if (!s.isEnabled()) automation_color = color_to_grayscale(automation_color);
 
-#if 0
-  // modulatable indicator
-  if (ps != nullptr && ps->param()->param->dsp.can_modulate(ps->param()->info.slot))
-  {
-    // TODO
-    g.setColour(colors().knob_can_modulate);
-    g.fillEllipse(left + width / 2 - height / 2 + 1, top + 1, height - 2, height - 2);
-  }
-#endif
-
   // automation indication
   g.setColour(automation_color);
   float trackw = (0.5f - pos) * 2 * (width - 2) / 2;
@@ -986,6 +976,15 @@ lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, f
   {
     g.setColour(automation_color.withAlpha(1.0f - std::max(0.0f, std::abs(0.5f - pos) * 20.0f)));
     g.fillEllipse(left + width / 2 - height / 2, top, height, height);
+  }
+
+  if(!ps) return;
+
+  // modulatable indicator
+  if (ps->param()->param->dsp.can_modulate(ps->param()->info.slot))
+  {
+    g.setColour(colors().knob_can_modulate.withAlpha(0.75f));
+    g.fillEllipse(left + width / 2 - (height - 2) / 2, top + (height - 2) / 2 - 1, (height - 2), (height - 2));
   }
 }
 
