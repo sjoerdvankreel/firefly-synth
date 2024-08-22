@@ -900,24 +900,24 @@ lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, f
     {
       if (max_mod_pos - min_mod_pos <= 0.05f)
       {
-        g.fillRect(left, top, max_mod_pos * width, 1.0f);
-        g.fillRect(left, top + height - 1, max_mod_pos * width, 1.0f);
+        g.fillRect(left + 1, top, max_mod_pos * (width - 2), 1.0f);
+        g.fillRect(left + 1, top + height - 1, max_mod_pos * (width - 2), 1.0f);
       } 
       else
       {
-        g.fillRect(left + min_mod_pos * width, top, (max_mod_pos - min_mod_pos) * width, 1.0f);
-        g.fillRect(left + min_mod_pos * width, top + height - 1, (max_mod_pos - min_mod_pos) * width, 1.0f);
+        g.fillRect(left + 1 + min_mod_pos * (width - 2), top, (max_mod_pos - min_mod_pos) * (width - 2), 1.0f);
+        g.fillRect(left + 1 + min_mod_pos * (width - 2), top + height - 1, (max_mod_pos - min_mod_pos) * (width - 2), 1.0f);
       }
     } else
     {
       if (max_mod_pos >= 0.5f)
       {
-        g.fillRect(centerx, top, (max_mod_pos - 0.5f) * 2 * width / 2, 1.0f);
-        g.fillRect(centerx, top + height - 1, (max_mod_pos - 0.5f) * 2 * width / 2, 1.0f);
+        g.fillRect(centerx, top, (max_mod_pos - 0.5f) * 2 * (width - 2) / 2, 1.0f);
+        g.fillRect(centerx, top + height - 1, (max_mod_pos - 0.5f) * 2 * (width - 2) / 2, 1.0f);
       }
       if(min_mod_pos < 0.5f)
       {
-        float trackw = (0.5f - min_mod_pos) * 2 * width / 2;
+        float trackw = (0.5f - min_mod_pos) * 2 * (width - 2) / 2; 
         g.fillRect(centerx - trackw, top, trackw, 1.0f);
         g.fillRect(centerx - trackw, top + height - 1, trackw, 1.0f);
       }
