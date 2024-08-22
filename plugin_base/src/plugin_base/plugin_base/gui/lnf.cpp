@@ -492,12 +492,11 @@ lnf::drawLabel(Graphics& g, Label& label)
 
   if (!label.isBeingEdited()) 
   {
-    auto alpha = label.isEnabled() ? 1.0f : 0.5f;
     auto area = getLabelBorderSize(label).subtractedFrom(label.getLocalBounds());
     g.setFont(getLabelFont(label));
-    g.setColour(label.findColour(Label::textColourId).withMultipliedAlpha(alpha));
+    g.setColour(label.findColour(Label::textColourId));
     g.drawText(label.getText(), area, label.getJustificationType(), false);
-    g.setColour(label.findColour(Label::outlineColourId).withMultipliedAlpha(alpha));
+    g.setColour(label.findColour(Label::outlineColourId));
   }
   else if (label.isEnabled())
     g.setColour(label.findColour(Label::outlineColourId));

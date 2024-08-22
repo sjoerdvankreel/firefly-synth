@@ -18,6 +18,8 @@ on release:
 12 update kvr
 
 ui-fixes-again:
+* drop the old themes
+* what about graph bg images?
 * make some of the param sections darker ?
 * check all the other colors / remove the gradients
 * make all green defaults
