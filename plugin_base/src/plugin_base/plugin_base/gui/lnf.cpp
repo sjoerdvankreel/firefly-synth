@@ -857,7 +857,7 @@ void
 lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, float, Slider::SliderStyle style, Slider& s)
 {
   float pos = (p - x) / w;
-  int const fixedHeight = 6;
+  int const fixedHeight = 8;
   assert(style == Slider::SliderStyle::LinearHorizontal);
 
   // in table mode dont align right against the next one
@@ -885,8 +885,10 @@ lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, f
   //float min_mod_pos = ps ? ps->min_mod_indicator() : -1.0f;
   //float max_mod_pos = ps ? ps->max_mod_indicator() : -1.0f;
   
-  g.setColour(colors().knob_background);
+  g.setGradientFill(ColourGradient(colors().knob_highlight.withAlpha(0.0f), left, 0, colors().knob_highlight, width, 0, false));
   g.fillRoundedRectangle(left, top, width, height, 2);
+  g.setColour(colors().knob_background);
+  g.fillRoundedRectangle(left + 1, top + 1, width - 2, height - 2, 2);
 
 
 #if 0
@@ -958,24 +960,24 @@ lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, f
 
   // automation indication
   g.setColour(automation_color);
-  float trackw = (0.5f - pos) * 2 * (width - 2) / 2;
+  float trackw = (0.5f - pos) * 2 * (width - 4) / 2;
   if (!bipolar)
-    g.fillRoundedRectangle(left + 1, top + 1, pos * (width - 2), height - 2, 2);
+    g.fillRoundedRectangle(left + 2, top + 2, pos * (width - 4), height - 4, 2);
   else if (pos >= 0.5)
-    g.fillRoundedRectangle(centerx, top + 1, (pos - 0.5f) * 2 * (width - 2) / 2, height - 2, 2);
+    g.fillRoundedRectangle(centerx, top + 2, (pos - 0.5f) * 2 * (width - 4) / 2, height - 4, 2);
   else
-    g.fillRoundedRectangle(centerx - trackw, top + 1, trackw, height - 2, 2);
+    g.fillRoundedRectangle(centerx - trackw, top + 2, trackw, height - 4, 2);
 
   // automation indication
   if (!bipolar)
   {
     g.setColour(automation_color.withAlpha(std::max(0.0f, 1.0f - pos * 10.0f)));
-    g.fillEllipse(left, top, height, height);
+    g.fillEllipse(left + 1, top + 1, height - 2, height - 2);
   }
   else
   {
     g.setColour(automation_color.withAlpha(1.0f - std::max(0.0f, std::abs(0.5f - pos) * 20.0f)));
-    g.fillEllipse(left + width / 2 - height / 2, top, height, height);
+    g.fillEllipse(left + 1 + width / 2 - (height - 2) / 2, top + 1, (height - 2), (height - 2));
   }
 
   if(!ps) return;
@@ -984,7 +986,7 @@ lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, f
   if (ps->param()->param->dsp.can_modulate(ps->param()->info.slot))
   {
     g.setColour(colors().knob_can_modulate.withAlpha(0.75f));
-    g.fillEllipse(left + width - (height - 2) - 1, top + (height - 2) / 2 - 1, (height - 2), (height - 2));
+    g.fillEllipse(left + width - (height - 4) - 2, top + (height - 4) / 2, (height - 4), (height - 4));
   }
 }
 
