@@ -789,6 +789,7 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
   bool bipolar = s.getMinimum() < 0;
   float end_angle = (180 + 340) * pi32 / 180;
   float start_angle = (180 + 20) * pi32 / 180;
+  float angle_gap = end_angle - start_angle;
   float angle_range = end_angle - start_angle;
   auto track1 = colors().knob_track1;
   auto track2 = colors().knob_track2;
@@ -825,8 +826,9 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
     else draw_conic_arc(g, left, top, size, start_angle, start_angle + angle_range / 2, thumb_color, thumb_color, conic_count / 2, pos * 2, 1, stroke);
   }
 
-  float dot_y = top + size / 2.0f + size / 2.0f * std::sin(start_angle + pos * angle_range) - 2.0f;
-  float dot_x = left + size / 2.0f + size / 2.0f * std::cos(start_angle + pos * angle_range) - 2.0f;
+  g.setColour(thumb_color);
+  float dot_y = top + size / 2.0f + size / 2.0f * std::sin(start_angle - pi32 * 0.25f + angle_gap + pos * angle_range) - 2.0f;
+  float dot_x = left + size / 2.0f + size / 2.0f * std::cos(start_angle - pi32 * 0.25f + angle_gap + pos * angle_range) - 2.0f;
   g.fillEllipse(dot_x, dot_y, 4.0f, 4.0f);
 
   int x = 1;

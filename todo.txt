@@ -18,6 +18,7 @@ on release:
 12 update kvr
 
 ui-fixes-again:
+* deal with disabled sliders
 * fix the osc mod text size in graph
 * less ugly audio graphs
 * uppercase some stuff in the menus to match the main gui
