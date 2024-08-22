@@ -887,7 +887,8 @@ lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, f
     float block_width_base = width / block_count;
     float actual_block_width = (int)(block_width_base - block_pad);
     float actual_cell_width = actual_block_width + block_pad;
-    int block_count_off = block_count * pos * (param_topo.domain.max - param_topo.domain.min);
+    float pos_adjust = pos * (param_topo.domain.max - param_topo.domain.min);
+    int block_count_off = block_count * std::clamp(pos_adjust, 0.0f, 1.0f);
 
     g.setColour(colors().control_background);
     for (int i = 0; i < block_count_off; i++)
