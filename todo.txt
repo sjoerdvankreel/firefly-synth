@@ -18,40 +18,37 @@ on release:
 12 update kvr
 
 ui-fixes-again:
+V make all green defaults
+V do not do label disabled color
+V deal with disabled sliders
+V color-on-gray not gray-on-color
+V do monitor like 1.8.4
+V do master in like 1.8.4
+V rethink section colors global red/orange voice blue/cyan main gray
+V do load/save like 1.8.4
+V gmatrix to the top, vmatrix to the bottom
+V make matrix tab headers match new section colors
 * drop the old themes
 * what about graph bg images?
 * make some of the param sections darker ?
 * check all the other colors / remove the gradients
-* make all green defaults
 * hot/cold + light/dark
-* do not do label disabled color
-* deal with disabled sliders
 * fix the osc mod text size in graph
 * less ugly audio graphs
 * uppercase some stuff in the menus to match the main gui
 * extend " voice"/"global" tab headers to 100%
 * re-check all the names in menus and hosts and matrices
 * move smoothing to somewhere else
-* have the main graph take on the active color
 * show clap mod indicator
 * repaint on waveform change (free running or random-per-voice)
 * some bolletjes don't go away
 * fix the undo history for tuning mode
-* color-on-gray not gray-on-color
-* vertical textboxes main / global/voice audio/cv to the left
 * drop the header text ?
-* do monitor like 1.8.4
 * do output meters not text (cpu, voices etc)
-* do master in like 1.8.4
-* smaller font ?
 * do big knobs not sliders some places
 * prettify knobs, sliders, combos, toggles, menus
 * make the bolletjes work in case of automation
 * show active modulation for the other graphs
-* rethink section colors global red/orange voice blue/cyan main gray
-* do load/save like 1.8.4
-* gmatrix to the top, vmatrix to the bottom
-* make matrix tab headers match new section colors
 * do mod-free themes
 * bugfix: rerender graph on master in param hover?
 * drop some ugly-ass themes
