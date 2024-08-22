@@ -757,10 +757,9 @@ lnf::drawTabButton(TabBarButton& button, Graphics& g, bool isMouseOver, bool isM
 void 
 lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, Slider& s)
 {
-  float stroke = 5;
+  bool tabular = false;
   int conic_count = 256;
 
-  bool tabular = false;
   if (auto ps = dynamic_cast<param_slider*>(&s))
     if (ps->param()->param->gui.tabular)
       tabular = true;
@@ -776,7 +775,7 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
   }
 
   float padding = tabular? _global_settings.tabular_knob_padding: _global_settings.knob_padding;
-  float size = size_base - padding - stroke / 2;
+  float size = size_base - padding;
   float left = (s.getWidth() - size) / 2;
   float top = (s.getHeight() - size) / 2;
 
@@ -804,13 +803,18 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
     background2 = color_to_grayscale(background2);
   }
 
-  g.setColour(Colour(0xFF888888));
-  g.fillEllipse(left - 3, top - 3, size + 6, size + 6);
-  g.setColour(Colours::black);
-  g.fillEllipse(left - 1, top - 1, size + 2, size + 2);
+  g.setColour(Colour(0xFF333333));
+  g.fillEllipse(left + 1, top + 1, size - 2, size - 2);
+  draw_conic_arc(g, left, top, size, pi32, 2.0f * pi32, Colours::black, Colours::white, conic_count / 2, 0.0f, 1.0f, 1.0f);
+  draw_conic_arc(g, left, top, size, 0.0f, pi32, Colours::white, Colours::black, conic_count / 2, 0.0f, 1.0f, 1.0f);
+
+  int x = 1;
+  if (x == 1)return;
+
   left += 1;
   top += 1;
   size -= 2;
+  int stroke = 5;
   if(!bipolar)
   {
     draw_conic_arc(g, left, top, size, start_angle, end_angle, background1, background2, conic_count, 0, 1.0f, stroke);
