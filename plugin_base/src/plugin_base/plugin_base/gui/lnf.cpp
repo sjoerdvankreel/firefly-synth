@@ -818,15 +818,12 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
   background2 = Colours::green;
 
   auto thumb_color = colors().slider_thumb;
-  if(!bipolar)
-    draw_conic_arc(g, left, top, size, start_angle, end_angle, thumb_color, thumb_color, conic_count, 0, pos, stroke);
-  else
-  {
-    if (pos >= 0.5f) draw_conic_arc(g, left, top, size, start_angle + angle_range / 2, end_angle, thumb_color, thumb_color, conic_count / 2, 0, (pos - 0.5f) * 2, stroke);
-    else draw_conic_arc(g, left, top, size, start_angle, start_angle + angle_range / 2, thumb_color, thumb_color, conic_count / 2, pos * 2, 1, stroke);
-  }
+  if(!bipolar) draw_conic_arc(g, left, top, size, start_angle, end_angle, thumb_color, thumb_color, conic_count, 0, pos, stroke);
+  else if (pos >= 0.5f) draw_conic_arc(g, left, top, size, start_angle + angle_range / 2, end_angle, thumb_color, thumb_color, conic_count / 2, 0, (pos - 0.5f) * 2, stroke);
+  else draw_conic_arc(g, left, top, size, start_angle, start_angle + angle_range / 2, thumb_color, thumb_color, conic_count / 2, pos * 2, 1, stroke);
 
-  g.setColour(thumb_color.withAlpha(std::max(0.0f, 1.0f - pos * 10.0f)));
+  if(!bipolar) g.setColour(thumb_color.withAlpha(std::max(0.0f, 1.0f - pos * 10.0f)));
+  else g.setColour(thumb_color.withAlpha(1.0f - std::max(0.0f, std::abs(0.5f - pos) * 20.0f)));
   float dot_y = top + size / 2.0f + size / 2.0f * std::sin(start_angle - pi32 * 0.25f + angle_gap + pos * angle_range) - 2.0f;
   float dot_x = left + size / 2.0f + size / 2.0f * std::cos(start_angle - pi32 * 0.25f + angle_gap + pos * angle_range) - 2.0f;
   g.fillEllipse(dot_x, dot_y, 4.0f, 4.0f);
