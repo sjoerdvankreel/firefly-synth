@@ -809,10 +809,10 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
   draw_conic_arc(g, left, top, size, pi32, 2.0f * pi32, Colours::black, Colours::white, conic_count / 2, 0.0f, 1.0f, 1.0f);
   draw_conic_arc(g, left, top, size, 0.0f, pi32, Colours::white, Colours::black, conic_count / 2, 0.0f, 1.0f, 1.0f);
 
-  left += 2;
-  top += 2;
-  size -= 4;
-  int stroke = 1;
+  left += 3;
+  top += 3;
+  size -= 6;
+  int stroke = 2;
   background1 = Colours::green;
   background2 = Colours::green;
 
