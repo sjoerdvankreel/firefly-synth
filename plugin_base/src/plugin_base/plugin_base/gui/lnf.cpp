@@ -841,7 +841,7 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
     if (ps->max_mod_indicator() >= 0.0f)
     { 
       Path path;
-      g.setColour(thumb_color.brighter());
+      g.setColour(thumb_color.withAlpha(0.5f)); // todo
 
       float half_mod_angle = start_angle + 0.5f * angle_range;
       float min_mod_angle = start_angle + ps->min_mod_indicator() * angle_range;
