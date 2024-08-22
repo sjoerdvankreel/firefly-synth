@@ -882,78 +882,46 @@ lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, f
   auto outline2 = colors().slider_outline2;
 
   bool bipolar = s.getMinimum() < 0;
-  //float min_mod_pos = ps ? ps->min_mod_indicator() : -1.0f;
-  //float max_mod_pos = ps ? ps->max_mod_indicator() : -1.0f;
+  float min_mod_pos = ps ? ps->min_mod_indicator() : -1.0f;
+  float max_mod_pos = ps ? ps->max_mod_indicator() : -1.0f;
   
+  // highlight
   g.setGradientFill(ColourGradient(colors().knob_highlight.withAlpha(0.0f), left, 0, colors().knob_highlight, width, 0, false));
   g.fillRoundedRectangle(left, top, width, height, 2);
+
+  // background
   g.setColour(colors().knob_background);
   g.fillRoundedRectangle(left + 1, top + 1, width - 2, height - 2, 2);
 
-
-#if 0
-  if(!bipolar)
-  {
-    if (max_mod_pos < 0.0f)
+  // modulation indicator
+  g.setColour(colors().knob_modulation);
+  if(max_mod_pos >= 0.0f)
+    if(!bipolar)
     {
-      g.setGradientFill(ColourGradient(track1, left, 0, track2, width, 0, false));
-      g.fillRoundedRectangle(left, top, pos * width, height, 2);
-    }
-    else if (max_mod_pos - min_mod_pos <= 0.05f)
-    {
-      g.setGradientFill(ColourGradient(track1.brighter(), left, 0, track2.brighter(), width, 0, false));
-      g.fillRoundedRectangle(left, top, max_mod_pos * width, height, 2);
-    }
-    else
-    {
-      g.setGradientFill(ColourGradient(track1.brighter(), left, 0, track2.brighter(), width, 0, false));
-      g.fillRoundedRectangle(left + min_mod_pos * width, top, (max_mod_pos - min_mod_pos) * width, height, 2);
-    }
-
-    g.setGradientFill(ColourGradient(outline1, left, 0, outline2, width, 0, false));
-    g.drawRoundedRectangle(left, top, width, height, 2, 1);
-  } else
-  {
-    if (max_mod_pos < 0.0f)
-    {
-      if (pos >= 0.5)
+      if (max_mod_pos - min_mod_pos <= 0.05f)
       {
-        g.setGradientFill(ColourGradient(track1, centerx, 0, track2, width, 0, false));
-        g.fillRoundedRectangle(centerx, top, (pos - 0.5f) * 2 * width / 2, height, 2);
-      }
+        g.fillRect(left, top, max_mod_pos * width, 1.0f);
+        g.fillRect(left, top + height - 1, max_mod_pos * width, 1.0f);
+      } 
       else
       {
-        float trackw = (0.5f - pos) * 2 * width / 2;
-        g.setGradientFill(ColourGradient(track2, left, 0, track1, centerx, 0, false));
-        g.fillRoundedRectangle(centerx - trackw, top, trackw, height, 2);
+        g.fillRect(left + min_mod_pos * width, top, (max_mod_pos - min_mod_pos) * width, 1.0f);
+        g.fillRect(left + min_mod_pos * width, top + height - 1, (max_mod_pos - min_mod_pos) * width, 1.0f);
       }
-    }
-    else
+    } else
     {
       if (max_mod_pos >= 0.5f)
       {
-        g.setGradientFill(ColourGradient(track1.brighter(), centerx, 0, track2.brighter(), width, 0, false));
-        g.fillRoundedRectangle(centerx, top, (max_mod_pos - 0.5f) * 2 * width / 2, height, 2);
+        g.fillRect(centerx, top, (max_mod_pos - 0.5f) * 2 * width / 2, 1.0f);
+        g.fillRect(centerx, top + height - 1, (max_mod_pos - 0.5f) * 2 * width / 2, 1.0f);
       }
       if(min_mod_pos < 0.5f)
       {
         float trackw = (0.5f - min_mod_pos) * 2 * width / 2;
-        g.setGradientFill(ColourGradient(track2.brighter(), left, 0, track1.brighter(), centerx, 0, false));
-        g.fillRoundedRectangle(centerx - trackw, top, trackw, height, 2);
+        g.fillRect(centerx - trackw, top, trackw, 1.0f);
+        g.fillRect(centerx - trackw, top + height - 1, trackw, 1.0f);
       }
     }
-
-    Path pl;
-    pl.addRoundedRectangle(left, top, width / 2, height, 2, 2, true, false, true, false);
-    g.setGradientFill(ColourGradient(outline2, left, 0, outline1, centerx, 0, false));
-    g.strokePath(pl, PathStrokeType(1.0f));
-    Path pr;
-    pr.addRoundedRectangle(centerx, top, width / 2, height, 2, 2, false, true, false, true);
-    g.setGradientFill(ColourGradient(outline1, centerx, 0, outline2, centerx + width / 2, 0, false));
-    g.strokePath(pr, PathStrokeType(1.0f));
-  }
-
-#endif
 
   auto automation_color = colors().knob_automation;
   if (!s.isEnabled()) automation_color = color_to_grayscale(automation_color);
