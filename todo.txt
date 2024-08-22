@@ -18,6 +18,7 @@ on release:
 12 update kvr
 
 ui-fixes-again:
+* hot/cold + light/dark
 * deal with disabled sliders
 * fix the osc mod text size in graph
 * less ugly audio graphs
