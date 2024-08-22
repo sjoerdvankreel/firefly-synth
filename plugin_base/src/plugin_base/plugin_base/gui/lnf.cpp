@@ -803,30 +803,35 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
     background2 = color_to_grayscale(background2);
   }
 
+  // todo the color
   g.setColour(Colour(0xFF333333));
   g.fillEllipse(left + 1, top + 1, size - 2, size - 2);
   draw_conic_arc(g, left, top, size, pi32, 2.0f * pi32, Colours::black, Colours::white, conic_count / 2, 0.0f, 1.0f, 1.0f);
   draw_conic_arc(g, left, top, size, 0.0f, pi32, Colours::white, Colours::black, conic_count / 2, 0.0f, 1.0f, 1.0f);
 
-  int x = 1;
-  if (x == 1)return;
+  left += 2;
+  top += 2;
+  size -= 4;
+  int stroke = 1;
+  background1 = Colours::green;
+  background2 = Colours::green;
 
-  left += 1;
-  top += 1;
-  size -= 2;
-  int stroke = 5;
+  auto thumb_color = colors().slider_thumb;
   if(!bipolar)
   {
-    draw_conic_arc(g, left, top, size, start_angle, end_angle, background1, background2, conic_count, 0, 1.0f, stroke);
-    draw_conic_arc(g, left, top, size, start_angle, end_angle, track1, track2, conic_count, 0, pos, stroke);
+    //draw_conic_arc(g, left, top, size, start_angle, end_angle, thumb_color, thumb_color, conic_count, 0, 1.0f, stroke);
+    draw_conic_arc(g, left, top, size, start_angle, end_angle, thumb_color, thumb_color, conic_count, 0, pos, stroke);
   }
   else
   {
-    draw_conic_arc(g, left, top, size, start_angle, start_angle + angle_range / 2, background2, background1, conic_count / 2, 0, 1.0f, stroke);
-    draw_conic_arc(g, left, top, size, start_angle + angle_range / 2, end_angle, background1, background2, conic_count / 2, 0, 1.0f, stroke);
-    if (pos >= 0.5f) draw_conic_arc(g, left, top, size, start_angle + angle_range / 2, end_angle, track1, track2, conic_count / 2, 0, (pos - 0.5f) * 2, stroke);
-    else draw_conic_arc(g, left, top, size, start_angle, start_angle + angle_range / 2, track2, track1, conic_count / 2, pos * 2, 1, stroke);
+    //draw_conic_arc(g, left, top, size, start_angle, start_angle + angle_range / 2, thumb_color, thumb_color, conic_count / 2, 0, 1.0f, stroke);
+    //draw_conic_arc(g, left, top, size, start_angle + angle_range / 2, end_angle, thumb_color, thumb_color, conic_count / 2, 0, 1.0f, stroke);
+    if (pos >= 0.5f) draw_conic_arc(g, left, top, size, start_angle + angle_range / 2, end_angle, thumb_color, thumb_color, conic_count / 2, 0, (pos - 0.5f) * 2, stroke);
+    else draw_conic_arc(g, left, top, size, start_angle, start_angle + angle_range / 2, thumb_color, thumb_color, conic_count / 2, pos * 2, 1, stroke);
   }
+
+  int x = 1;
+  if (x == 1)return;
 
   if(auto ps = dynamic_cast<param_slider*>(&s))
   {
@@ -870,7 +875,7 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
   float thumb_end_angle = 340 * pi32 / 180;
   float thumb_start_angle = 20 * pi32 / 180;
   float thum_angle_range = thumb_end_angle - thumb_start_angle;
-  auto thumb_color = colors().slider_thumb;
+  thumb_color = colors().slider_thumb;
   if (!s.isEnabled()) thumb_color = color_to_grayscale(thumb_color);
   g.setColour(thumb_color);
 
