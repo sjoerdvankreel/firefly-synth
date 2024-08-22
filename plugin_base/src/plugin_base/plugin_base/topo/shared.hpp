@@ -179,8 +179,6 @@ struct gui_colors final {
   juce::Colour tab_text_inactive = juce::Colour(0xFF00FF00);
   juce::Colour tab_button = juce::Colour(0xFF00FF00);
   juce::Colour tab_header = juce::Colour(0xFF00FF00);
-  juce::Colour tab_background1 = juce::Colour(0xFF00FF00);
-  juce::Colour tab_background2 = juce::Colour(0xFF00FF00);
   juce::Colour graph_grid = juce::Colour(0xFF00FF00);
   juce::Colour graph_text = juce::Colour(0xFF00FF00);
   juce::Colour graph_background = juce::Colour(0xFF00FF00);
@@ -193,10 +191,8 @@ struct gui_colors final {
   juce::Colour slider_shadow = juce::Colour(0xFF00FF00);
   juce::Colour slider_automation = juce::Colour(0xFF00FF00);
   juce::Colour slider_can_modulate = juce::Colour(0xFF00FF00);
-  juce::Colour section_outline1 = juce::Colour(0xFF00FF00);
-  juce::Colour section_outline2 = juce::Colour(0xFF00FF00);
-  juce::Colour section_background1 = juce::Colour(0xFF00FF00);
-  juce::Colour section_background2 = juce::Colour(0xFF00FF00);
+  juce::Colour section_outline = juce::Colour(0xFF00FF00);
+  juce::Colour section_background = juce::Colour(0xFF00FF00);
   juce::Colour edit_text = juce::Colour(0xFF00FF00);
   juce::Colour table_header = juce::Colour(0xFF00FF00);
   juce::Colour label_text = juce::Colour(0xFF00FF00);

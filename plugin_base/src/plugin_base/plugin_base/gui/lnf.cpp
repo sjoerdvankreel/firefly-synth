@@ -75,8 +75,6 @@ override_colors(gui_colors const& base, var const& json)
   result.tab_text_inactive = override_color_if_present(json, "tab_text_inactive", result.tab_text_inactive);
   result.tab_button = override_color_if_present(json, "tab_button", result.tab_button);
   result.tab_header = override_color_if_present(json, "tab_header", result.tab_header);
-  result.tab_background1 = override_color_if_present(json, "tab_background1", result.tab_background1);
-  result.tab_background2 = override_color_if_present(json, "tab_background2", result.tab_background2);
   result.graph_grid = override_color_if_present(json, "graph_grid", result.graph_grid);
   result.graph_text = override_color_if_present(json, "graph_text", result.graph_text);
   result.graph_mod_indicator = override_color_if_present(json, "graph_mod_indicator", result.graph_mod_indicator);
@@ -89,10 +87,8 @@ override_colors(gui_colors const& base, var const& json)
   result.slider_shadow = override_color_if_present(json, "slider_shadow", result.slider_shadow);
   result.slider_automation = override_color_if_present(json, "slider_automation", result.slider_automation);
   result.slider_can_modulate = override_color_if_present(json, "slider_can_modulate", result.slider_can_modulate);
-  result.section_outline1 = override_color_if_present(json, "section_outline1", result.section_outline1);   
-  result.section_outline2 = override_color_if_present(json, "section_outline2", result.section_outline2);
-  result.section_background1 = override_color_if_present(json, "section_background1", result.section_background1);
-  result.section_background2 = override_color_if_present(json, "section_background2", result.section_background2);
+  result.section_outline = override_color_if_present(json, "section_outline", result.section_outline);
+  result.section_background = override_color_if_present(json, "section_background", result.section_background);
   result.edit_text = override_color_if_present(json, "edit_text", result.edit_text);
   result.label_text = override_color_if_present(json, "label_text", result.label_text);
   result.table_header = override_color_if_present(json, "table_header", result.table_header);
@@ -161,7 +157,7 @@ _theme(theme), _desc(desc), _custom_section(custom_section), _module_section(mod
   setColour(ScrollBar::ColourIds::thumbColourId, colors().scrollbar_thumb);
   setColour(ScrollBar::ColourIds::backgroundColourId, colors().scrollbar_background);
 
-  setColour(PopupMenu::ColourIds::textColourId, colors().label_text);
+  setColour(PopupMenu::ColourIds::textColourId, colors().label_text);  
   setColour(PopupMenu::ColourIds::backgroundColourId, colors().control_background);
   setColour(PopupMenu::ColourIds::highlightedTextColourId, colors().label_text.brighter(_global_settings.lighten));
   setColour(PopupMenu::ColourIds::highlightedBackgroundColourId, colors().control_background.brighter(_global_settings.lighten));

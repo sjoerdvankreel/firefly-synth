@@ -666,10 +666,8 @@ plugin_gui::make_custom_section(custom_section_gui const& section)
   int radius = _lnf->global_settings().section_radius;
   int vpadding = _lnf->global_settings().param_section_vpadding;
   auto colors = _lnf->section_gui_colors(section.full_name);
-  auto outline1 = colors.section_outline1;
-  auto outline2 = colors.section_outline2;
-  auto background1 = colors.section_background1;
-  auto background2 = colors.section_background2;
+  auto outline = colors.section_outline;
+  auto background = colors.section_background;
   auto store = [this](std::unique_ptr<Component>&& owned) -> Component& { 
     auto result = owned.get(); 
     _components.emplace_back(std::move(owned)); 
@@ -678,7 +676,7 @@ plugin_gui::make_custom_section(custom_section_gui const& section)
   lnf* lnf = custom_lnf(section.index);
   auto& content = section.gui_factory(this, lnf, store);
   auto& result = make_component<rounded_container>(&content, radius, vpadding, 0, false,
-    rounded_container_mode::both, background1, background2, outline1, outline2);
+    rounded_container_mode::both, background, outline);
   result.setLookAndFeel(lnf);
   add_hover_listener(result, gui_hover_type::custom, section.index);
   return result;
