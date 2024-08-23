@@ -91,6 +91,7 @@ override_colors(gui_colors const& base, var const& json)
   result.section_background = override_color_if_present(json, "section_background", result.section_background);
   result.edit_text = override_color_if_present(json, "edit_text", result.edit_text);
   result.label_text = override_color_if_present(json, "label_text", result.label_text);
+  result.button_text = override_color_if_present(json, "button_text", result.button_text);
   result.table_header = override_color_if_present(json, "table_header", result.table_header);
   result.table_cell = override_color_if_present(json, "table_cell", result.table_cell);
   result.table_header_cell = override_color_if_present(json, "table_header_cell", result.table_header_cell);
@@ -138,8 +139,8 @@ _theme(theme), _desc(desc), _custom_section(custom_section), _module_section(mod
   setColour(ToggleButton::ColourIds::textColourId, colors().control_text);
   setColour(ToggleButton::ColourIds::tickColourId, colors().control_tick);
    
-  setColour(TextButton::ColourIds::textColourOnId, colors().label_text);
-  setColour(TextButton::ColourIds::textColourOffId, colors().label_text);
+  setColour(TextButton::ColourIds::textColourOnId, colors().button_text);
+  setColour(TextButton::ColourIds::textColourOffId, colors().button_text);
   setColour(TextButton::ColourIds::buttonOnColourId, control_bg_high);
   setColour(TextButton::ColourIds::buttonColourId, colors().control_background);
 

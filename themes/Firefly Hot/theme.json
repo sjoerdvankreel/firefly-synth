@@ -63,7 +63,7 @@
         "slider_automation": "FFCCCCCC",
         "control_text": "FF3333333",
         "control_tick": "FF3333333",
-        "label_text": "FFCCCCCC",
+        "button_text": "FFCCCCCC",
         "bubble_outline": "FFCCCCCC",
         "scrollbar_thumb": "FFCCCCCC",
         "graph_area": "80999999",

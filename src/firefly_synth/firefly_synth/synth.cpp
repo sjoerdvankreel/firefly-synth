@@ -192,7 +192,7 @@ make_edit_controls_section(plugin_gui* gui, lnf* lnf, component_store store)
   tweak_value_label.setJustificationType(Justification::centredLeft);
   tweak_value_label.setColour(Label::ColourIds::textColourId, colors.control_text);
   result.add(tweak_value_label, { 1, 0 });
-  auto& tweak = store_component<last_tweaked_label>(store, gui->gui_state());
+  auto& tweak = store_component<last_tweaked_label>(store, gui, lnf);
   result.add(tweak, { 0, 1, 1, 3 });
   result.add(store_component<last_tweaked_editor>(store, gui->gui_state(), lnf), { 1, 1, 1, 3 });
   return result;
