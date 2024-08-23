@@ -21,7 +21,7 @@ static float const max_phase_mod = 0.1f;
 
 enum { type_off, type_basic, type_dsf, type_kps1, type_kps2, type_static };
 enum { rand_svf_lpf, rand_svf_hpf, rand_svf_bpf, rand_svf_bsf, rand_svf_peq };
-enum { section_type, section_sync_on, section_sync_params, section_uni, section_basic, section_basic_pw, section_dsf, section_rand };
+enum { section_type, section_sync_on, section_sync_uni, section_basic, section_basic_pw, section_dsf, section_rand };
 enum { 
   scratch_pb, scratch_cent, scratch_pitch, scratch_sync_semi, 
   scratch_basic_sin_mix, scratch_basic_saw_mix, scratch_basic_tri_mix, scratch_basic_sqr_mix, 
@@ -345,53 +345,49 @@ osc_topo(int section, gui_position const& pos)
   sync_on.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return can_do_phase(vs[0]); });
   sync_on.info.description = "Enables hard-sync against an internal reference oscillator.";
 
-  result.sections.emplace_back(make_param_section(section_sync_params,
-    make_topo_tag_basic("{18204EB2-1066-4F27-8FD9-5C3D1505BDD7}", "Sync Params"),
-    make_param_section_gui({ 0, 2, 2, 1 }, gui_dimension({ 1, 1 }, { gui_dimension::auto_size_all, 1 }), gui_label_edit_cell_split::horizontal)));
+  result.sections.emplace_back(make_param_section(section_sync_uni,
+    make_topo_tag_basic("{18204EB2-1066-4F27-8FD9-5C3D1505BDD7}", "Sync/Unisonc Params"),
+    make_param_section_gui({ 0, 2, 2, 2 }, gui_dimension({ 1, 1 }, { 
+      gui_dimension::auto_size_all, 1, gui_dimension::auto_size_all, 1, gui_dimension::auto_size_all, 1 }), gui_label_edit_cell_split::horizontal)));
   auto& sync_semi = result.params.emplace_back(make_param(
     make_topo_info("{FBD5ADB5-63E2-42E0-BF90-71B694E6F52C}", true, "Hard Sync Semitones", "HST", "HS Semi", param_hard_sync_semis, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_linear(0, 48, 0, 2, "Semi"),
-    make_param_gui_single(section_sync_params, gui_edit_type::knob, { 0, 0 },
+    make_param_gui_single(section_sync_uni, gui_edit_type::knob, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   sync_semi.gui.bindings.enabled.bind_params({ param_type, param_hard_sync }, [](auto const& vs) { return can_do_phase(vs[0]) && vs[1]; });
   sync_semi.info.description = "Pitch offset of the actual oscillator against the reference oscillator.";
   auto& sync_xover = result.params.emplace_back(make_param(
     make_topo_info("{FE055A0E-4619-438B-9129-24E56437A54E}", true, "Hard Sync XOver Time", "HXO", "HS XOver", param_hard_sync_xover, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_linear(0, 5, 2.5, 2, "Ms"),
-    make_param_gui_single(section_sync_params, gui_edit_type::knob, { 1, 0 },
+    make_param_gui_single(section_sync_uni, gui_edit_type::knob, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   sync_xover.gui.bindings.enabled.bind_params({ param_type, param_hard_sync }, [](auto const& vs) { return can_do_phase(vs[0]) && vs[1]; });
   sync_xover.info.description = "Controls cross-over time between the synced and unsyced signal after a phase reset occurs.";
-  
-  result.sections.emplace_back(make_param_section(section_uni,
-    make_topo_tag_basic("{D91778EE-63D7-4346-B857-64B2D64D0441}", "Unison"),
-    make_param_section_gui({ 0, 3, 2, 1 }, gui_dimension({ 1, 1 }, { 
-      gui_dimension::auto_size_all, 1, gui_dimension::auto_size_all, 1 }), gui_label_edit_cell_split::horizontal)));
   auto& uni_voices = result.params.emplace_back(make_param(
     make_topo_info("{376DE9EF-1CC4-49A0-8CA7-9CF20D33F4D8}", true, "Unison Voices", "Uni", "Uni", param_uni_voices, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_step(1, max_osc_unison_voices, 1, 0),
-    make_param_gui_single(section_uni, gui_edit_type::list, { 0, 0 },
+    make_param_gui_single(section_sync_uni, gui_edit_type::list, { 0, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   uni_voices.gui.bindings.enabled.bind_params({ param_type, param_uni_voices }, [](auto const& vs) { return vs[0] != type_off; });
   uni_voices.info.description = "Unison voice count. Oversampling, hard-sync, AM and FM are applied per-unison-voice.";
   auto& uni_spread = result.params.emplace_back(make_param(
     make_topo_info("{537A8F3F-006B-4F99-90E4-F65D0DF2F59F}", true, "Unison Spread", "Spr", "Uni Sprd", param_uni_sprd, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
-    make_param_gui_single(section_uni, gui_edit_type::knob, { 0, 2 },
+    make_param_gui_single(section_sync_uni, gui_edit_type::knob, { 0, 4 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   uni_spread.gui.bindings.enabled.bind_params({ param_type, param_uni_voices }, [](auto const& vs) { return vs[0] != type_off && vs[1] > 1; });
   uni_spread.info.description = "Unison stereo spread, works on all oscillator modes.";
   auto& uni_dtn = result.params.emplace_back(make_param(
     make_topo_info("{FDAE1E98-B236-4B2B-8124-0B8E1EF72367}", true, "Unison Detune", "Dtn", "Uni Dtn", param_uni_dtn, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.33, 0, true),
-    make_param_gui_single(section_uni, gui_edit_type::knob, { 1, 0 },
+    make_param_gui_single(section_sync_uni, gui_edit_type::knob, { 1, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   uni_dtn.gui.bindings.enabled.bind_params({ param_type, param_uni_voices }, [](auto const& vs) { return can_do_pitch(vs[0]) && vs[1] > 1; });
   uni_dtn.info.description = "Detune unison voices. Only applicable to Basic and DSF generators.";
   auto& uni_phase = result.params.emplace_back(make_param(
     make_topo_info("{8F1098B6-64F9-407E-A8A3-8C3637D59A26}", true, "Unison Phase", "Phs", "Uni Phs", param_uni_phase, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
-    make_param_gui_single(section_uni, gui_edit_type::knob, { 1, 2 },
+    make_param_gui_single(section_sync_uni, gui_edit_type::knob, { 1, 4 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   uni_phase.gui.bindings.enabled.bind_params({ param_type, param_uni_voices }, [](auto const& vs) { return can_do_phase(vs[0]) && vs[1] > 1; });
   uni_phase.info.description = "Phase offset for subsequent voices, to get that unison effect 'right from the start'. Only applicable to Basic and DSF generators.";
