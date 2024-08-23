@@ -694,7 +694,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
   svf_left.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_off || vs[0] == type_svf; });
   svf_left.gui.merge_with_section = section_svf_right;
   auto& svf_kbd = result.params.emplace_back(make_param(
-    make_topo_info("{9EEA6FE0-983E-4EC7-A47F-0DFD79D68BCB}", true, "SV Filter KTrk", "KTrk", "SVF KTrk", param_svf_kbd, 1),
+    make_topo_info("{9EEA6FE0-983E-4EC7-A47F-0DFD79D68BCB}", true, "SV Filter KeyTrk", "KeyTrk", "SVF KeyTrk", param_svf_kbd, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-2, 2, global ? 0 : 1, 0, true),
     make_param_gui_single(section_svf_left, gui_edit_type::hslider, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
@@ -744,14 +744,14 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
   comb_left.gui.merge_with_section = section_comb_right;
   comb_left.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_cmb; });
   auto& comb_dly_plus = result.params.emplace_back(make_param(
-    make_topo_info("{097ECBDB-1129-423C-9335-661D612A9945}", true, "Comb Filter Delay+", "Delay+", "Cmb Dly+", param_comb_dly_plus, 1),
+    make_topo_info("{097ECBDB-1129-423C-9335-661D612A9945}", true, "Comb Filter Delay+", "Delay+", "Comb Delay+", param_comb_dly_plus, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_linear(comb_min_ms, comb_max_ms, 1, 2, "Ms"),
     make_param_gui_single(section_comb_left, gui_edit_type::hslider, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   comb_dly_plus.gui.bindings.enabled.bind_params({ param_type, param_comb_mode }, [](auto const& vs) { return vs[0] == type_cmb && comb_has_feedforward(vs[1]); });
   comb_dly_plus.info.description = "Feed-forward time.";
   auto& comb_dly_min = result.params.emplace_back(make_param(
-    make_topo_info("{D4846933-6AED-4979-AA1C-2DD80B68404F}", true, "Comb Filter Delay-", "Delay-", "Cmb Dly-", param_comb_dly_min, 1),
+    make_topo_info("{D4846933-6AED-4979-AA1C-2DD80B68404F}", true, "Comb Filter Delay-", "Delay-", "Comb Delay-", param_comb_dly_min, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_linear(comb_min_ms, comb_max_ms, 1, 2, "Ms"),
     make_param_gui_single(section_comb_left, gui_edit_type::hslider, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
@@ -764,14 +764,14 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
   comb_right.gui.merge_with_section = section_comb_left;
   comb_right.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_cmb; });
   auto& comb_gain_plus = result.params.emplace_back(make_param(
-    make_topo_info("{3069FB5E-7B17-4FC4-B45F-A9DFA383CAA9}", true, "Comb Filter Gain+", "Gain+", "Cmb Gain+", param_comb_gain_plus, 1),
+    make_topo_info("{3069FB5E-7B17-4FC4-B45F-A9DFA383CAA9}", true, "Comb Filter Gain+", "Gain+", "Comb Gain+", param_comb_gain_plus, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 0.5, 0, true),
     make_param_gui_single(section_comb_right, gui_edit_type::hslider, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   comb_gain_plus.gui.bindings.enabled.bind_params({ param_type, param_comb_mode }, [](auto const& vs) { return vs[0] == type_cmb && comb_has_feedforward(vs[1]); });
   comb_gain_plus.info.description = "Feed-forward amount.";
   auto& comb_gain_min = result.params.emplace_back(make_param(
-    make_topo_info("{9684165E-897B-4EB7-835D-D5AAF8E61E65}", true, "Comb Filter Gain-", "Gain-", "Cmb Gain-", param_comb_gain_min, 1),
+    make_topo_info("{9684165E-897B-4EB7-835D-D5AAF8E61E65}", true, "Comb Filter Gain-", "Gain-", "Comb Gain-", param_comb_gain_min, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 0, 0, true),
     make_param_gui_single(section_comb_right, gui_edit_type::hslider, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
