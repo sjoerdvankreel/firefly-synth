@@ -992,14 +992,14 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
   delay_left.gui.merge_with_section = section_delay_sync;
   delay_left.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_delay; });
   auto& delay_amt = result.params.emplace_back(make_param(
-    make_topo_info("{7CEE3B9A-99CF-46D3-847B-42F91A4F5227}", true, "Delay Amount", "Amount", "Dly Amt", param_dly_amt, 1),
+    make_topo_info("{7CEE3B9A-99CF-46D3-847B-42F91A4F5227}", true, "Delay Amount", "Amount", "Delay Amount", param_dly_amt, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
     make_param_gui_single(section_delay_left, gui_edit_type::hslider, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   delay_amt.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_delay; });
   delay_amt.info.description = "Feedback-amount or tap-amount control.";
   auto& delay_mix = result.params.emplace_back(make_param(
-    make_topo_info("{6933B1F7-886F-41F0-8D23-175AA537327E}", true, "Delay Mix", "Mix", "Dly Mix", param_dly_mix, 1),
+    make_topo_info("{6933B1F7-886F-41F0-8D23-175AA537327E}", true, "Delay Mix", "Mix", "Delay Mix", param_dly_mix, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
     make_param_gui_single(section_delay_left, gui_edit_type::hslider, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
@@ -1012,7 +1012,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
       gui_dimension::auto_size_all, 1, gui_dimension::auto_size_all, 1 } }, gui_label_edit_cell_split::horizontal)));
   delay_right.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_delay; });
   auto& delay_sprd = result.params.emplace_back(make_param(
-    make_topo_info("{1BD8008B-DC2C-4A77-A5DE-869983E5786C}", true, "Delay Spread", "Spread", "Dly Sprd", param_dly_sprd, 1),
+    make_topo_info("{1BD8008B-DC2C-4A77-A5DE-869983E5786C}", true, "Delay Spread", "Spread", "Delay Spread", param_dly_sprd, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 0, 0, true),
     make_param_gui_single(section_delay_right, gui_edit_type::hslider, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
@@ -1097,7 +1097,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
   delay_multi_tempo.info.description = "Multi-tap delay length in bars.";
 
   auto& reverb_mix = result.params.emplace_back(make_param(
-    make_topo_info("{7F71B450-2EAA-4D4E-8919-A94D87645DB0}", true, "Reverb Mix", "Mix", "Rev Mix", param_reverb_mix, 1),
+    make_topo_info("{7F71B450-2EAA-4D4E-8919-A94D87645DB0}", true, "Reverb Mix", "Mix", "Reverb Mix", param_reverb_mix, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
     make_param_gui_single(section_main, gui_edit_type::hslider, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
@@ -1109,14 +1109,14 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_param_section_gui({ 0, 1, 2, 2 }, { { 1, 1 }, { gui_dimension::auto_size_all, 1 } }, gui_label_edit_cell_split::horizontal)));
   reverb_left.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_reverb; });
   auto& reverb_sprd = result.params.emplace_back(make_param(
-    make_topo_info("{0D138920-65D2-42E9-98C5-D8FEC5FD2C55}", true, "Reverb Spread", "Spread", "Rev Sprd", param_reverb_spread, 1),
+    make_topo_info("{0D138920-65D2-42E9-98C5-D8FEC5FD2C55}", true, "Reverb Spread", "Spread", "Reverb Spread", param_reverb_spread, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
     make_param_gui_single(section_reverb_left, gui_edit_type::hslider, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   reverb_sprd.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_reverb; });
   reverb_sprd.info.description = "Reverb stereo-spread control.";
   auto& reverb_apf = result.params.emplace_back(make_param(
-    make_topo_info("{09DF58B0-4155-47F2-9AEB-927B2D8FD250}", true, "Reverb APF", "APF", "Rev APF", param_reverb_apf, 1),
+    make_topo_info("{09DF58B0-4155-47F2-9AEB-927B2D8FD250}", true, "Reverb APF", "APF", "Reverb APF", param_reverb_apf, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(1.0, 0, true),
     make_param_gui_single(section_reverb_left, gui_edit_type::hslider, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
@@ -1128,14 +1128,14 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_param_section_gui({ 0, 3, 2, 2 }, { { 1, 1 }, { gui_dimension::auto_size_all, 1 } }, gui_label_edit_cell_split::horizontal)));
   reverb_right.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_reverb; });
   auto& reverb_size = result.params.emplace_back(make_param(
-    make_topo_info("{E413FA18-420D-4510-80D1-54E2A0ED4CB2}", true, "Reverb Size", "Size", "Rev Size", param_reverb_size, 1),
+    make_topo_info("{E413FA18-420D-4510-80D1-54E2A0ED4CB2}", true, "Reverb Size", "Size", "Reverb Size", param_reverb_size, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.8, 0, true),
     make_param_gui_single(section_reverb_right, gui_edit_type::hslider, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   reverb_size.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_reverb; });
   reverb_size.info.description = "Reverb room size.";
   auto& reverb_damp = result.params.emplace_back(make_param(
-    make_topo_info("{44EE5538-9920-4F39-A68E-51E86E96943B}", true, "Reverb Damping", "Damp", "Rev Damp", param_reverb_damp, 1),
+    make_topo_info("{44EE5538-9920-4F39-A68E-51E86E96943B}", true, "Reverb Damping", "Damp", "Reverb Damp", param_reverb_damp, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.8, 0, true),
     make_param_gui_single(section_reverb_right, gui_edit_type::hslider, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
