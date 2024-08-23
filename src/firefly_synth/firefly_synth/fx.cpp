@@ -692,6 +692,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_param_section_gui({ 0, 1, 2, 2 }, { { 1, 1 }, { gui_dimension::auto_size_all, 1 } }, gui_label_edit_cell_split::horizontal)));
   svf_left.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_svf; });
   svf_left.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_off || vs[0] == type_svf; });
+  svf_left.gui.merge_with_section = section_svf_right;
   auto& svf_kbd = result.params.emplace_back(make_param(
     make_topo_info("{9EEA6FE0-983E-4EC7-A47F-0DFD79D68BCB}", true, "SV Filter KTrk", "KTrk", "SVF KTrk", param_svf_kbd, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-2, 2, global ? 0 : 1, 0, true),
@@ -710,6 +711,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
   auto& svf_right = result.sections.emplace_back(make_param_section(section_svf_right,
     make_topo_tag_basic("{0068DAD1-DE32-43CE-9BFE-1CB5B6B7CA3B}", "SV Filter Left"),
     make_param_section_gui({ 0, 3, 2, 2 }, { { 1, 1 }, { gui_dimension::auto_size_all, 1 } }, gui_label_edit_cell_split::horizontal)));
+  svf_right.gui.merge_with_section = section_svf_left;
   svf_right.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_svf; });
   svf_right.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_off || vs[0] == type_svf; });
   auto& svf_freq = result.params.emplace_back(make_param(
