@@ -354,7 +354,7 @@ preset_button::extra_state_changed()
 theme_button::
 theme_button(plugin_gui* gui) :
 _gui(gui), _themes(gui->gui_state()->desc().themes())
-{ 
+{  
   auto const* topo = gui->gui_state()->desc().plugin;
   std::string default_theme = topo->gui.default_theme;
   std::string theme = user_io_load_list(topo->vendor, topo->full_name, user_io::base, user_state_theme_key, default_theme, _themes);

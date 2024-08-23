@@ -207,6 +207,7 @@ struct gui_colors final {
   juce::Colour scrollbar_thumb = juce::Colour(0xFF00FF00);
   juce::Colour scrollbar_background = juce::Colour(0xFF00FF00);
   juce::Colour popup_text = juce::Colour(0xFF00FF00);
+  juce::Colour popup_text_highlighted = juce::Colour(0xFF00FF00); 
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(gui_colors);
 };
 
