@@ -33,7 +33,7 @@ enum {
   param_fm_on, param_fm_source, param_fm_target, param_fm_mode, param_fm_idx,
 };
 
-static int const route_count = 8;
+static int const route_count = 9;
 
 std::unique_ptr<graph_engine> make_osc_graph_engine(plugin_desc const* desc);
 std::vector<graph_data> render_osc_graphs(plugin_state const& state, graph_engine* engine, int slot, bool for_osc_osc_matrix);
@@ -140,10 +140,9 @@ osc_osc_matrix_topo(int section, gui_position const& pos, plugin_topo const* plu
   result.gui.menu_handler_factory = [](plugin_state* state) { return std::make_unique<tidy_matrix_menu_handler>(
     state, 2, param_am_on, 0, std::vector<std::vector<int>>({{ param_am_target, param_am_source }, { param_fm_target, param_fm_source } })); };
 
-  auto& am = result.sections.emplace_back(make_param_section(section_am,
+  result.sections.emplace_back(make_param_section(section_am,
     make_topo_tag_basic("{A48C0675-C020-4D05-A384-EF2B8CA8A066}", "AM"),
     make_param_section_gui({ 0, 0 }, { { 1 }, { -25, gui_dimension::auto_size, gui_dimension::auto_size, 1, 1 } })));
-  am.gui.scroll_mode = gui_scroll_mode::vertical;  
   auto& am_on = result.params.emplace_back(make_param(
     make_topo_info_tabular("{13B61F71-161B-40CE-BF7F-5022F48D60C7}", "AM On", "AM", param_am_on, route_count),
     make_param_dsp_voice(param_automate::automate), make_domain_toggle(false),
@@ -194,10 +193,9 @@ osc_osc_matrix_topo(int section, gui_position const& pos, plugin_topo const* plu
   am_ring.gui.bindings.enabled.bind_params({ param_am_on }, [](auto const& vs) { return vs[0] != 0; });
   am_ring.info.description = "Dry/wet control between amplitude-modulated and ring-modulated signal.";
 
-  auto& fm = result.sections.emplace_back(make_param_section(section_fm,
+  result.sections.emplace_back(make_param_section(section_fm,
     make_topo_tag_basic("{1B39A828-3429-4245-BF07-551C17A78341}", "FM"),
     make_param_section_gui({ 0, 1 }, { { 1 }, { -25, -55, -55, -45, 1 } })));
-  fm.gui.scroll_mode = gui_scroll_mode::vertical;
   auto& fm_on = result.params.emplace_back(make_param(
     make_topo_info_tabular("{02112C80-D1E9-409E-A9FB-6DCA34F5CABA}", "FM On", "FM", param_fm_on, route_count),
     make_param_dsp_voice(param_automate::automate), make_domain_toggle(false),
