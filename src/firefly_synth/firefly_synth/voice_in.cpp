@@ -32,9 +32,9 @@ static std::vector<list_item>
 mode_items()
 {
   std::vector<list_item> result;
-  result.emplace_back("{88F746C4-1A70-4A64-A11D-584D87D3059C}", "Poly");
-  result.emplace_back("{6ABA8E48-F284-40A4-A0E2-C263B536D493}", "Mono");
-  result.emplace_back("{519341B0-4F79-4433-9449-1386F927E88B}", "Release");
+  result.emplace_back("{88F746C4-1A70-4A64-A11D-584D87D3059C}", "Polyphonic");
+  result.emplace_back("{6ABA8E48-F284-40A4-A0E2-C263B536D493}", "Monophonic");
+  result.emplace_back("{519341B0-4F79-4433-9449-1386F927E88B}", "Release Mono");
   return result;
 }
 
