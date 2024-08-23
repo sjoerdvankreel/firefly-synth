@@ -140,9 +140,10 @@ global_in_topo(int section, bool is_fx, gui_position const& pos)
       make_label(gui_label_contents::name, gui_label_align::top, gui_label_justify::center))));
   pb_range.info.description = "Pitch bend range. Together with Pitch Bend this affects the base pitch of all oscillators.";
 
-  result.sections.emplace_back(make_param_section(section_uni_count,
+  auto& uni_count = result.sections.emplace_back(make_param_section(section_uni_count,
     make_topo_tag_basic("{550AAF78-C95A-4D4E-814C-0C5CC26C6457}", "Unison Voices"),
     make_param_section_gui({ 0, 5, is_fx ? 1 : 2, 1 }, gui_dimension({ 1, 1 }, { 1 }), gui_label_edit_cell_split::vertical)));
+  uni_count.gui.merge_with_section = section_uni_prms;
   auto& uni_voices = result.params.emplace_back(make_param(
     make_topo_info("{C2B06E63-0283-4564-BABB-F20D9B30AD68}", true, "Global Unison Voices", "Global Uni", "Uni", param_uni_voices, 1),
     make_param_dsp_block(param_automate::automate), make_domain_step(1, max_global_unison_voices, 1, 0),
@@ -151,11 +152,12 @@ global_in_topo(int section, bool is_fx, gui_position const& pos)
   uni_voices.info.description = "Global unison voice count. Global unison spawns an entire polyphonic synth voice per unison voice. This includes per-voice oscillators, effects, lfo's and envelopes.";
   uni_voices.gui.bindings.global_enabled.bind_param(module_voice_in, voice_in_param_mode, [](int v) { return v == engine_voice_mode_poly; });
 
-  result.sections.emplace_back(make_param_section(section_uni_prms,
+  auto& uni_params = result.sections.emplace_back(make_param_section(section_uni_prms,
     make_topo_tag_basic("{7DCA43C8-CD48-4414-9017-EC1B982281FF}", "Global Unison Params"),
     make_param_section_gui({ 0, 6, is_fx? 1: 2, 2 }, gui_dimension({ 1, 1 }, { 
       gui_dimension::auto_size_all, 1, gui_dimension::auto_size_all, 1, gui_dimension::auto_size_all, 1 }), 
         gui_label_edit_cell_split::horizontal)));
+  uni_params.gui.merge_with_section = section_uni_count;
   auto& uni_dtn = result.params.emplace_back(make_param(
     make_topo_info("{2F0E199D-7B8A-497E-BED4-BC0FC55F1720}", true, "Global Unison Detune", "Dtn", "Uni Dtn", param_uni_dtn, 1),
     make_param_dsp_accurate(param_automate::automate), make_domain_percentage_identity(0.33, 0, true),
