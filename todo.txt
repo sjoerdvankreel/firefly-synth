@@ -58,6 +58,8 @@ V drag over combo paints ugly and wrong side
 * bugfix: rerender graph on master in param hover?
 * show effective modulation in the ui for clap param mod
 * fix the fx version
+* drop the smoothing module, make the settings module
+* fix the main graph
 
 autobuilds:
 * ask paul

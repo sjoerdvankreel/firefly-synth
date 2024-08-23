@@ -136,7 +136,7 @@ _theme(theme), _desc(desc), _custom_section(custom_section), _module_section(mod
 
   setColour(ToggleButton::ColourIds::textColourId, colors().control_text);
   setColour(ToggleButton::ColourIds::tickColourId, colors().control_tick);
-  
+   
   setColour(TextButton::ColourIds::textColourOnId, colors().label_text);
   setColour(TextButton::ColourIds::textColourOffId, colors().label_text);
   setColour(TextButton::ColourIds::buttonOnColourId, control_bg_high);
@@ -522,8 +522,7 @@ lnf::drawButtonText(Graphics& g, TextButton& button, bool, bool)
   arrow.startNewSubPath(x, y);
   arrow.lineTo(x + w, y);
   arrow.lineTo(x + w / 2, y + h);
-  arrow.closeSubPath();
-  g.setColour(colors().control_text);
+  arrow.closeSubPath(); 
   g.fillPath(arrow);
 }
  

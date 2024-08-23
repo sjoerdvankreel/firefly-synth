@@ -58,14 +58,15 @@
       "custom_sections": ["Title Text", "Title Image", "Monitor", "Main Graph", "Tweak", "Patch"],
       "module_sections": ["Monitor"],
       "colors": {
-        "tab_text": "FF333333",
-        "slider_automation": "FF333333",
-        "control_text": "FF333333",
-        "control_tick": "FF333333",
-        "bubble_outline": "FF333333",
-        "scrollbar_thumb": "FF333333",
-        "graph_area": "80333333",
-        "graph_line": "FF333333",
+        "tab_text": "FFCCCCCC",
+        "slider_automation": "FFCCCCCC",
+        "control_text": "FF3333333",
+        "control_tick": "FF3333333",
+        "label_text": "FFCCCCCC",
+        "bubble_outline": "FFCCCCCC",
+        "scrollbar_thumb": "FFCCCCCC",
+        "graph_area": "80999999",
+        "graph_line": "FF999999",
         "table_header": "FFCCCCCC"
       }
     },
