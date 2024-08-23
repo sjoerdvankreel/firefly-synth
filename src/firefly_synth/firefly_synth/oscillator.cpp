@@ -576,7 +576,7 @@ osc_topo(int section, gui_position const& pos)
   pitch.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return can_do_pitch(vs[0]); });
   pitch.info.description = "Absolute pitch modulation target, also reacts to Voice-in pitch modulation.";
   auto& pb = result.params.emplace_back(make_param(
-    make_topo_info("{D310300A-A143-4866-8356-F82329A76BAE}", true, "Pitch Bend", "PB", "PB", param_pb, 1),
+    make_topo_info("{D310300A-A143-4866-8356-F82329A76BAE}", true, "Pitch Bend", "Pitch Bend", "Pitch Bend", param_pb, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 0, 0, true),
     make_param_gui_none()));
   pb.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return can_do_pitch(vs[0]); });
