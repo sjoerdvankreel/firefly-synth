@@ -21,7 +21,7 @@ static float const max_phase_mod = 0.1f;
 
 enum { type_off, type_basic, type_dsf, type_kps1, type_kps2, type_static };
 enum { rand_svf_lpf, rand_svf_hpf, rand_svf_bpf, rand_svf_bsf, rand_svf_peq };
-enum { section_type, section_sync_params, section_sync_on, section_uni, section_basic, section_basic_pw, section_dsf, section_rand };
+enum { section_type, section_sync_on, section_sync_params, section_uni, section_basic, section_basic_pw, section_dsf, section_rand };
 enum { 
   scratch_pb, scratch_cent, scratch_pitch, scratch_sync_semi, 
   scratch_basic_sin_mix, scratch_basic_saw_mix, scratch_basic_tri_mix, scratch_basic_sqr_mix, 
@@ -29,7 +29,7 @@ enum {
 
 enum {
   param_type, param_gain, param_note, param_cent, 
-  param_hard_sync_semis, param_hard_sync_xover, param_hard_sync,
+  param_hard_sync, param_hard_sync_semis, param_hard_sync_xover,
   param_uni_voices, param_uni_sprd, param_uni_dtn, param_uni_phase,
   param_basic_sin_on, param_basic_sin_mix, param_basic_saw_on, param_basic_saw_mix,
   param_basic_tri_on, param_basic_tri_mix, param_basic_sqr_on, param_basic_sqr_mix, param_basic_sqr_pw,
@@ -279,7 +279,7 @@ osc_topo(int section, gui_position const& pos)
     make_topo_info_basic("{45C2CCFE-48D9-4231-A327-319DAE5C9366}", "Osc", module_osc, 5),
     make_module_dsp(module_stage::voice, module_output::audio, scratch_count, {
       make_module_dsp_output(false, make_topo_info_basic("{FA702356-D73E-4438-8127-0FDD01526B7E}", "Output", 0, 1 + max_osc_unison_voices)) }),
-    make_module_gui(section, pos, { { 1, 1 }, { 32, 13, 8, 26, 55, 8 } })));
+    make_module_gui(section, pos, { { 1, 1 }, { 32, 8, 13, 26, 55, 8 } })));
   result.info.description = "Oscillator module with sine/saw/triangle/square/DSF/Karplus-Strong/noise generators, hardsync and unison support.";
   result.gui.tabbed_name = "OSC";
   result.gui.is_drag_mod_source = true;
@@ -334,9 +334,20 @@ osc_topo(int section, gui_position const& pos)
   cent.info.description = "Oscillator cents, also reacts to Voice-In cents.";
   cent.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return can_do_pitch(vs[0]); });
 
+  result.sections.emplace_back(make_param_section(section_sync_on,
+    make_topo_tag_basic("{D5A040EE-5F64-4771-8581-CDC5C0CC11A8}", "Sync On"),
+    make_param_section_gui({ 0, 1, 2, 1 }, gui_dimension({ 1, 1 }, { 1 }), gui_label_edit_cell_split::vertical)));
+  auto& sync_on = result.params.emplace_back(make_param(
+    make_topo_info("{900958A4-74BC-4912-976E-45E66D4F00C7}", true, "Hard Sync On", "HS", "HSync", param_hard_sync, 1),
+    make_param_dsp_voice(param_automate::automate), make_domain_toggle(false),
+    make_param_gui_single(section_sync_on, gui_edit_type::toggle, { 0, 0 },
+      make_label(gui_label_contents::name, gui_label_align::top, gui_label_justify::center))));
+  sync_on.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return can_do_phase(vs[0]); });
+  sync_on.info.description = "Enables hard-sync against an internal reference oscillator.";
+
   result.sections.emplace_back(make_param_section(section_sync_params,
     make_topo_tag_basic("{18204EB2-1066-4F27-8FD9-5C3D1505BDD7}", "Sync Params"),
-    make_param_section_gui({ 0, 1, 2, 1 }, gui_dimension({ 1, 1 }, { gui_dimension::auto_size_all, 1 }), gui_label_edit_cell_split::horizontal)));
+    make_param_section_gui({ 0, 2, 2, 1 }, gui_dimension({ 1, 1 }, { gui_dimension::auto_size_all, 1 }), gui_label_edit_cell_split::horizontal)));
   auto& sync_semi = result.params.emplace_back(make_param(
     make_topo_info("{FBD5ADB5-63E2-42E0-BF90-71B694E6F52C}", true, "Hard Sync Semitones", "HST", "HS Semi", param_hard_sync_semis, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_linear(0, 48, 0, 2, "Semi"),
@@ -351,17 +362,6 @@ osc_topo(int section, gui_position const& pos)
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   sync_xover.gui.bindings.enabled.bind_params({ param_type, param_hard_sync }, [](auto const& vs) { return can_do_phase(vs[0]) && vs[1]; });
   sync_xover.info.description = "Controls cross-over time between the synced and unsyced signal after a phase reset occurs.";
-
-  result.sections.emplace_back(make_param_section(section_sync_on,
-    make_topo_tag_basic("{D5A040EE-5F64-4771-8581-CDC5C0CC11A8}", "Sync On"),
-    make_param_section_gui({ 0, 2, 2, 1 }, gui_dimension({ 1, 1 }, { 1 }), gui_label_edit_cell_split::vertical)));
-  auto& sync_on = result.params.emplace_back(make_param(
-    make_topo_info("{900958A4-74BC-4912-976E-45E66D4F00C7}", true, "Hard Sync On", "HS", "HSync", param_hard_sync, 1),
-    make_param_dsp_voice(param_automate::automate), make_domain_toggle(false),
-    make_param_gui_single(section_sync_on, gui_edit_type::toggle, { 0, 0 },
-      make_label(gui_label_contents::name, gui_label_align::top, gui_label_justify::center))));
-  sync_on.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return can_do_phase(vs[0]); });
-  sync_on.info.description = "Enables hard-sync against an internal reference oscillator.";
   
   result.sections.emplace_back(make_param_section(section_uni,
     make_topo_tag_basic("{D91778EE-63D7-4346-B857-64B2D64D0441}", "Unison"),
