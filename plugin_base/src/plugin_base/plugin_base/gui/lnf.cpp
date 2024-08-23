@@ -616,10 +616,20 @@ lnf::drawComboBox(Graphics& g, int width, int height, bool, int, int, int, int, 
   int const fixedHeight = combo_height(tabular) - (tabular? 4: 0);
   int const comboTop = height < fixedHeight ? 0 : (height - fixedHeight) / 2;
   auto cornerSize = box.findParentComponentOfClass<ChoicePropertyComponent>() != nullptr ? 0.0f : global_settings().combo_radius;
-  Rectangle<int> boxBounds(tabular? 3: 1, comboTop, box_width - 2 - (tabular? 4: 0), fixedHeight);
-  g.setColour(colors().control_background); 
-  g.fillRoundedRectangle(boxBounds.toFloat(), cornerSize);
+  int x = tabular ? 3 : 1;
+  int y = comboTop;
+  int w = box_width - 2 - (tabular ? 4 : 0);
+  int h = fixedHeight;
 
+  // highlight
+  g.setGradientFill(ColourGradient(colors().slider_highlight.withAlpha(0.0f), x, 0, colors().slider_highlight, w, 0, false));
+  g.fillRoundedRectangle(x, y, w, h, cornerSize);
+
+  // background
+  g.setColour(colors().slider_background);
+  g.fillRoundedRectangle(x + 1, y + 1, w - 2, h - 2, cornerSize);
+
+  // dropdown arrow
   Path path;
   path.startNewSubPath(box_width - arrowWidth - arrowPad, height / 2 - arrowHeight / 2 + 1);
   path.lineTo(box_width - arrowWidth / 2 - arrowPad, height / 2 + arrowHeight / 2 + 1);
@@ -639,11 +649,7 @@ lnf::drawComboBox(Graphics& g, int width, int height, bool, int, int, int, int, 
   else if (drop_action == drop_target_action::never) drop_icon = "[N/A]";
   else assert(false);
 
-  auto apply_mod_box = Rectangle<int>(
-    boxBounds.getTopRight().x + 2,
-    boxBounds.getTopLeft().y,
-    apply_mod_width,
-    boxBounds.getHeight()); 
+  auto apply_mod_box = Rectangle<int>(x + 2, y, apply_mod_width, h); 
   g.setColour(Colours::darkgrey);
   g.fillRoundedRectangle(apply_mod_box.toFloat(), 2.0f);
   g.setColour(colors().control_text);
