@@ -136,7 +136,7 @@ make_matrix_graphs_section(
       graph_params params;
       params.name_in_theme = name_in_theme;
       params.scale_type = graph_params::scale_h;
-      params.partition_scale = module_index == module_osc_osc_matrix ? 0.075f : 0.33f;
+      params.partition_scale = 0.33f;
 
       if (is_fx)
       {
