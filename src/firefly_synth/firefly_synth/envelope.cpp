@@ -57,10 +57,10 @@ static std::vector<list_item>
 mode_items()
 {
   std::vector<list_item> result;
-  result.emplace_back("{B3310A09-6A49-4EB6-848C-1F61A1028126}", "Linear");
-  result.emplace_back("{924FB84C-7509-446F-82E7-B9E39DE399A5}", "Exp Uni");
-  result.emplace_back("{35EDA297-B042-41C0-9A1C-9502DBDAF633}", "Exp Bi");
-  result.emplace_back("{666FEFDF-3BC5-4FDA-8490-A8980741D6E7}", "Exp Split");
+  result.emplace_back("{B3310A09-6A49-4EB6-848C-1F61A1028126}", "Linear", "Linear");
+  result.emplace_back("{924FB84C-7509-446F-82E7-B9E39DE399A5}", "Exp Uni", "Exponential Unipolar");
+  result.emplace_back("{35EDA297-B042-41C0-9A1C-9502DBDAF633}", "Exp Bi", "Exponential Bipolar");
+  result.emplace_back("{666FEFDF-3BC5-4FDA-8490-A8980741D6E7}", "Exp Split", "Exponential Split");
   return result;
 }
 
