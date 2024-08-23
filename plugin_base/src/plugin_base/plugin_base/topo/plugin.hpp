@@ -110,9 +110,6 @@ struct plugin_topo_gui_theme_settings final {
 #endif
   }
 
-  // graph name to image path in theme folder
-  std::map<std::string, std::string> graph_background_images = {};
-
   int get_default_width(bool is_fx) const { return is_fx? default_width_fx: default_width_instrument; }
   int get_aspect_ratio_width(bool is_fx) const { return is_fx? aspect_ratio_width_fx: aspect_ratio_width_instrument; }
   int get_aspect_ratio_height(bool is_fx) const { return is_fx? aspect_ratio_height_fx: aspect_ratio_height_instrument; }

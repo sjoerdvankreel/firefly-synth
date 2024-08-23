@@ -174,25 +174,6 @@ lnf::init_theme(std::filesystem::path const& theme_folder, var const& json)
   if (!json.hasProperty("global_settings")) return;
   if (!json.hasProperty("default_settings")) return; 
 
-  if (json.hasProperty("graph_background_images"))
-  {
-    var graph_background_images = json["graph_background_images"];
-    for (int i = 0; i < graph_background_images.size(); i++)
-    {
-      var this_bg_image = graph_background_images[i];
-      if (this_bg_image.hasProperty("graph") && this_bg_image.hasProperty("image"))
-      {
-        std::string image = this_bg_image["image"].toString().toStdString();
-        if(!image.empty())
-        {
-          std::string graph = this_bg_image["graph"].toString().toStdString();
-          std::string image_path = (theme_folder / image).string();
-          _global_settings.graph_background_images[graph] = image_path;
-        }
-      }
-    }
-  }
-
   assert(json.hasProperty("default_colors"));
   var default_colors = json["default_colors"];
   _default_colors = override_colors(_default_colors, default_colors);

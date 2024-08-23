@@ -53,17 +53,6 @@
     "scrollbar_background": "FF444444",
     "popup_text": "FFCCCCCC"
   },
-  "graph_background_images": [
-    { "graph": "Main Graph", "image": "" },
-    { "graph": "Voice FX Graph", "image": "" },
-    { "graph": "Global FX Graph", "image": "" },
-    { "graph": "Voice LFO Graph", "image": "" },
-    { "graph": "Global LFO Graph", "image": "" },
-    { "graph": "Envelope Graph", "image": "" },
-    { "graph": "Oscillator Graph", "image": "" },
-    { "graph": "Voice Matrix Graphs", "image": "" },
-    { "graph": "Global Matrix Graphs", "image": "" }
-  ],
   "overrides": [
     {
       "custom_sections": ["Title Text", "Title Image", "Monitor", "Main Graph", "Tweak", "Patch"],
