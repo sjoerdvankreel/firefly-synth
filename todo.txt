@@ -60,6 +60,7 @@ V fix the main graph
 * show effective modulation in the ui for clap param mod
 * fix the fx version
 * drop the smoothing module, make the settings module
+* fix the todos
 
 autobuilds:
 * ask paul
