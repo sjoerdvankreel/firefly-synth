@@ -31,6 +31,7 @@ V make matrix tab headers match new section colors
 V mts-esp indicator is too dark
 V do output meters not text (cpu, voices etc)
 V change multi eq drag handle
+* do long names for combo items in tooltip
 * do longest possible names in menus
 * simplify the fx version just drop the lower section and disable some stuff
 * check all the module ui
