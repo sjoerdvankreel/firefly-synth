@@ -818,7 +818,12 @@ plugin_gui::make_param_sections(module_desc const& module)
           merged_grid.add(this_gui, { that_topo_gui.position.row_span, 0, this_topo_gui.position.row_span, 1 });
         }
       }
-      result.add(merged_grid, { min_row, min_col, (int)merged_row_sizes.size(), (int)merged_column_sizes.size() });
+
+      // NOTE: this takes the visibility properties from the first one so they better match
+      auto& merged_container = make_component<param_section_container>(
+        this, _lnf.get(), &module, &topo.sections[this_index], &merged_grid, this_topo_gui.position.column == 0 ? 0 : margin_hsection);
+      result.add(merged_container, { min_row, min_col, (int)merged_row_sizes.size(), (int)merged_column_sizes.size() });
+
     }
     add_hover_listener(result, gui_hover_type::module, module.info.global);
     return result;
