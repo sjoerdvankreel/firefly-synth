@@ -42,6 +42,8 @@ V what about graph bg images?
 V drop the header text ?
 V drop some ugly-ass themes
 V drag over combo paints ugly and wrong side
+V prettify knobs, sliders, combos, toggles, menus
+V fix the main graph
 * simplify the fx version just drop the lower section and disable some stuff
 * rename ff fx to firefly fx not firefly synth fx (in the header)
 * hot/cold + light/dark
@@ -52,14 +54,12 @@ V drag over combo paints ugly and wrong side
 * repaint on waveform change (free running or random-per-voice)
 * some bolletjes don't go away
 * fix the undo history for tuning mode
-* prettify knobs, sliders, combos, toggles, menus
 * make the bolletjes work in case of automation
 * show active modulation for the other graphs
 * bugfix: rerender graph on master in param hover?
 * show effective modulation in the ui for clap param mod
 * fix the fx version
 * drop the smoothing module, make the settings module
-* fix the main graph
 
 autobuilds:
 * ask paul

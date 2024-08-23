@@ -230,8 +230,6 @@ lnf::init_theme(std::filesystem::path const& theme_folder, var const& json)
     _global_settings.linux_font_height = (float)global_settings["linux_font_height"];
   if (global_settings.hasProperty("table_cell_radius"))
     _global_settings.table_cell_radius = (int)global_settings["table_cell_radius"];
-  if (global_settings.hasProperty("text_editor_radius"))
-    _global_settings.text_editor_radius = (int)global_settings["text_editor_radius"];
   if (global_settings.hasProperty("scroll_thumb_radius"))
     _global_settings.scroll_thumb_radius = (int)global_settings["scroll_thumb_radius"];
   if (global_settings.hasProperty("combo_radius"))
@@ -413,14 +411,13 @@ lnf::drawTooltip(Graphics& g, String const& text, int w, int h)
 void 
 lnf::drawTextEditorOutline(juce::Graphics& g, int w, int h, TextEditor& te)
 {
-  auto cornerSize = global_settings().text_editor_radius;
   if (!te.isEnabled()) return;
   if (dynamic_cast<AlertWindow*> (te.getParentComponent()) != nullptr) return;
   if (te.hasKeyboardFocus(true) && !te.isReadOnly())
     g.setColour(te.findColour(TextEditor::focusedOutlineColourId));
   else
     g.setColour(te.findColour(TextEditor::outlineColourId));
-  g.drawRoundedRectangle(0, 0, w, h, cornerSize, 2);
+  g.drawRect(0, 0, w, h, 1);
 }
 
 void
