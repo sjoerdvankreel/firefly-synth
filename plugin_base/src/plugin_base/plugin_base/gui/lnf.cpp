@@ -232,7 +232,7 @@ lnf::init_theme(std::filesystem::path const& theme_folder, var const& json)
             this_colors = override_colors(this_colors, this_override["colors"]);
           _module_colors[module_sections[j].toString().toStdString()] = gui_colors(this_colors);
         } 
-      }
+      }  
     }
   }
 
