@@ -12,9 +12,9 @@ namespace plugin_base {
 static int const conic_count = 256;
 
 static void
-draw_tabular_cell_bg(Graphics& g, Component* c, int radius)
+draw_tabular_cell_bg(Graphics& g, Colour const& color, Component* c, int radius)
 {
-  g.setColour(Colours::black.withAlpha(0.5f));
+  g.setColour(color);
   g.fillRoundedRectangle(c->getLocalBounds().reduced(1).toFloat(), radius);
 }
 
@@ -92,6 +92,7 @@ override_colors(gui_colors const& base, var const& json)
   result.edit_text = override_color_if_present(json, "edit_text", result.edit_text);
   result.label_text = override_color_if_present(json, "label_text", result.label_text);
   result.table_header = override_color_if_present(json, "table_header", result.table_header);
+  result.table_cell = override_color_if_present(json, "table_cell", result.table_cell);
   result.control_tick = override_color_if_present(json, "control_tick", result.control_tick);
   result.control_text = override_color_if_present(json, "control_text", result.control_text);
   result.control_outline = override_color_if_present(json, "control_outline", result.control_outline);
@@ -485,7 +486,7 @@ lnf::drawLabel(Graphics& g, Label& label)
      
   if (auto afl = dynamic_cast<autofit_label*>(&label))
     if (afl->tabular())
-      draw_tabular_cell_bg(g, &label, global_settings().table_cell_radius);
+      draw_tabular_cell_bg(g, colors().table_cell, & label, global_settings().table_cell_radius);
 
   if (!label.isBeingEdited()) 
   {
@@ -600,7 +601,7 @@ lnf::drawComboBox(Graphics& g, int width, int height, bool, int, int, int, int, 
     if (param_cb->param()->param->gui.tabular)
     {
       tabular = true;
-      draw_tabular_cell_bg(g, &box, global_settings().table_cell_radius);
+      draw_tabular_cell_bg(g, colors().table_cell, &box, global_settings().table_cell_radius);
     }
     drop_action = param_cb->get_drop_target_action();
     if (drop_action != drop_target_action::none)
@@ -665,7 +666,7 @@ lnf::drawToggleButton(Graphics& g, ToggleButton& tb, bool highlighted, bool down
     if (ps->param()->param->gui.tabular)
       tabular = true;
   if(tabular)
-    draw_tabular_cell_bg(g, &tb, global_settings().table_cell_radius);
+    draw_tabular_cell_bg(g, colors().table_cell, &tb, global_settings().table_cell_radius);
 
   int left = tb.getWidth() / 2 - toggle_height(tabular) / 2;
   int pad = tabular? 3: 1;
@@ -783,7 +784,7 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
   {
     size_base = 0.9 * std::min(s.getHeight(), s.getWidth());
     scale_factor = size_base / s.getHeight();
-    draw_tabular_cell_bg(g, &s, global_settings().table_cell_radius);
+    draw_tabular_cell_bg(g, colors().table_cell, &s, global_settings().table_cell_radius);
   }
   
   float size = size_base - padding;
@@ -910,7 +911,7 @@ lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, f
   if(ps != nullptr && ps->param()->param->gui.tabular)
   {
     padh = 2;
-    draw_tabular_cell_bg(g, &s, global_settings().table_cell_radius);
+    draw_tabular_cell_bg(g, colors().table_cell, &s, global_settings().table_cell_radius);
   }
   
   // highlight

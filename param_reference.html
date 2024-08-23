@@ -371,22 +371,6 @@
 <td colspan='11' class='description'>Auxilliary controls to be used through automation and the CV matrices.</td>
 </tr>
 <tr>
-<td rowspan='2'>Mod Wheel</td>
-<td>Linked</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Accurate</td>
-<td>MIDI</td>
-<td>0 %</td>
-<td>100 %</td>
-<td>0 %</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Linked to MIDI mod wheel, updates on incoming MIDI events.</td>
-</tr>
-<tr>
 <td rowspan='2'>Pitch Bend</td>
 <td>Linked</td>
 <td>Yes</td>
@@ -401,6 +385,22 @@
 </tr>
 <tr>
 <td colspan='11' class='description'>Linked to MIDI pitch bend, updates on incoming MIDI events.</td>
+</tr>
+<tr>
+<td rowspan='2'>Mod Wheel</td>
+<td>Linked</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Accurate</td>
+<td>MIDI</td>
+<td>0 %</td>
+<td>100 %</td>
+<td>0 %</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Linked to MIDI mod wheel, updates on incoming MIDI events.</td>
 </tr>
 <tr>
 <td rowspan='2'>Pitch Bend Range</td>
@@ -893,9 +893,9 @@
 <td>Input</td>
 <td>Block</td>
 <td>Automate</td>
-<td>GFX 1 SVF KTrk</td>
+<td>GFX 1 SVF KeyTrk</td>
 <td>GOut Bal</td>
-<td>GFX 1 SVF KTrk</td>
+<td>GFX 1 SVF KeyTrk</td>
 <td>N/A</td>
 </tr>
 <tr>
@@ -1320,7 +1320,7 @@
 <td colspan='11' class='description'>Attack section length in bars.</td>
 </tr>
 <tr>
-<td rowspan='2'>A Slope</td>
+<td rowspan='2'>Att Slope</td>
 <td>DAHDR</td>
 <td>Yes</td>
 <td>1</td>
@@ -1368,7 +1368,7 @@
 <td colspan='11' class='description'>Decay section length in bars.</td>
 </tr>
 <tr>
-<td rowspan='2'>D Slope</td>
+<td rowspan='2'>Dcy Slope</td>
 <td>DAHDR</td>
 <td>Yes</td>
 <td>1</td>
@@ -1416,7 +1416,7 @@
 <td colspan='11' class='description'>Release section length in bars.</td>
 </tr>
 <tr>
-<td rowspan='2'>R Slope</td>
+<td rowspan='2'>Rls Slope</td>
 <td>DAHDR</td>
 <td>Yes</td>
 <td>1</td>
@@ -1826,9 +1826,9 @@
 <td>Input</td>
 <td>Voice</td>
 <td>Automate</td>
-<td>Poly</td>
-<td>Release</td>
-<td>Poly</td>
+<td>Polyphonic</td>
+<td>Release Mono</td>
+<td>Polyphonic</td>
 <td>N/A</td>
 </tr>
 <tr>
@@ -2334,38 +2334,6 @@
 <td colspan='11' class='description'>Oscillator cents, also reacts to Voice-In cents.</td>
 </tr>
 <tr>
-<td rowspan='2'>Hard Sync Semitones</td>
-<td>Sync Params</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Accurate</td>
-<td>Modulate</td>
-<td>0.00 Semi</td>
-<td>48.00 Semi</td>
-<td>0.00 Semi</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Pitch offset of the actual oscillator against the reference oscillator.</td>
-</tr>
-<tr>
-<td rowspan='2'>Hard Sync XOver Time</td>
-<td>Sync Params</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Voice</td>
-<td>Automate</td>
-<td>0.00 Ms</td>
-<td>5.00 Ms</td>
-<td>2.50 Ms</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Controls cross-over time between the synced and unsyced signal after a phase reset occurs.</td>
-</tr>
-<tr>
 <td rowspan='2'>Hard Sync On</td>
 <td>Sync On</td>
 <td>Yes</td>
@@ -2382,8 +2350,40 @@
 <td colspan='11' class='description'>Enables hard-sync against an internal reference oscillator.</td>
 </tr>
 <tr>
+<td rowspan='2'>Hard Sync Semitones</td>
+<td>Sync/Unisonc Params</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Accurate</td>
+<td>Modulate</td>
+<td>0.00 Semi</td>
+<td>48.00 Semi</td>
+<td>0.00 Semi</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Pitch offset of the actual oscillator against the reference oscillator.</td>
+</tr>
+<tr>
+<td rowspan='2'>Hard Sync XOver Time</td>
+<td>Sync/Unisonc Params</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Voice</td>
+<td>Automate</td>
+<td>0.00 Ms</td>
+<td>5.00 Ms</td>
+<td>2.50 Ms</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Controls cross-over time between the synced and unsyced signal after a phase reset occurs.</td>
+</tr>
+<tr>
 <td rowspan='2'>Unison Voices</td>
-<td>Unison</td>
+<td>Sync/Unisonc Params</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -2399,7 +2399,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Unison Spread</td>
-<td>Unison</td>
+<td>Sync/Unisonc Params</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -2415,7 +2415,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Unison Detune</td>
-<td>Unison</td>
+<td>Sync/Unisonc Params</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -2431,7 +2431,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Unison Phase</td>
-<td>Unison</td>
+<td>Sync/Unisonc Params</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -2863,7 +2863,7 @@
 <td colspan='11' class='description'>Selects the state-variable filter mode.</td>
 </tr>
 <tr>
-<td rowspan='2'>SV Filter KTrk</td>
+<td rowspan='2'>SV Filter KeyTrk</td>
 <td>SV Filter Left</td>
 <td>Yes</td>
 <td>1</td>
@@ -3015,7 +3015,7 @@
 <td>Voice</td>
 <td>Automate</td>
 <td>No Filter</td>
-<td>Shaper To Flt</td>
+<td>Shape 2 Filter</td>
 <td>No Filter</td>
 <td>N/A</td>
 </tr>
@@ -3023,7 +3023,7 @@
 <td colspan='11' class='description'>Affects where the filter is placed.<br/ >No Filter: filter is not used, schema is Input => Gain => Skew In => Shape => Skew Out => Clip => Mix.<br/>Filter To Shaper: filter before shape, schema is Input => Gain => Skew In => Filter => Shape => Skew Out => Clip => Mix.<br/>Shaper To Filter: filter after shape, schema is Input => Gain => Skew In => Shape => Filter => Skew Out => Clip => Mix.</td>
 </tr>
 <tr>
-<td rowspan='2'>Dist LPF Frequency</td>
+<td rowspan='2'>Dist LPF Freq</td>
 <td>Distortion Filter</td>
 <td>Yes</td>
 <td>1</td>
@@ -3039,7 +3039,7 @@
 <td colspan='11' class='description'>Lowpass filter frequency inside the oversampling stage.</td>
 </tr>
 <tr>
-<td rowspan='2'>Dist LPF Res</td>
+<td rowspan='2'>Dist LPF Reso</td>
 <td>Distortion Filter</td>
 <td>Yes</td>
 <td>1</td>
@@ -3490,7 +3490,7 @@
 <td colspan='11' class='description'>Selects the state-variable filter mode.</td>
 </tr>
 <tr>
-<td rowspan='2'>SV Filter KTrk</td>
+<td rowspan='2'>SV Filter KeyTrk</td>
 <td>SV Filter Left</td>
 <td>Yes</td>
 <td>1</td>
@@ -3642,7 +3642,7 @@
 <td>Block</td>
 <td>None</td>
 <td>No Filter</td>
-<td>Shaper To Flt</td>
+<td>Shape 2 Filter</td>
 <td>No Filter</td>
 <td>N/A</td>
 </tr>
@@ -3650,7 +3650,7 @@
 <td colspan='11' class='description'>Affects where the filter is placed.<br/ >No Filter: filter is not used, schema is Input => Gain => Skew In => Shape => Skew Out => Clip => Mix.<br/>Filter To Shaper: filter before shape, schema is Input => Gain => Skew In => Filter => Shape => Skew Out => Clip => Mix.<br/>Shaper To Filter: filter after shape, schema is Input => Gain => Skew In => Shape => Filter => Skew Out => Clip => Mix.</td>
 </tr>
 <tr>
-<td rowspan='2'>Dist LPF Frequency</td>
+<td rowspan='2'>Dist LPF Freq</td>
 <td>Distortion Filter</td>
 <td>Yes</td>
 <td>1</td>
@@ -3666,7 +3666,7 @@
 <td colspan='11' class='description'>Lowpass filter frequency inside the oversampling stage.</td>
 </tr>
 <tr>
-<td rowspan='2'>Dist LPF Res</td>
+<td rowspan='2'>Dist LPF Reso</td>
 <td>Distortion Filter</td>
 <td>Yes</td>
 <td>1</td>

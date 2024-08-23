@@ -60,6 +60,8 @@ V fix the osc mod text size in graph
 * bugfix: rerender graph on master in param hover?
 * drop some ugly-ass themes
 * show effective modulation in the ui for clap param mod
+* drag over combo paints ugly and wrong side
+* fix the fx version
 
 autobuilds:
 * ask paul
