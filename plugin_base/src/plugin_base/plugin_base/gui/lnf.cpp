@@ -493,10 +493,15 @@ lnf::drawLabel(Graphics& g, Label& label)
     auto area = getLabelBorderSize(label).subtractedFrom(label.getLocalBounds());
     g.setFont(getLabelFont(label));
 
-    // if we are part of a disabled combobox, paint with a grayscale control_text
+    // if we are part of a disabled combobox, paint with a grayscale/darker control_text
     auto parent_param_combo = dynamic_cast<param_combobox*>(label.getParentComponent());
     if (parent_param_combo && !parent_param_combo->isEnabled())
-      g.setColour(color_to_grayscale(colors().control_text));
+    {
+      if(parent_param_combo->param()->param->gui.tabular)
+        g.setColour(colors().control_text.darker());
+      else
+        g.setColour(color_to_grayscale(colors().control_text));
+    } 
     else
       g.setColour(label.findColour(Label::textColourId));
 
@@ -873,7 +878,7 @@ lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, f
   int padh = 2;
   auto ps = dynamic_cast<param_slider*>(&s);
   if (ps && ps->param()->param->gui.tabular)
-    padh = 6;
+    padh = 6; 
 
   float height = 8;
   float pos = (p - x) / w;
