@@ -656,7 +656,7 @@ lnf::drawComboBox(Graphics& g, int width, int height, bool, int, int, int, int, 
   else if (drop_action == drop_target_action::never) drop_icon = "[N/A]";
   else assert(false);
 
-  auto apply_mod_box = Rectangle<int>(x + 2, y, apply_mod_width, h); 
+  auto apply_mod_box = Rectangle<int>(x + w + 2, y, apply_mod_width, h); 
   g.setColour(Colours::darkgrey);
   g.fillRoundedRectangle(apply_mod_box.toFloat(), 2.0f);
   g.setColour(colors().control_text);
