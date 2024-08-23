@@ -231,7 +231,7 @@ voice_in_topo(int section, gui_position const& pos)
     make_param_gui_none()));
   pitch.info.description = "Absolute pitch modulation target for all Oscs.";
   auto& pb = result.params.emplace_back(make_param(
-    make_topo_info("{BF20BA77-A162-401B-9F32-92AE34841AB2}", true, "Pitch Bend", "PB", "PB", param_pb, 1),
+    make_topo_info("{BF20BA77-A162-401B-9F32-92AE34841AB2}", true, "Pitch Bend", "Pitch Bend", "Pitch Bend", param_pb, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 0, 0, true),
     make_param_gui_none()));
   pb.info.description = "Pitch-bend modulation target for all Oscs. Reacts to global pitchbend range.";

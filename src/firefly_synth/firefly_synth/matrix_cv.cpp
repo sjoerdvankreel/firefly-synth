@@ -165,7 +165,7 @@ init_audio_voice_default(plugin_state& state)
   state.set_text_at(module_vcv_audio_matrix, 0, param_target, 1, "VAudio Bal 1");
   state.set_text_at(module_vcv_audio_matrix, 0, param_type, 2, "AB Abs");
   state.set_text_at(module_vcv_audio_matrix, 0, param_source, 2, "Global PB");
-  state.set_text_at(module_vcv_audio_matrix, 0, param_target, 2, "Voice PB");
+  state.set_text_at(module_vcv_audio_matrix, 0, param_target, 2, "Voice Pitch Bend");
   state.set_text_at(module_vcv_audio_matrix, 0, param_type, 3, "Mul Abs");
   state.set_text_at(module_vcv_audio_matrix, 0, param_source, 3, "Note Velo");
   state.set_text_at(module_vcv_audio_matrix, 0, param_target, 3, "VOut Gain");
