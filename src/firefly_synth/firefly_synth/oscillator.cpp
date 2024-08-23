@@ -399,6 +399,7 @@ osc_topo(int section, gui_position const& pos)
     make_param_section_gui({ 0, 4, 2, 1 }, gui_dimension({ 1, 1 }, { 
       gui_dimension::auto_size_all, gui_dimension::auto_size_all, 1, 
       gui_dimension::auto_size_all, gui_dimension::auto_size_all, 1 }), gui_label_edit_cell_split::horizontal)));
+  basic.gui.merge_with_section = section_basic_pw;
   basic.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_basic; });
   basic.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_off || vs[0] == type_basic; });
   auto& basic_sin_on = result.params.emplace_back(make_param(
@@ -461,6 +462,7 @@ osc_topo(int section, gui_position const& pos)
   auto& basic_pw = result.sections.emplace_back(make_param_section(section_basic_pw,
     make_topo_tag_basic("{93984655-A05F-424D-B3E5-A0C94AF8D0B3}", "Basic PW"),
     make_param_section_gui({ 0, 5, 2, 1 }, gui_dimension({ 1, 1 }, { 1 }), gui_label_edit_cell_split::vertical)));
+  basic_pw.gui.merge_with_section = section_basic;
   basic_pw.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_basic; });
   basic_pw.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_off || vs[0] == type_basic; });
   auto& basic_sqr_pw = result.params.emplace_back(make_param(
