@@ -43,8 +43,8 @@ porta_items()
 {
   std::vector<list_item> result;
   result.emplace_back("{51C360E5-967A-4218-B375-5052DAC4FD02}", "Off");
-  result.emplace_back("{112A9728-8564-469E-95A7-34FE5CC7C8FC}", "On");
-  result.emplace_back("{0E3AF80A-F242-4176-8C72-C0C91D72AEBB}", "Auto");
+  result.emplace_back("{112A9728-8564-469E-95A7-34FE5CC7C8FC}", "On", "On (Constant Pitch)");
+  result.emplace_back("{0E3AF80A-F242-4176-8C72-C0C91D72AEBB}", "Auto", "Auto (Constant Time)");
   return result;
 }
 

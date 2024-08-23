@@ -78,15 +78,15 @@ type_items()
 {
   std::vector<list_item> result;
   result.emplace_back("{7CE8B8A1-0711-4BDE-BDFF-0F97BF16EB57}", "Off");
-  result.emplace_back("{C185C0A7-AE6A-4ADE-8171-119A96C24233}", "Mul Abs");
-  result.emplace_back("{51FBF610-2039-448E-96B0-3C5FDED5DC7C}", "Mul Rel");
-  result.emplace_back("{D9AEAC34-8E75-4EFD-91D3-6F9058226816}", "Mul Stk");
-  result.emplace_back("{000C0860-B191-4554-9249-85846B1AFFD1}", "Add Abs");
-  result.emplace_back("{169406D2-E86F-4275-A49F-59ED67CD7661}", "Add Rel");
-  result.emplace_back("{621467B6-CFB7-4801-9DF4-6F9A200AD098}", "Add Stk");
-  result.emplace_back("{23FB17DA-B98B-49FF-8D46-4E5FE7F486D6}", "AB Abs");
-  result.emplace_back("{6708DDD1-14EA-4E1D-8A1F-E4FFE76A87F0}", "AB Rel");
-  result.emplace_back("{1CCAB37F-0AA7-4A77-8C4C-28838970665B}", "AB Stk");
+  result.emplace_back("{C185C0A7-AE6A-4ADE-8171-119A96C24233}", "Mul Abs", "Multiply Absolute");
+  result.emplace_back("{51FBF610-2039-448E-96B0-3C5FDED5DC7C}", "Mul Rel", "Multiply Relative To Param");
+  result.emplace_back("{D9AEAC34-8E75-4EFD-91D3-6F9058226816}", "Mul Stk", "Multiply Relative To Stacked Modulation");
+  result.emplace_back("{000C0860-B191-4554-9249-85846B1AFFD1}", "Add Abs", "Add Absolute");
+  result.emplace_back("{169406D2-E86F-4275-A49F-59ED67CD7661}", "Add Rel", "Add Relative To Param");
+  result.emplace_back("{621467B6-CFB7-4801-9DF4-6F9A200AD098}", "Add Stk", "Add Relative To Stacked Modulation");
+  result.emplace_back("{23FB17DA-B98B-49FF-8D46-4E5FE7F486D6}", "AB Abs", "Bipolar Add Absolute");
+  result.emplace_back("{6708DDD1-14EA-4E1D-8A1F-E4FFE76A87F0}", "AB Rel", "Bipolar Add Relative To Param");
+  result.emplace_back("{1CCAB37F-0AA7-4A77-8C4C-28838970665B}", "AB Stk", "Bipolar Add Relative To Stacked Modulation");
   return result;
 }
 

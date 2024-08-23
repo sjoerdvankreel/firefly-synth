@@ -36,8 +36,8 @@ V do longest possible names in menus
 V check all the module ui
 V not colored text in de matrix combos
 V re-check all the names in menus and hosts and matrices
+V do long names for combo items in tooltip
 * tooltip in the param ref
-* do long names for combo items in tooltip
 * simplify the fx version just drop the lower section and disable some stuff
 * rename ff fx to firefly fx not firefly synth fx (in the header)
 * drop the old themes

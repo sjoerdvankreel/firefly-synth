@@ -150,16 +150,16 @@ static std::vector<list_item>
 meq_flt_mode_items()
 {
   std::vector<list_item> result;
-  result.emplace_back("{D375AAEB-461A-43B4-A09A-83D57C80EEDB}", "Off");
-  result.emplace_back("{59611761-EE2B-47B9-8400-6AA86A4D6B2E}", "LP");
-  result.emplace_back("{B5B8C797-6CA9-4822-B906-3DEECEB75237}", "HP");
-  result.emplace_back("{55DB2D11-F20E-4284-A3F7-06A66BF292F1}", "BP");
-  result.emplace_back("{E27BDD78-02A1-495D-9EDE-B3E9ABFE34F6}", "BS");
-  result.emplace_back("{05A53330-ED0A-4E33-95DD-F8A509A4DD7E}", "AP");
-  result.emplace_back("{634D6AC1-889D-4128-B1C0-8B734494E47F}", "PQ");
-  result.emplace_back("{0D6B841F-CF91-4D2D-9EFD-E12CD4427363}", "BL");
-  result.emplace_back("{CC57B060-4B05-44F6-AAFA-4CFD43E5CCC7}", "LS");
-  result.emplace_back("{393EE610-F904-4BAF-A66E-0BB0A39EA5E7}", "HS");
+  result.emplace_back("{D375AAEB-461A-43B4-A09A-83D57C80EEDB}", "Off", "Off");
+  result.emplace_back("{59611761-EE2B-47B9-8400-6AA86A4D6B2E}", "LP", "Low Pass");
+  result.emplace_back("{B5B8C797-6CA9-4822-B906-3DEECEB75237}", "HP", "High Pass");
+  result.emplace_back("{55DB2D11-F20E-4284-A3F7-06A66BF292F1}", "BP", "Band Pass");
+  result.emplace_back("{E27BDD78-02A1-495D-9EDE-B3E9ABFE34F6}", "BS", "Band Stop");
+  result.emplace_back("{05A53330-ED0A-4E33-95DD-F8A509A4DD7E}", "AP", "All Pass");
+  result.emplace_back("{634D6AC1-889D-4128-B1C0-8B734494E47F}", "PQ", "Peaking EQ");
+  result.emplace_back("{0D6B841F-CF91-4D2D-9EFD-E12CD4427363}", "BL", "Bell");
+  result.emplace_back("{CC57B060-4B05-44F6-AAFA-4CFD43E5CCC7}", "LS", "Low Shelf");
+  result.emplace_back("{393EE610-F904-4BAF-A66E-0BB0A39EA5E7}", "HS", "High Shelf");
   return result;
 }
 

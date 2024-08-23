@@ -69,12 +69,12 @@ static std::vector<list_item>
 type_items()
 {
   std::vector<list_item> result;
-  result.emplace_back("{9C9FFCAD-09A5-49E6-A083-482C8A3CF20B}", "Off");
-  result.emplace_back("{9185A6F4-F9EF-4A33-8462-1B02A25FDF29}", "Basic");
-  result.emplace_back("{5DDB5617-85CC-4BE7-8295-63184BA56191}", "DSF");
-  result.emplace_back("{E6814747-6CEE-47DA-9878-890D0A5DC5C7}", "K+S1");
-  result.emplace_back("{43DC7825-E437-4792-88D5-6E76241493A1}", "K+S2");
-  result.emplace_back("{8B81D211-2A23-4D5D-89B0-24DA3B7D7E2C}", "Static");
+  result.emplace_back("{9C9FFCAD-09A5-49E6-A083-482C8A3CF20B}", "Off", "Off");
+  result.emplace_back("{9185A6F4-F9EF-4A33-8462-1B02A25FDF29}", "Basic", "Basic Analog");
+  result.emplace_back("{5DDB5617-85CC-4BE7-8295-63184BA56191}", "DSF", "Discrete Summation Formulae");
+  result.emplace_back("{E6814747-6CEE-47DA-9878-890D0A5DC5C7}", "K+S1", "Karplus-Strong");
+  result.emplace_back("{43DC7825-E437-4792-88D5-6E76241493A1}", "K+S2", "Karplus-Strong With Midpoint Adjustment");
+  result.emplace_back("{8B81D211-2A23-4D5D-89B0-24DA3B7D7E2C}", "Static", "Static (Random Noise)");
   return result;
 }
 
@@ -82,11 +82,11 @@ static std::vector<list_item>
 random_svf_items()
 {
   std::vector<list_item> result;
-  result.emplace_back("{E4193E9C-3305-42AE-90D4-A9A5554E43EA}", "LPF");
-  result.emplace_back("{D51180AF-5D49-4BB6-BE73-73EF753A15A8}", "HPF");
-  result.emplace_back("{F2DCD276-E111-4A63-8701-6751438A1FAA}", "BPF");
-  result.emplace_back("{CC4012D9-272E-4E33-96EB-AF1ADBF0E879}", "BSF");
-  result.emplace_back("{C4025CB0-5B1A-4B5D-A293-CAD380F264FA}", "PEQ");
+  result.emplace_back("{E4193E9C-3305-42AE-90D4-A9A5554E43EA}", "LPF", "Low Pass");
+  result.emplace_back("{D51180AF-5D49-4BB6-BE73-73EF753A15A8}", "HPF", "High Pass");
+  result.emplace_back("{F2DCD276-E111-4A63-8701-6751438A1FAA}", "BPF", "Band Pass");
+  result.emplace_back("{CC4012D9-272E-4E33-96EB-AF1ADBF0E879}", "BSF", "Band Stop");
+  result.emplace_back("{C4025CB0-5B1A-4B5D-A293-CAD380F264FA}", "PEQ", "Peaking EQ");
   return result;
 }
 

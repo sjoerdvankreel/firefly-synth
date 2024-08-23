@@ -42,9 +42,9 @@ static std::vector<list_item>
 fm_mode_items()
 {
   std::vector<list_item> result;
-  result.emplace_back("{B5CD2CE9-89C0-4E15-87E9-D8EF4D399EE6}", "Tru");
-  result.emplace_back("{0E688960-E59A-4E78-8812-6BADDAF881B8}", "Fwd");
-  result.emplace_back("{4B6716B2-4422-40AE-8AF4-2B31FFCC7E8C}", "Bwd");
+  result.emplace_back("{B5CD2CE9-89C0-4E15-87E9-D8EF4D399EE6}", "Tru", "Through-Zero");
+  result.emplace_back("{0E688960-E59A-4E78-8812-6BADDAF881B8}", "Fwd", "Forward");
+  result.emplace_back("{4B6716B2-4422-40AE-8AF4-2B31FFCC7E8C}", "Bwd", "Backward");
   return result;
 }
 
