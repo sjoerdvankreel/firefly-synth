@@ -871,6 +871,10 @@ void
 lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, float, Slider::SliderStyle style, Slider& s)
 {
   int padh = 2;
+  auto ps = dynamic_cast<param_slider*>(&s);
+  if (ps && ps->param()->param->gui.tabular)
+    padh = 6;
+
   float height = 8;
   float pos = (p - x) / w;
   bool bipolar = s.getMinimum() < 0;
@@ -879,7 +883,6 @@ lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, f
   float width = s.getWidth() - padh;
   float centerx = left + width / 2;
 
-  auto ps = dynamic_cast<param_slider*>(&s);
   float min_mod_pos = ps ? ps->min_mod_indicator() : -1.0f;
   float max_mod_pos = ps ? ps->max_mod_indicator() : -1.0f;
 
@@ -909,10 +912,7 @@ lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, f
   // in table mode dont align right against the next one
   // normally thats not a point because theres labels in between
   if(ps != nullptr && ps->param()->param->gui.tabular)
-  {
-    padh = 2;
     draw_tabular_cell_bg(g, colors().table_cell, &s, global_settings().table_cell_radius);
-  }
   
   // highlight
   g.setGradientFill(ColourGradient(colors().slider_highlight.withAlpha(0.0f), left, 0, colors().slider_highlight, width, 0, false));
