@@ -794,6 +794,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_topo_tag_basic("{EEB74521-81AC-418B-901E-8ED8EE472A9E}", "Distortion Filter"),
     make_param_section_gui({ 0, 1, 2, 1 }, { { 1, 1 }, {
       gui_dimension::auto_size_all, gui_dimension::auto_size_all } }, gui_label_edit_cell_split::horizontal)));
+  dist_flt.gui.merge_with_section = section_dist_skew;
   dist_flt.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   auto& dist_lp = result.params.emplace_back(make_param(
     make_topo_info("{C82BC20D-2F1E-4001-BCFB-0C8945D1B329}", true, "Dist LPF Frequency", "LPF", "Dst LPF", param_dist_lp_frq, 1),
@@ -814,6 +815,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_topo_tag_basic("{9BA32ACF-FA53-450A-A280-F0F76F30F240}", "Distortion Skew"),
     make_param_section_gui({ 0, 2, 2, 1 }, { { 1, 1 }, { 
       gui_dimension::auto_size_all, gui_dimension::auto_size_all, gui_dimension::auto_size_all } }, gui_label_edit_cell_split::horizontal)));
+  dist_skew.gui.merge_with_section = section_dist_flt;
   dist_skew.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   auto& dist_skew_in = result.params.emplace_back(make_param(
     make_topo_info("{DAF94A21-BCA4-4D49-BEC0-F0D70CE4F118}", true, "Dist Skew X Mode", "Skew X", "Dst SkX", param_dist_skew_x, 1),
