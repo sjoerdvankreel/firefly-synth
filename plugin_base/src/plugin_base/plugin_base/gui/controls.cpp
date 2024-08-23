@@ -169,9 +169,9 @@ param_drag_label::paint(Graphics& g)
   float x = (w - _size) / 2.0f;
   float y = (h - _size) / 2.0f;
   if(isEnabled())
-    g.setColour(_lnf->colors().control_text);
+    g.setColour(_lnf->colors().label_text);
   else
-    g.setColour(_lnf->colors().control_text.darker(0.67f));
+    g.setColour(_lnf->colors().label_text.withAlpha(0.5f));
   g.fillEllipse(x, y, _size, _size);
 }
 

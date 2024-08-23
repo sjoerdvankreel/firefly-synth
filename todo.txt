@@ -30,8 +30,8 @@ V gmatrix to the top, vmatrix to the bottom
 V make matrix tab headers match new section colors
 V mts-esp indicator is too dark
 V do output meters not text (cpu, voices etc)
+V change multi eq drag handle
 * simplify the fx version just drop the lower section and disable some stuff
-* change multi eq drag handle
 * check all the module ui
 * rename ff fx to firefly fx not firefly synth fx (in the header)
 * not colored text in de matrix combos
