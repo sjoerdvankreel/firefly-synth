@@ -55,7 +55,7 @@ monitor_topo(int section, gui_position const& pos, int polyphony, bool is_fx)
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   mts_status.info.description = "MTS-ESP master status.";
   auto& drained = result.params.emplace_back(make_param(
-    make_topo_info("{C10AEC7B-A79D-4236-B65E-BBC444FAC854}", true, "Voices Drained", "Drain", "Drain", param_drain, 1),
+    make_topo_info("{C10AEC7B-A79D-4236-B65E-BBC444FAC854}", true, "Voices Drained", "Drained", "Drained", param_drain, 1),
     make_param_dsp_output(), make_domain_toggle(false),
     make_param_gui_single(section_main, gui_edit_type::output_toggle, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
