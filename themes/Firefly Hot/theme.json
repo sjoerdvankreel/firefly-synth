@@ -101,6 +101,12 @@
       }
     },
     {
+      "module_sections": ["Global"],
+      "settings": {
+        "header_width": "378"
+      }
+    },
+    {
       "module_sections": ["Osc Mod", "VAudio", "VCV-A", "VCV-CV"],
       "colors": {
         "tab_text": "FFFFA040",
@@ -134,6 +140,12 @@
       "settings": {
         "tab_width": "67",
         "header_width": "40"
+      }
+    },
+    {
+      "module_sections": ["Voice"],
+      "settings": {
+        "header_width": "378"
       }
     }
   ]

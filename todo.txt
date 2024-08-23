@@ -44,11 +44,11 @@ V drop some ugly-ass themes
 V drag over combo paints ugly and wrong side
 V prettify knobs, sliders, combos, toggles, menus
 V fix the main graph
+V extend " voice"/"global" tab headers to 100%
 * simplify the fx version just drop the lower section and disable some stuff
 * rename ff fx to firefly fx not firefly synth fx (in the header)
 * hot/cold + light/dark
 * less ugly audio graphs
-* extend " voice"/"global" tab headers to 100%
 * move smoothing to somewhere else
 * show clap mod indicator
 * repaint on waveform change (free running or random-per-voice)
@@ -61,6 +61,7 @@ V fix the main graph
 * fix the fx version
 * drop the smoothing module, make the settings module
 * fix the todos
+* check if global header is extended
 
 autobuilds:
 * ask paul
