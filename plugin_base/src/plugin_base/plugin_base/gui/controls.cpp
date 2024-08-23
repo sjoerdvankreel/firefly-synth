@@ -782,8 +782,12 @@ autofit_combobox(lnf, param->param->gui.edit_type == gui_edit_type::autofit_list
 void 
 param_combobox::own_param_changed(plain_value plain)
 {
+  std::string value;
   setSelectedId(plain.step() + 1 - _param->param->domain.min, dontSendNotification);
-  std::string value = _param->param->domain.plain_to_text(false, plain);
+  if(_param->param->domain.type == domain_type::item)
+    value = _param->param->domain.plain_to_item_tooltip(plain);
+  else
+    value = _param->param->domain.plain_to_text(false, plain);
   setTooltip(_param->info.name + ": " + value);
 }
 

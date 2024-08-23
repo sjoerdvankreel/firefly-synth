@@ -38,8 +38,8 @@ trigger_items()
 {
   std::vector<list_item> result;
   result.emplace_back("{5600C9FE-6122-47B3-A625-9E059E56D949}", "Legato");
-  result.emplace_back("{0EAFA1E3-4707-4E8C-B16D-5E16955F8962}", "Retrig");
-  result.emplace_back("{A49D48D7-D664-4A52-BD82-07A488BDB4C8}", "Multi");
+  result.emplace_back("{0EAFA1E3-4707-4E8C-B16D-5E16955F8962}", "Retrigger");
+  result.emplace_back("{A49D48D7-D664-4A52-BD82-07A488BDB4C8}", "Multi-trigger");
   return result;
 }
 

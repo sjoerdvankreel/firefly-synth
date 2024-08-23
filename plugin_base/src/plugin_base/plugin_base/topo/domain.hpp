@@ -51,12 +51,14 @@ struct param_topo_mapping final {
 struct list_item final {
   std::string id = {};
   std::string name = {};
+  std::string tooltip = {};
   // in case of auto binding
   param_topo_mapping param_topo = {};
 
   void validate() const;
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(list_item);
   list_item(std::string const& id, std::string const& name);
+  list_item(std::string const& id, std::string const& name, std::string const& tooltip);
 };
 
 // parameter bounds
@@ -95,6 +97,7 @@ struct param_domain final {
 
   // parse and format
   std::string raw_to_text(bool io, double raw) const;
+  std::string plain_to_item_tooltip(plain_value plain) const;
   std::string plain_to_text(bool io, plain_value plain) const;
   std::string normalized_to_text(bool io, normalized_value normalized) const;
   bool text_to_plain(bool io, std::string const& textual, plain_value& plain) const;
@@ -114,6 +117,10 @@ struct param_domain final {
 inline list_item::
 list_item(std::string const& id, std::string const& name) :
 id(id), name(name) {}
+
+inline list_item::
+list_item(std::string const& id, std::string const& name, std::string const& tooltip) :
+id(id), name(name), tooltip(tooltip) {}
 
 inline double 
 param_domain::default_raw(int module_slot, int param_slot) const

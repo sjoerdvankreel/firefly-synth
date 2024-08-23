@@ -32,21 +32,19 @@ V mts-esp indicator is too dark
 V do output meters not text (cpu, voices etc)
 V change multi eq drag handle
 V fix the osc mod text size in graph
+V do longest possible names in menus
+V check all the module ui
+V not colored text in de matrix combos
+V re-check all the names in menus and hosts and matrices
+* tooltip in the param ref
 * do long names for combo items in tooltip
-* do longest possible names in menus
 * simplify the fx version just drop the lower section and disable some stuff
-* check all the module ui
 * rename ff fx to firefly fx not firefly synth fx (in the header)
-* not colored text in de matrix combos
 * drop the old themes
 * what about graph bg images?
-* make some of the param sections darker ?
-* check all the other colors / remove the gradients
 * hot/cold + light/dark
 * less ugly audio graphs
-* uppercase some stuff in the menus to match the main gui
 * extend " voice"/"global" tab headers to 100%
-* re-check all the names in menus and hosts and matrices
 * move smoothing to somewhere else
 * show clap mod indicator
 * repaint on waveform change (free running or random-per-voice)
