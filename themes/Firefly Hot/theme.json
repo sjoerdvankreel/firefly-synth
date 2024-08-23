@@ -114,11 +114,8 @@
       }
     },
     {
-      "module_sections": ["Osc"],
-      "settings": {
-        "tab_width": "67",
-        "header_width": "40"
-      },
+      "custom_sections": ["Oscillator Graph", "Voice FX Graph", "Voice LFO Graph", "Envelope Graph", "Voice Matrix Graphs"],
+      "module_sections": ["Voice", "Voice Out", "Osc", "Voice FX", "Voice LFO", "Env"],
       "colors": {
         "tab_text": "FFFFA040",
         "slider_automation": "FFFFA040",
@@ -133,19 +130,10 @@
       }
     },
     {
-      "custom_sections": ["Oscillator Graph", "Voice FX Graph", "Voice LFO Graph", "Envelope Graph", "Voice Matrix Graphs"],
-      "module_sections": ["Voice", "Voice Out", "Voice FX", "Voice LFO", "Env"],
-      "colors": {
-        "tab_text": "FFFFA040",
-        "slider_automation": "FFFFA040",
-        "control_text": "FFFFA040",
-        "control_tick": "FFFFA040",
-        "bubble_outline": "FFFFA040",
-        "scrollbar_thumb": "FFFFA040",
-        "graph_area": "80FFA040",
-        "graph_line": "FFFFA040",
-        "table_header": "FFCCCCCC",
-        "popup_text_highlighted": "FFFFA040"
+      "module_sections": ["Osc"],
+      "settings": {
+        "tab_width": "67",
+        "header_width": "40"
       }
     }
   ]
