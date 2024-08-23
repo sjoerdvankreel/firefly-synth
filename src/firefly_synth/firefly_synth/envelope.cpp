@@ -308,9 +308,10 @@ env_topo(int section, gui_position const& pos)
   result.engine_factory = [](auto const&, int, int) { return std::make_unique<env_engine>(); };
   result.state_converter_factory = [](auto desc) { return std::make_unique<env_state_converter>(desc); };
 
-  result.sections.emplace_back(make_param_section(section_on,
+  auto& on_section = result.sections.emplace_back(make_param_section(section_on,
     make_topo_tag_basic("{6BC7E26F-C687-4F38-AC60-1661714A0538}", "On"),
     make_param_section_gui({ 0, 0, 2, 1 }, { { 1, 1 }, { gui_dimension::auto_size_all } }, gui_label_edit_cell_split::vertical)));
+  on_section.gui.merge_with_section = section_type;
   auto& on = result.params.emplace_back(make_param(
     make_topo_info_basic("{5EB485ED-6A5B-4A91-91F9-15BDEC48E5E6}", "On", param_on, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_toggle(false),
@@ -320,9 +321,10 @@ env_topo(int section, gui_position const& pos)
   on.gui.bindings.enabled.bind_slot([](int slot) { return slot > 0; });
   on.info.description = "Toggles envelope on/off.";
 
-  result.sections.emplace_back(make_param_section(section_type,
+  auto& type_section = result.sections.emplace_back(make_param_section(section_type,
     make_topo_tag_basic("{25E441B9-D023-4312-92C0-9B3E64D4DAF9}", "Type"),
     make_param_section_gui({ 0, 1, 2, 1 }, { { 1, 1 }, { gui_dimension::auto_size_all, 1 } }, gui_label_edit_cell_split::horizontal)));
+  type_section.gui.merge_with_section = section_on;
   auto& type = result.params.emplace_back(make_param(
     make_topo_info_basic("{E6025B4A-495C-421F-9A9A-8D2A247F94E7}", "Type", param_type, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_item(type_items(), ""),
@@ -345,9 +347,10 @@ env_topo(int section, gui_position const& pos)
     "Exponential bipolar - vertically splits section in 2 exponential parts.<br/>" +
     "Exponential split - horizontally and vertically splits section in 2 exponential parts to generate smooth curves.";
 
-  result.sections.emplace_back(make_param_section(section_sync,
+  auto& sync_section = result.sections.emplace_back(make_param_section(section_sync,
     make_topo_tag_basic("{B9A937AF-6807-438F-8F79-506C47F621BD}", "Sync"),
     make_param_section_gui({ 0, 2, 2, 1 }, { { 1, 1 }, { gui_dimension::auto_size_all, 1 } }, gui_label_edit_cell_split::horizontal)));
+  sync_section.gui.merge_with_section = section_trigger;
   auto& sync = result.params.emplace_back(make_param(
     make_topo_info("{4E2B3213-8BCF-4F93-92C7-FA59A88D5B3C}", true, "Tempo Sync", "Snc", "Snc", param_sync, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_toggle(false),
@@ -363,9 +366,10 @@ env_topo(int section, gui_position const& pos)
   filter.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
   filter.info.description = "Lowpass filter to smooth out rough edges.";
 
-  result.sections.emplace_back(make_param_section(section_trigger,
+  auto& trig_section = result.sections.emplace_back(make_param_section(section_trigger,
     make_topo_tag_basic("{2764871C-8E30-4780-B804-9E0FDE1A63EE}", "Trigger"),
-    make_param_section_gui({ 0, 3, 2, 1 }, { { 1, 1 }, { gui_dimension::auto_size, 1 } }, gui_label_edit_cell_split::horizontal)));
+    make_param_section_gui({ 0, 3, 2, 1 }, { { 1, 1 }, { gui_dimension::auto_size_all, 1 } }, gui_label_edit_cell_split::horizontal)));
+  trig_section.gui.merge_with_section = section_sync;
   auto& trigger = result.params.emplace_back(make_param(
     make_topo_info_basic("{84B6DC4D-D2FF-42B0-992D-49B561C46013}", "Trigger", param_trigger, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_item(trigger_items(), ""),
@@ -379,7 +383,7 @@ env_topo(int section, gui_position const& pos)
     "Multi - upon note-on event, envelope will start over from the current level.<br/>" + 
     "To avoid clicks it is best to use release-monophonic mode with multi-triggered envelopes.";
   auto& sustain = result.params.emplace_back(make_param(
-    make_topo_info("{E5AB2431-1953-40E4-AFD3-735DB31A4A06}", true, "Sustain", "Sustn", "Stn", param_sustain, 1),
+    make_topo_info("{E5AB2431-1953-40E4-AFD3-735DB31A4A06}", true, "Sustain", "Sustain", "Sustain", param_sustain, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
     make_param_gui_single(section_trigger, gui_edit_type::hslider, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
