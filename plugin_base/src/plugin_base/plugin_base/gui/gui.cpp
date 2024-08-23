@@ -738,12 +738,88 @@ plugin_gui::make_modules(module_desc const* slots)
 Component&
 plugin_gui::make_param_sections(module_desc const& module)
 {
+  std::set<int> merged_sections = {};
   auto const& topo = *module.module;
   if (!topo.gui.param_sections_tabbed)
   {
     auto& result = make_component<grid_component>(topo.gui.dimension, margin_vsection, 0, topo.gui.autofit_row, topo.gui.autofit_column);
     for (int s = 0; s < topo.sections.size(); s++)
-      result.add(make_param_section(module, topo.sections[s], topo.sections[s].gui.position.column == 0), topo.sections[s].gui.position);
+      if (topo.sections[s].gui.merge_with_section == -1)
+        result.add(make_param_section(module, topo.sections[s], topo.sections[s].gui.position.column == 0), topo.sections[s].gui.position);
+      else
+        merged_sections.insert(topo.sections[s].gui.merge_with_section);
+    while(!merged_sections.empty())
+    {
+      int this_index = *merged_sections.begin();
+      int that_index = topo.sections[this_index].gui.merge_with_section;
+      auto const& this_topo_gui = topo.sections[this_index].gui;
+      auto const& that_topo_gui = topo.sections[that_index].gui;
+      merged_sections.erase(this_index);
+      merged_sections.erase(that_index);
+      
+      int min_row = std::min(this_topo_gui.position.row, that_topo_gui.position.row);
+      int min_col = std::min(this_topo_gui.position.column, that_topo_gui.position.column);
+      int this_rowspan = this_topo_gui.position.row_span;
+      int that_rowspan = that_topo_gui.position.row_span;
+      int this_colspan = this_topo_gui.position.column_span;
+      int that_colspan = that_topo_gui.position.column_span;
+      
+      bool merged_horizontal = this_topo_gui.position.row == that_topo_gui.position.row;
+      bool merged_vertical = this_topo_gui.position.column == that_topo_gui.position.column;
+      int merged_colspan = merged_horizontal ? this_colspan + that_colspan : 1;
+      int merged_rowspan = merged_vertical ? this_rowspan + that_rowspan : 1;
+      assert(merged_horizontal != merged_vertical);
+      if (merged_horizontal) assert(this_rowspan == that_rowspan);
+      if (merged_vertical) assert(this_colspan == that_colspan);
+      auto& this_gui = make_param_section(module, topo.sections[this_index], this_topo_gui.position.column == 0);
+      auto& that_gui = make_param_section(module, topo.sections[that_index], that_topo_gui.position.column == 0);
+      
+      std::vector<int> merged_row_sizes = {};
+      std::vector<int> merged_column_sizes = {};
+      if (merged_horizontal)
+      {
+        for (int i = 0; i < this_rowspan; i++)
+          merged_row_sizes.push_back(1);
+        for (int i = min_col; i < min_col + merged_colspan; i++)
+          merged_column_sizes.push_back(topo.gui.dimension.column_sizes[i]);
+      }
+      else
+      {
+        for (int i = 0; i < this_colspan; i++)
+          merged_column_sizes.push_back(1);
+        for (int i = min_row; i < min_row + merged_rowspan; i++)
+          merged_row_sizes.push_back(topo.gui.dimension.row_sizes[i]);
+      }
+
+      auto& merged_grid = make_component<grid_component>(gui_dimension(merged_row_sizes, merged_column_sizes), 0, 0, 0, 0);
+      if (merged_horizontal)
+      {
+        if (this_topo_gui.position.column < that_topo_gui.position.column)
+        {
+          merged_grid.add(this_gui, { 0, 0, this_rowspan, this_topo_gui.position.column_span });
+          merged_grid.add(that_gui, { 0, this_topo_gui.position.column_span, this_rowspan, that_topo_gui.position.column_span });
+        }
+        else
+        {
+          merged_grid.add(that_gui, { 0, 0, this_rowspan, that_topo_gui.position.column_span });
+          merged_grid.add(this_gui, { 0, that_topo_gui.position.column_span, this_rowspan, this_topo_gui.position.column_span });
+        }
+      }
+      else
+      {
+        if (this_topo_gui.position.row < that_topo_gui.position.row)
+        {
+          merged_grid.add(this_gui, { 0, 0, this_topo_gui.position.row_span, this_colspan });
+          merged_grid.add(that_gui, { this_topo_gui.position.row_span, 0, that_topo_gui.position.row_span, this_colspan });
+        }
+        else
+        {
+          merged_grid.add(that_gui, { 0, 0, that_topo_gui.position.row_span, 1 });
+          merged_grid.add(this_gui, { that_topo_gui.position.row_span, 0, this_topo_gui.position.row_span, 1 });
+        }
+      }
+      result.add(merged_grid, { min_row, min_col, (int)merged_row_sizes.size(), (int)merged_column_sizes.size() });
+    }
     add_hover_listener(result, gui_hover_type::module, module.info.global);
     return result;
   }
@@ -896,7 +972,7 @@ plugin_gui::make_param_section(module_desc const& module, param_section const& s
         
   if (section.gui.scroll_mode == gui_scroll_mode::none)
   {
-    if (section.gui.wrap_in_container)
+    if (section.gui.wrap_in_container && section.gui.merge_with_section == -1)
       return make_component<param_section_container>(this, _lnf.get(), &module, &section, &grid, first_horizontal ? 0 : margin_hsection);
     return grid;
   }
