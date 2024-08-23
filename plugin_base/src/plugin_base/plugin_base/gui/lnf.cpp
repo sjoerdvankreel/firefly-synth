@@ -93,6 +93,7 @@ override_colors(gui_colors const& base, var const& json)
   result.label_text = override_color_if_present(json, "label_text", result.label_text);
   result.table_header = override_color_if_present(json, "table_header", result.table_header);
   result.table_cell = override_color_if_present(json, "table_cell", result.table_cell);
+  result.table_header_cell = override_color_if_present(json, "table_header_cell", result.table_header_cell);
   result.control_tick = override_color_if_present(json, "control_tick", result.control_tick);
   result.control_text = override_color_if_present(json, "control_text", result.control_text);
   result.control_outline = override_color_if_present(json, "control_outline", result.control_outline);
@@ -486,7 +487,7 @@ lnf::drawLabel(Graphics& g, Label& label)
      
   if (auto afl = dynamic_cast<autofit_label*>(&label))
     if (afl->tabular())
-      draw_tabular_cell_bg(g, colors().table_cell, & label, global_settings().table_cell_radius);
+      draw_tabular_cell_bg(g, colors().table_header_cell, & label, global_settings().table_cell_radius);
 
   if (!label.isBeingEdited()) 
   {

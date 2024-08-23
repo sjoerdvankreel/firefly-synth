@@ -238,7 +238,7 @@ audio_audio_matrix_topo(
   amount.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
   amount.info.description = "Controls route gain.";
   auto& bal = result.params.emplace_back(make_param(
-    make_topo_info("{941C6961-044F-431E-8296-C5303EAFD11D}", true, "Balance", "Bal", "Bal", param_bal, route_count),
+    make_topo_info("{941C6961-044F-431E-8296-C5303EAFD11D}", true, "Balance", "Balance", "Balance", param_bal, route_count),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 0, 0, true),
     make_param_gui(section_main, gui_edit_type::hslider, param_layout::vertical, { 0, 4 },
       make_label(gui_label_contents::drag, gui_label_align::left, gui_label_justify::center))));
