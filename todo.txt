@@ -15,7 +15,7 @@ on release:
 9 check if need update github social preview
 10 dont forget to tag
 11 make a github release
-12 update kvr
+12 update kvr 
 
 ui-fixes-again:
 V make all green defaults
