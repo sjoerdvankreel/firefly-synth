@@ -1,7 +1,7 @@
-### ?, ? - ?, ?.
+### ?, ? - V1.8.9.
 
-- Rename master->global (trying to get a consistent terminology, voice vs global. "Master" and "Global" were interchangeable everywhere).
--
+- Major UI overhaul, again.
+- Dropped the existing themes (sorry!) and added 2 new ones.
 
 ### August 21, 2024 - V1.8.8.
 
