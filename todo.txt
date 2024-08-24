@@ -17,37 +17,11 @@ on release:
 11 make a github release
 12 update kvr 
 
-ui-fixes-again:
-V make all green defaults
-V do not do label disabled color
-V deal with disabled sliders
-V color-on-gray not gray-on-color
-V do monitor like 1.8.4
-V do master in like 1.8.4
-V rethink section colors global red/orange voice blue/cyan main gray
-V do load/save like 1.8.4
-V gmatrix to the top, vmatrix to the bottom
-V make matrix tab headers match new section colors
-V mts-esp indicator is too dark
-V do output meters not text (cpu, voices etc)
-V change multi eq drag handle
-V fix the osc mod text size in graph
-V do longest possible names in menus
-V check all the module ui
-V not colored text in de matrix combos
-V re-check all the names in menus and hosts and matrices
-V do long names for combo items in tooltip
-V drop the old themes
-V what about graph bg images?
-V drop the header text ?
-V drop some ugly-ass themes
-V drag over combo paints ugly and wrong side
-V prettify knobs, sliders, combos, toggles, menus
-V fix the main graph
-V extend " voice"/"global" tab headers to 100%
-V hot/cold
-* simplify the fx version just drop the lower section and disable some stuff
-* rename ff fx to firefly fx not firefly synth fx (in the header)
+autobuilds:
+* ask paul
+* integrate https://github.com/surge-synthesizer/monique-monosynth/blob/main/.github/workflows/build-pr.yml
+
+ui-vnext:
 * less ugly audio graphs
 * move smoothing to somewhere else
 * show clap mod indicator
@@ -63,10 +37,6 @@ V hot/cold
 * fix the todos
 * check if global header is extended
 * move some params from global in/smooth to the settings module (including tuning)
-
-autobuilds:
-* ask paul
-* integrate https://github.com/surge-synthesizer/monique-monosynth/blob/main/.github/workflows/build-pr.yml
 
 wishlist:
 filter microtuning
