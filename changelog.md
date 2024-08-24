@@ -1,3 +1,12 @@
+### August 24, 2024 - V1.8.9.
+
+- Major UI overhaul, again.
+- Output CPU/Gain is now meters instead of text.
+- Dropped the existing themes and replaced by 2 new ones.
+- Merged some gui sections to make the thing look less crowded.
+- Moved all global matrices to the top, voice matrices to the bottom.
+- Some cryptic combobox items now have useful tooltips (e.g. filter "LS" -> "Low Shelf").
+
 ### August 21, 2024 - V1.8.8.
 
 - Add voice drain indicator to monitor.

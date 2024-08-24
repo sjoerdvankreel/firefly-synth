@@ -1,0 +1,152 @@
+{
+  "global_settings": {
+    "lighten": "0.15",
+    "windows_font_height": "13",
+    "linux_font_height": "11",
+    "mac_font_height": "11",
+    "combo_radius": "3",
+    "button_radius": "6",
+    "table_cell_radius": "3",
+    "scroll_thumb_radius": "2",
+    "section_radius": "4",
+    "param_section_radius": "4",
+    "param_section_vpadding": "0",
+    "knob_padding": "6",
+    "tabular_knob_padding": "3",
+    "min_scale": "0.5",
+    "max_scale": "8.0",
+    "default_width_fx": "1280",
+    "aspect_ratio_width_fx": "118",
+    "aspect_ratio_height_fx": "27",
+    "default_width_instrument": "1280",
+    "aspect_ratio_width_instrument": "118",
+    "aspect_ratio_height_instrument": "60"
+  },
+  "default_settings": {
+    "tab_width": "33",
+    "header_width": "40"
+  },
+  "default_colors": {
+    "tab_text_inactive": "FFAAAAAA",
+    "tab_button": "FF333333",
+    "tab_header": "FF222222",
+    "graph_grid": "40FFFFFF",
+    "graph_text": "C0FFFFFF",
+    "graph_background": "FF000000",
+    "graph_mod_indicator": "50FFFFFF",
+    "bubble_outline": "FF999999",
+    "slider_background": "FF333333",
+    "slider_highlight": "FFFFFFFF",
+    "slider_shadow": "FF000000",
+    "slider_can_modulate": "FF666666",
+    "section_outline": "00000000",
+    "section_background": "FFCCCCCC",
+    "table_header_cell": "FF666666",
+    "table_cell": "FF999999",
+    "edit_text": "FFEEEEEE",
+    "label_text": "FF333333",
+    "control_text": "FF999999",
+    "control_tick": "FF999999",
+    "control_outline": "FFCCCCCC",
+    "control_background": "FF333333",
+    "scrollbar_background": "FF444444",
+    "popup_text": "FFCCCCCC",
+    "popup_text_highlighted": "FF999999",
+  },
+  "overrides": [
+    {
+      "custom_sections": ["Title Text", "Title Image", "Monitor", "Main Graph", "Tweak", "Patch"],
+      "module_sections": ["Monitor"],
+      "colors": {
+        "tab_text": "FFCCCCCC",
+        "slider_automation": "FFCCCCCC",
+        "control_text": "FF3333333",
+        "control_tick": "FF3333333",
+        "button_text": "FFCCCCCC",
+        "bubble_outline": "FFCCCCCC",
+        "scrollbar_thumb": "FFCCCCCC",
+        "graph_area": "80999999",
+        "graph_line": "FF999999",
+        "table_header": "FFCCCCCC",
+        "popup_text_highlighted": "FFEEEEEE"
+      }
+    },
+    {
+      "module_sections": ["GAudio", "GCV-A", "GCV-CV"],
+      "colors": {
+        "tab_text": "FF40A0FF",
+        "slider_automation": "FF40A0FF",
+        "control_text": "FFCCCCCC",
+        "control_tick": "FF40A0FF",
+        "bubble_outline": "FF40A0FF",
+        "scrollbar_thumb": "FF40A0FF",
+        "table_header": "FFCCCCCC",
+        "popup_text_highlighted": "FFCCCCCC"
+      }
+    },
+    {
+      "custom_sections": ["Global FX Graph", "Global LFO Graph", "Global Matrix Graphs"],
+      "module_sections": ["Global", "Glob Smt", "Global Out", "Global FX", "Global LFO"],
+      "colors": {
+        "tab_text": "FF40A0FF",
+        "slider_automation": "FF40A0FF",
+        "control_text": "FF40A0FF",
+        "control_tick": "FF40A0FF",
+        "bubble_outline": "FF40A0FF",
+        "scrollbar_thumb": "FF40A0FF",
+        "graph_area": "8040A0FF",
+        "graph_line": "FF40A0FF",
+        "table_header": "FFCCCCCC",
+        "popup_text_highlighted": "FF40A0FF"
+      }
+    },
+    {
+      "module_sections": ["Global"],
+      "settings": {
+        "header_width": "378"
+      }
+    },
+    {
+      "module_sections": ["Osc Mod", "VAudio", "VCV-A", "VCV-CV"],
+      "colors": {
+        "tab_text": "FF40FFA0",
+        "slider_automation": "FF40FFA0",
+        "control_text": "FFCCCCCC",
+        "control_tick": "FF40FFA0",
+        "bubble_outline": "FF40FFA0",
+        "scrollbar_thumb": "FF40FFA0",
+        "table_header": "FFCCCCCC",
+        "popup_text_highlighted": "FFCCCCCC"
+      }
+    },
+    {
+      "custom_sections": ["Oscillator Graph", "Voice FX Graph", "Voice LFO Graph", "Envelope Graph", "Voice Matrix Graphs"],
+      "module_sections": ["Voice", "Voice Out", "Osc", "Voice FX", "Voice LFO", "Env"],
+      "colors": {
+        "tab_text": "FF40FFA0",
+        "slider_automation": "FF40FFA0",
+        "control_text": "FF40FFA0",
+        "control_tick": "FF40FFA0",
+        "bubble_outline": "FF40FFA0",
+        "scrollbar_thumb": "FF40FFA0",
+        "graph_area": "8040FFA0",
+        "graph_line": "FF40FFA0",
+        "table_header": "FFCCCCCC",
+        "popup_text_highlighted": "FF40FFA0"
+      }
+    },
+    {
+      "module_sections": ["Osc"],
+      "settings": {
+        "tab_width": "67",
+        "header_width": "40"
+      }
+    },
+    {
+      "module_sections": ["Voice"],
+      "settings": {
+        "header_width": "378"
+      }
+    }
+  ]
+}

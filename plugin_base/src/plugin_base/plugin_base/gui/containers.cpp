@@ -85,10 +85,8 @@ param_section_container(plugin_gui* gui, lnf* lnf, module_desc const* module, pa
     lnf->global_settings().param_section_radius,
     lnf->global_settings().param_section_vpadding,
     margin_left, false, rounded_container_mode::both,
-    lnf->module_gui_colors(module->module->info.tag.full_name).section_background1,
-    lnf->module_gui_colors(module->module->info.tag.full_name).section_background2,
-    lnf->module_gui_colors(module->module->info.tag.full_name).section_outline1, 
-    lnf->module_gui_colors(module->module->info.tag.full_name).section_outline2) {
+    lnf->module_gui_colors(module->module->info.tag.full_name).section_background,
+    lnf->module_gui_colors(module->module->info.tag.full_name).section_outline) {
   init(); 
 }
 
@@ -178,19 +176,13 @@ rounded_container::paint(Graphics& g)
 
   if (_mode == rounded_container_mode::both || _mode == rounded_container_mode::fill)
   {
-    if (!_vertical) g.setGradientFill(ColourGradient(
-      _background1, 0, 0, _background2, 0, getHeight(), false));
-    else g.setGradientFill(ColourGradient(
-      _background2, 0, 0, _background1, getWidth(), 0, false));
+    g.setColour(_background);
     g.fillRoundedRectangle(bounds, _radius);
   }
 
   if (_mode == rounded_container_mode::both || _mode == rounded_container_mode::stroke)
   {
-    if (_vertical) g.setGradientFill(ColourGradient(
-      _outline1, 0, 0, _outline2, 0, getHeight(), false));
-    else g.setGradientFill(ColourGradient(
-      _outline2, 0, 0, _outline1, getWidth(), 0, false));
+    g.setColour(_outline);
     g.drawRoundedRectangle(bounds, _radius, 1);
   }
 }

@@ -71,7 +71,7 @@ static int constexpr scratch_count = std::max({
 
 enum { param_type,
   param_svf_mode, param_svf_kbd, param_svf_gain, param_svf_freq, param_svf_res,
-  param_comb_mode, param_comb_dly_plus, param_comb_gain_plus, param_comb_dly_min, param_comb_gain_min,
+  param_comb_mode, param_comb_dly_plus, param_comb_dly_min, param_comb_gain_plus, param_comb_gain_min,
   param_dist_mode, param_dist_lp_frq, param_dist_lp_res, param_dist_skew_x, param_dist_skew_x_amt, param_dist_skew_y, param_dist_skew_y_amt, 
   param_dist_shaper, param_dist_over, param_dist_clip, param_dist_clip_exp, param_dist_gain, param_dist_mix,
   param_meq_mode, param_meq_flt_mode, param_meq_gain, param_meq_freq, param_meq_res,
@@ -116,8 +116,8 @@ dist_mode_items()
 {
   std::vector<list_item> result;
   result.emplace_back("{4216D379-72FD-4C2D-B594-20C175CF275E}", "No Filter");
-  result.emplace_back("{90657FC7-42E9-4D8E-88D1-5380F916A6C1}", "Flt To Shaper");
-  result.emplace_back("{01871DF5-5834-43F9-B95C-09D8102BF985}", "Shaper To Flt");
+  result.emplace_back("{90657FC7-42E9-4D8E-88D1-5380F916A6C1}", "Filter 2 Shape");
+  result.emplace_back("{01871DF5-5834-43F9-B95C-09D8102BF985}", "Shape 2 Filter");
   return result;
 }
 
@@ -150,16 +150,16 @@ static std::vector<list_item>
 meq_flt_mode_items()
 {
   std::vector<list_item> result;
-  result.emplace_back("{D375AAEB-461A-43B4-A09A-83D57C80EEDB}", "Off");
-  result.emplace_back("{59611761-EE2B-47B9-8400-6AA86A4D6B2E}", "LP");
-  result.emplace_back("{B5B8C797-6CA9-4822-B906-3DEECEB75237}", "HP");
-  result.emplace_back("{55DB2D11-F20E-4284-A3F7-06A66BF292F1}", "BP");
-  result.emplace_back("{E27BDD78-02A1-495D-9EDE-B3E9ABFE34F6}", "BS");
-  result.emplace_back("{05A53330-ED0A-4E33-95DD-F8A509A4DD7E}", "AP");
-  result.emplace_back("{634D6AC1-889D-4128-B1C0-8B734494E47F}", "PQ");
-  result.emplace_back("{0D6B841F-CF91-4D2D-9EFD-E12CD4427363}", "BL");
-  result.emplace_back("{CC57B060-4B05-44F6-AAFA-4CFD43E5CCC7}", "LS");
-  result.emplace_back("{393EE610-F904-4BAF-A66E-0BB0A39EA5E7}", "HS");
+  result.emplace_back("{D375AAEB-461A-43B4-A09A-83D57C80EEDB}", "Off", "Off");
+  result.emplace_back("{59611761-EE2B-47B9-8400-6AA86A4D6B2E}", "LP", "Low Pass");
+  result.emplace_back("{B5B8C797-6CA9-4822-B906-3DEECEB75237}", "HP", "High Pass");
+  result.emplace_back("{55DB2D11-F20E-4284-A3F7-06A66BF292F1}", "BP", "Band Pass");
+  result.emplace_back("{E27BDD78-02A1-495D-9EDE-B3E9ABFE34F6}", "BS", "Band Stop");
+  result.emplace_back("{05A53330-ED0A-4E33-95DD-F8A509A4DD7E}", "AP", "All Pass");
+  result.emplace_back("{634D6AC1-889D-4128-B1C0-8B734494E47F}", "PQ", "Peaking EQ");
+  result.emplace_back("{0D6B841F-CF91-4D2D-9EFD-E12CD4427363}", "BL", "Bell");
+  result.emplace_back("{CC57B060-4B05-44F6-AAFA-4CFD43E5CCC7}", "LS", "Low Shelf");
+  result.emplace_back("{393EE610-F904-4BAF-A66E-0BB0A39EA5E7}", "HS", "High Shelf");
   return result;
 }
 
@@ -648,6 +648,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_module_dsp(stage, module_output::audio, scratch_count, {
       make_module_dsp_output(false, make_topo_info_basic("{E7C21225-7ED5-45CC-9417-84A69BECA73C}", "Output", 0, 1)) }),
     make_module_gui(section, pos, { { 1, 1 }, { 32, 13, 34, 55, 8 } })));
+  result.gui.tabbed_name = "FX";
   result.gui.is_drag_mod_source = true;
  
   result.graph_engine_factory = make_graph_engine;
@@ -691,8 +692,9 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_param_section_gui({ 0, 1, 2, 2 }, { { 1, 1 }, { gui_dimension::auto_size_all, 1 } }, gui_label_edit_cell_split::horizontal)));
   svf_left.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_svf; });
   svf_left.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_off || vs[0] == type_svf; });
+  svf_left.gui.merge_with_section = section_svf_right;
   auto& svf_kbd = result.params.emplace_back(make_param(
-    make_topo_info("{9EEA6FE0-983E-4EC7-A47F-0DFD79D68BCB}", true, "SV Filter KTrk", "KTrk", "SVF KTrk", param_svf_kbd, 1),
+    make_topo_info("{9EEA6FE0-983E-4EC7-A47F-0DFD79D68BCB}", true, "SV Filter KeyTrk", "KeyTrk", "SVF KeyTrk", param_svf_kbd, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-2, 2, global ? 0 : 1, 0, true),
     make_param_gui_single(section_svf_left, gui_edit_type::hslider, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
@@ -709,6 +711,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
   auto& svf_right = result.sections.emplace_back(make_param_section(section_svf_right,
     make_topo_tag_basic("{0068DAD1-DE32-43CE-9BFE-1CB5B6B7CA3B}", "SV Filter Left"),
     make_param_section_gui({ 0, 3, 2, 2 }, { { 1, 1 }, { gui_dimension::auto_size_all, 1 } }, gui_label_edit_cell_split::horizontal)));
+  svf_right.gui.merge_with_section = section_svf_left;
   svf_right.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_svf; });
   svf_right.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_off || vs[0] == type_svf; });
   auto& svf_freq = result.params.emplace_back(make_param(
@@ -734,38 +737,41 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
   comb_mode.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_cmb; });
   comb_mode.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_cmb; });
   comb_mode.info.description = "Selects the comb filter mode.";
+
   auto& comb_left = result.sections.emplace_back(make_param_section(section_comb_left,
     make_topo_tag_basic("{54CF060F-3EE7-4F42-921F-612F8EEA8EB0}", "Comb Filter"),
     make_param_section_gui({ 0, 1, 2, 2 }, { { 1, 1 }, { gui_dimension::auto_size_all, 1 } }, gui_label_edit_cell_split::horizontal)));
+  comb_left.gui.merge_with_section = section_comb_right;
   comb_left.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_cmb; });
   auto& comb_dly_plus = result.params.emplace_back(make_param(
-    make_topo_info("{097ECBDB-1129-423C-9335-661D612A9945}", true, "Comb Filter Delay+", "Delay+", "Cmb Dly+", param_comb_dly_plus, 1),
+    make_topo_info("{097ECBDB-1129-423C-9335-661D612A9945}", true, "Comb Filter Delay+", "Delay+", "Comb Delay+", param_comb_dly_plus, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_linear(comb_min_ms, comb_max_ms, 1, 2, "Ms"),
     make_param_gui_single(section_comb_left, gui_edit_type::hslider, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   comb_dly_plus.gui.bindings.enabled.bind_params({ param_type, param_comb_mode }, [](auto const& vs) { return vs[0] == type_cmb && comb_has_feedforward(vs[1]); });
   comb_dly_plus.info.description = "Feed-forward time.";
-  auto& comb_gain_plus = result.params.emplace_back(make_param(
-    make_topo_info("{3069FB5E-7B17-4FC4-B45F-A9DFA383CAA9}", true, "Comb Filter Gain+", "Gain+", "Cmb Gain+", param_comb_gain_plus, 1),
-    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 0.5, 0, true),
+  auto& comb_dly_min = result.params.emplace_back(make_param(
+    make_topo_info("{D4846933-6AED-4979-AA1C-2DD80B68404F}", true, "Comb Filter Delay-", "Delay-", "Comb Delay-", param_comb_dly_min, 1),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_linear(comb_min_ms, comb_max_ms, 1, 2, "Ms"),
     make_param_gui_single(section_comb_left, gui_edit_type::hslider, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  comb_gain_plus.gui.bindings.enabled.bind_params({ param_type, param_comb_mode }, [](auto const& vs) { return vs[0] == type_cmb && comb_has_feedforward(vs[1]); });
-  comb_gain_plus.info.description = "Feed-forward amount.";
+  comb_dly_min.gui.bindings.enabled.bind_params({ param_type, param_comb_mode }, [](auto const& vs) { return vs[0] == type_cmb && comb_has_feedback(vs[1]); });
+  comb_dly_min.info.description = "Feed-back time.";
 
   auto& comb_right = result.sections.emplace_back(make_param_section(section_comb_right,
     make_topo_tag_basic("{9B508F7D-1E8D-4775-96EA-6AE752EA6E55}", "Comb Filter"),
     make_param_section_gui({ 0, 3, 2, 2 }, { { 1, 1 }, { gui_dimension::auto_size_all, 1 } }, gui_label_edit_cell_split::horizontal)));
+  comb_right.gui.merge_with_section = section_comb_left;
   comb_right.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_cmb; });
-  auto& comb_dly_min = result.params.emplace_back(make_param(
-    make_topo_info("{D4846933-6AED-4979-AA1C-2DD80B68404F}", true, "Comb Filter Delay-", "Delay-", "Cmb Dly-", param_comb_dly_min, 1),
-    make_param_dsp_accurate(param_automate::modulate), make_domain_linear(comb_min_ms, comb_max_ms, 1, 2, "Ms"),
+  auto& comb_gain_plus = result.params.emplace_back(make_param(
+    make_topo_info("{3069FB5E-7B17-4FC4-B45F-A9DFA383CAA9}", true, "Comb Filter Gain+", "Gain+", "Comb Gain+", param_comb_gain_plus, 1),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 0.5, 0, true),
     make_param_gui_single(section_comb_right, gui_edit_type::hslider, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  comb_dly_min.gui.bindings.enabled.bind_params({ param_type, param_comb_mode }, [](auto const& vs) { return vs[0] == type_cmb && comb_has_feedback(vs[1]); });
-  comb_dly_min.info.description = "Feed-back time.";
+  comb_gain_plus.gui.bindings.enabled.bind_params({ param_type, param_comb_mode }, [](auto const& vs) { return vs[0] == type_cmb && comb_has_feedforward(vs[1]); });
+  comb_gain_plus.info.description = "Feed-forward amount.";
   auto& comb_gain_min = result.params.emplace_back(make_param(
-    make_topo_info("{9684165E-897B-4EB7-835D-D5AAF8E61E65}", true, "Comb Filter Gain-", "Gain-", "Cmb Gain-", param_comb_gain_min, 1),
+    make_topo_info("{9684165E-897B-4EB7-835D-D5AAF8E61E65}", true, "Comb Filter Gain-", "Gain-", "Comb Gain-", param_comb_gain_min, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 0, 0, true),
     make_param_gui_single(section_comb_right, gui_edit_type::hslider, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
@@ -788,16 +794,17 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_topo_tag_basic("{EEB74521-81AC-418B-901E-8ED8EE472A9E}", "Distortion Filter"),
     make_param_section_gui({ 0, 1, 2, 1 }, { { 1, 1 }, {
       gui_dimension::auto_size_all, gui_dimension::auto_size_all } }, gui_label_edit_cell_split::horizontal)));
+  dist_flt.gui.merge_with_section = section_dist_skew;
   dist_flt.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   auto& dist_lp = result.params.emplace_back(make_param(
-    make_topo_info("{C82BC20D-2F1E-4001-BCFB-0C8945D1B329}", true, "Dist LPF Frequency", "LPF", "Dst LPF", param_dist_lp_frq, 1),
+    make_topo_info("{C82BC20D-2F1E-4001-BCFB-0C8945D1B329}", true, "Dist LPF Freq", "LPF", "Dist LPF", param_dist_lp_frq, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_log(flt_min_freq, flt_max_freq, flt_max_freq, 1000, 0, "Hz"),
     make_param_gui_single(section_dist_flt, gui_edit_type::knob, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   dist_lp.gui.bindings.enabled.bind_params({ param_type, param_dist_mode }, [](auto const& vs) { return vs[0] == type_dst && vs[1] != dist_mode_a; });
   dist_lp.info.description = "Lowpass filter frequency inside the oversampling stage.";
   auto& dist_res = result.params.emplace_back(make_param(
-    make_topo_info("{A9F6D41F-3C99-44DD-AAAA-BDC1FEEFB250}", true, "Dist LPF Res", "Res", "Dst Res", param_dist_lp_res, 1),
+    make_topo_info("{A9F6D41F-3C99-44DD-AAAA-BDC1FEEFB250}", true, "Dist LPF Reso", "Res", "Dist Reso", param_dist_lp_res, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0, 0, true),
     make_param_gui_single(section_dist_flt, gui_edit_type::knob, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
@@ -808,16 +815,17 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_topo_tag_basic("{9BA32ACF-FA53-450A-A280-F0F76F30F240}", "Distortion Skew"),
     make_param_section_gui({ 0, 2, 2, 1 }, { { 1, 1 }, { 
       gui_dimension::auto_size_all, gui_dimension::auto_size_all, gui_dimension::auto_size_all } }, gui_label_edit_cell_split::horizontal)));
+  dist_skew.gui.merge_with_section = section_dist_flt;
   dist_skew.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   auto& dist_skew_in = result.params.emplace_back(make_param(
-    make_topo_info("{DAF94A21-BCA4-4D49-BEC0-F0D70CE4F118}", true, "Dist Skew X Mode", "Skew X", "Dst SkX", param_dist_skew_x, 1),
+    make_topo_info("{DAF94A21-BCA4-4D49-BEC0-F0D70CE4F118}", true, "Dist Skew X Mode", "Skew X", "Skew X Mode", param_dist_skew_x, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(wave_skew_type_items(), "Off"),
     make_param_gui_single(section_dist_skew, gui_edit_type::autofit_list, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   dist_skew_in.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   dist_skew_in.info.description = "Before-shape skew: off (cpu efficient, so use it if you dont need the extra control), linear, scale unipolar/bipolar and exponential unipolar/bipolar.";
   auto& dist_skew_in_amt = result.params.emplace_back(make_param(
-    make_topo_info("{94A94B06-6217-4EF5-8BA1-9F77AE54076B}", true, "Dist Skew X Amt", "Skew X", "Dst SkX", param_dist_skew_x_amt, 1),
+    make_topo_info("{94A94B06-6217-4EF5-8BA1-9F77AE54076B}", true, "Dist Skew X Amt", "Skew X Amt", "Dist Skew X", param_dist_skew_x_amt, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
     make_param_gui_single(section_dist_skew, gui_edit_type::knob, { 0, 2 }, make_label_none())));
   dist_skew_in_amt.gui.bindings.enabled.bind_params({ param_type, param_dist_skew_x }, [](auto const& vs) {
@@ -825,14 +833,14 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
   dist_skew_in_amt.info.description = "Before-shape skew amount.";
   dist_skew_in.gui.alternate_drag_param_id = dist_skew_in_amt.info.tag.id;
   auto& dist_skew_out = result.params.emplace_back(make_param(
-    make_topo_info("{BF8BB684-50E5-414D-9DAD-6290330C0C40}", true, "Dist Skew Y Mode", "Skew Y", "Dst SkY", param_dist_skew_y, 1),
+    make_topo_info("{BF8BB684-50E5-414D-9DAD-6290330C0C40}", true, "Dist Skew Y Mode", "Skew Y", "Skew Y Mode", param_dist_skew_y, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(wave_skew_type_items(), "Off"),
     make_param_gui_single(section_dist_skew, gui_edit_type::autofit_list, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   dist_skew_out.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   dist_skew_out.info.description = "After-shape skew: off (cpu efficient, so use it if you dont need the extra control), linear, scale unipolar/bipolar and exponential unipolar/bipolar.";
   auto& dist_skew_out_amt = result.params.emplace_back(make_param(
-    make_topo_info("{042570BF-6F02-4F91-9805-6C49FE9A3954}", true, "Dist Skew Y Amt", "Skew Y", "Dst SkY", param_dist_skew_y_amt, 1),
+    make_topo_info("{042570BF-6F02-4F91-9805-6C49FE9A3954}", true, "Dist Skew Y Amt", "Skew Y Amt", "Dist Skew Y", param_dist_skew_y_amt, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
     make_param_gui_single(section_dist_skew, gui_edit_type::knob, { 1, 2 }, make_label_none())));
   dist_skew_out_amt.gui.bindings.enabled.bind_params({ param_type, param_dist_skew_y }, [](auto const& vs) {
@@ -847,35 +855,35 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
       1, gui_dimension::auto_size_all, gui_dimension::auto_size_all } }, gui_label_edit_cell_split::horizontal)));
   dist_right.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   auto& dist_shaper = result.params.emplace_back(make_param(
-    make_topo_info("{BFB5A04F-5372-4259-8198-6761BA52ADEB}", true, "Dist Shape", "Shape", "Dst.Shape", param_dist_shaper, 1),
+    make_topo_info("{BFB5A04F-5372-4259-8198-6761BA52ADEB}", true, "Dist Shape", "Shape", "Dist Shape", param_dist_shaper, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(wave_shape_type_items(true, global), ""),
     make_param_gui_single(section_dist_right, gui_edit_type::autofit_list, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   dist_shaper.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   dist_shaper.info.description = "Selects waveshaper type: various periodic functions plus foldback distortion.";  
   auto& dist_over = result.params.emplace_back(make_param(
-    make_topo_info("{99C6E4A8-F90A-41DC-8AC7-4078A6DE0031}", true, "Dist Oversampling", "OvrSmp", "Dst.OvrSmp", param_dist_over, 1),
+    make_topo_info("{99C6E4A8-F90A-41DC-8AC7-4078A6DE0031}", true, "Dist Oversampling", "OvrSmp", "Dist OvrSmp", param_dist_over, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(dist_over_items(), ""),
     make_param_gui_single(section_dist_right, gui_edit_type::autofit_list, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   dist_over.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   dist_over.info.description = "Oversampling factor. If you go really crazy with distortion, this might tip the scale from just-not-acceptible to just-acceptible.";
   auto& dist_clip = result.params.emplace_back(make_param(
-    make_topo_info("{810325E4-C3AB-48DA-A770-65887DF57845}", true, "Dist Clip Mode", "Clip", "Dst Clip", param_dist_clip, 1),
+    make_topo_info("{810325E4-C3AB-48DA-A770-65887DF57845}", true, "Dist Clip Mode", "Clip", "Dist Clip", param_dist_clip, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(dist_clip_items(), "Tanh"),
     make_param_gui_single(section_dist_right, gui_edit_type::autofit_list, { 0, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   dist_clip.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   dist_clip.info.description = "Selects hard clipping (clamp to [-1, 1]) or various soft clipping functions.";
   auto& dist_clip_expo = result.params.emplace_back(make_param(
-    make_topo_info("{A0C0BCE3-1BC3-495F-950B-8849C802B4EA}", true, "Dist Clip Exp", "Exp", "Dst Exp", param_dist_clip_exp, 1),
+    make_topo_info("{A0C0BCE3-1BC3-495F-950B-8849C802B4EA}", true, "Dist Clip Exp", "Exp", "Dist Exp", param_dist_clip_exp, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_linear(0.1, 10, 1, 1, ""),
     make_param_gui_single(section_dist_right, gui_edit_type::hslider, { 1, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   dist_clip_expo.gui.bindings.enabled.bind_params({ param_type, param_dist_clip }, [](auto const& vs) { return vs[0] == type_dst && vs[1] == dist_clip_exp; });
   dist_clip_expo.info.description = "Exponential clipper amount.";
   auto& dist_gain = result.params.emplace_back(make_param(
-    make_topo_info("{3FC57F28-075F-44A2-8D0D-6908447AE87C}", true, "Dist Gain", "Gain", "Dst Gain", param_dist_gain, 1),
+    make_topo_info("{3FC57F28-075F-44A2-8D0D-6908447AE87C}", true, "Dist Gain", "Gain", "Dist Gain", param_dist_gain, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_log(0.1, 32, 1, 1, 2, ""),
     make_param_gui_single(section_dist_right, gui_edit_type::knob, { 0, 4 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
@@ -883,7 +891,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
   dist_gain.info.description = std::string("Gain amount to drive the shaper and X/Y parameters. ") +
     "Use an Osc with gain envelope to have the effect of the distortion gradually fall-off.";
   auto& dist_mix = result.params.emplace_back(make_param(
-    make_topo_info("{667D9997-5BE1-48C7-9B50-4F178E2D9FE5}", true, "Dist Mix", "Mix", "Dst Mix", param_dist_mix, 1),
+    make_topo_info("{667D9997-5BE1-48C7-9B50-4F178E2D9FE5}", true, "Dist Mix", "Mix", "Dist Mix", param_dist_mix, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(1, 0, true),
     make_param_gui_single(section_dist_right, gui_edit_type::knob, { 1, 4 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
@@ -967,6 +975,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_topo_tag_basic("{E92225CF-21BF-459C-8C9D-8E50285F26D4}", "Delay Sync"),
     make_param_section_gui({ 0, 1, 2, 1 }, { { 1, 1 }, { 1 } }, gui_label_edit_cell_split::vertical)));
   delay_sync_section.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_delay; });
+  delay_sync_section.gui.merge_with_section = section_delay_left;
   auto& delay_sync = result.params.emplace_back(make_param(
     make_topo_info("{50E6B543-9BC2-490A-8CE3-CB80076BD8E1}", true, "Tempo Sync", "Sync", "Sync", param_dly_sync, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_toggle(false),
@@ -980,16 +989,17 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_topo_tag_basic("{B9841FED-30EA-4D9E-97A0-C22F3D0D87A1}", "Delay Left"),
     make_param_section_gui({ 0, 2, 2, 1 }, { { 1, 1 }, {
       gui_dimension::auto_size_all, 1 } }, gui_label_edit_cell_split::horizontal)));
+  delay_left.gui.merge_with_section = section_delay_sync;
   delay_left.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_delay; });
   auto& delay_amt = result.params.emplace_back(make_param(
-    make_topo_info("{7CEE3B9A-99CF-46D3-847B-42F91A4F5227}", true, "Delay Amount", "Amt", "Dly Amt", param_dly_amt, 1),
+    make_topo_info("{7CEE3B9A-99CF-46D3-847B-42F91A4F5227}", true, "Delay Amount", "Amount", "Delay Amount", param_dly_amt, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
     make_param_gui_single(section_delay_left, gui_edit_type::hslider, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   delay_amt.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_delay; });
   delay_amt.info.description = "Feedback-amount or tap-amount control.";
   auto& delay_mix = result.params.emplace_back(make_param(
-    make_topo_info("{6933B1F7-886F-41F0-8D23-175AA537327E}", true, "Delay Mix", "Mix", "Dly Mix", param_dly_mix, 1),
+    make_topo_info("{6933B1F7-886F-41F0-8D23-175AA537327E}", true, "Delay Mix", "Mix", "Delay Mix", param_dly_mix, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
     make_param_gui_single(section_delay_left, gui_edit_type::hslider, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
@@ -1002,7 +1012,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
       gui_dimension::auto_size_all, 1, gui_dimension::auto_size_all, 1 } }, gui_label_edit_cell_split::horizontal)));
   delay_right.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_delay; });
   auto& delay_sprd = result.params.emplace_back(make_param(
-    make_topo_info("{1BD8008B-DC2C-4A77-A5DE-869983E5786C}", true, "Delay Spread", "Sprd", "Dly Sprd", param_dly_sprd, 1),
+    make_topo_info("{1BD8008B-DC2C-4A77-A5DE-869983E5786C}", true, "Delay Spread", "Spread", "Delay Spread", param_dly_sprd, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 0, 0, true),
     make_param_gui_single(section_delay_right, gui_edit_type::hslider, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
@@ -1027,7 +1037,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
   delay_hold_tempo.info.description = "Multi-tap delay hold time in bars.";
 
   auto& delay_fdbk_time_l = result.params.emplace_back(make_param(
-    make_topo_info("{E32F17BC-03D2-4F2D-8292-2B4C3AB24E8D}", true, "Fdbk Delay Time L", "L", "FDly L", param_dly_fdbk_time_l, 1),
+    make_topo_info("{E32F17BC-03D2-4F2D-8292-2B4C3AB24E8D}", true, "Fdbk Delay Time L", "Left", "FDly L", param_dly_fdbk_time_l, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_log(0, dly_max_sec, 1, 1, 3, "Sec"),
     make_param_gui_single(section_delay_right, gui_edit_type::hslider, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
@@ -1035,7 +1045,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
   delay_fdbk_time_l.gui.bindings.enabled.bind_params({ param_type, param_dly_mode, param_dly_sync }, [](auto const& vs) { return vs[0] == type_delay && vs[1] == dly_mode_fdbk && vs[2] == 0; });
   delay_fdbk_time_l.info.description = "Feedback delay left length in seconds.";
   auto& delay_fdbk_tempo_l = result.params.emplace_back(make_param(
-    make_topo_info("{33BCF50C-C7DE-4630-A835-44D50DA3B8BB}", true, "Fdbk Delay Tempo L", "L", "FDly L", param_dly_fdbk_tempo_l, 1),
+    make_topo_info("{33BCF50C-C7DE-4630-A835-44D50DA3B8BB}", true, "Fdbk Delay Tempo L", "Left", "FDly L", param_dly_fdbk_tempo_l, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_timesig_default(false, { 4, 1 }, { 3, 16 }),
     make_param_gui_single(section_delay_right, gui_edit_type::list, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
@@ -1044,7 +1054,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
   delay_fdbk_tempo_l.gui.bindings.enabled.bind_params({ param_type, param_dly_mode, param_dly_sync }, [](auto const& vs) { return vs[0] == type_delay && vs[1] == dly_mode_fdbk && vs[2] != 0; });
   delay_fdbk_tempo_l.info.description = "Feedback delay left length in bars.";
   auto& delay_fdbk_time_r = result.params.emplace_back(make_param(
-    make_topo_info("{5561243C-838F-4C33-BD46-3E934E854969}", true, "Fdbk Delay Time R", "R", "FDly R", param_dly_fdbk_time_r, 1),
+    make_topo_info("{5561243C-838F-4C33-BD46-3E934E854969}", true, "Fdbk Delay Time R", "Right", "FDly R", param_dly_fdbk_time_r, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_log(0, dly_max_sec, 1, 1, 3, "Sec"),
     make_param_gui_single(section_delay_right, gui_edit_type::hslider, { 1, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
@@ -1052,7 +1062,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
   delay_fdbk_time_r.gui.bindings.enabled.bind_params({ param_type, param_dly_mode, param_dly_sync }, [](auto const& vs) { return vs[0] == type_delay && vs[1] == dly_mode_fdbk && vs[2] == 0; });
   delay_fdbk_time_r.info.description = "Feedback delay right length in seconds.";
   auto& delay_fdbk_tempo_r = result.params.emplace_back(make_param(
-    make_topo_info("{4FA78F9E-AC3A-45D7-A8A3-E0E2C7C264D7}", true, "Fdbk Delay Tempo R", "R", "FDly R", param_dly_fdbk_tempo_r, 1),
+    make_topo_info("{4FA78F9E-AC3A-45D7-A8A3-E0E2C7C264D7}", true, "Fdbk Delay Tempo R", "Right", "FDly R", param_dly_fdbk_tempo_r, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_timesig_default(false, { 4, 1 }, { 5, 16 }),
     make_param_gui_single(section_delay_right, gui_edit_type::list, { 1, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
@@ -1087,7 +1097,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
   delay_multi_tempo.info.description = "Multi-tap delay length in bars.";
 
   auto& reverb_mix = result.params.emplace_back(make_param(
-    make_topo_info("{7F71B450-2EAA-4D4E-8919-A94D87645DB0}", true, "Reverb Mix", "Mix", "Rev Mix", param_reverb_mix, 1),
+    make_topo_info("{7F71B450-2EAA-4D4E-8919-A94D87645DB0}", true, "Reverb Mix", "Mix", "Reverb Mix", param_reverb_mix, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
     make_param_gui_single(section_main, gui_edit_type::hslider, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
@@ -1099,14 +1109,14 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_param_section_gui({ 0, 1, 2, 2 }, { { 1, 1 }, { gui_dimension::auto_size_all, 1 } }, gui_label_edit_cell_split::horizontal)));
   reverb_left.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_reverb; });
   auto& reverb_sprd = result.params.emplace_back(make_param(
-    make_topo_info("{0D138920-65D2-42E9-98C5-D8FEC5FD2C55}", true, "Reverb Spread", "Sprd", "Rev Sprd", param_reverb_spread, 1),
+    make_topo_info("{0D138920-65D2-42E9-98C5-D8FEC5FD2C55}", true, "Reverb Spread", "Spread", "Reverb Spread", param_reverb_spread, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
     make_param_gui_single(section_reverb_left, gui_edit_type::hslider, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   reverb_sprd.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_reverb; });
   reverb_sprd.info.description = "Reverb stereo-spread control.";
   auto& reverb_apf = result.params.emplace_back(make_param(
-    make_topo_info("{09DF58B0-4155-47F2-9AEB-927B2D8FD250}", true, "Reverb APF", "APF", "Rev APF", param_reverb_apf, 1),
+    make_topo_info("{09DF58B0-4155-47F2-9AEB-927B2D8FD250}", true, "Reverb APF", "APF", "Reverb APF", param_reverb_apf, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(1.0, 0, true),
     make_param_gui_single(section_reverb_left, gui_edit_type::hslider, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
@@ -1118,14 +1128,14 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_param_section_gui({ 0, 3, 2, 2 }, { { 1, 1 }, { gui_dimension::auto_size_all, 1 } }, gui_label_edit_cell_split::horizontal)));
   reverb_right.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_reverb; });
   auto& reverb_size = result.params.emplace_back(make_param(
-    make_topo_info("{E413FA18-420D-4510-80D1-54E2A0ED4CB2}", true, "Reverb Size", "Size", "Rev Size", param_reverb_size, 1),
+    make_topo_info("{E413FA18-420D-4510-80D1-54E2A0ED4CB2}", true, "Reverb Size", "Size", "Reverb Size", param_reverb_size, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.8, 0, true),
     make_param_gui_single(section_reverb_right, gui_edit_type::hslider, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   reverb_size.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_reverb; });
   reverb_size.info.description = "Reverb room size.";
   auto& reverb_damp = result.params.emplace_back(make_param(
-    make_topo_info("{44EE5538-9920-4F39-A68E-51E86E96943B}", true, "Reverb Damping", "Damp", "Rev Damp", param_reverb_damp, 1),
+    make_topo_info("{44EE5538-9920-4F39-A68E-51E86E96943B}", true, "Reverb Damping", "Damp", "Reverb Damp", param_reverb_damp, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.8, 0, true),
     make_param_gui_single(section_reverb_right, gui_edit_type::hslider, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
@@ -1471,7 +1481,7 @@ fx_engine::process_svf_uni_mode(plugin_block& block,
 
   jarray<float, 1> const* glob_uni_dtn_curve = nullptr;
   if constexpr(GlobalUnison)
-    glob_uni_dtn_curve = &block.state.all_accurate_automation[module_master_in][0][master_in_param_glob_uni_dtn][0];
+    glob_uni_dtn_curve = &block.state.all_accurate_automation[module_global_in][0][global_in_param_uni_dtn][0];
 
   auto const& res_curve = *modulation[this_module][block.module_slot][param_svf_res][0];  
   double kbd_trk_base = _global ? (block.state.last_midi_note == -1 ? midi_middle_c : block.state.last_midi_note) : block.voice->state.note_id_.key;

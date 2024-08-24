@@ -21,7 +21,7 @@ static float const max_phase_mod = 0.1f;
 
 enum { type_off, type_basic, type_dsf, type_kps1, type_kps2, type_static };
 enum { rand_svf_lpf, rand_svf_hpf, rand_svf_bpf, rand_svf_bsf, rand_svf_peq };
-enum { section_type, section_sync_params, section_sync_on, section_uni, section_basic, section_basic_pw, section_dsf, section_rand };
+enum { section_type, section_sync_on, section_sync_uni, section_basic, section_basic_pw, section_dsf, section_rand };
 enum { 
   scratch_pb, scratch_cent, scratch_pitch, scratch_sync_semi, 
   scratch_basic_sin_mix, scratch_basic_saw_mix, scratch_basic_tri_mix, scratch_basic_sqr_mix, 
@@ -29,7 +29,7 @@ enum {
 
 enum {
   param_type, param_gain, param_note, param_cent, 
-  param_hard_sync_semis, param_hard_sync_xover, param_hard_sync,
+  param_hard_sync, param_hard_sync_semis, param_hard_sync_xover,
   param_uni_voices, param_uni_sprd, param_uni_dtn, param_uni_phase,
   param_basic_sin_on, param_basic_sin_mix, param_basic_saw_on, param_basic_saw_mix,
   param_basic_tri_on, param_basic_tri_mix, param_basic_sqr_on, param_basic_sqr_mix, param_basic_sqr_pw,
@@ -69,12 +69,12 @@ static std::vector<list_item>
 type_items()
 {
   std::vector<list_item> result;
-  result.emplace_back("{9C9FFCAD-09A5-49E6-A083-482C8A3CF20B}", "Off");
-  result.emplace_back("{9185A6F4-F9EF-4A33-8462-1B02A25FDF29}", "Basic");
-  result.emplace_back("{5DDB5617-85CC-4BE7-8295-63184BA56191}", "DSF");
-  result.emplace_back("{E6814747-6CEE-47DA-9878-890D0A5DC5C7}", "K+S1");
-  result.emplace_back("{43DC7825-E437-4792-88D5-6E76241493A1}", "K+S2");
-  result.emplace_back("{8B81D211-2A23-4D5D-89B0-24DA3B7D7E2C}", "Static");
+  result.emplace_back("{9C9FFCAD-09A5-49E6-A083-482C8A3CF20B}", "Off", "Off");
+  result.emplace_back("{9185A6F4-F9EF-4A33-8462-1B02A25FDF29}", "Basic", "Basic Analog");
+  result.emplace_back("{5DDB5617-85CC-4BE7-8295-63184BA56191}", "DSF", "Discrete Summation Formulae");
+  result.emplace_back("{E6814747-6CEE-47DA-9878-890D0A5DC5C7}", "K+S1", "Karplus-Strong");
+  result.emplace_back("{43DC7825-E437-4792-88D5-6E76241493A1}", "K+S2", "Karplus-Strong With Midpoint Adjustment");
+  result.emplace_back("{8B81D211-2A23-4D5D-89B0-24DA3B7D7E2C}", "Static", "Static (Random Noise)");
   return result;
 }
 
@@ -82,11 +82,11 @@ static std::vector<list_item>
 random_svf_items()
 {
   std::vector<list_item> result;
-  result.emplace_back("{E4193E9C-3305-42AE-90D4-A9A5554E43EA}", "LPF");
-  result.emplace_back("{D51180AF-5D49-4BB6-BE73-73EF753A15A8}", "HPF");
-  result.emplace_back("{F2DCD276-E111-4A63-8701-6751438A1FAA}", "BPF");
-  result.emplace_back("{CC4012D9-272E-4E33-96EB-AF1ADBF0E879}", "BSF");
-  result.emplace_back("{C4025CB0-5B1A-4B5D-A293-CAD380F264FA}", "PEQ");
+  result.emplace_back("{E4193E9C-3305-42AE-90D4-A9A5554E43EA}", "LPF", "Low Pass");
+  result.emplace_back("{D51180AF-5D49-4BB6-BE73-73EF753A15A8}", "HPF", "High Pass");
+  result.emplace_back("{F2DCD276-E111-4A63-8701-6751438A1FAA}", "BPF", "Band Pass");
+  result.emplace_back("{CC4012D9-272E-4E33-96EB-AF1ADBF0E879}", "BSF", "Band Stop");
+  result.emplace_back("{C4025CB0-5B1A-4B5D-A293-CAD380F264FA}", "PEQ", "Peaking EQ");
   return result;
 }
 
@@ -276,11 +276,12 @@ module_topo
 osc_topo(int section, gui_position const& pos)
 { 
   module_topo result(make_module(
-    make_topo_info("{45C2CCFE-48D9-4231-A327-319DAE5C9366}", true, "Oscillator", "Oscillator", "Osc", module_osc, 5),
+    make_topo_info_basic("{45C2CCFE-48D9-4231-A327-319DAE5C9366}", "Osc", module_osc, 5),
     make_module_dsp(module_stage::voice, module_output::audio, scratch_count, {
       make_module_dsp_output(false, make_topo_info_basic("{FA702356-D73E-4438-8127-0FDD01526B7E}", "Output", 0, 1 + max_osc_unison_voices)) }),
-    make_module_gui(section, pos, { { 1, 1 }, { 32, 13, 8, 26, 55, 8 } })));
+    make_module_gui(section, pos, { { 1, 1 }, { 32, 8, 13, 26, 55, 8 } })));
   result.info.description = "Oscillator module with sine/saw/triangle/square/DSF/Karplus-Strong/noise generators, hardsync and unison support.";
+  result.gui.tabbed_name = "OSC";
   result.gui.is_drag_mod_source = true;
 
   result.minimal_initializer = init_minimal;
@@ -333,64 +334,62 @@ osc_topo(int section, gui_position const& pos)
   cent.info.description = "Oscillator cents, also reacts to Voice-In cents.";
   cent.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return can_do_pitch(vs[0]); });
 
-  result.sections.emplace_back(make_param_section(section_sync_params,
-    make_topo_tag_basic("{18204EB2-1066-4F27-8FD9-5C3D1505BDD7}", "Sync Params"),
-    make_param_section_gui({ 0, 1, 2, 1 }, gui_dimension({ 1, 1 }, { gui_dimension::auto_size_all, 1 }), gui_label_edit_cell_split::horizontal)));
-  auto& sync_semi = result.params.emplace_back(make_param(
-    make_topo_info("{FBD5ADB5-63E2-42E0-BF90-71B694E6F52C}", true, "Hard Sync Semitones", "HST", "HS Semi", param_hard_sync_semis, 1),
-    make_param_dsp_accurate(param_automate::modulate), make_domain_linear(0, 48, 0, 2, "Semi"),
-    make_param_gui_single(section_sync_params, gui_edit_type::knob, { 0, 0 },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  sync_semi.gui.bindings.enabled.bind_params({ param_type, param_hard_sync }, [](auto const& vs) { return can_do_phase(vs[0]) && vs[1]; });
-  sync_semi.info.description = "Pitch offset of the actual oscillator against the reference oscillator.";
-  auto& sync_xover = result.params.emplace_back(make_param(
-    make_topo_info("{FE055A0E-4619-438B-9129-24E56437A54E}", true, "Hard Sync XOver Time", "HXO", "HS XOver", param_hard_sync_xover, 1),
-    make_param_dsp_voice(param_automate::automate), make_domain_linear(0, 5, 2.5, 2, "Ms"),
-    make_param_gui_single(section_sync_params, gui_edit_type::knob, { 1, 0 },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  sync_xover.gui.bindings.enabled.bind_params({ param_type, param_hard_sync }, [](auto const& vs) { return can_do_phase(vs[0]) && vs[1]; });
-  sync_xover.info.description = "Controls cross-over time between the synced and unsyced signal after a phase reset occurs.";
-
-  result.sections.emplace_back(make_param_section(section_sync_on,
+  auto& sync_on_section = result.sections.emplace_back(make_param_section(section_sync_on,
     make_topo_tag_basic("{D5A040EE-5F64-4771-8581-CDC5C0CC11A8}", "Sync On"),
-    make_param_section_gui({ 0, 2, 2, 1 }, gui_dimension({ 1, 1 }, { 1 }), gui_label_edit_cell_split::vertical)));
+    make_param_section_gui({ 0, 1, 2, 1 }, gui_dimension({ 1, 1 }, { 1 }), gui_label_edit_cell_split::vertical)));
+  sync_on_section.gui.merge_with_section = section_sync_uni;
   auto& sync_on = result.params.emplace_back(make_param(
-    make_topo_info("{900958A4-74BC-4912-976E-45E66D4F00C7}", true, "Hard Sync On", "HS", "HSync", param_hard_sync, 1),
+    make_topo_info("{900958A4-74BC-4912-976E-45E66D4F00C7}", true, "Hard Sync On", "HSn", "HSync", param_hard_sync, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_toggle(false),
     make_param_gui_single(section_sync_on, gui_edit_type::toggle, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::top, gui_label_justify::center))));
   sync_on.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return can_do_phase(vs[0]); });
   sync_on.info.description = "Enables hard-sync against an internal reference oscillator.";
-  
-  result.sections.emplace_back(make_param_section(section_uni,
-    make_topo_tag_basic("{D91778EE-63D7-4346-B857-64B2D64D0441}", "Unison"),
-    make_param_section_gui({ 0, 3, 2, 1 }, gui_dimension({ 1, 1 }, { 
-      gui_dimension::auto_size_all, 1, gui_dimension::auto_size_all, 1 }), gui_label_edit_cell_split::horizontal)));
+
+  auto& sync_uni_section = result.sections.emplace_back(make_param_section(section_sync_uni,
+    make_topo_tag_basic("{18204EB2-1066-4F27-8FD9-5C3D1505BDD7}", "Sync/Unisonc Params"),
+    make_param_section_gui({ 0, 2, 2, 2 }, gui_dimension({ 1, 1 }, { 
+      gui_dimension::auto_size_all, 1, gui_dimension::auto_size_all, 1, gui_dimension::auto_size_all, 1 }), gui_label_edit_cell_split::horizontal)));
+  sync_uni_section.gui.merge_with_section = section_sync_on;
+  auto& sync_semi = result.params.emplace_back(make_param(
+    make_topo_info("{FBD5ADB5-63E2-42E0-BF90-71B694E6F52C}", true, "Hard Sync Semitones", "Semi", "HS Semi", param_hard_sync_semis, 1),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_linear(0, 48, 0, 2, "Semi"),
+    make_param_gui_single(section_sync_uni, gui_edit_type::knob, { 0, 0 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
+  sync_semi.gui.bindings.enabled.bind_params({ param_type, param_hard_sync }, [](auto const& vs) { return can_do_phase(vs[0]) && vs[1]; });
+  sync_semi.info.description = "Pitch offset of the actual oscillator against the reference oscillator.";
+  auto& sync_xover = result.params.emplace_back(make_param(
+    make_topo_info("{FE055A0E-4619-438B-9129-24E56437A54E}", true, "Hard Sync XOver Time", "XOvr", "HS XOvr", param_hard_sync_xover, 1),
+    make_param_dsp_voice(param_automate::automate), make_domain_linear(0, 5, 2.5, 2, "Ms"),
+    make_param_gui_single(section_sync_uni, gui_edit_type::knob, { 1, 0 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
+  sync_xover.gui.bindings.enabled.bind_params({ param_type, param_hard_sync }, [](auto const& vs) { return can_do_phase(vs[0]) && vs[1]; });
+  sync_xover.info.description = "Controls cross-over time between the synced and unsyced signal after a phase reset occurs.";
   auto& uni_voices = result.params.emplace_back(make_param(
     make_topo_info("{376DE9EF-1CC4-49A0-8CA7-9CF20D33F4D8}", true, "Unison Voices", "Uni", "Uni", param_uni_voices, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_step(1, max_osc_unison_voices, 1, 0),
-    make_param_gui_single(section_uni, gui_edit_type::list, { 0, 0 },
+    make_param_gui_single(section_sync_uni, gui_edit_type::list, { 0, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   uni_voices.gui.bindings.enabled.bind_params({ param_type, param_uni_voices }, [](auto const& vs) { return vs[0] != type_off; });
   uni_voices.info.description = "Unison voice count. Oversampling, hard-sync, AM and FM are applied per-unison-voice.";
   auto& uni_spread = result.params.emplace_back(make_param(
-    make_topo_info("{537A8F3F-006B-4F99-90E4-F65D0DF2F59F}", true, "Unison Spread", "Spr", "Uni Sprd", param_uni_sprd, 1),
+    make_topo_info("{537A8F3F-006B-4F99-90E4-F65D0DF2F59F}", true, "Unison Spread", "Spr", "Uni Spread", param_uni_sprd, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
-    make_param_gui_single(section_uni, gui_edit_type::knob, { 0, 2 },
+    make_param_gui_single(section_sync_uni, gui_edit_type::knob, { 0, 4 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   uni_spread.gui.bindings.enabled.bind_params({ param_type, param_uni_voices }, [](auto const& vs) { return vs[0] != type_off && vs[1] > 1; });
   uni_spread.info.description = "Unison stereo spread, works on all oscillator modes.";
   auto& uni_dtn = result.params.emplace_back(make_param(
-    make_topo_info("{FDAE1E98-B236-4B2B-8124-0B8E1EF72367}", true, "Unison Detune", "Dtn", "Uni Dtn", param_uni_dtn, 1),
+    make_topo_info("{FDAE1E98-B236-4B2B-8124-0B8E1EF72367}", true, "Unison Detune", "Dtn", "Uni Detune", param_uni_dtn, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.33, 0, true),
-    make_param_gui_single(section_uni, gui_edit_type::knob, { 1, 0 },
+    make_param_gui_single(section_sync_uni, gui_edit_type::knob, { 1, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   uni_dtn.gui.bindings.enabled.bind_params({ param_type, param_uni_voices }, [](auto const& vs) { return can_do_pitch(vs[0]) && vs[1] > 1; });
   uni_dtn.info.description = "Detune unison voices. Only applicable to Basic and DSF generators.";
   auto& uni_phase = result.params.emplace_back(make_param(
-    make_topo_info("{8F1098B6-64F9-407E-A8A3-8C3637D59A26}", true, "Unison Phase", "Phs", "Uni Phs", param_uni_phase, 1),
+    make_topo_info("{8F1098B6-64F9-407E-A8A3-8C3637D59A26}", true, "Unison Phase", "Phs", "Uni Phase", param_uni_phase, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
-    make_param_gui_single(section_uni, gui_edit_type::knob, { 1, 2 },
+    make_param_gui_single(section_sync_uni, gui_edit_type::knob, { 1, 4 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   uni_phase.gui.bindings.enabled.bind_params({ param_type, param_uni_voices }, [](auto const& vs) { return can_do_phase(vs[0]) && vs[1] > 1; });
   uni_phase.info.description = "Phase offset for subsequent voices, to get that unison effect 'right from the start'. Only applicable to Basic and DSF generators.";
@@ -400,59 +399,60 @@ osc_topo(int section, gui_position const& pos)
     make_param_section_gui({ 0, 4, 2, 1 }, gui_dimension({ 1, 1 }, { 
       gui_dimension::auto_size_all, gui_dimension::auto_size_all, 1, 
       gui_dimension::auto_size_all, gui_dimension::auto_size_all, 1 }), gui_label_edit_cell_split::horizontal)));
+  basic.gui.merge_with_section = section_basic_pw;
   basic.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_basic; });
   basic.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_off || vs[0] == type_basic; });
   auto& basic_sin_on = result.params.emplace_back(make_param(
-    make_topo_info("{BD753E3C-B84E-4185-95D1-66EA3B27C76B}", true, "Basic Sin On", "Sin", "Bsc Sin", param_basic_sin_on, 1),
+    make_topo_info("{BD753E3C-B84E-4185-95D1-66EA3B27C76B}", true, "Basic Sin On", "Sin", "Basic Sin", param_basic_sin_on, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_toggle(true),
     make_param_gui_single(section_basic, gui_edit_type::toggle, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   basic_sin_on.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_basic; });
   basic_sin_on.info.description = "Toggle sine generator on/off.";
   auto& basic_sin_mix = result.params.emplace_back(make_param(
-    make_topo_info("{60FAAC91-7F69-4804-AC8B-2C7E6F3E4238}", true, "Basic Sin Mix", "Sin", "Bsc Sin", param_basic_sin_mix, 1),
+    make_topo_info("{60FAAC91-7F69-4804-AC8B-2C7E6F3E4238}", true, "Basic Sin Mix", "Sin", "Basic Sin Mix", param_basic_sin_mix, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 1, 0, true),
     make_param_gui_single(section_basic, gui_edit_type::hslider, { 0, 2 }, make_label_none())));
   basic_sin_mix.gui.bindings.enabled.bind_params({ param_type, param_basic_sin_on }, [](auto const& vs) { return vs[0] == type_basic && vs[1] != 0; });
   basic_sin_mix.info.description = "Sine generator mix amount.";
   basic_sin_on.gui.alternate_drag_param_id = basic_sin_mix.info.tag.id;
   auto& basic_saw_on = result.params.emplace_back(make_param(
-    make_topo_info("{A31C1E92-E7FF-410F-8466-7AC235A95BDB}", true, "Basic Saw On", "Saw", "Bsc Saw", param_basic_saw_on, 1),
+    make_topo_info("{A31C1E92-E7FF-410F-8466-7AC235A95BDB}", true, "Basic Saw On", "Saw", "Basic Saw", param_basic_saw_on, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_toggle(false),
     make_param_gui_single(section_basic, gui_edit_type::toggle, { 0, 3 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   basic_saw_on.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_basic; });
   basic_saw_on.info.description = "Toggle saw generator on/off.";
   auto& basic_saw_mix = result.params.emplace_back(make_param(
-    make_topo_info("{A459839C-F78E-4871-8494-6D524F00D0CE}", true, "Basic Saw Mix", "Saw", "Bsc Saw", param_basic_saw_mix, 1),
+    make_topo_info("{A459839C-F78E-4871-8494-6D524F00D0CE}", true, "Basic Saw Mix", "Saw", "Basic Saw Mix", param_basic_saw_mix, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 1, 0, true),
     make_param_gui_single(section_basic, gui_edit_type::hslider, { 0, 5 }, make_label_none())));
   basic_saw_mix.gui.bindings.enabled.bind_params({ param_type, param_basic_saw_on }, [](auto const& vs) { return vs[0] == type_basic && vs[1] != 0; });
   basic_saw_mix.info.description = "Saw generator mix amount.";
   basic_saw_on.gui.alternate_drag_param_id = basic_saw_mix.info.tag.id;
   auto& basic_tri_on = result.params.emplace_back(make_param(
-    make_topo_info("{F2B92036-ED14-4D88-AFE3-B83C1AAE5E76}", true, "Basic Tri On", "Tri", "Bsc Tri", param_basic_tri_on, 1),
+    make_topo_info("{F2B92036-ED14-4D88-AFE3-B83C1AAE5E76}", true, "Basic Tri On", "Tri", "Basic Tri", param_basic_tri_on, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_toggle(false),
     make_param_gui_single(section_basic, gui_edit_type::toggle, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   basic_tri_on.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_basic; });
   basic_tri_on.info.description = "Toggle triangle generator on/off.";
   auto& basic_tri_mix = result.params.emplace_back(make_param(
-    make_topo_info("{88F88506-5916-4668-BD8B-5C35D01D1147}", true, "Basic Tri Mix", "Tri", "Bsc Tri", param_basic_tri_mix, 1),
+    make_topo_info("{88F88506-5916-4668-BD8B-5C35D01D1147}", true, "Basic Tri Mix", "Tri", "Basic Tri Mix", param_basic_tri_mix, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 1, 0, true),
     make_param_gui_single(section_basic, gui_edit_type::hslider, { 1, 2 }, make_label_none())));
   basic_tri_mix.gui.bindings.enabled.bind_params({ param_type, param_basic_tri_on }, [](auto const& vs) { return vs[0] == type_basic && vs[1] != 0; });
   basic_tri_mix.info.description = "Triangle generator mix amount.";
   basic_tri_on.gui.alternate_drag_param_id = basic_tri_mix.info.tag.id;
   auto& basic_sqr_on = result.params.emplace_back(make_param(
-    make_topo_info("{C3AF1917-64FD-481B-9C21-3FE6F8D039C4}", true, "Basic Sqr On", "Sqr", "Bsc Sqr", param_basic_sqr_on, 1),
+    make_topo_info("{C3AF1917-64FD-481B-9C21-3FE6F8D039C4}", true, "Basic Sqr On", "Sqr", "Basic Sqr", param_basic_sqr_on, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_toggle(false),
     make_param_gui_single(section_basic, gui_edit_type::toggle, { 1, 3 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   basic_sqr_on.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_basic; });
   basic_sqr_on.info.description = "Toggle square generator on/off.";
   auto& basic_sqr_mix = result.params.emplace_back(make_param(
-    make_topo_info("{B133B0E6-23DC-4B44-AA3B-6D04649271A4}", true, "Basic Sqr Mix", "Sqr", "Bsc Sqr", param_basic_sqr_mix, 1),
+    make_topo_info("{B133B0E6-23DC-4B44-AA3B-6D04649271A4}", true, "Basic Sqr Mix", "Sqr", "Basic Sqr Mix", param_basic_sqr_mix, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 1, 0, true),
     make_param_gui_single(section_basic, gui_edit_type::hslider, { 1, 5 }, make_label_none())));
   basic_sqr_mix.gui.bindings.enabled.bind_params({ param_type, param_basic_sqr_on }, [](auto const& vs) { return vs[0] == type_basic && vs[1] != 0; });
@@ -462,10 +462,11 @@ osc_topo(int section, gui_position const& pos)
   auto& basic_pw = result.sections.emplace_back(make_param_section(section_basic_pw,
     make_topo_tag_basic("{93984655-A05F-424D-B3E5-A0C94AF8D0B3}", "Basic PW"),
     make_param_section_gui({ 0, 5, 2, 1 }, gui_dimension({ 1, 1 }, { 1 }), gui_label_edit_cell_split::vertical)));
+  basic_pw.gui.merge_with_section = section_basic;
   basic_pw.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_basic; });
   basic_pw.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_off || vs[0] == type_basic; });
   auto& basic_sqr_pw = result.params.emplace_back(make_param(
-    make_topo_info("{57A231B9-CCC7-4881-885E-3244AE61107C}", true, "Basic Sqr PW", "PW", "Bsc PW", param_basic_sqr_pw, 1),
+    make_topo_info("{57A231B9-CCC7-4881-885E-3244AE61107C}", true, "Basic Sqr PW", "PW", "Basic PW", param_basic_sqr_pw, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(1, 0, true),
     make_param_gui_single(section_basic_pw, gui_edit_type::knob, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::top, gui_label_justify::center))));
@@ -492,7 +493,7 @@ osc_topo(int section, gui_position const& pos)
   dsf_dist.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dsf; });
   dsf_dist.info.description = "Controls the frequency distance between the base frequency and subsequent partials.";
   auto& dsf_dcy = result.params.emplace_back(make_param(
-    make_topo_info("{2D07A6F2-F4D3-4094-B1C0-453FDF434CC8}", true, "DSF Decay", "Decay", "DSF Dcy", param_dsf_dcy, 1),
+    make_topo_info("{2D07A6F2-F4D3-4094-B1C0-453FDF434CC8}", true, "DSF Decay", "Decay", "DSF Decay", param_dsf_dcy, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
     make_param_gui_single(section_dsf, gui_edit_type::hslider, { 1, 0, 1, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
@@ -514,7 +515,7 @@ osc_topo(int section, gui_position const& pos)
   random_svf.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_random(vs[0]); });
   random_svf.info.description = "Continuous filter type for static noise or initial-excite filter type for Karplus-Strong.";
   auto& random_step = result.params.emplace_back(make_param(
-    make_topo_info("{41E7954F-27B0-48A8-932F-ACB3B3F310A7}", true, "Rnd Rate", "Rate", "Rnd Rate", param_rand_rate, 1),
+    make_topo_info("{41E7954F-27B0-48A8-932F-ACB3B3F310A7}", true, "Random Rate", "Rate", "Random Rate", param_rand_rate, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_log(1, 100, 10, 10, 1, "%"),
     make_param_gui_single(section_rand, gui_edit_type::hslider, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
@@ -522,7 +523,7 @@ osc_topo(int section, gui_position const& pos)
   random_step.info.description = std::string("On-voice-init step count for static noise and initial-excite stage of Karplus-Strong. ") +
     "Modulation takes place only at voice start.";
   auto& random_freq = result.params.emplace_back(make_param(
-    make_topo_info("{289B4EA4-4A0E-4D33-98BA-7DF475B342E9}", true, "Rnd Filter Freq", "Freq", "Rnd Freq", param_rand_freq, 1),
+    make_topo_info("{289B4EA4-4A0E-4D33-98BA-7DF475B342E9}", true, "Random Filter Freq", "Freq", "Random Freq", param_rand_freq, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_log(20, 20000, 20000, 1000, 0, "Hz"),
     make_param_gui_single(section_rand, gui_edit_type::knob, { 0, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
@@ -530,7 +531,7 @@ osc_topo(int section, gui_position const& pos)
   random_freq.info.description = std::string("Continuous filter frequency for static noise or initial-excite filter frequency for Karplus-Strong. ") + 
     "Modulation takes place only at voice start.";
   auto& random_res = result.params.emplace_back(make_param(
-    make_topo_info("{3E68ACDC-9800-4A4B-9BB6-984C5A7F624B}", true, "Rnd Filter Reso", "Reso", "Rnd Reso", param_rand_res, 1),
+    make_topo_info("{3E68ACDC-9800-4A4B-9BB6-984C5A7F624B}", true, "Random Filter Reso", "Reso", "Random Reso", param_rand_res, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0, 0, true),
     make_param_gui_single(section_rand, gui_edit_type::knob, { 1, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
@@ -545,14 +546,14 @@ osc_topo(int section, gui_position const& pos)
   random_seed.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_random(vs[0]); });
   random_seed.info.description = "On-voice-init random seed for static noise and initial-excite stage of Karplus-Strong.";
   auto& kps_fdbk = result.params.emplace_back(make_param(
-    make_topo_info("{E1907E30-9C17-42C4-B8B6-F625A388C257}", true, "K+S Feedback", "Fdbk", "KPS Fdbk", param_kps_fdbk, 1),
+    make_topo_info("{E1907E30-9C17-42C4-B8B6-F625A388C257}", true, "K+S Feedback", "Fdbk", "K+S Feedback", param_kps_fdbk, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(1, 0, true),
     make_param_gui_single(section_rand, gui_edit_type::knob, { 1, 4 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   kps_fdbk.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_kps(vs[0]); });
   kps_fdbk.info.description = "Use to shorten low-frequency notes.";
   auto& kps_mid = result.params.emplace_back(make_param(
-    make_topo_info("{AE914D18-C5AB-4ABB-A43B-C80E24868F78}", true, "K+S Midpoint", "Mid", "KPS Mid", param_kps_mid, 1),
+    make_topo_info("{AE914D18-C5AB-4ABB-A43B-C80E24868F78}", true, "K+S Midpoint", "Mid", "K+S Midpoint", param_kps_mid, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_step(1, 127, midi_middle_c, 0),
     make_param_gui_single(section_rand, gui_edit_type::knob, { 0, 6 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
@@ -561,7 +562,7 @@ osc_topo(int section, gui_position const& pos)
     "Lower notes will be stretched less, higher notes will be stretched more. " +
     "This tries to keep audible note lengths relatively equal.";
   auto& kps_stretch = result.params.emplace_back(make_param(
-    make_topo_info("{9EC580EA-33C6-48E4-8C7E-300DAD341F57}", true, "K+S Stretch", "Stretch", "KPS Str", param_kps_stretch, 1),
+    make_topo_info("{9EC580EA-33C6-48E4-8C7E-300DAD341F57}", true, "K+S Stretch", "Stretch", "K+S Stretch", param_kps_stretch, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0, 0, true),
     make_param_gui_single(section_rand, gui_edit_type::knob, { 1, 6 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
@@ -575,11 +576,11 @@ osc_topo(int section, gui_position const& pos)
   pitch.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return can_do_pitch(vs[0]); });
   pitch.info.description = "Absolute pitch modulation target, also reacts to Voice-in pitch modulation.";
   auto& pb = result.params.emplace_back(make_param(
-    make_topo_info("{D310300A-A143-4866-8356-F82329A76BAE}", true, "Pitch Bend", "PB", "PB", param_pb, 1),
+    make_topo_info("{D310300A-A143-4866-8356-F82329A76BAE}", true, "Pitch Bend", "Pitch Bend", "Pitch Bend", param_pb, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 0, 0, true),
     make_param_gui_none()));
   pb.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return can_do_pitch(vs[0]); });
-  pb.info.description = "Pitch-bend modulation target. Also reacts to Voice-in PB modulation and master pitchbend range.";
+  pb.info.description = "Pitch-bend modulation target. Also reacts to Voice-in PB modulation and global pitchbend range.";
   auto& pm = result.params.emplace_back(make_param(
     make_topo_info("{EDBD2257-6582-4438-8EEA-7464B06FB37F}", true, "Phase", "Phase", "Phase", param_phase, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0, 1, true),
@@ -733,7 +734,7 @@ osc_engine::real_reset(plugin_block& block, cv_audio_matrix_mixdown const* modul
     // Adjust phase for global unison.
     if (block.voice->state.sub_voice_count > 1)
     {
-      float glob_uni_phs_offset = block.state.all_block_automation[module_master_in][0][master_in_param_glob_uni_osc_phase][0].real();
+      float glob_uni_phs_offset = block.state.all_block_automation[module_global_in][0][global_in_param_uni_osc_phase][0].real();
       float voice_pos = (float)block.voice->state.sub_voice_index / (block.voice->state.sub_voice_count - 1.0f);
       _ref_phases[v] += voice_pos * glob_uni_phs_offset;
       _ref_phases[v] -= (int)_ref_phases[v];
@@ -1020,7 +1021,7 @@ osc_engine::process_tuning_mode_unison(plugin_block& block, cv_audio_matrix_mixd
   (void)type;
 
   int dsf_parts = (int)std::round(block_auto[param_dsf_parts][0].real());
-  int master_pb_range = block.state.all_block_automation[module_master_in][0][master_in_param_pb_range][0].step();
+  int global_pb_range = block.state.all_block_automation[module_global_in][0][global_in_param_pb_range][0].step();
   
   int rand_seed = block_auto[param_rand_seed][0].step();
   int kps_mid_note = block_auto[param_kps_mid][0].step();
@@ -1119,7 +1120,7 @@ osc_engine::process_tuning_mode_unison(plugin_block& block, cv_audio_matrix_mixd
     float base_pb = pb_curve[mod_index];
     float base_cent = cent_curve[mod_index];
     float base_pitch_auto = pitch_curve[mod_index];
-    float base_pitch_ref = note + base_cent + base_pitch_auto + base_pb * master_pb_range + voice_pitch_offset_curve[mod_index];
+    float base_pitch_ref = note + base_cent + base_pitch_auto + base_pb * global_pb_range + voice_pitch_offset_curve[mod_index];
     float base_pitch_sync = base_pitch_ref;
     (void)base_pitch_sync;
 

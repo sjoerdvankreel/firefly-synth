@@ -22,7 +22,9 @@ enum class gui_label_justify { near, far, center };
 enum class gui_label_align { top, bottom, left, right };
 enum class gui_label_contents { none, name, value, drag, no_drag }; // no drag = none, but be explicit about it
 enum class gui_label_edit_cell_split { no_split, horizontal, vertical };
-enum class gui_edit_type { none, toggle, list, autofit_list, knob, hslider, vslider, output_label_left, output_label_center, output_toggle, output_module_name };
+enum class gui_edit_type { 
+  none, toggle, list, autofit_list, knob, hslider, vslider, output_label_left, 
+  output_label_center, output_toggle, output_module_name, output_meter };
 
 typedef std::function<bool(int module_slot)>
 gui_slot_binding_selector;
@@ -175,44 +177,38 @@ struct gui_dimension final {
 
 // color scheme
 struct gui_colors final {
-  juce::Colour tab_text = juce::Colour(0xFFFF8844);
-  juce::Colour tab_text_inactive = juce::Colour(0xFFAAAAAA);
-  juce::Colour tab_button = juce::Colour(0xFF333333);
-  juce::Colour tab_header = juce::Colour(0xFF222222);
-  juce::Colour tab_background1 = juce::Colour(0xFF222222);
-  juce::Colour tab_background2 = juce::Colour(0xFF111111);
-  juce::Colour graph_grid = juce::Colour(0x40FFFFFF);
-  juce::Colour graph_text = juce::Colour(0xC0FFFFFF);
-  juce::Colour graph_background = juce::Colour(0xFF000000);
-  juce::Colour graph_area = juce::Colour(0x80FF8844);
-  juce::Colour graph_line = juce::Colour(0xFFFF8844);
-  juce::Colour graph_mod_indicator = juce::Colour(0x50FFFFFF);
-  juce::Colour bubble_outline = juce::Colour(0xFFFF8844);
-  juce::Colour knob_thumb = juce::Colour(0xFFFF8844);
-  juce::Colour knob_track1 = juce::Colour(0xFF222222);
-  juce::Colour knob_track2 = juce::Colour(0xFFFF8844);
-  juce::Colour knob_background1 = juce::Colour(0xFF222222);
-  juce::Colour knob_background2 = juce::Colour(0xFF999999);
-  juce::Colour section_outline1 = juce::Colour(0xFF884422);
-  juce::Colour section_outline2 = juce::Colour(0xFF444444);
-  juce::Colour section_background1 = juce::Colour(0xFF884422).darker(1.75f);
-  juce::Colour section_background2 = juce::Colour(0xFF444444).darker(1.75f);
-  juce::Colour slider_thumb = juce::Colour(0xFFFF8844);
-  juce::Colour slider_track1 = juce::Colour(0xFF222222);
-  juce::Colour slider_track2 = juce::Colour(0xFF999999);
-  juce::Colour slider_outline1 = juce::Colour(0xFF444444);
-  juce::Colour slider_outline2 = juce::Colour(0xFFBBBBBB);
-  juce::Colour slider_background = juce::Colour(0xFF000000);
-  juce::Colour slider_mod_indicator = juce::Colour(0x80FFFFFF);
-  juce::Colour edit_text = juce::Colour(0xFFFFFFFF);
-  juce::Colour table_header = juce::Colour(0xFFFF8844);
-  juce::Colour label_text = juce::Colour(0xFFEEEEEE);
-  juce::Colour control_tick = juce::Colour(0xFFFF8844);
-  juce::Colour control_text = juce::Colour(0xFFEEEEEE);
-  juce::Colour control_outline = juce::Colour(0xFFAAAAAA);
-  juce::Colour control_background = juce::Colour(0xFF111111);
-  juce::Colour scrollbar_thumb = juce::Colour(0xFFFF8844);
-  juce::Colour scrollbar_background = juce::Colour(0xFF444444);
+  juce::Colour tab_text = juce::Colour(0xFF00FF00);
+  juce::Colour tab_text_inactive = juce::Colour(0xFF00FF00);
+  juce::Colour tab_button = juce::Colour(0xFF00FF00);
+  juce::Colour tab_header = juce::Colour(0xFF00FF00);
+  juce::Colour graph_grid = juce::Colour(0xFF00FF00);
+  juce::Colour graph_text = juce::Colour(0xFF00FF00);
+  juce::Colour graph_background = juce::Colour(0xFF00FF00);
+  juce::Colour graph_area = juce::Colour(0xFF00FF00);
+  juce::Colour graph_line = juce::Colour(0xFF00FF00);
+  juce::Colour graph_mod_indicator = juce::Colour(0xFF00FF00);
+  juce::Colour bubble_outline = juce::Colour(0xFF00FF00);
+  juce::Colour slider_background = juce::Colour(0xFF00FF00);
+  juce::Colour slider_highlight = juce::Colour(0xFF00FF00);
+  juce::Colour slider_shadow = juce::Colour(0xFF00FF00);
+  juce::Colour slider_automation = juce::Colour(0xFF00FF00);
+  juce::Colour slider_can_modulate = juce::Colour(0xFF00FF00);
+  juce::Colour section_outline = juce::Colour(0xFF00FF00);
+  juce::Colour section_background = juce::Colour(0xFF00FF00);
+  juce::Colour edit_text = juce::Colour(0xFF00FF00);
+  juce::Colour table_header = juce::Colour(0xFF00FF00);
+  juce::Colour table_cell = juce::Colour(0xFF00FF00);
+  juce::Colour table_header_cell = juce::Colour(0xFF00FF00);
+  juce::Colour label_text = juce::Colour(0xFF00FF00);
+  juce::Colour button_text = juce::Colour(0xFF00FF00);
+  juce::Colour control_tick = juce::Colour(0xFF00FF00);
+  juce::Colour control_text = juce::Colour(0xFF00FF00);
+  juce::Colour control_outline = juce::Colour(0xFF00FF00);
+  juce::Colour control_background = juce::Colour(0xFF00FF00);
+  juce::Colour scrollbar_thumb = juce::Colour(0xFF00FF00);
+  juce::Colour scrollbar_background = juce::Colour(0xFF00FF00);
+  juce::Colour popup_text = juce::Colour(0xFF00FF00);
+  juce::Colour popup_text_highlighted = juce::Colour(0xFF00FF00); 
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(gui_colors);
 };
 

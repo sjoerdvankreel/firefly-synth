@@ -64,6 +64,15 @@ param_domain::text_to_normalized(
 }
 
 std::string
+param_domain::plain_to_item_tooltip(plain_value plain) const
+{
+  assert(type == domain_type::item);
+  if (items[plain.step()].tooltip.size()) 
+    return items[plain.step()].tooltip;
+  return items[plain.step()].name;
+}
+
+std::string
 param_domain::plain_to_text(bool io, plain_value plain) const
 {
   std::string prefix = "";

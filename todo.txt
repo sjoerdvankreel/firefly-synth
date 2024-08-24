@@ -15,36 +15,28 @@ on release:
 9 check if need update github social preview
 10 dont forget to tag
 11 make a github release
-12 update kvr
-
-ui-fixes-again:
-* show clap mod indicator
-* repaint on waveform change (free running or random-per-voice)
-* some bolletjes don't go away
-* fix the undo history for tuning mode
-* color-on-gray not gray-on-color
-* vertical textboxes main / global/voice audio/cv to the left
-* drop the header text ?
-* do monitor like 1.8.4
-* do output meters not text (cpu, voices etc)
-* do master in like 1.8.4
-* smaller font ?
-* do big knobs not sliders some places
-* prettify knobs, sliders, combos, toggles, menus
-* make the bolletjes work in case of automation
-* show active modulation for the other graphs
-* rethink section colors global red/orange voice blue/cyan main gray
-* do load/save like 1.8.4
-* gmatrix to the top, vmatrix to the bottom
-* make matrix tab headers match new section colors
-* do mod-free themes
-* bugfix: rerender graph on master in param hover?
-* drop some ugly-ass themes
-* show effective modulation in the ui for clap param mod
+12 update kvr 
 
 autobuilds:
 * ask paul
 * integrate https://github.com/surge-synthesizer/monique-monosynth/blob/main/.github/workflows/build-pr.yml
+
+ui-vnext:
+* less ugly audio graphs
+* move smoothing to somewhere else
+* show clap mod indicator
+* repaint on waveform change (free running or random-per-voice)
+* some bolletjes don't go away
+* fix the undo history for tuning mode
+* make the bolletjes work in case of automation
+* show active modulation for the other graphs
+* bugfix: rerender graph on master in param hover?
+* show effective modulation in the ui for clap param mod
+* fix the fx version
+* drop the smoothing module, make the settings module
+* fix the todos
+* check if global header is extended
+* move some params from global in/smooth to the settings module (including tuning)
 
 wishlist:
 filter microtuning

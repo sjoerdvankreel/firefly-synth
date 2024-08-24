@@ -32,9 +32,9 @@ static std::vector<list_item>
 mode_items()
 {
   std::vector<list_item> result;
-  result.emplace_back("{88F746C4-1A70-4A64-A11D-584D87D3059C}", "Poly");
-  result.emplace_back("{6ABA8E48-F284-40A4-A0E2-C263B536D493}", "Mono");
-  result.emplace_back("{519341B0-4F79-4433-9449-1386F927E88B}", "Release");
+  result.emplace_back("{88F746C4-1A70-4A64-A11D-584D87D3059C}", "Polyphonic");
+  result.emplace_back("{6ABA8E48-F284-40A4-A0E2-C263B536D493}", "Monophonic");
+  result.emplace_back("{519341B0-4F79-4433-9449-1386F927E88B}", "Release Mono");
   return result;
 }
 
@@ -43,8 +43,8 @@ porta_items()
 {
   std::vector<list_item> result;
   result.emplace_back("{51C360E5-967A-4218-B375-5052DAC4FD02}", "Off");
-  result.emplace_back("{112A9728-8564-469E-95A7-34FE5CC7C8FC}", "On");
-  result.emplace_back("{0E3AF80A-F242-4176-8C72-C0C91D72AEBB}", "Auto");
+  result.emplace_back("{112A9728-8564-469E-95A7-34FE5CC7C8FC}", "On", "On (Constant Pitch)");
+  result.emplace_back("{0E3AF80A-F242-4176-8C72-C0C91D72AEBB}", "Auto", "Auto (Constant Time)");
   return result;
 }
 
@@ -133,7 +133,7 @@ module_topo
 voice_in_topo(int section, gui_position const& pos)
 {
   module_topo result(make_module(
-    make_topo_info("{524138DF-1303-4961-915A-3CAABA69D53A}", true, "Voice In", "Voice In", "VIn", module_voice_in, 1),
+    make_topo_info_basic("{524138DF-1303-4961-915A-3CAABA69D53A}", "Voice", module_voice_in, 1),
     make_module_dsp(module_stage::voice, module_output::cv, scratch_count, {
       make_module_dsp_output(false, make_topo_info_basic("{58E73C3A-CACD-48CC-A2B6-25861EC7C828}", "Pitch", 0, 1)) }),
     make_module_gui(section, pos, { { 1 }, { 32, 13, 34, 63 } } )));
@@ -159,9 +159,10 @@ voice_in_topo(int section, gui_position const& pos)
     "Release - monophonic untill a mono section is released. So, multiple mono sections may overlap.<br/>"
     "To avoid clicks it is best to use release-monophonic mode with multi-triggered envelopes.";
 
-  result.sections.emplace_back(make_param_section(section_sync,
+  auto& sync_section = result.sections.emplace_back(make_param_section(section_sync,
     make_topo_tag_basic("{11E4DE4C-A824-424E-BC5E-014240518C0F}", "Sync"),
     make_param_section_gui({ 0, 1 }, gui_dimension({ { 1 }, { { 1 } } }), gui_label_edit_cell_split::no_split)));
+  sync_section.gui.merge_with_section = section_mid;
   auto& sync = result.params.emplace_back(make_param(
     make_topo_info("{FE70E21D-2104-4EB6-B852-6CD9690E5F72}", true, "Porta Tempo Sync", "Sync", "Sync", param_porta_sync, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_toggle(false),
@@ -170,9 +171,10 @@ voice_in_topo(int section, gui_position const& pos)
   sync.gui.bindings.enabled.bind_params({ param_porta }, [](auto const& vs) { return vs[0] != porta_off; });
   sync.info.description = "Selects time or tempo-synced mode.";
 
-  result.sections.emplace_back(make_param_section(section_mid,
+  auto& mid_section = result.sections.emplace_back(make_param_section(section_mid,
     make_topo_tag_basic("{1C5D7493-AD1C-4F89-BF32-2D0092CB59EF}", "Mid"),
     make_param_section_gui({ 0, 2 }, gui_dimension({ { 1 }, { { gui_dimension::auto_size, 1 } } }))));
+  mid_section.gui.merge_with_section = section_sync;
   auto& porta = result.params.emplace_back(make_param(
     make_topo_info("{586BEE16-430A-483E-891B-48E89C4B8FC1}", true, "Porta Mode", "Porta", "Porta", param_porta, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_item(porta_items(), ""),
@@ -229,10 +231,10 @@ voice_in_topo(int section, gui_position const& pos)
     make_param_gui_none()));
   pitch.info.description = "Absolute pitch modulation target for all Oscs.";
   auto& pb = result.params.emplace_back(make_param(
-    make_topo_info("{BF20BA77-A162-401B-9F32-92AE34841AB2}", true, "Pitch Bend", "PB", "PB", param_pb, 1),
+    make_topo_info("{BF20BA77-A162-401B-9F32-92AE34841AB2}", true, "Pitch Bend", "Pitch Bend", "Pitch Bend", param_pb, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 0, 0, true),
     make_param_gui_none()));
-  pb.info.description = "Pitch-bend modulation target for all Oscs. Reacts to master pitchbend range.";
+  pb.info.description = "Pitch-bend modulation target for all Oscs. Reacts to global pitchbend range.";
   return result;
 }
 
@@ -350,8 +352,8 @@ voice_in_engine::process_voice_mode_tuning_mode_unison(plugin_block& block)
   int porta_mode = block_auto[param_porta][0].step();
 
   auto const& modulation = get_cv_audio_matrix_mixdown(block, false);
-  int master_pb_range = block.state.all_block_automation[module_master_in][0][master_in_param_pb_range][0].step();
-  auto const& glob_uni_dtn_curve = block.state.all_accurate_automation[module_master_in][0][master_in_param_glob_uni_dtn][0];
+  int global_pb_range = block.state.all_block_automation[module_global_in][0][global_in_param_pb_range][0].step();
+  auto const& glob_uni_dtn_curve = block.state.all_accurate_automation[module_global_in][0][global_in_param_uni_dtn][0];
 
   auto const& pb_curve_norm = *(modulation)[module_voice_in][0][param_pb][0];
   auto& pb_curve = block.state.own_scratch[scratch_pb];
@@ -420,7 +422,7 @@ voice_in_engine::process_voice_mode_tuning_mode_unison(plugin_block& block)
 
     float new_pitch_offset = note + cent_curve[f] + glob_uni_detune - midi_middle_c;
     new_pitch_offset += porta_note - midi_middle_c;
-    new_pitch_offset += pitch_curve[f] + pb_curve[f] * master_pb_range;
+    new_pitch_offset += pitch_curve[f] + pb_curve[f] * global_pb_range;
 
     // microtuning support
     if constexpr (TuningMode == engine_tuning_mode_on_note_before_mod || TuningMode == engine_tuning_mode_continuous_before_mod)

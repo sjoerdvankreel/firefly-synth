@@ -57,7 +57,7 @@ init_global_minimal(plugin_state& state)
   bool is_fx = state.desc().plugin->type == plugin_type::fx;
   state.set_text_at(module_gaudio_audio_matrix, 0, param_on, 0, "On");
   state.set_text_at(module_gaudio_audio_matrix, 0, param_source, 0, is_fx ? "Ext" : "VOut");
-  state.set_text_at(module_gaudio_audio_matrix, 0, param_target, 0, "MOut");
+  state.set_text_at(module_gaudio_audio_matrix, 0, param_target, 0, "GOut");
 }
 
 static void
@@ -85,14 +85,14 @@ init_global_default(plugin_state& state)
   state.set_text_at(module_gaudio_audio_matrix, 0, param_source, 1, "GFX 1");
   if (is_fx)
   {
-    state.set_text_at(module_gaudio_audio_matrix, 0, param_target, 1, "MOut");
+    state.set_text_at(module_gaudio_audio_matrix, 0, param_target, 1, "GOut");
     return;
   }
 
   state.set_text_at(module_gaudio_audio_matrix, 0, param_target, 1, "GFX 2");
   state.set_text_at(module_gaudio_audio_matrix, 0, param_on, 2, "On");
   state.set_text_at(module_gaudio_audio_matrix, 0, param_source, 2, "GFX 2");
-  state.set_text_at(module_gaudio_audio_matrix, 0, param_target, 2, "MOut");
+  state.set_text_at(module_gaudio_audio_matrix, 0, param_target, 2, "GOut");
 }
 
 static graph_data
@@ -150,7 +150,7 @@ audio_audio_matrix_topo(
   auto voice_info = make_topo_info_basic("{6EDEA9FD-901E-4B5D-9CDE-724AC5538B35}", "VAudio", module_vaudio_audio_matrix, 1);
   voice_info.description = "Audio routing matrix with gain/balance control to route from oscillators to fx modules to voice mixdown.";
   auto global_info = make_topo_info_basic("{787CDC52-0F59-4855-A7B6-ECC1FB024742}", "GAudio", module_gaudio_audio_matrix, 1);
-  global_info.description = "Audio routing matrix with gain/balance control to route from voice mixdown to fx modules to master output.";
+  global_info.description = "Audio routing matrix with gain/balance control to route from voice mixdown to fx modules to global output.";
   module_stage stage = global ? module_stage::output : module_stage::voice;
   auto const info = topo_info(global ? global_info : voice_info);
 
@@ -164,18 +164,17 @@ audio_audio_matrix_topo(
       make_module_dsp_output(false, make_topo_info_basic("{3EFFD54D-440A-4C91-AD4F-B1FA290208EB}", "Mixed", output_mixed, route_count)) }),
     make_module_gui(section, pos, { 1, 1 })));
 
+  result.gui.tabbed_name = "Audio";
   result.graph_renderer = [tm = target_matrix.items](
     auto const& state, auto* engine, int param, auto const& mapping) {
       return render_graph(state, engine, param, mapping, tm); };
   if (global)
   {
-    result.gui.tabbed_name = "GAudio Matrix";
     result.default_initializer = init_global_default;
     result.minimal_initializer = init_global_minimal;
   }
   else
   {
-    result.gui.tabbed_name = "VAudio Matrix";
     result.default_initializer = init_voice_default;
     result.minimal_initializer = init_voice_minimal;
   }
@@ -212,7 +211,7 @@ audio_audio_matrix_topo(
         return sm[self].slot < tm[other].slot;
       return true; });
   source.info.description = "Selects audio route source. Note that you can only route FX 'upwards', so not FX2 -> FX1.";
-  auto default_target = global? "MOut": "VOut";
+  auto default_target = global? "GOut": "VOut";
   auto& target = result.params.emplace_back(make_param(
     make_topo_info_basic("{F05208C5-F8D3-4418-ACFE-85CE247F222A}", "Target", param_target, route_count),
     make_param_dsp_input(!global, param_automate::automate), make_domain_item(target_matrix.items, default_target),
@@ -233,15 +232,15 @@ audio_audio_matrix_topo(
   auto& amount = result.params.emplace_back(make_param(
     make_topo_info_basic("{C12ADFE9-1D83-439C-BCA3-30AD7B86848B}", "Gain", param_gain, route_count),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(1, 0, true),
-    make_param_gui(section_main, is_fx ? gui_edit_type::hslider : gui_edit_type::knob, param_layout::vertical, { 0, 3 },
+    make_param_gui(section_main, gui_edit_type::hslider, param_layout::vertical, { 0, 3 },
       make_label(gui_label_contents::drag, gui_label_align::left, gui_label_justify::center))));
   amount.gui.tabular = true;
   amount.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
   amount.info.description = "Controls route gain.";
   auto& bal = result.params.emplace_back(make_param(
-    make_topo_info("{941C6961-044F-431E-8296-C5303EAFD11D}", true, "Balance", "Bal", "Bal", param_bal, route_count),
+    make_topo_info("{941C6961-044F-431E-8296-C5303EAFD11D}", true, "Balance", "Balance", "Balance", param_bal, route_count),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 0, 0, true),
-    make_param_gui(section_main, is_fx ? gui_edit_type::hslider : gui_edit_type::knob, param_layout::vertical, { 0, 4 },
+    make_param_gui(section_main, gui_edit_type::hslider, param_layout::vertical, { 0, 4 },
       make_label(gui_label_contents::drag, gui_label_align::left, gui_label_justify::center))));
   bal.gui.tabular = true;
   bal.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });

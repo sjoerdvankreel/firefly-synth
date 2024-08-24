@@ -4,7 +4,7 @@ using namespace juce;
 
 namespace plugin_base {
 
-binding_component::
+binding_component::   
 binding_component(
   plugin_gui* gui, module_desc const* module, 
   gui_bindings const* bindings, int own_slot_index):

@@ -24,7 +24,7 @@ static float const log_half = std::log(0.5f);
 enum class lfo_stage { cycle, filter, end };
 enum { scratch_rate, scratch_count };
 enum { type_off, type_repeat, type_one_shot, type_one_phase };
-enum { section_left, section_sync, section_skew, section_right, section_phase };
+enum { section_left, section_sync, section_skew, section_shape, section_phase };
 enum {
   param_type, param_rate, param_tempo, param_sync,
   param_skew_x, param_skew_x_amt, param_skew_y, param_skew_y_amt,
@@ -352,6 +352,7 @@ lfo_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_module_dsp(stage, module_output::cv, 1, {
       make_module_dsp_output(true, make_topo_info_basic("{197CB1D4-8A48-4093-A5E7-2781C731BBFC}", "Output", 0, 1)) }),
     make_module_gui(section, pos, { { 1, 1 }, column_sizes })));
+  result.gui.tabbed_name = "LFO";
   result.gui.is_drag_mod_source = true;
   
   result.graph_engine_factory = make_graph_engine;
@@ -390,9 +391,10 @@ lfo_topo(int section, gui_position const& pos, bool global, bool is_fx)
   tempo.gui.bindings.visible.bind_params({ param_type, param_sync }, [](auto const& vs) { return vs[1] != 0; });
   tempo.info.description = "LFO rate in bars.";
 
-  result.sections.emplace_back(make_param_section(section_sync,
+  auto& sync_section = result.sections.emplace_back(make_param_section(section_sync,
     make_topo_tag_basic("{404ADE73-7C3D-4BEF-8B5A-2E6DE467AB37}", "Sync"),
     make_param_section_gui({ 0, 1, 2, 1 }, gui_dimension({ 1, 1 }, { { 1 } }), gui_label_edit_cell_split::vertical)));
+  sync_section.gui.merge_with_section = section_skew;
   auto& sync = result.params.emplace_back(make_param(
     make_topo_info("{7F59C0F3-739E-4068-B1FD-B1520775FFBA}", true, "Tempo Sync", "Sync", "Sync", param_sync, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_toggle(false),
@@ -401,10 +403,11 @@ lfo_topo(int section, gui_position const& pos, bool global, bool is_fx)
   sync.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   sync.info.description = "Toggles time or tempo-synced type.";
 
-  result.sections.emplace_back(make_param_section(section_skew,
+  auto& skew_section = result.sections.emplace_back(make_param_section(section_skew,
     make_topo_tag_basic("{6DE1B08B-6C81-4146-B752-02F9559EA8CE}", "Skew"),
     make_param_section_gui({ 0, 2, 2, 1 }, gui_dimension({1, 1}, {
     gui_dimension::auto_size_all, gui_dimension::auto_size_all, gui_dimension::auto_size_all }), gui_label_edit_cell_split::horizontal)));
+  skew_section.gui.merge_with_section = section_sync;
   auto& x_mode = result.params.emplace_back(make_param(
     make_topo_info("{A95BA410-6777-4386-8E86-38B5CBA3D9F1}", true, "Skew X Mode", "Skew X", "Skew X", param_skew_x, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(wave_skew_type_items(), "Off"),
@@ -434,14 +437,15 @@ lfo_topo(int section, gui_position const& pos, bool global, bool is_fx)
   y_amt.info.description = "Vertical skew amount.";
   y_mode.gui.alternate_drag_param_id = y_amt.info.tag.id;
 
-  result.sections.emplace_back(make_param_section(section_right,
+  auto& shape_section = result.sections.emplace_back(make_param_section(section_shape,
     make_topo_tag_basic("{A5B5DC53-2E73-4C0B-9DD1-721A335EA076}", "Right"),
     make_param_section_gui({ 0, 3, 2, 1 }, gui_dimension({ 1, 1 }, {
     gui_dimension::auto_size_all, gui_dimension::auto_size, gui_dimension::auto_size_all, 1 }), gui_label_edit_cell_split::horizontal)));
+  if(!global) shape_section.gui.merge_with_section = section_phase;
   auto& shape = result.params.emplace_back(make_param(
     make_topo_info_basic("{7D48C09B-AC99-4B88-B880-4633BC8DFB37}", "Shape", param_shape, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(wave_shape_type_items(false, global), "Sin"),
-    make_param_gui_single(section_right, gui_edit_type::autofit_list, { 0, 0 },
+    make_param_gui_single(section_shape, gui_edit_type::autofit_list, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   shape.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   shape.info.description = std::string("Selects waveform plus horizontal and vertical skewing modes. ") +
@@ -450,7 +454,7 @@ lfo_topo(int section, gui_position const& pos, bool global, bool is_fx)
   auto& steps = result.params.emplace_back(make_param(
     make_topo_info_basic("{445CF696-0364-4638-9BD5-3E1C9A957B6A}", "Steps", param_steps, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_step(1, 99, 1, 0),
-    make_param_gui_single(section_right, gui_edit_type::hslider, { 1, 0 },
+    make_param_gui_single(section_shape, gui_edit_type::hslider, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   steps.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   steps.info.description = std::string("Step count for static and smooth noise generators, set to > 1. ") +
@@ -458,7 +462,7 @@ lfo_topo(int section, gui_position const& pos, bool global, bool is_fx)
   auto& seed = result.params.emplace_back(make_param(
     make_topo_info_basic("{19ED9A71-F50A-47D6-BF97-70EA389A62EA}", "Seed", param_seed, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_step(1, 255, 1, 0),
-    make_param_gui_single(section_right, gui_edit_type::hslider, { 0, 2 },
+    make_param_gui_single(section_shape, gui_edit_type::hslider, { 0, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   seed.gui.bindings.visible.bind_params({ param_type, param_shape }, [](auto const& vs) { return !is_noise_voice_rand(vs[1]); });
   seed.gui.bindings.enabled.bind_params({ param_type, param_shape }, [](auto const& vs) { return vs[0] != type_off && is_noise_not_voice_rand(vs[1]); });
@@ -466,7 +470,7 @@ lfo_topo(int section, gui_position const& pos, bool global, bool is_fx)
   auto& voice_rnd_source = result.params.emplace_back(make_param(
     make_topo_info_basic("{81DAE640-815C-4D61-8DDE-D4CAD70309EF}", "Source", param_voice_rnd_source, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_step(0, on_voice_random_count - 1, 1, 1),
-    make_param_gui_single(section_right, gui_edit_type::list, { 0, 2 },
+    make_param_gui_single(section_shape, gui_edit_type::list, { 0, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   voice_rnd_source.gui.bindings.visible.bind_params({ param_type, param_shape }, [](auto const& vs) { return is_noise_voice_rand(vs[1]); });
   voice_rnd_source.gui.bindings.enabled.bind_params({ param_type, param_shape }, [](auto const& vs) { return vs[0] != type_off && is_noise_voice_rand(vs[1]); });
@@ -474,15 +478,17 @@ lfo_topo(int section, gui_position const& pos, bool global, bool is_fx)
   auto& smooth = result.params.emplace_back(make_param(
     make_topo_info_basic("{21DBFFBE-79DA-45D4-B778-AC939B7EF785}", "Smooth", param_filter, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_linear(0, max_filter_time_ms, 0, 0, "Ms"),
-    make_param_gui_single(section_right, gui_edit_type::hslider, { 1, 2 },
+    make_param_gui_single(section_shape, gui_edit_type::hslider, { 1, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   smooth.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   smooth.info.description = "Applies a lowpass filter to smooth out rough edges.";
 
   if(global) return result;
-  result.sections.emplace_back(make_param_section(section_phase,
+
+  auto& phase_section = result.sections.emplace_back(make_param_section(section_phase,
     make_topo_tag_basic("{8EB0A04C-5D69-4B0E-89BD-884BC2EFDFBE}", "Phase"),
     make_param_section_gui({ 0, 4, 2, 1 }, gui_dimension({ 1, 1 }, { 1 }), gui_label_edit_cell_split::vertical)));
+  if (!global) phase_section.gui.merge_with_section = section_shape;
   auto& phase = result.params.emplace_back(make_param(
     make_topo_info_basic("{B23E9732-ECE3-4D5D-8EC1-FF299C6926BB}", "Phs", param_phase, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_percentage_identity(0, 0, true),
@@ -547,7 +553,7 @@ lfo_engine::reset(plugin_block const* block)
   // global unison
   if (!_global && block->voice->state.sub_voice_count > 1)
   {
-    float glob_uni_phs_offset = block->state.all_block_automation[module_master_in][0][master_in_param_glob_uni_lfo_phase][0].real();
+    float glob_uni_phs_offset = block->state.all_block_automation[module_global_in][0][global_in_param_uni_lfo_phase][0].real();
     float voice_pos = (float)block->voice->state.sub_voice_index / (block->voice->state.sub_voice_count - 1.0f);
     _phase += voice_pos * glob_uni_phs_offset;
     _phase -= (int)_phase;
@@ -806,7 +812,7 @@ void lfo_engine::process_loop(plugin_block& block, cv_cv_matrix_mixdown const* m
   if constexpr (GlobalUnison)
   {
     float voice_pos = unipolar_to_bipolar((float)block.voice->state.sub_voice_index / (block.voice->state.sub_voice_count - 1.0f));
-    auto const& glob_uni_lfo_dtn_curve = block.state.all_accurate_automation[module_master_in][0][master_in_param_glob_uni_lfo_dtn][0];
+    auto const& glob_uni_lfo_dtn_curve = block.state.all_accurate_automation[module_global_in][0][global_in_param_uni_lfo_dtn][0];
     for(int f = block.start_frame; f < block.end_frame; f++)
       rate_curve[f] *= 1 + (voice_pos * glob_uni_lfo_dtn_curve[f]);
   }

@@ -22,13 +22,7 @@ It's basically [InfernalSynth](https://github.com/sjoerdvankreel/infernal-synth)
 - KVR: [https://www.kvraudio.com/product/firefly-synth-by-sjoerdvankreel](https://www.kvraudio.com/product/firefly-synth-by-sjoerdvankreel)
 - Manual: [https://github.com/sjoerdvankreel/firefly-synth/blob/main/manual.md](https://github.com/sjoerdvankreel/firefly-synth/blob/main/manual.md)
 
-# Screenshot / Demo video
-
-See bottom of the page for some built-in themes. <br/>
-See [modulation_visualization_demo.mp4](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/video/modulation_visualization_demo.mp4) for an example of real-time modulation visualizers.
-
-![Screenshot](static/screenshot_instrument_firefly_default.png)
-![Screenshot](static/screenshot_fx_firefly_default.png)
+# Legal
 
 <table>
   <tr>
@@ -38,6 +32,15 @@ See [modulation_visualization_demo.mp4](https://github.com/sjoerdvankreel/firefl
     <td>VST is a trademark of Steinberg Media Technologies GmbH, registered in Europe and other countries.</td>
   </tr>
 </table>
+
+# Screenshots / Demo video
+
+See [modulation_visualization_demo.mp4](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/video/modulation_visualization_demo.mp4) for an example of real-time modulation visualizers.
+
+![Screenshot](static/screenshot_synth_hot.png)
+![Screenshot](static/screenshot_synth_cold.png)
+![Screenshot](static/screenshot_fx_hot.png)
+![Screenshot](static/screenshot_fx_cold.png)
 
 # Install
 Extract the zipped folder and copy/replace it (the entire folder, not just the .dll/.so/.dylib!) to your VST3/CLAP folder:
@@ -148,16 +151,3 @@ Windows: the build scripts assume 7zip is installed. It will build fine without,
 - Contains a slightly adapted implementation of the [Karplus-Strong algorithm](https://blog.demofox.org/2016/06/16/synthesizing-a-pluked-string-sound-with-the-karplus-strong-algorithm).
 - Contains a verbatim implementation of [Andrew Simper's state variable filter equations](https://cytomic.com/files/dsp/SvfLinearTrapOptimised2.pdf).
 - Contains a verbatim implementation of [Moorer's DSF algorithm as described by Burkhard Reike](https://www.verklagekasper.de/synths/dsfsynthesis/dsfsynthesis.html).
-
-# Theme examples
-
-<table>
-  <tr>
-    <td><img src="static/screenshot_instrument_firefly_pink.png"/></td>
-    <td><img src="static/screenshot_instrument_firefly_orange.png"/></td>
-  </tr>
-  <tr>
-    <td><img src="static/screenshot_instrument_firefly_blue.png"/></td>
-    <td><img src="static/screenshot_instrument_infernal_default.png"/></td>
-  </tr>
-</table>

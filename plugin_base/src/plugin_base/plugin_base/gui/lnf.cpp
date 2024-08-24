@@ -9,15 +9,12 @@ using namespace juce;
 
 namespace plugin_base {
 
-static int const knob_thumb_width = 6;
-static int const knob_thumb_height = 7;
-static int const slider_thumb_width = 9;
-static int const slider_thumb_height = 6;
+static int const conic_count = 256;
 
 static void
-draw_tabular_cell_bg(Graphics& g, Component* c, int radius)
+draw_tabular_cell_bg(Graphics& g, Colour const& color, Component* c, int radius)
 {
-  g.setColour(Colours::black.withAlpha(0.5f));
+  g.setColour(color);
   g.fillRoundedRectangle(c->getLocalBounds().reduced(1).toFloat(), radius);
 }
 
@@ -78,40 +75,34 @@ override_colors(gui_colors const& base, var const& json)
   result.tab_text_inactive = override_color_if_present(json, "tab_text_inactive", result.tab_text_inactive);
   result.tab_button = override_color_if_present(json, "tab_button", result.tab_button);
   result.tab_header = override_color_if_present(json, "tab_header", result.tab_header);
-  result.tab_background1 = override_color_if_present(json, "tab_background1", result.tab_background1);
-  result.tab_background2 = override_color_if_present(json, "tab_background2", result.tab_background2);
   result.graph_grid = override_color_if_present(json, "graph_grid", result.graph_grid);
   result.graph_text = override_color_if_present(json, "graph_text", result.graph_text);
   result.graph_mod_indicator = override_color_if_present(json, "graph_mod_indicator", result.graph_mod_indicator);
-  result.slider_mod_indicator = override_color_if_present(json, "slider_mod_indicator", result.slider_mod_indicator);
   result.graph_background = override_color_if_present(json, "graph_background", result.graph_background);
   result.graph_area = override_color_if_present(json, "graph_area", result.graph_area);
   result.graph_line = override_color_if_present(json, "graph_line", result.graph_line);
-  result.bubble_outline = override_color_if_present(json, "bubble_outline", result.bubble_outline);
-  result.knob_thumb = override_color_if_present(json, "knob_thumb", result.knob_thumb);
-  result.knob_track1 = override_color_if_present(json, "knob_track1", result.knob_track1);
-  result.knob_track2 = override_color_if_present(json, "knob_track2", result.knob_track2);
-  result.knob_background1 = override_color_if_present(json, "knob_background1", result.knob_background1);
-  result.knob_background2 = override_color_if_present(json, "knob_background2", result.knob_background2);
-  result.section_outline1 = override_color_if_present(json, "section_outline1", result.section_outline1);
-  result.section_outline2 = override_color_if_present(json, "section_outline2", result.section_outline2);
-  result.section_background1 = override_color_if_present(json, "section_background1", result.section_background1);
-  result.section_background2 = override_color_if_present(json, "section_background2", result.section_background2);
-  result.slider_thumb = override_color_if_present(json, "slider_thumb", result.slider_thumb);
-  result.slider_track1 = override_color_if_present(json, "slider_track1", result.slider_track1);
-  result.slider_track2 = override_color_if_present(json, "slider_track2", result.slider_track2);
-  result.slider_outline1 = override_color_if_present(json, "slider_outline1", result.slider_outline1);
-  result.slider_outline2 = override_color_if_present(json, "slider_outline2", result.slider_outline2);
+  result.bubble_outline = override_color_if_present(json, "bubble_outline", result.bubble_outline);  
   result.slider_background = override_color_if_present(json, "slider_background", result.slider_background);
+  result.slider_highlight = override_color_if_present(json, "slider_highlight", result.slider_highlight);
+  result.slider_shadow = override_color_if_present(json, "slider_shadow", result.slider_shadow);
+  result.slider_automation = override_color_if_present(json, "slider_automation", result.slider_automation);
+  result.slider_can_modulate = override_color_if_present(json, "slider_can_modulate", result.slider_can_modulate);
+  result.section_outline = override_color_if_present(json, "section_outline", result.section_outline);
+  result.section_background = override_color_if_present(json, "section_background", result.section_background);
   result.edit_text = override_color_if_present(json, "edit_text", result.edit_text);
   result.label_text = override_color_if_present(json, "label_text", result.label_text);
+  result.button_text = override_color_if_present(json, "button_text", result.button_text);
   result.table_header = override_color_if_present(json, "table_header", result.table_header);
+  result.table_cell = override_color_if_present(json, "table_cell", result.table_cell);
+  result.table_header_cell = override_color_if_present(json, "table_header_cell", result.table_header_cell);
   result.control_tick = override_color_if_present(json, "control_tick", result.control_tick);
   result.control_text = override_color_if_present(json, "control_text", result.control_text);
   result.control_outline = override_color_if_present(json, "control_outline", result.control_outline);
   result.control_background = override_color_if_present(json, "control_background", result.control_background);
   result.scrollbar_thumb = override_color_if_present(json, "scrollbar_thumb", result.scrollbar_thumb);
   result.scrollbar_background = override_color_if_present(json, "scrollbar_background", result.scrollbar_background);
+  result.popup_text = override_color_if_present(json, "popup_text", result.popup_text);
+  result.popup_text_highlighted = override_color_if_present(json, "popup_text_highlighted", result.popup_text_highlighted);
   return gui_colors(result); 
 }
 
@@ -147,9 +138,9 @@ _theme(theme), _desc(desc), _custom_section(custom_section), _module_section(mod
 
   setColour(ToggleButton::ColourIds::textColourId, colors().control_text);
   setColour(ToggleButton::ColourIds::tickColourId, colors().control_tick);
-  
-  setColour(TextButton::ColourIds::textColourOnId, colors().label_text);
-  setColour(TextButton::ColourIds::textColourOffId, colors().label_text);
+   
+  setColour(TextButton::ColourIds::textColourOnId, colors().button_text);
+  setColour(TextButton::ColourIds::textColourOffId, colors().button_text);
   setColour(TextButton::ColourIds::buttonOnColourId, control_bg_high);
   setColour(TextButton::ColourIds::buttonColourId, colors().control_background);
 
@@ -171,9 +162,9 @@ _theme(theme), _desc(desc), _custom_section(custom_section), _module_section(mod
   setColour(ScrollBar::ColourIds::thumbColourId, colors().scrollbar_thumb);
   setColour(ScrollBar::ColourIds::backgroundColourId, colors().scrollbar_background);
 
-  setColour(PopupMenu::ColourIds::textColourId, colors().label_text);
+  setColour(PopupMenu::ColourIds::textColourId, colors().popup_text);
+  setColour(PopupMenu::ColourIds::highlightedTextColourId, colors().popup_text_highlighted);
   setColour(PopupMenu::ColourIds::backgroundColourId, colors().control_background);
-  setColour(PopupMenu::ColourIds::highlightedTextColourId, colors().label_text.brighter(_global_settings.lighten));
   setColour(PopupMenu::ColourIds::highlightedBackgroundColourId, colors().control_background.brighter(_global_settings.lighten));
 }
 
@@ -184,25 +175,6 @@ lnf::init_theme(std::filesystem::path const& theme_folder, var const& json)
   if(!json.hasProperty("default_colors")) return;
   if (!json.hasProperty("global_settings")) return;
   if (!json.hasProperty("default_settings")) return; 
-
-  if (json.hasProperty("graph_background_images"))
-  {
-    var graph_background_images = json["graph_background_images"];
-    for (int i = 0; i < graph_background_images.size(); i++)
-    {
-      var this_bg_image = graph_background_images[i];
-      if (this_bg_image.hasProperty("graph") && this_bg_image.hasProperty("image"))
-      {
-        std::string image = this_bg_image["image"].toString().toStdString();
-        if(!image.empty())
-        {
-          std::string graph = this_bg_image["graph"].toString().toStdString();
-          std::string image_path = (theme_folder / image).string();
-          _global_settings.graph_background_images[graph] = image_path;
-        }
-      }
-    }
-  }
 
   assert(json.hasProperty("default_colors"));
   var default_colors = json["default_colors"];
@@ -219,17 +191,24 @@ lnf::init_theme(std::filesystem::path const& theme_folder, var const& json)
     for (int i = 0; i < overrides.size(); i++)
     {
       var this_override = overrides[i];
-      auto this_settings = _default_settings;
-      auto this_colors = gui_colors(_default_colors);
-      if(this_override.hasProperty("colors")) this_colors = override_colors(_default_colors, this_override["colors"]);
-      if (this_override.hasProperty("settings")) this_settings = override_settings(_default_settings, this_override["settings"]);
       if (this_override.hasProperty("custom_sections"))
       {
         var custom_sections = this_override["custom_sections"];
         assert(custom_sections.isArray());
         for(int j = 0; j < custom_sections.size(); j++)
         {
+          auto this_settings = _default_settings;
+          if(_section_settings.contains(custom_sections[j].toString().toStdString()))
+            this_settings = _section_settings[custom_sections[j].toString().toStdString()];
+          if (this_override.hasProperty("settings")) 
+            this_settings = override_settings(this_settings, this_override["settings"]);
           _section_settings[custom_sections[j].toString().toStdString()] = this_settings;
+
+          auto this_colors = gui_colors(_default_colors);
+          if (_section_colors.contains(custom_sections[j].toString().toStdString()))
+            this_colors = gui_colors(_section_colors[custom_sections[j].toString().toStdString()]);
+          if (this_override.hasProperty("colors")) 
+            this_colors = override_colors(this_colors, this_override["colors"]);
           _section_colors[custom_sections[j].toString().toStdString()] = gui_colors(this_colors);
         }
       }
@@ -239,10 +218,21 @@ lnf::init_theme(std::filesystem::path const& theme_folder, var const& json)
         assert(module_sections.isArray());
         for (int j = 0; j < module_sections.size(); j++)
         {
+          auto this_settings = _default_settings;
+          if (_module_settings.contains(module_sections[j].toString().toStdString()))
+            this_settings = _module_settings[module_sections[j].toString().toStdString()];
+          if (this_override.hasProperty("settings"))
+            this_settings = override_settings(this_settings, this_override["settings"]);
           _module_settings[module_sections[j].toString().toStdString()] = this_settings;
+
+          auto this_colors = gui_colors(_default_colors);
+          if (_module_colors.contains(module_sections[j].toString().toStdString()))
+            this_colors = gui_colors(_module_colors[module_sections[j].toString().toStdString()]);
+          if (this_override.hasProperty("colors"))
+            this_colors = override_colors(this_colors, this_override["colors"]);
           _module_colors[module_sections[j].toString().toStdString()] = gui_colors(this_colors);
-        }
-      }
+        } 
+      }    
     }
   }
 
@@ -258,8 +248,6 @@ lnf::init_theme(std::filesystem::path const& theme_folder, var const& json)
     _global_settings.linux_font_height = (float)global_settings["linux_font_height"];
   if (global_settings.hasProperty("table_cell_radius"))
     _global_settings.table_cell_radius = (int)global_settings["table_cell_radius"];
-  if (global_settings.hasProperty("text_editor_radius"))
-    _global_settings.text_editor_radius = (int)global_settings["text_editor_radius"];
   if (global_settings.hasProperty("scroll_thumb_radius"))
     _global_settings.scroll_thumb_radius = (int)global_settings["scroll_thumb_radius"];
   if (global_settings.hasProperty("combo_radius"))
@@ -441,14 +429,13 @@ lnf::drawTooltip(Graphics& g, String const& text, int w, int h)
 void 
 lnf::drawTextEditorOutline(juce::Graphics& g, int w, int h, TextEditor& te)
 {
-  auto cornerSize = global_settings().text_editor_radius;
   if (!te.isEnabled()) return;
   if (dynamic_cast<AlertWindow*> (te.getParentComponent()) != nullptr) return;
   if (te.hasKeyboardFocus(true) && !te.isReadOnly())
     g.setColour(te.findColour(TextEditor::focusedOutlineColourId));
   else
     g.setColour(te.findColour(TextEditor::outlineColourId));
-  g.drawRoundedRectangle(0, 0, w, h, cornerSize, 2);
+  g.drawRect(0, 0, w, h, 1);
 }
 
 void
@@ -498,16 +485,27 @@ lnf::drawLabel(Graphics& g, Label& label)
      
   if (auto afl = dynamic_cast<autofit_label*>(&label))
     if (afl->tabular())
-      draw_tabular_cell_bg(g, &label, global_settings().table_cell_radius);
+      draw_tabular_cell_bg(g, colors().table_header_cell, & label, global_settings().table_cell_radius);
 
   if (!label.isBeingEdited()) 
   {
-    auto alpha = label.isEnabled() ? 1.0f : 0.5f;
     auto area = getLabelBorderSize(label).subtractedFrom(label.getLocalBounds());
     g.setFont(getLabelFont(label));
-    g.setColour(label.findColour(Label::textColourId).withMultipliedAlpha(alpha));
+
+    // if we are part of a disabled combobox, paint with a grayscale/darker control_text
+    auto parent_param_combo = dynamic_cast<param_combobox*>(label.getParentComponent());
+    if (parent_param_combo && !parent_param_combo->isEnabled())
+    {
+      if(parent_param_combo->param()->param->gui.tabular)
+        g.setColour(colors().control_text.darker());
+      else
+        g.setColour(color_to_grayscale(colors().control_text));
+    } 
+    else
+      g.setColour(label.findColour(Label::textColourId));
+
     g.drawText(label.getText(), area, label.getJustificationType(), false);
-    g.setColour(label.findColour(Label::outlineColourId).withMultipliedAlpha(alpha));
+    g.setColour(label.findColour(Label::outlineColourId));
   }
   else if (label.isEnabled())
     g.setColour(label.findColour(Label::outlineColourId));
@@ -541,8 +539,7 @@ lnf::drawButtonText(Graphics& g, TextButton& button, bool, bool)
   arrow.startNewSubPath(x, y);
   arrow.lineTo(x + w, y);
   arrow.lineTo(x + w / 2, y + h);
-  arrow.closeSubPath();
-  g.setColour(colors().control_text);
+  arrow.closeSubPath(); 
   g.fillPath(arrow);
 }
  
@@ -607,7 +604,7 @@ lnf::drawComboBox(Graphics& g, int width, int height, bool, int, int, int, int, 
     if (param_cb->param()->param->gui.tabular)
     {
       tabular = true;
-      draw_tabular_cell_bg(g, &box, global_settings().table_cell_radius);
+      draw_tabular_cell_bg(g, colors().table_cell, &box, global_settings().table_cell_radius);
     }
     drop_action = param_cb->get_drop_target_action();
     if (drop_action != drop_target_action::none)
@@ -617,21 +614,35 @@ lnf::drawComboBox(Graphics& g, int width, int height, bool, int, int, int, int, 
     }
   }
 
-  Path path;
   int arrowPad = 4;
   int arrowWidth = 6;
   int arrowHeight = 4;
   int const fixedHeight = combo_height(tabular) - (tabular? 4: 0);
   int const comboTop = height < fixedHeight ? 0 : (height - fixedHeight) / 2;
   auto cornerSize = box.findParentComponentOfClass<ChoicePropertyComponent>() != nullptr ? 0.0f : global_settings().combo_radius;
-  Rectangle<int> boxBounds(tabular? 3: 1, comboTop, box_width - 2 - (tabular? 4: 0), fixedHeight);
-  g.setColour(Colours::white.withAlpha(0.125f));
-  g.fillRoundedRectangle(boxBounds.toFloat(), cornerSize);
+  int x = tabular ? 3 : 1;
+  int y = comboTop;
+  int w = box_width - 2 - (tabular ? 4 : 0);
+  int h = fixedHeight;
+
+  // highlight
+  g.setGradientFill(ColourGradient(colors().slider_highlight.withAlpha(0.0f), x, 0, colors().slider_highlight, w, 0, false));
+  g.fillRoundedRectangle(x, y, w, h, cornerSize);
+
+  // background
+  g.setColour(colors().slider_background);
+  g.fillRoundedRectangle(x + 1, y + 1, w - 2, h - 2, cornerSize);
+
+  // dropdown arrow
+  Path path;
   path.startNewSubPath(box_width - arrowWidth - arrowPad, height / 2 - arrowHeight / 2 + 1);
   path.lineTo(box_width - arrowWidth / 2 - arrowPad, height / 2 + arrowHeight / 2 + 1);
   path.lineTo(box_width - arrowPad, height / 2 - arrowHeight / 2 + 1);
   path.closeSubPath();  
-  g.setColour(box.findColour(ComboBox::arrowColourId).withAlpha((box.isEnabled() ? 0.9f : 0.2f)));
+
+  Colour tick = colors().control_tick;
+  if (!box.isEnabled()) tick = color_to_grayscale(tick);
+  g.setColour(tick);
   g.fillPath(path);
 
   if (!param_cb || drop_action == drop_target_action::none) return;
@@ -642,11 +653,7 @@ lnf::drawComboBox(Graphics& g, int width, int height, bool, int, int, int, int, 
   else if (drop_action == drop_target_action::never) drop_icon = "[N/A]";
   else assert(false);
 
-  auto apply_mod_box = Rectangle<int>(
-    boxBounds.getTopRight().x + 2,
-    boxBounds.getTopLeft().y,
-    apply_mod_width,
-    boxBounds.getHeight());
+  auto apply_mod_box = Rectangle<int>(x + w + 2, y, apply_mod_width, h); 
   g.setColour(Colours::darkgrey);
   g.fillRoundedRectangle(apply_mod_box.toFloat(), 2.0f);
   g.setColour(colors().control_text);
@@ -662,7 +669,7 @@ lnf::drawToggleButton(Graphics& g, ToggleButton& tb, bool highlighted, bool down
     if (ps->param()->param->gui.tabular)
       tabular = true;
   if(tabular)
-    draw_tabular_cell_bg(g, &tb, global_settings().table_cell_radius);
+    draw_tabular_cell_bg(g, colors().table_cell, &tb, global_settings().table_cell_radius);
 
   int left = tb.getWidth() / 2 - toggle_height(tabular) / 2;
   int pad = tabular? 3: 1;
@@ -670,13 +677,25 @@ lnf::drawToggleButton(Graphics& g, ToggleButton& tb, bool highlighted, bool down
   int const fixedHeight = toggle_height(tabular);
   int const toggleTop = height < fixedHeight ? 0 : (height - fixedHeight) / 2;
   Rectangle<int> boxBounds(left + pad, toggleTop + pad, fixedHeight - pad * 2, fixedHeight - pad * 2);
-  g.setColour(Colours::black.withAlpha(0.167f));
+  
+  auto automation_color = colors().slider_automation;
+  if (!tb.isEnabled()) automation_color = color_to_grayscale(automation_color);
+
+  // background, shadow, highlight
+  g.setColour(colors().slider_background);
   g.fillEllipse(boxBounds.toFloat());
-  g.setColour(findColour(ComboBox::outlineColourId).darker());
-  g.drawEllipse(boxBounds.toFloat(), 1);
+  draw_conic_arc(g, boxBounds.getTopLeft().x, boxBounds.getTopLeft().y, boxBounds.getWidth(), 
+    pi32, 1.5f * pi32, colors().slider_shadow, automation_color, conic_count / 2, 0.0f, 1.0f, 1.0f);
+  draw_conic_arc(g, boxBounds.getTopLeft().x, boxBounds.getTopLeft().y, boxBounds.getWidth(),
+    1.5f * pi32, 2.0f * pi32, automation_color, colors().slider_highlight, conic_count / 2, 0.0f, 1.0f, 1.0f);
+  draw_conic_arc(g, boxBounds.getTopLeft().x, boxBounds.getTopLeft().y, boxBounds.getWidth(),
+    0.0f, 0.5f * pi32, colors().slider_highlight, automation_color, conic_count / 2, 0.0f, 1.0f, 1.0f);
+  draw_conic_arc(g, boxBounds.getTopLeft().x, boxBounds.getTopLeft().y, boxBounds.getWidth(),
+    0.5f * pi32, pi32, automation_color, colors().slider_shadow, conic_count / 2, 0.0f, 1.0f, 1.0f);
+
+  // toggle
   if (!tb.getToggleState()) return;
-  if (tb.isEnabled()) g.setColour(tb.findColour(ToggleButton::tickColourId));
-  else g.setColour(tb.findColour(ToggleButton::tickDisabledColourId));
+  g.setColour(automation_color);
   g.fillEllipse(boxBounds.toFloat().reduced(5.0f, 5.0f));
 }
 
@@ -757,26 +776,21 @@ lnf::drawTabButton(TabBarButton& button, Graphics& g, bool isMouseOver, bool isM
 void 
 lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, Slider& s)
 {
-  float stroke = 5;
-  int conic_count = 256;
-
-  bool tabular = false;
-  if (auto ps = dynamic_cast<param_slider*>(&s))
-    if (ps->param()->param->gui.tabular)
-      tabular = true;
-  if(tabular)
-    draw_tabular_cell_bg(g, &s, global_settings().table_cell_radius);
-
   float scale_factor = 1;
   float size_base = s.getHeight();
+  auto ps = dynamic_cast<param_slider*>(&s);
+  bool tabular = ps && ps->param()->param->gui.tabular;
+  float padding = tabular ? _global_settings.tabular_knob_padding : _global_settings.knob_padding;
+
+  // cell background
   if(tabular) 
   {
     size_base = 0.9 * std::min(s.getHeight(), s.getWidth());
     scale_factor = size_base / s.getHeight();
+    draw_tabular_cell_bg(g, colors().table_cell, &s, global_settings().table_cell_radius);
   }
-
-  float padding = tabular? _global_settings.tabular_knob_padding: _global_settings.knob_padding;
-  float size = size_base - padding - stroke / 2;
+  
+  float size = size_base - padding;
   float left = (s.getWidth() - size) / 2;
   float top = (s.getHeight() - size) / 2;
 
@@ -790,214 +804,190 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
   bool bipolar = s.getMinimum() < 0;
   float end_angle = (180 + 340) * pi32 / 180;
   float start_angle = (180 + 20) * pi32 / 180;
+  float angle_gap = end_angle - start_angle;
   float angle_range = end_angle - start_angle;
-  auto track1 = colors().knob_track1;
-  auto track2 = colors().knob_track2;
-  auto background1 = colors().knob_background1;
-  auto background2 = colors().knob_background2;
 
-  if (!s.isEnabled())
+  // background, shadow, highlight
+  g.setColour(colors().slider_background);
+  g.fillEllipse(left + 1, top + 1, size - 2, size - 2);
+  draw_conic_arc(g, left, top, size, pi32, 2.0f * pi32, 
+    colors().slider_shadow, colors().slider_highlight, conic_count / 2, 0.0f, 1.0f, 1.0f);
+  draw_conic_arc(g, left, top, size, 0.0f, pi32, 
+    colors().slider_highlight, colors().slider_shadow, conic_count / 2, 0.0f, 1.0f, 1.0f);
+
+  left += 3;
+  top += 3;
+  size -= 6;
+  int stroke = 2;
+
+  // automation indication
+  auto automation_color = colors().slider_automation;
+  if (!s.isEnabled()) automation_color = color_to_grayscale(automation_color);
+  if(!bipolar) draw_conic_arc(g, left, top, size, start_angle, end_angle,
+    automation_color, automation_color, conic_count, 0, pos, stroke);
+  else if (pos >= 0.5f) draw_conic_arc(g, left, top, size, start_angle + angle_range / 2, end_angle, 
+    automation_color, automation_color, conic_count / 2, 0, (pos - 0.5f) * 2, stroke);
+  else draw_conic_arc(g, left, top, size, start_angle, start_angle + angle_range / 2, 
+    automation_color, automation_color, conic_count / 2, pos * 2, 1, stroke);
+
+  // automation indication
+  if(!bipolar) g.setColour(automation_color.withAlpha(std::max(0.0f, 1.0f - pos * 10.0f)));
+  else g.setColour(automation_color.withAlpha(1.0f - std::max(0.0f, std::abs(0.5f - pos) * 20.0f)));
+  float dot_y = top + size / 2.0f + size / 2.0f * std::sin(start_angle - pi32 * 0.25f + angle_gap + pos * angle_range) - 2.0f;
+  float dot_x = left + size / 2.0f + size / 2.0f * std::cos(start_angle - pi32 * 0.25f + angle_gap + pos * angle_range) - 2.0f;
+  g.fillEllipse(dot_x, dot_y, 4.0f, 4.0f);
+
+  if (!ps) return;
+    
+  // modulatable indicator
+  if(ps->param()->param->dsp.can_modulate(ps->param()->info.slot))
   {
-    track1 = color_to_grayscale(track1);
-    track2 = color_to_grayscale(track2);
-    background1 = color_to_grayscale(background1);
-    background2 = color_to_grayscale(background2);
+    g.setColour(colors().slider_can_modulate);
+    g.fillEllipse(left + size / 3, top + size / 3, size / 3, size / 3);
   }
 
-  g.setColour(Colour(0xFF888888));
-  g.fillEllipse(left - 3, top - 3, size + 6, size + 6);
-  g.setColour(Colours::black);
-  g.fillEllipse(left - 1, top - 1, size + 2, size + 2);
-  left += 1;
-  top += 1;
-  size -= 2;
-  if(!bipolar)
+  if (ps->max_mod_indicator() < 0.0f) return;
+
+  // modulation indication
+  Path path;
+  g.setColour(colors().slider_automation.darker());
+  float half_mod_angle = start_angle + 0.5f * angle_range;
+  float min_mod_angle = start_angle + ps->min_mod_indicator() * angle_range;
+  float max_mod_angle = start_angle + ps->max_mod_indicator() * angle_range;
+  if (!bipolar)
   {
-    draw_conic_arc(g, left, top, size, start_angle, end_angle, background1, background2, conic_count, 0, 1.0f, stroke);
-    draw_conic_arc(g, left, top, size, start_angle, end_angle, track1, track2, conic_count, 0, pos, stroke);
+    if(ps->max_mod_indicator() - ps->min_mod_indicator() <= 0.05f)
+      path.addArc(left - 3, top - 3, size + 6, size + 6, start_angle, max_mod_angle, true);
+    else
+      path.addArc(left - 3, top - 3, size + 6, size + 6, min_mod_angle, max_mod_angle, true);
   }
+  else if(ps->max_mod_indicator() - ps->min_mod_indicator() > 0.05f)
+    path.addArc(left - 3, top - 3, size + 6, size + 6, min_mod_angle, max_mod_angle, true);
+  else if(ps->max_mod_indicator() >= 0.5f)
+    path.addArc(left - 3, top - 3, size + 6, size + 6, half_mod_angle, max_mod_angle, true);
   else
-  {
-    draw_conic_arc(g, left, top, size, start_angle, start_angle + angle_range / 2, background2, background1, conic_count / 2, 0, 1.0f, stroke);
-    draw_conic_arc(g, left, top, size, start_angle + angle_range / 2, end_angle, background1, background2, conic_count / 2, 0, 1.0f, stroke);
-    if (pos >= 0.5f) draw_conic_arc(g, left, top, size, start_angle + angle_range / 2, end_angle, track1, track2, conic_count / 2, 0, (pos - 0.5f) * 2, stroke);
-    else draw_conic_arc(g, left, top, size, start_angle, start_angle + angle_range / 2, track2, track1, conic_count / 2, pos * 2, 1, stroke);
-  }
-
-  if(auto ps = dynamic_cast<param_slider*>(&s))
-  {
-    // modulatable indicator
-    if(ps->param()->param->dsp.can_modulate(ps->param()->info.slot))
-    {
-      auto indicator = background1.interpolatedWith(background2, 0.33);
-      if(!s.isEnabled()) indicator = indicator.darker();
-      g.setColour(indicator);
-      g.fillEllipse(left + size / 4, top + size / 4, size / 2, size / 2);
-    }
-
-    // current modulation indicator
-    if (ps->max_mod_indicator() >= 0.0f)
-    { 
-      Path path;
-      g.setColour(colors().slider_mod_indicator);
-
-      float half_mod_angle = start_angle + 0.5f * angle_range;
-      float min_mod_angle = start_angle + ps->min_mod_indicator() * angle_range;
-      float max_mod_angle = start_angle + ps->max_mod_indicator() * angle_range;
-      if (!bipolar)
-      {
-        if(ps->max_mod_indicator() - ps->min_mod_indicator() <= 0.05f)
-          path.addArc(left - 3, top - 3, size + 6, size + 6, start_angle, max_mod_angle, true);
-        else
-          path.addArc(left - 3, top - 3, size + 6, size + 6, min_mod_angle, max_mod_angle, true);
-      }
-      else if(ps->max_mod_indicator() - ps->min_mod_indicator() > 0.05f)
-        path.addArc(left - 3, top - 3, size + 6, size + 6, min_mod_angle, max_mod_angle, true);
-      else if(ps->max_mod_indicator() >= 0.5f)
-        path.addArc(left - 3, top - 3, size + 6, size + 6, half_mod_angle, max_mod_angle, true);
-      else
-        path.addArc(left - 3, top - 3, size + 6, size + 6, max_mod_angle, half_mod_angle, true);
-
-      g.strokePath(path, PathStrokeType(2));
-    }
-  }
-
-  Path thumb;
-  float thumb_end_angle = 340 * pi32 / 180;
-  float thumb_start_angle = 20 * pi32 / 180;
-  float thum_angle_range = thumb_end_angle - thumb_start_angle;
-  auto thumb_color = colors().slider_thumb;
-  if (!s.isEnabled()) thumb_color = color_to_grayscale(thumb_color);
-  g.setColour(thumb_color);
-
-  float thumb_top = top + size - knob_thumb_height * scale_factor * 1.25;
-  float thumb_left = left + size / 2 - knob_thumb_width * scale_factor / 2;
-  thumb.startNewSubPath(thumb_left, thumb_top);
-  thumb.lineTo(thumb_left + knob_thumb_width * scale_factor / 2, thumb_top + knob_thumb_height * scale_factor);
-  thumb.lineTo(thumb_left + knob_thumb_width * scale_factor, thumb_top);
-  thumb.closeSubPath();
-  auto transform = AffineTransform::rotation(thumb_start_angle + pos * thum_angle_range, left + size / 2, top + size / 2);
-  thumb.applyTransform(transform);
-  g.fillPath(thumb);
+    path.addArc(left - 3, top - 3, size + 6, size + 6, max_mod_angle, half_mod_angle, true);
+   g.strokePath(path, PathStrokeType(2));
 }
 
 void 	
 lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, float, Slider::SliderStyle style, Slider& s)
 {
+  int padh = 2;
+  auto ps = dynamic_cast<param_slider*>(&s);
+  if (ps && ps->param()->param->gui.tabular)
+    padh = 6; 
+
+  float height = 8;
   float pos = (p - x) / w;
-  int const fixedHeight = 5;
+  bool bipolar = s.getMinimum() < 0;
+  float left = padh / 2;
+  float top = (s.getHeight() - height) / 2;
+  float width = s.getWidth() - padh;
+  float centerx = left + width / 2;
+
+  float min_mod_pos = ps ? ps->min_mod_indicator() : -1.0f;
+  float max_mod_pos = ps ? ps->max_mod_indicator() : -1.0f;
+
   assert(style == Slider::SliderStyle::LinearHorizontal);
+
+  // output meter
+  auto const& param_topo = *ps->param()->param;
+  if (ps && ps->param()->param->gui.edit_type == gui_edit_type::output_meter)
+  {
+    int block_pad = 2;
+    int block_count = 20;
+    float block_width_base = width / block_count;
+    float actual_block_width = (int)(block_width_base - block_pad);
+    float actual_cell_width = actual_block_width + block_pad;
+    float pos_adjust = pos * (param_topo.domain.max - param_topo.domain.min);
+    int block_count_off = block_count * std::clamp(pos_adjust, 0.0f, 1.0f);
+
+    g.setColour(colors().control_background);
+    for (int i = 0; i < block_count_off; i++)
+      g.fillRect(left + i * actual_cell_width, top, actual_block_width, height);
+    g.setColour(colors().control_background.brighter());
+    for (int i = block_count_off; i < block_count; i++)
+      g.fillRect(left + i * actual_cell_width, top, actual_block_width, height);
+    return;
+  }
 
   // in table mode dont align right against the next one
   // normally thats not a point because theres labels in between
-  int padh = 0;
-  auto ps = dynamic_cast<param_slider*>(&s);
   if(ps != nullptr && ps->param()->param->gui.tabular)
-  {
-    padh = 2;
-    draw_tabular_cell_bg(g, &s, global_settings().table_cell_radius);
-  }
-
-  float left = slider_thumb_width / 2 + padh / 2;
-  float top = (s.getHeight() - fixedHeight) / 2;
-  float width = s.getWidth() - slider_thumb_width - padh;
-  float centerx = left + width / 2;
-  float height = fixedHeight;
-
-  auto track1 = colors().slider_track1;
-  auto track2 = colors().slider_track2;
-  auto outline1 = colors().slider_outline1;
-  auto outline2 = colors().slider_outline2;
-
-  bool bipolar = s.getMinimum() < 0;
-  float min_mod_pos = ps ? ps->min_mod_indicator() : -1.0f;
-  float max_mod_pos = ps ? ps->max_mod_indicator() : -1.0f;
+    draw_tabular_cell_bg(g, colors().table_cell, &s, global_settings().table_cell_radius);
   
-  g.setColour(colors().slider_background);
+  // highlight
+  g.setGradientFill(ColourGradient(colors().slider_highlight.withAlpha(0.0f), left, 0, colors().slider_highlight, width, 0, false));
   g.fillRoundedRectangle(left, top, width, height, 2);
 
-  if(!bipolar)
-  {
-    if (max_mod_pos < 0.0f)
-    {
-      g.setGradientFill(ColourGradient(track1, left, 0, track2, width, 0, false));
-      g.fillRoundedRectangle(left, top, pos * width, height, 2);
-    }
-    else if (max_mod_pos - min_mod_pos <= 0.05f)
-    {
-      g.setGradientFill(ColourGradient(track1.brighter(), left, 0, track2.brighter(), width, 0, false));
-      g.fillRoundedRectangle(left, top, max_mod_pos * width, height, 2);
-    }
-    else
-    {
-      g.setGradientFill(ColourGradient(track1.brighter(), left, 0, track2.brighter(), width, 0, false));
-      g.fillRoundedRectangle(left + min_mod_pos * width, top, (max_mod_pos - min_mod_pos) * width, height, 2);
-    }
+  // background
+  g.setColour(colors().slider_background);
+  g.fillRoundedRectangle(left + 1, top + 1, width - 2, height - 2, 2);
 
-    g.setGradientFill(ColourGradient(outline1, left, 0, outline2, width, 0, false));
-    g.drawRoundedRectangle(left, top, width, height, 2, 1);
-  } else
-  {
-    if (max_mod_pos < 0.0f)
+  // modulation indicator
+  g.setColour(colors().slider_background);
+  if(max_mod_pos >= 0.0f)
+    if(!bipolar)
     {
-      if (pos >= 0.5)
+      if (max_mod_pos - min_mod_pos <= 0.05f)
       {
-        g.setGradientFill(ColourGradient(track1, centerx, 0, track2, width, 0, false));
-        g.fillRoundedRectangle(centerx, top, (pos - 0.5f) * 2 * width / 2, height, 2);
-      }
+        g.fillRect(left + 1, top, max_mod_pos * (width - 2), 1.0f);
+        g.fillRect(left + 1, top + height - 1, max_mod_pos * (width - 2), 1.0f);
+      } 
       else
       {
-        float trackw = (0.5f - pos) * 2 * width / 2;
-        g.setGradientFill(ColourGradient(track2, left, 0, track1, centerx, 0, false));
-        g.fillRoundedRectangle(centerx - trackw, top, trackw, height, 2);
+        g.fillRect(left + 1 + min_mod_pos * (width - 2), top, (max_mod_pos - min_mod_pos) * (width - 2), 1.0f);
+        g.fillRect(left + 1 + min_mod_pos * (width - 2), top + height - 1, (max_mod_pos - min_mod_pos) * (width - 2), 1.0f);
       }
-    }
-    else
+    } else
     {
       if (max_mod_pos >= 0.5f)
       {
-        g.setGradientFill(ColourGradient(track1.brighter(), centerx, 0, track2.brighter(), width, 0, false));
-        g.fillRoundedRectangle(centerx, top, (max_mod_pos - 0.5f) * 2 * width / 2, height, 2);
+        g.fillRect(centerx, top, (max_mod_pos - 0.5f) * 2 * (width - 2) / 2, 1.0f);
+        g.fillRect(centerx, top + height - 1, (max_mod_pos - 0.5f) * 2 * (width - 2) / 2, 1.0f);
       }
       if(min_mod_pos < 0.5f)
       {
-        float trackw = (0.5f - min_mod_pos) * 2 * width / 2;
-        g.setGradientFill(ColourGradient(track2.brighter(), left, 0, track1.brighter(), centerx, 0, false));
-        g.fillRoundedRectangle(centerx - trackw, top, trackw, height, 2);
+        float trackw = (0.5f - min_mod_pos) * 2 * (width - 2) / 2; 
+        g.fillRect(centerx - trackw, top, trackw, 1.0f);
+        g.fillRect(centerx - trackw, top + height - 1, trackw, 1.0f);
       }
     }
 
-    Path pl;
-    pl.addRoundedRectangle(left, top, width / 2, height, 2, 2, true, false, true, false);
-    g.setGradientFill(ColourGradient(outline2, left, 0, outline1, centerx, 0, false));
-    g.strokePath(pl, PathStrokeType(1.0f));
-    Path pr;
-    pr.addRoundedRectangle(centerx, top, width / 2, height, 2, 2, false, true, false, true);
-    g.setGradientFill(ColourGradient(outline1, centerx, 0, outline2, centerx + width / 2, 0, false));
-    g.strokePath(pr, PathStrokeType(1.0f));
+  auto automation_color = colors().slider_automation;
+  if (!s.isEnabled()) automation_color = color_to_grayscale(automation_color);
+
+  // automation indication
+  g.setColour(automation_color);
+  float trackw = (0.5f - pos) * 2 * (width - 4) / 2;
+  if (!bipolar)
+    g.fillRoundedRectangle(left + 2, top + 2, pos * (width - 4), height - 4, 2);
+  else if (pos >= 0.5)
+    g.fillRoundedRectangle(centerx, top + 2, (pos - 0.5f) * 2 * (width - 4) / 2, height - 4, 2);
+  else
+    g.fillRoundedRectangle(centerx - trackw, top + 2, trackw, height - 4, 2);
+
+  // automation indication
+  if (!bipolar)
+  {
+    g.setColour(automation_color.withAlpha(std::max(0.0f, 1.0f - pos * 10.0f)));
+    g.fillEllipse(left + 1, top + 1, height - 2, height - 2);
+  }
+  else
+  {
+    g.setColour(automation_color.withAlpha(std::clamp(1.0f - std::max(0.0f, std::abs(0.5f - pos) * 20.0f), 0.0f, 1.0f)));
+    g.fillEllipse(left + 1 + width / 2 - (height - 2) / 2, top + 1, (height - 2), (height - 2));
   }
 
-  auto thumb_color = colors().slider_thumb;
-  if (!s.isEnabled()) thumb_color = color_to_grayscale(thumb_color);
+  if(!ps) return;
 
   // modulatable indicator
-  if (ps != nullptr && ps->param()->param->dsp.can_modulate(ps->param()->info.slot))
+  if (ps->param()->param->dsp.can_modulate(ps->param()->info.slot))
   {
-    auto indicator = outline1.interpolatedWith(outline2, 0.33);
-    if (!s.isEnabled()) indicator = indicator.darker();
-    g.setColour(thumb_color);
-    g.fillEllipse(left + width / 2 - height / 2 + 1, top + 1, height - 2, height - 2);
+    g.setColour(colors().slider_can_modulate.withAlpha(0.75f));
+    g.fillEllipse(left + width - (height - 4) - 2, top + (height - 4) / 2, (height - 4), (height - 4));
   }
-
-  Path thumb;
-  float thumb_left = width * pos;
-  float thumb_top = s.getHeight() / 2;
-  g.setColour(thumb_color);
-  thumb.startNewSubPath(thumb_left, thumb_top + slider_thumb_height);
-  thumb.lineTo(thumb_left + slider_thumb_width / 2, thumb_top);
-  thumb.lineTo(thumb_left + slider_thumb_width, thumb_top + slider_thumb_height);
-  thumb.closeSubPath();
-  g.fillPath(thumb);
 }
 
 }

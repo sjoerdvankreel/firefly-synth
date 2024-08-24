@@ -78,15 +78,15 @@ type_items()
 {
   std::vector<list_item> result;
   result.emplace_back("{7CE8B8A1-0711-4BDE-BDFF-0F97BF16EB57}", "Off");
-  result.emplace_back("{C185C0A7-AE6A-4ADE-8171-119A96C24233}", "Mul Abs");
-  result.emplace_back("{51FBF610-2039-448E-96B0-3C5FDED5DC7C}", "Mul Rel");
-  result.emplace_back("{D9AEAC34-8E75-4EFD-91D3-6F9058226816}", "Mul Stk");
-  result.emplace_back("{000C0860-B191-4554-9249-85846B1AFFD1}", "Add Abs");
-  result.emplace_back("{169406D2-E86F-4275-A49F-59ED67CD7661}", "Add Rel");
-  result.emplace_back("{621467B6-CFB7-4801-9DF4-6F9A200AD098}", "Add Stk");
-  result.emplace_back("{23FB17DA-B98B-49FF-8D46-4E5FE7F486D6}", "AB Abs");
-  result.emplace_back("{6708DDD1-14EA-4E1D-8A1F-E4FFE76A87F0}", "AB Rel");
-  result.emplace_back("{1CCAB37F-0AA7-4A77-8C4C-28838970665B}", "AB Stk");
+  result.emplace_back("{C185C0A7-AE6A-4ADE-8171-119A96C24233}", "Mul Abs", "Multiply Absolute");
+  result.emplace_back("{51FBF610-2039-448E-96B0-3C5FDED5DC7C}", "Mul Rel", "Multiply Relative To Param");
+  result.emplace_back("{D9AEAC34-8E75-4EFD-91D3-6F9058226816}", "Mul Stk", "Multiply Relative To Stacked Modulation");
+  result.emplace_back("{000C0860-B191-4554-9249-85846B1AFFD1}", "Add Abs", "Add Absolute");
+  result.emplace_back("{169406D2-E86F-4275-A49F-59ED67CD7661}", "Add Rel", "Add Relative To Param");
+  result.emplace_back("{621467B6-CFB7-4801-9DF4-6F9A200AD098}", "Add Stk", "Add Relative To Stacked Modulation");
+  result.emplace_back("{23FB17DA-B98B-49FF-8D46-4E5FE7F486D6}", "AB Abs", "Bipolar Add Absolute");
+  result.emplace_back("{6708DDD1-14EA-4E1D-8A1F-E4FFE76A87F0}", "AB Rel", "Bipolar Add Relative To Param");
+  result.emplace_back("{1CCAB37F-0AA7-4A77-8C4C-28838970665B}", "AB Stk", "Bipolar Add Relative To Stacked Modulation");
   return result;
 }
 
@@ -162,10 +162,10 @@ init_audio_voice_default(plugin_state& state)
   state.set_text_at(module_vcv_audio_matrix, 0, param_min, 1, "35");
   state.set_text_at(module_vcv_audio_matrix, 0, param_max, 1, "65");
   state.set_text_at(module_vcv_audio_matrix, 0, param_source, 1, "GLFO 2");
-  state.set_text_at(module_vcv_audio_matrix, 0, param_target, 1, "VAudio Bal 1");
+  state.set_text_at(module_vcv_audio_matrix, 0, param_target, 1, "VAudio Balance 1"); 
   state.set_text_at(module_vcv_audio_matrix, 0, param_type, 2, "AB Abs");
-  state.set_text_at(module_vcv_audio_matrix, 0, param_source, 2, "MIn PB");
-  state.set_text_at(module_vcv_audio_matrix, 0, param_target, 2, "VIn PB");
+  state.set_text_at(module_vcv_audio_matrix, 0, param_source, 2, "Global PB");
+  state.set_text_at(module_vcv_audio_matrix, 0, param_target, 2, "Voice Pitch Bend");
   state.set_text_at(module_vcv_audio_matrix, 0, param_type, 3, "Mul Abs");
   state.set_text_at(module_vcv_audio_matrix, 0, param_source, 3, "Note Velo");
   state.set_text_at(module_vcv_audio_matrix, 0, param_target, 3, "VOut Gain");
@@ -180,7 +180,7 @@ init_audio_global_default(plugin_state& state)
   state.set_text_at(module_gcv_audio_matrix, 0, param_source, 0, "GLFO 1");
   state.set_text_at(module_gcv_audio_matrix, 0, param_target, 0, "GFX 1 SVF Freq");
   state.set_text_at(module_gcv_audio_matrix, 0, param_type, 1, "Add Abs");
-  state.set_text_at(module_gcv_audio_matrix, 0, param_source, 1, "MIn Mod");
+  state.set_text_at(module_gcv_audio_matrix, 0, param_source, 1, "Global Mod");
   state.set_text_at(module_gcv_audio_matrix, 0, param_target, 1, "GFX 1 SVF Freq");
 }
 
@@ -381,7 +381,7 @@ render_graph(
   int ti = state.get_plain_at(map.module_index, map.module_slot, param_target, map.param_slot).step();
 
   engine->process_begin(&state, sample_rate, params.max_frame_count, voice_release_at);  
-  std::vector<int> relevant_modules({ module_gcv_cv_matrix, module_master_in, module_glfo });
+  std::vector<int> relevant_modules({ module_gcv_cv_matrix, module_global_in, module_glfo });
   if(map.module_index == module_vcv_audio_matrix || map.module_index == module_vcv_cv_matrix)
     relevant_modules.insert(relevant_modules.end(), { module_vcv_cv_matrix, module_voice_on_note, module_vlfo, module_env });
   for(int m = 0; m < relevant_modules.size(); m++)
@@ -468,7 +468,7 @@ cv_matrix_topo(
   };
   if(cv)
   {
-    result.gui.tabbed_name = global? "GCV-CV Matrix": "VCV-CV Matrix";
+    result.gui.tabbed_name = "CV-CV";
     result.engine_factory = [global, sm = source_matrix.mappings, tm = target_matrix.mappings](
       auto const& topo, int, int) {
         return std::make_unique<cv_cv_matrix_engine>(global, topo, sm, tm);
@@ -476,7 +476,7 @@ cv_matrix_topo(
   }
   else
   {
-    result.gui.tabbed_name = global ? "GCV-Audio Matrix" : "VCV-Audio Matrix";
+    result.gui.tabbed_name = "CV-Audio";
     result.engine_factory = [global, sm = source_matrix.mappings, tm = target_matrix.mappings](
       auto const& topo, int, int) { 
         return std::make_unique<cv_audio_matrix_engine>(global, topo, sm, tm);

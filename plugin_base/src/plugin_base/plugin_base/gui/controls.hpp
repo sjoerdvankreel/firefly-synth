@@ -119,10 +119,10 @@ class last_tweaked_label :
 public juce::Label,
 public any_state_listener
 {
-  plugin_state const* const _state;
+  plugin_gui* const _gui;
 public:
-  last_tweaked_label(plugin_state const* state);
-  ~last_tweaked_label() { _state->remove_any_listener(this); }
+  last_tweaked_label(plugin_gui* gui, lnf* lnf);
+  ~last_tweaked_label() { _gui->gui_state()->remove_any_listener(this); }
   void any_state_changed(int index, plain_value plain) override;
 };
 

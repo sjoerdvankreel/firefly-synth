@@ -1,10 +1,10 @@
 <html>
 <head>
-<title>Firefly Synth 1.8.8</title>
+<title>Firefly Synth 1.8.9</title>
 <style>th, td { padding: 3px; }a, a:visited { color: #666666; }.description { background:#EEEEEE; }h1 { font-size: 19px; color: black; }h2 { font-size: 17px; color: black; }h3 { font-size: 15px; color: black; }body { font-family: Verdana; color: black; }html { position: relative; max-width: 1024px; margin: auto; }tr td { width: auto; white-space: nowrap; } tr th { width: auto; white-space: nowrap; }table, th, td { font-size: 13px; border: 1px solid gray; border-collapse: collapse; text-align: left; }tr td:last-child { width: 100%; white-space: wrap; } tr th:last-child { width: 100%; white-space: wrap; }</style>
 </head>
 <body>
-<h1>Firefly Synth 1.8.8</h1>
+<h1>Firefly Synth 1.8.9</h1>
 <h2>Module Overview</h2>
 <table>
 <tr>
@@ -41,15 +41,15 @@
 </tr>
 <tr>
 <td><a href='#4'>4</a></td>
-<td>Master In</td>
+<td>Global</td>
 <td>Yes</td>
 <td>Before voice</td>
 <td>1</td>
-<td class='description'>Master CV module with MIDI-linked modwheel and pitchbend, some additional freely-assignable parameters and global unison support.</td>
+<td class='description'>Global CV module with MIDI-linked modwheel and pitchbend, some additional freely-assignable parameters and unison support.</td>
 </tr>
 <tr>
 <td><a href='#5'>5</a></td>
-<td>Master Smoothing</td>
+<td>Glob Smt</td>
 <td>Yes</td>
 <td>Before voice</td>
 <td>1</td>
@@ -97,7 +97,7 @@
 </tr>
 <tr>
 <td><a href='#11'>11</a></td>
-<td>Envelope</td>
+<td>Env</td>
 <td>Yes</td>
 <td>Voice</td>
 <td>10</td>
@@ -121,7 +121,7 @@
 </tr>
 <tr>
 <td><a href='#14'>14</a></td>
-<td>Voice In</td>
+<td>Voice</td>
 <td>Yes</td>
 <td>Voice</td>
 <td>1</td>
@@ -145,7 +145,7 @@
 </tr>
 <tr>
 <td><a href='#17'>17</a></td>
-<td>Oscillator</td>
+<td>Osc</td>
 <td>Yes</td>
 <td>Voice</td>
 <td>5</td>
@@ -181,7 +181,7 @@
 <td>Yes</td>
 <td>After voice</td>
 <td>1</td>
-<td class='description'>Audio routing matrix with gain/balance control to route from voice mixdown to fx modules to master output.</td>
+<td class='description'>Audio routing matrix with gain/balance control to route from voice mixdown to fx modules to global output.</td>
 </tr>
 <tr>
 <td><a href='#22'>22</a></td>
@@ -193,11 +193,11 @@
 </tr>
 <tr>
 <td><a href='#23'>23</a></td>
-<td>Master Out</td>
+<td>Global Out</td>
 <td>Yes</td>
 <td>After voice</td>
 <td>1</td>
-<td class='description'>Controls gain and balance of the master audio output.</td>
+<td class='description'>Controls gain and balance of global audio output.</td>
 </tr>
 <tr>
 <td><a href='#24'>24</a></td>
@@ -205,7 +205,7 @@
 <td>Yes</td>
 <td>After voice</td>
 <td>1</td>
-<td class='description'>Monitor module with active voice count, CLAP threadpool thread count, master gain, overall CPU usage and highest-module CPU usage.</td>
+<td class='description'>Monitor module with active voice count, CLAP threadpool thread count, global output gain, overall CPU usage and highest-module CPU usage.</td>
 </tr>
 </table>
 <h2>Parameter Overview</h2>
@@ -249,9 +249,9 @@
 <td>Input</td>
 <td>Block</td>
 <td>Automate</td>
-<td>MIn Aux 1</td>
+<td>Global Aux 1</td>
 <td>MIDI CC 127</td>
-<td>MIn Aux 1</td>
+<td>Global Aux 1</td>
 <td>N/A</td>
 </tr>
 <tr>
@@ -339,7 +339,7 @@
 </tr>
 </table>
 <a name='4'/>
-<h3>Master In</h3>
+<h3>Global</h3>
 <table>
 <tr>
 <th>Name</th>
@@ -371,22 +371,6 @@
 <td colspan='11' class='description'>Auxilliary controls to be used through automation and the CV matrices.</td>
 </tr>
 <tr>
-<td rowspan='2'>Mod Wheel</td>
-<td>Linked</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Accurate</td>
-<td>MIDI</td>
-<td>0 %</td>
-<td>100 %</td>
-<td>0 %</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Linked to MIDI mod wheel, updates on incoming MIDI events.</td>
-</tr>
-<tr>
 <td rowspan='2'>Pitch Bend</td>
 <td>Linked</td>
 <td>Yes</td>
@@ -401,6 +385,22 @@
 </tr>
 <tr>
 <td colspan='11' class='description'>Linked to MIDI pitch bend, updates on incoming MIDI events.</td>
+</tr>
+<tr>
+<td rowspan='2'>Mod Wheel</td>
+<td>Linked</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Accurate</td>
+<td>MIDI</td>
+<td>0 %</td>
+<td>100 %</td>
+<td>0 %</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Linked to MIDI mod wheel, updates on incoming MIDI events.</td>
 </tr>
 <tr>
 <td rowspan='2'>Pitch Bend Range</td>
@@ -420,7 +420,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Global Unison Voices</td>
-<td>Global Unison Voices</td>
+<td>Unison Voices</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -435,7 +435,7 @@
 <td colspan='11' class='description'>Global unison voice count. Global unison spawns an entire polyphonic synth voice per unison voice. This includes per-voice oscillators, effects, lfo's and envelopes.</td>
 </tr>
 <tr>
-<td rowspan='2'>Global Unison Detune</td>
+<td rowspan='2'>Global Unison Osc Detune</td>
 <td>Global Unison Params</td>
 <td>Yes</td>
 <td>1</td>
@@ -449,54 +449,6 @@
 </tr>
 <tr>
 <td colspan='11' class='description'>Global unison voice pitch detune amount.</td>
-</tr>
-<tr>
-<td rowspan='2'>Global Unison Spread</td>
-<td>Global Unison Params</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Accurate</td>
-<td>Automate</td>
-<td>0 %</td>
-<td>100 %</td>
-<td>50 %</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Global unison stereo spread.</td>
-</tr>
-<tr>
-<td rowspan='2'>Global Unison LFO Phase Offset</td>
-<td>Global Unison Params</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Block</td>
-<td>Automate</td>
-<td>0 %</td>
-<td>100 %</td>
-<td>0 %</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Global unison voice LFO phase offset.</td>
-</tr>
-<tr>
-<td rowspan='2'>Global Unison LFO Detune</td>
-<td>Global Unison Params</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Accurate</td>
-<td>Automate</td>
-<td>0 %</td>
-<td>100 %</td>
-<td>0 %</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Global unison voice LFO detune amount.</td>
 </tr>
 <tr>
 <td rowspan='2'>Global Unison Osc Phase Offset</td>
@@ -515,6 +467,38 @@
 <td colspan='11' class='description'>Global unison voice osc phase offset.</td>
 </tr>
 <tr>
+<td rowspan='2'>Global Unison LFO Detune</td>
+<td>Global Unison Params</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Accurate</td>
+<td>Automate</td>
+<td>0 %</td>
+<td>100 %</td>
+<td>0 %</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Global unison voice LFO detune amount.</td>
+</tr>
+<tr>
+<td rowspan='2'>Global Unison LFO Phase Offset</td>
+<td>Global Unison Params</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Block</td>
+<td>Automate</td>
+<td>0 %</td>
+<td>100 %</td>
+<td>0 %</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Global unison voice LFO phase offset.</td>
+</tr>
+<tr>
 <td rowspan='2'>Global Unison Env Detune</td>
 <td>Global Unison Params</td>
 <td>Yes</td>
@@ -529,6 +513,22 @@
 </tr>
 <tr>
 <td colspan='11' class='description'>Global unison voice envelope detune amount.</td>
+</tr>
+<tr>
+<td rowspan='2'>Global Unison Spread</td>
+<td>Global Unison Params</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Accurate</td>
+<td>Automate</td>
+<td>0 %</td>
+<td>100 %</td>
+<td>50 %</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Global unison stereo spread.</td>
 </tr>
 <tr>
 <td rowspan='2'>Tuning Mode</td>
@@ -548,7 +548,7 @@
 </tr>
 </table>
 <a name='5'/>
-<h3>Master Smoothing</h3>
+<h3>Glob Smt</h3>
 <table>
 <tr>
 <th>Name</th>
@@ -877,9 +877,9 @@
 <td>Input</td>
 <td>Block</td>
 <td>Automate</td>
-<td>MIn Aux 1</td>
+<td>Global Aux 1</td>
 <td>MIDI CC 127</td>
-<td>MIn Aux 1</td>
+<td>Global Aux 1</td>
 <td>N/A</td>
 </tr>
 <tr>
@@ -893,9 +893,9 @@
 <td>Input</td>
 <td>Block</td>
 <td>Automate</td>
-<td>GFX 1 SVF KTrk</td>
-<td>MOut Bal</td>
-<td>GFX 1 SVF KTrk</td>
+<td>GFX 1 SVF KeyTrk</td>
+<td>GOut Bal</td>
+<td>GFX 1 SVF KeyTrk</td>
 <td>N/A</td>
 </tr>
 <tr>
@@ -1006,9 +1006,9 @@
 <td>Input</td>
 <td>Voice</td>
 <td>Automate</td>
-<td>MIn Aux 1</td>
+<td>Global Aux 1</td>
 <td>On Nt MIDI CC 127</td>
-<td>MIn Aux 1</td>
+<td>Global Aux 1</td>
 <td>N/A</td>
 </tr>
 <tr>
@@ -1022,9 +1022,9 @@
 <td>Input</td>
 <td>Voice</td>
 <td>Automate</td>
-<td>Env 1 Stn</td>
+<td>Env 1 Sustain</td>
 <td>VCV-A Max 30</td>
-<td>Env 1 Stn</td>
+<td>Env 1 Sustain</td>
 <td>N/A</td>
 </tr>
 <tr>
@@ -1096,7 +1096,7 @@
 </tr>
 </table>
 <a name='11'/>
-<h3>Envelope</h3>
+<h3>Env</h3>
 <table>
 <tr>
 <th>Name</th>
@@ -1200,7 +1200,7 @@
 <td>Voice</td>
 <td>Automate</td>
 <td>Legato</td>
-<td>Multi</td>
+<td>Multi-trigger</td>
 <td>Legato</td>
 <td>N/A</td>
 </tr>
@@ -1320,7 +1320,7 @@
 <td colspan='11' class='description'>Attack section length in bars.</td>
 </tr>
 <tr>
-<td rowspan='2'>A Slope</td>
+<td rowspan='2'>Att Slope</td>
 <td>DAHDR</td>
 <td>Yes</td>
 <td>1</td>
@@ -1368,7 +1368,7 @@
 <td colspan='11' class='description'>Decay section length in bars.</td>
 </tr>
 <tr>
-<td rowspan='2'>D Slope</td>
+<td rowspan='2'>Dcy Slope</td>
 <td>DAHDR</td>
 <td>Yes</td>
 <td>1</td>
@@ -1416,7 +1416,7 @@
 <td colspan='11' class='description'>Release section length in bars.</td>
 </tr>
 <tr>
-<td rowspan='2'>R Slope</td>
+<td rowspan='2'>Rls Slope</td>
 <td>DAHDR</td>
 <td>Yes</td>
 <td>1</td>
@@ -1713,9 +1713,9 @@
 <td>Input</td>
 <td>Voice</td>
 <td>Automate</td>
-<td>MIn Aux 1</td>
+<td>Global Aux 1</td>
 <td>On Nt MIDI CC 127</td>
-<td>MIn Aux 1</td>
+<td>Global Aux 1</td>
 <td>N/A</td>
 </tr>
 <tr>
@@ -1729,9 +1729,9 @@
 <td>Input</td>
 <td>Voice</td>
 <td>Automate</td>
-<td>VIn Cent</td>
+<td>Voice Cent</td>
 <td>VOut Bal</td>
-<td>VIn Cent</td>
+<td>Voice Cent</td>
 <td>N/A</td>
 </tr>
 <tr>
@@ -1803,7 +1803,7 @@
 </tr>
 </table>
 <a name='14'/>
-<h3>Voice In</h3>
+<h3>Voice</h3>
 <table>
 <tr>
 <th>Name</th>
@@ -1826,9 +1826,9 @@
 <td>Input</td>
 <td>Voice</td>
 <td>Automate</td>
-<td>Poly</td>
-<td>Release</td>
-<td>Poly</td>
+<td>Polyphonic</td>
+<td>Release Mono</td>
+<td>Polyphonic</td>
 <td>N/A</td>
 </tr>
 <tr>
@@ -1976,7 +1976,7 @@
 <td>N/A</td>
 </tr>
 <tr>
-<td colspan='11' class='description'>Pitch-bend modulation target for all Oscs. Reacts to master pitchbend range.</td>
+<td colspan='11' class='description'>Pitch-bend modulation target for all Oscs. Reacts to global pitchbend range.</td>
 </tr>
 </table>
 <a name='15'/>
@@ -2096,7 +2096,7 @@
 <td rowspan='2'>AM On</td>
 <td>AM</td>
 <td>Yes</td>
-<td>8</td>
+<td>9</td>
 <td>Input</td>
 <td>Voice</td>
 <td>Automate</td>
@@ -2112,7 +2112,7 @@
 <td rowspan='2'>AM Source</td>
 <td>AM</td>
 <td>Yes</td>
-<td>8</td>
+<td>9</td>
 <td>Input</td>
 <td>Voice</td>
 <td>Automate</td>
@@ -2128,7 +2128,7 @@
 <td rowspan='2'>AM Target</td>
 <td>AM</td>
 <td>Yes</td>
-<td>8</td>
+<td>9</td>
 <td>Input</td>
 <td>Voice</td>
 <td>Automate</td>
@@ -2144,7 +2144,7 @@
 <td rowspan='2'>AM Mix</td>
 <td>AM</td>
 <td>Yes</td>
-<td>8</td>
+<td>9</td>
 <td>Input</td>
 <td>Accurate</td>
 <td>Modulate</td>
@@ -2160,7 +2160,7 @@
 <td rowspan='2'>AM Ring</td>
 <td>AM</td>
 <td>Yes</td>
-<td>8</td>
+<td>9</td>
 <td>Input</td>
 <td>Accurate</td>
 <td>Modulate</td>
@@ -2176,7 +2176,7 @@
 <td rowspan='2'>FM On</td>
 <td>FM</td>
 <td>Yes</td>
-<td>8</td>
+<td>9</td>
 <td>Input</td>
 <td>Voice</td>
 <td>Automate</td>
@@ -2192,7 +2192,7 @@
 <td rowspan='2'>FM Source</td>
 <td>FM</td>
 <td>Yes</td>
-<td>8</td>
+<td>9</td>
 <td>Input</td>
 <td>Voice</td>
 <td>Automate</td>
@@ -2208,7 +2208,7 @@
 <td rowspan='2'>FM Target</td>
 <td>FM</td>
 <td>Yes</td>
-<td>8</td>
+<td>9</td>
 <td>Input</td>
 <td>Voice</td>
 <td>Automate</td>
@@ -2224,7 +2224,7 @@
 <td rowspan='2'>FM Mode</td>
 <td>FM</td>
 <td>Yes</td>
-<td>8</td>
+<td>9</td>
 <td>Input</td>
 <td>Voice</td>
 <td>Automate</td>
@@ -2240,7 +2240,7 @@
 <td rowspan='2'>FM Idx</td>
 <td>FM</td>
 <td>Yes</td>
-<td>8</td>
+<td>9</td>
 <td>Input</td>
 <td>Accurate</td>
 <td>Modulate</td>
@@ -2254,7 +2254,7 @@
 </tr>
 </table>
 <a name='17'/>
-<h3>Oscillator</h3>
+<h3>Osc</h3>
 <table>
 <tr>
 <th>Name</th>
@@ -2334,38 +2334,6 @@
 <td colspan='11' class='description'>Oscillator cents, also reacts to Voice-In cents.</td>
 </tr>
 <tr>
-<td rowspan='2'>Hard Sync Semitones</td>
-<td>Sync Params</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Accurate</td>
-<td>Modulate</td>
-<td>0.00 Semi</td>
-<td>48.00 Semi</td>
-<td>0.00 Semi</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Pitch offset of the actual oscillator against the reference oscillator.</td>
-</tr>
-<tr>
-<td rowspan='2'>Hard Sync XOver Time</td>
-<td>Sync Params</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Voice</td>
-<td>Automate</td>
-<td>0.00 Ms</td>
-<td>5.00 Ms</td>
-<td>2.50 Ms</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Controls cross-over time between the synced and unsyced signal after a phase reset occurs.</td>
-</tr>
-<tr>
 <td rowspan='2'>Hard Sync On</td>
 <td>Sync On</td>
 <td>Yes</td>
@@ -2382,8 +2350,40 @@
 <td colspan='11' class='description'>Enables hard-sync against an internal reference oscillator.</td>
 </tr>
 <tr>
+<td rowspan='2'>Hard Sync Semitones</td>
+<td>Sync/Unisonc Params</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Accurate</td>
+<td>Modulate</td>
+<td>0.00 Semi</td>
+<td>48.00 Semi</td>
+<td>0.00 Semi</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Pitch offset of the actual oscillator against the reference oscillator.</td>
+</tr>
+<tr>
+<td rowspan='2'>Hard Sync XOver Time</td>
+<td>Sync/Unisonc Params</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Voice</td>
+<td>Automate</td>
+<td>0.00 Ms</td>
+<td>5.00 Ms</td>
+<td>2.50 Ms</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Controls cross-over time between the synced and unsyced signal after a phase reset occurs.</td>
+</tr>
+<tr>
 <td rowspan='2'>Unison Voices</td>
-<td>Unison</td>
+<td>Sync/Unisonc Params</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -2399,7 +2399,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Unison Spread</td>
-<td>Unison</td>
+<td>Sync/Unisonc Params</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -2415,7 +2415,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Unison Detune</td>
-<td>Unison</td>
+<td>Sync/Unisonc Params</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -2431,7 +2431,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Unison Phase</td>
-<td>Unison</td>
+<td>Sync/Unisonc Params</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -2654,7 +2654,7 @@
 <td colspan='11' class='description'>Continuous filter type for static noise or initial-excite filter type for Karplus-Strong.</td>
 </tr>
 <tr>
-<td rowspan='2'>Rnd Rate</td>
+<td rowspan='2'>Random Rate</td>
 <td>Random</td>
 <td>Yes</td>
 <td>1</td>
@@ -2670,7 +2670,7 @@
 <td colspan='11' class='description'>On-voice-init step count for static noise and initial-excite stage of Karplus-Strong. Modulation takes place only at voice start.</td>
 </tr>
 <tr>
-<td rowspan='2'>Rnd Filter Freq</td>
+<td rowspan='2'>Random Filter Freq</td>
 <td>Random</td>
 <td>Yes</td>
 <td>1</td>
@@ -2686,7 +2686,7 @@
 <td colspan='11' class='description'>Continuous filter frequency for static noise or initial-excite filter frequency for Karplus-Strong. Modulation takes place only at voice start.</td>
 </tr>
 <tr>
-<td rowspan='2'>Rnd Filter Reso</td>
+<td rowspan='2'>Random Filter Reso</td>
 <td>Random</td>
 <td>Yes</td>
 <td>1</td>
@@ -2795,7 +2795,7 @@
 <td>N/A</td>
 </tr>
 <tr>
-<td colspan='11' class='description'>Pitch-bend modulation target. Also reacts to Voice-in PB modulation and master pitchbend range.</td>
+<td colspan='11' class='description'>Pitch-bend modulation target. Also reacts to Voice-in PB modulation and global pitchbend range.</td>
 </tr>
 <tr>
 <td rowspan='2'>Phase</td>
@@ -2863,7 +2863,7 @@
 <td colspan='11' class='description'>Selects the state-variable filter mode.</td>
 </tr>
 <tr>
-<td rowspan='2'>SV Filter KTrk</td>
+<td rowspan='2'>SV Filter KeyTrk</td>
 <td>SV Filter Left</td>
 <td>Yes</td>
 <td>1</td>
@@ -2959,22 +2959,6 @@
 <td colspan='11' class='description'>Feed-forward time.</td>
 </tr>
 <tr>
-<td rowspan='2'>Comb Filter Gain+</td>
-<td>Comb Filter</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Accurate</td>
-<td>Modulate</td>
-<td>-100 %</td>
-<td>+100 %</td>
-<td>+50 %</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Feed-forward amount.</td>
-</tr>
-<tr>
 <td rowspan='2'>Comb Filter Delay-</td>
 <td>Comb Filter</td>
 <td>Yes</td>
@@ -2989,6 +2973,22 @@
 </tr>
 <tr>
 <td colspan='11' class='description'>Feed-back time.</td>
+</tr>
+<tr>
+<td rowspan='2'>Comb Filter Gain+</td>
+<td>Comb Filter</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Accurate</td>
+<td>Modulate</td>
+<td>-100 %</td>
+<td>+100 %</td>
+<td>+50 %</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Feed-forward amount.</td>
 </tr>
 <tr>
 <td rowspan='2'>Comb Filter Gain-</td>
@@ -3015,7 +3015,7 @@
 <td>Voice</td>
 <td>Automate</td>
 <td>No Filter</td>
-<td>Shaper To Flt</td>
+<td>Shape 2 Filter</td>
 <td>No Filter</td>
 <td>N/A</td>
 </tr>
@@ -3023,7 +3023,7 @@
 <td colspan='11' class='description'>Affects where the filter is placed.<br/ >No Filter: filter is not used, schema is Input => Gain => Skew In => Shape => Skew Out => Clip => Mix.<br/>Filter To Shaper: filter before shape, schema is Input => Gain => Skew In => Filter => Shape => Skew Out => Clip => Mix.<br/>Shaper To Filter: filter after shape, schema is Input => Gain => Skew In => Shape => Filter => Skew Out => Clip => Mix.</td>
 </tr>
 <tr>
-<td rowspan='2'>Dist LPF Frequency</td>
+<td rowspan='2'>Dist LPF Freq</td>
 <td>Distortion Filter</td>
 <td>Yes</td>
 <td>1</td>
@@ -3039,7 +3039,7 @@
 <td colspan='11' class='description'>Lowpass filter frequency inside the oversampling stage.</td>
 </tr>
 <tr>
-<td rowspan='2'>Dist LPF Res</td>
+<td rowspan='2'>Dist LPF Reso</td>
 <td>Distortion Filter</td>
 <td>Yes</td>
 <td>1</td>
@@ -3401,8 +3401,8 @@
 <td>Block</td>
 <td>Automate</td>
 <td>GFX 1</td>
-<td>MOut</td>
-<td>MOut</td>
+<td>GOut</td>
+<td>GOut</td>
 <td>N/A</td>
 </tr>
 <tr>
@@ -3490,7 +3490,7 @@
 <td colspan='11' class='description'>Selects the state-variable filter mode.</td>
 </tr>
 <tr>
-<td rowspan='2'>SV Filter KTrk</td>
+<td rowspan='2'>SV Filter KeyTrk</td>
 <td>SV Filter Left</td>
 <td>Yes</td>
 <td>1</td>
@@ -3586,22 +3586,6 @@
 <td colspan='11' class='description'>Feed-forward time.</td>
 </tr>
 <tr>
-<td rowspan='2'>Comb Filter Gain+</td>
-<td>Comb Filter</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Accurate</td>
-<td>Modulate</td>
-<td>-100 %</td>
-<td>+100 %</td>
-<td>+50 %</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Feed-forward amount.</td>
-</tr>
-<tr>
 <td rowspan='2'>Comb Filter Delay-</td>
 <td>Comb Filter</td>
 <td>Yes</td>
@@ -3616,6 +3600,22 @@
 </tr>
 <tr>
 <td colspan='11' class='description'>Feed-back time.</td>
+</tr>
+<tr>
+<td rowspan='2'>Comb Filter Gain+</td>
+<td>Comb Filter</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Accurate</td>
+<td>Modulate</td>
+<td>-100 %</td>
+<td>+100 %</td>
+<td>+50 %</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Feed-forward amount.</td>
 </tr>
 <tr>
 <td rowspan='2'>Comb Filter Gain-</td>
@@ -3642,7 +3642,7 @@
 <td>Block</td>
 <td>None</td>
 <td>No Filter</td>
-<td>Shaper To Flt</td>
+<td>Shape 2 Filter</td>
 <td>No Filter</td>
 <td>N/A</td>
 </tr>
@@ -3650,7 +3650,7 @@
 <td colspan='11' class='description'>Affects where the filter is placed.<br/ >No Filter: filter is not used, schema is Input => Gain => Skew In => Shape => Skew Out => Clip => Mix.<br/>Filter To Shaper: filter before shape, schema is Input => Gain => Skew In => Filter => Shape => Skew Out => Clip => Mix.<br/>Shaper To Filter: filter after shape, schema is Input => Gain => Skew In => Shape => Filter => Skew Out => Clip => Mix.</td>
 </tr>
 <tr>
-<td rowspan='2'>Dist LPF Frequency</td>
+<td rowspan='2'>Dist LPF Freq</td>
 <td>Distortion Filter</td>
 <td>Yes</td>
 <td>1</td>
@@ -3666,7 +3666,7 @@
 <td colspan='11' class='description'>Lowpass filter frequency inside the oversampling stage.</td>
 </tr>
 <tr>
-<td rowspan='2'>Dist LPF Res</td>
+<td rowspan='2'>Dist LPF Reso</td>
 <td>Distortion Filter</td>
 <td>Yes</td>
 <td>1</td>
@@ -4227,7 +4227,7 @@
 </tr>
 </table>
 <a name='23'/>
-<h3>Master Out</h3>
+<h3>Global Out</h3>
 <table>
 <tr>
 <th>Name</th>
@@ -4292,88 +4292,24 @@
 <th>Log Midpoint</th>
 </tr>
 <tr>
-<td rowspan='2'>Gain</td>
-<td>Left</td>
+<td rowspan='2'>MTS-ESP</td>
+<td>Main</td>
 <td>Yes</td>
 <td>1</td>
 <td>Output</td>
 <td>Block</td>
 <td>None</td>
-<td>0</td>
-<td>999</td>
-<td>0</td>
+<td>Off</td>
+<td>On</td>
+<td>Off</td>
 <td>N/A</td>
 </tr>
 <tr>
-<td colspan='11' class='description'>Master output gain. Nothing is clipped, so this may well exceed 100%.</td>
-</tr>
-<tr>
-<td rowspan='2'>CPU</td>
-<td>Left</td>
-<td>Yes</td>
-<td>1</td>
-<td>Output</td>
-<td>Block</td>
-<td>None</td>
-<td>0</td>
-<td>999</td>
-<td>0</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>CPU usage relative to last processing block length. For example, if it took 1 ms to render a 5 ms block, this will be 20%.</td>
-</tr>
-<tr>
-<td rowspan='2'>Hi CPU</td>
-<td>Right</td>
-<td>Yes</td>
-<td>1</td>
-<td>Output</td>
-<td>Block</td>
-<td>None</td>
-<td>0</td>
-<td>99</td>
-<td>0</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>CPU usage of the most expensive module, relative to total CPU usage.</td>
-</tr>
-<tr>
-<td rowspan='2'>Hi Module</td>
-<td>Right</td>
-<td>Yes</td>
-<td>1</td>
-<td>Output</td>
-<td>Block</td>
-<td>None</td>
-<td>0</td>
-<td>999</td>
-<td>0</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Module that used the most CPU relative to total usage.</td>
-</tr>
-<tr>
-<td rowspan='2'>Voices</td>
-<td>Left</td>
-<td>Yes</td>
-<td>1</td>
-<td>Output</td>
-<td>Block</td>
-<td>None</td>
-<td>0</td>
-<td>64</td>
-<td>0</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Active voice count. Max 32, after that, recycling will occur.</td>
+<td colspan='11' class='description'>MTS-ESP master status.</td>
 </tr>
 <tr>
 <td rowspan='2'>Voices Drained</td>
-<td>Left</td>
+<td>Main</td>
 <td>Yes</td>
 <td>1</td>
 <td>Output</td>
@@ -4389,7 +4325,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Threads</td>
-<td>Right</td>
+<td>Main</td>
 <td>Yes</td>
 <td>1</td>
 <td>Output</td>
@@ -4404,20 +4340,84 @@
 <td colspan='11' class='description'>Number of CLAP threadpool threads used to process voices in the last block. For VST3, this will always be 0 or 1.</td>
 </tr>
 <tr>
-<td rowspan='2'>MTS-ESP</td>
-<td>Right</td>
+<td rowspan='2'>Voices</td>
+<td>Main</td>
 <td>Yes</td>
 <td>1</td>
 <td>Output</td>
 <td>Block</td>
 <td>None</td>
-<td>Off</td>
-<td>On</td>
-<td>Off</td>
+<td>0</td>
+<td>64</td>
+<td>0</td>
 <td>N/A</td>
 </tr>
 <tr>
-<td colspan='11' class='description'>MTS-ESP master status.</td>
+<td colspan='11' class='description'>Active voice count. Max 32, after that, recycling will occur.</td>
+</tr>
+<tr>
+<td rowspan='2'>Hi CPU</td>
+<td>Main</td>
+<td>Yes</td>
+<td>1</td>
+<td>Output</td>
+<td>Block</td>
+<td>None</td>
+<td>0</td>
+<td>99</td>
+<td>0</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>CPU usage of the most expensive module, relative to total CPU usage.</td>
+</tr>
+<tr>
+<td rowspan='2'>Hi Module</td>
+<td>Main</td>
+<td>Yes</td>
+<td>1</td>
+<td>Output</td>
+<td>Block</td>
+<td>None</td>
+<td>0</td>
+<td>999</td>
+<td>0</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Module that used the most CPU relative to total usage.</td>
+</tr>
+<tr>
+<td rowspan='2'>Gain</td>
+<td>Main</td>
+<td>Yes</td>
+<td>1</td>
+<td>Output</td>
+<td>Block</td>
+<td>None</td>
+<td>0</td>
+<td>999</td>
+<td>0</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Global output gain. Nothing is clipped, so this may well exceed 100%.</td>
+</tr>
+<tr>
+<td rowspan='2'>CPU</td>
+<td>Main</td>
+<td>Yes</td>
+<td>1</td>
+<td>Output</td>
+<td>Block</td>
+<td>None</td>
+<td>0</td>
+<td>999</td>
+<td>0</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>CPU usage relative to last processing block length. For example, if it took 1 ms to render a 5 ms block, this will be 20%.</td>
 </tr>
 </table>
 </body>

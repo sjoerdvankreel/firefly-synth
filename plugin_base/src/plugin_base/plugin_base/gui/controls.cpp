@@ -169,9 +169,9 @@ param_drag_label::paint(Graphics& g)
   float x = (w - _size) / 2.0f;
   float y = (h - _size) / 2.0f;
   if(isEnabled())
-    g.setColour(_lnf->colors().control_text);
+    g.setColour(_lnf->colors().label_text);
   else
-    g.setColour(_lnf->colors().control_text.darker(0.67f));
+    g.setColour(_lnf->colors().label_text.withAlpha(0.5f));
   g.fillEllipse(x, y, _size, _size);
 }
 
@@ -248,18 +248,19 @@ param_value_label::mouseDrag(juce::MouseEvent const& e)
 }
 
 last_tweaked_label::
-last_tweaked_label(plugin_state const* state):
-_state(state)
-{
-  state->add_any_listener(this);
-  any_state_changed(0, state->get_plain_at_index(0));
+last_tweaked_label(plugin_gui* gui, lnf* lnf):
+_gui(gui)
+{ 
+  gui->gui_state()->add_any_listener(this);
+  any_state_changed(0, gui->gui_state()->get_plain_at_index(0));
+  setColour(textColourId, lnf->colors().label_text);
 }
 
 void 
 last_tweaked_label::any_state_changed(int index, plain_value plain)
 {
-  if(_state->desc().params[index]->param->dsp.direction == param_direction::output) return;
-  setText(_state->desc().params[index]->full_name, dontSendNotification);
+  if(_gui->gui_state()->desc().params[index]->param->dsp.direction == param_direction::output) return;
+  setText(_gui->gui_state()->desc().params[index]->full_name, dontSendNotification);
 }
 
 last_tweaked_editor::
@@ -271,8 +272,8 @@ _state(state)
   state->add_any_listener(this);
   setJustification(Justification::centredRight);
   any_state_changed(0, state->get_plain_at_index(0));
-  setColour(TextEditor::ColourIds::textColourId, lnf->colors().control_text);
-  setColour(TextEditor::ColourIds::highlightedTextColourId, lnf->colors().control_text);
+  setColour(TextEditor::ColourIds::textColourId, lnf->colors().edit_text);
+  setColour(TextEditor::ColourIds::highlightedTextColourId, lnf->colors().edit_text);
 }
 
 last_tweaked_editor::
@@ -354,7 +355,7 @@ preset_button::extra_state_changed()
 theme_button::
 theme_button(plugin_gui* gui) :
 _gui(gui), _themes(gui->gui_state()->desc().themes())
-{ 
+{  
   auto const* topo = gui->gui_state()->desc().plugin;
   std::string default_theme = topo->gui.default_theme;
   std::string theme = user_io_load_list(topo->vendor, topo->full_name, user_io::base, user_state_theme_key, default_theme, _themes);
@@ -387,6 +388,8 @@ tuning_mode_button(plugin_gui* gui) :
 _gui(gui)
 { 
   setButtonText("Tuning");
+
+  // tuning is not implemented for fx and crashes when trying to change
   setEnabled(gui->gui_state()->desc().plugin->type == plugin_type::synth);
 
   // fill the list
@@ -578,10 +581,48 @@ param_component::mouseUp(MouseEvent const& evt)
   });
 }
 
+static void
+get_module_output_label_names(
+  module_desc const& desc, std::string& full_name, std::string& display_name)
+{
+  full_name = desc.module->info.tag.full_name;
+  display_name = desc.module->info.tag.menu_display_name;
+  if (desc.module->info.slot_count > 1)
+  {
+    std::string slot = std::to_string(desc.info.slot + 1);
+    full_name += " " + slot;
+    display_name += " " + slot;
+  }
+}
+
+static std::string
+get_longest_module_name(plugin_gui* gui)
+{
+  float w = 0;
+  juce::Font font;
+  std::string result;
+  std::string full_name;
+  std::string display_name;
+  auto const& desc = gui->gui_state()->desc();
+
+  for (int i = 0; i < desc.modules.size(); i++)
+    if(desc.modules[i].module->gui.visible)
+    {
+      get_module_output_label_names(desc.modules[i], full_name, display_name);
+      float name_w = font.getStringWidth(display_name);
+      if (name_w > w)
+      {
+        w = name_w;
+        result = display_name;
+      }
+    }
+  return result;
+}
+
 module_name_label::
 module_name_label(plugin_gui* gui, module_desc const* module, param_desc const* param, lnf* lnf) :
 param_component(gui, module, param), 
-autofit_label(lnf, param->param->gui.label_reference_text)
+autofit_label(lnf, get_longest_module_name(gui))
 { init(); }
 
 void
@@ -594,14 +635,9 @@ module_name_label::own_param_changed(plain_value plain)
     setText("", dontSendNotification);
     return;
   }
-  std::string full_name = desc.module->info.tag.full_name;
-  std::string display_name = desc.module->info.tag.display_name;
-  if(desc.module->info.slot_count > 1)
-  {
-    std::string slot = std::to_string(desc.info.slot + 1);
-    full_name += " " + slot;
-    display_name += " " + slot;
-  }
+  std::string full_name;
+  std::string display_name;
+  get_module_output_label_names(desc, full_name, display_name);
   setTooltip(full_name);
   setText(display_name, dontSendNotification);
 }
@@ -652,8 +688,9 @@ param_component(gui, module, param), Slider()
   case gui_edit_type::knob: setSliderStyle(Slider::RotaryVerticalDrag); break;
   case gui_edit_type::vslider: setSliderStyle(Slider::LinearVertical); break;
   case gui_edit_type::hslider: setSliderStyle(Slider::LinearHorizontal); break;
+  case gui_edit_type::output_meter: setSliderStyle(Slider::LinearHorizontal); break;
   default: assert(false); break;
-  }
+  }  
 
   // parameter modulation indicators
   if (param->param->dsp.can_modulate(param->info.slot))
@@ -748,8 +785,12 @@ autofit_combobox(lnf, param->param->gui.edit_type == gui_edit_type::autofit_list
 void 
 param_combobox::own_param_changed(plain_value plain)
 {
+  std::string value;
   setSelectedId(plain.step() + 1 - _param->param->domain.min, dontSendNotification);
-  std::string value = _param->param->domain.plain_to_text(false, plain);
+  if(_param->param->domain.type == domain_type::item)
+    value = _param->param->domain.plain_to_item_tooltip(plain);
+  else
+    value = _param->param->domain.plain_to_text(false, plain);
   setTooltip(_param->info.name + ": " + value);
 }
 
