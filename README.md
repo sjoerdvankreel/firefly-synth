@@ -12,6 +12,17 @@ Downloads have moved to the [releases](https://github.com/sjoerdvankreel/firefly
 MacOS Note: if you get a warning like "archive damaged" or "failed to open" etc, it's probably this:
 [https://syntheway.com/fix-au-vst-vst3-macos.htm](https://syntheway.com/fix-au-vst-vst3-macos.htm)
 
+# Legal
+
+<table>
+  <tr>
+    <td><img alt="CLAP logo" src="static/clap_logo.png"/></td>
+    <td><a href="https://github.com/free-audio/clap">https://github.com/free-audio/clap</a></td>
+    <td><img alt="VST logo" src="static/vst_logo.png"/></td>
+    <td>VST is a trademark of Steinberg Media Technologies GmbH, registered in Europe and other countries.</td>
+  </tr>
+</table>
+
 # About
 
 A semi-modular software synthesizer and fx plugin.
@@ -30,15 +41,6 @@ See [modulation_visualization_demo.mp4](https://github.com/sjoerdvankreel/firefl
 ![Screenshot](static/screenshot_synth_cold.png)
 ![Screenshot](static/screenshot_fx_hot.png)
 ![Screenshot](static/screenshot_fx_cold.png)
-
-<table>
-  <tr>
-    <td><img alt="CLAP logo" src="static/clap_logo.png"/></td>
-    <td><a href="https://github.com/free-audio/clap">https://github.com/free-audio/clap</a></td>
-    <td><img alt="VST logo" src="static/vst_logo.png"/></td>
-    <td>VST is a trademark of Steinberg Media Technologies GmbH, registered in Europe and other countries.</td>
-  </tr>
-</table>
 
 # Install
 Extract the zipped folder and copy/replace it (the entire folder, not just the .dll/.so/.dylib!) to your VST3/CLAP folder:
