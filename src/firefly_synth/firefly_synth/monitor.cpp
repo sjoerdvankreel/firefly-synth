@@ -17,12 +17,11 @@ enum {
 
 class monitor_engine: 
 public module_engine {
-  bool const _is_fx;
 public:
+  monitor_engine() = default;
   void process(plugin_block& block) override;
   void reset(plugin_block const*) override {}
   PB_PREVENT_ACCIDENTAL_COPY(monitor_engine);
-  monitor_engine(bool is_fx) : _is_fx(is_fx) {}
 };
 
 module_topo
@@ -36,7 +35,7 @@ monitor_topo(int section, gui_position const& pos, int polyphony, bool is_fx)
   result.info.description = "Monitor module with active voice count, CLAP threadpool thread count, global output gain, overall CPU usage and highest-module CPU usage.";
   
   result.gui.enable_tab_menu = false;
-  result.engine_factory = [is_fx](auto const&, int, int) { return std::make_unique<monitor_engine>(is_fx); };
+  result.engine_factory = [](auto const&, int, int) { return std::make_unique<monitor_engine>(); };
 
   gui_dimension dimension = { { 1, 1 } , { 
     gui_dimension::auto_size_all, gui_dimension::auto_size_all, 
@@ -110,16 +109,14 @@ monitor_engine::process(plugin_block& block)
       max_out = std::max(max_out, block.out->host_audio[c][f]);
 
   auto const& params = block.plugin_desc_.plugin->modules[module_monitor].params;
-  block.set_out_param(param_hi_mod, 0, block.out->high_cpu_module);
-  block.set_out_param(param_gain, 0, std::clamp((double)max_out, 0.0, params[param_gain].domain.max));
-  block.set_out_param(param_cpu, 0, std::clamp(block.out->cpu_usage, 0.0, params[param_cpu].domain.max));
-  block.set_out_param(param_hi_mod_cpu, 0, std::clamp(block.out->high_cpu_module_usage, 0.0, params[param_hi_mod_cpu].domain.max));
-  
-  if (_is_fx) return;
   block.set_out_param(param_voices, 0, block.out->voice_count);
   block.set_out_param(param_threads, 0, block.out->thread_count);
   block.set_out_param(param_drain, 0, block.out->voices_drained);
   block.set_out_param(param_mts_status, 0, block.out->mts_esp_status);
+  block.set_out_param(param_hi_mod, 0, block.out->high_cpu_module);
+  block.set_out_param(param_gain, 0, std::clamp((double)max_out, 0.0, params[param_gain].domain.max));
+  block.set_out_param(param_cpu, 0, std::clamp(block.out->cpu_usage, 0.0, params[param_cpu].domain.max));
+  block.set_out_param(param_hi_mod_cpu, 0, std::clamp(block.out->high_cpu_module_usage, 0.0, params[param_hi_mod_cpu].domain.max));
 }
 
 }
