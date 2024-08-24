@@ -12,6 +12,16 @@ Downloads have moved to the [releases](https://github.com/sjoerdvankreel/firefly
 MacOS Note: if you get a warning like "archive damaged" or "failed to open" etc, it's probably this:
 [https://syntheway.com/fix-au-vst-vst3-macos.htm](https://syntheway.com/fix-au-vst-vst3-macos.htm)
 
+# About
+
+A semi-modular software synthesizer and fx plugin.
+It's basically [InfernalSynth](https://github.com/sjoerdvankreel/infernal-synth)'s big brother.
+
+- Changelog: [changelog.md](changelog.md).
+- Parameter reference: [param_reference.html](https://htmlpreview.github.io/?https://github.com/sjoerdvankreel/firefly-synth/blob/main/param_reference.html).
+- KVR: [https://www.kvraudio.com/product/firefly-synth-by-sjoerdvankreel](https://www.kvraudio.com/product/firefly-synth-by-sjoerdvankreel)
+- Manual: [https://github.com/sjoerdvankreel/firefly-synth/blob/main/manual.md](https://github.com/sjoerdvankreel/firefly-synth/blob/main/manual.md)
+
 # Legal
 
 <table>
@@ -22,16 +32,6 @@ MacOS Note: if you get a warning like "archive damaged" or "failed to open" etc,
     <td>VST is a trademark of Steinberg Media Technologies GmbH, registered in Europe and other countries.</td>
   </tr>
 </table>
-
-# About
-
-A semi-modular software synthesizer and fx plugin.
-It's basically [InfernalSynth](https://github.com/sjoerdvankreel/infernal-synth)'s big brother.
-
-- Changelog: [changelog.md](changelog.md).
-- Parameter reference: [param_reference.html](https://htmlpreview.github.io/?https://github.com/sjoerdvankreel/firefly-synth/blob/main/param_reference.html).
-- KVR: [https://www.kvraudio.com/product/firefly-synth-by-sjoerdvankreel](https://www.kvraudio.com/product/firefly-synth-by-sjoerdvankreel)
-- Manual: [https://github.com/sjoerdvankreel/firefly-synth/blob/main/manual.md](https://github.com/sjoerdvankreel/firefly-synth/blob/main/manual.md)
 
 # Screenshots / Demo video
 
