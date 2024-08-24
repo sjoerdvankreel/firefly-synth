@@ -389,6 +389,9 @@ _gui(gui)
 { 
   setButtonText("Tuning");
 
+  // tuning is not implemented for fx and crashes when trying to change
+  setEnabled(gui->gui_state()->desc().plugin->type == plugin_type::synth);
+
   // fill the list
   std::vector<menu_button_item> button_items;
   auto mode_items = engine_tuning_mode_items();
