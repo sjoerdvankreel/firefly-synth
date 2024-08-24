@@ -40,7 +40,7 @@ extern int const global_in_param_uni_env_dtn;
 extern int const global_in_param_uni_lfo_phase;
 extern int const global_in_param_uni_lfo_dtn;
 
-extern int const global_in_param_tuning_mode; // move in the gui TODO
+extern int const global_in_param_tuning_mode;
 extern int const global_smoothing_param_auto_smooth;
 extern int const global_smoothing_param_midi_smooth;
 extern int const global_smoothing_param_tempo_smooth;
@@ -218,9 +218,9 @@ plugin_base::module_topo global_in_topo(int section, bool is_fx, plugin_base::gu
 plugin_base::module_topo fx_topo(int section, plugin_base::gui_position const& pos, bool global, bool is_fx);
 plugin_base::module_topo lfo_topo(int section, plugin_base::gui_position const& pos, bool global, bool is_fx);
 plugin_base::module_topo monitor_topo(int section, plugin_base::gui_position const& pos, int polyphony, bool is_fx);
-plugin_base::module_topo audio_out_topo(int section, plugin_base::gui_position const& pos, bool global, bool is_fx);
+plugin_base::module_topo audio_out_topo(int section, plugin_base::gui_position const& pos, bool global);
 plugin_base::module_topo osc_osc_matrix_topo(int section, plugin_base::gui_position const& pos, plugin_base::plugin_topo const* plugin);
-plugin_base::module_topo global_smoothing_topo(std::string const& vendor, std::string const& full_name, int section, bool is_fx, plugin_base::gui_position const& pos);
+plugin_base::module_topo global_smoothing_topo(std::string const& vendor, std::string const& full_name, int section, plugin_base::gui_position const& pos);
 plugin_base::module_topo audio_audio_matrix_topo(int section, plugin_base::gui_position const& pos, bool global, bool is_fx,
   std::vector<plugin_base::module_topo const*> const& sources, std::vector<plugin_base::module_topo const*> const& targets);
 plugin_base::module_topo cv_matrix_topo(int section, plugin_base::gui_position const& pos, bool cv, bool global, bool is_fx,

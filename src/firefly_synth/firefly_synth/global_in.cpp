@@ -33,7 +33,7 @@ extern int const global_in_param_uni_env_dtn = param_uni_env_dtn;
 extern int const global_in_param_uni_lfo_dtn = param_uni_lfo_dtn;
 extern int const global_in_param_uni_lfo_phase = param_uni_lfo_phase;
 extern int const global_in_param_uni_osc_phase = param_uni_osc_phase;
-extern int const global_in_param_tuning_mode = param_tuning_mode; // TODO move visually to the module
+extern int const global_in_param_tuning_mode = param_tuning_mode;
 
 class global_in_engine :
 public module_engine {
@@ -60,11 +60,6 @@ global_in_topo(int section, bool is_fx, gui_position const& pos)
 {
   std::vector<int> row_distribution = { 1, 1 };
   std::vector<int> column_distribution = { 37, 27, 26, 44, 24, 22, 28, 76 };
-  if(is_fx) // TODO
-  {
-    row_distribution = { 1 };
-    column_distribution = { 64, 26, 30, 38, 73, 53 };
-  }
   module_topo result(make_module(
     make_topo_info_basic("{E22B3B9D-2337-4DE5-AA34-EB3351948D6A}", "Global", module_global_in, 1),
     make_module_dsp(module_stage::input, module_output::cv, 0, {
@@ -85,14 +80,6 @@ global_in_topo(int section, bool is_fx, gui_position const& pos)
       gui_dimension::auto_size_all, 1,
       gui_dimension::auto_size_all, 1, }), 
       gui_label_edit_cell_split::horizontal);
-  if(is_fx) section_aux_gui = make_param_section_gui({ 0, 0, 1, 4 }, gui_dimension({ 1 }, { 
-      gui_dimension::auto_size_all, 1,
-      gui_dimension::auto_size_all, 1,
-      gui_dimension::auto_size_all, 1,
-      gui_dimension::auto_size_all, 1,
-      gui_dimension::auto_size_all, 1,
-      gui_dimension::auto_size_all, 1, }),
-      gui_label_edit_cell_split::horizontal);
   result.sections.emplace_back(make_param_section(section_aux,
     make_topo_tag_basic("{BB12B605-4EEF-4FEA-9F2C-FACEEA39644A}", "Aux"), section_aux_gui));
   auto& aux = result.params.emplace_back(make_param(
@@ -105,31 +92,27 @@ global_in_topo(int section, bool is_fx, gui_position const& pos)
 
   auto linked_gui = make_param_section_gui(
     { 0, 3, 2, 1 }, gui_dimension({ 1, 1 }, { gui_dimension::auto_size_all, 1 }), gui_label_edit_cell_split::horizontal);
-  if(is_fx) linked_gui = make_param_section_gui(
-    { 0, 4, 1, 2 }, gui_dimension({ 1 }, { 1, 1 }), gui_label_edit_cell_split::no_split);
   linked_gui.merge_with_section = section_linked_pbrange;
   result.sections.emplace_back(make_param_section(section_linked,
     make_topo_tag_basic("{56FD2FEB-3084-4E28-B56C-06D31406EB42}", "Linked"), linked_gui));
   auto& pitch_bend = result.params.emplace_back(make_param(
     make_topo_info("{D1B334A6-FA2F-4AE4-97A0-A28DD0C1B48D}", true, "Pitch Bend", "Pitch Bend", "PB", param_pb, 1),
     make_param_dsp_midi({ module_midi, 0, midi_source_pb }), make_domain_percentage(-1, 1, 0, 0, true),
-    make_param_gui_single(section_linked, is_fx ? gui_edit_type::hslider : gui_edit_type::knob, { 0, 0 }, // todo fx
+    make_param_gui_single(section_linked, gui_edit_type::knob, { 0, 0 },
     make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   pitch_bend.info.description = "Linked to MIDI pitch bend, updates on incoming MIDI events.";
   pitch_bend.gui.alternate_drag_output_id = result.dsp.outputs[output_pb].info.tag.id;
   auto& mod_wheel = result.params.emplace_back(make_param(
     make_topo_info("{7696305C-28F3-4C54-A6CA-7C9DB5635153}", true, "Mod Wheel", "Mod Wheel", "Mod", param_mod, 1),
     make_param_dsp_midi({ module_midi, 0, 1 }), make_domain_percentage_identity(0, 0, true),
-    make_param_gui_single(section_linked, is_fx ? gui_edit_type::hslider : gui_edit_type::knob, { 1, 0 },
+    make_param_gui_single(section_linked, gui_edit_type::knob, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   mod_wheel.info.description = "Linked to MIDI mod wheel, updates on incoming MIDI events.";
   mod_wheel.gui.alternate_drag_output_id = result.dsp.outputs[output_mod].info.tag.id;
 
-  // if(is_fx) return result; TODO cannot bc merge section
-
   auto& pb_range_section = result.sections.emplace_back(make_param_section(section_linked_pbrange,
     make_topo_tag_basic("{12EAD382-DF92-486C-A451-E19EC1C009BD}", "Linked PB Range"),
-    make_param_section_gui({ 0, 4, is_fx? 1: 2, 1}, gui_dimension({1, 1}, {1}),
+    make_param_section_gui({ 0, 4, 2, 1}, gui_dimension({1, 1}, {1}),
       gui_label_edit_cell_split::vertical)));
   pb_range_section.gui.merge_with_section = section_linked;
   auto& pb_range = result.params.emplace_back(make_param(
@@ -141,7 +124,7 @@ global_in_topo(int section, bool is_fx, gui_position const& pos)
 
   auto& uni_count = result.sections.emplace_back(make_param_section(section_uni_count,
     make_topo_tag_basic("{550AAF78-C95A-4D4E-814C-0C5CC26C6457}", "Unison Voices"),
-    make_param_section_gui({ 0, 5, is_fx ? 1 : 2, 1 }, gui_dimension({ 1, 1 }, { 1 }), gui_label_edit_cell_split::vertical)));
+    make_param_section_gui({ 0, 5, 2, 1 }, gui_dimension({ 1, 1 }, { 1 }), gui_label_edit_cell_split::vertical)));
   uni_count.gui.merge_with_section = section_uni_prms;
   auto& uni_voices = result.params.emplace_back(make_param(
     make_topo_info("{C2B06E63-0283-4564-BABB-F20D9B30AD68}", true, "Global Unison Voices", "Unison", "Uni", param_uni_voices, 1),
@@ -153,7 +136,7 @@ global_in_topo(int section, bool is_fx, gui_position const& pos)
 
   auto& uni_params = result.sections.emplace_back(make_param_section(section_uni_prms,
     make_topo_tag_basic("{7DCA43C8-CD48-4414-9017-EC1B982281FF}", "Global Unison Params"),
-    make_param_section_gui({ 0, 6, is_fx? 1: 2, 2 }, gui_dimension({ 1, 1 }, { 
+    make_param_section_gui({ 0, 6, 2, 2 }, gui_dimension({ 1, 1 }, { 
       gui_dimension::auto_size_all, 1, gui_dimension::auto_size_all, 1, gui_dimension::auto_size_all, 1 }), 
         gui_label_edit_cell_split::horizontal)));
   uni_params.gui.merge_with_section = section_uni_count;
@@ -205,16 +188,12 @@ global_in_topo(int section, bool is_fx, gui_position const& pos)
   uni_spread.info.description = "Global unison stereo spread.";
   uni_spread.gui.bindings.enabled.bind_params({ param_uni_voices }, [](auto const& vs) { return vs[0] > 1; });
   uni_spread.gui.bindings.global_enabled.bind_param(module_voice_in, voice_in_param_mode, [](int v) { return v == engine_voice_mode_poly; });
-
-  if (is_fx) return result;
-
   auto& tuning_mode_audio_param = result.params.emplace_back(make_param(
     make_topo_info("{28C619C2-C04E-4BD6-8D84-89667E1A5659}", true, "Tuning Mode", "Tuning Mode", "Tuning Mode", param_tuning_mode, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_item(engine_tuning_mode_items(), "On Note Before Mod"), // default must be same as extra_state
     make_param_gui_none()));
   tuning_mode_audio_param.info.is_per_instance = true;
   tuning_mode_audio_param.info.description = "Per-instance tuning parameter (readonly).";
-
   return result;
 }
 

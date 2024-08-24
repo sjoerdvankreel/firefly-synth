@@ -66,7 +66,7 @@ make_plugin_dimension(bool is_fx, plugin_topo_gui_theme_settings const& settings
   gui_dimension result;
   result.column_sizes = { synth_first_column_size, synth_second_column_size, 127, 34, 64, 64 };
   int height = settings.get_default_width(is_fx) * settings.get_aspect_ratio_height(is_fx) / settings.get_aspect_ratio_width(is_fx);
-  std::vector<gui_vertical_section_size> section_vsizes = { { true, 1 }, { true, is_fx? 1.0f: 2.0f }, { true, 2 }, { true, 2 } };
+  std::vector<gui_vertical_section_size> section_vsizes = { { true, 1 }, { true, 2 }, { true, 2 }, { true, 2 } };
   if (!is_fx) section_vsizes.insert(section_vsizes.end(), { { true, 1 }, { true, 2 }, { true, 2 }, { true, 2 }, { true, 2 } });
   result.row_sizes = gui_vertical_distribution(height, settings.get_font_height(), section_vsizes);
   return result;
@@ -205,7 +205,7 @@ make_title_section(plugin_gui* gui, lnf* lnf, component_store store, bool is_fx)
   std::string name = is_fx? FF_SYNTH_FX_NAME: FF_SYNTH_INST_NAME;
   for(int i = 0; i < name.size(); i++) name[i] = std::toupper(name[i]); 
   auto& grid = store_component<grid_component>(store, gui_dimension({ { 2, 1 }, { synth_first_column_size, synth_second_column_size } }), 2, 2, 0, 1);
-  auto& title_label = store_component<autofit_label>(store, lnf, name, true, is_fx? 14: 15);
+  auto& title_label = store_component<autofit_label>(store, lnf, name, true, 15);
   title_label.setColour(Label::ColourIds::textColourId, colors.control_text);
   title_label.setJustificationType(Justification::left);
   grid.add(title_label, { 0, 0, 1, 1 });
@@ -477,11 +477,11 @@ synth_topo(bool is_fx, std::string const& full_name)
   result->modules[module_vlfo] = lfo_topo(is_fx ? module_section_hidden : module_section_vlfo, { 0, 0 }, false, is_fx);
   result->modules[module_osc] = osc_topo(is_fx ? module_section_hidden : module_section_osc, { 0, 0 });
   result->modules[module_global_in] = global_in_topo(module_section_global_in, is_fx, { 0, 0 });
-  result->modules[module_global_smoothing] = global_smoothing_topo(result->vendor, result->full_name, module_section_global_in, is_fx, { 0, 0 });
+  result->modules[module_global_smoothing] = global_smoothing_topo(result->vendor, result->full_name, module_section_global_in, { 0, 0 });
   result->modules[module_voice_on_note] = voice_on_note_topo(result.get(), module_section_hidden); // must be after all global cv  
   result->modules[module_voice_in] = voice_in_topo(is_fx ? module_section_hidden : module_section_voice_in, { 0, 0 }); // must be after all cv
-  result->modules[module_voice_out] = audio_out_topo(is_fx ? module_section_hidden : module_section_voice_out, { 0, 0 }, false, is_fx);
-  result->modules[module_global_out] = audio_out_topo(module_section_global_out, { 0, 0 }, true, is_fx);
+  result->modules[module_voice_out] = audio_out_topo(is_fx ? module_section_hidden : module_section_voice_out, { 0, 0 }, false);
+  result->modules[module_global_out] = audio_out_topo(module_section_global_out, { 0, 0 }, true);
   result->modules[module_monitor] = monitor_topo(module_section_monitor, { 0, 0 }, result->audio_polyphony, is_fx);
   result->modules[module_osc_osc_matrix] = osc_osc_matrix_topo(is_fx ? module_section_hidden : module_section_voice_matrices, { 0, 0 }, result.get());
   result->modules[module_gaudio_audio_matrix] = audio_audio_matrix_topo(module_section_global_matrices, { 0, 0 }, true, is_fx,

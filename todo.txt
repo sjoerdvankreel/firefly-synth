@@ -62,6 +62,7 @@ V hot/cold
 * drop the smoothing module, make the settings module
 * fix the todos
 * check if global header is extended
+* move some params from global in/smooth to the settings module (including tuning)
 
 autobuilds:
 * ask paul

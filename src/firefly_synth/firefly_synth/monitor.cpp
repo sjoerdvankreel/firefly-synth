@@ -43,11 +43,9 @@ monitor_topo(int section, gui_position const& pos, int polyphony, bool is_fx)
     gui_dimension::auto_size_all, gui_dimension::auto_size_all,
     gui_dimension::auto_size_all, gui_dimension::auto_size_all,
     gui_dimension::auto_size_all, 1 } };
-  if(is_fx)  dimension = { { 1 } , { gui_dimension::auto_size_all, 1, gui_dimension::auto_size_all, 1 } }; // TODO
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag_basic("{988E6A84-A012-413C-B33B-80B8B135D203}", "Main"),
     make_param_section_gui({ 0, 0 }, dimension, gui_label_edit_cell_split::horizontal)));
-
   auto& mts_status = result.params.emplace_back(make_param(
     make_topo_info_basic("{4388D544-4208-4839-A73C-2C641D915BD7}", "MTS-ESP", param_mts_status, 1),
     make_param_dsp_output(), make_domain_toggle(false),
@@ -83,7 +81,7 @@ monitor_topo(int section, gui_position const& pos, int polyphony, bool is_fx)
   auto& hi_module = result.params.emplace_back(make_param(
     make_topo_info_basic("{BE8AF913-E888-4A0E-B674-8151AF1B7D65}", "Hi Module", param_hi_mod, 1),
     make_param_dsp_output(), make_domain_step(0, 999, 0, 0),
-    make_param_gui_single(section_main, gui_edit_type::output_module_name, { 1, 4 }, // todo fx
+    make_param_gui_single(section_main, gui_edit_type::output_module_name, { 1, 4 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   hi_module.info.description = "Module that used the most CPU relative to total usage.";
 
@@ -96,13 +94,10 @@ monitor_topo(int section, gui_position const& pos, int polyphony, bool is_fx)
   auto& cpu = result.params.emplace_back(make_param(
     make_topo_info_basic("{55919A34-BF81-4EDF-8222-F0F0BE52DB8E}", "CPU", param_cpu, 1),
     make_param_dsp_output(), make_domain_percentage(0, 9.99, 0, 0, false),
-    make_param_gui_single(section_main, gui_edit_type::output_meter, { 1, 6 }, // todo fx
+    make_param_gui_single(section_main, gui_edit_type::output_meter, { 1, 6 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   cpu.info.description = std::string("CPU usage relative to last processing block length. ") +
     "For example, if it took 1 ms to render a 5 ms block, this will be 20%.";
-
-  // if (is_fx) return result; // TODO
-
   return result;
 }
 
