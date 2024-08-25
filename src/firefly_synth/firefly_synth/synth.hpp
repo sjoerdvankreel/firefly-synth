@@ -26,19 +26,19 @@ inline int const on_voice_random_count = 3;
 inline int const on_voice_random_output_index = 0;
 
 // some parameters need to be exposed to modules other than the one that declares them
+extern int const global_in_param_pb_range;
 extern int const osc_param_type;
 extern int const osc_param_uni_voices;
 extern int const voice_in_output_pitch_offset;
 extern int const voice_in_param_mode;
 extern int const voice_in_param_oversmp;
-extern int const global_in_param_pb_range;
-extern int const global_in_param_uni_dtn;
-extern int const global_in_param_uni_sprd;
-extern int const global_in_param_uni_voices;
-extern int const global_in_param_uni_osc_phase;
-extern int const global_in_param_uni_env_dtn;
-extern int const global_in_param_uni_lfo_phase;
-extern int const global_in_param_uni_lfo_dtn;
+extern int const voice_in_param_uni_dtn;
+extern int const voice_in_param_uni_sprd;
+extern int const voice_in_param_uni_voices;
+extern int const voice_in_param_uni_osc_phase;
+extern int const voice_in_param_uni_env_dtn;
+extern int const voice_in_param_uni_lfo_phase;
+extern int const voice_in_param_uni_lfo_dtn;
 
 extern int const global_in_param_tuning_mode;
 extern int const global_smoothing_param_auto_smooth;

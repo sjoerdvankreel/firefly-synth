@@ -45,7 +45,7 @@
 <td>Yes</td>
 <td>Before voice</td>
 <td>1</td>
-<td class='description'>Global CV module with MIDI-linked modwheel and pitchbend, some additional freely-assignable parameters and unison support.</td>
+<td class='description'>Global CV module with MIDI-linked modwheel and pitchbend, and some additional freely-assignable parameters.</td>
 </tr>
 <tr>
 <td><a href='#5'>5</a></td>
@@ -125,7 +125,7 @@
 <td>Yes</td>
 <td>Voice</td>
 <td>1</td>
-<td class='description'>Oscillator common module. Controls portamento, oversampling and base pitch for all oscillators.</td>
+<td class='description'>Oscillator common module. Controls portamento, oversampling and base pitch for all oscillators. Also contains global unison support.</td>
 </tr>
 <tr>
 <td><a href='#15'>15</a></td>
@@ -417,118 +417,6 @@
 </tr>
 <tr>
 <td colspan='11' class='description'>Pitch bend range. Together with Pitch Bend this affects the base pitch of all oscillators.</td>
-</tr>
-<tr>
-<td rowspan='2'>Global Unison Voices</td>
-<td>Unison Voices</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Block</td>
-<td>Automate</td>
-<td>1</td>
-<td>4</td>
-<td>1</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Global unison voice count. Global unison spawns an entire polyphonic synth voice per unison voice. This includes per-voice oscillators, effects, lfo's and envelopes.</td>
-</tr>
-<tr>
-<td rowspan='2'>Global Unison Osc Detune</td>
-<td>Global Unison Params</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Accurate</td>
-<td>Automate</td>
-<td>0 %</td>
-<td>100 %</td>
-<td>33 %</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Global unison voice pitch detune amount.</td>
-</tr>
-<tr>
-<td rowspan='2'>Global Unison Osc Phase Offset</td>
-<td>Global Unison Params</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Block</td>
-<td>Automate</td>
-<td>0 %</td>
-<td>100 %</td>
-<td>0 %</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Global unison voice osc phase offset.</td>
-</tr>
-<tr>
-<td rowspan='2'>Global Unison LFO Detune</td>
-<td>Global Unison Params</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Accurate</td>
-<td>Automate</td>
-<td>0 %</td>
-<td>100 %</td>
-<td>0 %</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Global unison voice LFO detune amount.</td>
-</tr>
-<tr>
-<td rowspan='2'>Global Unison LFO Phase Offset</td>
-<td>Global Unison Params</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Block</td>
-<td>Automate</td>
-<td>0 %</td>
-<td>100 %</td>
-<td>0 %</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Global unison voice LFO phase offset.</td>
-</tr>
-<tr>
-<td rowspan='2'>Global Unison Env Detune</td>
-<td>Global Unison Params</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Block</td>
-<td>Automate</td>
-<td>0 %</td>
-<td>100 %</td>
-<td>0 %</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Global unison voice envelope detune amount.</td>
-</tr>
-<tr>
-<td rowspan='2'>Global Unison Spread</td>
-<td>Global Unison Params</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Accurate</td>
-<td>Automate</td>
-<td>0 %</td>
-<td>100 %</td>
-<td>50 %</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Global unison stereo spread.</td>
 </tr>
 <tr>
 <td rowspan='2'>Tuning Mode</td>
@@ -1945,6 +1833,118 @@
 </tr>
 <tr>
 <td colspan='11' class='description'>Oscillator pitch cents adjustment for all Oscs.</td>
+</tr>
+<tr>
+<td rowspan='2'>Global Unison Voices</td>
+<td>Unison Voices</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Voice</td>
+<td>Automate</td>
+<td>1</td>
+<td>4</td>
+<td>1</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Global unison voice count. Global unison spawns an entire polyphonic synth voice per unison voice. This includes per-voice oscillators, effects, lfo's and envelopes.</td>
+</tr>
+<tr>
+<td rowspan='2'>Global Unison Osc Detune</td>
+<td>Global Unison Params</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Accurate</td>
+<td>Automate</td>
+<td>0 %</td>
+<td>100 %</td>
+<td>33 %</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Global unison voice pitch detune amount.</td>
+</tr>
+<tr>
+<td rowspan='2'>Global Unison Osc Phase Offset</td>
+<td>Global Unison Params</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Voice</td>
+<td>Automate</td>
+<td>0 %</td>
+<td>100 %</td>
+<td>0 %</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Global unison voice osc phase offset.</td>
+</tr>
+<tr>
+<td rowspan='2'>Global Unison LFO Detune</td>
+<td>Global Unison Params</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Accurate</td>
+<td>Automate</td>
+<td>0 %</td>
+<td>100 %</td>
+<td>0 %</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Global unison voice LFO detune amount.</td>
+</tr>
+<tr>
+<td rowspan='2'>Global Unison LFO Phase Offset</td>
+<td>Global Unison Params</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Voice</td>
+<td>Automate</td>
+<td>0 %</td>
+<td>100 %</td>
+<td>0 %</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Global unison voice LFO phase offset.</td>
+</tr>
+<tr>
+<td rowspan='2'>Global Unison Env Detune</td>
+<td>Global Unison Params</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Voice</td>
+<td>Automate</td>
+<td>0 %</td>
+<td>100 %</td>
+<td>0 %</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Global unison voice envelope detune amount.</td>
+</tr>
+<tr>
+<td rowspan='2'>Global Unison Spread</td>
+<td>Global Unison Params</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Accurate</td>
+<td>Automate</td>
+<td>0 %</td>
+<td>100 %</td>
+<td>50 %</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Global unison stereo spread.</td>
 </tr>
 <tr>
 <td rowspan='2'>Pitch</td>

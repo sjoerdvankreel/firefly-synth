@@ -356,7 +356,7 @@ synth_topo(bool is_fx, std::string const& full_name)
     // those voices just like regular polyphonic voices.
     if (graph) return 1;
     if(state.get_plain_at(module_voice_in, 0, voice_in_param_mode, 0).step() != engine_voice_mode_poly) return 1;
-    return state.get_plain_at(module_global_in, 0, global_in_param_uni_voices, 0).step();
+    return state.get_plain_at(module_voice_in, 0, voice_in_param_uni_voices, 0).step();
   };
 
   if(is_fx)

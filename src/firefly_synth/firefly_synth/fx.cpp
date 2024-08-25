@@ -1481,7 +1481,7 @@ fx_engine::process_svf_uni_mode(plugin_block& block,
 
   jarray<float, 1> const* glob_uni_dtn_curve = nullptr;
   if constexpr(GlobalUnison)
-    glob_uni_dtn_curve = &block.state.all_accurate_automation[module_global_in][0][global_in_param_uni_dtn][0];
+    glob_uni_dtn_curve = &block.state.all_accurate_automation[module_voice_in][0][voice_in_param_uni_dtn][0];
 
   auto const& res_curve = *modulation[this_module][block.module_slot][param_svf_res][0];  
   double kbd_trk_base = _global ? (block.state.last_midi_note == -1 ? midi_middle_c : block.state.last_midi_note) : block.voice->state.note_id_.key;
