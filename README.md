@@ -145,7 +145,6 @@ Windows: the build scripts assume 7zip is installed. It will build fine without,
 - Everyone from [Surge Synth Team](https://surge-synth-team.org/) microtuning discord channel for helping out with MTS-ESP support.
 
 # Credits
-- Infernal theme artwork by Dante Cyberman: [https://www.deviantart.com/dantecyberman](https://www.deviantart.com/dantecyberman).
 - Contains soft clippers by [Sean Enderby and Zlatko Baracskai](https://dafx.de/paper-archive/2012/papers/dafx12_submission_45.pdf).
 - Contains a slightly adapted implementation of [Jezar's Freeverb](https://github.com/sinshu/freeverb).
 - Contains a slightly adapted implementation of the [Karplus-Strong algorithm](https://blog.demofox.org/2016/06/16/synthesizing-a-pluked-string-sound-with-the-karplus-strong-algorithm).
