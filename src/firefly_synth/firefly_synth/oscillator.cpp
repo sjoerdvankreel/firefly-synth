@@ -734,7 +734,7 @@ osc_engine::real_reset(plugin_block& block, cv_audio_matrix_mixdown const* modul
     // Adjust phase for global unison.
     if (block.voice->state.sub_voice_count > 1)
     {
-      float glob_uni_phs_offset = (*(*modulation)[module_voice_in][0][voice_in_param_uni_osc_phase][0])[0];
+      float glob_uni_phs_offset = block.state.all_block_automation[module_voice_in][0][voice_in_param_uni_osc_phase][0].real();
       float voice_pos = (float)block.voice->state.sub_voice_index / (block.voice->state.sub_voice_count - 1.0f);
       _ref_phases[v] += voice_pos * glob_uni_phs_offset;
       _ref_phases[v] -= (int)_ref_phases[v];
