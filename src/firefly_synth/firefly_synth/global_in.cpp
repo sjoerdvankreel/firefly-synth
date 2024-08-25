@@ -16,9 +16,9 @@ namespace firefly_synth {
 
 static int const aux_count = 6;
 
+enum { section_aux, section_linked };
 enum { output_aux, output_mod, output_pb };
-enum { param_aux, param_pb, param_mod, param_pb_range, param_tuning_mode, param_count };
-enum { section_aux, section_linked, section_linked_pbrange };
+enum { param_aux, param_mod, param_pb, param_pb_range, param_tuning_mode, param_count }; // todo move tunmode
 
 // we provide the buttons, everyone else needs to implement it
 extern int const global_in_param_pb_range = param_pb_range;
@@ -47,7 +47,7 @@ render_graph(
 module_topo
 global_in_topo(int section, bool is_fx, gui_position const& pos)
 {
-  std::vector<int> row_distribution = { 1, 1 };
+  std::vector<int> row_distribution = { 1 };
   std::vector<int> column_distribution = { 37, 27, 26, 44, 24, 22, 28, 76 };
   module_topo result(make_module(
     make_topo_info_basic("{E22B3B9D-2337-4DE5-AA34-EB3351948D6A}", "Global", module_global_in, 1),
@@ -64,10 +64,13 @@ global_in_topo(int section, bool is_fx, gui_position const& pos)
   result.gui.menu_handler_factory = make_cv_routing_menu_handler;
   result.engine_factory = [](auto const&, int, int) { return std::make_unique<global_in_engine>(); };
 
-  auto section_aux_gui = make_param_section_gui({ 0, 0, 2, 5 }, gui_dimension({ 1, 1 }, {
+  auto section_aux_gui = make_param_section_gui({ 0, 0, 1, 5 }, gui_dimension({ 1 }, {
       gui_dimension::auto_size_all, 1,
       gui_dimension::auto_size_all, 1,
-      gui_dimension::auto_size_all, 1, }), 
+      gui_dimension::auto_size_all, 1,
+      gui_dimension::auto_size_all, 1,
+      gui_dimension::auto_size_all, 1,
+      gui_dimension::auto_size_all, 1 }),
       gui_label_edit_cell_split::horizontal);
   result.sections.emplace_back(make_param_section(section_aux,
     make_topo_tag_basic("{BB12B605-4EEF-4FEA-9F2C-FACEEA39644A}", "Aux"), section_aux_gui));
@@ -78,40 +81,38 @@ global_in_topo(int section, bool is_fx, gui_position const& pos)
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   aux.info.description = "Auxilliary controls to be used through automation and the CV matrices.";
   aux.gui.alternate_drag_output_id = result.dsp.outputs[output_aux].info.tag.id;
+  aux.gui.display_formatter = [](auto const& desc) { 
+    return desc.info.slot == 0 ? desc.info.name : std::to_string(desc.info.slot + 1); };
 
   auto linked_gui = make_param_section_gui(
-    { 0, 5, 2, 1 }, gui_dimension({ 1, 1 }, { gui_dimension::auto_size_all, 1 }), gui_label_edit_cell_split::horizontal);
-  linked_gui.merge_with_section = section_linked_pbrange;
+    { 0, 5, 1, 3 }, gui_dimension({ 1 }, { 
+      gui_dimension::auto_size_all, gui_dimension::auto_size_all, gui_dimension::auto_size_all, 
+      gui_dimension::auto_size_all, gui_dimension::auto_size_all, 1 }), gui_label_edit_cell_split::horizontal);
   result.sections.emplace_back(make_param_section(section_linked,
     make_topo_tag_basic("{56FD2FEB-3084-4E28-B56C-06D31406EB42}", "Linked"), linked_gui));
-  auto& pitch_bend = result.params.emplace_back(make_param(
-    make_topo_info("{D1B334A6-FA2F-4AE4-97A0-A28DD0C1B48D}", true, "Pitch Bend", "Pitch Bend", "PB", param_pb, 1),
-    make_param_dsp_midi({ module_midi, 0, midi_source_pb }), make_domain_percentage(-1, 1, 0, 0, true),
-    make_param_gui_single(section_linked, gui_edit_type::knob, { 0, 0 },
-    make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  pitch_bend.info.description = "Linked to MIDI pitch bend, updates on incoming MIDI events.";
-  pitch_bend.gui.alternate_drag_output_id = result.dsp.outputs[output_pb].info.tag.id;
   auto& mod_wheel = result.params.emplace_back(make_param(
     make_topo_info("{7696305C-28F3-4C54-A6CA-7C9DB5635153}", true, "Mod Wheel", "Mod Wheel", "Mod", param_mod, 1),
     make_param_dsp_midi({ module_midi, 0, 1 }), make_domain_percentage_identity(0, 0, true),
-    make_param_gui_single(section_linked, gui_edit_type::knob, { 1, 0 },
+    make_param_gui_single(section_linked, gui_edit_type::knob, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   mod_wheel.info.description = "Linked to MIDI mod wheel, updates on incoming MIDI events.";
   mod_wheel.gui.alternate_drag_output_id = result.dsp.outputs[output_mod].info.tag.id;
-
-  auto& pb_range_section = result.sections.emplace_back(make_param_section(section_linked_pbrange,
-    make_topo_tag_basic("{12EAD382-DF92-486C-A451-E19EC1C009BD}", "Linked PB Range"),
-    make_param_section_gui({ 0, 6, 2, 2 }, gui_dimension({1, 1}, {1}),
-      gui_label_edit_cell_split::vertical)));
-  pb_range_section.gui.merge_with_section = section_linked;
+  auto& pitch_bend = result.params.emplace_back(make_param(
+    make_topo_info("{D1B334A6-FA2F-4AE4-97A0-A28DD0C1B48D}", true, "Pitch Bend", "Pitch Bend", "PB", param_pb, 1),
+    make_param_dsp_midi({ module_midi, 0, midi_source_pb }), make_domain_percentage(-1, 1, 0, 0, true),
+    make_param_gui_single(section_linked, gui_edit_type::knob, { 0, 2 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
+  pitch_bend.info.description = "Linked to MIDI pitch bend, updates on incoming MIDI events.";
+  pitch_bend.gui.alternate_drag_output_id = result.dsp.outputs[output_pb].info.tag.id;
   auto& pb_range = result.params.emplace_back(make_param(
     make_topo_info("{79B7592A-4911-4B04-8F71-5DD4B2733F4F}", true, "Pitch Bend Range", "Range", "PB Range", param_pb_range, 1),
     make_param_dsp_block(param_automate::automate), make_domain_step(1, 24, 12, 0),
-    make_param_gui_single(section_linked_pbrange, gui_edit_type::list, { 0, 0 },
-      make_label(gui_label_contents::name, gui_label_align::top, gui_label_justify::center))));
+    make_param_gui_single(section_linked, gui_edit_type::list, { 0, 4 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   pb_range.info.description = "Pitch bend range. Together with Pitch Bend this affects the base pitch of all oscillators.";
   pb_range.gui.bindings.enabled.bind_slot([is_fx](int) { return !is_fx; });
 
+  // todo move to settings
   auto& tuning_mode_audio_param = result.params.emplace_back(make_param(
     make_topo_info("{28C619C2-C04E-4BD6-8D84-89667E1A5659}", true, "Tuning Mode", "Tuning Mode", "Tuning Mode", param_tuning_mode, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_item(engine_tuning_mode_items(), "On Note Before Mod"), // default must be same as extra_state
