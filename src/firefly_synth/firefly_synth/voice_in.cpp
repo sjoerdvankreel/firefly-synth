@@ -149,7 +149,7 @@ voice_in_topo(int section, gui_position const& pos)
     make_topo_info_basic("{524138DF-1303-4961-915A-3CAABA69D53A}", "Voice", module_voice_in, 1),
     make_module_dsp(module_stage::voice, module_output::cv, scratch_count, {
       make_module_dsp_output(false, make_topo_info_basic("{58E73C3A-CACD-48CC-A2B6-25861EC7C828}", "Pitch", 0, 1)) }),
-    make_module_gui(section, pos, { { 1, 1 }, { 32, 7, 40, 33, 15, 15 } } )));
+    make_module_gui(section, pos, { { 1, 1 }, { 32, 8, 39, 13, 50 } } )));
   result.info.description = "Oscillator common module. Controls portamento, oversampling and base pitch for all oscillators. Also contains global unison support.";
   
   result.graph_renderer = render_graph;
@@ -242,7 +242,7 @@ voice_in_topo(int section, gui_position const& pos)
 
   auto& uni_count = result.sections.emplace_back(make_param_section(section_uni_count,
     make_topo_tag_basic("{550AAF78-C95A-4D4E-814C-0C5CC26C6457}", "Unison Voices"),
-    make_param_section_gui({ 0, 3, 2, 2 }, gui_dimension({ 1, 1 }, { 1 }), gui_label_edit_cell_split::vertical)));
+    make_param_section_gui({ 0, 3, 2, 1 }, gui_dimension({ 1, 1 }, { 1 }), gui_label_edit_cell_split::vertical)));
   uni_count.gui.merge_with_section = section_uni_prms;
   auto& uni_voices = result.params.emplace_back(make_param(
     make_topo_info("{C2B06E63-0283-4564-BABB-F20D9B30AD68}", true, "Global Unison Voices", "Unison", "Uni", param_uni_voices, 1),
@@ -255,7 +255,7 @@ voice_in_topo(int section, gui_position const& pos)
   // TODO make all these params modulatable
   auto& uni_params = result.sections.emplace_back(make_param_section(section_uni_prms,
     make_topo_tag_basic("{7DCA43C8-CD48-4414-9017-EC1B982281FF}", "Global Unison Params"),
-    make_param_section_gui({ 0, 5, 2, 1 }, gui_dimension({ 1, 1 }, {
+    make_param_section_gui({ 0, 4, 2, 1 }, gui_dimension({ 1, 1 }, {
       gui_dimension::auto_size_all, 1, gui_dimension::auto_size_all, 1, gui_dimension::auto_size_all, 1 }),
       gui_label_edit_cell_split::horizontal)));
   uni_params.gui.merge_with_section = section_uni_count;
