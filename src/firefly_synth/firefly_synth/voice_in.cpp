@@ -252,7 +252,6 @@ voice_in_topo(int section, gui_position const& pos)
   uni_voices.info.description = "Global unison voice count. Global unison spawns an entire polyphonic synth voice per unison voice. This includes per-voice oscillators, effects, lfo's and envelopes.";
   uni_voices.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] == engine_voice_mode_poly; });
 
-  // TODO make all these params modulatable
   auto& uni_params = result.sections.emplace_back(make_param_section(section_uni_prms,
     make_topo_tag_basic("{7DCA43C8-CD48-4414-9017-EC1B982281FF}", "Global Unison Params"),
     make_param_section_gui({ 0, 4, 2, 1 }, gui_dimension({ 1, 1 }, {
@@ -261,7 +260,7 @@ voice_in_topo(int section, gui_position const& pos)
   uni_params.gui.merge_with_section = section_uni_count;
   auto& uni_dtn = result.params.emplace_back(make_param(
     make_topo_info("{2F0E199D-7B8A-497E-BED4-BC0FC55F1720}", true, "Global Unison Osc Detune", "Osc Dtn", "Uni Osc Dtn", param_uni_dtn, 1),
-    make_param_dsp_accurate(param_automate::automate), make_domain_percentage_identity(0.33, 0, true),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.33, 0, true),
     make_param_gui_single(section_uni_prms, gui_edit_type::knob, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   uni_dtn.info.description = "Global unison voice pitch detune amount.";
@@ -430,7 +429,7 @@ voice_in_engine::process_voice_mode_tuning_mode_unison(plugin_block& block)
 
   auto const& modulation = get_cv_audio_matrix_mixdown(block, false);
   int global_pb_range = block.state.all_block_automation[module_global_in][0][global_in_param_pb_range][0].step();
-  auto const& glob_uni_dtn_curve = block.state.all_accurate_automation[module_voice_in][0][voice_in_param_uni_dtn][0];
+  auto const& glob_uni_dtn_curve = *(modulation)[module_voice_in][0][voice_in_param_uni_dtn][0];
 
   auto const& pb_curve_norm = *(modulation)[module_voice_in][0][param_pb][0];
   auto& pb_curve = block.state.own_scratch[scratch_pb];
