@@ -25,7 +25,7 @@ ui-vnext:
 V fix the fx version
 V remove global uni params from fx
 V less fx total height
-* move global uni to voice + make it modulatable + conversion
+V move global uni to voice + make it modulatable + conversion
 * less ugly audio graphs
 * move smoothing to somewhere else
 * show clap mod indicator

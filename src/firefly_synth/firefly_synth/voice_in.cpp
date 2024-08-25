@@ -75,7 +75,7 @@ public state_converter
   plugin_desc const* const _desc;
 public:
   voice_in_state_converter(plugin_desc const* const desc) : _desc(desc) {}
-  void post_process_always(load_handler const& handler, plugin_state& new_state) override {}
+  void post_process_always(load_handler const& handler, plugin_state& new_state) override;
   void post_process_existing(load_handler const& handler, plugin_state& new_state) override {}
 
   bool handle_invalid_param_value(
@@ -140,6 +140,34 @@ voice_in_state_converter::handle_invalid_param_value(
       }
 
   return false;
+}
+
+// Global unison params got moved from global in to voice in.
+void
+voice_in_state_converter::post_process_always(load_handler const& handler, plugin_state& new_state)
+{
+  std::string old_value;
+  auto const& modules = new_state.desc().plugin->modules;
+  std::string global_in_id = modules[module_global_in].info.tag.id;
+
+  // All global uni params moved from Global-In to Voice-In.
+  if (handler.old_version() < plugin_version{ 1, 9, 0 })
+  {
+    if (handler.old_param_value(global_in_id, 0, "{C2B06E63-0283-4564-BABB-F20D9B30AD68}", 0, old_value))
+      new_state.set_text_at(module_voice_in, 0, param_uni_voices, 0, old_value);
+    if (handler.old_param_value(global_in_id, 0, "{2F0E199D-7B8A-497E-BED4-BC0FC55F1720}", 0, old_value))
+      new_state.set_text_at(module_voice_in, 0, param_uni_dtn, 0, old_value);
+    if (handler.old_param_value(global_in_id, 0, "{35D94C8A-3986-44EC-A4D6-485ACF199C4C}", 0, old_value))
+      new_state.set_text_at(module_voice_in, 0, param_uni_osc_phase, 0, old_value);
+    if (handler.old_param_value(global_in_id, 0, "{1B61F48D-7995-4295-A8DB-3AA44E1BF346}", 0, old_value))
+      new_state.set_text_at(module_voice_in, 0, param_uni_lfo_dtn, 0, old_value);
+    if (handler.old_param_value(global_in_id, 0, "{1799D722-B551-485F-A7F1-0590D97514EF}", 0, old_value))
+      new_state.set_text_at(module_voice_in, 0, param_uni_lfo_phase, 0, old_value);
+    if (handler.old_param_value(global_in_id, 0, "{52E0A939-296F-4F2A-A1E4-F283556B0BFD}", 0, old_value))
+      new_state.set_text_at(module_voice_in, 0, param_uni_env_dtn, 0, old_value);
+    if (handler.old_param_value(global_in_id, 0, "{356468BC-59A0-40D0-AC14-C7DDBB16F4CE}", 0, old_value))
+      new_state.set_text_at(module_voice_in, 0, param_uni_sprd, 0, old_value);
+  }
 }
 
 module_topo
