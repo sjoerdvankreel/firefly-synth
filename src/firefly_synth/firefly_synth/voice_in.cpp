@@ -267,7 +267,7 @@ voice_in_topo(int section, gui_position const& pos)
   uni_dtn.gui.bindings.enabled.bind_params({ param_mode, param_uni_voices }, [](auto const& vs) { return vs[0] == engine_voice_mode_poly && vs[1] > 1; });
   auto& uni_osc_phase = result.params.emplace_back(make_param(
     make_topo_info("{35D94C8A-3986-44EC-A4D6-485ACF199C4C}", true, "Global Unison Osc Phase Offset", "Osc Phs", "Uni Osc Phs", param_uni_osc_phase, 1),
-    make_param_dsp_voice(param_automate::automate), make_domain_percentage_identity(0.0, 0, true),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.0, 0, true),
     make_param_gui_single(section_uni_prms, gui_edit_type::knob, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   uni_osc_phase.info.description = "Global unison voice osc phase offset.";

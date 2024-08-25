@@ -1,3 +1,8 @@
+### ?, ? - V1.9.0.
+
+- Move global unison from global to voice section.
+- Make global uni osc detune and osc phase a modulatable parameter.
+
 ### August 24, 2024 - V1.8.9.
 
 - Major UI overhaul, again.
