@@ -22,6 +22,7 @@ autobuilds:
 * integrate https://github.com/surge-synthesizer/monique-monosynth/blob/main/.github/workflows/build-pr.yml
 
 ui-vnext:
+* remove global uni params from fx
 * less ugly audio graphs
 * move smoothing to somewhere else
 * show clap mod indicator
