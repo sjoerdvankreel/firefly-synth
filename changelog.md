@@ -2,6 +2,7 @@
 
 - Move global unison from global to voice section.
 - Make global unison osc detune, osc phase and stereo spread modulatable parameters.
+- Bugfix: only up to 20 routes were processed for cv->audio matrix.
 
 ### August 24, 2024 - V1.8.9.
 
