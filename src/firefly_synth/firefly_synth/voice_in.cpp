@@ -18,7 +18,7 @@ enum { output_pitch_offset };
 enum { over_1, over_2, over_4 };
 enum { porta_off, porta_on, porta_auto };
 enum { scratch_pb, scratch_cent, scratch_pitch, scratch_count };
-enum { section_mode, section_oversmp, section_porta_sync, section_porta, section_note, section_uni_count, section_uni_prms };
+enum { section_mode, section_oversmp, section_porta_sync, section_porta_note, section_uni_count, section_uni_prms };
 
 enum {
   param_mode, param_oversmp, 
@@ -189,7 +189,7 @@ voice_in_topo(int section, gui_position const& pos)
   auto& porta_sync_section = result.sections.emplace_back(make_param_section(section_porta_sync,
     make_topo_tag_basic("{11E4DE4C-A824-424E-BC5E-014240518C0F}", "Sync"),
     make_param_section_gui({ 0, 1, 2, 1 }, gui_dimension({ { 1, 1 }, { { 1 } } }), gui_label_edit_cell_split::vertical)));
-  porta_sync_section.gui.merge_with_section = section_porta;
+  porta_sync_section.gui.merge_with_section = section_porta_note;
   auto& sync = result.params.emplace_back(make_param(
     make_topo_info("{FE70E21D-2104-4EB6-B852-6CD9690E5F72}", true, "Porta Tempo Sync", "Sync", "Sync", param_porta_sync, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_toggle(false),
@@ -198,14 +198,14 @@ voice_in_topo(int section, gui_position const& pos)
   sync.gui.bindings.enabled.bind_params({ param_porta }, [](auto const& vs) { return vs[0] != porta_off; });
   sync.info.description = "Selects time or tempo-synced mode.";
 
-  auto& porta_section = result.sections.emplace_back(make_param_section(section_porta,
+  auto& porta_note_section = result.sections.emplace_back(make_param_section(section_porta_note,
     make_topo_tag_basic("{1C5D7493-AD1C-4F89-BF32-2D0092CB59EF}", "Mid"),
-    make_param_section_gui({ 0, 2, 2, 1 }, gui_dimension({ { 1 }, { { gui_dimension::auto_size, 1 } } }))));
-  porta_section.gui.merge_with_section = section_porta_sync;
+    make_param_section_gui({ 0, 2, 2, 1 }, gui_dimension({ { 1, 1 }, { { gui_dimension::auto_size, 1 } } }))));
+  porta_note_section.gui.merge_with_section = section_porta_sync;
   auto& porta = result.params.emplace_back(make_param(
     make_topo_info("{586BEE16-430A-483E-891B-48E89C4B8FC1}", true, "Porta Mode", "Porta", "Porta", param_porta, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_item(porta_items(), ""),
-    make_param_gui_single(section_porta, gui_edit_type::autofit_list, { 0, 0 },
+    make_param_gui_single(section_porta_note, gui_edit_type::autofit_list, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   porta.info.description = std::string("Selects portamento mode.<br/>") + 
     "Off - no portamento.<br/>" + 
@@ -214,39 +214,35 @@ voice_in_topo(int section, gui_position const& pos)
   auto& time = result.params.emplace_back(make_param(
     make_topo_info("{E8301E86-B6EE-4F87-8181-959A05384866}", true, "Porta Time", "Time", "Time", param_porta_time, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_log(0.001, 10, 0.1, 1, 3, "Sec"),
-    make_param_gui_single(section_porta, gui_edit_type::hslider, { 0, 1 }, make_label_none())));
+    make_param_gui_single(section_porta_note, gui_edit_type::hslider, { 0, 1 }, make_label_none())));
   time.gui.bindings.enabled.bind_params({ param_porta }, [](auto const& vs) { return vs[0] != porta_off; });
   time.gui.bindings.visible.bind_params({ param_porta, param_porta_sync }, [](auto const& vs) { return vs[1] == 0; });
   time.info.description = "Pitch glide time in seconds.";
   auto& tempo = result.params.emplace_back(make_param(
     make_topo_info("{15271CBC-9876-48EC-BD3C-480FF68F9ACC}", true, "Porta Tempo", "Tempo", "Tempo", param_porta_tempo, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_timesig_default(false, {4, 1}, {1, 16}),
-    make_param_gui_single(section_porta, gui_edit_type::list, { 0, 1 }, make_label_none())));
+    make_param_gui_single(section_porta_note, gui_edit_type::list, { 0, 1 }, make_label_none())));
   tempo.gui.submenu = make_timesig_submenu(tempo.domain.timesigs);
   tempo.gui.bindings.enabled.bind_params({ param_porta }, [](auto const& vs) { return vs[0] != porta_off; });
   tempo.gui.bindings.visible.bind_params({ param_porta, param_porta_sync }, [](auto const& vs) { return vs[1] == 1; });
   tempo.info.description = "Pitch glide time in bars.";
- 
-  result.sections.emplace_back(make_param_section(section_note,
-    make_topo_tag_basic("{3EB05593-E649-4460-929C-993B6FB7BBD3}", "Note"),
-    make_param_section_gui({ 0, 3, 2, 1 }, gui_dimension({ 1, 1 }, { gui_dimension::auto_size_all, 1 }), gui_label_edit_cell_split::horizontal)));
   auto& note = result.params.emplace_back(make_param(
     make_topo_info_basic("{CB6D7BC8-5DE6-4A84-97C9-4E405A96E0C8}", "Note", param_note, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_item(make_midi_note_list(), "C4"),
-    make_param_gui_single(section_note, gui_edit_type::autofit_list, { 0, 0 },
+    make_param_gui_single(section_porta_note, gui_edit_type::autofit_list, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   note.gui.submenu = make_midi_note_submenu();
   note.info.description = "Oscillator base pitch adjustment for all Oscs, C4 is no adjustment.";
   auto& cent = result.params.emplace_back(make_param(
     make_topo_info_basic("{57A908CD-ED0A-4FCD-BA5F-92257175A9DE}", "Cent", param_cent, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 0, 0, false),
-    make_param_gui_single(section_note, gui_edit_type::hslider, { 1, 0 },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
+    make_param_gui_single(section_porta_note, gui_edit_type::hslider, { 1, 1 },
+      make_label(gui_label_contents::value, gui_label_align::left, gui_label_justify::near))));
   cent.info.description = "Oscillator pitch cents adjustment for all Oscs.";
 
   auto& uni_count = result.sections.emplace_back(make_param_section(section_uni_count,
     make_topo_tag_basic("{550AAF78-C95A-4D4E-814C-0C5CC26C6457}", "Unison Voices"),
-    make_param_section_gui({ 0, 4, 2, 1 }, gui_dimension({ 1, 1 }, { 1 }), gui_label_edit_cell_split::vertical)));
+    make_param_section_gui({ 0, 3, 2, 2 }, gui_dimension({ 1, 1 }, { 1 }), gui_label_edit_cell_split::vertical)));
   uni_count.gui.merge_with_section = section_uni_prms;
   auto& uni_voices = result.params.emplace_back(make_param(
     make_topo_info("{C2B06E63-0283-4564-BABB-F20D9B30AD68}", true, "Global Unison Voices", "Unison", "Uni", param_uni_voices, 1),
