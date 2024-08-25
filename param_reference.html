@@ -1708,7 +1708,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Voice Mode</td>
-<td>Left</td>
+<td>Mode</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -1721,6 +1721,22 @@
 </tr>
 <tr>
 <td colspan='11' class='description'>Selects poly/mono mode.<br/>Poly - regular polyphonic mode.<br/>Mono - true monophonic mode, may cause clicks.<br/>Release - monophonic untill a mono section is released. So, multiple mono sections may overlap.<br/>To avoid clicks it is best to use release-monophonic mode with multi-triggered envelopes.</td>
+</tr>
+<tr>
+<td rowspan='2'>Osc Oversampling</td>
+<td>Oversampling</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Voice</td>
+<td>Automate</td>
+<td>1X</td>
+<td>4X</td>
+<td>1X</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Oversampling for those rare cases where it makes a positive difference. Only affects FM and hardsync, but not AM. Oversampling is per unison voice, so setting both this and unison to 8 results in an oscillator being 64 times as expensive to calculate.</td>
 </tr>
 <tr>
 <td rowspan='2'>Porta Tempo Sync</td>
@@ -1787,24 +1803,8 @@
 <td colspan='11' class='description'>Pitch glide time in bars.</td>
 </tr>
 <tr>
-<td rowspan='2'>Osc Oversampling</td>
-<td>Right</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Voice</td>
-<td>Automate</td>
-<td>1X</td>
-<td>4X</td>
-<td>1X</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Oversampling for those rare cases where it makes a positive difference. Only affects FM and hardsync, but not AM. Oversampling is per unison voice, so setting both this and unison to 8 results in an oscillator being 64 times as expensive to calculate.</td>
-</tr>
-<tr>
 <td rowspan='2'>Note</td>
-<td>Right</td>
+<td>Note</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -1820,7 +1820,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Cent</td>
-<td>Right</td>
+<td>Note</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -1948,7 +1948,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Pitch</td>
-<td>Left</td>
+<td>Mode</td>
 <td>No</td>
 <td>1</td>
 <td>Input</td>
@@ -1964,7 +1964,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Pitch Bend</td>
-<td>Left</td>
+<td>Mode</td>
 <td>No</td>
 <td>1</td>
 <td>Input</td>

@@ -18,13 +18,13 @@ enum { output_pitch_offset };
 enum { over_1, over_2, over_4 };
 enum { porta_off, porta_on, porta_auto };
 enum { scratch_pb, scratch_cent, scratch_pitch, scratch_count };
-enum { section_left, section_sync, section_mid, section_right, section_uni_count, section_uni_prms };
+enum { section_mode, section_oversmp, section_porta_sync, section_porta, section_note, section_uni_count, section_uni_prms };
 
 enum {
-  param_mode, param_porta_sync, param_porta, param_porta_time, param_porta_tempo,
-  param_oversmp, param_note, param_cent, 
-  param_uni_voices, param_uni_dtn, param_uni_osc_phase, param_uni_lfo_dtn, 
-  param_uni_lfo_phase, param_uni_env_dtn, param_uni_sprd, 
+  param_mode, param_oversmp, 
+  param_porta_sync, param_porta, param_porta_time, param_porta_tempo,
+  param_note, param_cent, 
+  param_uni_voices, param_uni_dtn, param_uni_osc_phase, param_uni_lfo_dtn, param_uni_lfo_phase, param_uni_env_dtn, param_uni_sprd, 
   param_pitch, param_pb, param_count };
 
 // we provide the buttons, everyone else needs to implement it
@@ -149,7 +149,7 @@ voice_in_topo(int section, gui_position const& pos)
     make_topo_info_basic("{524138DF-1303-4961-915A-3CAABA69D53A}", "Voice", module_voice_in, 1),
     make_module_dsp(module_stage::voice, module_output::cv, scratch_count, {
       make_module_dsp_output(false, make_topo_info_basic("{58E73C3A-CACD-48CC-A2B6-25861EC7C828}", "Pitch", 0, 1)) }),
-    make_module_gui(section, pos, { { 1 }, { 32, 13, 34, 33, 15, 15 } } )));
+    make_module_gui(section, pos, { { 1, 1 }, { 32, 13, 34, 33, 15, 15 } } )));
   result.info.description = "Oscillator common module. Controls portamento, oversampling and base pitch for all oscillators. Also contains global unison support.";
   
   result.graph_renderer = render_graph;
@@ -158,13 +158,14 @@ voice_in_topo(int section, gui_position const& pos)
   result.engine_factory = [](auto const&, int, int) { return std::make_unique<voice_in_engine>(); };
   result.state_converter_factory = [](auto desc) { return std::make_unique<voice_in_state_converter>(desc); };
 
-  result.sections.emplace_back(make_param_section(section_left,
-    make_topo_tag_basic("{C85AA7CC-FBD1-4631-BB7A-831A2E084E9E}", "Left"),
-    make_param_section_gui({ 0, 0 }, gui_dimension({ { 1 } }, { { 1 } }))));
+  auto& mode_section = result.sections.emplace_back(make_param_section(section_mode,
+    make_topo_tag_basic("{C85AA7CC-FBD1-4631-BB7A-831A2E084E9E}", "Mode"),
+    make_param_section_gui({ 0, 0, 1, 1 }, gui_dimension({ { 1 } }, { { 1 } }))));
+  mode_section.gui.merge_with_section = section_oversmp;
   auto& voice_mode = result.params.emplace_back(make_param(
     make_topo_info("{F26D6913-63E8-4A23-97C0-9A17D859ED93}", true, "Voice Mode", "Mode", "Mode", param_mode, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_item(mode_items(), ""),
-    make_param_gui_single(section_left, gui_edit_type::list, { 0, 0 },
+    make_param_gui_single(section_mode, gui_edit_type::list, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   voice_mode.info.description = std::string("Selects poly/mono mode.<br/>") +
     "Poly - regular polyphonic mode.<br/>" +
@@ -172,26 +173,39 @@ voice_in_topo(int section, gui_position const& pos)
     "Release - monophonic untill a mono section is released. So, multiple mono sections may overlap.<br/>"
     "To avoid clicks it is best to use release-monophonic mode with multi-triggered envelopes.";
 
-  auto& sync_section = result.sections.emplace_back(make_param_section(section_sync,
+  auto& ovrsmp_section = result.sections.emplace_back(make_param_section(section_oversmp,
+    make_topo_tag_basic("{A61A30E3-D18C-4064-9B68-9CE8D55A7940}", "Oversampling"),
+    make_param_section_gui({ 1, 0, 1, 1 }, gui_dimension({ { 1 } }, { { 1 } }))));
+  ovrsmp_section.gui.merge_with_section = section_mode;
+  auto& oversmp = result.params.emplace_back(make_param(
+    make_topo_info("{0A866D59-E7C1-4D45-9DAF-D0C62EA03E93}", true, "Osc Oversampling", "Osc OvrSmp", "Osc OvrSmp", param_oversmp, 1),
+    make_param_dsp_voice(param_automate::automate), make_domain_item(over_items(), ""),
+    make_param_gui_single(section_oversmp, gui_edit_type::autofit_list, { 0, 0 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
+  oversmp.info.description = std::string("Oversampling for those rare cases where it makes a positive difference. ") +
+    "Only affects FM and hardsync, but not AM. " +
+    "Oversampling is per unison voice, so setting both this and unison to 8 results in an oscillator being 64 times as expensive to calculate.";
+
+  auto& porta_sync_section = result.sections.emplace_back(make_param_section(section_porta_sync,
     make_topo_tag_basic("{11E4DE4C-A824-424E-BC5E-014240518C0F}", "Sync"),
-    make_param_section_gui({ 0, 1 }, gui_dimension({ { 1 }, { { 1 } } }), gui_label_edit_cell_split::no_split)));
-  sync_section.gui.merge_with_section = section_mid;
+    make_param_section_gui({ 0, 1, 2, 1 }, gui_dimension({ { 1, 1 }, { { 1 } } }), gui_label_edit_cell_split::vertical)));
+  porta_sync_section.gui.merge_with_section = section_porta;
   auto& sync = result.params.emplace_back(make_param(
     make_topo_info("{FE70E21D-2104-4EB6-B852-6CD9690E5F72}", true, "Porta Tempo Sync", "Sync", "Sync", param_porta_sync, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_toggle(false),
-    make_param_gui_single(section_sync, gui_edit_type::toggle, { 0, 0 },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
+    make_param_gui_single(section_porta_sync, gui_edit_type::toggle, { 0, 0 },
+      make_label(gui_label_contents::name, gui_label_align::top, gui_label_justify::center))));
   sync.gui.bindings.enabled.bind_params({ param_porta }, [](auto const& vs) { return vs[0] != porta_off; });
   sync.info.description = "Selects time or tempo-synced mode.";
 
-  auto& mid_section = result.sections.emplace_back(make_param_section(section_mid,
+  auto& porta_section = result.sections.emplace_back(make_param_section(section_porta,
     make_topo_tag_basic("{1C5D7493-AD1C-4F89-BF32-2D0092CB59EF}", "Mid"),
-    make_param_section_gui({ 0, 2 }, gui_dimension({ { 1 }, { { gui_dimension::auto_size, 1 } } }))));
-  mid_section.gui.merge_with_section = section_sync;
+    make_param_section_gui({ 0, 2, 2, 1 }, gui_dimension({ { 1 }, { { gui_dimension::auto_size, 1 } } }))));
+  porta_section.gui.merge_with_section = section_porta_sync;
   auto& porta = result.params.emplace_back(make_param(
     make_topo_info("{586BEE16-430A-483E-891B-48E89C4B8FC1}", true, "Porta Mode", "Porta", "Porta", param_porta, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_item(porta_items(), ""),
-    make_param_gui_single(section_mid, gui_edit_type::autofit_list, { 0, 0 },
+    make_param_gui_single(section_porta, gui_edit_type::autofit_list, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   porta.info.description = std::string("Selects portamento mode.<br/>") + 
     "Off - no portamento.<br/>" + 
@@ -200,47 +214,39 @@ voice_in_topo(int section, gui_position const& pos)
   auto& time = result.params.emplace_back(make_param(
     make_topo_info("{E8301E86-B6EE-4F87-8181-959A05384866}", true, "Porta Time", "Time", "Time", param_porta_time, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_log(0.001, 10, 0.1, 1, 3, "Sec"),
-    make_param_gui_single(section_mid, gui_edit_type::hslider, { 0, 1 }, make_label_none())));
+    make_param_gui_single(section_porta, gui_edit_type::hslider, { 0, 1 }, make_label_none())));
   time.gui.bindings.enabled.bind_params({ param_porta }, [](auto const& vs) { return vs[0] != porta_off; });
   time.gui.bindings.visible.bind_params({ param_porta, param_porta_sync }, [](auto const& vs) { return vs[1] == 0; });
   time.info.description = "Pitch glide time in seconds.";
   auto& tempo = result.params.emplace_back(make_param(
     make_topo_info("{15271CBC-9876-48EC-BD3C-480FF68F9ACC}", true, "Porta Tempo", "Tempo", "Tempo", param_porta_tempo, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_timesig_default(false, {4, 1}, {1, 16}),
-    make_param_gui_single(section_mid, gui_edit_type::list, { 0, 1 }, make_label_none())));
+    make_param_gui_single(section_porta, gui_edit_type::list, { 0, 1 }, make_label_none())));
   tempo.gui.submenu = make_timesig_submenu(tempo.domain.timesigs);
   tempo.gui.bindings.enabled.bind_params({ param_porta }, [](auto const& vs) { return vs[0] != porta_off; });
   tempo.gui.bindings.visible.bind_params({ param_porta, param_porta_sync }, [](auto const& vs) { return vs[1] == 1; });
   tempo.info.description = "Pitch glide time in bars.";
  
-  result.sections.emplace_back(make_param_section(section_right,
-    make_topo_tag_basic("{3EB05593-E649-4460-929C-993B6FB7BBD3}", "Right"),
-    make_param_section_gui({ 0, 3 }, gui_dimension({ 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, 1 }))));
-  auto& oversmp = result.params.emplace_back(make_param(
-    make_topo_info("{0A866D59-E7C1-4D45-9DAF-D0C62EA03E93}", true, "Osc Oversampling", "Osc OvrSmp", "Osc OvrSmp", param_oversmp, 1),
-    make_param_dsp_voice(param_automate::automate), make_domain_item(over_items(), ""),
-    make_param_gui_single(section_right, gui_edit_type::autofit_list, { 0, 0 },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  oversmp.info.description = std::string("Oversampling for those rare cases where it makes a positive difference. ") +
-    "Only affects FM and hardsync, but not AM. " +
-    "Oversampling is per unison voice, so setting both this and unison to 8 results in an oscillator being 64 times as expensive to calculate.";
+  result.sections.emplace_back(make_param_section(section_note,
+    make_topo_tag_basic("{3EB05593-E649-4460-929C-993B6FB7BBD3}", "Note"),
+    make_param_section_gui({ 0, 3, 2, 1 }, gui_dimension({ 1, 1 }, { gui_dimension::auto_size_all, 1 }), gui_label_edit_cell_split::horizontal)));
   auto& note = result.params.emplace_back(make_param(
     make_topo_info_basic("{CB6D7BC8-5DE6-4A84-97C9-4E405A96E0C8}", "Note", param_note, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_item(make_midi_note_list(), "C4"),
-    make_param_gui_single(section_right, gui_edit_type::autofit_list, { 0, 1 },
+    make_param_gui_single(section_note, gui_edit_type::autofit_list, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   note.gui.submenu = make_midi_note_submenu();
   note.info.description = "Oscillator base pitch adjustment for all Oscs, C4 is no adjustment.";
   auto& cent = result.params.emplace_back(make_param(
     make_topo_info_basic("{57A908CD-ED0A-4FCD-BA5F-92257175A9DE}", "Cent", param_cent, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 0, 0, false),
-    make_param_gui_single(section_right, gui_edit_type::hslider, { 0, 2 },
-      make_label(gui_label_contents::value, gui_label_align::left, gui_label_justify::near))));
+    make_param_gui_single(section_note, gui_edit_type::hslider, { 1, 0 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   cent.info.description = "Oscillator pitch cents adjustment for all Oscs.";
 
   auto& uni_count = result.sections.emplace_back(make_param_section(section_uni_count,
     make_topo_tag_basic("{550AAF78-C95A-4D4E-814C-0C5CC26C6457}", "Unison Voices"),
-    make_param_section_gui({ 0, 4 }, gui_dimension({ 1, 1 }, { 1 }), gui_label_edit_cell_split::vertical)));
+    make_param_section_gui({ 0, 4, 2, 1 }, gui_dimension({ 1, 1 }, { 1 }), gui_label_edit_cell_split::vertical)));
   uni_count.gui.merge_with_section = section_uni_prms;
   auto& uni_voices = result.params.emplace_back(make_param(
     make_topo_info("{C2B06E63-0283-4564-BABB-F20D9B30AD68}", true, "Global Unison Voices", "Unison", "Uni", param_uni_voices, 1),
@@ -253,7 +259,7 @@ voice_in_topo(int section, gui_position const& pos)
   // TODO make all these params modulatable
   auto& uni_params = result.sections.emplace_back(make_param_section(section_uni_prms,
     make_topo_tag_basic("{7DCA43C8-CD48-4414-9017-EC1B982281FF}", "Global Unison Params"),
-    make_param_section_gui({ 0, 5 }, gui_dimension({ 1, 1 }, {
+    make_param_section_gui({ 0, 5, 2, 1 }, gui_dimension({ 1, 1 }, {
       gui_dimension::auto_size_all, 1, gui_dimension::auto_size_all, 1, gui_dimension::auto_size_all, 1 }),
       gui_label_edit_cell_split::horizontal)));
   uni_params.gui.merge_with_section = section_uni_count;
