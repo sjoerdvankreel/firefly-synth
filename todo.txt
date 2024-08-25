@@ -22,8 +22,9 @@ autobuilds:
 * integrate https://github.com/surge-synthesizer/monique-monosynth/blob/main/.github/workflows/build-pr.yml
 
 ui-vnext:
+V fix the fx version
 V remove global uni params from fx
-* less fx total height
+V less fx total height
 * move global uni to voice + make it modulatable + conversion
 * less ugly audio graphs
 * move smoothing to somewhere else
@@ -35,7 +36,6 @@ V remove global uni params from fx
 * show active modulation for the other graphs
 * bugfix: rerender graph on master in param hover?
 * show effective modulation in the ui for clap param mod
-* fix the fx version
 * drop the smoothing module, make the settings module
 * fix the todos
 * check if global header is extended

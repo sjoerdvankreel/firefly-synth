@@ -149,9 +149,9 @@ voice_in_topo(int section, gui_position const& pos)
     make_topo_info_basic("{524138DF-1303-4961-915A-3CAABA69D53A}", "Voice", module_voice_in, 1),
     make_module_dsp(module_stage::voice, module_output::cv, scratch_count, {
       make_module_dsp_output(false, make_topo_info_basic("{58E73C3A-CACD-48CC-A2B6-25861EC7C828}", "Pitch", 0, 1)) }),
-    make_module_gui(section, pos, { { 1, 1 }, { 32, 8, 39, 13, 50 } } )));
+      make_module_gui(section, pos, { { 1, 1 }, { 32, 8, 39, 13, 50 } })));
   result.info.description = "Oscillator common module. Controls portamento, oversampling and base pitch for all oscillators. Also contains global unison support.";
-  
+
   result.graph_renderer = render_graph;
   result.force_rerender_on_param_hover = true;
   result.gui.menu_handler_factory = make_cv_routing_menu_handler;
@@ -207,8 +207,8 @@ voice_in_topo(int section, gui_position const& pos)
     make_param_dsp_voice(param_automate::automate), make_domain_item(porta_items(), ""),
     make_param_gui_single(section_porta_note, gui_edit_type::autofit_list, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  porta.info.description = std::string("Selects portamento mode.<br/>") + 
-    "Off - no portamento.<br/>" + 
+  porta.info.description = std::string("Selects portamento mode.<br/>") +
+    "Off - no portamento.<br/>" +
     "On - glides 1 semitone in the specified time, so glide pitch is constant and glide time is variable.<br/>" +
     "Auto - glides pitch difference between old and new note in the specified time, so glide pitch is variable and glide time is constant.";
   auto& time = result.params.emplace_back(make_param(
@@ -220,7 +220,7 @@ voice_in_topo(int section, gui_position const& pos)
   time.info.description = "Pitch glide time in seconds.";
   auto& tempo = result.params.emplace_back(make_param(
     make_topo_info("{15271CBC-9876-48EC-BD3C-480FF68F9ACC}", true, "Porta Tempo", "Tempo", "Tempo", param_porta_tempo, 1),
-    make_param_dsp_voice(param_automate::automate), make_domain_timesig_default(false, {4, 1}, {1, 16}),
+    make_param_dsp_voice(param_automate::automate), make_domain_timesig_default(false, { 4, 1 }, { 1, 16 }),
     make_param_gui_single(section_porta_note, gui_edit_type::list, { 0, 1 }, make_label_none())));
   tempo.gui.submenu = make_timesig_submenu(tempo.domain.timesigs);
   tempo.gui.bindings.enabled.bind_params({ param_porta }, [](auto const& vs) { return vs[0] != porta_off; });
@@ -312,7 +312,7 @@ voice_in_topo(int section, gui_position const& pos)
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 0, 0, true),
     make_param_gui_none()));
   pb.info.description = "Pitch-bend modulation target for all Oscs. Reacts to global pitchbend range.";
-  return result;
+  return result;  
 }
 
 inline float
