@@ -121,6 +121,7 @@ global_in_topo(int section, bool is_fx, gui_position const& pos)
     make_param_gui_single(section_linked_pbrange, gui_edit_type::list, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::top, gui_label_justify::center))));
   pb_range.info.description = "Pitch bend range. Together with Pitch Bend this affects the base pitch of all oscillators.";
+  pb_range.gui.bindings.enabled.bind_slot([is_fx](int) { return !is_fx; });
 
   auto& uni_count = result.sections.emplace_back(make_param_section(section_uni_count,
     make_topo_tag_basic("{550AAF78-C95A-4D4E-814C-0C5CC26C6457}", "Unison Voices"),
@@ -132,6 +133,7 @@ global_in_topo(int section, bool is_fx, gui_position const& pos)
     make_param_gui_single(section_uni_count, gui_edit_type::list, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::top, gui_label_justify::center))));
   uni_voices.info.description = "Global unison voice count. Global unison spawns an entire polyphonic synth voice per unison voice. This includes per-voice oscillators, effects, lfo's and envelopes.";
+  uni_voices.gui.bindings.enabled.bind_params({ param_pb_range }, [is_fx](auto const& vs) { return !is_fx; });
   uni_voices.gui.bindings.global_enabled.bind_param(module_voice_in, voice_in_param_mode, [](int v) { return v == engine_voice_mode_poly; });
 
   auto& uni_params = result.sections.emplace_back(make_param_section(section_uni_prms,
@@ -146,7 +148,7 @@ global_in_topo(int section, bool is_fx, gui_position const& pos)
     make_param_gui_single(section_uni_prms, gui_edit_type::knob, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   uni_dtn.info.description = "Global unison voice pitch detune amount.";
-  uni_dtn.gui.bindings.enabled.bind_params({ param_uni_voices }, [](auto const& vs) { return vs[0] > 1; });
+  uni_dtn.gui.bindings.enabled.bind_params({ param_uni_voices }, [is_fx](auto const& vs) { return !is_fx && vs[0] > 1; });
   uni_dtn.gui.bindings.global_enabled.bind_param(module_voice_in, voice_in_param_mode, [](int v) { return v == engine_voice_mode_poly; });
   auto& uni_osc_phase = result.params.emplace_back(make_param(
     make_topo_info("{35D94C8A-3986-44EC-A4D6-485ACF199C4C}", true, "Global Unison Osc Phase Offset", "Osc Phs", "Uni Osc Phs", param_uni_osc_phase, 1),
@@ -154,7 +156,7 @@ global_in_topo(int section, bool is_fx, gui_position const& pos)
     make_param_gui_single(section_uni_prms, gui_edit_type::knob, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   uni_osc_phase.info.description = "Global unison voice osc phase offset.";
-  uni_osc_phase.gui.bindings.enabled.bind_params({ param_uni_voices }, [](auto const& vs) { return vs[0] > 1; });
+  uni_osc_phase.gui.bindings.enabled.bind_params({ param_uni_voices }, [is_fx](auto const& vs) { return !is_fx && vs[0] > 1; });
   uni_osc_phase.gui.bindings.global_enabled.bind_param(module_voice_in, voice_in_param_mode, [](int v) { return v == engine_voice_mode_poly; });
   auto& uni_lfo_dtn = result.params.emplace_back(make_param(
     make_topo_info("{1B61F48D-7995-4295-A8DB-3AA44E1BF346}", true, "Global Unison LFO Detune", "LFO Dtn", "Uni LFO Dtn", param_uni_lfo_dtn, 1),
@@ -162,7 +164,7 @@ global_in_topo(int section, bool is_fx, gui_position const& pos)
     make_param_gui_single(section_uni_prms, gui_edit_type::knob, { 0, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   uni_lfo_dtn.info.description = "Global unison voice LFO detune amount.";
-  uni_lfo_dtn.gui.bindings.enabled.bind_params({ param_uni_voices }, [](auto const& vs) { return vs[0] > 1; });
+  uni_lfo_dtn.gui.bindings.enabled.bind_params({ param_uni_voices }, [is_fx](auto const& vs) { return !is_fx && vs[0] > 1; });
   uni_lfo_dtn.gui.bindings.global_enabled.bind_param(module_voice_in, voice_in_param_mode, [](int v) { return v == engine_voice_mode_poly; });
   auto& uni_lfo_phase = result.params.emplace_back(make_param(
     make_topo_info("{1799D722-B551-485F-A7F1-0590D97514EF}", true, "Global Unison LFO Phase Offset", "LFO Phs", "Uni LFO Phs", param_uni_lfo_phase, 1),
@@ -170,7 +172,7 @@ global_in_topo(int section, bool is_fx, gui_position const& pos)
     make_param_gui_single(section_uni_prms, gui_edit_type::knob, { 1, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   uni_lfo_phase.info.description = "Global unison voice LFO phase offset.";
-  uni_lfo_phase.gui.bindings.enabled.bind_params({ param_uni_voices }, [](auto const& vs) { return vs[0] > 1; });
+  uni_lfo_phase.gui.bindings.enabled.bind_params({ param_uni_voices }, [is_fx](auto const& vs) { return !is_fx && vs[0] > 1; });
   uni_lfo_phase.gui.bindings.global_enabled.bind_param(module_voice_in, voice_in_param_mode, [](int v) { return v == engine_voice_mode_poly; });
   auto& uni_env_dtn = result.params.emplace_back(make_param(
     make_topo_info("{52E0A939-296F-4F2A-A1E4-F283556B0BFD}", true, "Global Unison Env Detune", "Env Dtn", "Uni Env Dtn", param_uni_env_dtn, 1),
@@ -178,7 +180,7 @@ global_in_topo(int section, bool is_fx, gui_position const& pos)
     make_param_gui_single(section_uni_prms, gui_edit_type::knob, { 0, 4 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   uni_env_dtn.info.description = "Global unison voice envelope detune amount.";
-  uni_env_dtn.gui.bindings.enabled.bind_params({ param_uni_voices }, [](auto const& vs) { return vs[0] > 1; });
+  uni_env_dtn.gui.bindings.enabled.bind_params({ param_uni_voices }, [is_fx](auto const& vs) { return !is_fx && vs[0] > 1; });
   uni_env_dtn.gui.bindings.global_enabled.bind_param(module_voice_in, voice_in_param_mode, [](int v) { return v == engine_voice_mode_poly; });
   auto& uni_spread = result.params.emplace_back(make_param(
     make_topo_info("{356468BC-59A0-40D0-AC14-C7DDBB16F4CE}", true, "Global Unison Spread", "Spread", "Uni Spread", param_uni_sprd, 1),
@@ -186,7 +188,7 @@ global_in_topo(int section, bool is_fx, gui_position const& pos)
     make_param_gui_single(section_uni_prms, gui_edit_type::knob, { 1, 4 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   uni_spread.info.description = "Global unison stereo spread.";
-  uni_spread.gui.bindings.enabled.bind_params({ param_uni_voices }, [](auto const& vs) { return vs[0] > 1; });
+  uni_spread.gui.bindings.enabled.bind_params({ param_uni_voices }, [is_fx](auto const& vs) { return !is_fx && vs[0] > 1; });
   uni_spread.gui.bindings.global_enabled.bind_param(module_voice_in, voice_in_param_mode, [](int v) { return v == engine_voice_mode_poly; });
   auto& tuning_mode_audio_param = result.params.emplace_back(make_param(
     make_topo_info("{28C619C2-C04E-4BD6-8D84-89667E1A5659}", true, "Tuning Mode", "Tuning Mode", "Tuning Mode", param_tuning_mode, 1),
