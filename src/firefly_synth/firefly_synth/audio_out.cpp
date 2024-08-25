@@ -152,7 +152,7 @@ voice_audio_out_engine::process_unison(plugin_block& block)
     attn = std::sqrt(block.voice->state.sub_voice_count);
     voice_pos = (float)block.voice->state.sub_voice_index / (block.voice->state.sub_voice_count - 1.0f);
     voice_pos = unipolar_to_bipolar(voice_pos);
-    glob_uni_sprd_curve = &block.state.all_accurate_automation[module_voice_in][0][voice_in_param_uni_sprd][0];
+    glob_uni_sprd_curve = modulation[module_voice_in][0][voice_in_param_uni_sprd][0];
   }
 
   auto& bal_curve = block.state.own_scratch[scratch_bal];

@@ -295,7 +295,7 @@ voice_in_topo(int section, gui_position const& pos)
   uni_env_dtn.gui.bindings.enabled.bind_params({ param_mode, param_uni_voices }, [](auto const& vs) { return vs[0] == engine_voice_mode_poly && vs[1] > 1; });
   auto& uni_spread = result.params.emplace_back(make_param(
     make_topo_info("{356468BC-59A0-40D0-AC14-C7DDBB16F4CE}", true, "Global Unison Spread", "Spread", "Uni Spread", param_uni_sprd, 1),
-    make_param_dsp_accurate(param_automate::automate), make_domain_percentage_identity(0.5, 0, true),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
     make_param_gui_single(section_uni_prms, gui_edit_type::knob, { 1, 4 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   uni_spread.info.description = "Global unison stereo spread.";
