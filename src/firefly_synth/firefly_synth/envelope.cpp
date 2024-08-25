@@ -674,7 +674,7 @@ void env_engine::process_mono_type_sync_trigger_mode(plugin_block& block, cv_cv_
     if (block.voice->state.sub_voice_count > 1)
     {
       float const max_scale = 0.95f;
-      float glob_uni_env_dtn = block.state.all_block_automation[module_voice_in][0][voice_in_param_uni_env_dtn][0].real();
+      float glob_uni_env_dtn = (*modulation)[module_voice_in][0][voice_in_param_uni_env_dtn][0];
       float voice_pos = unipolar_to_bipolar((float)block.voice->state.sub_voice_index / (block.voice->state.sub_voice_count - 1.0f));
       float scale_length = 1 + (voice_pos * glob_uni_env_dtn * max_scale);
       _hld *= scale_length;
