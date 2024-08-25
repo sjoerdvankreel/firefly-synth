@@ -85,7 +85,6 @@ public module_engine {
   float _graph_phase;
   float _lfo_end_value;
   float _filter_end_value;
-  bool _first_cycle = true;
   
   bool const _global;
   lfo_stage _stage = {};
@@ -100,6 +99,7 @@ public module_engine {
 
   int _per_voice_seed = -1;
   int _prev_global_seed = -1;
+  bool _per_voice_seed_was_initialized = false;
 
   void reset_smooth_noise(int seed, int steps);
   void update_block_params(plugin_block const* block);
@@ -544,11 +544,20 @@ lfo_engine::reset(plugin_block const* block)
   _end_filter_stage_samples = 0;
   _per_voice_seed = -1;
   _prev_global_seed = -1;
-  _first_cycle = true;
+  _per_voice_seed_was_initialized = false;
 
   update_block_params(block);
   auto const& block_auto = block->state.own_block_automation;
   _phase = _global? 0: block_auto[param_phase][0].real();
+
+  // global unison
+  if (!_global && block->voice->state.sub_voice_count > 1)
+  {
+    float glob_uni_phs_offset = block->state.all_block_automation[module_voice_in][0][voice_in_param_uni_lfo_phase][0].real();
+    float voice_pos = (float)block->voice->state.sub_voice_index / (block->voice->state.sub_voice_count - 1.0f);
+    _phase += voice_pos * glob_uni_phs_offset;
+    _phase -= (int)_phase;
+  }
 }
 
 void
@@ -603,7 +612,7 @@ lfo_engine::process(plugin_block& block, cv_cv_matrix_mixdown const* modulation)
   {
     // cannot do this in reset() because we depend on output of the on-note module
     int shape = block_auto[param_shape][0].step();
-    if (_first_cycle)
+    if (!_per_voice_seed_was_initialized)
     {
       if (is_noise(shape))
       {
@@ -620,17 +629,7 @@ lfo_engine::process(plugin_block& block, cv_cv_matrix_mixdown const* modulation)
         _static_noise.reset(_per_voice_seed);
         reset_smooth_noise(_per_voice_seed, block_auto[param_steps][0].step());
       }
-
-      // global unison
-      if (!_global && block.voice->state.sub_voice_count > 1)
-      { 
-        float glob_uni_phs_offset = (*modulation)[module_voice_in][0][voice_in_param_uni_lfo_phase][0];
-        float voice_pos = (float)block.voice->state.sub_voice_index / (block.voice->state.sub_voice_count - 1.0f);
-        _phase += voice_pos * glob_uni_phs_offset;
-        _phase -= (int)_phase;
-      }
-
-      _first_cycle = false;
+      _per_voice_seed_was_initialized = true;
     }
   }
 
