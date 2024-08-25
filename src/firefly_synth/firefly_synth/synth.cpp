@@ -66,8 +66,8 @@ make_plugin_dimension(bool is_fx, plugin_topo_gui_theme_settings const& settings
   gui_dimension result;
   result.column_sizes = { synth_first_column_size, synth_second_column_size, 127, 34, 64, 64 };
   int height = settings.get_default_width(is_fx) * settings.get_aspect_ratio_height(is_fx) / settings.get_aspect_ratio_width(is_fx);
-  std::vector<gui_vertical_section_size> section_vsizes = { { true, 1 }, { true, 2 }, { true, 2 }, { true, 2 } };
-  if (!is_fx) section_vsizes.insert(section_vsizes.end(), { { true, 1 }, { true, 2 }, { true, 2 }, { true, 2 }, { true, 2 } });
+  std::vector<gui_vertical_section_size> section_vsizes = { { true, 1 }, { true, 1 }, { true, 2 }, { true, 2 } };
+  if (!is_fx) section_vsizes.insert(section_vsizes.end(), { { true, 2 }, { true, 2 }, { true, 2 }, { true, 2 }, { true, 2 } });
   result.row_sizes = gui_vertical_distribution(height, settings.get_font_height(), section_vsizes);
   return result;
 }

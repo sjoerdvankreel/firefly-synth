@@ -23,6 +23,7 @@ autobuilds:
 
 ui-vnext:
 V remove global uni params from fx
+* less fx total height
 * move global uni to voice + make it modulatable
 * less ugly audio graphs
 * move smoothing to somewhere else
