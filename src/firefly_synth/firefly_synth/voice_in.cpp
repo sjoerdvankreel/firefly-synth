@@ -149,7 +149,7 @@ voice_in_topo(int section, gui_position const& pos)
     make_topo_info_basic("{524138DF-1303-4961-915A-3CAABA69D53A}", "Voice", module_voice_in, 1),
     make_module_dsp(module_stage::voice, module_output::cv, scratch_count, {
       make_module_dsp_output(false, make_topo_info_basic("{58E73C3A-CACD-48CC-A2B6-25861EC7C828}", "Pitch", 0, 1)) }),
-    make_module_gui(section, pos, { { 1, 1 }, { 32, 13, 34, 33, 15, 15 } } )));
+    make_module_gui(section, pos, { { 1, 1 }, { 32, 7, 40, 33, 15, 15 } } )));
   result.info.description = "Oscillator common module. Controls portamento, oversampling and base pitch for all oscillators. Also contains global unison support.";
   
   result.graph_renderer = render_graph;
@@ -200,7 +200,7 @@ voice_in_topo(int section, gui_position const& pos)
 
   auto& porta_note_section = result.sections.emplace_back(make_param_section(section_porta_note,
     make_topo_tag_basic("{1C5D7493-AD1C-4F89-BF32-2D0092CB59EF}", "Mid"),
-    make_param_section_gui({ 0, 2, 2, 1 }, gui_dimension({ { 1, 1 }, { { gui_dimension::auto_size, 1 } } }))));
+    make_param_section_gui({ 0, 2, 2, 1 }, gui_dimension({ { 1, 1 }, { { gui_dimension::auto_size_all, 1 } } }))));
   porta_note_section.gui.merge_with_section = section_porta_sync;
   auto& porta = result.params.emplace_back(make_param(
     make_topo_info("{586BEE16-430A-483E-891B-48E89C4B8FC1}", true, "Porta Mode", "Porta", "Porta", param_porta, 1),
