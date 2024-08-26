@@ -49,6 +49,7 @@ protected:
   static int const max_indicators = 64;
 
   graph_data _data;
+  std::vector<mod_indicator_state> _indicator_states = {};
   std::vector<std::unique_ptr<graph_indicator>> _indicators = {};
 
 public:

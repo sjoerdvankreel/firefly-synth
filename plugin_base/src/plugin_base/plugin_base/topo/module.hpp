@@ -89,12 +89,14 @@ typedef std::function<std::unique_ptr<module_engine>(
 module_engine_factory;
 typedef std::function<graph_data(
   plugin_state const& state, graph_engine* engine, 
-  int param, param_topo_mapping const& mapping)>
+  int param, param_topo_mapping const& mapping,
+  bool overlay, std::vector<mod_indicator_state> const& mod_indicators)>
 module_graph_renderer;
 
 // in case we want to plot someone elses mod indicators
 typedef std::function<mod_indicator_source(
-  plugin_state const& state, param_topo_mapping const& mapping)>
+  plugin_state const& state, 
+  param_topo_mapping const& mapping)>
   module_mod_indicator_source_selector;
 
 // module topo mapping

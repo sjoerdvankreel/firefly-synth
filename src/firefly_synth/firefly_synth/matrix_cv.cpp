@@ -276,7 +276,7 @@ make_graph_engine(plugin_desc const* desc)
 // mapping to longest mod source for graph
 static float
 scale_to_longest_mod_source(
-  plugin_state const& state, param_topo_mapping const& mapping,
+  plugin_state const& state, param_topo_mapping const& mapping, 
   std::vector<module_output_mapping> const& sources, 
   float& max_dahd, float& max_dahdrf,
   int& module_index, int& module_slot)
@@ -293,6 +293,7 @@ scale_to_longest_mod_source(
   module_slot = -1;
   module_index = -1;
 
+  // TODO how zit this ?
   float dly, att, hld, dcy, rls, flt;
   int ti = state.get_plain_at(map.module_index, map.module_slot, param_target, map.param_slot).step();
 
@@ -344,7 +345,7 @@ scale_to_longest_mod_source(
 // mapping to longest mod source, prefer envelope
 static mod_indicator_source
 select_mod_indicator_source(
-  plugin_state const& state, param_topo_mapping const& mapping,
+  plugin_state const& state, param_topo_mapping const& mapping, 
   std::vector<module_output_mapping> const& sources)
 {
   float max_dahd, max_dahdrf;
@@ -382,7 +383,7 @@ render_graph(
   int voice_release_at = max_dahd / max_dahdrf * params.max_frame_count;
   int ti = state.get_plain_at(map.module_index, map.module_slot, param_target, map.param_slot).step();
 
-  engine->process_begin(&state, sample_rate, params.max_frame_count, voice_release_at);  
+  engine->process_begin(&state, {} /*todo*/, sample_rate, params.max_frame_count, voice_release_at);
   std::vector<int> relevant_modules({ module_gcv_cv_matrix, module_global_in, module_glfo });
   if(map.module_index == module_vcv_audio_matrix || map.module_index == module_vcv_cv_matrix)
     relevant_modules.insert(relevant_modules.end(), { module_vcv_cv_matrix, module_voice_on_note, module_vlfo, module_env });
@@ -453,7 +454,8 @@ cv_matrix_topo(
   result.graph_engine_factory = make_graph_engine;
   if(!cv && !is_fx) result.default_initializer = global ? init_audio_global_default : init_audio_voice_default;
   result.graph_renderer = [sm = source_matrix.mappings, tm = target_matrix](
-    auto const& state, auto* engine, int param, auto const& mapping) {
+    auto const& state, auto* engine, int param, auto const& mapping, 
+    bool overlay, std::vector<mod_indicator_state> const& mod_indicators) {
       return render_graph(state, engine, param, mapping, sm, tm);
     };
   result.mod_indicator_source_selector = [sm = source_matrix.mappings](

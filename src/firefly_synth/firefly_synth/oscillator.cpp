@@ -229,7 +229,7 @@ render_osc_graphs(plugin_state const& state, graph_engine* engine, int slot, boo
   // to the block in case of processing for graphs and
   // we use an alternate means to access the modulation
   // signal inside matrix_osc::modulate_fm
-  engine->process_begin(&state, sample_rate, params.max_frame_count, -1);
+  engine->process_begin(&state, {} /*todo*/, sample_rate, params.max_frame_count, -1);
   engine->process_default(module_osc_osc_matrix, 0);
   for (int i = 0; i <= slot; i++)
   {
@@ -261,7 +261,8 @@ render_osc_graphs(plugin_state const& state, graph_engine* engine, int slot, boo
 
 static graph_data
 render_osc_graph(
-  plugin_state const& state, graph_engine* engine, int param, param_topo_mapping const& mapping)
+  plugin_state const& state, graph_engine* engine, int param, param_topo_mapping const& mapping,
+  bool overlay, std::vector<mod_indicator_state> const& mod_indicators)
 {
   graph_engine_params params = {};
   int type = state.get_plain_at(module_osc, mapping.module_slot, param_type, 0).step();

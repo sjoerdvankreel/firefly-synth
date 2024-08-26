@@ -24,7 +24,8 @@ extern int const global_smoothing_param_midi_smooth = param_midi_smooth;
 extern int const global_smoothing_param_tempo_smooth = param_tempo_smooth;
 
 static graph_data
-render_graph(plugin_state const& state, graph_engine* engine, int param, param_topo_mapping const& mapping)
+render_graph(plugin_state const& state, graph_engine* engine, int param, param_topo_mapping const& mapping, 
+  bool overlay, std::vector<mod_indicator_state> const& mod_indicators)
 {
   float value = state.get_plain_at(mapping).real();
   if (mapping.param_index == param_auto_smooth)

@@ -359,7 +359,8 @@ make_graph_engine(plugin_desc const* desc)
 
 static graph_data
 render_graph(
-  plugin_state const& state, graph_engine* engine, int param, param_topo_mapping const& mapping)
+  plugin_state const& state, graph_engine* engine, int param, param_topo_mapping const& mapping, 
+  bool overlay, std::vector<mod_indicator_state> const& mod_indicators)
 {
   int type = state.get_plain_at(mapping.module_index, mapping.module_slot, param_type, 0).step();
   if(type == type_off) return graph_data(graph_data_type::off, {});
@@ -421,7 +422,7 @@ render_graph(
     }
   }
 
-  engine->process_begin(&state, sample_rate, frame_count, -1);
+  engine->process_begin(&state, {} /*todo*/, sample_rate, frame_count, -1);
   auto const* block = engine->process(
     mapping.module_index, mapping.module_slot, [mapping, sample_rate, frame_count, &audio_in](plugin_block& block) {
     bool global = mapping.module_index == module_gfx;
