@@ -26,12 +26,12 @@ V fix the fx version
 V remove global uni params from fx
 V less fx total height
 V move global uni to voice + make it modulatable + conversion
+V some bolletjes don't go away -> repaint on module switch
 * global unit lfo phase offset not plot good
 * less ugly audio graphs
 * move smoothing to somewhere else
 * show clap mod indicator
 * repaint on waveform change (free running or random-per-voice)
-* some bolletjes don't go away -> repaint on module switch
 * fix the undo history for tuning mode
 * make the bolletjes work in case of automation
 * show active modulation for the other graphs -> better to have a separate state copy including modulation

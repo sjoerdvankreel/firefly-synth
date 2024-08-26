@@ -206,8 +206,14 @@ module_graph::request_rerender(int param)
   int m = mapping.topo.module_index;
   int p = mapping.topo.param_index;
   if (desc.plugin->modules[m].params[p].dsp.direction == param_direction::output) return;
+  
   _render_dirty = true;
   _hovered_or_tweaked_param = param;
+
+  // will be picked up on the next round, 
+  // need them to disappear first otherwise they may hang around on module switch
+  for (int i = 0; i < max_indicators; i++)
+    _indicators[i]->setVisible(false);
 }
 
 bool
