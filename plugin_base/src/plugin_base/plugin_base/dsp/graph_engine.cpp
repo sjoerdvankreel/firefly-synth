@@ -26,9 +26,7 @@ graph_engine::process_end()
 }
 
 void 
-graph_engine::process_begin(
-  plugin_state const* state, std::vector<mod_indicator_state> const& mod_indicators, 
-  int sample_rate, int frame_count, int voice_release_at)
+graph_engine::process_begin(plugin_state const* state, int sample_rate, int frame_count, int voice_release_at)
 {
   assert(sample_rate > 0);
   assert(0 < frame_count && frame_count <= _params.max_frame_count);
@@ -41,7 +39,7 @@ graph_engine::process_begin(
   _host_block->shared.bpm = _params.bpm;
   _host_block->audio_out = _audio_out_ptrs;
   _host_block->shared.audio_in = _audio_in_ptrs;
-  _engine.init_graph_render(state, mod_indicators);
+  _engine.init_from_state(state);
 }
 
 plugin_block*

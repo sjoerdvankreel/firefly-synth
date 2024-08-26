@@ -97,19 +97,8 @@ module_graph::mod_indicator_state_changed(std::vector<mod_indicator_state> const
     }
   }
 
-  // TODO only for the last voice
-  // ALSO TODO cap it at max_mod_indicators or something
-  // keep track of override parameter values for the next paint round
-  _indicator_states.clear();
-  int current_module_global = desc.module_topo_to_index.at(current_module_index) + current_module_slot;
-  for (int i = 0; i < states.size(); i++)
-    if (current_module_global == states[i].data.module_global && states[i].data.param_global != -1)
-      _indicator_states.push_back(states[i]);
-  if (_indicator_states.size() > 0)
-    request_rerender(_indicator_states[0].data.param_global);
-
-  // figure out where to draw the little balls
   int current_indicator = 0;
+  int current_module_global = desc.module_topo_to_index.at(current_module_index) + current_module_slot;
   for (int i = 0; i < states.size() && current_indicator < max_indicators; i++)
     if (current_module_global == states[i].data.module_global && states[i].data.param_global == -1)
     {
@@ -232,7 +221,7 @@ module_graph::render_if_dirty()
   auto const& module = _gui->gui_state()->desc().plugin->modules[mapping.module_index];
   if(module.graph_renderer != nullptr)
     render(module.graph_renderer(
-      *_gui->gui_state(), _gui->get_module_graph_engine(module), _hovered_or_tweaked_param, mapping, true, _indicator_states));
+      *_gui->gui_state(), _gui->get_module_graph_engine(module), _hovered_or_tweaked_param, mapping));
   _render_dirty = false;
   return true;
 }
@@ -263,7 +252,6 @@ graph(lnf* lnf, graph_params const& params) :
   _lnf(lnf), _data(graph_data_type::na, {}), _params(params)
 {
   _indicators.resize(max_indicators);
-  _indicator_states.reserve(max_indicators);
   for (int i = 0; i < max_indicators; i++)
   {
     _indicators[i] = std::make_unique<graph_indicator>(_lnf);

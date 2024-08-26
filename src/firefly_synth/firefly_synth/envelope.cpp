@@ -169,8 +169,7 @@ make_graph_engine(plugin_desc const* desc)
 
 static graph_data
 render_graph(
-  plugin_state const& state, graph_engine* engine, int param, param_topo_mapping const& mapping, 
-  bool overlay, std::vector<mod_indicator_state> const& mod_indicators)
+  plugin_state const& state, graph_engine* engine, int param, param_topo_mapping const& mapping)
 {
   if (state.get_plain_at(module_env, mapping.module_slot, param_on, 0).step() == 0) 
     return graph_data(graph_data_type::off, {});
@@ -190,7 +189,7 @@ render_graph(
   int sample_rate = params.max_frame_count / dahdrf;
   int voice_release_at = dahd / dahdrf * params.max_frame_count;
 
-  engine->process_begin(&state, {} /*todo*/, sample_rate, params.max_frame_count, voice_release_at);
+  engine->process_begin(&state, sample_rate, params.max_frame_count, voice_release_at);
   auto const* block = engine->process(module_env, mapping.module_slot, [mapping](plugin_block& block) {
     env_engine engine;
     engine.reset(&block);

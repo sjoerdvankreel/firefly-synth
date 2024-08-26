@@ -42,10 +42,7 @@ public:
   graph_engine(plugin_desc const* desc, graph_engine_params const& params);
 
   void process_end();
-  void process_begin(
-    plugin_state const* state, std::vector<mod_indicator_state> const& mod_indicators, 
-    int sample_rate, int frame_count, int voice_release_at);
-
+  void process_begin(plugin_state const* state, int sample_rate, int frame_count, int voice_release_at);
   plugin_block* process_default(int module_index, int module_slot);
   plugin_block* process(int module_index, int module_slot, graph_processor processor);
 };

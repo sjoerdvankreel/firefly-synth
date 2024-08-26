@@ -192,18 +192,9 @@ plugin_engine::make_plugin_block(
 }
 
 void
-plugin_engine::init_graph_render(
-  plugin_state const* state, 
-  std::vector<mod_indicator_state> const& mod_indicators)
+plugin_engine::init_from_state(plugin_state const* state)
 {
   _state.copy_from(state->state(), true);
-  auto const& mappings = _state.desc().param_mappings.params;
-  for (int i = 0; i < mod_indicators.size(); i++)
-  {
-    auto val = normalized_value(mod_indicators[i].data.value);
-    auto const& mt = mappings[mod_indicators[i].data.param_global].topo;
-    _state.set_normalized_at(mt.module_index, mt.module_slot, mt.param_index, mt.param_slot, val);
-  }
   automation_state_dirty();
   init_automation_from_state();
 }        

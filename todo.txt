@@ -31,7 +31,7 @@ V move global uni to voice + make it modulatable + conversion
 * move smoothing to somewhere else
 * show clap mod indicator
 * repaint on waveform change (free running or random-per-voice)
-* some bolletjes don't go away -> repaint on module switch
+* some bolletjes don't go away
 * fix the undo history for tuning mode
 * make the bolletjes work in case of automation
 * show active modulation for the other graphs

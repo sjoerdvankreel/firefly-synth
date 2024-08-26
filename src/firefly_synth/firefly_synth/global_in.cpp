@@ -34,8 +34,7 @@ public:
 
 static graph_data
 render_graph(
-  plugin_state const& state, graph_engine* engine, int param, param_topo_mapping const& mapping,
-  bool overlay, std::vector<mod_indicator_state> const& mod_indicators)
+  plugin_state const& state, graph_engine* engine, int param, param_topo_mapping const& mapping)
 {
   if (mapping.param_index == param_pb_range)
     return graph_data(graph_data_type::na, {});

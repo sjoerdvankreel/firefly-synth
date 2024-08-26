@@ -167,8 +167,7 @@ lfo_frequency_from_state(plugin_state const& state, int module_index, int module
 
 static graph_data
 render_graph(
-  plugin_state const& state, graph_engine* engine, int param, param_topo_mapping const& mapping, 
-  bool overlay, std::vector<mod_indicator_state> const& mod_indicators)
+  plugin_state const& state, graph_engine* engine, int param, param_topo_mapping const& mapping)
 {
   int type = state.get_plain_at(mapping.module_index, mapping.module_slot, param_type, mapping.param_slot).step();
   bool sync = state.get_plain_at(mapping.module_index, mapping.module_slot, param_sync, mapping.param_slot).step() != 0;
@@ -179,11 +178,6 @@ render_graph(
   auto const params = make_graph_engine_params();
   bool global = mapping.module_index == module_glfo;
   float freq = lfo_frequency_from_state(state, mapping.module_index, mapping.module_slot, 120);
-
-  // need modulated freq to determine the sample rate
-  for (int i = 0; i < mod_indicators.size(); i++)
-    if (state.desc().param_mappings.params[mod_indicators[i].data.param_global].topo.param_index == param_rate)
-      freq = state.desc().normalized_to_raw_at_index(mod_indicators[i].data.param_global, normalized_value(mod_indicators[i].data.value));
 
   // make sure we exactly plot 1 cycle otherwise
   // we cannot not where to put the mod indicators
@@ -197,7 +191,7 @@ render_graph(
     partition = float_to_string(one_bar_freq / freq, 2) + " Bar";
   }
 
-  engine->process_begin(&state, mod_indicators, sample_rate, params.max_frame_count, -1);
+  engine->process_begin(&state, sample_rate, params.max_frame_count, -1);
   
   // we need this for the on-voice-random
   // although it's just mapped to fixed values
