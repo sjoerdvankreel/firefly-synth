@@ -197,19 +197,20 @@ lnf::init_theme(std::filesystem::path const& theme_folder, var const& json)
         assert(custom_sections.isArray());
         for(int j = 0; j < custom_sections.size(); j++)
         {
+          auto section_name = custom_sections[j].toString().toStdString();
           auto this_settings = _default_settings;
-          if(_section_settings.contains(custom_sections[j].toString().toStdString()))
-            this_settings = _section_settings[custom_sections[j].toString().toStdString()];
+          if(_section_settings.contains(section_name))
+            this_settings = _section_settings[section_name];
           if (this_override.hasProperty("settings")) 
             this_settings = override_settings(this_settings, this_override["settings"]);
-          _section_settings[custom_sections[j].toString().toStdString()] = this_settings;
+          _section_settings[section_name] = this_settings;
 
           auto this_colors = gui_colors(_default_colors);
-          if (_section_colors.contains(custom_sections[j].toString().toStdString()))
-            this_colors = gui_colors(_section_colors[custom_sections[j].toString().toStdString()]);
+          if (_section_colors.contains(section_name))
+            this_colors = gui_colors(_section_colors[section_name]);
           if (this_override.hasProperty("colors")) 
             this_colors = override_colors(this_colors, this_override["colors"]);
-          _section_colors[custom_sections[j].toString().toStdString()] = gui_colors(this_colors);
+          _section_colors[section_name] = gui_colors(this_colors);
         }
       }
       if (this_override.hasProperty("module_sections"))
@@ -218,23 +219,24 @@ lnf::init_theme(std::filesystem::path const& theme_folder, var const& json)
         assert(module_sections.isArray());
         for (int j = 0; j < module_sections.size(); j++)
         {
+          auto section_name = module_sections[j].toString().toStdString();
           auto this_settings = _default_settings;
-          if (_module_settings.contains(module_sections[j].toString().toStdString()))
-            this_settings = _module_settings[module_sections[j].toString().toStdString()];
+          if (_module_settings.contains(section_name))
+            this_settings = _module_settings[section_name];
           if (this_override.hasProperty("settings"))
             this_settings = override_settings(this_settings, this_override["settings"]);
-          _module_settings[module_sections[j].toString().toStdString()] = this_settings;
+          _module_settings[section_name] = this_settings;
 
           auto this_colors = gui_colors(_default_colors);
-          if (_module_colors.contains(module_sections[j].toString().toStdString()))
-            this_colors = gui_colors(_module_colors[module_sections[j].toString().toStdString()]);
+          if (_module_colors.contains(section_name))
+            this_colors = gui_colors(_module_colors[section_name]);
           if (this_override.hasProperty("colors"))
             this_colors = override_colors(this_colors, this_override["colors"]);
-          _module_colors[module_sections[j].toString().toStdString()] = gui_colors(this_colors);
+          _module_colors[section_name] = gui_colors(this_colors);
         } 
       }    
     }
-  }
+  } 
 
   assert(json.hasProperty("global_settings"));
   var global_settings = json["global_settings"];

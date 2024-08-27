@@ -55,8 +55,8 @@
   },
   "overrides": [
     {
-      "custom_sections": ["Title Text", "Title Image", "Monitor", "Main Graph", "Tweak", "Patch"],
-      "module_sections": ["Master", "Monitor"],   
+      "custom_sections": ["Title Text", "Title Image", "Main Graph", "Tweak", "Patch"],
+      "module_sections": ["Master", "Monitor"],
       "colors": {
         "tab_text": "FFCCCCCC",
         "slider_automation": "FFCCCCCC",
@@ -86,7 +86,7 @@
     },
     {
       "custom_sections": ["Global FX Graph", "Global LFO Graph", "Global Matrix Graphs"],
-      "module_sections": ["Global", "Glob Smt", "Global Out", "Global FX", "Global LFO"],
+      "module_sections": ["Global", "Global Out", "Global FX", "Global LFO"],
       "colors": {
         "tab_text": "FFFF0040",
         "slider_automation": "FFFF0040",

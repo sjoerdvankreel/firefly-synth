@@ -30,7 +30,7 @@ enum {
   custom_section_title,
   custom_section_main_graph,
   custom_section_patch_controls,
-  custom_section_edit_controls,
+  custom_section_edit_controls, 
   custom_section_gfx_graph,
   custom_section_glfo_graph,
   custom_section_global_matrix_graphs,
@@ -503,6 +503,6 @@ synth_topo(bool is_fx, std::string const& full_name)
     make_cv_matrix_sources(result.get(), true),
     make_cv_cv_matrix_targets(result.get(), false));
   return result;
-}
+} 
 
 }
