@@ -57,7 +57,7 @@ public gui_param_listener
   void push_to_audio(int index, plain_value plain);
   void push_to_audio(int index, sync_event_type type);
 
-  void init_tuning_from_extra_state();
+  void init_instance_from_extra_state();
   void process_gui_to_audio_events(clap_output_events_t const* out);
 
 public:

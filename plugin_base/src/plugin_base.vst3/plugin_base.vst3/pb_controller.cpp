@@ -33,7 +33,7 @@ _extra_state(set_join<std::string>({ gui_extra_state_keyset(*_desc->plugin), tun
 { 
   PB_LOG_FUNC_ENTRY_EXIT();
   _gui_state.add_any_listener(this);  
-  init_tuning_from_extra_state();
+  init_instance_from_extra_state();
 
   // fetch mod indicator param tags
   _mod_indicator_states_to_gui.resize(mod_indicator_output_param_count);
@@ -46,7 +46,7 @@ _extra_state(set_join<std::string>({ gui_extra_state_keyset(*_desc->plugin), tun
 }
 
 void
-pb_controller::init_tuning_from_extra_state()
+pb_controller::init_instance_from_extra_state()
 {
   auto const* topo = _gui_state.desc().plugin;
   if (topo->tuning_mode_module == -1 || topo->tuning_mode_param == -1) return;
@@ -93,7 +93,7 @@ pb_controller::setState(IBStream* state)
   PB_LOG_FUNC_ENTRY_EXIT();
   if (!plugin_io_load_extra_state(*_gui_state.desc().plugin, load_ibstream(state), _extra_state).ok())
     return kResultFalse;
-  init_tuning_from_extra_state();
+  init_instance_from_extra_state();
   return kResultOk;
 }
 

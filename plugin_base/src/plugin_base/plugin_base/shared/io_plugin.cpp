@@ -323,7 +323,9 @@ save_patch_state_internal(plugin_state const& state)
       {
         var param_slot_states;
         auto const& param_topo = module_topo.params[p];
-        if(param_topo.dsp.direction == param_direction::output) continue;
+        if (param_topo.dsp.direction == param_direction::output) continue;
+        if (param_topo.info.is_per_instance) continue;
+
         auto param_state = std::make_unique<DynamicObject>();
         for (int pi = 0; pi < param_topo.info.slot_count; pi++)
         {
@@ -433,7 +435,7 @@ load_patch_state_internal(
         var param_slots = json["state"][m]["slots"][mi]["params"][p]["slots"];
         auto const& new_param = state.desc().plugin->modules[module_iter->second].params[param_iter->second];
 
-        // readonly support for per-instance microtuning (outside of the patch)
+        // readonly support for per-instance params outside of the patch
         if (new_param.info.is_per_instance) 
           continue;
 

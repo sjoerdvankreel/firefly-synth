@@ -48,7 +48,7 @@ master_settings_topo(std::string const& vendor, std::string const& full_name, in
   result.graph_renderer = render_graph;
   result.gui.show_tab_header = false;
   result.force_rerender_on_param_hover = true;
-  // TODO state converter  
+  // todo document breaking change 
 
   gui_dimension dimension({ 1 }, { { 1, 1, 1 } });
   auto section_gui = make_param_section_gui({ 0, 0 }, dimension);
@@ -60,18 +60,21 @@ master_settings_topo(std::string const& vendor, std::string const& full_name, in
     make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 0, 1, 1 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   midi_smooth.info.description = "Smoothing MIDI controller changes.";
+  midi_smooth.info.is_per_instance = true;
   auto& bpm_smooth = result.params.emplace_back(make_param(
     make_topo_info_basic("{99B88F8C-6F3B-47E9-932F-D46136252223}", "BPM Smoothing", param_tempo_smooth, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_linear(1, max_other_smoothing_ms, 200, 0, "Ms"),
     make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 1, 1, 1 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   bpm_smooth.info.description = "Smoothing host BPM parameter changes. Affects tempo-synced delay lines.";
+  bpm_smooth.info.is_per_instance = true;
   auto& auto_smooth = result.params.emplace_back(make_param(
     make_topo_info_basic("{AF6D2954-3B17-4A32-895B-FB92433761D6}", "Automation Smoothing", param_auto_smooth, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_linear(1, max_auto_smoothing_ms, 1, 0, "Ms"),
     make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 2, 1, 1 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   auto_smooth.info.description = "Smoothing automation parameter changes.";
+  auto_smooth.info.is_per_instance = true;
   return result;
 }
 

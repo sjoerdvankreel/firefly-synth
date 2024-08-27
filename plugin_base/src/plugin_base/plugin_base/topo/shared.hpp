@@ -73,7 +73,7 @@ struct topo_info final {
   int slot_count;
   topo_tag tag;
 
-  // if this is set, value doesn't get copied into the plug state on patch load
+  // if this is set, value doesn't get copied into the plug state on patch load/save
   bool is_per_instance = false;
 
   // for reference generator
