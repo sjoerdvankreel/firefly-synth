@@ -612,7 +612,7 @@ lnf::drawComboBox(Graphics& g, int width, int height, bool, int, int, int, int, 
       apply_mod_width = apply_mod_width;
       box_width -= apply_mod_width + 2;
     }
-  }
+  } 
 
   int arrowPad = 4;
   int arrowWidth = 6;
@@ -783,14 +783,14 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
   float padding = tabular ? _global_settings.tabular_knob_padding : _global_settings.knob_padding;
 
   // cell background
-  if(tabular) 
+  if(tabular)  
   {
     size_base = 0.9 * std::min(s.getHeight(), s.getWidth());
     scale_factor = size_base / s.getHeight();
     draw_tabular_cell_bg(g, colors().table_cell, &s, global_settings().table_cell_radius);
   }
   
-  float size = size_base - padding;
+  float size = (int)(size_base - padding);
   float left = (s.getWidth() - size) / 2;
   float top = (s.getHeight() - size) / 2;
 

@@ -11,7 +11,7 @@
     "section_radius": "4",
     "param_section_radius": "4",
     "param_section_vpadding": "0",
-    "knob_padding": "6",
+    "knob_padding": "2",
     "tabular_knob_padding": "3",
     "min_scale": "0.5",
     "max_scale": "8.0",
@@ -20,7 +20,7 @@
     "aspect_ratio_height_fx": "28",
     "default_width_instrument": "1280",
     "aspect_ratio_width_instrument": "118",
-    "aspect_ratio_height_instrument": "64"
+    "aspect_ratio_height_instrument": "62"
   },
   "default_settings": {
     "tab_width": "33",
