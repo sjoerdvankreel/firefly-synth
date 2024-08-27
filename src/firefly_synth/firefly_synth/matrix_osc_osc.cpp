@@ -33,7 +33,7 @@ enum {
   param_fm_on, param_fm_source, param_fm_target, param_fm_mode, param_fm_idx,
 };
 
-static int const route_count = 9;
+static int const route_count = 10;
 
 std::unique_ptr<graph_engine> make_osc_graph_engine(plugin_desc const* desc);
 std::vector<graph_data> render_osc_graphs(plugin_state const& state, graph_engine* engine, int slot, bool for_osc_osc_matrix);

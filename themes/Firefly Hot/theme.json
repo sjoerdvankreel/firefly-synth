@@ -12,7 +12,7 @@
     "param_section_radius": "4",
     "param_section_vpadding": "0",
     "knob_padding": "2",
-    "tabular_knob_padding": "3",
+    "tabular_knob_padding": "0",
     "min_scale": "0.5",
     "max_scale": "8.0",
     "default_width_fx": "1280",

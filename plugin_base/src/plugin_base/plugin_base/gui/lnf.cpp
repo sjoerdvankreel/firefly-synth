@@ -616,13 +616,13 @@ lnf::drawComboBox(Graphics& g, int width, int height, bool, int, int, int, int, 
 
   int arrowPad = 4;
   int arrowWidth = 6;
-  int arrowHeight = 4;
-  int const fixedHeight = combo_height(tabular) - (tabular? 4: 0);
+  int arrowHeight = 4; 
+  int const fixedHeight = combo_height(tabular) - (tabular? 2: 0);
   int const comboTop = height < fixedHeight ? 0 : (height - fixedHeight) / 2;
   auto cornerSize = box.findParentComponentOfClass<ChoicePropertyComponent>() != nullptr ? 0.0f : global_settings().combo_radius;
   int x = tabular ? 3 : 1;
   int y = comboTop;
-  int w = box_width - 2 - (tabular ? 4 : 0);
+  int w = box_width - 2 - (tabular ? 2 : 0);
   int h = fixedHeight;
 
   // highlight
