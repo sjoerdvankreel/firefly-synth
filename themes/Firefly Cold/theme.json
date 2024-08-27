@@ -55,8 +55,8 @@
   },
   "overrides": [
     {
-      "custom_sections": ["Master", "Title Text", "Title Image", "Monitor", "Main Graph", "Tweak", "Patch"],
-      "module_sections": ["Monitor"],
+      "custom_sections": ["Title Text", "Title Image", "Monitor", "Main Graph", "Tweak", "Patch"],
+      "module_sections": ["Master", "Monitor"],        
       "colors": {
         "tab_text": "FFCCCCCC",
         "slider_automation": "FFCCCCCC",

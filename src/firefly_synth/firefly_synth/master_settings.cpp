@@ -40,7 +40,7 @@ master_settings_topo(std::string const& vendor, std::string const& full_name, in
 {
   std::vector<int> row_distribution = { 1 };
   std::vector<int> column_distribution = { 1 };
-  module_topo result(make_module(
+  module_topo result(make_module( 
     make_topo_info_basic("{7F400614-E996-4B02-9B78-80E22F1C44A4}", "Master", module_master_settings, 1),
     make_module_dsp(module_stage::input, module_output::none, 0, {}),
       make_module_gui(section, pos, { row_distribution, column_distribution } )));
@@ -48,7 +48,7 @@ master_settings_topo(std::string const& vendor, std::string const& full_name, in
   result.graph_renderer = render_graph;
   result.gui.show_tab_header = false;
   result.force_rerender_on_param_hover = true;
-  // TODO state converter 
+  // TODO state converter  
 
   gui_dimension dimension({ 1 }, { { 1, 1, 1 } });
   auto section_gui = make_param_section_gui({ 0, 0 }, dimension);
