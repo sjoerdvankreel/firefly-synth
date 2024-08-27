@@ -67,7 +67,7 @@ make_plugin_dimension(bool is_fx, plugin_topo_gui_theme_settings const& settings
   gui_dimension result;  
   result.column_sizes = { synth_first_column_size, synth_second_column_size, 127, 34, 64, 64 };
   int height = settings.get_default_width(is_fx) * settings.get_aspect_ratio_height(is_fx) / settings.get_aspect_ratio_width(is_fx);
-  std::vector<gui_vertical_section_size> section_vsizes = { { true, 1 }, { true, 2 }, { true, 2.25f }, { true, 4 }, { true, 4 } };
+  std::vector<gui_vertical_section_size> section_vsizes = { { true, 2 }, { true, 1 }, { true, 2.25f }, { true, 4 }, { true, 4 } };
   if (!is_fx) section_vsizes.insert(section_vsizes.end(), { { true, 4 }, { true, 4 }, { true, 4 }, { true, 4 }, { true, 4 } });
   result.row_sizes = gui_vertical_distribution(height, settings.get_font_height(), section_vsizes);
   return result;
@@ -377,15 +377,15 @@ synth_topo(bool is_fx, std::string const& full_name)
   auto make_title_section_ui = [is_fx](plugin_gui* gui, lnf* lnf, auto store) -> Component& {
     return make_title_section(gui, lnf, store, is_fx); };
   result->gui.custom_sections[custom_section_title] = make_custom_section_gui(
-    custom_section_title, "Title", { 1, 0, 1, 2 }, make_title_section_ui);
+    custom_section_title, "Title", { 0, 0, 1, 2 }, make_title_section_ui);
   result->gui.custom_sections[custom_section_patch_controls] = make_custom_section_gui(
-    custom_section_patch_controls, "Patch", { 1, 5, 1, 1 }, 
+    custom_section_patch_controls, "Patch", { 0, 5, 1, 1 }, 
       [](auto gui, auto lnf, auto store) -> juce::Component& { return make_patch_controls_section(gui, lnf, store); });
   result->gui.custom_sections[custom_section_edit_controls] = make_custom_section_gui(
-    custom_section_edit_controls, "Tweak", { 1, 4, 1, 1 }, 
+    custom_section_edit_controls, "Tweak", { 0, 4, 1, 1 }, 
       [](auto gui, auto lnf, auto store) -> juce::Component& { return make_edit_controls_section(gui, lnf, store); });
   result->gui.custom_sections[custom_section_main_graph] = make_custom_section_gui(
-    custom_section_main_graph, main_graph_name, { 1, 3, 1, 1 }, [](auto* gui, auto* lnf, auto store)
+    custom_section_main_graph, main_graph_name, { 0, 3, 1, 1 }, [](auto* gui, auto* lnf, auto store)
     -> Component& { return make_main_graph_section(gui, lnf, store); });
   result->gui.custom_sections[custom_section_gfx_graph] = make_custom_section_gui(
     custom_section_gfx_graph, gfx_graph_name, { 3, 3, 1, 1 }, [](auto* gui, auto* lnf, auto store)
@@ -432,11 +432,11 @@ synth_topo(bool is_fx, std::string const& full_name)
   result->gui.module_sections[module_section_global_in] = make_module_section_gui(
     "{F9578AAA-66A4-4B0C-A941-4719B5F0E998}", module_section_global_in, { 2, 0, 1, 3 }, { 1, 1 });
   result->gui.module_sections[module_section_master_settings] = make_module_section_gui(
-    "{D7ECBB86-2257-43DE-80FA-A648F648F715}", module_section_master_settings, { 0, 0, 1, 6 }, { 1, 1 });
+    "{D7ECBB86-2257-43DE-80FA-A648F648F715}", module_section_master_settings, { 1, 0, 1, 6 }, { 1, 1 });
   result->gui.module_sections[module_section_global_out] = make_module_section_gui(
     "{F77335AC-B701-40DA-B4C2-1F55DBCC29A4}", module_section_global_out, { 2, 3, 1, 1 }, { { 1 }, { 1 } });
   result->gui.module_sections[module_section_monitor] = make_module_section_gui(
-    "{8FDAEB21-8876-4A90-A8E1-95A96FB98FD8}", module_section_monitor, { 1, 2, 1, 1 }, { { 1 }, { 1 } });
+    "{8FDAEB21-8876-4A90-A8E1-95A96FB98FD8}", module_section_monitor, { 0, 2, 1, 1 }, { { 1 }, { 1 } });
 
   if(is_fx) 
   {
