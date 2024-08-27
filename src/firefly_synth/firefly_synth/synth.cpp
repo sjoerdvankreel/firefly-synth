@@ -44,6 +44,7 @@ enum {
 
 enum { 
   module_section_hidden, 
+  module_section_master_settings,
   module_section_global_in,
   module_section_global_out,
   module_section_gfx, 
@@ -62,12 +63,12 @@ enum {
 
 static gui_dimension
 make_plugin_dimension(bool is_fx, plugin_topo_gui_theme_settings const& settings)
-{
-  gui_dimension result;
+{    
+  gui_dimension result;  
   result.column_sizes = { synth_first_column_size, synth_second_column_size, 127, 34, 64, 64 };
   int height = settings.get_default_width(is_fx) * settings.get_aspect_ratio_height(is_fx) / settings.get_aspect_ratio_width(is_fx);
-  std::vector<gui_vertical_section_size> section_vsizes = { { true, 1 }, { true, 1 }, { true, 2 }, { true, 2 } };
-  if (!is_fx) section_vsizes.insert(section_vsizes.end(), { { true, 2 }, { true, 2 }, { true, 2 }, { true, 2 }, { true, 2 } });
+  std::vector<gui_vertical_section_size> section_vsizes = { { true, 1 }, { true, 2 }, { true, 2.25f }, { true, 4 }, { true, 4 } };
+  if (!is_fx) section_vsizes.insert(section_vsizes.end(), { { true, 4 }, { true, 4 }, { true, 4 }, { true, 4 }, { true, 4 } });
   result.row_sizes = gui_vertical_distribution(height, settings.get_font_height(), section_vsizes);
   return result;
 }
@@ -121,7 +122,7 @@ make_main_graph_section(plugin_gui* gui, lnf* lnf, component_store store)
   module_params.render_on_module_mouse_enter = true;
   module_params.render_on_mod_indicator_change = true;
   module_params.render_on_param_mouse_enter_modules = {
-    module_gcv_cv_matrix, module_global_in, module_global_smoothing, module_vcv_cv_matrix, module_voice_in, module_osc_osc_matrix,
+    module_gcv_cv_matrix, module_global_in, module_master_settings, module_vcv_cv_matrix, module_voice_in, module_osc_osc_matrix,
     module_vaudio_audio_matrix, module_gaudio_audio_matrix, module_vcv_audio_matrix, module_gcv_audio_matrix };
   return store_component<module_graph>(store, gui, lnf, params, module_params);
 }
@@ -338,12 +339,12 @@ synth_topo(bool is_fx, std::string const& full_name)
   result->version.patch = FF_SYNTH_VERSION_PATCH;
   result->voice_mode_module = module_voice_in;
   result->voice_mode_param = voice_in_param_mode;
-  result->bpm_smooth_module = module_global_smoothing;
-  result->bpm_smooth_param = global_smoothing_param_tempo_smooth;
-  result->midi_smooth_module = module_global_smoothing;
-  result->midi_smooth_param = global_smoothing_param_midi_smooth;
-  result->auto_smooth_module = module_global_smoothing;
-  result->auto_smooth_param = global_smoothing_param_auto_smooth;
+  result->bpm_smooth_module = module_master_settings;
+  result->bpm_smooth_param = master_settings_param_tempo_smooth;
+  result->midi_smooth_module = module_master_settings;
+  result->midi_smooth_param = master_settings_param_midi_smooth;
+  result->auto_smooth_module = module_master_settings;
+  result->auto_smooth_param = master_settings_param_auto_smooth;
   result->tuning_mode_module = is_fx? -1: module_global_in;
   result->tuning_mode_param = is_fx ? -1 : global_in_param_tuning_mode;
 
@@ -376,48 +377,48 @@ synth_topo(bool is_fx, std::string const& full_name)
   auto make_title_section_ui = [is_fx](plugin_gui* gui, lnf* lnf, auto store) -> Component& {
     return make_title_section(gui, lnf, store, is_fx); };
   result->gui.custom_sections[custom_section_title] = make_custom_section_gui(
-    custom_section_title, "Title", { 0, 0, 1, 2 }, make_title_section_ui);
+    custom_section_title, "Title", { 1, 0, 1, 2 }, make_title_section_ui);
   result->gui.custom_sections[custom_section_patch_controls] = make_custom_section_gui(
-    custom_section_patch_controls, "Patch", { 0, 5, 1, 1 }, 
+    custom_section_patch_controls, "Patch", { 1, 5, 1, 1 }, 
       [](auto gui, auto lnf, auto store) -> juce::Component& { return make_patch_controls_section(gui, lnf, store); });
   result->gui.custom_sections[custom_section_edit_controls] = make_custom_section_gui(
-    custom_section_edit_controls, "Tweak", { 0, 4, 1, 1 }, 
+    custom_section_edit_controls, "Tweak", { 1, 4, 1, 1 }, 
       [](auto gui, auto lnf, auto store) -> juce::Component& { return make_edit_controls_section(gui, lnf, store); });
   result->gui.custom_sections[custom_section_main_graph] = make_custom_section_gui(
-    custom_section_main_graph, main_graph_name, { 0, 3, 1, 1 }, [](auto* gui, auto* lnf, auto store)
+    custom_section_main_graph, main_graph_name, { 1, 3, 1, 1 }, [](auto* gui, auto* lnf, auto store)
     -> Component& { return make_main_graph_section(gui, lnf, store); });
   result->gui.custom_sections[custom_section_gfx_graph] = make_custom_section_gui(
-    custom_section_gfx_graph, gfx_graph_name, { 2, 3, 1, 1 }, [](auto* gui, auto* lnf, auto store)
+    custom_section_gfx_graph, gfx_graph_name, { 3, 3, 1, 1 }, [](auto* gui, auto* lnf, auto store)
     -> Component& { return make_module_graph_section(gui, lnf, store, module_gfx, gfx_graph_name, false, false, false, {}); });
   result->gui.custom_sections[custom_section_glfo_graph] = make_custom_section_gui(
-    custom_section_glfo_graph, glfo_graph_name, { 3, 3, 1, 1 }, [](auto* gui, auto* lnf, auto store)
+    custom_section_glfo_graph, glfo_graph_name, { 4, 3, 1, 1 }, [](auto* gui, auto* lnf, auto store)
     -> Component& { return make_module_graph_section(gui, lnf, store, module_glfo, glfo_graph_name, false, false, true, {}); });
   if (is_fx)
   {
     result->gui.custom_sections[custom_section_global_matrix_graphs] = make_custom_section_gui(
-      custom_section_global_matrix_graphs, global_matrix_graphs_name, { 3, 4, 1, 2 }, [](auto* gui, auto* lnf, auto store)
+      custom_section_global_matrix_graphs, global_matrix_graphs_name, { 4, 4, 1, 2 }, [](auto* gui, auto* lnf, auto store)
       -> Component& { return make_matrix_graphs_section(gui, lnf, store, true, module_section_global_matrices, global_matrix_graphs_name); });
   }
   else
   {
     result->gui.custom_sections[custom_section_osc_graph] = make_custom_section_gui(
-      custom_section_osc_graph, osc_graph_name, { 5, 3, 1, 1 }, [](auto* gui, auto* lnf, auto store)
+      custom_section_osc_graph, osc_graph_name, { 6, 3, 1, 1 }, [](auto* gui, auto* lnf, auto store)
       -> Component& { return make_module_graph_section(gui, lnf, store, module_osc, osc_graph_name, false, false, false, { module_osc_osc_matrix, module_voice_in }); });
     result->gui.custom_sections[custom_section_vfx_graph] = make_custom_section_gui(
-      custom_section_vfx_graph, vfx_graph_name, { 6, 3, 1, 1 }, [](auto* gui, auto* lnf, auto store)
+      custom_section_vfx_graph, vfx_graph_name, { 7, 3, 1, 1 }, [](auto* gui, auto* lnf, auto store)
       -> Component& { return make_module_graph_section(gui, lnf, store, module_vfx, vfx_graph_name, false, false, false, {}); });
     result->gui.custom_sections[custom_section_vlfo_graph] = make_custom_section_gui(
-      custom_section_vlfo_graph, vlfo_graph_name, { 7, 3, 1, 1 }, [](auto* gui, auto* lnf, auto store)
+      custom_section_vlfo_graph, vlfo_graph_name, { 8, 3, 1, 1 }, [](auto* gui, auto* lnf, auto store)
       -> Component& { return make_module_graph_section(gui, lnf, store, module_vlfo, vlfo_graph_name, false, false, true, {}); });
     result->gui.custom_sections[custom_section_env_graph] = make_custom_section_gui(
-      custom_section_env_graph, env_graph_name, { 8, 3, 1, 1 }, [](auto* gui, auto* lnf, auto store)
+      custom_section_env_graph, env_graph_name, { 9, 3, 1, 1 }, [](auto* gui, auto* lnf, auto store)
       -> Component& { return make_module_graph_section(gui, lnf, store, module_env, env_graph_name, false, false, true, {}); });
     result->gui.custom_sections[custom_section_global_matrix_graphs] = make_custom_section_gui(
-      custom_section_global_matrix_graphs, global_matrix_graphs_name, { 3, 4, 1, 2 }, [](auto* gui, auto* lnf, auto store)
+      custom_section_global_matrix_graphs, global_matrix_graphs_name, { 4, 4, 1, 2 }, [](auto* gui, auto* lnf, auto store)
       -> Component& { return make_matrix_graphs_section(gui, lnf, store, false, module_section_global_matrices, global_matrix_graphs_name); });
 
     result->gui.custom_sections[custom_section_voice_matrix_graphs] = make_custom_section_gui(
-      custom_section_voice_matrix_graphs, voice_matrix_graphs_name, { 8, 4, 1, 2 }, [](auto* gui, auto* lnf, auto store)
+      custom_section_voice_matrix_graphs, voice_matrix_graphs_name, { 9, 4, 1, 2 }, [](auto* gui, auto* lnf, auto store)
       -> Component& { return make_matrix_graphs_section(gui, lnf, store, false, module_section_voice_matrices, voice_matrix_graphs_name); });
   }
 
@@ -425,44 +426,45 @@ synth_topo(bool is_fx, std::string const& full_name)
   result->gui.module_sections[module_section_hidden] = make_module_section_gui_none(
     "{F289D07F-0A00-4AB1-B87B-685CB4D8B2F8}", module_section_hidden);
   result->gui.module_sections[module_section_glfo] = make_module_section_gui(
-    "{96C75EE5-577E-4508-A85A-E92FF9FD8A4D}", module_section_glfo, { 3, 0, 1, 3 }, { 1, 1 });
+    "{96C75EE5-577E-4508-A85A-E92FF9FD8A4D}", module_section_glfo, { 4, 0, 1, 3 }, { 1, 1 });
   result->gui.module_sections[module_section_gfx] = make_module_section_gui(
-    "{654B206B-27AE-4DFD-B885-772A8AD0A4F3}", module_section_gfx, { 2, 0, 1, 3 }, { 1, 1 });
-  result->gui.module_sections[module_section_global_in] = make_module_section_gui_tabbed(
-    "{F9578AAA-66A4-4B0C-A941-4719B5F0E998}", module_section_global_in, { 1, 0, 1, 3 }, { module_global_in, module_global_smoothing });
-  result->gui.module_sections[module_section_global_in].auto_size_tab_headers = true;
+    "{654B206B-27AE-4DFD-B885-772A8AD0A4F3}", module_section_gfx, { 3, 0, 1, 3 }, { 1, 1 });
+  result->gui.module_sections[module_section_global_in] = make_module_section_gui(
+    "{F9578AAA-66A4-4B0C-A941-4719B5F0E998}", module_section_global_in, { 2, 0, 1, 3 }, { 1, 1 });
+  result->gui.module_sections[module_section_master_settings] = make_module_section_gui(
+    "{D7ECBB86-2257-43DE-80FA-A648F648F715}", module_section_master_settings, { 0, 0, 1, 6 }, { 1, 1 });
   result->gui.module_sections[module_section_global_out] = make_module_section_gui(
-    "{F77335AC-B701-40DA-B4C2-1F55DBCC29A4}", module_section_global_out, { 1, 3, 1, 1 }, { { 1 }, { 1 } });
+    "{F77335AC-B701-40DA-B4C2-1F55DBCC29A4}", module_section_global_out, { 2, 3, 1, 1 }, { { 1 }, { 1 } });
   result->gui.module_sections[module_section_monitor] = make_module_section_gui(
-    "{8FDAEB21-8876-4A90-A8E1-95A96FB98FD8}", module_section_monitor, { 0, 2, 1, 1 }, { { 1 }, { 1 } });
+    "{8FDAEB21-8876-4A90-A8E1-95A96FB98FD8}", module_section_monitor, { 1, 2, 1, 1 }, { { 1 }, { 1 } });
 
   if(is_fx) 
   {
     std::vector<int> fx_only_matrix_modules = { 
       module_gaudio_audio_matrix, module_gcv_audio_matrix, module_gcv_cv_matrix };
     result->gui.module_sections[module_section_global_matrices] = make_module_section_gui_tabbed(
-      "{D450B51E-468E-457E-B954-FF1B9645CADB}", module_section_global_matrices, { 1, 4, 2, 2 }, fx_only_matrix_modules);
+      "{D450B51E-468E-457E-B954-FF1B9645CADB}", module_section_global_matrices, { 2, 4, 2, 2 }, fx_only_matrix_modules);
   } else 
   {
     result->gui.module_sections[module_section_vlfo] = make_module_section_gui(
-      "{0DA0E7C3-8DBB-440E-8830-3B6087F23B81}", module_section_vlfo, { 7, 0, 1, 3 }, { 1, 1 });
+      "{0DA0E7C3-8DBB-440E-8830-3B6087F23B81}", module_section_vlfo, { 8, 0, 1, 3 }, { 1, 1 });
     result->gui.module_sections[module_section_vfx] = make_module_section_gui(
-      "{5BD5F320-3CA9-490B-B69E-36A003F41CEC}", module_section_vfx, { 6, 0, 1, 3 }, { 1, 1 });
+      "{5BD5F320-3CA9-490B-B69E-36A003F41CEC}", module_section_vfx, { 7, 0, 1, 3 }, { 1, 1 });
     result->gui.module_sections[module_section_env] = make_module_section_gui(
-      "{AB26F56E-DC6D-4F0B-845D-C750728F8FA2}", module_section_env, { 8, 0, 1, 3 }, { 1, 1 });
+      "{AB26F56E-DC6D-4F0B-845D-C750728F8FA2}", module_section_env, { 9, 0, 1, 3 }, { 1, 1 });
     result->gui.module_sections[module_section_osc] = make_module_section_gui(
-      "{7A457CCC-E719-4C07-98B1-017EA7DEFB1F}", module_section_osc, { 5, 0, 1, 3 }, { { 1 }, { 1 } });
+      "{7A457CCC-E719-4C07-98B1-017EA7DEFB1F}", module_section_osc, { 6, 0, 1, 3 }, { { 1 }, { 1 } });
     result->gui.module_sections[module_section_voice_in] = make_module_section_gui(
-      "{FB435C64-8349-4F0F-84FC-FFC82002D69F}", module_section_voice_in, { 4, 0, 1, 3 }, { { 1 }, { 1 } });
+      "{FB435C64-8349-4F0F-84FC-FFC82002D69F}", module_section_voice_in, { 5, 0, 1, 3 }, { { 1 }, { 1 } });
     result->gui.module_sections[module_section_voice_out] = make_module_section_gui(
-      "{2B764ECA-B745-4087-BB73-1B5952BC6B96}", module_section_voice_out, { 4, 3, 1, 1 }, { { 1 }, { 1 } });
+      "{2B764ECA-B745-4087-BB73-1B5952BC6B96}", module_section_voice_out, { 5, 3, 1, 1 }, { { 1 }, { 1 } });
 
     std::vector<int> global_matrix_modules = { module_gaudio_audio_matrix, module_gcv_audio_matrix, module_gcv_cv_matrix };
     std::vector<int> voice_matrix_modules = { module_osc_osc_matrix, module_vaudio_audio_matrix, module_vcv_audio_matrix, module_vcv_cv_matrix };
     result->gui.module_sections[module_section_global_matrices] = make_module_section_gui_tabbed(
-      "{628D5FCB-0672-47A5-A23D-31257D4CCAF1}", module_section_global_matrices, { 1, 4, 2, 2 }, global_matrix_modules);
+      "{628D5FCB-0672-47A5-A23D-31257D4CCAF1}", module_section_global_matrices, { 2, 4, 2, 2 }, global_matrix_modules);
     result->gui.module_sections[module_section_voice_matrices] = make_module_section_gui_tabbed(
-      "{9BEB7D58-47AB-4E2D-891B-349607170508}", module_section_voice_matrices, { 4, 4, 4, 2 }, voice_matrix_modules);
+      "{9BEB7D58-47AB-4E2D-891B-349607170508}", module_section_voice_matrices, { 5, 4, 4, 2 }, voice_matrix_modules);
   }
 
   result->modules.resize(module_count);
@@ -477,7 +479,7 @@ synth_topo(bool is_fx, std::string const& full_name)
   result->modules[module_vlfo] = lfo_topo(is_fx ? module_section_hidden : module_section_vlfo, { 0, 0 }, false, is_fx);
   result->modules[module_osc] = osc_topo(is_fx ? module_section_hidden : module_section_osc, { 0, 0 });
   result->modules[module_global_in] = global_in_topo(module_section_global_in, is_fx, { 0, 0 });
-  result->modules[module_global_smoothing] = global_smoothing_topo(result->vendor, result->full_name, module_section_global_in, { 0, 0 });
+  result->modules[module_master_settings] = master_settings_topo(result->vendor, result->full_name, module_section_master_settings, { 0, 0 });
   result->modules[module_voice_on_note] = voice_on_note_topo(result.get(), module_section_hidden); // must be after all global cv  
   result->modules[module_voice_in] = voice_in_topo(is_fx ? module_section_hidden : module_section_voice_in, { 0, 0 }); // must be after all cv
   result->modules[module_voice_out] = audio_out_topo(is_fx ? module_section_hidden : module_section_voice_out, { 0, 0 }, false);

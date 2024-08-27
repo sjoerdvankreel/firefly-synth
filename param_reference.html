@@ -16,7 +16,15 @@
 <th>Description</th>
 </tr>
 <tr>
+<td><a href='#1'>1</a></td>
+<td>Master</td>
+<td>Yes</td>
+<td>Before voice</td>
 <td>1</td>
+<td class='description'>Automation, MIDI and BPM smoothing control.</td>
+</tr>
+<tr>
+<td>2</td>
 <td>External Audio</td>
 <td>No</td>
 <td>Before voice</td>
@@ -24,7 +32,7 @@
 <td class='description'>In FX mode, provides external audio input to the global audio matrix.</td>
 </tr>
 <tr>
-<td>2</td>
+<td>3</td>
 <td>MIDI</td>
 <td>No</td>
 <td>Before voice</td>
@@ -32,7 +40,7 @@
 <td class='description'>Provides MIDI pitchbend, channel pressure and 128 CC parameters as modulation sources.</td>
 </tr>
 <tr>
-<td><a href='#3'>3</a></td>
+<td><a href='#4'>4</a></td>
 <td>GCV-CV</td>
 <td>Yes</td>
 <td>Before voice</td>
@@ -40,20 +48,12 @@
 <td class='description'>CV-To-CV routing matrix with min/max control and various stacking options that affect how source signals are combined in case they affect the same target.</td>
 </tr>
 <tr>
-<td><a href='#4'>4</a></td>
+<td><a href='#5'>5</a></td>
 <td>Global</td>
 <td>Yes</td>
 <td>Before voice</td>
 <td>1</td>
 <td class='description'>Global CV module with MIDI-linked modwheel and pitchbend, and some additional freely-assignable parameters.</td>
-</tr>
-<tr>
-<td><a href='#5'>5</a></td>
-<td>Glob Smt</td>
-<td>Yes</td>
-<td>Before voice</td>
-<td>1</td>
-<td class='description'>Automation, MIDI and BPM smoothing control.</td>
 </tr>
 <tr>
 <td><a href='#6'>6</a></td>
@@ -209,7 +209,72 @@
 </tr>
 </table>
 <h2>Parameter Overview</h2>
-<a name='3'/>
+<a name='1'/>
+<h3>Master</h3>
+<table>
+<tr>
+<th>Name</th>
+<th>Section</th>
+<th>UI</th>
+<th>Num</th>
+<th>Dir</th>
+<th>Rate</th>
+<th>Automate</th>
+<th>Min</th>
+<th>Max</th>
+<th>Default</th>
+<th>Log Midpoint</th>
+</tr>
+<tr>
+<td rowspan='2'>MIDI Smoothing</td>
+<td>Main</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Block</td>
+<td>None</td>
+<td>1 Ms</td>
+<td>1000 Ms</td>
+<td>50 Ms</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Smoothing MIDI controller changes.</td>
+</tr>
+<tr>
+<td rowspan='2'>BPM Smoothing</td>
+<td>Main</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Block</td>
+<td>None</td>
+<td>1 Ms</td>
+<td>1000 Ms</td>
+<td>200 Ms</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Smoothing host BPM parameter changes. Affects tempo-synced delay lines.</td>
+</tr>
+<tr>
+<td rowspan='2'>Automation Smoothing</td>
+<td>Main</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Block</td>
+<td>None</td>
+<td>1 Ms</td>
+<td>50 Ms</td>
+<td>1 Ms</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Smoothing automation parameter changes.</td>
+</tr>
+</table>
+<a name='4'/>
 <h3>GCV-CV</h3>
 <table>
 <tr>
@@ -338,7 +403,7 @@
 <td colspan='11' class='description'>Defines the bounds of the modulation effect. When min > max, modulation will invert.</td>
 </tr>
 </table>
-<a name='4'/>
+<a name='5'/>
 <h3>Global</h3>
 <table>
 <tr>
@@ -433,71 +498,6 @@
 </tr>
 <tr>
 <td colspan='11' class='description'>Per-instance tuning parameter (readonly).</td>
-</tr>
-</table>
-<a name='5'/>
-<h3>Glob Smt</h3>
-<table>
-<tr>
-<th>Name</th>
-<th>Section</th>
-<th>UI</th>
-<th>Num</th>
-<th>Dir</th>
-<th>Rate</th>
-<th>Automate</th>
-<th>Min</th>
-<th>Max</th>
-<th>Default</th>
-<th>Log Midpoint</th>
-</tr>
-<tr>
-<td rowspan='2'>MIDI Smoothing</td>
-<td>Main</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Block</td>
-<td>None</td>
-<td>1 Ms</td>
-<td>1000 Ms</td>
-<td>50 Ms</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Smoothing MIDI controller changes.</td>
-</tr>
-<tr>
-<td rowspan='2'>BPM Smoothing</td>
-<td>Main</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Block</td>
-<td>None</td>
-<td>1 Ms</td>
-<td>1000 Ms</td>
-<td>200 Ms</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Smoothing host BPM parameter changes. Affects tempo-synced delay lines.</td>
-</tr>
-<tr>
-<td rowspan='2'>Automation Smoothing</td>
-<td>Main</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Block</td>
-<td>None</td>
-<td>1 Ms</td>
-<td>50 Ms</td>
-<td>1 Ms</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Smoothing automation parameter changes.</td>
 </tr>
 </table>
 <a name='6'/>

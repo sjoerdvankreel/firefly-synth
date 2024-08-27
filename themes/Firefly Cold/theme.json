@@ -17,10 +17,10 @@
     "max_scale": "8.0",
     "default_width_fx": "1280",
     "aspect_ratio_width_fx": "118",
-    "aspect_ratio_height_fx": "24",
+    "aspect_ratio_height_fx": "28",
     "default_width_instrument": "1280",
     "aspect_ratio_width_instrument": "118",
-    "aspect_ratio_height_instrument": "60"
+    "aspect_ratio_height_instrument": "64"
   },
   "default_settings": {
     "tab_width": "33",
@@ -55,7 +55,7 @@
   },
   "overrides": [
     {
-      "custom_sections": ["Title Text", "Title Image", "Monitor", "Main Graph", "Tweak", "Patch"],
+      "custom_sections": ["Master", "Title Text", "Title Image", "Monitor", "Main Graph", "Tweak", "Patch"],
       "module_sections": ["Monitor"],
       "colors": {
         "tab_text": "FFCCCCCC",
