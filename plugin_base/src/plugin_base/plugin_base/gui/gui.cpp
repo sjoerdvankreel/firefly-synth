@@ -721,7 +721,9 @@ plugin_gui::make_modules(module_desc const* slots)
   {
     // tabbed param sections in multi-slot modules not supported
     assert(topo.info.slot_count == 1);
-    return make_param_sections(slots[0]);
+    auto& result = make_param_sections(slots[0]);
+    result.setLookAndFeel(module_lnf(slots[0].module->info.index));
+    return result;
   }
 
   // case the module itself is tabbed (osc 1 2 3 etc)
