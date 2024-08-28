@@ -18,11 +18,10 @@ static int const aux_count = 6;
 
 enum { section_aux, section_linked };
 enum { output_aux, output_mod, output_pb };
-enum { param_aux, param_mod, param_pb, param_pb_range, param_tuning_mode, param_count }; // todo move tunmode
+enum { param_aux, param_mod, param_pb, param_pb_range, param_count };
 
 // we provide the buttons, everyone else needs to implement it
 extern int const global_in_param_pb_range = param_pb_range;
-extern int const global_in_param_tuning_mode = param_tuning_mode;
 
 class global_in_engine :
 public module_engine {
@@ -111,14 +110,6 @@ global_in_topo(int section, bool is_fx, gui_position const& pos)
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   pb_range.info.description = "Pitch bend range. Together with Pitch Bend this affects the base pitch of all oscillators.";
   pb_range.gui.bindings.enabled.bind_slot([is_fx](int) { return !is_fx; });
-
-  // todo move to settings
-  auto& tuning_mode_audio_param = result.params.emplace_back(make_param(
-    make_topo_info("{28C619C2-C04E-4BD6-8D84-89667E1A5659}", true, "Tuning Mode", "Tuning Mode", "Tuning Mode", param_tuning_mode, 1),
-    make_param_dsp_input(false, param_automate::none), make_domain_item(engine_tuning_mode_items(), "On Note Before Mod"), // default must be same as extra_state
-    make_param_gui_none()));
-  tuning_mode_audio_param.info.per_instance_key = "plugin_tuning_mode";
-  tuning_mode_audio_param.info.description = "Per-instance tuning parameter (readonly).";
   return result;
 }
 

@@ -14,12 +14,13 @@ static int const max_auto_smoothing_ms = 50;
 static int const max_other_smoothing_ms = 1000;
 
 enum { section_main }; 
-enum { param_midi_smooth, param_tempo_smooth, param_auto_smooth, param_count };
+enum { param_midi_smooth, param_tempo_smooth, param_auto_smooth, param_tuning_mode, param_count };
 
 // we provide the buttons, everyone else needs to implement it
 extern int const master_settings_param_auto_smooth = param_auto_smooth;
 extern int const master_settings_param_midi_smooth = param_midi_smooth;
 extern int const master_settings_param_tempo_smooth = param_tempo_smooth;
+extern int const master_settings_param_tuning_mode = param_tuning_mode;
 
 static graph_data
 render_graph(plugin_state const& state, graph_engine* engine, int param, param_topo_mapping const& mapping)
@@ -50,7 +51,7 @@ master_settings_topo(std::string const& vendor, std::string const& full_name, in
   result.force_rerender_on_param_hover = true;
   // todo document breaking change 
 
-  gui_dimension dimension({ 1 }, { { 1, 1, 1 } });
+  gui_dimension dimension({ 1 }, { { 1, 1, 1, 1 } });
   auto section_gui = make_param_section_gui({ 0, 0 }, dimension);
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag_basic("{650CEC37-B01B-4EE6-A010-34C2AE1C66B0}", "Main"), section_gui));
@@ -75,6 +76,13 @@ master_settings_topo(std::string const& vendor, std::string const& full_name, in
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   auto_smooth.info.description = "Smoothing automation parameter changes.";
   auto_smooth.info.per_instance_key = "plugin_automation_smoothing";
+  auto& tuning_mode = result.params.emplace_back(make_param(
+    make_topo_info_basic("{28C619C2-C04E-4BD6-8D84-89667E1A5659}", "Tuning Mode", param_tuning_mode, 1),
+    make_param_dsp_input(false, param_automate::none), make_domain_item(engine_tuning_mode_items(), "On Note Before Mod"),
+    make_param_gui_single(section_main, gui_edit_type::list, { 0, 3, 1, 1 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
+  tuning_mode.info.per_instance_key = "plugin_tuning_mode";
+  tuning_mode.info.description = "Microtuning mode."; // TODO per_instance in refgen
   return result;
 }
 

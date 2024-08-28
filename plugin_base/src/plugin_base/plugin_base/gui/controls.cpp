@@ -229,7 +229,7 @@ autofit_label(lnf, value_ref_text(gui, param))
 { init(); }
 
 void
-param_value_label::own_param_changed(plain_value plain)
+param_value_label::own_param_changed_core(plain_value plain)
 { 
   std::string text = _gui->gui_state()->plain_to_text_at_index(false, _param->info.global, plain);
   setText(text, dontSendNotification); 
@@ -372,65 +372,6 @@ _gui(gui), _themes(gui->gui_state()->desc().themes())
   };
 }
 
-tuning_mode_button::
-~tuning_mode_button()
-{
-  auto const* topo = _gui->gui_state()->desc().plugin;
-  if (topo->engine.tuning_mode.module_index != -1)
-  {
-    int param_index = _gui->gui_state()->desc().param_mappings.topo_to_index[
-      topo->engine.tuning_mode.module_index][0][topo->engine.tuning_mode.param_index][0];
-    _gui->gui_state()->remove_listener(param_index, this);
-  }
-}
-
-tuning_mode_button::
-tuning_mode_button(plugin_gui* gui) :
-_gui(gui)
-{ 
-  setButtonText("Tuning");
-
-  // tuning is not implemented for fx and crashes when trying to change
-  setEnabled(gui->gui_state()->desc().plugin->type == plugin_type::synth);
-
-  // fill the list
-  std::vector<menu_button_item> button_items;
-  auto mode_items = engine_tuning_mode_items();
-  auto const* topo = gui->gui_state()->desc().plugin;
-  for (int i = engine_tuning_mode_no_tuning; i < engine_tuning_mode_count; i++)
-  {
-    menu_button_item item;
-    item.group = "";
-    item.name = mode_items[i].name;
-    button_items.push_back(item);
-  }
-  set_items(button_items);
-
-  if (topo->engine.tuning_mode.module_index)
-  {
-    // need to pick up the real value from plugin state
-    set_selected_index(_gui->gui_state()->get_plain_at(
-      topo->engine.tuning_mode.module_index, 0, topo->engine.tuning_mode.param_index, 0).step());
-
-    // and also react to it
-    int param_index = _gui->gui_state()->desc().param_mappings.topo_to_index[
-      topo->engine.tuning_mode.module_index][0][topo->engine.tuning_mode.param_index][0];
-    _gui->gui_state()->add_listener(param_index, this);
-  }
-
-  // need to push both to plugin state and extra state
-  _selected_index_changed = [this, topo, mode_items](int selected_index) {
-    selected_index = std::clamp(selected_index, 0, (int)get_items().size());
-    int param_index = _gui->gui_state()->desc().param_mappings.topo_to_index[
-      topo->engine.tuning_mode.module_index][0][topo->engine.tuning_mode.param_index][0];
-    auto instance_key = _gui->gui_state()->desc().params[param_index]->param->info.per_instance_key;
-    plain_value plain_mode = _gui->gui_state()->desc().raw_to_plain_at_index(param_index, selected_index);
-    double normalized_mode = _gui->gui_state()->desc().raw_to_normalized_at_index(param_index, selected_index).value();
-    _gui->param_changed(param_index, plain_mode);
-    _gui->extra_state_()->set_normalized(instance_key, normalized_mode);
-  };
-}
-
 image_component::
 image_component(
   format_config const* config, 
@@ -502,7 +443,10 @@ autofit_combobox::autofit()
 param_component::
 param_component(plugin_gui* gui, module_desc const* module, param_desc const* param) :
 binding_component(gui, module, &param->param->gui.bindings, param->info.slot), _param(param)
-{ _gui->gui_state()->add_listener(_param->info.global, this); }
+{ 
+  // TODO disable tuning mode for fx
+  _gui->gui_state()->add_listener(_param->info.global, this);
+}
 
 void
 param_component::state_changed(int index, plain_value plain)
@@ -511,6 +455,18 @@ param_component::state_changed(int index, plain_value plain)
     own_param_changed(plain);
   else
     binding_component::state_changed(index, plain);
+}
+
+void 
+param_component::own_param_changed(plain_value plain)
+{
+  own_param_changed_core(plain);
+
+  // if we are per-instance push to extra state
+  auto instance_key = _param->param->info.per_instance_key;
+  if (!instance_key.size()) return;
+  auto norm_value = _gui->gui_state()->desc().plain_to_normalized_at_index(_param->info.global, plain);
+  _gui->extra_state_()->set_normalized(instance_key, norm_value.value());
 }
 
 void
@@ -631,7 +587,7 @@ autofit_label(lnf, get_longest_module_name(gui))
 { init(); }
 
 void
-module_name_label::own_param_changed(plain_value plain)
+module_name_label::own_param_changed_core(plain_value plain)
 { 
   auto const& desc = _gui->gui_state()->desc().modules[plain.step()];
   if (!desc.module->gui.visible)
@@ -648,7 +604,7 @@ module_name_label::own_param_changed(plain_value plain)
 }
 
 void 
-param_toggle_button::own_param_changed(plain_value plain)
+param_toggle_button::own_param_changed_core(plain_value plain)
 {
   _checked = plain.step() != 0;
   setToggleState(plain.step() != 0, dontSendNotification);
@@ -788,7 +744,7 @@ autofit_combobox(lnf, param->param->gui.edit_type == gui_edit_type::autofit_list
 }
 
 void 
-param_combobox::own_param_changed(plain_value plain)
+param_combobox::own_param_changed_core(plain_value plain)
 {
   std::string value;
   setSelectedId(plain.step() + 1 - _param->param->domain.min, dontSendNotification);

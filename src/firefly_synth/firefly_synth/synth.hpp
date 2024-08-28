@@ -40,7 +40,7 @@ extern int const voice_in_param_uni_env_dtn;
 extern int const voice_in_param_uni_lfo_phase;
 extern int const voice_in_param_uni_lfo_dtn;
 
-extern int const global_in_param_tuning_mode; // TODO
+extern int const master_settings_param_tuning_mode;
 extern int const master_settings_param_auto_smooth;
 extern int const master_settings_param_midi_smooth;
 extern int const master_settings_param_tempo_smooth;

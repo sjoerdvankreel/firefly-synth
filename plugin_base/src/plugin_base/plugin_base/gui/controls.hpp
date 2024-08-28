@@ -143,6 +143,8 @@ public:
   void any_state_changed(int index, plain_value plain) override;
 };
 
+// TODO remove
+// ALSO todo check all of this which is need all kinds of special buttons
 // load/save/init/clear patch
 class patch_menu :
 public text_button
@@ -153,6 +155,7 @@ public:
   patch_menu(plugin_gui* gui);
 };
 
+// TODO remove
 // binds factory preset to extra_state
 class preset_button:
 public menu_button,
@@ -176,18 +179,6 @@ public:
   theme_button(plugin_gui* gui);
 };
 
-// binds per-instance tuning mode selection to user config
-class tuning_mode_button :
-public menu_button,
-public state_listener
-{
-  plugin_gui* const _gui;
-public:
-  ~tuning_mode_button();
-  tuning_mode_button(plugin_gui* gui);
-  void state_changed(int index, plain_value plain) override { set_selected_index(plain.step()); }
-};
-
 // binding_component that is additionally bound to a single parameter value
 // i.e., edit control or a label that displays a plugin parameter value
 // also provides host context menu
@@ -195,6 +186,8 @@ class param_component:
 public binding_component,
 public juce::MouseListener
 {
+  void own_param_changed(plain_value plain);
+
 protected:
   param_desc const* const _param;
 
@@ -206,7 +199,7 @@ public:
 
 protected:
   void init() override;
-  virtual void own_param_changed(plain_value plain) = 0;
+  virtual void own_param_changed_core(plain_value plain) = 0;
   param_component(plugin_gui* gui, module_desc const* module, param_desc const* param);
 };
 
@@ -256,7 +249,7 @@ public autofit_label
 {
   static std::string value_ref_text(plugin_gui* gui, param_desc const* param);
 protected:
-  void own_param_changed(plain_value plain) override final;
+  void own_param_changed_core(plain_value plain) override final;
 public:
   juce::MouseCursor getMouseCursor() override;
   void mouseDrag(juce::MouseEvent const& e) override;
@@ -269,7 +262,7 @@ public param_component,
 public autofit_label
 {
 protected:
-  void own_param_changed(plain_value plain) override final;
+  void own_param_changed_core(plain_value plain) override final;
 public:
   module_name_label(plugin_gui* gui, module_desc const* module, param_desc const* param, lnf* lnf);
 };
@@ -282,7 +275,7 @@ public juce::Button::Listener
 {
   bool _checked = false;
 protected:
-  void own_param_changed(plain_value plain) override final;
+  void own_param_changed_core(plain_value plain) override final;
 
 public:
   void buttonClicked(Button*) override {}
@@ -304,7 +297,7 @@ public mod_indicator_state_listener
   double _mod_indicator_activated_time_seconds = {};
 
 protected:
-  void own_param_changed(plain_value plain) override final
+  void own_param_changed_core(plain_value plain) override final
   { setValue(_param->param->domain.plain_to_raw(plain), juce::dontSendNotification); }
 
 public: 
@@ -344,7 +337,7 @@ public juce::ComboBox::Listener
   void update_all_items_enabled_state();
 
 protected:
-  void own_param_changed(plain_value plain) override final;
+  void own_param_changed_core(plain_value plain) override final;
 
 public:
   ~param_combobox() { removeListener(this); }
