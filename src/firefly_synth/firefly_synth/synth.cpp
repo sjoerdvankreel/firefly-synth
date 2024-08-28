@@ -478,7 +478,7 @@ synth_topo(bool is_fx, std::string const& full_name)
   result->modules[module_vlfo] = lfo_topo(is_fx ? module_section_hidden : module_section_vlfo, { 0, 0 }, false, is_fx);
   result->modules[module_osc] = osc_topo(is_fx ? module_section_hidden : module_section_osc, { 0, 0 });
   result->modules[module_global_in] = global_in_topo(module_section_global_in, is_fx, { 0, 0 });
-  result->modules[module_master_settings] = master_settings_topo(result->vendor, result->full_name, module_section_master_settings, { 0, 0 });
+  result->modules[module_master_settings] = master_settings_topo(result->vendor, result->full_name, module_section_master_settings, { 0, 0 }, is_fx);
   result->modules[module_voice_on_note] = voice_on_note_topo(result.get(), module_section_hidden); // must be after all global cv  
   result->modules[module_voice_in] = voice_in_topo(is_fx ? module_section_hidden : module_section_voice_in, { 0, 0 }); // must be after all cv
   result->modules[module_voice_out] = audio_out_topo(is_fx ? module_section_hidden : module_section_voice_out, { 0, 0 }, false);

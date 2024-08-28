@@ -37,7 +37,7 @@ render_graph(plugin_state const& state, graph_engine* engine, int param, param_t
 }
 
 module_topo
-master_settings_topo(std::string const& vendor, std::string const& full_name, int section, gui_position const& pos)
+master_settings_topo(std::string const& vendor, std::string const& full_name, int section, gui_position const& pos, bool is_fx)
 {
   std::vector<int> row_distribution = { 1 };
   std::vector<int> column_distribution = { 1 };
@@ -45,7 +45,7 @@ master_settings_topo(std::string const& vendor, std::string const& full_name, in
     make_topo_info_basic("{7F400614-E996-4B02-9B78-80E22F1C44A4}", "Master", module_master_settings, 1),
     make_module_dsp(module_stage::input, module_output::none, 0, {}),
       make_module_gui(section, pos, { row_distribution, column_distribution } )));
-  result.info.description = "Automation, MIDI and BPM smoothing control."; // TODO tuning to here
+  result.info.description = "Automation, MIDI and BPM smoothing control and microtuning mode.";
   result.graph_renderer = render_graph;
   result.gui.show_tab_header = false;
   result.force_rerender_on_param_hover = true;
@@ -83,6 +83,7 @@ master_settings_topo(std::string const& vendor, std::string const& full_name, in
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   tuning_mode.info.is_per_instance = true;
   tuning_mode.info.description = "Microtuning mode."; // TODO per_instance in refgen
+  tuning_mode.gui.bindings.enabled.bind_slot([is_fx](int) { return !is_fx; });
   return result;
 }
 

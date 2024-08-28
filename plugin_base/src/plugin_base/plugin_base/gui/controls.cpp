@@ -443,10 +443,7 @@ autofit_combobox::autofit()
 param_component::
 param_component(plugin_gui* gui, module_desc const* module, param_desc const* param) :
 binding_component(gui, module, &param->param->gui.bindings, param->info.slot), _param(param)
-{ 
-  // TODO disable tuning mode for fx
-  _gui->gui_state()->add_listener(_param->info.global, this);
-}
+{ _gui->gui_state()->add_listener(_param->info.global, this); }
 
 void
 param_component::state_changed(int index, plain_value plain)

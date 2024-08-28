@@ -220,7 +220,7 @@ plugin_base::module_topo lfo_topo(int section, plugin_base::gui_position const& 
 plugin_base::module_topo monitor_topo(int section, plugin_base::gui_position const& pos, int polyphony, bool is_fx);
 plugin_base::module_topo audio_out_topo(int section, plugin_base::gui_position const& pos, bool global);
 plugin_base::module_topo osc_osc_matrix_topo(int section, plugin_base::gui_position const& pos, plugin_base::plugin_topo const* plugin);
-plugin_base::module_topo master_settings_topo(std::string const& vendor, std::string const& full_name, int section, plugin_base::gui_position const& pos);
+plugin_base::module_topo master_settings_topo(std::string const& vendor, std::string const& full_name, int section, plugin_base::gui_position const& pos, bool is_fx);
 plugin_base::module_topo audio_audio_matrix_topo(int section, plugin_base::gui_position const& pos, bool global, bool is_fx,
   std::vector<plugin_base::module_topo const*> const& sources, std::vector<plugin_base::module_topo const*> const& targets);
 plugin_base::module_topo cv_matrix_topo(int section, plugin_base::gui_position const& pos, bool cv, bool global, bool is_fx,
