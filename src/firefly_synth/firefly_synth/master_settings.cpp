@@ -40,7 +40,7 @@ module_topo
 master_settings_topo(int section, gui_position const& pos, bool is_fx, plugin_base::plugin_topo const* plugin)
 {
   std::vector<int> row_distribution = { 1 };
-  std::vector<int> column_distribution = { -153, -200, 1 };
+  std::vector<int> column_distribution = { -153, -225, 1 };
   module_topo result(make_module( 
     make_topo_info_basic("{7F400614-E996-4B02-9B78-80E22F1C44A4}", "Master", module_master_settings, 1),
     make_module_dsp(module_stage::input, module_output::none, 0, {}),
