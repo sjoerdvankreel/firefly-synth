@@ -325,23 +325,27 @@ patch_menu::clicked()
   menu.showMenuAsync(options);
 }
 
-theme_button::
-theme_button(plugin_gui* gui) :
+theme_combo::
+theme_combo(plugin_gui* gui, lnf* lnf) :
+autofit_combobox(lnf, true, false),
 _gui(gui), _themes(gui->gui_state()->desc().plugin->themes())
 {  
-  auto const* topo = gui->gui_state()->desc().plugin;
-  std::string default_theme = topo->gui.default_theme;
-  std::string theme = user_io_load_list(topo->vendor, topo->full_name, user_io::base, user_state_theme_key, default_theme, _themes);
-  set_items(vector_map(_themes, [](auto const& t) { return menu_button_item { t, ""}; }));
-  setButtonText("Theme");
-  for(int i = 0; i < _themes.size(); i++)
-    if(_themes[i] == theme)
-      set_selected_index(i);
-  _selected_index_changed = [this, topo](int index) {
-    index = std::clamp(index, 0, (int)get_items().size());
+  auto const& topo = *gui->gui_state()->desc().plugin;
+  std::string default_theme = topo.gui.default_theme;
+  std::string theme = user_io_load_list(topo.vendor, topo.full_name, user_io::base, user_state_theme_key, default_theme, _themes);
+  for (int i = 0; i < _themes.size(); i++)
+    addItem(_themes[i], i + 1);
+  for (int i = 0; i < _themes.size(); i++)
+    if (_themes[i] == theme)
+      setSelectedItemIndex(i);
+  setColour(ColourIds::textColourId, Colours::green); // TODO
+  onChange = [this, default_theme, &topo]() {
     // DONT run synchronously because theme_changed will destroy [this]!
-    user_io_save_list(topo->vendor, topo->full_name, user_io::base, user_state_theme_key, _themes[index]);
-    MessageManager::callAsync([gui = _gui, theme_name = _themes[index]]() { gui->theme_changed(theme_name); });
+    int new_index = std::clamp(getSelectedItemIndex(), 0, (int)_themes.size() - 1);
+    auto current_theme = user_io_load_list(topo.vendor, topo.full_name, user_io::base, user_state_theme_key, default_theme, _themes);
+    if (_themes[new_index] == current_theme) return;
+    user_io_save_list(topo.vendor, topo.full_name, user_io::base, user_state_theme_key, _themes[new_index]);
+    MessageManager::callAsync([gui = _gui, theme_name = _themes[new_index]]() { gui->theme_changed(theme_name); });
   };
 }
 

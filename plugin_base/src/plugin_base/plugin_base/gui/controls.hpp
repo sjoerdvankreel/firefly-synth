@@ -10,6 +10,7 @@
 
 namespace plugin_base {
 
+// TODO remove
 // same as juce version but does not react to right-click
 class text_button:
 public juce::TextButton
@@ -95,6 +96,7 @@ public:
   int fixed_height(int parent_w, int parent_h) const override { return _lnf->combo_height(_tabular); }
 };
 
+// TODO remove
 // button that opens a popupmenu
 // basically a combobox that shows a fixed button text
 struct menu_button_item { std::string name; std::string group; };
@@ -155,15 +157,14 @@ public:
   patch_menu(plugin_gui* gui);
 };
 
-// TODO remove
-// binds theme preset to user config
-class theme_button:
-public menu_button
+// binds theme to global user config
+class theme_combo:
+public autofit_combobox
 {
   plugin_gui* const _gui;
   std::vector<std::string> _themes = {};
 public:
-  theme_button(plugin_gui* gui);
+  theme_combo(plugin_gui* gui, lnf* lnf);
 };
 
 // binding_component that is additionally bound to a single parameter value
