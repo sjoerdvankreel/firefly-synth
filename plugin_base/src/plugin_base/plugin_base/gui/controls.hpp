@@ -156,19 +156,6 @@ public:
 };
 
 // TODO remove
-// binds factory preset to extra_state
-class preset_button:
-public menu_button,
-public extra_state_listener
-{
-  plugin_gui* const _gui;
-  std::vector<preset_item> _presets = {};
-public:
-  preset_button(plugin_gui* gui);
-  void extra_state_changed() override;
-  ~preset_button() { _gui->extra_state_()->remove_listener(extra_state_factory_preset_key, this); }
-};
-
 // binds theme preset to user config
 class theme_button:
 public menu_button
@@ -341,16 +328,15 @@ public:
   ~param_combobox() { removeListener(this); }
   param_combobox(plugin_gui* gui, module_desc const* module, param_desc const* param, lnf* lnf);
 
+  void showPopup() override;
+  void comboBoxChanged(ComboBox*) override final;
+
   // d&d support
   drop_target_action get_drop_target_action() const { return _drop_target_action; }
   void itemDropped(juce::DragAndDropTarget::SourceDetails const& details) override;
   void itemDragExit(juce::DragAndDropTarget::SourceDetails const& details) override;
   void itemDragEnter(juce::DragAndDropTarget::SourceDetails const& details) override;
   bool isInterestedInDragSource(juce::DragAndDropTarget::SourceDetails const& details) override;
-
-  void showPopup() override;
-  void comboBoxChanged(ComboBox*) override final
-  { _gui->param_changed(_param->info.global, _param->param->domain.raw_to_plain(getSelectedId() - 1 + _param->param->domain.min)); }
 };
 
 }

@@ -171,8 +171,7 @@ make_patch_controls_section(plugin_gui* gui, lnf* lnf, component_store store)
 {
   auto colors = lnf->section_gui_colors("Patch");
   auto& result = store_component<grid_component>(store, gui_dimension{ 2, 2 }, 2, 2, 0, 0);
-  result.add(store_component<patch_menu>(store, gui), { 0, 0 });
-  result.add(store_component<preset_button>(store, gui), { 0, 1 });
+  result.add(store_component<patch_menu>(store, gui), { 0, 0, 1, 2 });
   result.add(store_component<theme_button>(store, gui), { 1, 0, 1, 2 });
   return result;
 }

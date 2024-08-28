@@ -89,6 +89,7 @@ master_settings_topo(int section, gui_position const& pos, bool is_fx, plugin_ba
     make_param_gui_single(section_main, gui_edit_type::list, { 0, 4, 1, 1 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   preset.info.is_per_instance = true;
+  preset.gui.is_preset_selector = true;
   preset.info.description = "Factory preset.";
   preset.gui.submenu = plugin->preset_submenu();
   return result;

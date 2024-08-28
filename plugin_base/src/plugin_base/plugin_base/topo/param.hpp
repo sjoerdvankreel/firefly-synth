@@ -87,6 +87,9 @@ struct param_topo_gui final {
   std::shared_ptr<gui_submenu> submenu;
   param_menu_handler_factory menu_handler_factory;
 
+  // if set, triggers patch reload on change
+  bool is_preset_selector = false;
+
   // d&d handling
   // allow to drop on this combobox?
   bool enable_dropdown_drop_target = false;

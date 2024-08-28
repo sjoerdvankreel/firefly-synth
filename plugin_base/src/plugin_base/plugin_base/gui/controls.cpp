@@ -325,33 +325,6 @@ patch_menu::clicked()
   menu.showMenuAsync(options);
 }
 
-preset_button::
-preset_button(plugin_gui* gui) :
-_gui(gui), _presets(gui->gui_state()->desc().plugin->presets())
-{ 
-  set_items(vector_map(_presets, [](auto const& p) { return menu_button_item { p.name, p.group }; }));
-  extra_state_changed();
-  setButtonText("Preset");
-  _gui->extra_state_()->add_listener(extra_state_factory_preset_key, this);
-  _selected_index_changed = [this](int index) {
-    index = std::clamp(index, 0, (int)get_items().size());
-    _gui->extra_state_()->set_text(extra_state_factory_preset_key, get_items()[index].name);
-    _gui->load_patch(_presets[index].path, true);
-  };
-}
-
-void 
-preset_button::extra_state_changed()
-{
-  std::string selected_preset = _gui->extra_state_()->get_text(extra_state_factory_preset_key, "");
-  for(int i = 0; i < get_items().size(); i++)
-    if(get_items()[i].name == selected_preset)
-    {
-      set_selected_index(i);
-      break;
-    }
-}
-
 theme_button::
 theme_button(plugin_gui* gui) :
 _gui(gui), _themes(gui->gui_state()->desc().plugin->themes())
@@ -726,6 +699,19 @@ autofit_combobox(lnf, param->param->gui.edit_type == gui_edit_type::autofit_list
   setEditableText(false);
   init();
   update_all_items_enabled_state();
+}
+
+void
+param_combobox::comboBoxChanged(ComboBox* box)
+{ 
+  int index = getSelectedId() - 1 + _param->param->domain.min;
+  _gui->param_changed(_param->info.global, _param->param->domain.raw_to_plain(index));
+  if (_param->param->gui.is_preset_selector)
+  {
+    auto presets = _gui->gui_state()->desc().plugin->presets();
+    if (0 <= index && index < presets.size())
+      _gui->load_patch(presets[index].path, true);
+  }
 }
 
 void 
