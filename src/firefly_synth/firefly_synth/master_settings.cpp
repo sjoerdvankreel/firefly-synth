@@ -55,7 +55,7 @@ master_settings_topo(int section, gui_position const& pos, bool is_fx, plugin_ba
     make_param_section_gui({ 0, 0 }, { 1, 1 })));
   auto& tuning_mode = result.params.emplace_back(make_param(
     make_topo_info_basic("{28C619C2-C04E-4BD6-8D84-89667E1A5659}", "Tuning", param_tuning_mode, 1),
-    make_param_dsp_input(false, param_automate::none), make_domain_item(engine_tuning_mode_items(), "On Note Before Mod"),
+    make_param_dsp_input(false, param_automate::none), make_domain_item(engine_tuning_mode_items(), engine_tuning_mode_items()[1].name),
     make_param_gui_single(section_tuning, gui_edit_type::autofit_list, { 0, 0, 1, 1 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   tuning_mode.info.is_per_instance = true;
