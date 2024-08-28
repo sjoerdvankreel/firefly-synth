@@ -17,9 +17,9 @@ static int const file_version = 1;
 static std::string const file_magic = "{296BBDE2-6411-4A85-BFAF-A9A7B9703DF0}";
 
 static std::unique_ptr<DynamicObject> save_extra_state_internal(extra_state const& state);
-static std::unique_ptr<DynamicObject> save_patch_state_internal(plugin_state const& state);
 static load_result load_extra_state_internal(var const& json, extra_state& state);
-static load_result load_patch_state_internal(var const& json, plugin_version const& old_version, plugin_state& state);
+static std::unique_ptr<DynamicObject> save_instance_state_internal(plugin_state const& state, bool patch_only);
+static load_result load_instance_state_internal(var const& json, plugin_version const& old_version, plugin_state& state, bool patch_only);
 
 load_handler::
 load_handler(juce::var const* json, plugin_version const& old_version):
@@ -157,15 +157,15 @@ plugin_io_save_extra_state(plugin_topo const& topo, extra_state const& state)
 }
 
 std::vector<char>
-plugin_io_save_patch_state(plugin_state const& state)
+plugin_io_save_instance_state(plugin_state const& state, bool patch_only)
 {
   PB_LOG_FUNC_ENTRY_EXIT();
-  auto json = wrap_json_with_meta(*state.desc().plugin, var(save_patch_state_internal(state).release()));
+  auto json = wrap_json_with_meta(*state.desc().plugin, var(save_instance_state_internal(state, patch_only).release()));
   return release_json_to_buffer(std::move(json));
 }
 
 load_result
-plugin_io_load_patch_state(std::vector<char> const& data, plugin_state& state)
+plugin_io_load_instance_state(std::vector<char> const& data, plugin_state& state, bool patch_only)
 {
   var json;
   var content;
@@ -175,7 +175,7 @@ plugin_io_load_patch_state(std::vector<char> const& data, plugin_state& state)
   auto result = load_json_from_buffer(data, json);
   if (!result.ok()) return result;
   result = unwrap_json_from_meta(*state.desc().plugin, json, content, old_version);
-  return load_patch_state_internal(content, old_version, state);
+  return load_instance_state_internal(content, old_version, state, patch_only);
 }
 
 load_result
@@ -193,41 +193,46 @@ plugin_io_load_extra_state(plugin_topo const& topo, std::vector<char> const& dat
 }
 
 load_result
-plugin_io_load_file_all_state(
-  std::filesystem::path const& path, plugin_state& plugin, extra_state& extra)
+plugin_io_load_file_patch_state(
+  std::filesystem::path const& path, plugin_state& plugin)
 {
   PB_LOG_FUNC_ENTRY_EXIT();
   load_result failed("Could not read file.");
   std::vector<char> data = file_load(path);
   if(data.size() == 0) return failed;
-  return plugin_io_load_all_state(data, plugin, extra);
+  return plugin_io_load_all_state(data, plugin, nullptr, true);
 };
 
 bool
-plugin_io_save_file_all_state(
-  std::filesystem::path const& path, plugin_state const& plugin, extra_state const& extra)
+plugin_io_save_file_patch_state(
+  std::filesystem::path const& path, plugin_state const& plugin)
 {
   PB_LOG_FUNC_ENTRY_EXIT();
   std::ofstream stream(path, std::ios::out | std::ios::binary);
   if (stream.bad()) return false;
-  auto data(plugin_io_save_all_state(plugin, extra));
+  auto data(plugin_io_save_all_state(plugin, nullptr, true));
   stream.write(data.data(), data.size());
   return !stream.bad();
 }
 
 std::vector<char> 
-plugin_io_save_all_state(plugin_state const& plugin, extra_state const& extra)
+plugin_io_save_all_state(plugin_state const& plugin, extra_state const* extra, bool patch_only)
 {
   PB_LOG_FUNC_ENTRY_EXIT();
   auto const& topo = *plugin.desc().plugin;
   auto root = std::make_unique<DynamicObject>();
-  root->setProperty("extra", var(wrap_json_with_meta(topo, var(save_extra_state_internal(extra).release())).release()));
-  root->setProperty("plugin", var(wrap_json_with_meta(topo, var(save_patch_state_internal(plugin).release())).release()));
+
+  // due to a design oversight extra state was saved with the patch file at some time
+  // so now we are stuck with that json format, just dont save it again
+  if(extra != nullptr)
+    root->setProperty("extra", var(wrap_json_with_meta(topo, var(save_extra_state_internal(*extra).release())).release()));
+
+  root->setProperty("plugin", var(wrap_json_with_meta(topo, var(save_instance_state_internal(plugin, patch_only).release())).release()));
   return release_json_to_buffer(wrap_json_with_meta(topo, var(root.release())));
 }
 
 load_result 
-plugin_io_load_all_state(std::vector<char> const& data, plugin_state& plugin, extra_state& extra)
+plugin_io_load_all_state(std::vector<char> const& data, plugin_state& plugin, extra_state* extra, bool patch_only)
 {
   var json;
   var content;
@@ -238,23 +243,29 @@ plugin_io_load_all_state(std::vector<char> const& data, plugin_state& plugin, ex
   if(!result.ok()) return result;
   result = unwrap_json_from_meta(*plugin.desc().plugin, json, content, old_version);
   if (!result.ok()) return result;
+  
+  // due to a design oversight extra state was saved with the patch file at some time
+  // so now we are stuck with that json format, just dont load it again
+  if (extra != nullptr)
+  {
+    var extra_content;
+    result = unwrap_json_from_meta(*plugin.desc().plugin, content["extra"], extra_content, old_version);
+    if (!result.ok()) return result;
+    auto extra_state_load = extra_state(extra->keyset());
+    result = load_extra_state_internal(extra_content, extra_state_load);
+    if (!result.ok()) return result;
 
-  // can't produce warnings, only errors
-  var extra_content;
-  result = unwrap_json_from_meta(*plugin.desc().plugin, content["extra"], extra_content, old_version);
-  if (!result.ok()) return result;
-  auto extra_state_load = extra_state(extra.keyset());
-  result = load_extra_state_internal(extra_content, extra_state_load);
-  if (!result.ok()) return result;
+    for (auto k : extra_state_load.keyset())
+      if (extra_state_load.contains_key(k))
+        extra->set_var(k, extra_state_load.get_var(k));
+  }
 
   var plugin_content;
   result = unwrap_json_from_meta(*plugin.desc().plugin, content["plugin"], plugin_content, old_version);
   if (!result.ok()) return result;
-  result = load_patch_state_internal(plugin_content, old_version, plugin);
+  result = load_instance_state_internal(plugin_content, old_version, plugin, patch_only);
   if(!result.ok()) return result;
-  for(auto k: extra_state_load.keyset())
-    if(extra_state_load.contains_key(k))
-      extra.set_var(k, extra_state_load.get_var(k));
+
   return result;
 }
 
@@ -279,7 +290,7 @@ load_extra_state_internal(var const& json, extra_state& state)
 }
 
 std::unique_ptr<DynamicObject>
-save_patch_state_internal(plugin_state const& state)
+save_instance_state_internal(plugin_state const& state, bool patch_only)
 {
   var modules;
   auto plugin = std::make_unique<DynamicObject>();
@@ -324,7 +335,7 @@ save_patch_state_internal(plugin_state const& state)
         var param_slot_states;
         auto const& param_topo = module_topo.params[p];
         if (param_topo.dsp.direction == param_direction::output) continue;
-        if (param_topo.info.per_instance_key.size()) continue;
+        if (patch_only && param_topo.info.is_per_instance) continue;
 
         auto param_state = std::make_unique<DynamicObject>();
         for (int pi = 0; pi < param_topo.info.slot_count; pi++)
@@ -346,8 +357,8 @@ save_patch_state_internal(plugin_state const& state)
 }
 
 load_result
-load_patch_state_internal(
-  var const& json, plugin_version const& old_version, plugin_state& state)
+load_instance_state_internal(
+  var const& json, plugin_version const& old_version, plugin_state& state, bool patch_only)
 {
   if(!json.hasProperty("state"))
     return load_result("Invalid plugin.");
@@ -434,10 +445,8 @@ load_patch_state_internal(
         if (param_iter == state.desc().param_mappings.id_to_index.at(module_id).end()) continue;
         var param_slots = json["state"][m]["slots"][mi]["params"][p]["slots"];
         auto const& new_param = state.desc().plugin->modules[module_iter->second].params[param_iter->second];
-
-        // readonly support for per-instance params outside of the patch
-        if (new_param.info.per_instance_key.size())
-          continue;
+        
+        if (patch_only && new_param.info.is_per_instance) continue;
 
         for (int pi = 0; pi < param_slots.size() && pi < new_param.info.slot_count; pi++)
         {

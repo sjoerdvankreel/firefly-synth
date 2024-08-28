@@ -29,19 +29,6 @@ module_section_gui::validate(plugin_topo const& plugin, int index_) const
     dimension.validate(gui_label_edit_cell_split::no_split, vector_map(plugin.modules, [](auto const& p) { return p.gui.position; }), {}, include, always_visible);
 }
 
-std::set<std::string>
-plugin_topo::make_instance_state_keyset() const
-{
-  // per-instance params are single-module single-slot
-  std::set<std::string> result;
-  for (int m = 0; m < modules.size(); m++)
-    if (modules[m].info.slot_count == 1)
-      for (int p = 0; p < modules[m].params.size(); p++)
-        if (modules[m].params[p].info.per_instance_key.size())
-          PB_ASSERT_EXEC(result.insert(modules[m].params[p].info.per_instance_key).second);
-  return result;
-}
-
 void
 plugin_topo::validate() const
 {

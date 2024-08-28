@@ -61,27 +61,27 @@ master_settings_topo(std::string const& vendor, std::string const& full_name, in
     make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 0, 1, 1 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   midi_smooth.info.description = "Smoothing MIDI controller changes.";
-  midi_smooth.info.per_instance_key = "plugin_midi_smoothing";
+  midi_smooth.info.is_per_instance = true;
   auto& bpm_smooth = result.params.emplace_back(make_param(
     make_topo_info_basic("{99B88F8C-6F3B-47E9-932F-D46136252223}", "BPM Smoothing", param_tempo_smooth, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_linear(1, max_other_smoothing_ms, 200, 0, "Ms"),
     make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 1, 1, 1 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   bpm_smooth.info.description = "Smoothing host BPM parameter changes. Affects tempo-synced delay lines.";
-  bpm_smooth.info.per_instance_key = "plugin_bpm_smoothing";
+  bpm_smooth.info.is_per_instance = true;
   auto& auto_smooth = result.params.emplace_back(make_param(
     make_topo_info_basic("{AF6D2954-3B17-4A32-895B-FB92433761D6}", "Automation Smoothing", param_auto_smooth, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_linear(1, max_auto_smoothing_ms, 1, 0, "Ms"),
     make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 2, 1, 1 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   auto_smooth.info.description = "Smoothing automation parameter changes.";
-  auto_smooth.info.per_instance_key = "plugin_automation_smoothing";
+  auto_smooth.info.is_per_instance = true;
   auto& tuning_mode = result.params.emplace_back(make_param(
     make_topo_info_basic("{28C619C2-C04E-4BD6-8D84-89667E1A5659}", "Tuning Mode", param_tuning_mode, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_item(engine_tuning_mode_items(), "On Note Before Mod"),
     make_param_gui_single(section_main, gui_edit_type::list, { 0, 3, 1, 1 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  tuning_mode.info.per_instance_key = "plugin_tuning_mode";
+  tuning_mode.info.is_per_instance = true;
   tuning_mode.info.description = "Microtuning mode."; // TODO per_instance in refgen
   return result;
 }

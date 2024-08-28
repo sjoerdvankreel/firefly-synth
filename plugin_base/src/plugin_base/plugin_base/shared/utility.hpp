@@ -144,13 +144,4 @@ std::vector<decltype(op(in[0]))>
   return result;
 }
 
-template <class T> std::set<T>
-set_join(std::vector<std::set<T>> const& vs)
-{
-  std::set<T> result;
-  for (int i = 0; i < vs.size(); i++)
-    result.insert(vs[i].begin(), vs[i].end());
-  return result;
-}
-
 }

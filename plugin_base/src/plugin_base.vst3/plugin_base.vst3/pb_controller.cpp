@@ -29,11 +29,10 @@ pb_controller::
 pb_controller(plugin_topo const* topo):
 _desc(std::make_unique<plugin_desc>(topo, this)),
 _gui_state(_desc.get(), true),
-_extra_state(set_join<std::string>({ gui_extra_state_keyset(*_desc->plugin), topo->make_instance_state_keyset() }))
+_extra_state(gui_extra_state_keyset(*_desc->plugin))
 { 
   PB_LOG_FUNC_ENTRY_EXIT();
   _gui_state.add_any_listener(this);  
-  init_instance_from_extra_state(_extra_state, _gui_state, this);
 
   // fetch mod indicator param tags
   _mod_indicator_states_to_gui.resize(mod_indicator_output_param_count);
@@ -81,7 +80,6 @@ pb_controller::setState(IBStream* state)
   PB_LOG_FUNC_ENTRY_EXIT();
   if (!plugin_io_load_extra_state(*_gui_state.desc().plugin, load_ibstream(state), _extra_state).ok())
     return kResultFalse;
-  init_instance_from_extra_state(_extra_state, _gui_state, this);
   return kResultOk;
 }
 
@@ -90,7 +88,7 @@ pb_controller::setComponentState(IBStream* state)
 {
   PB_LOG_FUNC_ENTRY_EXIT();
   gui_state().begin_undo_region();
-  if (!plugin_io_load_patch_state(load_ibstream(state), gui_state()).ok())
+  if (!plugin_io_load_instance_state(load_ibstream(state), gui_state(), false).ok())
   {
     gui_state().discard_undo_region();
     return kResultFalse;

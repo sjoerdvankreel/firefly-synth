@@ -69,7 +69,7 @@ Plugin(clap_desc, host),
 _mts_client(MTS_RegisterClient()),
 _desc(std::make_unique<plugin_desc>(topo, this)),
 _splice_engine(_desc.get(), false, forward_thread_pool_voice_processor, this),
-_extra_state(set_join<std::string>({ gui_extra_state_keyset(*_desc->plugin), topo->make_instance_state_keyset() })),
+_extra_state(gui_extra_state_keyset(*_desc->plugin)),
 _gui_state(_desc.get(), true),
 _to_gui_events(std::make_unique<event_queue>(default_q_size)), 
 _to_audio_events(std::make_unique<event_queue>(default_q_size)),
@@ -79,7 +79,6 @@ _mod_indicator_queue(std::make_unique<mod_indicator_queue>(default_q_size))
   _gui_state.add_any_listener(this);
   _mod_indicator_states.reserve(default_q_size);
   _block_automation_seen.resize(_splice_engine.state().desc().param_count);
-  init_instance_from_extra_state(_extra_state, _gui_state, this);
 }
 
 void
@@ -142,7 +141,7 @@ pb_plugin::stateSave(clap_ostream const* stream) noexcept
   // don't bother with that and just write byte-for-byte
   int written = 1;
   int total_written = 0;
-  std::vector<char> data(plugin_io_save_all_state(_gui_state, _extra_state));
+  std::vector<char> data(plugin_io_save_all_state(_gui_state, &_extra_state, false));
   while(written == 1 && total_written < data.size())
   {
     written = stream->write(stream, data.data() + total_written, 1);
@@ -167,12 +166,11 @@ pb_plugin::stateLoad(clap_istream const* stream) noexcept
   } while(true);
 
   _gui_state.begin_undo_region();
-  if (!plugin_io_load_all_state(data, _gui_state, _extra_state).ok())
+  if (!plugin_io_load_all_state(data, _gui_state, &_extra_state, false).ok())
   {
     _gui_state.discard_undo_region();
     return false;
   }
-  init_instance_from_extra_state(_extra_state, _gui_state, this);
   for (int p = 0; p < _splice_engine.state().desc().param_count; p++)
     gui_param_changed(p, _gui_state.get_plain_at_index(p));
   _gui_state.discard_undo_region();

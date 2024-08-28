@@ -35,13 +35,11 @@ public:
   extra_state(std::set<std::string> const& keyset) : _keyset(keyset) {}
 
   void set_int(std::string const& key, int val);
-  void set_normalized(std::string const& key, double norm);
   void set_var(std::string const& key, juce::var const& val);
   void set_text(std::string const& key, std::string const& val);
 
   juce::var get_var(std::string const& key) const;
   int get_int(std::string const& key, int default_) const;
-  double get_normalized(std::string const& key, double default_) const;
   std::string get_text(std::string const& key, std::string const& default_) const;
 
   void clear();
@@ -51,10 +49,5 @@ public:
   void remove_listener(std::string const& key, extra_state_listener* listener);
   void add_listener(std::string const& key, extra_state_listener* listener) { _listeners[key].push_back(listener); }
 };
-
-void
-init_instance_from_extra_state(
-  extra_state const& extra, 
-  plugin_state& gui_state, gui_param_listener* listener);
 
 }

@@ -164,7 +164,6 @@ struct plugin_topo final {
   std::vector<module_topo> modules;
 
   void validate() const;
-  std::set<std::string> make_instance_state_keyset() const;
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(plugin_topo);
 };
 

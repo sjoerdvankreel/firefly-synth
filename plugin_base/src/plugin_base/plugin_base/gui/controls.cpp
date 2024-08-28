@@ -229,7 +229,7 @@ autofit_label(lnf, value_ref_text(gui, param))
 { init(); }
 
 void
-param_value_label::own_param_changed_core(plain_value plain)
+param_value_label::own_param_changed(plain_value plain)
 { 
   std::string text = _gui->gui_state()->plain_to_text_at_index(false, _param->info.global, plain);
   setText(text, dontSendNotification); 
@@ -457,18 +457,6 @@ param_component::state_changed(int index, plain_value plain)
     binding_component::state_changed(index, plain);
 }
 
-void 
-param_component::own_param_changed(plain_value plain)
-{
-  own_param_changed_core(plain);
-
-  // if we are per-instance push to extra state
-  auto instance_key = _param->param->info.per_instance_key;
-  if (!instance_key.size()) return;
-  auto norm_value = _gui->gui_state()->desc().plain_to_normalized_at_index(_param->info.global, plain);
-  _gui->extra_state_()->set_normalized(instance_key, norm_value.value());
-}
-
 void
 param_component::init()
 {
@@ -587,7 +575,7 @@ autofit_label(lnf, get_longest_module_name(gui))
 { init(); }
 
 void
-module_name_label::own_param_changed_core(plain_value plain)
+module_name_label::own_param_changed(plain_value plain)
 { 
   auto const& desc = _gui->gui_state()->desc().modules[plain.step()];
   if (!desc.module->gui.visible)
@@ -604,7 +592,7 @@ module_name_label::own_param_changed_core(plain_value plain)
 }
 
 void 
-param_toggle_button::own_param_changed_core(plain_value plain)
+param_toggle_button::own_param_changed(plain_value plain)
 {
   _checked = plain.step() != 0;
   setToggleState(plain.step() != 0, dontSendNotification);
@@ -744,7 +732,7 @@ autofit_combobox(lnf, param->param->gui.edit_type == gui_edit_type::autofit_list
 }
 
 void 
-param_combobox::own_param_changed_core(plain_value plain)
+param_combobox::own_param_changed(plain_value plain)
 {
   std::string value;
   setSelectedId(plain.step() + 1 - _param->param->domain.min, dontSendNotification);

@@ -214,7 +214,7 @@ gui_undo_listener::mouseUp(MouseEvent const& event)
       _gui->gui_state()->redo(result - 1001);
     else if (2001 == result)
     {
-      auto state = plugin_io_save_patch_state(*_gui->gui_state());
+      auto state = plugin_io_save_instance_state(*_gui->gui_state(), true);
       state.push_back('\0');
       juce::SystemClipboard::copyTextToClipboard(juce::String(state.data()));
     }
@@ -223,7 +223,7 @@ gui_undo_listener::mouseUp(MouseEvent const& event)
       plugin_state new_state(&_gui->gui_state()->desc(), false);
       auto clip_contents = juce::SystemClipboard::getTextFromClipboard().toStdString();
       std::vector<char> clip_data(clip_contents.begin(), clip_contents.end());
-      auto load_result = plugin_io_load_patch_state(clip_data, new_state);
+      auto load_result = plugin_io_load_instance_state(clip_data, new_state, true);
       if (load_result.ok() && !load_result.warnings.size())
       {
         _gui->gui_state()->begin_undo_region();
@@ -1214,7 +1214,7 @@ plugin_gui::save_patch()
     auto path = chooser.getResult().getFullPathName();
     delete& chooser;
     if (path.length() == 0) return;
-    plugin_io_save_file_all_state(path.toStdString(), *_gui_state, *_extra_state);
+    plugin_io_save_file_patch_state(path.toStdString(), *_gui_state);
   });
 }
 
@@ -1238,7 +1238,7 @@ plugin_gui::load_patch(std::string const& path, bool preset)
   PB_LOG_FUNC_ENTRY_EXIT();  
   _gui_state->begin_undo_region();
   auto icon = MessageBoxIconType::WarningIcon;
-  auto result = plugin_io_load_file_all_state(path, *_gui_state, *_extra_state);
+  auto result = plugin_io_load_file_patch_state(path, *_gui_state);
   if (result.error.size())
   {
     auto options = MessageBoxOptions::makeOptionsOk(icon, "Error", result.error, String(), this);
