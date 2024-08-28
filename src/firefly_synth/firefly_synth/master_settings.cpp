@@ -14,7 +14,7 @@ static int const max_auto_smoothing_ms = 50;
 static int const max_other_smoothing_ms = 1000;
 
 enum { section_main }; 
-enum { param_preset, param_tuning_mode, param_midi_smooth, param_tempo_smooth, param_auto_smooth, param_count };
+enum { param_tuning_mode, param_preset, param_midi_smooth, param_tempo_smooth, param_auto_smooth, param_count };
 
 // we provide the buttons, everyone else needs to implement it
 extern int const master_settings_param_auto_smooth = param_auto_smooth;
@@ -60,23 +60,23 @@ master_settings_topo(int section, gui_position const& pos, bool is_fx, plugin_ba
   auto section_gui = make_param_section_gui({ 0, 0 }, dimension, gui_label_edit_cell_split::horizontal);
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag_basic("{650CEC37-B01B-4EE6-A010-34C2AE1C66B0}", "Main"), section_gui));
+  auto& tuning_mode = result.params.emplace_back(make_param(
+    make_topo_info_basic("{28C619C2-C04E-4BD6-8D84-89667E1A5659}", "Tuning Mode", param_tuning_mode, 1),
+    make_param_dsp_input(false, param_automate::none), make_domain_item(engine_tuning_mode_items(), "On Note Before Mod"),
+    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 0, 1, 1 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
+  tuning_mode.info.is_per_instance = true;
+  tuning_mode.info.description = "Microtuning mode.";
+  tuning_mode.gui.bindings.enabled.bind_slot([is_fx](int) { return !is_fx; });
   auto& preset = result.params.emplace_back(make_param(
     make_topo_info_basic("{B9FFE7EA-49D3-4B3C-97F5-2B99F9625088}", "Preset", param_preset, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_item(plugin->preset_list(), ""),
-    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 0, 1, 1 },
+    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 2, 1, 1 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   preset.info.is_per_instance = true;
   preset.gui.is_preset_selector = true;
   preset.info.description = "Factory preset.";
   preset.gui.submenu = plugin->preset_submenu();
-  auto& tuning_mode = result.params.emplace_back(make_param(
-    make_topo_info_basic("{28C619C2-C04E-4BD6-8D84-89667E1A5659}", "Tuning Mode", param_tuning_mode, 1),
-    make_param_dsp_input(false, param_automate::none), make_domain_item(engine_tuning_mode_items(), "On Note Before Mod"),
-    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 2, 1, 1 },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  tuning_mode.info.is_per_instance = true;
-  tuning_mode.info.description = "Microtuning mode.";
-  tuning_mode.gui.bindings.enabled.bind_slot([is_fx](int) { return !is_fx; });
   auto& midi_smooth = result.params.emplace_back(make_param(
     make_topo_info_basic("{97BAC4E5-B7EE-43AE-AE6D-B9D4A0A3C94F}", "MIDI Smoothing", param_midi_smooth, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_linear(1, max_other_smoothing_ms, 50, 0, "Ms"),
