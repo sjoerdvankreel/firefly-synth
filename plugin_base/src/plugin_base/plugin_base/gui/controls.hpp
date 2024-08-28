@@ -39,17 +39,6 @@ public:
     juce::RectanglePlacement placement);
 };
 
-// button that resizes to text content
-class autofit_button :
-public text_button,
-public autofit_component
-{
-public:
-  autofit_button(lnf* lnf, std::string const& text);
-  int fixed_width(int parent_w, int parent_h) const override { return getWidth(); }
-  int fixed_height(int parent_w, int parent_h) const override { return getHeight(); }
-};
-
 // fixed size checkbox
 class autofit_togglebutton :
 public toggle_button,
@@ -94,26 +83,6 @@ public:
   autofit_combobox(lnf* lnf, bool autofit, bool tabular) : _lnf(lnf), _autofit(autofit), _tabular(tabular) {}
   int fixed_width(int parent_w, int parent_h) const override { return getWidth(); }
   int fixed_height(int parent_w, int parent_h) const override { return _lnf->combo_height(_tabular); }
-};
-
-// TODO remove
-// button that opens a popupmenu
-// basically a combobox that shows a fixed button text
-struct menu_button_item { std::string name; std::string group; };
-class menu_button :
-public text_button
-{
-  int _selected_index = -1;
-  // popup filled by processing these in order
-  // should be sorted by group, empty group means no submenu
-  std::vector<menu_button_item> _items;
-protected:
-  void clicked() override;
-  std::function<void(int)> _selected_index_changed;
-public:  
-  std::vector<menu_button_item> const& get_items() const { return _items; }
-  void set_items(std::vector<menu_button_item> const& items) { _items = items; }
-  void set_selected_index(int index) { _selected_index = std::clamp(index, 0, (int)_items.size() - 1); }
 };
 
 // tracks last parameter change

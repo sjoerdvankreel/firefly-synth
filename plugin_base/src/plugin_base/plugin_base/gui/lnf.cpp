@@ -530,8 +530,7 @@ lnf::drawButtonText(Graphics& g, TextButton& button, bool, bool)
   if (textWidth > 0)
     g.drawText(button.getButtonText(), leftIndent, yIndent, textWidth, button.getHeight() - yIndent * 2, Justification::centred, false);
   
-  if (!dynamic_cast<menu_button*>(&button) &&
-    !dynamic_cast<patch_menu*>(&button)) return;
+  if (!dynamic_cast<patch_menu*>(&button)) return;
   
   Path arrow;
   float w = 6;

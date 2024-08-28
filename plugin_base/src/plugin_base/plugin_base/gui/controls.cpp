@@ -101,38 +101,6 @@ toggle_button::mouseUp(MouseEvent const& e)
     ToggleButton::mouseUp(e);
 }
 
-void
-menu_button::clicked()
-{
-  PopupMenu menu;
-  PopupMenu sub_menu;
-  PopupMenu* current_menu = &menu;
-  std::string current_group = "";
-  menu.setLookAndFeel(&getLookAndFeel());
-  for (int i = 0; i < _items.size(); i++)
-  {
-    if (_items[i].group != current_group)
-    {
-      sub_menu = PopupMenu();
-      current_menu = &sub_menu;
-      current_group = _items[i].group;
-    }
-    current_menu->addItem(i + 1, _items[i].name, true, i == _selected_index);
-    if(!_items[i].group.empty() && (i == _items.size() - 1 || _items[i].group != _items[i + 1].group))
-      menu.addSubMenu(_items[i].group, sub_menu, true);
-  }
-  PopupMenu::Options options;
-  options = options.withTargetComponent(this);
-  menu.showMenuAsync(options, [this](int id) {
-    if (id == 0) return;
-    int index = id - 1;
-    if (index == _selected_index) return;
-    _selected_index = index;
-    if (_selected_index_changed != nullptr)
-      _selected_index_changed(index);
-  });
-}
-
 static std::string
 param_slot_name(param_desc const* param)
 {
@@ -372,18 +340,6 @@ _bold(bold), _tabular(tabular), _font_height(height)
   float nw = std::ceil(tw) + getBorderSize().getLeftAndRight();
   setSize(nw, std::ceil(th) + getBorderSize().getTopAndBottom());
   setText(reference_text, dontSendNotification);
-}
-
-autofit_button::
-autofit_button(lnf* lnf, std::string const& text)
-{
-  float vmargin = 6.0f;
-  float hmargin = 16.0f;
-  setButtonText(text);
-  auto const& button_font = lnf->getTextButtonFont(*this, getHeight());
-  float th = button_font.getHeight();
-  float tw = button_font.getStringWidthFloat(getButtonText());
-  setSize(std::ceil(tw) + hmargin, std::ceil(th) + vmargin);
 }
 
 float 
