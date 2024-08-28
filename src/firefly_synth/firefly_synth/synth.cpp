@@ -180,8 +180,13 @@ static Component&
 make_theme_select_section(plugin_gui* gui, lnf* lnf, component_store store)
 {
   auto colors = lnf->section_gui_colors("Theme");
-  auto& result = store_component<grid_component>(store, gui_dimension{ 1, 1 }, 2, 2, 0, 0);
-  result.add(store_component<theme_combo>(store, gui, lnf), { 0, 0, 1, 1 });
+  auto& result = store_component<grid_component>(store, gui_dimension{ { 1 }, { gui_dimension::auto_size, 1 } }, 2, 2, 0, 0);
+  auto& theme_label = store_component<autofit_label>(store, lnf, "Theme");
+  theme_label.setText("Theme", juce::dontSendNotification);
+  theme_label.setJustificationType(Justification::centredLeft);
+  theme_label.setColour(Label::ColourIds::textColourId, colors.label_text);
+  result.add(theme_label, { 0, 0 });
+  result.add(store_component<theme_combo>(store, gui, lnf), { 0, 1, 1, 1 });
   return result;
 }
 
