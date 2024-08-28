@@ -671,6 +671,15 @@ plugin_engine::process()
   /* STEP 1: Set up per-block automation */
   /***************************************/
 
+  // host automation
+  for (int e = 0; e < _host_block->events.block.size(); e++)
+  {
+    // we update state right here so no need to mark as automated
+    auto const& event = _host_block->events.block[e];
+    _state.set_normalized_at_index(event.param, event.normalized);
+    _block_automation.set_normalized_at_index(event.param, event.normalized);
+  }
+
   // microtuning mode
   bool mts_esp_status = true;
   auto const& topo = *_state.desc().plugin;
@@ -698,15 +707,6 @@ plugin_engine::process()
       topo.engine.bpm_smoothing.module_index, 0, topo.engine.bpm_smoothing.param_index, 0).real() * 0.001);
   for(int f = 0; f < frame_count; f++)
     _bpm_automation[f] = _bpm_filter.next().first;
-   
-  // host automation
-  for (int e = 0; e < _host_block->events.block.size(); e++)
-  {
-    // we update state right here so no need to mark as automated
-    auto const& event = _host_block->events.block[e];
-    _state.set_normalized_at_index(event.param, event.normalized);
-    _block_automation.set_normalized_at_index(event.param, event.normalized);
-  }
 
   /*********************************************/
   /* STEP 2: Set up sample-accurate automation */
