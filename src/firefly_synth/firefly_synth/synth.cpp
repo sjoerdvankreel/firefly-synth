@@ -337,21 +337,21 @@ synth_topo(bool is_fx, std::string const& full_name)
   result->version.major = FF_SYNTH_VERSION_MAJOR;
   result->version.minor = FF_SYNTH_VERSION_MINOR;
   result->version.patch = FF_SYNTH_VERSION_PATCH;
-  result->voice_mode_module = module_voice_in;
-  result->voice_mode_param = voice_in_param_mode;
-  result->bpm_smooth_module = module_master_settings;
-  result->bpm_smooth_param = master_settings_param_tempo_smooth;
-  result->midi_smooth_module = module_master_settings;
-  result->midi_smooth_param = master_settings_param_midi_smooth;
-  result->auto_smooth_module = module_master_settings;
-  result->auto_smooth_param = master_settings_param_auto_smooth;
-  result->tuning_mode_module = is_fx? -1: module_global_in;
-  result->tuning_mode_param = is_fx ? -1 : global_in_param_tuning_mode;
+  result->engine.voice_mode.module_index = module_voice_in;
+  result->engine.voice_mode.param_index = voice_in_param_mode;
+  result->engine.bpm_smoothing.module_index = module_master_settings;
+  result->engine.bpm_smoothing.param_index = master_settings_param_tempo_smooth;
+  result->engine.midi_smoothing.module_index = module_master_settings;
+  result->engine.midi_smoothing.param_index = master_settings_param_midi_smooth;
+  result->engine.automation_smoothing.module_index = module_master_settings;
+  result->engine.automation_smoothing.param_index = master_settings_param_auto_smooth;
+  result->engine.tuning_mode.module_index = is_fx? -1: module_global_in; // TODO
+  result->engine.tuning_mode.param_index = is_fx ? -1 : global_in_param_tuning_mode;
 
   // this is INCLUDING global unison!
   result->audio_polyphony = 64;
   result->graph_polyphony = 1;
-  result->sub_voice_counter = [](bool graph, plugin_state const& state)
+  result->engine.sub_voice_counter = [](bool graph, plugin_state const& state)
   {
     // Global unison needs some help from plugin_base as we treat 
     // those voices just like regular polyphonic voices.

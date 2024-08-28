@@ -376,9 +376,10 @@ tuning_mode_button::
 ~tuning_mode_button()
 {
   auto const* topo = _gui->gui_state()->desc().plugin;
-  if (topo->tuning_mode_module != -1 && topo->tuning_mode_param != -1)
+  if (topo->engine.tuning_mode.module_index != -1)
   {
-    int param_index = _gui->gui_state()->desc().param_mappings.topo_to_index[topo->tuning_mode_module][0][topo->tuning_mode_param][0];
+    int param_index = _gui->gui_state()->desc().param_mappings.topo_to_index[
+      topo->engine.tuning_mode.module_index][0][topo->engine.tuning_mode.param_index][0];
     _gui->gui_state()->remove_listener(param_index, this);
   }
 }
@@ -405,24 +406,28 @@ _gui(gui)
   }
   set_items(button_items);
 
-  if (topo->tuning_mode_module != -1 && topo->tuning_mode_param != -1)
+  if (topo->engine.tuning_mode.module_index)
   {
     // need to pick up the real value from plugin state
     set_selected_index(_gui->gui_state()->get_plain_at(
-      topo->tuning_mode_module, 0, topo->tuning_mode_param, 0).step());
+      topo->engine.tuning_mode.module_index, 0, topo->engine.tuning_mode.param_index, 0).step());
 
     // and also react to it
-    int param_index = _gui->gui_state()->desc().param_mappings.topo_to_index[topo->tuning_mode_module][0][topo->tuning_mode_param][0];
+    int param_index = _gui->gui_state()->desc().param_mappings.topo_to_index[
+      topo->engine.tuning_mode.module_index][0][topo->engine.tuning_mode.param_index][0];
     _gui->gui_state()->add_listener(param_index, this);
   }
 
   // need to push both to plugin state and extra state
   _selected_index_changed = [this, topo, mode_items](int selected_index) {
     selected_index = std::clamp(selected_index, 0, (int)get_items().size());
-    int param_index = _gui->gui_state()->desc().param_mappings.topo_to_index[topo->tuning_mode_module][0][topo->tuning_mode_param][0];
+    int param_index = _gui->gui_state()->desc().param_mappings.topo_to_index[
+      topo->engine.tuning_mode.module_index][0][topo->engine.tuning_mode.param_index][0];
+    auto instance_key = _gui->gui_state()->desc().params[param_index]->param->info.per_instance_key;
     plain_value plain_mode = _gui->gui_state()->desc().raw_to_plain_at_index(param_index, selected_index);
+    double normalized_mode = _gui->gui_state()->desc().raw_to_normalized_at_index(param_index, selected_index).value();
     _gui->param_changed(param_index, plain_mode);
-    _gui->extra_state_()->set_num(extra_state_tuning_mode_key, selected_index);
+    _gui->extra_state_()->set_normalized(instance_key, normalized_mode);
   };
 }
 

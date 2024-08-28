@@ -22,13 +22,11 @@ class grid_component;
 
 enum class gui_hover_type { param, module, custom };
 
-// saved gui stuff
-inline std::string const extra_state_tab_index = "tab";
+// globally saved (across instances)
 inline std::string const user_state_scale_key = "scale";
 inline std::string const user_state_theme_key = "theme";
 
 // for serialization
-inline std::string const extra_state_factory_preset_key = "factory_preset";
 std::set<std::string> gui_extra_state_keyset(plugin_topo const& topo);
 std::string module_section_tab_key(plugin_topo const& topo, int section_index);
 
@@ -214,9 +212,9 @@ private:
   Component& make_content();
 
   void set_extra_state_num(std::string const& id, std::string const& part, double val)
-  { _extra_state->set_num(id + "/" + part, val); }
+  { _extra_state->set_int(id + "/" + part, val); }
   double get_extra_state_num(std::string const& id, std::string const& part, double default_)
-  { return _extra_state->get_num(id + "/" + part, default_); }
+  { return _extra_state->get_int(id + "/" + part, default_); }
 
   void add_tab_menu_listener(juce::TabBarButton& button, int module, int slot);
   void add_hover_listener(juce::Component& component, gui_hover_type type, int global_index);

@@ -20,6 +20,8 @@ static int const margin_content = 3;
 static int const margin_vsection = 3;
 static int const margin_hsection = 3;
 
+static std::string const extra_state_selected_tab_key = "gui_selected_tab";
+
 static std::vector<std::string> tab_menu_module_actions = { 
   "", "Clear", "Clear All", "Delete", "Insert Before", "Insert After", "Copy To", "Move To", "Swap With" };
 
@@ -308,16 +310,16 @@ gui_tab_menu_listener::mouseUp(MouseEvent const& event)
 
 std::string 
 module_section_tab_key(plugin_topo const& topo, int section_index)
-{ return topo.gui.module_sections[section_index].id + "/" + extra_state_tab_index; }
+{ return topo.gui.module_sections[section_index].id + "/" + extra_state_selected_tab_key; }
 
 std::set<std::string>
 gui_extra_state_keyset(plugin_topo const& topo)
 {
   std::set<std::string> result = {};
-  result.insert(extra_state_factory_preset_key);
+  result.insert(extra_state_factory_preset_key); // TODO make this a plugin state, not plugin-base-gui
   for (int i = 0; i < topo.modules.size(); i++)
     if (topo.modules[i].info.slot_count > 1)
-      result.insert(topo.modules[i].info.tag.id + "/" + extra_state_tab_index);
+      result.insert(topo.modules[i].info.tag.id + "/" + extra_state_selected_tab_key);
   for (int i = 0; i < topo.gui.module_sections.size(); i++)
     if (topo.gui.module_sections[i].tabbed)
       result.insert(module_section_tab_key(topo, i));
@@ -619,7 +621,7 @@ plugin_gui::init_multi_tab_component(tab_component& tab, std::string const& id, 
 {
   assert((module_index == -1) != (section_index == -1));
   tab.tab_changed = [this, id, module_index, section_index](int tab_index) {
-    set_extra_state_num(id, extra_state_tab_index, tab_index);
+    set_extra_state_num(id, extra_state_selected_tab_key, tab_index);
     if (module_index != -1)
       for (int i = 0; i < _tab_selection_listeners.size(); i++)
         _tab_selection_listeners[i]->module_tab_changed(module_index, tab_index);
@@ -627,8 +629,8 @@ plugin_gui::init_multi_tab_component(tab_component& tab, std::string const& id, 
       for (int i = 0; i < _tab_selection_listeners.size(); i++)
         _tab_selection_listeners[i]->section_tab_changed(section_index, tab_index);
     };
-  tab.setCurrentTabIndex(std::clamp((int)get_extra_state_num(id, extra_state_tab_index, 0), 0, tab.getNumTabs() - 1));
-  set_extra_state_num(id, extra_state_tab_index, tab.getCurrentTabIndex());
+  tab.setCurrentTabIndex(std::clamp((int)get_extra_state_num(id, extra_state_selected_tab_key, 0), 0, tab.getNumTabs() - 1));
+  set_extra_state_num(id, extra_state_selected_tab_key, tab.getCurrentTabIndex());
 }
 
 void

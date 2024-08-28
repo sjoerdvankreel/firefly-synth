@@ -98,6 +98,12 @@ param_topo::validate(plugin_topo const& plugin, module_topo const& module, int i
   assert(dsp.direction != param_direction::output || module.dsp.stage == module_stage::output);
   assert(gui.alternate_drag_output_id.size() == 0 || gui.alternate_drag_param_id.size() == 0);
 
+  if (info.per_instance_key.size())
+  {
+    assert(info.slot_count == 1);
+    assert(module.info.slot_count == 1);    
+  }
+
   if (gui.layout == param_layout::parent_grid)
   {
     // assert * 2 is for the labels

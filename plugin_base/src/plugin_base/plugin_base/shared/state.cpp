@@ -224,7 +224,7 @@ plugin_state::copy_from(jarray<plain_value, 4> const& other, bool patch_only)
     for (int mi = 0; mi < module.info.slot_count; mi++)
       for (int p = 0; p < module.params.size(); p++)
         // optional ignore for per-instance params outside of the patch
-        if (!patch_only || !module.params[p].info.is_per_instance)
+        if (!patch_only || module.params[p].info.per_instance_key.size() == 0)
         {
           auto const& param = module.params[p];
           for (int pi = 0; pi < param.info.slot_count; pi++)
@@ -242,7 +242,7 @@ plugin_state::init(state_init_type init_type, bool patch_only)
     for (int mi = 0; mi < module.info.slot_count; mi++)
       for (int p = 0; p < module.params.size(); p++)
         // optional ignore for per-instance params outside of the patch
-        if(!patch_only || !module.params[p].info.is_per_instance)
+        if(!patch_only || module.params[p].info.per_instance_key.size() == 0)
           for (int pi = 0; pi < module.params[p].info.slot_count; pi++)
             set_plain_at(m, mi, p, pi, module.params[p].domain.default_plain(mi, pi));
   }

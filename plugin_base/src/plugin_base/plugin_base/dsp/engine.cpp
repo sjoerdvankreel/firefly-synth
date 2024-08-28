@@ -75,9 +75,9 @@ engine_tuning_mode
 plugin_engine::get_current_tuning_mode()
 {
   auto const& topo = *_state.desc().plugin;
-  if (topo.tuning_mode_module == -1 || topo.tuning_mode_param == -1)
+  if (topo.engine.tuning_mode.module_index == -1)
     return engine_tuning_mode_no_tuning;
-  auto result = (engine_tuning_mode)_state.get_plain_at(topo.tuning_mode_module, 0, topo.tuning_mode_param, 0).step();
+  auto result = (engine_tuning_mode)_state.get_plain_at(topo.engine.tuning_mode.module_index, 0, topo.engine.tuning_mode.param_index, 0).step();
   assert(engine_tuning_mode_no_tuning <= result && result < engine_tuning_mode_count);
   return result;
 }
@@ -693,8 +693,9 @@ plugin_engine::process()
 
   // smoothing per-block bpm values
   _bpm_filter.set(_host_block->shared.bpm);
-  if(topo.bpm_smooth_module >= 0 && topo.bpm_smooth_param >= 0)
-    _bpm_filter.init(_sample_rate, _state.get_plain_at(topo.bpm_smooth_module, 0, topo.bpm_smooth_param, 0).real() * 0.001);
+  if(topo.engine.bpm_smoothing.module_index != -1)
+    _bpm_filter.init(_sample_rate, _state.get_plain_at(
+      topo.engine.bpm_smoothing.module_index, 0, topo.engine.bpm_smoothing.param_index, 0).real() * 0.001);
   for(int f = 0; f < frame_count; f++)
     _bpm_automation[f] = _bpm_filter.next().first;
    
@@ -719,8 +720,9 @@ plugin_engine::process()
 
   // param smoothing control
   float auto_filter_millis = default_auto_filter_millis;
-  if (topo.auto_smooth_module >= 0 && topo.auto_smooth_param >= 0)
-    auto_filter_millis = _state.get_plain_at(topo.auto_smooth_module, 0, topo.auto_smooth_param, 0).real();
+  if (topo.engine.automation_smoothing.module_index != -1)
+    auto_filter_millis = _state.get_plain_at(
+      topo.engine.automation_smoothing.module_index, 0, topo.engine.automation_smoothing.param_index, 0).real();
 
   // deal with unfinished filters from the previous round
   // automation events may overwrite below but i think thats ok
@@ -863,8 +865,9 @@ plugin_engine::process()
 
   // midi smoothing control
   float midi_filter_millis = default_midi_filter_millis;
-  if (topo.midi_smooth_module >= 0 && topo.midi_smooth_param >= 0)
-    midi_filter_millis = _state.get_plain_at(topo.midi_smooth_module, 0, topo.midi_smooth_param, 0).real();
+  if (topo.engine.midi_smoothing.module_index != -1)
+    midi_filter_millis = _state.get_plain_at(
+      topo.engine.midi_smoothing.module_index, 0, topo.engine.midi_smoothing.param_index, 0).real();
 
   // find out which midi sources are actually used
   // since it is quite expensive to just keep them all active
@@ -993,9 +996,8 @@ plugin_engine::process()
     }
 
     int voice_mode = -1;
-    assert(topo.voice_mode_module >= 0);
-    assert(topo.voice_mode_param >= 0);
-    voice_mode = _state.get_plain_at(topo.voice_mode_module, 0, topo.voice_mode_param, 0).step();
+    assert(topo.engine.voice_mode.module_index != -1);
+    voice_mode = _state.get_plain_at(topo.engine.voice_mode.module_index, 0, topo.engine.voice_mode.param_index, 0).step();
     assert(voice_mode == engine_voice_mode_mono || voice_mode == engine_voice_mode_poly || voice_mode == engine_voice_mode_release);
 
     // for mono mode
@@ -1005,7 +1007,7 @@ plugin_engine::process()
     {
       // figure out subvoice count for global unison
       int sub_voice_count = 1;
-      if (topo.sub_voice_counter) sub_voice_count = topo.sub_voice_counter(_graph, _state);
+      if (topo.engine.sub_voice_counter) sub_voice_count = topo.engine.sub_voice_counter(_graph, _state);
 
       // poly mode: steal voices for incoming notes by age
       for (int e = 0; e < _host_block->events.notes.size(); e++)

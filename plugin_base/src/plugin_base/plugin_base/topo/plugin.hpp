@@ -8,6 +8,7 @@
 #include <juce_gui_basics/juce_gui_basics.h>
 
 #include <map>
+#include <set>
 #include <vector>
 #include <string>
 #include <cstdint>
@@ -124,10 +125,34 @@ struct plugin_topo_gui final {
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(plugin_topo_gui);
 };
 
+// stuff that needs cooperation plug<->plugin_base
+struct engine_param 
+{
+  int module_index = -1;
+  int param_index = -1;
+};
+
+struct engine_params
+{
+  // smooths parameter automation, midi and bpm changes, use -1 for defaults,
+  // must resolve to real parameter indicating nr of milliseconds to smooth  engine_param bpm_smoothing = {};
+  engine_param bpm_smoothing = {};
+  engine_param midi_smoothing = {};
+  engine_param automation_smoothing = {};
+
+  // microtuning is done by plugin_base so we need some cooperation
+  engine_param tuning_mode = {};
+
+  // voice management is done by plugin_base so we need some cooperation
+  engine_param voice_mode = {};
+  sub_voice_counter_t sub_voice_counter = {};
+};
+
 // plugin definition
 struct plugin_topo final {
   int audio_polyphony;
   int graph_polyphony;
+  engine_params engine;
   plugin_version version;
 
   topo_tag tag;
@@ -138,25 +163,8 @@ struct plugin_topo final {
   std::string extension;
   std::vector<module_topo> modules;
 
-  // smooths parameter automation, midi and bpm changes, use -1 for defaults,
-  // must resolve to real parameter indicating nr of milliseconds to smooth
-  int bpm_smooth_param = -1;
-  int bpm_smooth_module = -1;
-  int midi_smooth_param = -1;
-  int midi_smooth_module = -1;
-  int auto_smooth_param = -1;
-  int auto_smooth_module = -1;
-
-  // voice management is done by plugin_base so we need some cooperation
-  int voice_mode_param = -1;
-  int voice_mode_module = -1;
-  sub_voice_counter_t sub_voice_counter = {};
-
-  // microtuning is done by plugin_base so we need some cooperation
-  int tuning_mode_module = -1;
-  int tuning_mode_param = -1;
-
   void validate() const;
+  std::set<std::string> make_instance_state_keyset() const;
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(plugin_topo);
 };
 

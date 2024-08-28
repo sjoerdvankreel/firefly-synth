@@ -29,11 +29,11 @@ pb_controller::
 pb_controller(plugin_topo const* topo):
 _desc(std::make_unique<plugin_desc>(topo, this)),
 _gui_state(_desc.get(), true),
-_extra_state(set_join<std::string>({ gui_extra_state_keyset(*_desc->plugin), tuning_extra_state_keyset() }))
+_extra_state(set_join<std::string>({ gui_extra_state_keyset(*_desc->plugin), topo->make_instance_state_keyset() }))
 { 
   PB_LOG_FUNC_ENTRY_EXIT();
   _gui_state.add_any_listener(this);  
-  init_instance_from_extra_state();
+  init_instance_from_extra_state(_extra_state, _gui_state, this);
 
   // fetch mod indicator param tags
   _mod_indicator_states_to_gui.resize(mod_indicator_output_param_count);
@@ -43,18 +43,6 @@ _extra_state(set_join<std::string>({ gui_extra_state_keyset(*_desc->plugin), tun
     _mod_indicator_param_tags[i] = desc_id_hash(mod_indicator_param_guids[i]);
     _tag_to_mod_indicator_index[_mod_indicator_param_tags[i]] = i;
   }
-}
-
-void
-pb_controller::init_instance_from_extra_state()
-{
-  auto const* topo = _gui_state.desc().plugin;
-  if (topo->tuning_mode_module == -1 || topo->tuning_mode_param == -1) return;
-  auto tuning_mode = std::clamp(_extra_state.get_num(extra_state_tuning_mode_key, engine_tuning_mode_on_note_before_mod), 0, engine_tuning_mode_count - 1);
-  int param_index = _gui_state.desc().param_mappings.topo_to_index[topo->tuning_mode_module][0][topo->tuning_mode_param][0];
-  auto tuning_plain = _gui_state.desc().raw_to_plain_at_index(param_index, tuning_mode);
-  _gui_state.set_plain_at_index(param_index, tuning_plain);
-  gui_param_changed(param_index, tuning_plain);
 }
 
 void 
@@ -93,7 +81,7 @@ pb_controller::setState(IBStream* state)
   PB_LOG_FUNC_ENTRY_EXIT();
   if (!plugin_io_load_extra_state(*_gui_state.desc().plugin, load_ibstream(state), _extra_state).ok())
     return kResultFalse;
-  init_instance_from_extra_state();
+  init_instance_from_extra_state(_extra_state, _gui_state, this);
   return kResultOk;
 }
 

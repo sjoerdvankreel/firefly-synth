@@ -6,6 +6,7 @@
 #include <plugin_base/shared/jarray.hpp>
 #include <plugin_base/shared/utility.hpp>
 
+#include <set>
 #include <map>
 #include <memory>
 #include <vector>

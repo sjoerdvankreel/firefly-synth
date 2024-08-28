@@ -73,11 +73,13 @@ struct topo_info final {
   int slot_count;
   topo_tag tag;
 
-  // if this is set, value doesn't get copied into the plug state on patch load/save
-  bool is_per_instance = false;
-
   // for reference generator
   std::string description;
+
+  // if this is set, value doesn't get copied into the plug state on patch load/save
+  // but it does get serialized with the rest of the daw project under the specified key
+  // Note: per-instance params must be part of single-slot module and itself have single slot
+  std::string per_instance_key = {};
 
   void validate() const;
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(topo_info);

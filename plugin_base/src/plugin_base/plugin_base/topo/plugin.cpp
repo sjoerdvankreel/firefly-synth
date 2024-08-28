@@ -29,6 +29,19 @@ module_section_gui::validate(plugin_topo const& plugin, int index_) const
     dimension.validate(gui_label_edit_cell_split::no_split, vector_map(plugin.modules, [](auto const& p) { return p.gui.position; }), {}, include, always_visible);
 }
 
+std::set<std::string>
+plugin_topo::make_instance_state_keyset() const
+{
+  // per-instance params are single-module single-slot
+  std::set<std::string> result;
+  for (int m = 0; m < modules.size(); m++)
+    if (modules[m].info.slot_count == 1)
+      for (int p = 0; p < modules[m].params.size(); p++)
+        if (modules[m].params[p].info.per_instance_key.size())
+          PB_ASSERT_EXEC(result.insert(modules[m].params[p].info.per_instance_key).second);
+  return result;
+}
+
 void
 plugin_topo::validate() const
 {
@@ -60,6 +73,12 @@ plugin_topo::validate() const
     gui.custom_sections[s].validate(*this, s);
   for(int s = 0; s < gui.module_sections.size(); s++)
     gui.module_sections[s].validate(*this, s);
+
+  assert((engine.voice_mode.module_index == -1) == (engine.voice_mode.param_index == -1));
+  assert((engine.tuning_mode.module_index == -1) == (engine.tuning_mode.param_index == -1));
+  assert((engine.bpm_smoothing.module_index == -1) == (engine.bpm_smoothing.param_index == -1));
+  assert((engine.midi_smoothing.module_index == -1) == (engine.midi_smoothing.param_index == -1));
+  assert((engine.automation_smoothing.module_index == -1) == (engine.automation_smoothing.param_index == -1));
 
   int stage = 0;
   std::set<std::string> module_ids;

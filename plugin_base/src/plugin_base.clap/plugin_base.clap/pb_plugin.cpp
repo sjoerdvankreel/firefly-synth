@@ -69,7 +69,7 @@ Plugin(clap_desc, host),
 _mts_client(MTS_RegisterClient()),
 _desc(std::make_unique<plugin_desc>(topo, this)),
 _splice_engine(_desc.get(), false, forward_thread_pool_voice_processor, this),
-_extra_state(set_join<std::string>({ gui_extra_state_keyset(*_desc->plugin), tuning_extra_state_keyset() })),
+_extra_state(set_join<std::string>({ gui_extra_state_keyset(*_desc->plugin), topo->make_instance_state_keyset() })),
 _gui_state(_desc.get(), true),
 _to_gui_events(std::make_unique<event_queue>(default_q_size)), 
 _to_audio_events(std::make_unique<event_queue>(default_q_size)),
@@ -79,16 +79,7 @@ _mod_indicator_queue(std::make_unique<mod_indicator_queue>(default_q_size))
   _gui_state.add_any_listener(this);
   _mod_indicator_states.reserve(default_q_size);
   _block_automation_seen.resize(_splice_engine.state().desc().param_count);
-  init_instance_from_extra_state();
-}
-
-void
-pb_plugin::init_instance_from_extra_state()
-{
-  auto const* topo = _gui_state.desc().plugin;
-  if (topo->tuning_mode_module == -1 || topo->tuning_mode_param == -1) return;
-  auto tuning_mode = std::clamp(_extra_state.get_num(extra_state_tuning_mode_key, engine_tuning_mode_on_note_before_mod), 0, engine_tuning_mode_count - 1);
-  _gui_state.set_raw_at(topo->tuning_mode_module, 0, topo->tuning_mode_param, 0, tuning_mode);
+  init_instance_from_extra_state(_extra_state, _gui_state, this);
 }
 
 void
@@ -181,7 +172,7 @@ pb_plugin::stateLoad(clap_istream const* stream) noexcept
     _gui_state.discard_undo_region();
     return false;
   }
-  init_instance_from_extra_state();
+  init_instance_from_extra_state(_extra_state, _gui_state, this);
   for (int p = 0; p < _splice_engine.state().desc().param_count; p++)
     gui_param_changed(p, _gui_state.get_plain_at_index(p));
   _gui_state.discard_undo_region();
