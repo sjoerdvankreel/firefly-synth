@@ -172,7 +172,6 @@ plugin_desc::presets() const
           item.path = entry.path().string();
           item.name = entry.path().stem().string();
           item.group = group_entry.path().filename().string();
-          item.path_hash = stable_hash(item.path);
           result.push_back(item);
         }
   std::sort(result.begin(), result.end(), [](auto const& l, auto const& r) { 
