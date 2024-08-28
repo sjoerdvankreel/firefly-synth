@@ -25,6 +25,14 @@ struct plugin_topo_gui_theme_settings;
 
 enum class plugin_type { synth, fx };
 
+// from resources folder
+struct preset_item
+{
+  std::string name;
+  std::string path;
+  std::string group;
+};
+
 // global unison support
 typedef int (*sub_voice_counter_t)(bool graph, plugin_state const& state);
 
@@ -162,8 +170,14 @@ struct plugin_topo final {
   plugin_topo_gui gui;
   std::string extension;
   std::vector<module_topo> modules;
+  format_basic_config const* config = {};
 
   void validate() const;
+  std::vector<std::string> themes() const;
+  std::vector<preset_item> presets() const;
+  std::vector<list_item> preset_list() const;
+  std::shared_ptr<gui_submenu> preset_submenu() const;
+
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(plugin_topo);
 };
 

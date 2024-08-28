@@ -16,12 +16,22 @@
 
 namespace plugin_base::clap {
 
+class pb_basic_config:
+public format_basic_config
+{
+public:
+  static pb_basic_config const* instance();
+  std::string format_name() const override { return "CLAP"; }
+  std::filesystem::path resources_folder(std::filesystem::path const& binary_path) const override
+  { return binary_path.parent_path().parent_path() / "Resources"; }
+};
+
 class pb_plugin:
 public ::clap::helpers::Plugin<
   ::clap::helpers::MisbehaviourHandler::Ignore,
   ::clap::helpers::CheckingLevel::Maximal>,
 public juce::Timer,
-public format_config,
+public format_menu_handler,
 public any_state_listener,
 public gui_param_listener
 {
@@ -119,6 +129,8 @@ public:
   std::uint32_t audioPortsCount(bool is_input) const noexcept override;
   bool audioPortsInfo(std::uint32_t index, bool is_input, clap_audio_port_info* info) const noexcept override;
 
+  std::unique_ptr<host_menu> context_menu(int param_id) const override;
+
   bool init() noexcept override;
   void deactivate() noexcept override;
   clap_process_status process(clap_process const* process) noexcept override;
@@ -128,11 +140,6 @@ public:
   void gui_param_begin_changes(int index) override;
   void any_state_changed(int index, plain_value plain) override { param_state_changed(index, plain); }
   void gui_param_changing(int index, plain_value plain) override { param_state_changed(index, plain); }
-
-  std::string format_name() const override { return "CLAP"; }
-  std::unique_ptr<host_menu> context_menu(int param_id) const override;
-  std::filesystem::path resources_folder(std::filesystem::path const& binary_path) const override
-  { return binary_path.parent_path().parent_path() / "Resources"; }
 };
 
 }

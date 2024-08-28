@@ -344,7 +344,7 @@ _gui_state(gui_state), _undo_listener(this), _extra_state(extra_state), _mod_ind
   setOpaque(true);
   addMouseListener(&_undo_listener, true);
   auto const& topo = *gui_state->desc().plugin;
-  theme_changed(user_io_load_list(topo.vendor, topo.full_name, user_io::base, user_state_theme_key, topo.gui.default_theme, gui_state->desc().themes()));
+  theme_changed(user_io_load_list(topo.vendor, topo.full_name, user_io::base, user_state_theme_key, topo.gui.default_theme, gui_state->desc().plugin->themes()));
 }
 
 void

@@ -100,7 +100,6 @@ public:
   int module_output_start = {};
 
   plugin_topo const* plugin = {};
-  format_config const* config = {};
   std::vector<module_desc> modules = {};
   plugin_midi_mappings midi_mappings = {};
   plugin_param_mappings param_mappings = {};
@@ -110,13 +109,11 @@ public:
   std::vector<midi_desc const*> midi_sources = {};
   std::vector<output_desc const*> output_sources = {};
   std::map<std::string, int> module_id_to_index = {};
+  format_menu_handler const* menu_handler = {};
 
   void validate() const;
-  std::vector<std::string> themes() const;
-  std::vector<preset_item> presets() const;
-
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(plugin_desc);
-  plugin_desc(plugin_topo const* plugin, format_config const* config);
+  plugin_desc(plugin_topo const* plugin, format_menu_handler const* menu_handler);
 
   param_desc const& param_at_index(int index) const 
   { return param_at_mapping(param_mappings.params[index]); }

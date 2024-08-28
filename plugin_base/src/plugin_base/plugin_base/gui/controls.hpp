@@ -32,7 +32,7 @@ public juce::ImageComponent
 {
 public:
   image_component(
-  format_config const* config, 
+    format_basic_config const* config,
     std::string const& theme,
     std::string const& file_name, 
     juce::RectanglePlacement placement);

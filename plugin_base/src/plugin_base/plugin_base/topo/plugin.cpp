@@ -90,4 +90,72 @@ plugin_topo::validate() const
   }
 }
 
+std::vector<std::string>
+plugin_topo::themes() const
+{
+  // expect theme folders directly in the "themes" folder
+  std::vector<std::string> result;
+  auto themes_folder = get_resource_location(config) / resource_folder_themes;
+  if (!std::filesystem::exists(themes_folder)) return {};
+  for (auto const& entry : std::filesystem::directory_iterator{ themes_folder })
+    if (entry.is_directory())
+      result.push_back(entry.path().filename().string());
+  std::sort(result.begin(), result.end(), [](auto const& l, auto const& r) { return l < r; });
+  return result;
+}
+
+std::vector<list_item>
+plugin_topo::preset_list() const
+{
+  auto items = presets();
+  std::vector<list_item> result;
+  for (int i = 0; i < items.size(); i++)
+    result.emplace_back(items[i].name, items[i].name);
+  return result;
+}
+
+std::shared_ptr<gui_submenu>
+plugin_topo::preset_submenu() const
+{
+  auto items = presets();
+  std::map<std::string, std::vector<int>> presets_by_group;
+  for (int i = 0; i < items.size(); i++)
+    presets_by_group[items[i].group].push_back(i);
+  auto result = std::make_shared<gui_submenu>();
+  for (auto const& pbg : presets_by_group)
+  {
+    auto sub = std::make_shared<gui_submenu>();
+    sub->name = pbg.first;
+    sub->indices = pbg.second;
+    result->children.push_back(sub);
+  }
+  return result;
+}
+
+std::vector<preset_item>
+plugin_topo::presets() const
+{
+  // expect preset files nested 1 level deep, subfolders act as grouping
+  std::vector<preset_item> result;
+  auto preset_folder = get_resource_location(config) / resource_folder_presets;
+  if (!std::filesystem::exists(preset_folder)) return {};
+  for (auto const& group_entry : std::filesystem::directory_iterator{ preset_folder })
+    if (group_entry.is_directory())
+      for (auto const& entry : std::filesystem::directory_iterator{ group_entry.path() })
+        if (entry.is_regular_file() && entry.path().extension().string() == std::string(".") + extension)
+        {
+          preset_item item;
+          item.path = entry.path().string();
+          item.name = entry.path().stem().string();
+          item.group = group_entry.path().filename().string();
+          result.push_back(item);
+        }
+  std::sort(result.begin(), result.end(), [](auto const& l, auto const& r) {
+    if (l.group < r.group) return true;
+    if (r.group < l.group) return false;
+    return l.name < r.name;
+    });
+  return result;
+}
+
 }

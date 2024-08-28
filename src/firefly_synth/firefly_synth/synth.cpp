@@ -209,7 +209,7 @@ make_title_section(plugin_gui* gui, lnf* lnf, component_store store, bool is_fx)
   title_label.setColour(Label::ColourIds::textColourId, colors.control_text);
   title_label.setJustificationType(Justification::left);
   grid.add(title_label, { 0, 0, 1, 1 });
-  std::string version_text = std::string(FF_SYNTH_VERSION_TEXT) + " " + gui->gui_state()->desc().config->format_name() + " ";
+  std::string version_text = std::string(FF_SYNTH_VERSION_TEXT) + " " + gui->gui_state()->desc().plugin->config->format_name() + " ";
 #ifdef __aarch64__
   version_text += "ARM";
 #else
@@ -220,7 +220,7 @@ make_title_section(plugin_gui* gui, lnf* lnf, component_store store, bool is_fx)
   version_label.setColour(Label::ColourIds::textColourId, colors.control_text);
   grid.add(version_label, { 1, 0, 1, 1 });
   grid.add(store_component<image_component>(
-    store, gui->gui_state()->desc().config,
+    store, gui->gui_state()->desc().plugin->config,
     lnf->theme(), "header.png", RectanglePlacement::xRight), { 0, 1, 2, 1 });
   return grid;
 }
@@ -325,11 +325,12 @@ make_cv_matrix_sources(plugin_topo const* topo, bool global)
 }
 
 std::unique_ptr<plugin_topo>
-synth_topo(bool is_fx, std::string const& full_name)
+synth_topo(format_basic_config const* config, bool is_fx, std::string const& full_name)
 {
   PB_LOG_FUNC_ENTRY_EXIT();   
   auto result = std::make_unique<plugin_topo>();
 
+  result->config = config;
   result->extension = "ffpreset";
   result->vendor = "Sjoerd van Kreel";
   result->full_name = full_name;
@@ -478,7 +479,7 @@ synth_topo(bool is_fx, std::string const& full_name)
   result->modules[module_vlfo] = lfo_topo(is_fx ? module_section_hidden : module_section_vlfo, { 0, 0 }, false, is_fx);
   result->modules[module_osc] = osc_topo(is_fx ? module_section_hidden : module_section_osc, { 0, 0 });
   result->modules[module_global_in] = global_in_topo(module_section_global_in, is_fx, { 0, 0 });
-  result->modules[module_master_settings] = master_settings_topo(result->vendor, result->full_name, module_section_master_settings, { 0, 0 }, is_fx);
+  result->modules[module_master_settings] = master_settings_topo(module_section_master_settings, { 0, 0 }, is_fx, result.get());
   result->modules[module_voice_on_note] = voice_on_note_topo(result.get(), module_section_hidden); // must be after all global cv  
   result->modules[module_voice_in] = voice_in_topo(is_fx ? module_section_hidden : module_section_voice_in, { 0, 0 }); // must be after all cv
   result->modules[module_voice_out] = audio_out_topo(is_fx ? module_section_hidden : module_section_voice_out, { 0, 0 }, false);

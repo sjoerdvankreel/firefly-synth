@@ -52,6 +52,13 @@ forward_thread_pool_voice_processor(plugin_engine& engine, void* context)
   return plugin->thread_pool_voice_processor(engine);
 }
 
+pb_basic_config const* 
+pb_basic_config::instance()
+{
+  static pb_basic_config result = {};
+  return &result;
+}
+
 pb_plugin::
 ~pb_plugin() 
 { 

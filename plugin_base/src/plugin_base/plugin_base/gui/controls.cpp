@@ -327,7 +327,7 @@ patch_menu::clicked()
 
 preset_button::
 preset_button(plugin_gui* gui) :
-_gui(gui), _presets(gui->gui_state()->desc().presets())
+_gui(gui), _presets(gui->gui_state()->desc().plugin->presets())
 { 
   set_items(vector_map(_presets, [](auto const& p) { return menu_button_item { p.name, p.group }; }));
   extra_state_changed();
@@ -354,7 +354,7 @@ preset_button::extra_state_changed()
 
 theme_button::
 theme_button(plugin_gui* gui) :
-_gui(gui), _themes(gui->gui_state()->desc().themes())
+_gui(gui), _themes(gui->gui_state()->desc().plugin->themes())
 {  
   auto const* topo = gui->gui_state()->desc().plugin;
   std::string default_theme = topo->gui.default_theme;
@@ -374,7 +374,7 @@ _gui(gui), _themes(gui->gui_state()->desc().themes())
 
 image_component::
 image_component(
-  format_config const* config, 
+  format_basic_config const* config, 
   std::string const& theme,
   std::string const& file_name, 
   RectanglePlacement placement)
@@ -501,7 +501,7 @@ param_component::mouseUp(MouseEvent const& evt)
     }
   }
 
-  auto host_menu = _gui->gui_state()->desc().config->context_menu(_param->info.id_hash);
+  auto host_menu = _gui->gui_state()->desc().menu_handler->context_menu(_param->info.id_hash);
   if (host_menu && host_menu->root.children.size())
   {
     have_menu = true;

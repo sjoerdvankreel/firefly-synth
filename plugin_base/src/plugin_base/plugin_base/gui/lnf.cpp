@@ -113,7 +113,7 @@ _theme(theme), _desc(desc), _custom_section(custom_section), _module_section(mod
   assert(module_section == -1 || module >= 0);
   assert(custom_section == -1 || module == -1);
 
-  auto theme_folder = get_resource_location(desc->config) / resource_folder_themes / _theme;
+  auto theme_folder = get_resource_location(desc->plugin->config) / resource_folder_themes / _theme;
   auto font_path = theme_folder / "font.ttf";
   std::vector<char> typeface = file_load(font_path);
 

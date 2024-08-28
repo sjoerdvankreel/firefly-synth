@@ -71,7 +71,8 @@ typedef plugin_base::jarray<plugin_base::jarray<
 enum { midi_output_cp, midi_output_pb, midi_output_cc };
 
 // this describes our semi-modular synth/fx plugin
-std::unique_ptr<plugin_base::plugin_topo> synth_topo(bool is_fx, std::string const& full_name);
+std::unique_ptr<plugin_base::plugin_topo> synth_topo(
+  plugin_base::format_basic_config const* config, bool is_fx, std::string const& full_name);
 
 // MIDI goes first! That hosts the midi sources everyone else needs.
 // There's also a whole bunch of other implicit dependencies in here so mind the ordering.
@@ -220,7 +221,7 @@ plugin_base::module_topo lfo_topo(int section, plugin_base::gui_position const& 
 plugin_base::module_topo monitor_topo(int section, plugin_base::gui_position const& pos, int polyphony, bool is_fx);
 plugin_base::module_topo audio_out_topo(int section, plugin_base::gui_position const& pos, bool global);
 plugin_base::module_topo osc_osc_matrix_topo(int section, plugin_base::gui_position const& pos, plugin_base::plugin_topo const* plugin);
-plugin_base::module_topo master_settings_topo(std::string const& vendor, std::string const& full_name, int section, plugin_base::gui_position const& pos, bool is_fx);
+plugin_base::module_topo master_settings_topo(int section, plugin_base::gui_position const& pos, bool is_fx, plugin_base::plugin_topo const* plugin);
 plugin_base::module_topo audio_audio_matrix_topo(int section, plugin_base::gui_position const& pos, bool global, bool is_fx,
   std::vector<plugin_base::module_topo const*> const& sources, std::vector<plugin_base::module_topo const*> const& targets);
 plugin_base::module_topo cv_matrix_topo(int section, plugin_base::gui_position const& pos, bool cv, bool global, bool is_fx,

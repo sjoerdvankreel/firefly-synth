@@ -14,7 +14,7 @@ static int const max_auto_smoothing_ms = 50;
 static int const max_other_smoothing_ms = 1000;
 
 enum { section_main }; 
-enum { param_midi_smooth, param_tempo_smooth, param_auto_smooth, param_tuning_mode, param_count };
+enum { param_midi_smooth, param_tempo_smooth, param_auto_smooth, param_tuning_mode, param_preset, param_count };
 
 // we provide the buttons, everyone else needs to implement it
 extern int const master_settings_param_auto_smooth = param_auto_smooth;
@@ -37,7 +37,7 @@ render_graph(plugin_state const& state, graph_engine* engine, int param, param_t
 }
 
 module_topo
-master_settings_topo(std::string const& vendor, std::string const& full_name, int section, gui_position const& pos, bool is_fx)
+master_settings_topo(int section, gui_position const& pos, bool is_fx, plugin_base::plugin_topo const* plugin)
 {
   std::vector<int> row_distribution = { 1 };
   std::vector<int> column_distribution = { 1 };
@@ -50,7 +50,7 @@ master_settings_topo(std::string const& vendor, std::string const& full_name, in
   result.gui.show_tab_header = false;
   result.force_rerender_on_param_hover = true;
 
-  gui_dimension dimension({ 1 }, { { 1, 1, 1, 1 } });
+  gui_dimension dimension({ 1 }, { { 1, 1, 1, 1, 1 } });
   auto section_gui = make_param_section_gui({ 0, 0 }, dimension);
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag_basic("{650CEC37-B01B-4EE6-A010-34C2AE1C66B0}", "Main"), section_gui));
@@ -83,6 +83,14 @@ master_settings_topo(std::string const& vendor, std::string const& full_name, in
   tuning_mode.info.is_per_instance = true;
   tuning_mode.info.description = "Microtuning mode.";
   tuning_mode.gui.bindings.enabled.bind_slot([is_fx](int) { return !is_fx; });
+  auto& preset = result.params.emplace_back(make_param(
+    make_topo_info_basic("{B9FFE7EA-49D3-4B3C-97F5-2B99F9625088}", "Preset", param_preset, 1),
+    make_param_dsp_input(false, param_automate::none), make_domain_item(plugin->preset_list(), ""),
+    make_param_gui_single(section_main, gui_edit_type::list, { 0, 4, 1, 1 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
+  preset.info.is_per_instance = true;
+  preset.info.description = "Factory preset.";
+  preset.gui.submenu = plugin->preset_submenu();
   return result;
 }
 

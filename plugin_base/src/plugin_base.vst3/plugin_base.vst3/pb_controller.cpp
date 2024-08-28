@@ -21,6 +21,13 @@ using namespace Steinberg::Vst;
 
 namespace plugin_base::vst3 {
 
+pb_basic_config const* 
+pb_basic_config::instance()
+{
+  static pb_basic_config result = {};
+  return &result;
+}
+
 pb_controller::
 ~pb_controller() 
 { _gui_state.remove_any_listener(this); }
