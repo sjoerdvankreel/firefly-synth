@@ -85,7 +85,7 @@
       }
     },
     {
-      "custom_sections": ["Global FX Graph", "Global LFO Graph", "Global Matrix Graphs"],
+      "custom_sections": ["Theme", "Global FX Graph", "Global LFO Graph", "Global Matrix Graphs"],
       "module_sections": ["Master", "Global", "Global Out", "Global FX", "Global LFO"],
       "colors": {
         "tab_text": "FFFF0040",

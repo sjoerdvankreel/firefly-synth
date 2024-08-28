@@ -31,6 +31,7 @@ enum {
   custom_section_main_graph,
   custom_section_patch_controls,
   custom_section_edit_controls, 
+  custom_section_theme_select,
   custom_section_gfx_graph,
   custom_section_glfo_graph,
   custom_section_global_matrix_graphs,
@@ -171,8 +172,16 @@ make_patch_controls_section(plugin_gui* gui, lnf* lnf, component_store store)
 {
   auto colors = lnf->section_gui_colors("Patch");
   auto& result = store_component<grid_component>(store, gui_dimension{ 2, 2 }, 2, 2, 0, 0);
-  result.add(store_component<patch_menu>(store, gui), { 0, 0, 1, 2 });
-  result.add(store_component<theme_combo>(store, gui, lnf), { 1, 0, 1, 2 });
+  result.add(store_component<patch_menu>(store, gui), { 0, 0, 2, 2 });
+  return result;
+}
+
+static Component&
+make_theme_select_section(plugin_gui* gui, lnf* lnf, component_store store)
+{
+  auto colors = lnf->section_gui_colors("Theme");
+  auto& result = store_component<grid_component>(store, gui_dimension{ 1, 1 }, 2, 2, 0, 0);
+  result.add(store_component<theme_combo>(store, gui, lnf), { 0, 0, 1, 1 });
   return result;
 }
 
@@ -380,6 +389,9 @@ synth_topo(format_basic_config const* config, bool is_fx, std::string const& ful
   result->gui.custom_sections[custom_section_patch_controls] = make_custom_section_gui(
     custom_section_patch_controls, "Patch", { 0, 5, 1, 1 }, 
       [](auto gui, auto lnf, auto store) -> juce::Component& { return make_patch_controls_section(gui, lnf, store); });
+  result->gui.custom_sections[custom_section_theme_select] = make_custom_section_gui(
+    custom_section_theme_select, "Theme", { 1, 5, 1, 1 },
+    [](auto gui, auto lnf, auto store) -> juce::Component& { return make_theme_select_section(gui, lnf, store); });
   result->gui.custom_sections[custom_section_edit_controls] = make_custom_section_gui(
     custom_section_edit_controls, "Tweak", { 0, 4, 1, 1 }, 
       [](auto gui, auto lnf, auto store) -> juce::Component& { return make_edit_controls_section(gui, lnf, store); });
@@ -431,7 +443,7 @@ synth_topo(format_basic_config const* config, bool is_fx, std::string const& ful
   result->gui.module_sections[module_section_global_in] = make_module_section_gui(
     "{F9578AAA-66A4-4B0C-A941-4719B5F0E998}", module_section_global_in, { 2, 0, 1, 3 }, { 1, 1 });
   result->gui.module_sections[module_section_master_settings] = make_module_section_gui(
-    "{D7ECBB86-2257-43DE-80FA-A648F648F715}", module_section_master_settings, { 1, 0, 1, 6 }, { 1, 1 });
+    "{D7ECBB86-2257-43DE-80FA-A648F648F715}", module_section_master_settings, { 1, 0, 1, 5 }, { 1, 1 });
   result->gui.module_sections[module_section_global_out] = make_module_section_gui(
     "{F77335AC-B701-40DA-B4C2-1F55DBCC29A4}", module_section_global_out, { 2, 3, 1, 1 }, { { 1 }, { 1 } });
   result->gui.module_sections[module_section_monitor] = make_module_section_gui(

@@ -338,7 +338,6 @@ _gui(gui), _themes(gui->gui_state()->desc().plugin->themes())
   for (int i = 0; i < _themes.size(); i++)
     if (_themes[i] == theme)
       setSelectedItemIndex(i);
-  setColour(ColourIds::textColourId, Colours::green); // TODO
   onChange = [this, default_theme, &topo]() {
     // DONT run synchronously because theme_changed will destroy [this]!
     int new_index = std::clamp(getSelectedItemIndex(), 0, (int)_themes.size() - 1);
