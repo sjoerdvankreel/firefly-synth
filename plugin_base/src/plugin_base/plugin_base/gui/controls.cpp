@@ -272,27 +272,6 @@ last_tweaked_editor::textEditorTextChanged(TextEditor& te)
   _updating = false;
 }
 
-patch_menu::
-patch_menu(plugin_gui* gui) : _gui(gui)
-{
-  setButtonText("Patch");
-}
-
-void 
-patch_menu::clicked()
-{
-  PopupMenu menu;
-  menu.setLookAndFeel(&getLookAndFeel());
-  menu.addItem("Load", [this]() { _gui->load_patch(); });
-  menu.addItem("Save", [this]() { _gui->save_patch(); });
-  menu.addItem("Init", [this]() { _gui->init_patch(); });
-  menu.addItem("Clear", [this]() { _gui->clear_patch(); });
-
-  PopupMenu::Options options;
-  options = options.withTargetComponent(this);
-  menu.showMenuAsync(options);
-}
-
 theme_combo::
 theme_combo(plugin_gui* gui, lnf* lnf) :
 autofit_combobox(lnf, true, false),

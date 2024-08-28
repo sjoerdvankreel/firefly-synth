@@ -141,6 +141,11 @@ public:
   void clear_patch();
   void load_patch(std::string const& path, bool preset);
 
+  Component& make_load_button();
+  Component& make_save_button();
+  Component& make_init_button();
+  Component& make_clear_button();
+
   void param_mouse_exit(int param);
   void param_mouse_enter(int param);
   void module_mouse_exit(int module);

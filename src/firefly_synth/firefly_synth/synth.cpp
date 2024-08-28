@@ -171,8 +171,16 @@ static Component&
 make_patch_controls_section(plugin_gui* gui, lnf* lnf, component_store store)
 {
   auto colors = lnf->section_gui_colors("Patch");
-  auto& result = store_component<grid_component>(store, gui_dimension{ 2, 2 }, 2, 2, 0, 0);
-  result.add(store_component<patch_menu>(store, gui), { 0, 0, 2, 2 });
+  auto& result = store_component<grid_component>(store, gui_dimension{ { 1, 1, }, { gui_dimension::auto_size_all, 1, 1 } }, 2, 2, 0, 0);
+  auto& patch_label = store_component<autofit_label>(store, lnf, "Patch");
+  patch_label.setText("Patch", juce::dontSendNotification);
+  patch_label.setJustificationType(Justification::centredLeft);
+  patch_label.setColour(Label::ColourIds::textColourId, colors.label_text);
+  result.add(patch_label, { 0, 0, 2, 1 });
+  result.add(gui->make_load_button(), { 0, 1 });
+  result.add(gui->make_save_button(), { 0, 2 });
+  result.add(gui->make_init_button(), { 1, 1 });
+  result.add(gui->make_clear_button(), { 1, 2 });
   return result;
 }
 

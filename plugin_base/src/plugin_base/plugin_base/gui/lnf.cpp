@@ -529,19 +529,6 @@ lnf::drawButtonText(Graphics& g, TextButton& button, bool, bool)
   const int textWidth = button.getWidth() - leftIndent - rightIndent;
   if (textWidth > 0)
     g.drawText(button.getButtonText(), leftIndent, yIndent, textWidth, button.getHeight() - yIndent * 2, Justification::centred, false);
-  
-  if (!dynamic_cast<patch_menu*>(&button)) return;
-  
-  Path arrow;
-  float w = 6;
-  float h = 4;
-  float x = button.getWidth() - 5 - w;
-  float y = button.getHeight() / 2 - h / 2 + 1;
-  arrow.startNewSubPath(x, y);
-  arrow.lineTo(x + w, y);
-  arrow.lineTo(x + w / 2, y + h);
-  arrow.closeSubPath(); 
-  g.fillPath(arrow);
 }
  
 void 

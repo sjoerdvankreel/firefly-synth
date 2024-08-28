@@ -10,8 +10,6 @@
 
 namespace plugin_base {
 
-// TODO remove
-// same as juce version but does not react to right-click
 class text_button:
 public juce::TextButton
 {
@@ -112,18 +110,6 @@ public:
 
   void textEditorTextChanged(juce::TextEditor&) override;
   void any_state_changed(int index, plain_value plain) override;
-};
-
-// TODO remove
-// ALSO todo check all of this which is need all kinds of special buttons
-// load/save/init/clear patch
-class patch_menu :
-public text_button
-{
-  plugin_gui* const _gui;
-public:
-  void clicked() override;
-  patch_menu(plugin_gui* gui);
 };
 
 // binds theme to global user config
