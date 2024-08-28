@@ -13,9 +13,6 @@ namespace plugin_base {
 class plugin_state;
 class gui_param_listener;
 
-// saved stuff per-instance TODO move the definitions
-inline std::string const extra_state_factory_preset_key = "factory_preset";
-
 class extra_state_listener {
 public:
   virtual ~extra_state_listener() {}
