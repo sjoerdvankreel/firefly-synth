@@ -49,7 +49,6 @@ master_settings_topo(std::string const& vendor, std::string const& full_name, in
   result.graph_renderer = render_graph;
   result.gui.show_tab_header = false;
   result.force_rerender_on_param_hover = true;
-  // todo document breaking change 
 
   gui_dimension dimension({ 1 }, { { 1, 1, 1, 1 } });
   auto section_gui = make_param_section_gui({ 0, 0 }, dimension);
@@ -82,7 +81,7 @@ master_settings_topo(std::string const& vendor, std::string const& full_name, in
     make_param_gui_single(section_main, gui_edit_type::list, { 0, 3, 1, 1 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   tuning_mode.info.is_per_instance = true;
-  tuning_mode.info.description = "Microtuning mode."; // TODO per_instance in refgen
+  tuning_mode.info.description = "Microtuning mode.";
   tuning_mode.gui.bindings.enabled.bind_slot([is_fx](int) { return !is_fx; });
   return result;
 }

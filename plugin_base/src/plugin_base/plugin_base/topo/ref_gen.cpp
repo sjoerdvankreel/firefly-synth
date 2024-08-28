@@ -199,6 +199,7 @@ generate_params_ref(
       out << "<th>Name</th>\n";
       out << "<th>Section</th>\n";
       out << "<th>UI</th>\n";
+      out << "<th>Storage</th>\n";
       out << "<th>Num</th>\n";
       out << "<th>Dir</th>\n";
       out << "<th>Rate</th>\n";
@@ -257,6 +258,7 @@ generate_params_ref(
         out << "<td rowspan='2'>" << param.info.tag.full_name << "</td>\n";
         out << "<td>" << module.sections[param.gui.section].tag.full_name << "</td>\n";
         out << "<td>" << (param.gui.visible? "Yes": "No") << "</td>\n";
+        out << "<td>" << (param.info.is_per_instance ? "Instance" : "Patch") << "</td>\n";
         out << "<td>" << param.info.slot_count << "</td>\n";
         out << "<td>" << direction << "</td>\n";
         out << "<td>" << rate << "</td>\n";
