@@ -36,7 +36,7 @@ topo_desc_info::validate(int topo_count, int slot_count) const
 }
 
 int
-desc_id_hash(std::string const& text)
+stable_hash(std::string const& text)
 {
   // stable hash, nonnegative required for vst3 param tags
   std::uint32_t h = 0;

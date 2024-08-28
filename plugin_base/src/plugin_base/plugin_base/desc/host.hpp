@@ -10,8 +10,9 @@
 namespace plugin_base {
 
 // from resources folder, used for presets
-struct resource_item
+struct preset_item
 {
+  int path_hash;
   std::string name;
   std::string path;
   std::string group;

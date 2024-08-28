@@ -36,10 +36,10 @@ _extra_state(gui_extra_state_keyset(*_desc->plugin))
 
   // fetch mod indicator param tags
   _mod_indicator_states_to_gui.resize(mod_indicator_output_param_count);
-  _mod_indicator_count_param_tag = desc_id_hash(mod_indicator_count_param_guid);
+  _mod_indicator_count_param_tag = stable_hash(mod_indicator_count_param_guid);
   for (int i = 0; i < mod_indicator_output_param_count; i++)
   {
-    _mod_indicator_param_tags[i] = desc_id_hash(mod_indicator_param_guids[i]);
+    _mod_indicator_param_tags[i] = stable_hash(mod_indicator_param_guids[i]);
     _tag_to_mod_indicator_index[_mod_indicator_param_tags[i]] = i;
   }
 }
@@ -300,7 +300,7 @@ pb_controller::initialize(FUnknown* context)
   mod_indicator_count_param.unitId = kRootUnitId;
   mod_indicator_count_param.defaultNormalizedValue = 0;
   mod_indicator_count_param.stepCount = mod_indicator_output_param_count + 1;
-  mod_indicator_count_param.id = desc_id_hash(mod_indicator_count_param_guid);
+  mod_indicator_count_param.id = stable_hash(mod_indicator_count_param_guid);
   mod_indicator_count_param.flags = ParameterInfo::kIsReadOnly | ParameterInfo::kIsHidden;
   parameters.addParameter(new Parameter(mod_indicator_count_param));
 
@@ -310,7 +310,7 @@ pb_controller::initialize(FUnknown* context)
     mod_indicator_param.stepCount = 0;
     mod_indicator_param.unitId = kRootUnitId;
     mod_indicator_param.defaultNormalizedValue = 0;
-    mod_indicator_param.id = desc_id_hash(mod_indicator_param_guids[i]);
+    mod_indicator_param.id = stable_hash(mod_indicator_param_guids[i]);
     mod_indicator_param.flags = ParameterInfo::kIsReadOnly | ParameterInfo::kIsHidden;
     parameters.addParameter(new Parameter(mod_indicator_param));
   }

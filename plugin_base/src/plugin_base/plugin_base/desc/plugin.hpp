@@ -113,7 +113,7 @@ public:
 
   void validate() const;
   std::vector<std::string> themes() const;
-  std::vector<resource_item> presets() const;
+  std::vector<preset_item> presets() const;
 
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(plugin_desc);
   plugin_desc(plugin_topo const* plugin, format_config const* config);

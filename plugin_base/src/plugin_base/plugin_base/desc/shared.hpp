@@ -6,7 +6,7 @@
 namespace plugin_base {
 
 int
-desc_id_hash(std::string const& text);
+stable_hash(std::string const& text);
 std::string
 desc_id(topo_info const& info, int slot);
 std::string

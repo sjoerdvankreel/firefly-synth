@@ -40,9 +40,9 @@ _splice_engine(_desc.get(), false, nullptr, nullptr)
   }
 
   // fetch mod indicator param tags
-  _mod_indicator_count_param_tag = desc_id_hash(mod_indicator_count_param_guid);
+  _mod_indicator_count_param_tag = stable_hash(mod_indicator_count_param_guid);
   for (int i = 0; i < mod_indicator_output_param_count; i++)
-    _mod_indicator_param_tags[i] = desc_id_hash(mod_indicator_param_guids[i]);
+    _mod_indicator_param_tags[i] = stable_hash(mod_indicator_param_guids[i]);
 }
 
 tresult PLUGIN_API
