@@ -26,9 +26,6 @@ enum class gui_hover_type { param, module, custom };
 inline std::string const user_state_scale_key = "scale";
 inline std::string const user_state_theme_key = "theme";
 
-// extra gui state stuff
-inline std::string const extra_state_factory_preset_key = "factory_preset";
-
 // for serialization
 std::set<std::string> gui_extra_state_keyset(plugin_topo const& topo);
 std::string module_section_tab_key(plugin_topo const& topo, int section_index);
