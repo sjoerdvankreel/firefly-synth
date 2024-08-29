@@ -1,4 +1,4 @@
-### ?, ? - V1.9.0.
+### August 29, 2024 - V1.9.0.
 
 - Load/save/init/clear patch split out to separate buttons again.
 - Move global unison from global to voice section.
