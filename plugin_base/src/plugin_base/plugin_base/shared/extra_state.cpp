@@ -1,3 +1,5 @@
+#include <plugin_base/gui/gui.hpp>
+#include <plugin_base/shared/state.hpp>
 #include <plugin_base/shared/extra_state.hpp>
 #include <cassert>
 
@@ -33,7 +35,7 @@ extra_state::remove_listener(std::string const& key, extra_state_listener* liste
 }
 
 void 
-extra_state::set_num(std::string const& key, int val)
+extra_state::set_int(std::string const& key, int val)
 {
   assert(_keyset.find(key) != _keyset.end());
   _values[key] = val;
@@ -65,7 +67,7 @@ extra_state::set_var(std::string const& key, var const& val)
 }
 
 int 
-extra_state::get_num(std::string const& key, int default_) const
+extra_state::get_int(std::string const& key, int default_) const
 {
   assert(_keyset.find(key) != _keyset.end());
   auto iter = _values.find(key);

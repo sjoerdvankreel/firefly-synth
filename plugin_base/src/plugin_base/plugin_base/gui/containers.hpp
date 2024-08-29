@@ -128,7 +128,7 @@ public:
     bool select_tab_on_drag_hover, module_desc const* drag_module_descriptors);
 
   void extra_state_changed() override
-  { setCurrentTabIndex(std::clamp(_state->get_num(_storage_id, 0), 0, getNumTabs())); }
+  { setCurrentTabIndex(std::clamp(_state->get_int(_storage_id, 0), 0, getNumTabs())); }
   void currentTabChanged(int index, juce::String const& name) override
   { if (tab_changed != nullptr) tab_changed(index); }
 };

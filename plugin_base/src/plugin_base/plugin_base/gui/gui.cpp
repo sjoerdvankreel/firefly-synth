@@ -20,6 +20,8 @@ static int const margin_content = 3;
 static int const margin_vsection = 3;
 static int const margin_hsection = 3;
 
+static std::string const extra_state_selected_tab_key = "gui_selected_tab";
+
 static std::vector<std::string> tab_menu_module_actions = { 
   "", "Clear", "Clear All", "Delete", "Insert Before", "Insert After", "Copy To", "Move To", "Swap With" };
 
@@ -212,7 +214,7 @@ gui_undo_listener::mouseUp(MouseEvent const& event)
       _gui->gui_state()->redo(result - 1001);
     else if (2001 == result)
     {
-      auto state = plugin_io_save_patch_state(*_gui->gui_state());
+      auto state = plugin_io_save_instance_state(*_gui->gui_state(), true);
       state.push_back('\0');
       juce::SystemClipboard::copyTextToClipboard(juce::String(state.data()));
     }
@@ -221,7 +223,7 @@ gui_undo_listener::mouseUp(MouseEvent const& event)
       plugin_state new_state(&_gui->gui_state()->desc(), false);
       auto clip_contents = juce::SystemClipboard::getTextFromClipboard().toStdString();
       std::vector<char> clip_data(clip_contents.begin(), clip_contents.end());
-      auto load_result = plugin_io_load_patch_state(clip_data, new_state);
+      auto load_result = plugin_io_load_instance_state(clip_data, new_state, true);
       if (load_result.ok() && !load_result.warnings.size())
       {
         _gui->gui_state()->begin_undo_region();
@@ -308,16 +310,15 @@ gui_tab_menu_listener::mouseUp(MouseEvent const& event)
 
 std::string 
 module_section_tab_key(plugin_topo const& topo, int section_index)
-{ return topo.gui.module_sections[section_index].id + "/" + extra_state_tab_index; }
+{ return topo.gui.module_sections[section_index].id + "/" + extra_state_selected_tab_key; }
 
 std::set<std::string>
 gui_extra_state_keyset(plugin_topo const& topo)
 {
   std::set<std::string> result = {};
-  result.insert(extra_state_factory_preset_key);
   for (int i = 0; i < topo.modules.size(); i++)
     if (topo.modules[i].info.slot_count > 1)
-      result.insert(topo.modules[i].info.tag.id + "/" + extra_state_tab_index);
+      result.insert(topo.modules[i].info.tag.id + "/" + extra_state_selected_tab_key);
   for (int i = 0; i < topo.gui.module_sections.size(); i++)
     if (topo.gui.module_sections[i].tabbed)
       result.insert(module_section_tab_key(topo, i));
@@ -342,7 +343,7 @@ _gui_state(gui_state), _undo_listener(this), _extra_state(extra_state), _mod_ind
   setOpaque(true);
   addMouseListener(&_undo_listener, true);
   auto const& topo = *gui_state->desc().plugin;
-  theme_changed(user_io_load_list(topo.vendor, topo.full_name, user_io::base, user_state_theme_key, topo.gui.default_theme, gui_state->desc().themes()));
+  theme_changed(user_io_load_list(topo.vendor, topo.full_name, user_io::base, user_state_theme_key, topo.gui.default_theme, gui_state->desc().plugin->themes()));
 }
 
 void
@@ -619,7 +620,7 @@ plugin_gui::init_multi_tab_component(tab_component& tab, std::string const& id, 
 {
   assert((module_index == -1) != (section_index == -1));
   tab.tab_changed = [this, id, module_index, section_index](int tab_index) {
-    set_extra_state_num(id, extra_state_tab_index, tab_index);
+    set_extra_state_num(id, extra_state_selected_tab_key, tab_index);
     if (module_index != -1)
       for (int i = 0; i < _tab_selection_listeners.size(); i++)
         _tab_selection_listeners[i]->module_tab_changed(module_index, tab_index);
@@ -627,8 +628,8 @@ plugin_gui::init_multi_tab_component(tab_component& tab, std::string const& id, 
       for (int i = 0; i < _tab_selection_listeners.size(); i++)
         _tab_selection_listeners[i]->section_tab_changed(section_index, tab_index);
     };
-  tab.setCurrentTabIndex(std::clamp((int)get_extra_state_num(id, extra_state_tab_index, 0), 0, tab.getNumTabs() - 1));
-  set_extra_state_num(id, extra_state_tab_index, tab.getCurrentTabIndex());
+  tab.setCurrentTabIndex(std::clamp((int)get_extra_state_num(id, extra_state_selected_tab_key, 0), 0, tab.getNumTabs() - 1));
+  set_extra_state_num(id, extra_state_selected_tab_key, tab.getCurrentTabIndex());
 }
 
 void
@@ -721,7 +722,9 @@ plugin_gui::make_modules(module_desc const* slots)
   {
     // tabbed param sections in multi-slot modules not supported
     assert(topo.info.slot_count == 1);
-    return make_param_sections(slots[0]);
+    auto& result = make_param_sections(slots[0]);
+    result.setLookAndFeel(module_lnf(slots[0].module->info.index));
+    return result;
   }
 
   // case the module itself is tabbed (osc 1 2 3 etc)
@@ -1164,6 +1167,42 @@ plugin_gui::make_param_label_edit(module_desc const& module, param_desc const& p
   return result;
 }
 
+Component&
+plugin_gui::make_init_button()
+{
+  auto& result = make_component<text_button>();
+  result.setButtonText("Init");
+  result.onClick = [this] { init_patch(); };
+  return result;
+}
+
+Component&
+plugin_gui::make_clear_button()
+{
+  auto& result = make_component<text_button>();
+  result.setButtonText("Clear");
+  result.onClick = [this] { clear_patch(); };
+  return result;
+}
+
+Component&
+plugin_gui::make_load_button()
+{
+  auto& result = make_component<text_button>();
+  result.setButtonText("Load");
+  result.onClick = [this] { load_patch(); };
+  return result;
+}
+
+Component&
+plugin_gui::make_save_button()
+{
+  auto& result = make_component<text_button>();
+  result.setButtonText("Save");
+  result.onClick = [this] { save_patch(); };
+  return result;
+}
+
 void 
 plugin_gui::init_patch()
 {
@@ -1210,7 +1249,7 @@ plugin_gui::save_patch()
     auto path = chooser.getResult().getFullPathName();
     delete& chooser;
     if (path.length() == 0) return;
-    plugin_io_save_file_all_state(path.toStdString(), *_gui_state, *_extra_state);
+    plugin_io_save_file_patch_state(path.toStdString(), *_gui_state);
   });
 }
 
@@ -1234,7 +1273,7 @@ plugin_gui::load_patch(std::string const& path, bool preset)
   PB_LOG_FUNC_ENTRY_EXIT();  
   _gui_state->begin_undo_region();
   auto icon = MessageBoxIconType::WarningIcon;
-  auto result = plugin_io_load_file_all_state(path, *_gui_state, *_extra_state);
+  auto result = plugin_io_load_file_patch_state(path, *_gui_state);
   if (result.error.size())
   {
     auto options = MessageBoxOptions::makeOptionsOk(icon, "Error", result.error, String(), this);

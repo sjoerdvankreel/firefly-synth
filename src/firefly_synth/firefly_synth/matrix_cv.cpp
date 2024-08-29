@@ -24,6 +24,8 @@ static int constexpr vaudio_route_count = 30;
 static int constexpr gaudio_route_count = 20;
 static int constexpr max_audio_route_count = std::max(vaudio_route_count, gaudio_route_count);
 
+static int constexpr max_any_route_count = std::max(max_cv_route_count, max_audio_route_count);
+
 enum { section_main };
 enum { scratch_transform_source, scratch_offset, scratch_scale, scratch_count };
 enum { param_type, param_source, param_target, param_offset, param_scale, param_min, param_max };
@@ -658,9 +660,9 @@ cv_matrix_engine_base::perform_mixdown(plugin_block& block, int module, int slot
 
   // apply modulation routing
   int modulation_index = 0;
-  int route_count = _global ? gcv_route_count : vcv_route_count;
-  jarray<float, 1>* modulated_curve_ptrs[max_cv_route_count] = { nullptr };
-  mod_indicator_usage mod_indicator_usages[max_cv_route_count];
+  int route_count = route_count_from_matrix_type(_global, _cv);
+  jarray<float, 1>* modulated_curve_ptrs[max_any_route_count] = { nullptr };
+  mod_indicator_usage mod_indicator_usages[max_any_route_count];
   std::memset(&mod_indicator_usages, 0, sizeof(mod_indicator_usages));
 
   for (int r = 0; r < route_count; r++)

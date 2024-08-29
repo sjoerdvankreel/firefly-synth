@@ -21,6 +21,13 @@ using namespace Steinberg::Vst;
 
 namespace plugin_base::vst3 {
 
+pb_basic_config const* 
+pb_basic_config::instance()
+{
+  static pb_basic_config result = {};
+  return &result;
+}
+
 pb_controller::
 ~pb_controller() 
 { _gui_state.remove_any_listener(this); }
@@ -29,32 +36,19 @@ pb_controller::
 pb_controller(plugin_topo const* topo):
 _desc(std::make_unique<plugin_desc>(topo, this)),
 _gui_state(_desc.get(), true),
-_extra_state(set_join<std::string>({ gui_extra_state_keyset(*_desc->plugin), tuning_extra_state_keyset() }))
+_extra_state(gui_extra_state_keyset(*_desc->plugin))
 { 
   PB_LOG_FUNC_ENTRY_EXIT();
   _gui_state.add_any_listener(this);  
-  init_tuning_from_extra_state();
 
   // fetch mod indicator param tags
   _mod_indicator_states_to_gui.resize(mod_indicator_output_param_count);
-  _mod_indicator_count_param_tag = desc_id_hash(mod_indicator_count_param_guid);
+  _mod_indicator_count_param_tag = stable_hash(mod_indicator_count_param_guid);
   for (int i = 0; i < mod_indicator_output_param_count; i++)
   {
-    _mod_indicator_param_tags[i] = desc_id_hash(mod_indicator_param_guids[i]);
+    _mod_indicator_param_tags[i] = stable_hash(mod_indicator_param_guids[i]);
     _tag_to_mod_indicator_index[_mod_indicator_param_tags[i]] = i;
   }
-}
-
-void
-pb_controller::init_tuning_from_extra_state()
-{
-  auto const* topo = _gui_state.desc().plugin;
-  if (topo->tuning_mode_module == -1 || topo->tuning_mode_param == -1) return;
-  auto tuning_mode = std::clamp(_extra_state.get_num(extra_state_tuning_mode_key, engine_tuning_mode_on_note_before_mod), 0, engine_tuning_mode_count - 1);
-  int param_index = _gui_state.desc().param_mappings.topo_to_index[topo->tuning_mode_module][0][topo->tuning_mode_param][0];
-  auto tuning_plain = _gui_state.desc().raw_to_plain_at_index(param_index, tuning_mode);
-  _gui_state.set_plain_at_index(param_index, tuning_plain);
-  gui_param_changed(param_index, tuning_plain);
 }
 
 void 
@@ -93,7 +87,6 @@ pb_controller::setState(IBStream* state)
   PB_LOG_FUNC_ENTRY_EXIT();
   if (!plugin_io_load_extra_state(*_gui_state.desc().plugin, load_ibstream(state), _extra_state).ok())
     return kResultFalse;
-  init_tuning_from_extra_state();
   return kResultOk;
 }
 
@@ -102,7 +95,7 @@ pb_controller::setComponentState(IBStream* state)
 {
   PB_LOG_FUNC_ENTRY_EXIT();
   gui_state().begin_undo_region();
-  if (!plugin_io_load_patch_state(load_ibstream(state), gui_state()).ok())
+  if (!plugin_io_load_instance_state(load_ibstream(state), gui_state(), false).ok())
   {
     gui_state().discard_undo_region();
     return kResultFalse;
@@ -314,7 +307,7 @@ pb_controller::initialize(FUnknown* context)
   mod_indicator_count_param.unitId = kRootUnitId;
   mod_indicator_count_param.defaultNormalizedValue = 0;
   mod_indicator_count_param.stepCount = mod_indicator_output_param_count + 1;
-  mod_indicator_count_param.id = desc_id_hash(mod_indicator_count_param_guid);
+  mod_indicator_count_param.id = stable_hash(mod_indicator_count_param_guid);
   mod_indicator_count_param.flags = ParameterInfo::kIsReadOnly | ParameterInfo::kIsHidden;
   parameters.addParameter(new Parameter(mod_indicator_count_param));
 
@@ -324,7 +317,7 @@ pb_controller::initialize(FUnknown* context)
     mod_indicator_param.stepCount = 0;
     mod_indicator_param.unitId = kRootUnitId;
     mod_indicator_param.defaultNormalizedValue = 0;
-    mod_indicator_param.id = desc_id_hash(mod_indicator_param_guids[i]);
+    mod_indicator_param.id = stable_hash(mod_indicator_param_guids[i]);
     mod_indicator_param.flags = ParameterInfo::kIsReadOnly | ParameterInfo::kIsHidden;
     parameters.addParameter(new Parameter(mod_indicator_param));
   }

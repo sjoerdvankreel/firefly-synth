@@ -101,38 +101,6 @@ toggle_button::mouseUp(MouseEvent const& e)
     ToggleButton::mouseUp(e);
 }
 
-void
-menu_button::clicked()
-{
-  PopupMenu menu;
-  PopupMenu sub_menu;
-  PopupMenu* current_menu = &menu;
-  std::string current_group = "";
-  menu.setLookAndFeel(&getLookAndFeel());
-  for (int i = 0; i < _items.size(); i++)
-  {
-    if (_items[i].group != current_group)
-    {
-      sub_menu = PopupMenu();
-      current_menu = &sub_menu;
-      current_group = _items[i].group;
-    }
-    current_menu->addItem(i + 1, _items[i].name, true, i == _selected_index);
-    if(!_items[i].group.empty() && (i == _items.size() - 1 || _items[i].group != _items[i + 1].group))
-      menu.addSubMenu(_items[i].group, sub_menu, true);
-  }
-  PopupMenu::Options options;
-  options = options.withTargetComponent(this);
-  menu.showMenuAsync(options, [this](int id) {
-    if (id == 0) return;
-    int index = id - 1;
-    if (index == _selected_index) return;
-    _selected_index = index;
-    if (_selected_index_changed != nullptr)
-      _selected_index_changed(index);
-  });
-}
-
 static std::string
 param_slot_name(param_desc const* param)
 {
@@ -304,131 +272,32 @@ last_tweaked_editor::textEditorTextChanged(TextEditor& te)
   _updating = false;
 }
 
-patch_menu::
-patch_menu(plugin_gui* gui) : _gui(gui)
-{
-  setButtonText("Patch");
-}
-
-void 
-patch_menu::clicked()
-{
-  PopupMenu menu;
-  menu.setLookAndFeel(&getLookAndFeel());
-  menu.addItem("Load", [this]() { _gui->load_patch(); });
-  menu.addItem("Save", [this]() { _gui->save_patch(); });
-  menu.addItem("Init", [this]() { _gui->init_patch(); });
-  menu.addItem("Clear", [this]() { _gui->clear_patch(); });
-
-  PopupMenu::Options options;
-  options = options.withTargetComponent(this);
-  menu.showMenuAsync(options);
-}
-
-preset_button::
-preset_button(plugin_gui* gui) :
-_gui(gui), _presets(gui->gui_state()->desc().presets())
-{ 
-  set_items(vector_map(_presets, [](auto const& p) { return menu_button_item { p.name, p.group }; }));
-  extra_state_changed();
-  setButtonText("Preset");
-  _gui->extra_state_()->add_listener(extra_state_factory_preset_key, this);
-  _selected_index_changed = [this](int index) {
-    index = std::clamp(index, 0, (int)get_items().size());
-    _gui->extra_state_()->set_text(extra_state_factory_preset_key, get_items()[index].name);
-    _gui->load_patch(_presets[index].path, true);
-  };
-}
-
-void 
-preset_button::extra_state_changed()
-{
-  std::string selected_preset = _gui->extra_state_()->get_text(extra_state_factory_preset_key, "");
-  for(int i = 0; i < get_items().size(); i++)
-    if(get_items()[i].name == selected_preset)
-    {
-      set_selected_index(i);
-      break;
-    }
-}
-
-theme_button::
-theme_button(plugin_gui* gui) :
-_gui(gui), _themes(gui->gui_state()->desc().themes())
+theme_combo::
+theme_combo(plugin_gui* gui, lnf* lnf) :
+autofit_combobox(lnf, true, false),
+_gui(gui), _themes(gui->gui_state()->desc().plugin->themes())
 {  
-  auto const* topo = gui->gui_state()->desc().plugin;
-  std::string default_theme = topo->gui.default_theme;
-  std::string theme = user_io_load_list(topo->vendor, topo->full_name, user_io::base, user_state_theme_key, default_theme, _themes);
-  set_items(vector_map(_themes, [](auto const& t) { return menu_button_item { t, ""}; }));
-  setButtonText("Theme");
-  for(int i = 0; i < _themes.size(); i++)
-    if(_themes[i] == theme)
-      set_selected_index(i);
-  _selected_index_changed = [this, topo](int index) {
-    index = std::clamp(index, 0, (int)get_items().size());
+  auto const& topo = *gui->gui_state()->desc().plugin;
+  std::string default_theme = topo.gui.default_theme;
+  std::string theme = user_io_load_list(topo.vendor, topo.full_name, user_io::base, user_state_theme_key, default_theme, _themes);
+  for (int i = 0; i < _themes.size(); i++)
+    addItem(_themes[i], i + 1);
+  for (int i = 0; i < _themes.size(); i++)
+    if (_themes[i] == theme)
+      setSelectedItemIndex(i);
+  onChange = [this, default_theme, &topo]() {
     // DONT run synchronously because theme_changed will destroy [this]!
-    user_io_save_list(topo->vendor, topo->full_name, user_io::base, user_state_theme_key, _themes[index]);
-    MessageManager::callAsync([gui = _gui, theme_name = _themes[index]]() { gui->theme_changed(theme_name); });
-  };
-}
-
-tuning_mode_button::
-~tuning_mode_button()
-{
-  auto const* topo = _gui->gui_state()->desc().plugin;
-  if (topo->tuning_mode_module != -1 && topo->tuning_mode_param != -1)
-  {
-    int param_index = _gui->gui_state()->desc().param_mappings.topo_to_index[topo->tuning_mode_module][0][topo->tuning_mode_param][0];
-    _gui->gui_state()->remove_listener(param_index, this);
-  }
-}
-
-tuning_mode_button::
-tuning_mode_button(plugin_gui* gui) :
-_gui(gui)
-{ 
-  setButtonText("Tuning");
-
-  // tuning is not implemented for fx and crashes when trying to change
-  setEnabled(gui->gui_state()->desc().plugin->type == plugin_type::synth);
-
-  // fill the list
-  std::vector<menu_button_item> button_items;
-  auto mode_items = engine_tuning_mode_items();
-  auto const* topo = gui->gui_state()->desc().plugin;
-  for (int i = engine_tuning_mode_no_tuning; i < engine_tuning_mode_count; i++)
-  {
-    menu_button_item item;
-    item.group = "";
-    item.name = mode_items[i].name;
-    button_items.push_back(item);
-  }
-  set_items(button_items);
-
-  if (topo->tuning_mode_module != -1 && topo->tuning_mode_param != -1)
-  {
-    // need to pick up the real value from plugin state
-    set_selected_index(_gui->gui_state()->get_plain_at(
-      topo->tuning_mode_module, 0, topo->tuning_mode_param, 0).step());
-
-    // and also react to it
-    int param_index = _gui->gui_state()->desc().param_mappings.topo_to_index[topo->tuning_mode_module][0][topo->tuning_mode_param][0];
-    _gui->gui_state()->add_listener(param_index, this);
-  }
-
-  // need to push both to plugin state and extra state
-  _selected_index_changed = [this, topo, mode_items](int selected_index) {
-    selected_index = std::clamp(selected_index, 0, (int)get_items().size());
-    int param_index = _gui->gui_state()->desc().param_mappings.topo_to_index[topo->tuning_mode_module][0][topo->tuning_mode_param][0];
-    plain_value plain_mode = _gui->gui_state()->desc().raw_to_plain_at_index(param_index, selected_index);
-    _gui->param_changed(param_index, plain_mode);
-    _gui->extra_state_()->set_num(extra_state_tuning_mode_key, selected_index);
+    int new_index = std::clamp(getSelectedItemIndex(), 0, (int)_themes.size() - 1);
+    auto current_theme = user_io_load_list(topo.vendor, topo.full_name, user_io::base, user_state_theme_key, default_theme, _themes);
+    if (_themes[new_index] == current_theme) return;
+    user_io_save_list(topo.vendor, topo.full_name, user_io::base, user_state_theme_key, _themes[new_index]);
+    MessageManager::callAsync([gui = _gui, theme_name = _themes[new_index]]() { gui->theme_changed(theme_name); });
   };
 }
 
 image_component::
 image_component(
-  format_config const* config, 
+  format_basic_config const* config, 
   std::string const& theme,
   std::string const& file_name, 
   RectanglePlacement placement)
@@ -450,18 +319,6 @@ _bold(bold), _tabular(tabular), _font_height(height)
   float nw = std::ceil(tw) + getBorderSize().getLeftAndRight();
   setSize(nw, std::ceil(th) + getBorderSize().getTopAndBottom());
   setText(reference_text, dontSendNotification);
-}
-
-autofit_button::
-autofit_button(lnf* lnf, std::string const& text)
-{
-  float vmargin = 6.0f;
-  float hmargin = 16.0f;
-  setButtonText(text);
-  auto const& button_font = lnf->getTextButtonFont(*this, getHeight());
-  float th = button_font.getHeight();
-  float tw = button_font.getStringWidthFloat(getButtonText());
-  setSize(std::ceil(tw) + hmargin, std::ceil(th) + vmargin);
 }
 
 float 
@@ -555,7 +412,7 @@ param_component::mouseUp(MouseEvent const& evt)
     }
   }
 
-  auto host_menu = _gui->gui_state()->desc().config->context_menu(_param->info.id_hash);
+  auto host_menu = _gui->gui_state()->desc().menu_handler->context_menu(_param->info.id_hash);
   if (host_menu && host_menu->root.children.size())
   {
     have_menu = true;
@@ -780,6 +637,19 @@ autofit_combobox(lnf, param->param->gui.edit_type == gui_edit_type::autofit_list
   setEditableText(false);
   init();
   update_all_items_enabled_state();
+}
+
+void
+param_combobox::comboBoxChanged(ComboBox* box)
+{ 
+  int index = getSelectedId() - 1 + _param->param->domain.min;
+  _gui->param_changed(_param->info.global, _param->param->domain.raw_to_plain(index));
+  if (_param->param->gui.is_preset_selector)
+  {
+    auto presets = _gui->gui_state()->desc().plugin->presets();
+    if (0 <= index && index < presets.size())
+      _gui->load_patch(presets[index].path, true);
+  }
 }
 
 void 

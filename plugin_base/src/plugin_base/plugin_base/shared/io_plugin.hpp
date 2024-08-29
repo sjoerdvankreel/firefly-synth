@@ -10,7 +10,7 @@
 
 namespace plugin_base {
 
-// per-instance state (plugin parameters and ui specific stuff like selected tabs)
+// per-instance state plugin parameters
 
 // ok, error, or ok with warnings
 struct load_result
@@ -58,14 +58,18 @@ public:
   post_process_always(load_handler const& handler, plugin_state& new_state) = 0;
 };
 
-std::vector<char> plugin_io_save_patch_state(plugin_state const& state);
-load_result plugin_io_load_patch_state(std::vector<char> const& data, plugin_state& state);
+// separate versions used by vst3 controller/processor
+std::vector<char> plugin_io_save_instance_state(plugin_state const& state, bool patch_only);
+load_result plugin_io_load_instance_state(std::vector<char> const& data, plugin_state& state, bool patch_only);
 std::vector<char> plugin_io_save_extra_state(plugin_topo const& topo, extra_state const& state);
 load_result plugin_io_load_extra_state(plugin_topo const& topo, std::vector<char> const& data, extra_state& state);
 
-std::vector<char> plugin_io_save_all_state(plugin_state const& plugin, extra_state const& extra);
-load_result plugin_io_load_all_state(std::vector<char> const& data, plugin_state& plugin, extra_state& extra);
-load_result plugin_io_load_file_all_state(std::filesystem::path const& path, plugin_state& plugin, extra_state& extra);
-bool plugin_io_save_file_all_state(std::filesystem::path const& path, plugin_state const& plugin, extra_state const& extra);
+// combined versions used by clap (all at once)
+std::vector<char> plugin_io_save_all_state(plugin_state const& plugin, extra_state const* extra, bool patch_only);
+load_result plugin_io_load_all_state(std::vector<char> const& data, plugin_state& plugin, extra_state* extra, bool patch_only);
+
+// for presets/user patches
+bool plugin_io_save_file_patch_state(std::filesystem::path const& path, plugin_state const& plugin);
+load_result plugin_io_load_file_patch_state(std::filesystem::path const& path, plugin_state& plugin);
 
 }

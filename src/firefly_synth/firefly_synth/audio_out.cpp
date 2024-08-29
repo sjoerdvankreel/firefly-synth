@@ -71,25 +71,25 @@ audio_out_topo(int section, gui_position const& pos, bool global)
     result.engine_factory = [](auto const&, int, int) { 
       return std::make_unique<voice_audio_out_engine>(); };
 
-  int bal_row = 0;
-  int bal_col = 1;
   int gain_row = 0;
   int gain_col = 0;
+  int bal_row = 1;
+  int bal_col = 0;
   double gain_default_ = 1.0;
-  gui_dimension dimension({ 1 }, { 1, 1 });
-  gui_edit_type edit_type = gui_edit_type::knob;
+  gui_dimension dimension({ 1, 1 }, { gui_dimension::auto_size_all, 1 });
+  gui_edit_type edit_type = gui_edit_type::hslider;
   if (global)
   {
-    bal_col = 0;
-    bal_row = 1;
+    bal_row = 0;
+    bal_col = 1;
     gain_default_ = 0.33;
-    edit_type = gui_edit_type::hslider;
-    dimension = gui_dimension({ 1, 1 }, { gui_dimension::auto_size_all, 1 });
+    edit_type = gui_edit_type::knob;
+    dimension = gui_dimension({ 1 }, { 1, 1 });
   } 
 
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag_basic("{34BF24A3-696C-48F5-A49F-7CA445DEF38E}", "Main"),
-    make_param_section_gui({ 0, 0 }, dimension, global ? gui_label_edit_cell_split::horizontal: gui_label_edit_cell_split::no_split)));
+    make_param_section_gui({ 0, 0 }, dimension, global ? gui_label_edit_cell_split::no_split : gui_label_edit_cell_split::horizontal)));
   auto& gain = result.params.emplace_back(make_param(
     make_topo_info_basic("{2156DEE6-A147-4B93-AEF3-ABE69F53DBF9}", "Gain", param_gain, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(gain_default_, 0, true),
@@ -152,7 +152,7 @@ voice_audio_out_engine::process_unison(plugin_block& block)
     attn = std::sqrt(block.voice->state.sub_voice_count);
     voice_pos = (float)block.voice->state.sub_voice_index / (block.voice->state.sub_voice_count - 1.0f);
     voice_pos = unipolar_to_bipolar(voice_pos);
-    glob_uni_sprd_curve = &block.state.all_accurate_automation[module_global_in][0][global_in_param_uni_sprd][0];
+    glob_uni_sprd_curve = modulation[module_voice_in][0][voice_in_param_uni_sprd][0];
   }
 
   auto& bal_curve = block.state.own_scratch[scratch_bal];

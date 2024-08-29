@@ -223,7 +223,7 @@ plugin_state::copy_from(jarray<plain_value, 4> const& other, bool patch_only)
     auto const& module = desc().plugin->modules[m];
     for (int mi = 0; mi < module.info.slot_count; mi++)
       for (int p = 0; p < module.params.size(); p++)
-        // readonly support for per-instance microtuning (outside of the patch)
+        // optional ignore for per-instance params outside of the patch
         if (!patch_only || !module.params[p].info.is_per_instance)
         {
           auto const& param = module.params[p];
@@ -241,7 +241,7 @@ plugin_state::init(state_init_type init_type, bool patch_only)
     auto const& module = desc().plugin->modules[m];
     for (int mi = 0; mi < module.info.slot_count; mi++)
       for (int p = 0; p < module.params.size(); p++)
-        // readonly support for per-instance microtuning (outside of the patch)
+        // optional ignore for per-instance params outside of the patch
         if(!patch_only || !module.params[p].info.is_per_instance)
           for (int pi = 0; pi < module.params[p].info.slot_count; pi++)
             set_plain_at(m, mi, p, pi, module.params[p].domain.default_plain(mi, pi));

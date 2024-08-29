@@ -5,7 +5,7 @@ namespace plugin_base {
 
 plugin_dims::
 plugin_dims(plugin_topo const& plugin, int polyphony)
-{
+{  
   for (int v = 0; v < polyphony; v++)
   {
     voice_module_slot.emplace_back();

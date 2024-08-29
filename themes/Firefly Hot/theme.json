@@ -11,8 +11,8 @@
     "section_radius": "4",
     "param_section_radius": "4",
     "param_section_vpadding": "0",
-    "knob_padding": "6",
-    "tabular_knob_padding": "3",
+    "knob_padding": "2",
+    "tabular_knob_padding": "0",
     "min_scale": "0.5",
     "max_scale": "8.0",
     "default_width_fx": "1280",
@@ -20,7 +20,7 @@
     "aspect_ratio_height_fx": "27",
     "default_width_instrument": "1280",
     "aspect_ratio_width_instrument": "118",
-    "aspect_ratio_height_instrument": "60"
+    "aspect_ratio_height_instrument": "62"
   },
   "default_settings": {
     "tab_width": "33",
@@ -33,7 +33,7 @@
     "graph_grid": "40FFFFFF",
     "graph_text": "C0FFFFFF",
     "graph_background": "FF000000",
-    "graph_mod_indicator": "50FFFFFF",
+    "graph_mod_indicator": "C0FFFFFF",
     "bubble_outline": "FF999999",
     "slider_background": "FF333333",
     "slider_highlight": "FFFFFFFF",
@@ -55,7 +55,7 @@
   },
   "overrides": [
     {
-      "custom_sections": ["Title Text", "Title Image", "Monitor", "Main Graph", "Tweak", "Patch"],
+      "custom_sections": ["Title Text", "Title Image", "Main Graph", "Tweak", "Patch"],
       "module_sections": ["Monitor"],
       "colors": {
         "tab_text": "FFCCCCCC",
@@ -76,6 +76,7 @@
       "colors": {
         "tab_text": "FFFF0040",
         "slider_automation": "FFFF0040",
+        "slider_modulation": "FFC07830",
         "control_text": "FFCCCCCC",
         "control_tick": "FFFF0040",
         "bubble_outline": "FFFF0040",
@@ -85,11 +86,12 @@
       }
     },
     {
-      "custom_sections": ["Global FX Graph", "Global LFO Graph", "Global Matrix Graphs"],
-      "module_sections": ["Global", "Glob Smt", "Global Out", "Global FX", "Global LFO"],
+      "custom_sections": ["Theme", "Global FX Graph", "Global LFO Graph", "Global Matrix Graphs"],
+      "module_sections": ["Master", "Global", "Global Out", "Global FX", "Global LFO"],
       "colors": {
         "tab_text": "FFFF0040",
         "slider_automation": "FFFF0040",
+        "slider_modulation": "FFC07830",
         "control_text": "FFFF0040",
         "control_tick": "FFFF0040",
         "bubble_outline": "FFFF0040",
@@ -111,6 +113,7 @@
       "colors": {
         "tab_text": "FFFFA040",
         "slider_automation": "FFFFA040",
+        "slider_modulation": "FFFF0040",
         "control_text": "FFCCCCCC",
         "control_tick": "FFFFA040",
         "bubble_outline": "FFFFA040",
@@ -125,6 +128,7 @@
       "colors": {
         "tab_text": "FFFFA040",
         "slider_automation": "FFFFA040",
+        "slider_modulation": "FFFF0040",
         "control_text": "FFFFA040",
         "control_tick": "FFFFA040",
         "bubble_outline": "FFFFA040",

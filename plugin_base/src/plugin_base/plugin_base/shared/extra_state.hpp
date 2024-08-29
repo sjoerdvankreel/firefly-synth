@@ -10,13 +10,16 @@
 
 namespace plugin_base {
 
+class plugin_state;
+class gui_param_listener;
+
 class extra_state_listener {
 public:
   virtual ~extra_state_listener() {}
   virtual void extra_state_changed() = 0;
 };
 
-// per-instance controller state
+// per-instance state
 class extra_state final {
   std::set<std::string> _keyset = {};
   std::map<std::string, juce::var> _values = {};
@@ -28,12 +31,12 @@ public:
   PB_PREVENT_ACCIDENTAL_COPY(extra_state);
   extra_state(std::set<std::string> const& keyset) : _keyset(keyset) {}
 
-  void set_num(std::string const& key, int val);
+  void set_int(std::string const& key, int val);
   void set_var(std::string const& key, juce::var const& val);
   void set_text(std::string const& key, std::string const& val);
 
   juce::var get_var(std::string const& key) const;
-  int get_num(std::string const& key, int default_) const;
+  int get_int(std::string const& key, int default_) const;
   std::string get_text(std::string const& key, std::string const& default_) const;
 
   void clear();

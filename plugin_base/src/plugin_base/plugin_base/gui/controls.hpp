@@ -10,7 +10,6 @@
 
 namespace plugin_base {
 
-// same as juce version but does not react to right-click
 class text_button:
 public juce::TextButton
 {
@@ -32,21 +31,10 @@ public juce::ImageComponent
 {
 public:
   image_component(
-  format_config const* config, 
+    format_basic_config const* config,
     std::string const& theme,
     std::string const& file_name, 
     juce::RectanglePlacement placement);
-};
-
-// button that resizes to text content
-class autofit_button :
-public text_button,
-public autofit_component
-{
-public:
-  autofit_button(lnf* lnf, std::string const& text);
-  int fixed_width(int parent_w, int parent_h) const override { return getWidth(); }
-  int fixed_height(int parent_w, int parent_h) const override { return getHeight(); }
 };
 
 // fixed size checkbox
@@ -95,25 +83,6 @@ public:
   int fixed_height(int parent_w, int parent_h) const override { return _lnf->combo_height(_tabular); }
 };
 
-// button that opens a popupmenu
-// basically a combobox that shows a fixed button text
-struct menu_button_item { std::string name; std::string group; };
-class menu_button :
-public text_button
-{
-  int _selected_index = -1;
-  // popup filled by processing these in order
-  // should be sorted by group, empty group means no submenu
-  std::vector<menu_button_item> _items;
-protected:
-  void clicked() override;
-  std::function<void(int)> _selected_index_changed;
-public:  
-  std::vector<menu_button_item> const& get_items() const { return _items; }
-  void set_items(std::vector<menu_button_item> const& items) { _items = items; }
-  void set_selected_index(int index) { _selected_index = std::clamp(index, 0, (int)_items.size() - 1); }
-};
-
 // tracks last parameter change
 class last_tweaked_label :
 public juce::Label,
@@ -143,49 +112,14 @@ public:
   void any_state_changed(int index, plain_value plain) override;
 };
 
-// load/save/init/clear patch
-class patch_menu :
-public text_button
-{
-  plugin_gui* const _gui;
-public:
-  void clicked() override;
-  patch_menu(plugin_gui* gui);
-};
-
-// binds factory preset to extra_state
-class preset_button:
-public menu_button,
-public extra_state_listener
-{
-  plugin_gui* const _gui;
-  std::vector<resource_item> _presets = {};
-public:
-  preset_button(plugin_gui* gui);
-  void extra_state_changed() override;
-  ~preset_button() { _gui->extra_state_()->remove_listener(extra_state_factory_preset_key, this); }
-};
-
-// binds theme preset to user config
-class theme_button:
-public menu_button
+// binds theme to global user config
+class theme_combo:
+public autofit_combobox
 {
   plugin_gui* const _gui;
   std::vector<std::string> _themes = {};
 public:
-  theme_button(plugin_gui* gui);
-};
-
-// binds per-instance tuning mode selection to user config
-class tuning_mode_button :
-public menu_button,
-public state_listener
-{
-  plugin_gui* const _gui;
-public:
-  ~tuning_mode_button();
-  tuning_mode_button(plugin_gui* gui);
-  void state_changed(int index, plain_value plain) override { set_selected_index(plain.step()); }
+  theme_combo(plugin_gui* gui, lnf* lnf);
 };
 
 // binding_component that is additionally bound to a single parameter value
@@ -350,16 +284,15 @@ public:
   ~param_combobox() { removeListener(this); }
   param_combobox(plugin_gui* gui, module_desc const* module, param_desc const* param, lnf* lnf);
 
+  void showPopup() override;
+  void comboBoxChanged(ComboBox*) override final;
+
   // d&d support
   drop_target_action get_drop_target_action() const { return _drop_target_action; }
   void itemDropped(juce::DragAndDropTarget::SourceDetails const& details) override;
   void itemDragExit(juce::DragAndDropTarget::SourceDetails const& details) override;
   void itemDragEnter(juce::DragAndDropTarget::SourceDetails const& details) override;
   bool isInterestedInDragSource(juce::DragAndDropTarget::SourceDetails const& details) override;
-
-  void showPopup() override;
-  void comboBoxChanged(ComboBox*) override final
-  { _gui->param_changed(_param->info.global, _param->param->domain.raw_to_plain(getSelectedId() - 1 + _param->param->domain.min)); }
 };
 
 }

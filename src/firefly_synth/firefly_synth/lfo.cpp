@@ -553,7 +553,7 @@ lfo_engine::reset(plugin_block const* block)
   // global unison
   if (!_global && block->voice->state.sub_voice_count > 1)
   {
-    float glob_uni_phs_offset = block->state.all_block_automation[module_global_in][0][global_in_param_uni_lfo_phase][0].real();
+    float glob_uni_phs_offset = block->state.all_block_automation[module_voice_in][0][voice_in_param_uni_lfo_phase][0].real();
     float voice_pos = (float)block->voice->state.sub_voice_index / (block->voice->state.sub_voice_count - 1.0f);
     _phase += voice_pos * glob_uni_phs_offset;
     _phase -= (int)_phase;
@@ -812,7 +812,7 @@ void lfo_engine::process_loop(plugin_block& block, cv_cv_matrix_mixdown const* m
   if constexpr (GlobalUnison)
   {
     float voice_pos = unipolar_to_bipolar((float)block.voice->state.sub_voice_index / (block.voice->state.sub_voice_count - 1.0f));
-    auto const& glob_uni_lfo_dtn_curve = block.state.all_accurate_automation[module_global_in][0][global_in_param_uni_lfo_dtn][0];
+    auto const& glob_uni_lfo_dtn_curve = block.state.all_accurate_automation[module_voice_in][0][voice_in_param_uni_lfo_dtn][0];
     for(int f = block.start_frame; f < block.end_frame; f++)
       rate_curve[f] *= 1 + (voice_pos * glob_uni_lfo_dtn_curve[f]);
   }

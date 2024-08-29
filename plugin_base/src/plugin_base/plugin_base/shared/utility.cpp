@@ -40,7 +40,7 @@ seconds_since_epoch()
 }
 
 std::filesystem::path
-get_resource_location(format_config const* config)
+get_resource_location(format_basic_config const* config)
 {
   File file(File::getSpecialLocation(File::currentExecutableFile));
   return config->resources_folder(file.getFullPathName().toStdString());

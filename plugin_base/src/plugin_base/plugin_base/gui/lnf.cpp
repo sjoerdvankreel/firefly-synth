@@ -86,6 +86,7 @@ override_colors(gui_colors const& base, var const& json)
   result.slider_highlight = override_color_if_present(json, "slider_highlight", result.slider_highlight);
   result.slider_shadow = override_color_if_present(json, "slider_shadow", result.slider_shadow);
   result.slider_automation = override_color_if_present(json, "slider_automation", result.slider_automation);
+  result.slider_modulation = override_color_if_present(json, "slider_modulation", result.slider_modulation);
   result.slider_can_modulate = override_color_if_present(json, "slider_can_modulate", result.slider_can_modulate);
   result.section_outline = override_color_if_present(json, "section_outline", result.section_outline);
   result.section_background = override_color_if_present(json, "section_background", result.section_background);
@@ -113,7 +114,7 @@ _theme(theme), _desc(desc), _custom_section(custom_section), _module_section(mod
   assert(module_section == -1 || module >= 0);
   assert(custom_section == -1 || module == -1);
 
-  auto theme_folder = get_resource_location(desc->config) / resource_folder_themes / _theme;
+  auto theme_folder = get_resource_location(desc->plugin->config) / resource_folder_themes / _theme;
   auto font_path = theme_folder / "font.ttf";
   std::vector<char> typeface = file_load(font_path);
 
@@ -197,19 +198,20 @@ lnf::init_theme(std::filesystem::path const& theme_folder, var const& json)
         assert(custom_sections.isArray());
         for(int j = 0; j < custom_sections.size(); j++)
         {
+          auto section_name = custom_sections[j].toString().toStdString();
           auto this_settings = _default_settings;
-          if(_section_settings.contains(custom_sections[j].toString().toStdString()))
-            this_settings = _section_settings[custom_sections[j].toString().toStdString()];
+          if(_section_settings.contains(section_name))
+            this_settings = _section_settings[section_name];
           if (this_override.hasProperty("settings")) 
             this_settings = override_settings(this_settings, this_override["settings"]);
-          _section_settings[custom_sections[j].toString().toStdString()] = this_settings;
+          _section_settings[section_name] = this_settings;
 
           auto this_colors = gui_colors(_default_colors);
-          if (_section_colors.contains(custom_sections[j].toString().toStdString()))
-            this_colors = gui_colors(_section_colors[custom_sections[j].toString().toStdString()]);
+          if (_section_colors.contains(section_name))
+            this_colors = gui_colors(_section_colors[section_name]);
           if (this_override.hasProperty("colors")) 
             this_colors = override_colors(this_colors, this_override["colors"]);
-          _section_colors[custom_sections[j].toString().toStdString()] = gui_colors(this_colors);
+          _section_colors[section_name] = gui_colors(this_colors);
         }
       }
       if (this_override.hasProperty("module_sections"))
@@ -218,23 +220,24 @@ lnf::init_theme(std::filesystem::path const& theme_folder, var const& json)
         assert(module_sections.isArray());
         for (int j = 0; j < module_sections.size(); j++)
         {
+          auto section_name = module_sections[j].toString().toStdString();
           auto this_settings = _default_settings;
-          if (_module_settings.contains(module_sections[j].toString().toStdString()))
-            this_settings = _module_settings[module_sections[j].toString().toStdString()];
+          if (_module_settings.contains(section_name))
+            this_settings = _module_settings[section_name];
           if (this_override.hasProperty("settings"))
             this_settings = override_settings(this_settings, this_override["settings"]);
-          _module_settings[module_sections[j].toString().toStdString()] = this_settings;
+          _module_settings[section_name] = this_settings;
 
           auto this_colors = gui_colors(_default_colors);
-          if (_module_colors.contains(module_sections[j].toString().toStdString()))
-            this_colors = gui_colors(_module_colors[module_sections[j].toString().toStdString()]);
+          if (_module_colors.contains(section_name))
+            this_colors = gui_colors(_module_colors[section_name]);
           if (this_override.hasProperty("colors"))
             this_colors = override_colors(this_colors, this_override["colors"]);
-          _module_colors[module_sections[j].toString().toStdString()] = gui_colors(this_colors);
+          _module_colors[section_name] = gui_colors(this_colors);
         } 
       }    
     }
-  }
+  } 
 
   assert(json.hasProperty("global_settings"));
   var global_settings = json["global_settings"];
@@ -527,20 +530,6 @@ lnf::drawButtonText(Graphics& g, TextButton& button, bool, bool)
   const int textWidth = button.getWidth() - leftIndent - rightIndent;
   if (textWidth > 0)
     g.drawText(button.getButtonText(), leftIndent, yIndent, textWidth, button.getHeight() - yIndent * 2, Justification::centred, false);
-  
-  if (!dynamic_cast<menu_button*>(&button) &&
-    !dynamic_cast<patch_menu*>(&button)) return;
-  
-  Path arrow;
-  float w = 6;
-  float h = 4;
-  float x = button.getWidth() - 5 - w;
-  float y = button.getHeight() / 2 - h / 2 + 1;
-  arrow.startNewSubPath(x, y);
-  arrow.lineTo(x + w, y);
-  arrow.lineTo(x + w / 2, y + h);
-  arrow.closeSubPath(); 
-  g.fillPath(arrow);
 }
  
 void 
@@ -612,17 +601,17 @@ lnf::drawComboBox(Graphics& g, int width, int height, bool, int, int, int, int, 
       apply_mod_width = apply_mod_width;
       box_width -= apply_mod_width + 2;
     }
-  }
+  } 
 
   int arrowPad = 4;
   int arrowWidth = 6;
-  int arrowHeight = 4;
-  int const fixedHeight = combo_height(tabular) - (tabular? 4: 0);
+  int arrowHeight = 4; 
+  int const fixedHeight = combo_height(tabular) - (tabular? 2: 0);
   int const comboTop = height < fixedHeight ? 0 : (height - fixedHeight) / 2;
   auto cornerSize = box.findParentComponentOfClass<ChoicePropertyComponent>() != nullptr ? 0.0f : global_settings().combo_radius;
   int x = tabular ? 3 : 1;
   int y = comboTop;
-  int w = box_width - 2 - (tabular ? 4 : 0);
+  int w = box_width - 2 - (tabular ? 2 : 0);
   int h = fixedHeight;
 
   // highlight
@@ -783,14 +772,14 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
   float padding = tabular ? _global_settings.tabular_knob_padding : _global_settings.knob_padding;
 
   // cell background
-  if(tabular) 
+  if(tabular)  
   {
     size_base = 0.9 * std::min(s.getHeight(), s.getWidth());
     scale_factor = size_base / s.getHeight();
     draw_tabular_cell_bg(g, colors().table_cell, &s, global_settings().table_cell_radius);
   }
   
-  float size = size_base - padding;
+  float size = (int)(size_base - padding);  
   float left = (s.getWidth() - size) / 2;
   float top = (s.getHeight() - size) / 2;
 
@@ -849,8 +838,10 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
   if (ps->max_mod_indicator() < 0.0f) return;
 
   // modulation indication
-  Path path;
-  g.setColour(colors().slider_automation.darker());
+  Path path;  
+  auto modulation_color = colors().slider_modulation;
+  if (!s.isEnabled()) modulation_color = color_to_grayscale(modulation_color);
+  g.setColour(modulation_color);
   float half_mod_angle = start_angle + 0.5f * angle_range;
   float min_mod_angle = start_angle + ps->min_mod_indicator() * angle_range;
   float max_mod_angle = start_angle + ps->max_mod_indicator() * angle_range;
@@ -969,7 +960,7 @@ lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, f
     g.fillRoundedRectangle(centerx - trackw, top + 2, trackw, height - 4, 2);
 
   // automation indication
-  if (!bipolar)
+  if (!bipolar) 
   {
     g.setColour(automation_color.withAlpha(std::max(0.0f, 1.0f - pos * 10.0f)));
     g.fillEllipse(left + 1, top + 1, height - 2, height - 2);

@@ -16,7 +16,7 @@ midi_desc(
   info.name = source_.tag.display_name;
   full_name = desc_name(module_.info, module_.info.tag.full_name, module_slot) + " " + info.name;
   info.id = desc_id(module_.info, module_slot) + "-" + source_.tag.id;
-  info.id_hash = desc_id_hash(info.id.c_str());
+  info.id_hash = stable_hash(info.id.c_str());
 }
 
 void

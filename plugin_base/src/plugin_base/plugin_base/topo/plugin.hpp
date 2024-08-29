@@ -8,6 +8,7 @@
 #include <juce_gui_basics/juce_gui_basics.h>
 
 #include <map>
+#include <set>
 #include <vector>
 #include <string>
 #include <cstdint>
@@ -23,6 +24,14 @@ struct plugin_topo_gui;
 struct plugin_topo_gui_theme_settings;
 
 enum class plugin_type { synth, fx };
+
+// from resources folder
+struct preset_item
+{
+  std::string name;
+  std::string path;
+  std::string group;
+};
 
 // global unison support
 typedef int (*sub_voice_counter_t)(bool graph, plugin_state const& state);
@@ -124,10 +133,34 @@ struct plugin_topo_gui final {
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(plugin_topo_gui);
 };
 
+// stuff that needs cooperation plug<->plugin_base
+struct engine_param 
+{
+  int module_index = -1;
+  int param_index = -1;
+};
+
+struct engine_params
+{
+  // smooths parameter automation, midi and bpm changes, use -1 for defaults,
+  // must resolve to real parameter indicating nr of milliseconds to smooth  engine_param bpm_smoothing = {};
+  engine_param bpm_smoothing = {};
+  engine_param midi_smoothing = {};
+  engine_param automation_smoothing = {};
+
+  // microtuning is done by plugin_base so we need some cooperation
+  engine_param tuning_mode = {};
+
+  // voice management is done by plugin_base so we need some cooperation
+  engine_param voice_mode = {};
+  sub_voice_counter_t sub_voice_counter = {};
+};
+
 // plugin definition
 struct plugin_topo final {
   int audio_polyphony;
   int graph_polyphony;
+  engine_params engine;
   plugin_version version;
 
   topo_tag tag;
@@ -137,26 +170,14 @@ struct plugin_topo final {
   plugin_topo_gui gui;
   std::string extension;
   std::vector<module_topo> modules;
-
-  // smooths parameter automation, midi and bpm changes, use -1 for defaults,
-  // must resolve to real parameter indicating nr of milliseconds to smooth
-  int bpm_smooth_param = -1;
-  int bpm_smooth_module = -1;
-  int midi_smooth_param = -1;
-  int midi_smooth_module = -1;
-  int auto_smooth_param = -1;
-  int auto_smooth_module = -1;
-
-  // voice management is done by plugin_base so we need some cooperation
-  int voice_mode_param = -1;
-  int voice_mode_module = -1;
-  sub_voice_counter_t sub_voice_counter = {};
-
-  // microtuning is done by plugin_base so we need some cooperation
-  int tuning_mode_module = -1;
-  int tuning_mode_param = -1;
+  format_basic_config const* config = {};
 
   void validate() const;
+  std::vector<std::string> themes() const;
+  std::vector<preset_item> presets() const;
+  std::vector<list_item> preset_list() const;
+  std::shared_ptr<gui_submenu> preset_submenu() const;
+
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(plugin_topo);
 };
 

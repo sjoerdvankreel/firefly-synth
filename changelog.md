@@ -1,3 +1,14 @@
+### August 29, 2024 - V1.9.0.
+
+- Load/save/init/clear patch split out to separate buttons again.
+- Move global unison from global to voice section.
+- Make global unison osc detune, osc phase and stereo spread modulatable parameters.
+- Bugfix: only up to 20 routes were processed for cv->audio matrix.
+- Renamed master section to global, made a new master section.
+- Theme selector moved to new master section.
+- Smoothing parameters, factory preset and tuning mode moved to new master section.
+- Smoothing parameters, factory preset and tuning mode are now saved per-instance not per-patch (breaking change, old values are not preserved).
+
 ### August 24, 2024 - V1.8.9.
 
 - Major UI overhaul, again.

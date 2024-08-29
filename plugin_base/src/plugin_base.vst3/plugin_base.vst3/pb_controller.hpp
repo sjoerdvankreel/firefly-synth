@@ -15,8 +15,18 @@ namespace plugin_base::vst3 {
 
 class pb_editor;
 
+class pb_basic_config:
+public format_basic_config
+{
+public:
+  static pb_basic_config const* instance();
+  std::string format_name() const override { return "VST3"; }
+  std::filesystem::path resources_folder(std::filesystem::path const& binary_path) const override
+  { return binary_path.parent_path().parent_path() / "Resources"; }
+};
+
 class pb_controller final:
-public format_config,
+public format_menu_handler,
 public any_state_listener,
 public gui_param_listener,
 public Steinberg::Vst::IMidiMapping,
@@ -48,7 +58,6 @@ public Steinberg::Vst::EditControllerEx1
   // a reentrancy flag
   bool _inside_set_param_normalized = false;
 
-  void init_tuning_from_extra_state();
   void param_state_changed(int index, plain_value plain);
 
 public: 
@@ -66,15 +75,12 @@ public:
   extra_state& extra_state_() { return _extra_state; }
   void editorDestroyed(Steinberg::Vst::EditorView*) override { _editor = nullptr; }
 
+  std::unique_ptr<host_menu> context_menu(int param_id) const override;
+
   void gui_param_end_changes(int index) override;
   void gui_param_begin_changes(int index) override;
   void any_state_changed(int index, plain_value plain) override { param_state_changed(index, plain); }
   void gui_param_changing(int index, plain_value plain) override { param_state_changed(index, plain); }
-
-  std::string format_name() const override { return "VST3"; }
-  std::unique_ptr<host_menu> context_menu(int param_id) const override;
-  std::filesystem::path resources_folder(std::filesystem::path const& binary_path) const override
-  { return binary_path.parent_path().parent_path() / "Resources"; }
 
   Steinberg::tresult PLUGIN_API getMidiControllerAssignment(
     Steinberg::int32 bus, Steinberg::int16 channel,

@@ -1,10 +1,10 @@
 <html>
 <head>
-<title>Firefly Synth 1.8.9</title>
+<title>Firefly Synth 1.9.0</title>
 <style>th, td { padding: 3px; }a, a:visited { color: #666666; }.description { background:#EEEEEE; }h1 { font-size: 19px; color: black; }h2 { font-size: 17px; color: black; }h3 { font-size: 15px; color: black; }body { font-family: Verdana; color: black; }html { position: relative; max-width: 1024px; margin: auto; }tr td { width: auto; white-space: nowrap; } tr th { width: auto; white-space: nowrap; }table, th, td { font-size: 13px; border: 1px solid gray; border-collapse: collapse; text-align: left; }tr td:last-child { width: 100%; white-space: wrap; } tr th:last-child { width: 100%; white-space: wrap; }</style>
 </head>
 <body>
-<h1>Firefly Synth 1.8.9</h1>
+<h1>Firefly Synth 1.9.0</h1>
 <h2>Module Overview</h2>
 <table>
 <tr>
@@ -16,7 +16,15 @@
 <th>Description</th>
 </tr>
 <tr>
+<td><a href='#1'>1</a></td>
+<td>Master</td>
+<td>Yes</td>
+<td>Before voice</td>
 <td>1</td>
+<td class='description'>Automation, MIDI and BPM smoothing control and microtuning mode.</td>
+</tr>
+<tr>
+<td>2</td>
 <td>External Audio</td>
 <td>No</td>
 <td>Before voice</td>
@@ -24,7 +32,7 @@
 <td class='description'>In FX mode, provides external audio input to the global audio matrix.</td>
 </tr>
 <tr>
-<td>2</td>
+<td>3</td>
 <td>MIDI</td>
 <td>No</td>
 <td>Before voice</td>
@@ -32,7 +40,7 @@
 <td class='description'>Provides MIDI pitchbend, channel pressure and 128 CC parameters as modulation sources.</td>
 </tr>
 <tr>
-<td><a href='#3'>3</a></td>
+<td><a href='#4'>4</a></td>
 <td>GCV-CV</td>
 <td>Yes</td>
 <td>Before voice</td>
@@ -40,20 +48,12 @@
 <td class='description'>CV-To-CV routing matrix with min/max control and various stacking options that affect how source signals are combined in case they affect the same target.</td>
 </tr>
 <tr>
-<td><a href='#4'>4</a></td>
+<td><a href='#5'>5</a></td>
 <td>Global</td>
 <td>Yes</td>
 <td>Before voice</td>
 <td>1</td>
-<td class='description'>Global CV module with MIDI-linked modwheel and pitchbend, some additional freely-assignable parameters and unison support.</td>
-</tr>
-<tr>
-<td><a href='#5'>5</a></td>
-<td>Glob Smt</td>
-<td>Yes</td>
-<td>Before voice</td>
-<td>1</td>
-<td class='description'>Automation, MIDI and BPM smoothing control.</td>
+<td class='description'>Global CV module with MIDI-linked modwheel and pitchbend, and some additional freely-assignable parameters.</td>
 </tr>
 <tr>
 <td><a href='#6'>6</a></td>
@@ -125,7 +125,7 @@
 <td>Yes</td>
 <td>Voice</td>
 <td>1</td>
-<td class='description'>Oscillator common module. Controls portamento, oversampling and base pitch for all oscillators.</td>
+<td class='description'>Oscillator common module. Controls portamento, oversampling and base pitch for all oscillators. Also contains global unison support.</td>
 </tr>
 <tr>
 <td><a href='#15'>15</a></td>
@@ -209,13 +209,117 @@
 </tr>
 </table>
 <h2>Parameter Overview</h2>
-<a name='3'/>
+<a name='1'/>
+<h3>Master</h3>
+<table>
+<tr>
+<th>Name</th>
+<th>Section</th>
+<th>UI</th>
+<th>Storage</th>
+<th>Num</th>
+<th>Dir</th>
+<th>Rate</th>
+<th>Automate</th>
+<th>Min</th>
+<th>Max</th>
+<th>Default</th>
+<th>Log Midpoint</th>
+</tr>
+<tr>
+<td rowspan='2'>Tuning</td>
+<td>Tuning</td>
+<td>Yes</td>
+<td>Instance</td>
+<td>1</td>
+<td>Input</td>
+<td>Block</td>
+<td>None</td>
+<td>No Tuning</td>
+<td>Cont. After</td>
+<td>Note Before</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Microtuning mode.</td>
+</tr>
+<tr>
+<td rowspan='2'>Preset</td>
+<td>Preset</td>
+<td>Yes</td>
+<td>Instance</td>
+<td>1</td>
+<td>Input</td>
+<td>Block</td>
+<td>None</td>
+<td>Bass 1</td>
+<td>Open Hat 3</td>
+<td>Bass 1</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Factory preset.</td>
+</tr>
+<tr>
+<td rowspan='2'>MIDI Smoothing</td>
+<td>Smoothing</td>
+<td>Yes</td>
+<td>Instance</td>
+<td>1</td>
+<td>Input</td>
+<td>Block</td>
+<td>None</td>
+<td>1 Ms</td>
+<td>1000 Ms</td>
+<td>50 Ms</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Smoothing MIDI controller changes.</td>
+</tr>
+<tr>
+<td rowspan='2'>BPM Smoothing</td>
+<td>Smoothing</td>
+<td>Yes</td>
+<td>Instance</td>
+<td>1</td>
+<td>Input</td>
+<td>Block</td>
+<td>None</td>
+<td>1 Ms</td>
+<td>1000 Ms</td>
+<td>200 Ms</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Smoothing host BPM parameter changes. Affects tempo-synced delay lines.</td>
+</tr>
+<tr>
+<td rowspan='2'>Automation Smoothing</td>
+<td>Smoothing</td>
+<td>Yes</td>
+<td>Instance</td>
+<td>1</td>
+<td>Input</td>
+<td>Block</td>
+<td>None</td>
+<td>1 Ms</td>
+<td>50 Ms</td>
+<td>1 Ms</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Smoothing automation parameter changes.</td>
+</tr>
+</table>
+<a name='4'/>
 <h3>GCV-CV</h3>
 <table>
 <tr>
 <th>Name</th>
 <th>Section</th>
 <th>UI</th>
+<th>Storage</th>
 <th>Num</th>
 <th>Dir</th>
 <th>Rate</th>
@@ -229,6 +333,7 @@
 <td rowspan='2'>Op</td>
 <td>Main</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>16</td>
 <td>Input</td>
 <td>Block</td>
@@ -245,6 +350,7 @@
 <td rowspan='2'>Source</td>
 <td>Main</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>16</td>
 <td>Input</td>
 <td>Block</td>
@@ -261,6 +367,7 @@
 <td rowspan='2'>Target</td>
 <td>Main</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>16</td>
 <td>Input</td>
 <td>Block</td>
@@ -277,6 +384,7 @@
 <td rowspan='2'>Offset</td>
 <td>Main</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>16</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -293,6 +401,7 @@
 <td rowspan='2'>Scale</td>
 <td>Main</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>16</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -309,6 +418,7 @@
 <td rowspan='2'>Min</td>
 <td>Main</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>16</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -325,6 +435,7 @@
 <td rowspan='2'>Max</td>
 <td>Main</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>16</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -338,13 +449,14 @@
 <td colspan='11' class='description'>Defines the bounds of the modulation effect. When min > max, modulation will invert.</td>
 </tr>
 </table>
-<a name='4'/>
+<a name='5'/>
 <h3>Global</h3>
 <table>
 <tr>
 <th>Name</th>
 <th>Section</th>
 <th>UI</th>
+<th>Storage</th>
 <th>Num</th>
 <th>Dir</th>
 <th>Rate</th>
@@ -358,6 +470,7 @@
 <td rowspan='2'>Aux</td>
 <td>Aux</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>6</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -371,25 +484,10 @@
 <td colspan='11' class='description'>Auxilliary controls to be used through automation and the CV matrices.</td>
 </tr>
 <tr>
-<td rowspan='2'>Pitch Bend</td>
-<td>Linked</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Accurate</td>
-<td>MIDI</td>
-<td>-100 %</td>
-<td>+100 %</td>
-<td>+0 %</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Linked to MIDI pitch bend, updates on incoming MIDI events.</td>
-</tr>
-<tr>
 <td rowspan='2'>Mod Wheel</td>
 <td>Linked</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -403,9 +501,27 @@
 <td colspan='11' class='description'>Linked to MIDI mod wheel, updates on incoming MIDI events.</td>
 </tr>
 <tr>
-<td rowspan='2'>Pitch Bend Range</td>
-<td>Linked PB Range</td>
+<td rowspan='2'>Pitch Bend</td>
+<td>Linked</td>
 <td>Yes</td>
+<td>Patch</td>
+<td>1</td>
+<td>Input</td>
+<td>Accurate</td>
+<td>MIDI</td>
+<td>-100 %</td>
+<td>+100 %</td>
+<td>+0 %</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Linked to MIDI pitch bend, updates on incoming MIDI events.</td>
+</tr>
+<tr>
+<td rowspan='2'>Pitch Bend Range</td>
+<td>Linked</td>
+<td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Block</td>
@@ -418,199 +534,6 @@
 <tr>
 <td colspan='11' class='description'>Pitch bend range. Together with Pitch Bend this affects the base pitch of all oscillators.</td>
 </tr>
-<tr>
-<td rowspan='2'>Global Unison Voices</td>
-<td>Unison Voices</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Block</td>
-<td>Automate</td>
-<td>1</td>
-<td>4</td>
-<td>1</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Global unison voice count. Global unison spawns an entire polyphonic synth voice per unison voice. This includes per-voice oscillators, effects, lfo's and envelopes.</td>
-</tr>
-<tr>
-<td rowspan='2'>Global Unison Osc Detune</td>
-<td>Global Unison Params</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Accurate</td>
-<td>Automate</td>
-<td>0 %</td>
-<td>100 %</td>
-<td>33 %</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Global unison voice pitch detune amount.</td>
-</tr>
-<tr>
-<td rowspan='2'>Global Unison Osc Phase Offset</td>
-<td>Global Unison Params</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Block</td>
-<td>Automate</td>
-<td>0 %</td>
-<td>100 %</td>
-<td>0 %</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Global unison voice osc phase offset.</td>
-</tr>
-<tr>
-<td rowspan='2'>Global Unison LFO Detune</td>
-<td>Global Unison Params</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Accurate</td>
-<td>Automate</td>
-<td>0 %</td>
-<td>100 %</td>
-<td>0 %</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Global unison voice LFO detune amount.</td>
-</tr>
-<tr>
-<td rowspan='2'>Global Unison LFO Phase Offset</td>
-<td>Global Unison Params</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Block</td>
-<td>Automate</td>
-<td>0 %</td>
-<td>100 %</td>
-<td>0 %</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Global unison voice LFO phase offset.</td>
-</tr>
-<tr>
-<td rowspan='2'>Global Unison Env Detune</td>
-<td>Global Unison Params</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Block</td>
-<td>Automate</td>
-<td>0 %</td>
-<td>100 %</td>
-<td>0 %</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Global unison voice envelope detune amount.</td>
-</tr>
-<tr>
-<td rowspan='2'>Global Unison Spread</td>
-<td>Global Unison Params</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Accurate</td>
-<td>Automate</td>
-<td>0 %</td>
-<td>100 %</td>
-<td>50 %</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Global unison stereo spread.</td>
-</tr>
-<tr>
-<td rowspan='2'>Tuning Mode</td>
-<td>Aux</td>
-<td>No</td>
-<td>1</td>
-<td>Input</td>
-<td>Block</td>
-<td>None</td>
-<td>No Tuning</td>
-<td>Continuous After Mod</td>
-<td>On Note Before Mod</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Per-instance tuning parameter (readonly).</td>
-</tr>
-</table>
-<a name='5'/>
-<h3>Glob Smt</h3>
-<table>
-<tr>
-<th>Name</th>
-<th>Section</th>
-<th>UI</th>
-<th>Num</th>
-<th>Dir</th>
-<th>Rate</th>
-<th>Automate</th>
-<th>Min</th>
-<th>Max</th>
-<th>Default</th>
-<th>Log Midpoint</th>
-</tr>
-<tr>
-<td rowspan='2'>MIDI Smoothing</td>
-<td>Main</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Block</td>
-<td>None</td>
-<td>1 Ms</td>
-<td>1000 Ms</td>
-<td>50 Ms</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Smoothing MIDI controller changes.</td>
-</tr>
-<tr>
-<td rowspan='2'>BPM Smoothing</td>
-<td>Main</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Block</td>
-<td>None</td>
-<td>1 Ms</td>
-<td>1000 Ms</td>
-<td>200 Ms</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Smoothing host BPM parameter changes. Affects tempo-synced delay lines.</td>
-</tr>
-<tr>
-<td rowspan='2'>Automation Smoothing</td>
-<td>Main</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Block</td>
-<td>None</td>
-<td>1 Ms</td>
-<td>50 Ms</td>
-<td>1 Ms</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Smoothing automation parameter changes.</td>
-</tr>
 </table>
 <a name='6'/>
 <h3>Global LFO</h3>
@@ -619,6 +542,7 @@
 <th>Name</th>
 <th>Section</th>
 <th>UI</th>
+<th>Storage</th>
 <th>Num</th>
 <th>Dir</th>
 <th>Rate</th>
@@ -632,6 +556,7 @@
 <td rowspan='2'>Type</td>
 <td>Left</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Block</td>
@@ -648,6 +573,7 @@
 <td rowspan='2'>Rate</td>
 <td>Left</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -664,6 +590,7 @@
 <td rowspan='2'>Tempo</td>
 <td>Left</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Block</td>
@@ -680,6 +607,7 @@
 <td rowspan='2'>Tempo Sync</td>
 <td>Sync</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Block</td>
@@ -696,6 +624,7 @@
 <td rowspan='2'>Skew X Mode</td>
 <td>Skew</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Block</td>
@@ -712,6 +641,7 @@
 <td rowspan='2'>Skew X Amt</td>
 <td>Skew</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -728,6 +658,7 @@
 <td rowspan='2'>Skew Y Mode</td>
 <td>Skew</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Block</td>
@@ -744,6 +675,7 @@
 <td rowspan='2'>Skew Y Amt</td>
 <td>Skew</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -760,6 +692,7 @@
 <td rowspan='2'>Shape</td>
 <td>Right</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Block</td>
@@ -776,6 +709,7 @@
 <td rowspan='2'>Steps</td>
 <td>Right</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Block</td>
@@ -792,6 +726,7 @@
 <td rowspan='2'>Seed</td>
 <td>Right</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Block</td>
@@ -808,6 +743,7 @@
 <td rowspan='2'>Source</td>
 <td>Right</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Block</td>
@@ -824,6 +760,7 @@
 <td rowspan='2'>Smooth</td>
 <td>Right</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Block</td>
@@ -844,6 +781,7 @@
 <th>Name</th>
 <th>Section</th>
 <th>UI</th>
+<th>Storage</th>
 <th>Num</th>
 <th>Dir</th>
 <th>Rate</th>
@@ -857,6 +795,7 @@
 <td rowspan='2'>Op</td>
 <td>Main</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>20</td>
 <td>Input</td>
 <td>Block</td>
@@ -873,6 +812,7 @@
 <td rowspan='2'>Source</td>
 <td>Main</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>20</td>
 <td>Input</td>
 <td>Block</td>
@@ -889,6 +829,7 @@
 <td rowspan='2'>Target</td>
 <td>Main</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>20</td>
 <td>Input</td>
 <td>Block</td>
@@ -905,6 +846,7 @@
 <td rowspan='2'>Offset</td>
 <td>Main</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>20</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -921,6 +863,7 @@
 <td rowspan='2'>Scale</td>
 <td>Main</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>20</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -937,6 +880,7 @@
 <td rowspan='2'>Min</td>
 <td>Main</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>20</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -953,6 +897,7 @@
 <td rowspan='2'>Max</td>
 <td>Main</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>20</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -973,6 +918,7 @@
 <th>Name</th>
 <th>Section</th>
 <th>UI</th>
+<th>Storage</th>
 <th>Num</th>
 <th>Dir</th>
 <th>Rate</th>
@@ -986,6 +932,7 @@
 <td rowspan='2'>Op</td>
 <td>Main</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>20</td>
 <td>Input</td>
 <td>Voice</td>
@@ -1002,6 +949,7 @@
 <td rowspan='2'>Source</td>
 <td>Main</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>20</td>
 <td>Input</td>
 <td>Voice</td>
@@ -1018,6 +966,7 @@
 <td rowspan='2'>Target</td>
 <td>Main</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>20</td>
 <td>Input</td>
 <td>Voice</td>
@@ -1034,6 +983,7 @@
 <td rowspan='2'>Offset</td>
 <td>Main</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>20</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -1050,6 +1000,7 @@
 <td rowspan='2'>Scale</td>
 <td>Main</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>20</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -1066,6 +1017,7 @@
 <td rowspan='2'>Min</td>
 <td>Main</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>20</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -1082,6 +1034,7 @@
 <td rowspan='2'>Max</td>
 <td>Main</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>20</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -1102,6 +1055,7 @@
 <th>Name</th>
 <th>Section</th>
 <th>UI</th>
+<th>Storage</th>
 <th>Num</th>
 <th>Dir</th>
 <th>Rate</th>
@@ -1115,6 +1069,7 @@
 <td rowspan='2'>On</td>
 <td>On</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Voice</td>
@@ -1131,6 +1086,7 @@
 <td rowspan='2'>Type</td>
 <td>Type</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Voice</td>
@@ -1147,6 +1103,7 @@
 <td rowspan='2'>Mode</td>
 <td>Type</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Voice</td>
@@ -1163,6 +1120,7 @@
 <td rowspan='2'>Tempo Sync</td>
 <td>Sync</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Voice</td>
@@ -1179,6 +1137,7 @@
 <td rowspan='2'>Smt</td>
 <td>Sync</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Voice</td>
@@ -1195,6 +1154,7 @@
 <td rowspan='2'>Trigger</td>
 <td>Trigger</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Voice</td>
@@ -1211,6 +1171,7 @@
 <td rowspan='2'>Sustain</td>
 <td>Trigger</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -1227,6 +1188,7 @@
 <td rowspan='2'>Dly Time</td>
 <td>DAHDR</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -1243,6 +1205,7 @@
 <td rowspan='2'>Dly Tempo</td>
 <td>DAHDR</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Voice</td>
@@ -1259,6 +1222,7 @@
 <td rowspan='2'>Hld Time</td>
 <td>DAHDR</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -1275,6 +1239,7 @@
 <td rowspan='2'>Hld Tempo</td>
 <td>DAHDR</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Voice</td>
@@ -1291,6 +1256,7 @@
 <td rowspan='2'>Att Time</td>
 <td>DAHDR</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -1307,6 +1273,7 @@
 <td rowspan='2'>Att Tempo</td>
 <td>DAHDR</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Voice</td>
@@ -1323,6 +1290,7 @@
 <td rowspan='2'>Att Slope</td>
 <td>DAHDR</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -1339,6 +1307,7 @@
 <td rowspan='2'>Dcy Time</td>
 <td>DAHDR</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -1355,6 +1324,7 @@
 <td rowspan='2'>Dcy Tempo</td>
 <td>DAHDR</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Voice</td>
@@ -1371,6 +1341,7 @@
 <td rowspan='2'>Dcy Slope</td>
 <td>DAHDR</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -1387,6 +1358,7 @@
 <td rowspan='2'>Rls Time</td>
 <td>DAHDR</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -1403,6 +1375,7 @@
 <td rowspan='2'>Rls Tempo</td>
 <td>DAHDR</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Voice</td>
@@ -1419,6 +1392,7 @@
 <td rowspan='2'>Rls Slope</td>
 <td>DAHDR</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -1439,6 +1413,7 @@
 <th>Name</th>
 <th>Section</th>
 <th>UI</th>
+<th>Storage</th>
 <th>Num</th>
 <th>Dir</th>
 <th>Rate</th>
@@ -1452,6 +1427,7 @@
 <td rowspan='2'>Type</td>
 <td>Left</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Voice</td>
@@ -1468,6 +1444,7 @@
 <td rowspan='2'>Rate</td>
 <td>Left</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -1484,6 +1461,7 @@
 <td rowspan='2'>Tempo</td>
 <td>Left</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Voice</td>
@@ -1500,6 +1478,7 @@
 <td rowspan='2'>Tempo Sync</td>
 <td>Sync</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Voice</td>
@@ -1516,6 +1495,7 @@
 <td rowspan='2'>Skew X Mode</td>
 <td>Skew</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Voice</td>
@@ -1532,6 +1512,7 @@
 <td rowspan='2'>Skew X Amt</td>
 <td>Skew</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -1548,6 +1529,7 @@
 <td rowspan='2'>Skew Y Mode</td>
 <td>Skew</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Voice</td>
@@ -1564,6 +1546,7 @@
 <td rowspan='2'>Skew Y Amt</td>
 <td>Skew</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -1580,6 +1563,7 @@
 <td rowspan='2'>Shape</td>
 <td>Right</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Voice</td>
@@ -1596,6 +1580,7 @@
 <td rowspan='2'>Steps</td>
 <td>Right</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Voice</td>
@@ -1612,6 +1597,7 @@
 <td rowspan='2'>Seed</td>
 <td>Right</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Voice</td>
@@ -1628,6 +1614,7 @@
 <td rowspan='2'>Source</td>
 <td>Right</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Voice</td>
@@ -1644,6 +1631,7 @@
 <td rowspan='2'>Smooth</td>
 <td>Right</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Voice</td>
@@ -1660,6 +1648,7 @@
 <td rowspan='2'>Phs</td>
 <td>Phase</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Voice</td>
@@ -1680,6 +1669,7 @@
 <th>Name</th>
 <th>Section</th>
 <th>UI</th>
+<th>Storage</th>
 <th>Num</th>
 <th>Dir</th>
 <th>Rate</th>
@@ -1693,6 +1683,7 @@
 <td rowspan='2'>Op</td>
 <td>Main</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>30</td>
 <td>Input</td>
 <td>Voice</td>
@@ -1709,6 +1700,7 @@
 <td rowspan='2'>Source</td>
 <td>Main</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>30</td>
 <td>Input</td>
 <td>Voice</td>
@@ -1725,6 +1717,7 @@
 <td rowspan='2'>Target</td>
 <td>Main</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>30</td>
 <td>Input</td>
 <td>Voice</td>
@@ -1741,6 +1734,7 @@
 <td rowspan='2'>Offset</td>
 <td>Main</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>30</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -1757,6 +1751,7 @@
 <td rowspan='2'>Scale</td>
 <td>Main</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>30</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -1773,6 +1768,7 @@
 <td rowspan='2'>Min</td>
 <td>Main</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>30</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -1789,6 +1785,7 @@
 <td rowspan='2'>Max</td>
 <td>Main</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>30</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -1809,6 +1806,7 @@
 <th>Name</th>
 <th>Section</th>
 <th>UI</th>
+<th>Storage</th>
 <th>Num</th>
 <th>Dir</th>
 <th>Rate</th>
@@ -1820,8 +1818,9 @@
 </tr>
 <tr>
 <td rowspan='2'>Voice Mode</td>
-<td>Left</td>
+<td>Mode</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Voice</td>
@@ -1835,9 +1834,27 @@
 <td colspan='11' class='description'>Selects poly/mono mode.<br/>Poly - regular polyphonic mode.<br/>Mono - true monophonic mode, may cause clicks.<br/>Release - monophonic untill a mono section is released. So, multiple mono sections may overlap.<br/>To avoid clicks it is best to use release-monophonic mode with multi-triggered envelopes.</td>
 </tr>
 <tr>
+<td rowspan='2'>Osc Oversampling</td>
+<td>Oversampling</td>
+<td>Yes</td>
+<td>Patch</td>
+<td>1</td>
+<td>Input</td>
+<td>Voice</td>
+<td>Automate</td>
+<td>1X</td>
+<td>4X</td>
+<td>1X</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Oversampling for those rare cases where it makes a positive difference. Only affects FM and hardsync, but not AM. Oversampling is per unison voice, so setting both this and unison to 8 results in an oscillator being 64 times as expensive to calculate.</td>
+</tr>
+<tr>
 <td rowspan='2'>Porta Tempo Sync</td>
 <td>Sync</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Voice</td>
@@ -1854,6 +1871,7 @@
 <td rowspan='2'>Porta Mode</td>
 <td>Mid</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Voice</td>
@@ -1870,6 +1888,7 @@
 <td rowspan='2'>Porta Time</td>
 <td>Mid</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Voice</td>
@@ -1886,6 +1905,7 @@
 <td rowspan='2'>Porta Tempo</td>
 <td>Mid</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Voice</td>
@@ -1899,25 +1919,10 @@
 <td colspan='11' class='description'>Pitch glide time in bars.</td>
 </tr>
 <tr>
-<td rowspan='2'>Osc Oversampling</td>
-<td>Right</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Voice</td>
-<td>Automate</td>
-<td>1X</td>
-<td>4X</td>
-<td>1X</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Oversampling for those rare cases where it makes a positive difference. Only affects FM and hardsync, but not AM. Oversampling is per unison voice, so setting both this and unison to 8 results in an oscillator being 64 times as expensive to calculate.</td>
-</tr>
-<tr>
 <td rowspan='2'>Note</td>
-<td>Right</td>
+<td>Mid</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Voice</td>
@@ -1932,8 +1937,9 @@
 </tr>
 <tr>
 <td rowspan='2'>Cent</td>
-<td>Right</td>
+<td>Mid</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -1947,9 +1953,129 @@
 <td colspan='11' class='description'>Oscillator pitch cents adjustment for all Oscs.</td>
 </tr>
 <tr>
+<td rowspan='2'>Global Unison Voices</td>
+<td>Unison Voices</td>
+<td>Yes</td>
+<td>Patch</td>
+<td>1</td>
+<td>Input</td>
+<td>Voice</td>
+<td>Automate</td>
+<td>1</td>
+<td>4</td>
+<td>1</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Global unison voice count. Global unison spawns an entire polyphonic synth voice per unison voice. This includes per-voice oscillators, effects, lfo's and envelopes.</td>
+</tr>
+<tr>
+<td rowspan='2'>Global Unison Osc Detune</td>
+<td>Global Unison Params</td>
+<td>Yes</td>
+<td>Patch</td>
+<td>1</td>
+<td>Input</td>
+<td>Accurate</td>
+<td>Modulate</td>
+<td>0 %</td>
+<td>100 %</td>
+<td>33 %</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Global unison voice pitch detune amount.</td>
+</tr>
+<tr>
+<td rowspan='2'>Global Unison Osc Phase Offset</td>
+<td>Global Unison Params</td>
+<td>Yes</td>
+<td>Patch</td>
+<td>1</td>
+<td>Input</td>
+<td>Accurate</td>
+<td>Modulate</td>
+<td>0 %</td>
+<td>100 %</td>
+<td>0 %</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Global unison voice osc phase offset.</td>
+</tr>
+<tr>
+<td rowspan='2'>Global Unison LFO Detune</td>
+<td>Global Unison Params</td>
+<td>Yes</td>
+<td>Patch</td>
+<td>1</td>
+<td>Input</td>
+<td>Accurate</td>
+<td>Automate</td>
+<td>0 %</td>
+<td>100 %</td>
+<td>0 %</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Global unison voice LFO detune amount.</td>
+</tr>
+<tr>
+<td rowspan='2'>Global Unison LFO Phase Offset</td>
+<td>Global Unison Params</td>
+<td>Yes</td>
+<td>Patch</td>
+<td>1</td>
+<td>Input</td>
+<td>Voice</td>
+<td>Automate</td>
+<td>0 %</td>
+<td>100 %</td>
+<td>0 %</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Global unison voice LFO phase offset.</td>
+</tr>
+<tr>
+<td rowspan='2'>Global Unison Env Detune</td>
+<td>Global Unison Params</td>
+<td>Yes</td>
+<td>Patch</td>
+<td>1</td>
+<td>Input</td>
+<td>Voice</td>
+<td>Automate</td>
+<td>0 %</td>
+<td>100 %</td>
+<td>0 %</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Global unison voice envelope detune amount.</td>
+</tr>
+<tr>
+<td rowspan='2'>Global Unison Spread</td>
+<td>Global Unison Params</td>
+<td>Yes</td>
+<td>Patch</td>
+<td>1</td>
+<td>Input</td>
+<td>Accurate</td>
+<td>Modulate</td>
+<td>0 %</td>
+<td>100 %</td>
+<td>50 %</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Global unison stereo spread.</td>
+</tr>
+<tr>
 <td rowspan='2'>Pitch</td>
-<td>Left</td>
+<td>Mode</td>
 <td>No</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -1964,8 +2090,9 @@
 </tr>
 <tr>
 <td rowspan='2'>Pitch Bend</td>
-<td>Left</td>
+<td>Mode</td>
 <td>No</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -1986,6 +2113,7 @@
 <th>Name</th>
 <th>Section</th>
 <th>UI</th>
+<th>Storage</th>
 <th>Num</th>
 <th>Dir</th>
 <th>Rate</th>
@@ -1999,6 +2127,7 @@
 <td rowspan='2'>On</td>
 <td>Main</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>20</td>
 <td>Input</td>
 <td>Voice</td>
@@ -2015,6 +2144,7 @@
 <td rowspan='2'>Source</td>
 <td>Main</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>20</td>
 <td>Input</td>
 <td>Voice</td>
@@ -2031,6 +2161,7 @@
 <td rowspan='2'>Target</td>
 <td>Main</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>20</td>
 <td>Input</td>
 <td>Voice</td>
@@ -2047,6 +2178,7 @@
 <td rowspan='2'>Gain</td>
 <td>Main</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>20</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -2063,6 +2195,7 @@
 <td rowspan='2'>Balance</td>
 <td>Main</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>20</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -2083,6 +2216,7 @@
 <th>Name</th>
 <th>Section</th>
 <th>UI</th>
+<th>Storage</th>
 <th>Num</th>
 <th>Dir</th>
 <th>Rate</th>
@@ -2096,7 +2230,8 @@
 <td rowspan='2'>AM On</td>
 <td>AM</td>
 <td>Yes</td>
-<td>9</td>
+<td>Patch</td>
+<td>10</td>
 <td>Input</td>
 <td>Voice</td>
 <td>Automate</td>
@@ -2112,7 +2247,8 @@
 <td rowspan='2'>AM Source</td>
 <td>AM</td>
 <td>Yes</td>
-<td>9</td>
+<td>Patch</td>
+<td>10</td>
 <td>Input</td>
 <td>Voice</td>
 <td>Automate</td>
@@ -2128,7 +2264,8 @@
 <td rowspan='2'>AM Target</td>
 <td>AM</td>
 <td>Yes</td>
-<td>9</td>
+<td>Patch</td>
+<td>10</td>
 <td>Input</td>
 <td>Voice</td>
 <td>Automate</td>
@@ -2144,7 +2281,8 @@
 <td rowspan='2'>AM Mix</td>
 <td>AM</td>
 <td>Yes</td>
-<td>9</td>
+<td>Patch</td>
+<td>10</td>
 <td>Input</td>
 <td>Accurate</td>
 <td>Modulate</td>
@@ -2160,7 +2298,8 @@
 <td rowspan='2'>AM Ring</td>
 <td>AM</td>
 <td>Yes</td>
-<td>9</td>
+<td>Patch</td>
+<td>10</td>
 <td>Input</td>
 <td>Accurate</td>
 <td>Modulate</td>
@@ -2176,7 +2315,8 @@
 <td rowspan='2'>FM On</td>
 <td>FM</td>
 <td>Yes</td>
-<td>9</td>
+<td>Patch</td>
+<td>10</td>
 <td>Input</td>
 <td>Voice</td>
 <td>Automate</td>
@@ -2192,7 +2332,8 @@
 <td rowspan='2'>FM Source</td>
 <td>FM</td>
 <td>Yes</td>
-<td>9</td>
+<td>Patch</td>
+<td>10</td>
 <td>Input</td>
 <td>Voice</td>
 <td>Automate</td>
@@ -2208,7 +2349,8 @@
 <td rowspan='2'>FM Target</td>
 <td>FM</td>
 <td>Yes</td>
-<td>9</td>
+<td>Patch</td>
+<td>10</td>
 <td>Input</td>
 <td>Voice</td>
 <td>Automate</td>
@@ -2224,7 +2366,8 @@
 <td rowspan='2'>FM Mode</td>
 <td>FM</td>
 <td>Yes</td>
-<td>9</td>
+<td>Patch</td>
+<td>10</td>
 <td>Input</td>
 <td>Voice</td>
 <td>Automate</td>
@@ -2240,7 +2383,8 @@
 <td rowspan='2'>FM Idx</td>
 <td>FM</td>
 <td>Yes</td>
-<td>9</td>
+<td>Patch</td>
+<td>10</td>
 <td>Input</td>
 <td>Accurate</td>
 <td>Modulate</td>
@@ -2260,6 +2404,7 @@
 <th>Name</th>
 <th>Section</th>
 <th>UI</th>
+<th>Storage</th>
 <th>Num</th>
 <th>Dir</th>
 <th>Rate</th>
@@ -2273,6 +2418,7 @@
 <td rowspan='2'>Type</td>
 <td>Type</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Voice</td>
@@ -2289,6 +2435,7 @@
 <td rowspan='2'>Gain</td>
 <td>Type</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -2305,6 +2452,7 @@
 <td rowspan='2'>Note</td>
 <td>Type</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Voice</td>
@@ -2321,6 +2469,7 @@
 <td rowspan='2'>Cent</td>
 <td>Type</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -2337,6 +2486,7 @@
 <td rowspan='2'>Hard Sync On</td>
 <td>Sync On</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Voice</td>
@@ -2353,6 +2503,7 @@
 <td rowspan='2'>Hard Sync Semitones</td>
 <td>Sync/Unisonc Params</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -2369,6 +2520,7 @@
 <td rowspan='2'>Hard Sync XOver Time</td>
 <td>Sync/Unisonc Params</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Voice</td>
@@ -2385,6 +2537,7 @@
 <td rowspan='2'>Unison Voices</td>
 <td>Sync/Unisonc Params</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Voice</td>
@@ -2401,6 +2554,7 @@
 <td rowspan='2'>Unison Spread</td>
 <td>Sync/Unisonc Params</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -2417,6 +2571,7 @@
 <td rowspan='2'>Unison Detune</td>
 <td>Sync/Unisonc Params</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -2433,6 +2588,7 @@
 <td rowspan='2'>Unison Phase</td>
 <td>Sync/Unisonc Params</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -2449,6 +2605,7 @@
 <td rowspan='2'>Basic Sin On</td>
 <td>Basic</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Voice</td>
@@ -2465,6 +2622,7 @@
 <td rowspan='2'>Basic Sin Mix</td>
 <td>Basic</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -2481,6 +2639,7 @@
 <td rowspan='2'>Basic Saw On</td>
 <td>Basic</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Voice</td>
@@ -2497,6 +2656,7 @@
 <td rowspan='2'>Basic Saw Mix</td>
 <td>Basic</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -2513,6 +2673,7 @@
 <td rowspan='2'>Basic Tri On</td>
 <td>Basic</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Voice</td>
@@ -2529,6 +2690,7 @@
 <td rowspan='2'>Basic Tri Mix</td>
 <td>Basic</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -2545,6 +2707,7 @@
 <td rowspan='2'>Basic Sqr On</td>
 <td>Basic</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Voice</td>
@@ -2561,6 +2724,7 @@
 <td rowspan='2'>Basic Sqr Mix</td>
 <td>Basic</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -2577,6 +2741,7 @@
 <td rowspan='2'>Basic Sqr PW</td>
 <td>Basic PW</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -2593,6 +2758,7 @@
 <td rowspan='2'>DSF Partials</td>
 <td>DSF</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Voice</td>
@@ -2609,6 +2775,7 @@
 <td rowspan='2'>DSF Distance</td>
 <td>DSF</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Voice</td>
@@ -2625,6 +2792,7 @@
 <td rowspan='2'>DSF Decay</td>
 <td>DSF</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -2641,6 +2809,7 @@
 <td rowspan='2'>Rnd Filter Mode</td>
 <td>Random</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Voice</td>
@@ -2657,6 +2826,7 @@
 <td rowspan='2'>Random Rate</td>
 <td>Random</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -2673,6 +2843,7 @@
 <td rowspan='2'>Random Filter Freq</td>
 <td>Random</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -2689,6 +2860,7 @@
 <td rowspan='2'>Random Filter Reso</td>
 <td>Random</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -2705,6 +2877,7 @@
 <td rowspan='2'>Rnd Seed</td>
 <td>Random</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Voice</td>
@@ -2721,6 +2894,7 @@
 <td rowspan='2'>K+S Feedback</td>
 <td>Random</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -2737,6 +2911,7 @@
 <td rowspan='2'>K+S Midpoint</td>
 <td>Random</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Voice</td>
@@ -2753,6 +2928,7 @@
 <td rowspan='2'>K+S Stretch</td>
 <td>Random</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -2769,6 +2945,7 @@
 <td rowspan='2'>Pitch</td>
 <td>Type</td>
 <td>No</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -2785,6 +2962,7 @@
 <td rowspan='2'>Pitch Bend</td>
 <td>Type</td>
 <td>No</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -2801,6 +2979,7 @@
 <td rowspan='2'>Phase</td>
 <td>Type</td>
 <td>No</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -2821,6 +3000,7 @@
 <th>Name</th>
 <th>Section</th>
 <th>UI</th>
+<th>Storage</th>
 <th>Num</th>
 <th>Dir</th>
 <th>Rate</th>
@@ -2834,6 +3014,7 @@
 <td rowspan='2'>Type</td>
 <td>Main</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Voice</td>
@@ -2850,6 +3031,7 @@
 <td rowspan='2'>SV Filter Mode</td>
 <td>Main</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Voice</td>
@@ -2866,6 +3048,7 @@
 <td rowspan='2'>SV Filter KeyTrk</td>
 <td>SV Filter Left</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -2882,6 +3065,7 @@
 <td rowspan='2'>SV Filter Shelf Gain</td>
 <td>SV Filter Left</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -2898,6 +3082,7 @@
 <td rowspan='2'>SV Filter Freq</td>
 <td>SV Filter Left</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -2914,6 +3099,7 @@
 <td rowspan='2'>SV Filter Reso</td>
 <td>SV Filter Left</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -2930,6 +3116,7 @@
 <td rowspan='2'>Comb Filter Mode</td>
 <td>Main</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Voice</td>
@@ -2946,6 +3133,7 @@
 <td rowspan='2'>Comb Filter Delay+</td>
 <td>Comb Filter</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -2962,6 +3150,7 @@
 <td rowspan='2'>Comb Filter Delay-</td>
 <td>Comb Filter</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -2978,6 +3167,7 @@
 <td rowspan='2'>Comb Filter Gain+</td>
 <td>Comb Filter</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -2994,6 +3184,7 @@
 <td rowspan='2'>Comb Filter Gain-</td>
 <td>Comb Filter</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -3010,6 +3201,7 @@
 <td rowspan='2'>Dist Mode</td>
 <td>Main</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Voice</td>
@@ -3026,6 +3218,7 @@
 <td rowspan='2'>Dist LPF Freq</td>
 <td>Distortion Filter</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -3042,6 +3235,7 @@
 <td rowspan='2'>Dist LPF Reso</td>
 <td>Distortion Filter</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -3058,6 +3252,7 @@
 <td rowspan='2'>Dist Skew X Mode</td>
 <td>Distortion Skew</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Voice</td>
@@ -3074,6 +3269,7 @@
 <td rowspan='2'>Dist Skew X Amt</td>
 <td>Distortion Skew</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -3090,6 +3286,7 @@
 <td rowspan='2'>Dist Skew Y Mode</td>
 <td>Distortion Skew</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Voice</td>
@@ -3106,6 +3303,7 @@
 <td rowspan='2'>Dist Skew Y Amt</td>
 <td>Distortion Skew</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -3122,6 +3320,7 @@
 <td rowspan='2'>Dist Shape</td>
 <td>Distortion Right</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Voice</td>
@@ -3138,6 +3337,7 @@
 <td rowspan='2'>Dist Oversampling</td>
 <td>Distortion Right</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Voice</td>
@@ -3154,6 +3354,7 @@
 <td rowspan='2'>Dist Clip Mode</td>
 <td>Distortion Right</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Voice</td>
@@ -3170,6 +3371,7 @@
 <td rowspan='2'>Dist Clip Exp</td>
 <td>Distortion Right</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -3186,6 +3388,7 @@
 <td rowspan='2'>Dist Gain</td>
 <td>Distortion Right</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -3202,6 +3405,7 @@
 <td rowspan='2'>Dist Mix</td>
 <td>Distortion Right</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -3218,6 +3422,7 @@
 <td rowspan='2'>Multi EQ Mode</td>
 <td>Main</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Voice</td>
@@ -3234,6 +3439,7 @@
 <td rowspan='2'>Multi EQ Filter Mode</td>
 <td>Multi EQ</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>5</td>
 <td>Input</td>
 <td>Voice</td>
@@ -3250,6 +3456,7 @@
 <td rowspan='2'>Multi EQ Gain</td>
 <td>Multi EQ</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>5</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -3266,6 +3473,7 @@
 <td rowspan='2'>Multi EQ Freq</td>
 <td>Multi EQ</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>5</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -3282,6 +3490,7 @@
 <td rowspan='2'>Multi EQ Reso</td>
 <td>Multi EQ</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>5</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -3302,6 +3511,7 @@
 <th>Name</th>
 <th>Section</th>
 <th>UI</th>
+<th>Storage</th>
 <th>Num</th>
 <th>Dir</th>
 <th>Rate</th>
@@ -3315,6 +3525,7 @@
 <td rowspan='2'>Gain</td>
 <td>Main</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -3331,6 +3542,7 @@
 <td rowspan='2'>Balance</td>
 <td>Main</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -3351,6 +3563,7 @@
 <th>Name</th>
 <th>Section</th>
 <th>UI</th>
+<th>Storage</th>
 <th>Num</th>
 <th>Dir</th>
 <th>Rate</th>
@@ -3364,6 +3577,7 @@
 <td rowspan='2'>On</td>
 <td>Main</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>20</td>
 <td>Input</td>
 <td>Block</td>
@@ -3380,6 +3594,7 @@
 <td rowspan='2'>Source</td>
 <td>Main</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>20</td>
 <td>Input</td>
 <td>Block</td>
@@ -3396,6 +3611,7 @@
 <td rowspan='2'>Target</td>
 <td>Main</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>20</td>
 <td>Input</td>
 <td>Block</td>
@@ -3412,6 +3628,7 @@
 <td rowspan='2'>Gain</td>
 <td>Main</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>20</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -3428,6 +3645,7 @@
 <td rowspan='2'>Balance</td>
 <td>Main</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>20</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -3448,6 +3666,7 @@
 <th>Name</th>
 <th>Section</th>
 <th>UI</th>
+<th>Storage</th>
 <th>Num</th>
 <th>Dir</th>
 <th>Rate</th>
@@ -3461,6 +3680,7 @@
 <td rowspan='2'>Type</td>
 <td>Main</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Block</td>
@@ -3477,6 +3697,7 @@
 <td rowspan='2'>SV Filter Mode</td>
 <td>Main</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Block</td>
@@ -3493,6 +3714,7 @@
 <td rowspan='2'>SV Filter KeyTrk</td>
 <td>SV Filter Left</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -3509,6 +3731,7 @@
 <td rowspan='2'>SV Filter Shelf Gain</td>
 <td>SV Filter Left</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -3525,6 +3748,7 @@
 <td rowspan='2'>SV Filter Freq</td>
 <td>SV Filter Left</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -3541,6 +3765,7 @@
 <td rowspan='2'>SV Filter Reso</td>
 <td>SV Filter Left</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -3557,6 +3782,7 @@
 <td rowspan='2'>Comb Filter Mode</td>
 <td>Main</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Block</td>
@@ -3573,6 +3799,7 @@
 <td rowspan='2'>Comb Filter Delay+</td>
 <td>Comb Filter</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -3589,6 +3816,7 @@
 <td rowspan='2'>Comb Filter Delay-</td>
 <td>Comb Filter</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -3605,6 +3833,7 @@
 <td rowspan='2'>Comb Filter Gain+</td>
 <td>Comb Filter</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -3621,6 +3850,7 @@
 <td rowspan='2'>Comb Filter Gain-</td>
 <td>Comb Filter</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -3637,6 +3867,7 @@
 <td rowspan='2'>Dist Mode</td>
 <td>Main</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Block</td>
@@ -3653,6 +3884,7 @@
 <td rowspan='2'>Dist LPF Freq</td>
 <td>Distortion Filter</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -3669,6 +3901,7 @@
 <td rowspan='2'>Dist LPF Reso</td>
 <td>Distortion Filter</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -3685,6 +3918,7 @@
 <td rowspan='2'>Dist Skew X Mode</td>
 <td>Distortion Skew</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Block</td>
@@ -3701,6 +3935,7 @@
 <td rowspan='2'>Dist Skew X Amt</td>
 <td>Distortion Skew</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -3717,6 +3952,7 @@
 <td rowspan='2'>Dist Skew Y Mode</td>
 <td>Distortion Skew</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Block</td>
@@ -3733,6 +3969,7 @@
 <td rowspan='2'>Dist Skew Y Amt</td>
 <td>Distortion Skew</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -3749,6 +3986,7 @@
 <td rowspan='2'>Dist Shape</td>
 <td>Distortion Right</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Block</td>
@@ -3765,6 +4003,7 @@
 <td rowspan='2'>Dist Oversampling</td>
 <td>Distortion Right</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Block</td>
@@ -3781,6 +4020,7 @@
 <td rowspan='2'>Dist Clip Mode</td>
 <td>Distortion Right</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Block</td>
@@ -3797,6 +4037,7 @@
 <td rowspan='2'>Dist Clip Exp</td>
 <td>Distortion Right</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -3813,6 +4054,7 @@
 <td rowspan='2'>Dist Gain</td>
 <td>Distortion Right</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -3829,6 +4071,7 @@
 <td rowspan='2'>Dist Mix</td>
 <td>Distortion Right</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -3845,6 +4088,7 @@
 <td rowspan='2'>Multi EQ Mode</td>
 <td>Main</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Block</td>
@@ -3861,6 +4105,7 @@
 <td rowspan='2'>Multi EQ Filter Mode</td>
 <td>Multi EQ</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>5</td>
 <td>Input</td>
 <td>Block</td>
@@ -3877,6 +4122,7 @@
 <td rowspan='2'>Multi EQ Gain</td>
 <td>Multi EQ</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>5</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -3893,6 +4139,7 @@
 <td rowspan='2'>Multi EQ Freq</td>
 <td>Multi EQ</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>5</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -3909,6 +4156,7 @@
 <td rowspan='2'>Multi EQ Reso</td>
 <td>Multi EQ</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>5</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -3925,6 +4173,7 @@
 <td rowspan='2'>Delay Mode</td>
 <td>Main</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Block</td>
@@ -3941,6 +4190,7 @@
 <td rowspan='2'>Tempo Sync</td>
 <td>Delay Sync</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Block</td>
@@ -3957,6 +4207,7 @@
 <td rowspan='2'>Delay Amount</td>
 <td>Delay Left</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -3973,6 +4224,7 @@
 <td rowspan='2'>Delay Mix</td>
 <td>Delay Left</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -3989,6 +4241,7 @@
 <td rowspan='2'>Delay Spread</td>
 <td>Delay Right</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -4005,6 +4258,7 @@
 <td rowspan='2'>Multi Delay Hold Time</td>
 <td>Delay Right</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Block</td>
@@ -4021,6 +4275,7 @@
 <td rowspan='2'>Multi Delay Hold Tempo</td>
 <td>Delay Right</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Block</td>
@@ -4037,6 +4292,7 @@
 <td rowspan='2'>Fdbk Delay Time L</td>
 <td>Delay Right</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Block</td>
@@ -4053,6 +4309,7 @@
 <td rowspan='2'>Fdbk Delay Tempo L</td>
 <td>Delay Right</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Block</td>
@@ -4069,6 +4326,7 @@
 <td rowspan='2'>Fdbk Delay Time R</td>
 <td>Delay Right</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Block</td>
@@ -4085,6 +4343,7 @@
 <td rowspan='2'>Fdbk Delay Tempo R</td>
 <td>Delay Right</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Block</td>
@@ -4101,6 +4360,7 @@
 <td rowspan='2'>Multi Delay Tap Count</td>
 <td>Delay Right</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Block</td>
@@ -4117,6 +4377,7 @@
 <td rowspan='2'>Multi Delay Time</td>
 <td>Delay Right</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Block</td>
@@ -4133,6 +4394,7 @@
 <td rowspan='2'>Multi Delay Tempo</td>
 <td>Delay Right</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Block</td>
@@ -4149,6 +4411,7 @@
 <td rowspan='2'>Reverb Mix</td>
 <td>Main</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -4165,6 +4428,7 @@
 <td rowspan='2'>Reverb Spread</td>
 <td>Reverb Left</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -4181,6 +4445,7 @@
 <td rowspan='2'>Reverb APF</td>
 <td>Reverb Left</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -4197,6 +4462,7 @@
 <td rowspan='2'>Reverb Size</td>
 <td>Reverb Right</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -4213,6 +4479,7 @@
 <td rowspan='2'>Reverb Damping</td>
 <td>Reverb Right</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -4233,6 +4500,7 @@
 <th>Name</th>
 <th>Section</th>
 <th>UI</th>
+<th>Storage</th>
 <th>Num</th>
 <th>Dir</th>
 <th>Rate</th>
@@ -4246,6 +4514,7 @@
 <td rowspan='2'>Gain</td>
 <td>Main</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -4262,6 +4531,7 @@
 <td rowspan='2'>Balance</td>
 <td>Main</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
@@ -4282,6 +4552,7 @@
 <th>Name</th>
 <th>Section</th>
 <th>UI</th>
+<th>Storage</th>
 <th>Num</th>
 <th>Dir</th>
 <th>Rate</th>
@@ -4295,6 +4566,7 @@
 <td rowspan='2'>MTS-ESP</td>
 <td>Main</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Output</td>
 <td>Block</td>
@@ -4311,6 +4583,7 @@
 <td rowspan='2'>Voices Drained</td>
 <td>Main</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Output</td>
 <td>Block</td>
@@ -4327,6 +4600,7 @@
 <td rowspan='2'>Threads</td>
 <td>Main</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Output</td>
 <td>Block</td>
@@ -4343,6 +4617,7 @@
 <td rowspan='2'>Voices</td>
 <td>Main</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Output</td>
 <td>Block</td>
@@ -4359,6 +4634,7 @@
 <td rowspan='2'>Hi CPU</td>
 <td>Main</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Output</td>
 <td>Block</td>
@@ -4375,6 +4651,7 @@
 <td rowspan='2'>Hi Module</td>
 <td>Main</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Output</td>
 <td>Block</td>
@@ -4391,6 +4668,7 @@
 <td rowspan='2'>Gain</td>
 <td>Main</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Output</td>
 <td>Block</td>
@@ -4407,6 +4685,7 @@
 <td rowspan='2'>CPU</td>
 <td>Main</td>
 <td>Yes</td>
+<td>Patch</td>
 <td>1</td>
 <td>Output</td>
 <td>Block</td>

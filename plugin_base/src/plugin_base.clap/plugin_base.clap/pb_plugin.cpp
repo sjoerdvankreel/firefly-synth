@@ -52,6 +52,13 @@ forward_thread_pool_voice_processor(plugin_engine& engine, void* context)
   return plugin->thread_pool_voice_processor(engine);
 }
 
+pb_basic_config const* 
+pb_basic_config::instance()
+{
+  static pb_basic_config result = {};
+  return &result;
+}
+
 pb_plugin::
 ~pb_plugin() 
 { 
@@ -69,7 +76,7 @@ Plugin(clap_desc, host),
 _mts_client(MTS_RegisterClient()),
 _desc(std::make_unique<plugin_desc>(topo, this)),
 _splice_engine(_desc.get(), false, forward_thread_pool_voice_processor, this),
-_extra_state(set_join<std::string>({ gui_extra_state_keyset(*_desc->plugin), tuning_extra_state_keyset() })),
+_extra_state(gui_extra_state_keyset(*_desc->plugin)),
 _gui_state(_desc.get(), true),
 _to_gui_events(std::make_unique<event_queue>(default_q_size)), 
 _to_audio_events(std::make_unique<event_queue>(default_q_size)),
@@ -79,16 +86,6 @@ _mod_indicator_queue(std::make_unique<mod_indicator_queue>(default_q_size))
   _gui_state.add_any_listener(this);
   _mod_indicator_states.reserve(default_q_size);
   _block_automation_seen.resize(_splice_engine.state().desc().param_count);
-  init_tuning_from_extra_state();
-}
-
-void
-pb_plugin::init_tuning_from_extra_state()
-{
-  auto const* topo = _gui_state.desc().plugin;
-  if (topo->tuning_mode_module == -1 || topo->tuning_mode_param == -1) return;
-  auto tuning_mode = std::clamp(_extra_state.get_num(extra_state_tuning_mode_key, engine_tuning_mode_on_note_before_mod), 0, engine_tuning_mode_count - 1);
-  _gui_state.set_raw_at(topo->tuning_mode_module, 0, topo->tuning_mode_param, 0, tuning_mode);
 }
 
 void
@@ -151,7 +148,7 @@ pb_plugin::stateSave(clap_ostream const* stream) noexcept
   // don't bother with that and just write byte-for-byte
   int written = 1;
   int total_written = 0;
-  std::vector<char> data(plugin_io_save_all_state(_gui_state, _extra_state));
+  std::vector<char> data(plugin_io_save_all_state(_gui_state, &_extra_state, false));
   while(written == 1 && total_written < data.size())
   {
     written = stream->write(stream, data.data() + total_written, 1);
@@ -176,12 +173,11 @@ pb_plugin::stateLoad(clap_istream const* stream) noexcept
   } while(true);
 
   _gui_state.begin_undo_region();
-  if (!plugin_io_load_all_state(data, _gui_state, _extra_state).ok())
+  if (!plugin_io_load_all_state(data, _gui_state, &_extra_state, false).ok())
   {
     _gui_state.discard_undo_region();
     return false;
   }
-  init_tuning_from_extra_state();
   for (int p = 0; p < _splice_engine.state().desc().param_count; p++)
     gui_param_changed(p, _gui_state.get_plain_at_index(p));
   _gui_state.discard_undo_region();
@@ -300,7 +296,7 @@ pb_plugin::guiAdjustSize(uint32_t* width, uint32_t* height) noexcept
   auto const& topo = *_splice_engine.state().desc().plugin;
   bool is_fx = topo.type == plugin_type::fx;
   auto settings = _gui->get_lnf()->global_settings();
-  int min_width = (int)(settings.get_default_width(is_fx) * settings.min_scale * _gui->get_system_dpi_scale()); // TODO different fx size
+  int min_width = (int)(settings.get_default_width(is_fx) * settings.min_scale * _gui->get_system_dpi_scale());
   int max_width = (int)(settings.get_default_width(is_fx) * settings.max_scale * _gui->get_system_dpi_scale());
   *width = std::clamp((int)*width, min_width, max_width);
   *height = *width * settings.get_aspect_ratio_height(is_fx) / settings.get_aspect_ratio_width(is_fx);

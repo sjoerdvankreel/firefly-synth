@@ -17,27 +17,22 @@ on release:
 11 make a github release
 12 update kvr 
 
+microtuning:
+* check up on andreyas comments
+
 autobuilds:
 * ask paul
 * integrate https://github.com/surge-synthesizer/monique-monosynth/blob/main/.github/workflows/build-pr.yml
 
 ui-vnext:
-* remove global uni params from fx
+* make the cv graphs + bolletjes work in case of automation
+* global unit lfo phase offset not plot good
 * less ugly audio graphs
-* move smoothing to somewhere else
 * show clap mod indicator
 * repaint on waveform change (free running or random-per-voice)
-* some bolletjes don't go away
-* fix the undo history for tuning mode
-* make the bolletjes work in case of automation
-* show active modulation for the other graphs
+* show active modulation for the other graphs -> better to have a separate state copy including modulation
 * bugfix: rerender graph on master in param hover?
 * show effective modulation in the ui for clap param mod
-* fix the fx version
-* drop the smoothing module, make the settings module
-* fix the todos
-* check if global header is extended
-* move some params from global in/smooth to the settings module (including tuning)
 
 wishlist:
 filter microtuning

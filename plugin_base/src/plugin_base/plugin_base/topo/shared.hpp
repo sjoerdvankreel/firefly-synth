@@ -73,11 +73,13 @@ struct topo_info final {
   int slot_count;
   topo_tag tag;
 
-  // if this is set, value doesn't get copied into the plug state on patch load
-  bool is_per_instance = false;
-
   // for reference generator
   std::string description;
+
+  // if this is set, value doesn't get copied into the plug state on patch load/save
+  // but it does get serialized with the rest of the daw project under the specified key
+  // Note: per-instance params must be part of single-slot module and itself have single slot
+  bool is_per_instance = false;
 
   void validate() const;
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(topo_info);
@@ -192,6 +194,7 @@ struct gui_colors final {
   juce::Colour slider_highlight = juce::Colour(0xFF00FF00);
   juce::Colour slider_shadow = juce::Colour(0xFF00FF00);
   juce::Colour slider_automation = juce::Colour(0xFF00FF00);
+  juce::Colour slider_modulation = juce::Colour(0xFF00FF00);
   juce::Colour slider_can_modulate = juce::Colour(0xFF00FF00);
   juce::Colour section_outline = juce::Colour(0xFF00FF00);
   juce::Colour section_background = juce::Colour(0xFF00FF00);

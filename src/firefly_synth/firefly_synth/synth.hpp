@@ -26,24 +26,24 @@ inline int const on_voice_random_count = 3;
 inline int const on_voice_random_output_index = 0;
 
 // some parameters need to be exposed to modules other than the one that declares them
+extern int const global_in_param_pb_range;
 extern int const osc_param_type;
 extern int const osc_param_uni_voices;
 extern int const voice_in_output_pitch_offset;
 extern int const voice_in_param_mode;
 extern int const voice_in_param_oversmp;
-extern int const global_in_param_pb_range;
-extern int const global_in_param_uni_dtn;
-extern int const global_in_param_uni_sprd;
-extern int const global_in_param_uni_voices;
-extern int const global_in_param_uni_osc_phase;
-extern int const global_in_param_uni_env_dtn;
-extern int const global_in_param_uni_lfo_phase;
-extern int const global_in_param_uni_lfo_dtn;
+extern int const voice_in_param_uni_dtn;
+extern int const voice_in_param_uni_sprd;
+extern int const voice_in_param_uni_voices;
+extern int const voice_in_param_uni_osc_phase;
+extern int const voice_in_param_uni_env_dtn;
+extern int const voice_in_param_uni_lfo_phase;
+extern int const voice_in_param_uni_lfo_dtn;
 
-extern int const global_in_param_tuning_mode;
-extern int const global_smoothing_param_auto_smooth;
-extern int const global_smoothing_param_midi_smooth;
-extern int const global_smoothing_param_tempo_smooth;
+extern int const master_settings_param_tuning_mode;
+extern int const master_settings_param_auto_smooth;
+extern int const master_settings_param_midi_smooth;
+extern int const master_settings_param_tempo_smooth;
 
 // these are needed by the osc
 struct osc_osc_matrix_context
@@ -71,13 +71,14 @@ typedef plugin_base::jarray<plugin_base::jarray<
 enum { midi_output_cp, midi_output_pb, midi_output_cc };
 
 // this describes our semi-modular synth/fx plugin
-std::unique_ptr<plugin_base::plugin_topo> synth_topo(bool is_fx, std::string const& full_name);
+std::unique_ptr<plugin_base::plugin_topo> synth_topo(
+  plugin_base::format_basic_config const* config, bool is_fx, std::string const& full_name);
 
 // MIDI goes first! That hosts the midi sources everyone else needs.
 // There's also a whole bunch of other implicit dependencies in here so mind the ordering.
 // For example env can modulate vlfo so env goes first.
 enum {
-  module_external_audio, module_midi, module_gcv_cv_matrix, module_global_in, module_global_smoothing,
+  module_master_settings, module_external_audio, module_midi, module_gcv_cv_matrix, module_global_in,
   module_glfo, module_gcv_audio_matrix, module_vcv_cv_matrix, module_voice_note, module_voice_on_note, 
   module_env, module_vlfo, module_vcv_audio_matrix, module_voice_in, module_vaudio_audio_matrix, 
   module_osc_osc_matrix, module_osc, module_vfx, module_voice_out, module_voice_mix, 
@@ -220,7 +221,7 @@ plugin_base::module_topo lfo_topo(int section, plugin_base::gui_position const& 
 plugin_base::module_topo monitor_topo(int section, plugin_base::gui_position const& pos, int polyphony, bool is_fx);
 plugin_base::module_topo audio_out_topo(int section, plugin_base::gui_position const& pos, bool global);
 plugin_base::module_topo osc_osc_matrix_topo(int section, plugin_base::gui_position const& pos, plugin_base::plugin_topo const* plugin);
-plugin_base::module_topo global_smoothing_topo(std::string const& vendor, std::string const& full_name, int section, plugin_base::gui_position const& pos);
+plugin_base::module_topo master_settings_topo(int section, plugin_base::gui_position const& pos, bool is_fx, plugin_base::plugin_topo const* plugin);
 plugin_base::module_topo audio_audio_matrix_topo(int section, plugin_base::gui_position const& pos, bool global, bool is_fx,
   std::vector<plugin_base::module_topo const*> const& sources, std::vector<plugin_base::module_topo const*> const& targets);
 plugin_base::module_topo cv_matrix_topo(int section, plugin_base::gui_position const& pos, bool cv, bool global, bool is_fx,

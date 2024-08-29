@@ -9,14 +9,6 @@
 
 namespace plugin_base {
 
-// from resources folder, used for presets
-struct resource_item
-{
-  std::string name;
-  std::string path;
-  std::string group;
-};
-
 enum { 
   host_menu_flags_none = 0x0, 
   host_menu_flags_checked = 0x1,
@@ -42,16 +34,20 @@ struct host_menu
 };
 
 // differences between plugin formats
-struct format_config {
-  PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(format_config);
+struct format_basic_config {
+  PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(format_basic_config);
 
-  virtual ~format_config() {}
+  virtual ~format_basic_config() {}
   virtual std::string format_name() const = 0;
-
-  virtual std::unique_ptr<host_menu>
-  context_menu(int param_id) const = 0;
-  virtual std::filesystem::path 
+  virtual std::filesystem::path
   resources_folder(std::filesystem::path const& binary_path) const = 0;
+};
+
+// differences between plugin formats
+struct format_menu_handler {
+  PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(format_menu_handler);
+  virtual ~format_menu_handler() {}
+  virtual std::unique_ptr<host_menu> context_menu(int param_id) const = 0;
 };
 
 }

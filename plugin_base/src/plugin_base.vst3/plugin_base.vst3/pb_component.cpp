@@ -40,16 +40,16 @@ _splice_engine(_desc.get(), false, nullptr, nullptr)
   }
 
   // fetch mod indicator param tags
-  _mod_indicator_count_param_tag = desc_id_hash(mod_indicator_count_param_guid);
+  _mod_indicator_count_param_tag = stable_hash(mod_indicator_count_param_guid);
   for (int i = 0; i < mod_indicator_output_param_count; i++)
-    _mod_indicator_param_tags[i] = desc_id_hash(mod_indicator_param_guids[i]);
+    _mod_indicator_param_tags[i] = stable_hash(mod_indicator_param_guids[i]);
 }
 
 tresult PLUGIN_API
 pb_component::getState(IBStream* state)
 {
   PB_LOG_FUNC_ENTRY_EXIT();
-  std::vector<char> data(plugin_io_save_patch_state(_splice_engine.state()));
+  std::vector<char> data(plugin_io_save_instance_state(_splice_engine.state(), false));
   return state->write(data.data(), data.size());
 }
 
@@ -57,7 +57,7 @@ tresult PLUGIN_API
 pb_component::setState(IBStream* state)
 {
   PB_LOG_FUNC_ENTRY_EXIT();
-  if (!plugin_io_load_patch_state(load_ibstream(state), _splice_engine.state()).ok())
+  if (!plugin_io_load_instance_state(load_ibstream(state), _splice_engine.state(), false).ok())
     return kResultFalse;
   _splice_engine.automation_state_dirty();
   return kResultOk;
