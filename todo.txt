@@ -17,6 +17,9 @@ on release:
 11 make a github release
 12 update kvr 
 
+microtuning:
+* check up on andreyas comments
+
 autobuilds:
 * ask paul
 * integrate https://github.com/surge-synthesizer/monique-monosynth/blob/main/.github/workflows/build-pr.yml
