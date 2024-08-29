@@ -21,9 +21,6 @@ autobuilds:
 * ask paul
 * integrate https://github.com/surge-synthesizer/monique-monosynth/blob/main/.github/workflows/build-pr.yml
 
-PATCH SELECT UNDO REGION
-UI MODULATORS ARE NOT GOOD VISIBLE 
-
 ui-vnext:
 * make the cv graphs + bolletjes work in case of automation
 * global unit lfo phase offset not plot good

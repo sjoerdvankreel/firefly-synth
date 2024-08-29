@@ -86,6 +86,7 @@ override_colors(gui_colors const& base, var const& json)
   result.slider_highlight = override_color_if_present(json, "slider_highlight", result.slider_highlight);
   result.slider_shadow = override_color_if_present(json, "slider_shadow", result.slider_shadow);
   result.slider_automation = override_color_if_present(json, "slider_automation", result.slider_automation);
+  result.slider_modulation = override_color_if_present(json, "slider_modulation", result.slider_modulation);
   result.slider_can_modulate = override_color_if_present(json, "slider_can_modulate", result.slider_can_modulate);
   result.section_outline = override_color_if_present(json, "section_outline", result.section_outline);
   result.section_background = override_color_if_present(json, "section_background", result.section_background);
@@ -778,7 +779,7 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
     draw_tabular_cell_bg(g, colors().table_cell, &s, global_settings().table_cell_radius);
   }
   
-  float size = (int)(size_base - padding);
+  float size = (int)(size_base - padding);  
   float left = (s.getWidth() - size) / 2;
   float top = (s.getHeight() - size) / 2;
 
@@ -837,8 +838,10 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
   if (ps->max_mod_indicator() < 0.0f) return;
 
   // modulation indication
-  Path path;
-  g.setColour(colors().slider_automation.darker());
+  Path path;  
+  auto modulation_color = colors().slider_modulation;
+  if (!s.isEnabled()) modulation_color = color_to_grayscale(modulation_color);
+  g.setColour(modulation_color);
   float half_mod_angle = start_angle + 0.5f * angle_range;
   float min_mod_angle = start_angle + ps->min_mod_indicator() * angle_range;
   float max_mod_angle = start_angle + ps->max_mod_indicator() * angle_range;
@@ -957,7 +960,7 @@ lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, f
     g.fillRoundedRectangle(centerx - trackw, top + 2, trackw, height - 4, 2);
 
   // automation indication
-  if (!bipolar)
+  if (!bipolar) 
   {
     g.setColour(automation_color.withAlpha(std::max(0.0f, 1.0f - pos * 10.0f)));
     g.fillEllipse(left + 1, top + 1, height - 2, height - 2);
