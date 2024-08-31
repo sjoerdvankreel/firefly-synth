@@ -84,9 +84,9 @@ make_module_graph_params(int module, bool render_on_module_mouse_enter,
   result.module_index = module;
   result.render_on_tweak = true;
   result.render_on_tab_change = true;
+  result.render_on_modulation_output_change = true; // TODO
   result.dependent_module_indices = dependent_module_indices;
   result.render_on_module_mouse_enter = render_on_module_mouse_enter;
-  result.render_on_modulation_output_change = render_on_modulation_output_change;
   if(render_on_param_mouse_enter)
     result.render_on_param_mouse_enter_modules = { -1 };
   return result;

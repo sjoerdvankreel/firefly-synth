@@ -68,8 +68,10 @@ module_graph::modulation_outputs_changed(std::vector<modulation_output> const& o
   float h = getHeight();
   int count = _data.series().size();
 
-  int current_module_slot = -1;
-  int current_module_index = -1;
+  int current_orig_module_slot = -1;
+  int current_orig_module_index = -1;
+  int current_mapped_module_slot = -1;
+  int current_mapped_module_index = -1;
 
   auto const& desc = _gui->automation_state()->desc();
   auto const& topo = *desc.plugin;
@@ -78,30 +80,36 @@ module_graph::modulation_outputs_changed(std::vector<modulation_output> const& o
 
   if (_module_params.module_index != -1)
   {
-    current_module_slot = _activated_module_slot;
-    current_module_index = _module_params.module_index;
+    current_orig_module_slot = _activated_module_slot;
+    current_orig_module_index = _module_params.module_index;
   }
   else
   {
-    current_module_slot = desc.param_mappings.params[_hovered_or_tweaked_param].topo.module_slot;
-    current_module_index = desc.param_mappings.params[_hovered_or_tweaked_param].topo.module_index;
+    current_orig_module_slot = desc.param_mappings.params[_hovered_or_tweaked_param].topo.module_slot;
+    current_orig_module_index = desc.param_mappings.params[_hovered_or_tweaked_param].topo.module_index;
   }
-
-  if (topo.modules[current_module_index].mod_output_source_selector != nullptr)
+  
+  // this is for stuff when someone else wants to paint our bubbles
+  // f.e. when cv matrix wants to paint the position of the longest env in the cv mixdown
+  current_mapped_module_slot = current_orig_module_slot;
+  current_mapped_module_index = current_orig_module_index;
+  if (topo.modules[current_orig_module_index].mod_output_source_selector != nullptr)
   {
-    auto selected = topo.modules[current_module_index].mod_output_source_selector(*_gui->automation_state(), mapping);
+    auto selected = topo.modules[current_orig_module_index].mod_output_source_selector(*_gui->automation_state(), mapping);
     if (selected.module_index != -1 && selected.module_slot != -1)
     {
-      current_module_slot = selected.module_slot;
-      current_module_index = selected.module_index;
+      current_mapped_module_slot = selected.module_slot;
+      current_mapped_module_index = selected.module_index;
     }
   }
 
+  bool need_full_repaint = false;
   int current_output = 0;
-  int current_module_global = desc.module_topo_to_index.at(current_module_index) + current_module_slot;
+  int current_module_global = desc.module_topo_to_index.at(current_mapped_module_index) + current_mapped_module_slot;
   for (int i = 0; i < outputs.size() && current_output < max_mod_outputs; i++)
     if (current_module_global == outputs[i].data.module_global && outputs[i].data.param_global == -1)
     {
+      need_full_repaint = true;
       float output_pos = outputs[i].data.value;
       float x = output_pos * w;
       int point = std::clamp((int)(output_pos * (count - 1)), 0, count - 1);
@@ -125,8 +133,21 @@ module_graph::modulation_outputs_changed(std::vector<modulation_output> const& o
     double time_now = seconds_since_epoch();
     for (int i = 0; i < max_mod_outputs; i++)
       if (_mod_outputs[i]->activated_time_seconds() < time_now - invalidate_after)
+      {
+        if(_mod_outputs[i]->isVisible())
+          need_full_repaint = true;
         _mod_outputs[i]->setVisible(false);
+      }
   }
+
+  // dont always repaint, only when stuff happened
+  //if (!need_full_repaint)
+    //return;
+  // TODO just repaint otherwise too complicated?
+  // also where are the bolletjes
+  int orig_module_global = desc.module_topo_to_index.at(current_orig_module_index) + current_orig_module_slot;
+  int orig_param_first = desc.modules[orig_module_global].params[0].info.global;
+  request_rerender(orig_param_first);
 }
 
 void 

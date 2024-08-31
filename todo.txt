@@ -25,6 +25,7 @@ autobuilds:
 * integrate https://github.com/surge-synthesizer/monique-monosynth/blob/main/.github/workflows/build-pr.yml
 
 ui-vnext:
+* todo show all voices or only last
 * make the cv graphs + bolletjes work in case of automation
 * global unit lfo phase offset not plot good
 * less ugly audio graphs
