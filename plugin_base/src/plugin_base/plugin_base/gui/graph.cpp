@@ -227,7 +227,7 @@ module_graph::render_if_dirty()
   auto const& module = _gui->automation_state()->desc().plugin->modules[mapping.module_index];
   if(module.graph_renderer != nullptr)
     render(module.graph_renderer(
-      *_gui->automation_state(), _gui->get_module_graph_engine(module), _hovered_or_tweaked_param, mapping));
+      _gui->modulation_state(), _gui->get_module_graph_engine(module), _hovered_or_tweaked_param, mapping));
   _render_dirty = false;
   return true;
 }
