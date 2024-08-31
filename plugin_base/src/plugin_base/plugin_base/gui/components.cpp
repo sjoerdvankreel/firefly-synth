@@ -18,22 +18,22 @@ binding_component::
 ~binding_component()
 {
   for(int i = 0; i < _visibility_params.size(); i++)
-    _gui->gui_state()->remove_listener(_visibility_params[i], this);
+    _gui->automation_state()->remove_listener(_visibility_params[i], this);
   for (int i = 0; i < _enabled_params.size(); i++)
-    _gui->gui_state()->remove_listener(_enabled_params[i], this);
+    _gui->automation_state()->remove_listener(_enabled_params[i], this);
 
-  auto const& param_topo_to_index = _gui->gui_state()->desc().param_mappings.topo_to_index;
+  auto const& param_topo_to_index = _gui->automation_state()->desc().param_mappings.topo_to_index;
   auto const& global_enabled = _bindings->global_enabled;
   if (global_enabled.is_bound())
   {
     int global_index = param_topo_to_index[global_enabled.module][0][global_enabled.param][0];
-    _gui->gui_state()->remove_listener(global_index, this);
+    _gui->automation_state()->remove_listener(global_index, this);
   }
   auto const& global_visible = _bindings->global_visible;
   if (global_visible.is_bound())
   {
     int global_index = param_topo_to_index[global_visible.module][0][global_visible.param][0];
-    _gui->gui_state()->remove_listener(global_index, this);
+    _gui->automation_state()->remove_listener(global_index, this);
   }
 }
 
@@ -44,7 +44,7 @@ binding_component::bind_param(
 {
   values.clear();
   for (int i = 0; i < params.size(); i++)
-    values.push_back(_gui->gui_state()->get_plain_at_index(params[i]).step());
+    values.push_back(_gui->automation_state()->get_plain_at_index(params[i]).step());
   return binding.param_selector(values);
 }
 
@@ -59,10 +59,10 @@ binding_component::init()
     _bindings->enabled.slot_selector(_module->info.slot));
   if (_enabled_params.size() != 0)
     state_changed(_enabled_params[0], 
-      _gui->gui_state()->get_plain_at_index(_enabled_params[0]));
+      _gui->automation_state()->get_plain_at_index(_enabled_params[0]));
   if (_visibility_params.size() != 0)
     state_changed(_visibility_params[0],
-      _gui->gui_state()->get_plain_at_index(_visibility_params[0]));
+      _gui->automation_state()->get_plain_at_index(_visibility_params[0]));
 }
 
 void
@@ -70,19 +70,19 @@ binding_component::setup_param_bindings(
   gui_global_binding const& global_binding,
   std::vector<int> const& topo_params, std::vector<int>& params)
 {
-  auto const& param_topo_to_index = _gui->gui_state()->desc().param_mappings.topo_to_index;
+  auto const& param_topo_to_index = _gui->automation_state()->desc().param_mappings.topo_to_index;
   for (int i = 0; i < topo_params.size(); i++)
   {
     auto const& slots = param_topo_to_index[_module->info.topo][_module->info.slot][topo_params[i]];
     bool single_slot = _module->module->params[topo_params[i]].info.slot_count == 1;
     int state_index = single_slot ? slots[0] : slots[_own_slot_index];
     params.push_back(state_index);
-    _gui->gui_state()->add_listener(state_index, this);
+    _gui->automation_state()->add_listener(state_index, this);
   }
   if (global_binding.is_bound())
   {
     int global_index = param_topo_to_index[global_binding.module][0][global_binding.param][0];
-    _gui->gui_state()->add_listener(global_index, this);
+    _gui->automation_state()->add_listener(global_index, this);
   }
 }
 
@@ -98,7 +98,7 @@ binding_component::state_changed(int index, plain_value plain)
     auto const& global_binding = _bindings->global_enabled;
     if(global_binding.is_bound())
     {
-      int global_value = _gui->gui_state()->get_plain_at(global_binding.module, 0, global_binding.param, 0).step();
+      int global_value = _gui->automation_state()->get_plain_at(global_binding.module, 0, global_binding.param, 0).step();
       global_enabled = global_binding.selector(global_value);
     }
     if(!global_enabled)
@@ -121,7 +121,7 @@ binding_component::state_changed(int index, plain_value plain)
     auto const& global_binding = _bindings->global_visible;
     if(global_binding.is_bound())
     {
-      int global_value = _gui->gui_state()->get_plain_at(global_binding.module, 0, global_binding.param, 0).step();
+      int global_value = _gui->automation_state()->get_plain_at(global_binding.module, 0, global_binding.param, 0).step();
       global_visible = global_binding.selector(global_value);
     }
     if (!global_visible)

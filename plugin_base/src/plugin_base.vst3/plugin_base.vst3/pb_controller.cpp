@@ -30,16 +30,16 @@ pb_basic_config::instance()
 
 pb_controller::
 ~pb_controller() 
-{ _gui_state.remove_any_listener(this); }
+{ _automation_state.remove_any_listener(this); }
 
 pb_controller::
 pb_controller(plugin_topo const* topo):
 _desc(std::make_unique<plugin_desc>(topo, this)),
-_gui_state(_desc.get(), true),
+_automation_state(_desc.get(), true),
 _extra_state(gui_extra_state_keyset(*_desc->plugin))
 { 
   PB_LOG_FUNC_ENTRY_EXIT();
-  _gui_state.add_any_listener(this);  
+  _automation_state.add_any_listener(this);
 
   // fetch mod output param tags
   _modulation_outputs_to_gui.resize(modulation_output_param_count);
@@ -54,7 +54,7 @@ _extra_state(gui_extra_state_keyset(*_desc->plugin))
 void 
 pb_controller::gui_param_begin_changes(int index) 
 { 
-  _gui_state.begin_undo_region();
+  _automation_state.begin_undo_region();
   beginEdit(gui_state().desc().param_mappings.index_to_tag[index]); 
 }
 
@@ -77,7 +77,7 @@ tresult PLUGIN_API
 pb_controller::getState(IBStream* state)
 {
   PB_LOG_FUNC_ENTRY_EXIT();
-  std::vector<char> data(plugin_io_save_extra_state(*_gui_state.desc().plugin, _extra_state));
+  std::vector<char> data(plugin_io_save_extra_state(*_automation_state.desc().plugin, _extra_state));
   return state->write(data.data(), data.size());
 }
 
@@ -85,7 +85,7 @@ tresult PLUGIN_API
 pb_controller::setState(IBStream* state)
 {
   PB_LOG_FUNC_ENTRY_EXIT();
-  if (!plugin_io_load_extra_state(*_gui_state.desc().plugin, load_ibstream(state), _extra_state).ok())
+  if (!plugin_io_load_extra_state(*_automation_state.desc().plugin, load_ibstream(state), _extra_state).ok())
     return kResultFalse;
   return kResultOk;
 }
@@ -119,7 +119,7 @@ pb_controller::setParamNormalized(ParamID tag, ParamValue value)
   // fake midi params are not mapped
   auto mapping_iter = gui_state().desc().param_mappings.tag_to_index.find(tag);
   if(mapping_iter != gui_state().desc().param_mappings.tag_to_index.end())
-    _gui_state.set_normalized_at_index(mapping_iter->second, normalized_value(value));
+    _automation_state.set_normalized_at_index(mapping_iter->second, normalized_value(value));
 
   // modulation output support
   // this is a bit of a cop out but at least it should be working without resorting to messaging
@@ -179,7 +179,7 @@ void
 pb_controller::param_state_changed(int index, plain_value plain)
 {
   if(_inside_set_param_normalized) return;
-  if (_gui_state.desc().params[index]->param->dsp.direction == param_direction::output) return;
+  if (_automation_state.desc().params[index]->param->dsp.direction == param_direction::output) return;
   int tag = gui_state().desc().param_mappings.index_to_tag[index];
   auto normalized = gui_state().desc().plain_to_normalized_at_index(index, plain).value();
 
@@ -279,7 +279,7 @@ pb_controller::initialize(FUnknown* context)
       param_info.stepCount = 0;
       if (!param.param->domain.is_real())
         param_info.stepCount = param.param->domain.max - param.param->domain.min;
-      parameters.addParameter(new pb_param(&_gui_state, module.params[p].param, module.params[p].info.global, param_info));
+      parameters.addParameter(new pb_param(&_automation_state, module.params[p].param, module.params[p].info.global, param_info));
     }
   }
 

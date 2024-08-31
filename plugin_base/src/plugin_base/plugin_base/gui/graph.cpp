@@ -12,7 +12,7 @@ module_graph::
 { 
   _done = true;
   stopTimer();
-  if(_module_params.render_on_tweak) _gui->gui_state()->remove_any_listener(this);
+  if(_module_params.render_on_tweak) _gui->automation_state()->remove_any_listener(this);
   if(_module_params.render_on_tab_change) _gui->remove_tab_selection_listener(this);
   if (_module_params.render_on_modulation_output_change) _gui->remove_modulation_output_listener(this);
   if (_module_params.render_on_module_mouse_enter || _module_params.render_on_param_mouse_enter_modules.size())
@@ -27,7 +27,7 @@ graph(lnf, params), _gui(gui), _module_params(module_params)
   assert(_module_params.render_on_tweak || _module_params.render_on_tab_change ||
     _module_params.render_on_module_mouse_enter || _module_params.render_on_param_mouse_enter_modules.size());
   if(_module_params.render_on_tab_change) assert(_module_params.module_index != -1);
-  if (_module_params.render_on_tweak) gui->gui_state()->add_any_listener(this);
+  if (_module_params.render_on_tweak) gui->automation_state()->add_any_listener(this);
   if(_module_params.render_on_module_mouse_enter || _module_params.render_on_param_mouse_enter_modules.size())
     gui->add_gui_mouse_listener(this);
   if (_module_params.render_on_modulation_output_change)
@@ -71,7 +71,7 @@ module_graph::modulation_outputs_changed(std::vector<modulation_output> const& o
   int current_module_slot = -1;
   int current_module_index = -1;
 
-  auto const& desc = _gui->gui_state()->desc();
+  auto const& desc = _gui->automation_state()->desc();
   auto const& topo = *desc.plugin;
   auto const& mappings = desc.param_mappings.params;
   param_topo_mapping mapping = mappings[_hovered_or_tweaked_param].topo;
@@ -89,7 +89,7 @@ module_graph::modulation_outputs_changed(std::vector<modulation_output> const& o
 
   if (topo.modules[current_module_index].mod_output_source_selector != nullptr)
   {
-    auto selected = topo.modules[current_module_index].mod_output_source_selector(*_gui->gui_state(), mapping);
+    auto selected = topo.modules[current_module_index].mod_output_source_selector(*_gui->automation_state(), mapping);
     if (selected.module_index != -1 && selected.module_slot != -1)
     {
       current_module_slot = selected.module_slot;
@@ -133,7 +133,7 @@ void
 module_graph::module_tab_changed(int module, int slot)
 {
   // trigger re-render based on first new module param
-  auto const& desc = _gui->gui_state()->desc();
+  auto const& desc = _gui->automation_state()->desc();
   if(_module_params.module_index != -1 && _module_params.module_index != module) return;
   _activated_module_slot = slot;
   int index = desc.module_topo_to_index.at(module) + slot;
@@ -144,7 +144,7 @@ module_graph::module_tab_changed(int module, int slot)
 void 
 module_graph::any_state_changed(int param, plain_value plain) 
 {
-  auto const& desc = _gui->gui_state()->desc();
+  auto const& desc = _gui->automation_state()->desc();
   auto const& mapping = desc.param_mappings.params[param];
   if(_module_params.module_index == -1 || _module_params.module_index == mapping.topo.module_index)
   {
@@ -178,7 +178,7 @@ void
 module_graph::module_mouse_enter(int module)
 {
   // trigger re-render based on first new module param
-  auto const& desc = _gui->gui_state()->desc().modules[module];
+  auto const& desc = _gui->automation_state()->desc().modules[module];
   if (_module_params.module_index != -1 && _module_params.module_index != desc.module->info.index) return;
   if(desc.params.size() == 0) return;
   if(_module_params.render_on_module_mouse_enter && !desc.module->force_rerender_on_param_hover)
@@ -189,7 +189,7 @@ void
 module_graph::param_mouse_enter(int param)
 {
   // trigger re-render based on specific param
-  auto const& mapping = _gui->gui_state()->desc().param_mappings.params[param];
+  auto const& mapping = _gui->automation_state()->desc().param_mappings.params[param];
   if (_module_params.module_index != -1 && _module_params.module_index != mapping.topo.module_index) return;
   auto end = _module_params.render_on_param_mouse_enter_modules.end();
   auto begin = _module_params.render_on_param_mouse_enter_modules.begin();
@@ -201,7 +201,7 @@ module_graph::param_mouse_enter(int param)
 void
 module_graph::request_rerender(int param)
 {
-  auto const& desc = _gui->gui_state()->desc();
+  auto const& desc = _gui->automation_state()->desc();
   auto const& mapping = desc.param_mappings.params[param];
   int m = mapping.topo.module_index;
   int p = mapping.topo.param_index;
@@ -222,12 +222,12 @@ module_graph::render_if_dirty()
   if (!_render_dirty) return false;
   if (_hovered_or_tweaked_param == -1) return false;
 
-  auto const& mappings = _gui->gui_state()->desc().param_mappings.params;
+  auto const& mappings = _gui->automation_state()->desc().param_mappings.params;
   param_topo_mapping mapping = mappings[_hovered_or_tweaked_param].topo;
-  auto const& module = _gui->gui_state()->desc().plugin->modules[mapping.module_index];
+  auto const& module = _gui->automation_state()->desc().plugin->modules[mapping.module_index];
   if(module.graph_renderer != nullptr)
     render(module.graph_renderer(
-      *_gui->gui_state(), _gui->get_module_graph_engine(module), _hovered_or_tweaked_param, mapping));
+      *_gui->automation_state(), _gui->get_module_graph_engine(module), _hovered_or_tweaked_param, mapping));
   _render_dirty = false;
   return true;
 }

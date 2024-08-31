@@ -64,7 +64,7 @@ pb_plugin::
 { 
   PB_LOG_FUNC_ENTRY_EXIT();
   stopTimer();
-  _gui_state.remove_any_listener(this);
+  _automation_state.remove_any_listener(this);
   MTS_DeregisterClient(_mts_client);
 }
 
@@ -77,13 +77,13 @@ _mts_client(MTS_RegisterClient()),
 _desc(std::make_unique<plugin_desc>(topo, this)),
 _splice_engine(_desc.get(), false, forward_thread_pool_voice_processor, this),
 _extra_state(gui_extra_state_keyset(*_desc->plugin)),
-_gui_state(_desc.get(), true),
+_automation_state(_desc.get(), true),
 _to_gui_events(std::make_unique<event_queue>(default_q_size)), 
 _to_audio_events(std::make_unique<event_queue>(default_q_size)),
 _modulation_output_queue(std::make_unique<modulation_output_queue>(default_q_size))
 { 
   PB_LOG_FUNC_ENTRY_EXIT();
-  _gui_state.add_any_listener(this);
+  _automation_state.add_any_listener(this);
   _modulation_outputs.reserve(default_q_size);
   _block_automation_seen.resize(_splice_engine.state().desc().param_count);
 }
@@ -91,7 +91,7 @@ _modulation_output_queue(std::make_unique<modulation_output_queue>(default_q_siz
 void
 pb_plugin::gui_param_begin_changes(int index)
 {
-  _gui_state.begin_undo_region();
+  _automation_state.begin_undo_region();
   push_to_audio(index, sync_event_type::begin_edit);
 }
 
@@ -99,16 +99,16 @@ void
 pb_plugin::gui_param_end_changes(int index) 
 { 
   push_to_audio(index, sync_event_type::end_edit); 
-  _gui_state.end_undo_region("Change", _gui_state.desc().params[index]->full_name);
+  _automation_state.end_undo_region("Change", _automation_state.desc().params[index]->full_name);
 }
 
 void
 pb_plugin::param_state_changed(int index, plain_value plain)
 {
   if(_inside_timer_callback) return;
-  if (_gui_state.desc().params[index]->param->dsp.direction == param_direction::output) return;
+  if (_automation_state.desc().params[index]->param->dsp.direction == param_direction::output) return;
   push_to_audio(index, plain);
-  _gui_state.set_plain_at_index(index, plain);
+  _automation_state.set_plain_at_index(index, plain);
 }
 
 bool
@@ -128,7 +128,7 @@ pb_plugin::timerCallback()
   sync_event sevent;
   _inside_timer_callback = true;
   while (_to_gui_events->try_dequeue(sevent))
-    _gui_state.set_plain_at_index(sevent.index, sevent.plain);
+    _automation_state.set_plain_at_index(sevent.index, sevent.plain);
   
   modulation_output mod_output;
   _modulation_outputs.clear();
@@ -148,7 +148,7 @@ pb_plugin::stateSave(clap_ostream const* stream) noexcept
   // don't bother with that and just write byte-for-byte
   int written = 1;
   int total_written = 0;
-  std::vector<char> data(plugin_io_save_all_state(_gui_state, &_extra_state, false));
+  std::vector<char> data(plugin_io_save_all_state(_automation_state, &_extra_state, false));
   while(written == 1 && total_written < data.size())
   {
     written = stream->write(stream, data.data() + total_written, 1);
@@ -172,15 +172,15 @@ pb_plugin::stateLoad(clap_istream const* stream) noexcept
     data.push_back(byte);
   } while(true);
 
-  _gui_state.begin_undo_region();
-  if (!plugin_io_load_all_state(data, _gui_state, &_extra_state, false).ok())
+  _automation_state.begin_undo_region();
+  if (!plugin_io_load_all_state(data, _automation_state, &_extra_state, false).ok())
   {
-    _gui_state.discard_undo_region();
+    _automation_state.discard_undo_region();
     return false;
   }
   for (int p = 0; p < _splice_engine.state().desc().param_count; p++)
-    gui_param_changed(p, _gui_state.get_plain_at_index(p));
-  _gui_state.discard_undo_region();
+    gui_param_changed(p, _automation_state.get_plain_at_index(p));
+  _automation_state.discard_undo_region();
   _splice_engine.automation_state_dirty();
   return true;
 }
@@ -276,7 +276,7 @@ bool
 pb_plugin::guiCreate(char const* api, bool is_floating) noexcept
 {
   PB_LOG_FUNC_ENTRY_EXIT();
-  _gui = std::make_unique<plugin_gui>(&_gui_state, &_extra_state, &_modulation_outputs);
+  _gui = std::make_unique<plugin_gui>(&_automation_state, &_extra_state, &_modulation_outputs);
   return true;
 }
 
@@ -373,8 +373,8 @@ pb_plugin::paramsValue(clap_id param_id, double* value) noexcept
   // need to pull in any outstanding audio-to-ui-values from 
   // the queue before we can report the current value to the host!
   timerCallback();
-  auto const& topo = *_gui_state.desc().param_at_tag(param_id).param;
-  auto normalized = _gui_state.get_normalized_at_tag(param_id);
+  auto const& topo = *_automation_state.desc().param_at_tag(param_id).param;
+  auto normalized = _automation_state.get_normalized_at_tag(param_id);
   *value = normalized_to_clap(topo, normalized).value();
   return true;
 }
@@ -456,7 +456,7 @@ pb_plugin::paramsFlush(clap_input_events const* in, clap_output_events const* ou
     auto normalized = clap_to_normalized(param, clap_value(event->value));
     if (main_thread)
     {
-      _gui_state.set_normalized_at_index(index, normalized);
+      _automation_state.set_normalized_at_index(index, normalized);
       push_to_audio(index, param.domain.normalized_to_plain(normalized));
     } else
     {

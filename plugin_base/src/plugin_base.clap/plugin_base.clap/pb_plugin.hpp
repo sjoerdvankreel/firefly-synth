@@ -45,7 +45,7 @@ public gui_param_listener
   std::unique_ptr<plugin_desc> _desc;
   plugin_splice_engine _splice_engine;
   extra_state _extra_state;
-  plugin_state _gui_state = {};
+  plugin_state _automation_state = {};
   std::atomic<bool> _is_active = {};
   std::unique_ptr<plugin_gui> _gui = {};
   std::vector<int> _block_automation_seen = {};

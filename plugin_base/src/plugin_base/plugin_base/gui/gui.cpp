@@ -193,13 +193,13 @@ gui_undo_listener::mouseUp(MouseEvent const& event)
   options = options.withMousePosition();
 
   juce::PopupMenu undo_menu;
-  auto undo_stack = _gui->gui_state()->undo_stack();
+  auto undo_stack = _gui->automation_state()->undo_stack();
   for(int i = 0; i < undo_stack.size(); i++)
     undo_menu.addItem(i + 1, undo_stack[i]);
   menu.addSubMenu("Undo", undo_menu);
 
   juce::PopupMenu redo_menu;
-  auto redo_stack = _gui->gui_state()->redo_stack();
+  auto redo_stack = _gui->automation_state()->redo_stack();
   for (int i = 0; i < redo_stack.size(); i++)
     redo_menu.addItem(i + 1000 + 1, redo_stack[i]);
   menu.addSubMenu("Redo", redo_menu);
@@ -209,26 +209,26 @@ gui_undo_listener::mouseUp(MouseEvent const& event)
 
   menu.showMenuAsync(options, [this](int result) {
     if(1 <= result && result < 1000)
-      _gui->gui_state()->undo(result - 1);
+      _gui->automation_state()->undo(result - 1);
     else if(1001 <= result && result < 2000)
-      _gui->gui_state()->redo(result - 1001);
+      _gui->automation_state()->redo(result - 1001);
     else if (2001 == result)
     {
-      auto state = plugin_io_save_instance_state(*_gui->gui_state(), true);
+      auto state = plugin_io_save_instance_state(*_gui->automation_state(), true);
       state.push_back('\0');
       juce::SystemClipboard::copyTextToClipboard(juce::String(state.data()));
     }
     else if (2002 == result)
     {
-      plugin_state new_state(&_gui->gui_state()->desc(), false);
+      plugin_state new_state(&_gui->automation_state()->desc(), false);
       auto clip_contents = juce::SystemClipboard::getTextFromClipboard().toStdString();
       std::vector<char> clip_data(clip_contents.begin(), clip_contents.end());
       auto load_result = plugin_io_load_instance_state(clip_data, new_state, true);
       if (load_result.ok() && !load_result.warnings.size())
       {
-        _gui->gui_state()->begin_undo_region();
-        _gui->gui_state()->copy_from(new_state.state(), true);
-        _gui->gui_state()->end_undo_region("Paste", "Patch");
+        _gui->automation_state()->begin_undo_region();
+        _gui->automation_state()->copy_from(new_state.state(), true);
+        _gui->automation_state()->end_undo_region("Paste", "Patch");
       }
       else
       {
@@ -337,7 +337,7 @@ plugin_gui::
 plugin_gui(
   plugin_state* gui_state, plugin_base::extra_state* extra_state, 
   std::vector<plugin_base::modulation_output>* modulation_outputs):
-_gui_state(gui_state), _undo_listener(this), _extra_state(extra_state), _modulation_outputs(modulation_outputs)
+_automation_state(gui_state), _undo_listener(this), _extra_state(extra_state), _modulation_outputs(modulation_outputs)
 {
   PB_LOG_FUNC_ENTRY_EXIT();
   setOpaque(true);
@@ -373,15 +373,15 @@ plugin_gui::theme_changed(std::string const& theme_name)
   _module_lnfs.clear();
   _custom_lnfs.clear();
 
-  _lnf = std::make_unique<lnf>(&gui_state()->desc(), theme_name, -1, -1, -1);
+  _lnf = std::make_unique<lnf>(&automation_state()->desc(), theme_name, -1, -1, -1);
   setLookAndFeel(_lnf.get());
-  auto const& topo = *gui_state()->desc().plugin;
+  auto const& topo = *automation_state()->desc().plugin;
   bool is_fx = topo.type == plugin_type::fx;
 
-  for (int i = 0; i < gui_state()->desc().plugin->gui.custom_sections.size(); i++)
-    _custom_lnfs[i] = std::make_unique<lnf>(&_gui_state->desc(), _lnf->theme(), i, -1, -1);
-  for (int i = 0; i < gui_state()->desc().plugin->modules.size(); i++)
-    _module_lnfs[i] = std::make_unique<lnf>(&_gui_state->desc(), _lnf->theme(), -1, gui_state()->desc().plugin->modules[i].gui.section, i);
+  for (int i = 0; i < automation_state()->desc().plugin->gui.custom_sections.size(); i++)
+    _custom_lnfs[i] = std::make_unique<lnf>(&_automation_state->desc(), _lnf->theme(), i, -1, -1);
+  for (int i = 0; i < automation_state()->desc().plugin->modules.size(); i++)
+    _module_lnfs[i] = std::make_unique<lnf>(&_automation_state->desc(), _lnf->theme(), -1, automation_state()->desc().plugin->modules[i].gui.section, i);
 
   // note: default width and aspect ratios are contained in theme
   add_and_make_visible(*this, make_content());
@@ -399,7 +399,7 @@ plugin_gui::theme_changed(std::string const& theme_name)
 void
 plugin_gui::param_changed(int index, plain_value plain)
 {
-  if (_gui_state->desc().params[index]->param->dsp.direction == param_direction::input)
+  if (_automation_state->desc().params[index]->param->dsp.direction == param_direction::input)
     for (int i = 0; i < _param_listeners.size(); i++)
       _param_listeners[i]->gui_param_changed(index, plain);
 }
@@ -407,7 +407,7 @@ plugin_gui::param_changed(int index, plain_value plain)
 void
 plugin_gui::param_begin_changes(int index)
 {
-  if (_gui_state->desc().params[index]->param->dsp.direction == param_direction::input)
+  if (_automation_state->desc().params[index]->param->dsp.direction == param_direction::input)
     for (int i = 0; i < _param_listeners.size(); i++)
       _param_listeners[i]->gui_param_begin_changes(index);
 }
@@ -415,7 +415,7 @@ plugin_gui::param_begin_changes(int index)
 void
 plugin_gui::param_end_changes(int index)
 {
-  if (_gui_state->desc().params[index]->param->dsp.direction == param_direction::input)
+  if (_automation_state->desc().params[index]->param->dsp.direction == param_direction::input)
     for (int i = 0; i < _param_listeners.size(); i++)
       _param_listeners[i]->gui_param_end_changes(index);
 }
@@ -423,7 +423,7 @@ plugin_gui::param_end_changes(int index)
 void
 plugin_gui::param_changing(int index, plain_value plain)
 {
-  if (_gui_state->desc().params[index]->param->dsp.direction == param_direction::input)
+  if (_automation_state->desc().params[index]->param->dsp.direction == param_direction::input)
     for (int i = 0; i < _param_listeners.size(); i++)
       _param_listeners[i]->gui_param_changing(index, plain);
 }
@@ -452,8 +452,8 @@ plugin_gui::remove_tab_selection_listener(gui_tab_selection_listener* listener)
 void
 plugin_gui::fire_state_loaded()
 {
-  for(int i = 0; i < _gui_state->desc().param_count; i++)
-    param_changed(i, _gui_state->get_plain_at_index(i));
+  for(int i = 0; i < _automation_state->desc().param_count; i++)
+    param_changed(i, _automation_state->get_plain_at_index(i));
 }
 
 void
@@ -507,7 +507,7 @@ void
 plugin_gui::module_mouse_enter(int module)
 {
   if(_last_mouse_enter_module == module) return;
-  int index = gui_state()->desc().modules[module].module->info.index;
+  int index = automation_state()->desc().modules[module].module->info.index;
   // tooltip may not be there yet during theme switching
   if(_tooltip) _tooltip->setLookAndFeel(_module_lnfs[index].get());
   for(int i = 0; i < _gui_mouse_listeners.size(); i++)
@@ -559,7 +559,7 @@ plugin_gui::modulation_outputs_changed()
 void
 plugin_gui::add_tab_menu_listener(juce::TabBarButton& button, int module, int slot)
 {
-  auto listener = std::make_unique<gui_tab_menu_listener>(this, gui_state(), _lnf.get(), &button, module, slot);
+  auto listener = std::make_unique<gui_tab_menu_listener>(this, automation_state(), _lnf.get(), &button, module, slot);
   _tab_menu_listeners.push_back(std::move(listener));
 }
 
@@ -591,8 +591,8 @@ void
 plugin_gui::resized()
 {
   float w = getLocalBounds().getWidth();
-  auto const& topo = *_gui_state->desc().plugin;
-  bool is_fx = _gui_state->desc().plugin->type == plugin_type::fx;
+  auto const& topo = *_automation_state->desc().plugin;
+  bool is_fx = _automation_state->desc().plugin->type == plugin_type::fx;
   float user_scale = (w / _lnf->global_settings().get_default_width(is_fx)) / _system_dpi_scale;
   getChildComponent(0)->setTransform(AffineTransform::scale(user_scale * _system_dpi_scale));
   user_io_save_num(topo.vendor, topo.full_name, user_io::base, user_state_scale_key, user_scale);
@@ -604,7 +604,7 @@ plugin_gui::get_module_graph_engine(module_topo const& module)
   if(module.graph_engine_factory == nullptr) return nullptr;
   auto iter = _module_graph_engines.find(module.info.index);
   if(iter != _module_graph_engines.end()) return iter->second.get();
-  _module_graph_engines[module.info.index] = module.graph_engine_factory(&_gui_state->desc());
+  _module_graph_engines[module.info.index] = module.graph_engine_factory(&_automation_state->desc());
   return _module_graph_engines[module.info.index].get();
 }
 
@@ -636,9 +636,9 @@ void
 plugin_gui::reloaded()
 {
   PB_LOG_FUNC_ENTRY_EXIT();
-  auto const& topo = *_gui_state->desc().plugin;
+  auto const& topo = *_automation_state->desc().plugin;
   auto settings = _lnf->global_settings();
-  bool is_fx = _gui_state->desc().plugin->type == plugin_type::fx;
+  bool is_fx = _automation_state->desc().plugin->type == plugin_type::fx;
   int default_width = settings.get_default_width(is_fx);
   float ratio = settings.get_aspect_ratio_height(is_fx) / (float)settings.get_aspect_ratio_width(is_fx);
   float user_scale = user_io_load_num(topo.vendor, topo.full_name, user_io::base, user_state_scale_key, 1.0,
@@ -650,7 +650,7 @@ plugin_gui::reloaded()
 Component&
 plugin_gui::make_content()
 {
-  auto const& topo = *_gui_state->desc().plugin;
+  auto const& topo = *_automation_state->desc().plugin;
   auto& grid = make_component<grid_component>(topo.gui.dimension_factory(_lnf->global_settings()), margin_module, margin_module, 0, 0);
   for(int s = 0; s < topo.gui.custom_sections.size(); s++)
     grid.add(make_custom_section(topo.gui.custom_sections[s]), topo.gui.custom_sections[s].position);
@@ -700,9 +700,9 @@ plugin_gui::make_tab_component(
 void 
 plugin_gui::add_component_tab(TabbedComponent& tc, Component& child, int module, std::string const& title)
 { 
-  auto const& topo = *_gui_state->desc().plugin;
-  int module_slot = _gui_state->desc().modules[module].info.slot;
-  int module_index = _gui_state->desc().modules[module].info.topo;
+  auto const& topo = *_automation_state->desc().plugin;
+  int module_slot = _automation_state->desc().modules[module].info.slot;
+  int module_index = _automation_state->desc().modules[module].info.topo;
   auto& margin = make_component<margin_component>(&child, BorderSize<int>(margin_module, 0, 0, 0));
   tc.addTab(title, Colours::transparentBlack, &margin, false);
   auto tab_button = tc.getTabbedButtonBar().getTabButton(tc.getTabbedButtonBar().getNumTabs() - 1);
@@ -994,7 +994,7 @@ plugin_gui::make_param_section(module_desc const& module, param_section const& s
 Component&
 plugin_gui::make_module_section(module_section_gui const& section)
 {
-  auto const& modules = _gui_state->desc().modules;
+  auto const& modules = _automation_state->desc().modules;
   if (!section.tabbed)
   {
     auto& grid = make_component<grid_component>(section.dimension, margin_module, margin_module, 0, 0);
@@ -1005,7 +1005,7 @@ plugin_gui::make_module_section(module_section_gui const& section)
   }
 
   int matched_module = -1;
-  auto const& topo = *_gui_state->desc().plugin;
+  auto const& topo = *_automation_state->desc().plugin;
   for (int i = 0; i < topo.modules.size(); i++)
     if (topo.modules[i].gui.section == section.index)
       matched_module = i;
@@ -1213,10 +1213,10 @@ plugin_gui::init_patch()
     if(result == 1)
     {
       _extra_state->clear();
-      _gui_state->begin_undo_region();
-      _gui_state->init(state_init_type::default_, true);
+      _automation_state->begin_undo_region();
+      _automation_state->init(state_init_type::default_, true);
       fire_state_loaded();
-      _gui_state->end_undo_region("Init", "Patch");
+      _automation_state->end_undo_region("Init", "Patch");
     }
   });
 }
@@ -1231,10 +1231,10 @@ plugin_gui::clear_patch()
     if (result == 1)
     {
       _extra_state->clear();
-      _gui_state->begin_undo_region();
-      _gui_state->init(state_init_type::minimal, true);
+      _automation_state->begin_undo_region();
+      _automation_state->init(state_init_type::minimal, true);
       fire_state_loaded();
-      _gui_state->end_undo_region("Clear", "Patch");
+      _automation_state->end_undo_region("Clear", "Patch");
     }
   });
 }
@@ -1244,12 +1244,12 @@ plugin_gui::save_patch()
 {
   PB_LOG_FUNC_ENTRY_EXIT();
   int save_flags = FileBrowserComponent::saveMode | FileBrowserComponent::warnAboutOverwriting;
-  FileChooser* chooser = new FileChooser("Save Patch", File(), String("*.") + _gui_state->desc().plugin->extension, true, false, this);
+  FileChooser* chooser = new FileChooser("Save Patch", File(), String("*.") + _automation_state->desc().plugin->extension, true, false, this);
   chooser->launchAsync(save_flags, [this](FileChooser const& chooser) {
     auto path = chooser.getResult().getFullPathName();
     delete& chooser;
     if (path.length() == 0) return;
-    plugin_io_save_file_patch_state(path.toStdString(), *_gui_state);
+    plugin_io_save_file_patch_state(path.toStdString(), *_automation_state);
   });
 }
 
@@ -1258,7 +1258,7 @@ plugin_gui::load_patch()
 {
   PB_LOG_FUNC_ENTRY_EXIT();
   int load_flags = FileBrowserComponent::openMode;
-  FileChooser* chooser = new FileChooser("Load Patch", File(), String("*.") + _gui_state->desc().plugin->extension, true, false, this);
+  FileChooser* chooser = new FileChooser("Load Patch", File(), String("*.") + _automation_state->desc().plugin->extension, true, false, this);
   chooser->launchAsync(load_flags, [this](FileChooser const& chooser) {
     auto path = chooser.getResult().getFullPathName();
     delete& chooser;
@@ -1271,9 +1271,9 @@ void
 plugin_gui::load_patch(std::string const& path, bool preset)
 {
   PB_LOG_FUNC_ENTRY_EXIT();  
-  _gui_state->begin_undo_region();
+  _automation_state->begin_undo_region();
   auto icon = MessageBoxIconType::WarningIcon;
-  auto result = plugin_io_load_file_patch_state(path, *_gui_state);
+  auto result = plugin_io_load_file_patch_state(path, *_automation_state);
   if (result.error.size())
   {
     auto options = MessageBoxOptions::makeOptionsOk(icon, "Error", result.error, String(), this);
@@ -1284,7 +1284,7 @@ plugin_gui::load_patch(std::string const& path, bool preset)
 
   if(preset) _extra_state->clear();
   fire_state_loaded();
-  _gui_state->end_undo_region("Load", preset ? "Preset" : "Patch");
+  _automation_state->end_undo_region("Load", preset ? "Preset" : "Patch");
 
   if (result.warnings.size())
   {

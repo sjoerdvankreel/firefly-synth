@@ -186,7 +186,7 @@ param_value_label::value_ref_text(plugin_gui* gui, param_desc const* param)
   auto const& ref_text = param->param->gui.value_reference_text;
   if (ref_text.size()) return ref_text;
   auto plain = param->param->domain.raw_to_plain(param->param->domain.max);
-  return gui->gui_state()->plain_to_text_at_index(false, param->info.global, plain);
+  return gui->automation_state()->plain_to_text_at_index(false, param->info.global, plain);
 }
 
 // Just guess max value is representative of the longest text.
@@ -199,7 +199,7 @@ autofit_label(lnf, value_ref_text(gui, param))
 void
 param_value_label::own_param_changed(plain_value plain)
 { 
-  std::string text = _gui->gui_state()->plain_to_text_at_index(false, _param->info.global, plain);
+  std::string text = _gui->automation_state()->plain_to_text_at_index(false, _param->info.global, plain);
   setText(text, dontSendNotification); 
   setTooltip(_param->info.name + ": " + text);
 }
@@ -219,16 +219,16 @@ last_tweaked_label::
 last_tweaked_label(plugin_gui* gui, lnf* lnf):
 _gui(gui)
 { 
-  gui->gui_state()->add_any_listener(this);
-  any_state_changed(0, gui->gui_state()->get_plain_at_index(0));
+  gui->automation_state()->add_any_listener(this);
+  any_state_changed(0, gui->automation_state()->get_plain_at_index(0));
   setColour(textColourId, lnf->colors().label_text);
 }
 
 void 
 last_tweaked_label::any_state_changed(int index, plain_value plain)
 {
-  if(_gui->gui_state()->desc().params[index]->param->dsp.direction == param_direction::output) return;
-  setText(_gui->gui_state()->desc().params[index]->full_name, dontSendNotification);
+  if(_gui->automation_state()->desc().params[index]->param->dsp.direction == param_direction::output) return;
+  setText(_gui->automation_state()->desc().params[index]->full_name, dontSendNotification);
 }
 
 last_tweaked_editor::
@@ -275,9 +275,9 @@ last_tweaked_editor::textEditorTextChanged(TextEditor& te)
 theme_combo::
 theme_combo(plugin_gui* gui, lnf* lnf) :
 autofit_combobox(lnf, true, false),
-_gui(gui), _themes(gui->gui_state()->desc().plugin->themes())
+_gui(gui), _themes(gui->automation_state()->desc().plugin->themes())
 {  
-  auto const& topo = *gui->gui_state()->desc().plugin;
+  auto const& topo = *gui->automation_state()->desc().plugin;
   std::string default_theme = topo.gui.default_theme;
   std::string theme = user_io_load_list(topo.vendor, topo.full_name, user_io::base, user_state_theme_key, default_theme, _themes);
   for (int i = 0; i < _themes.size(); i++)
@@ -354,7 +354,7 @@ autofit_combobox::autofit()
 param_component::
 param_component(plugin_gui* gui, module_desc const* module, param_desc const* param) :
 binding_component(gui, module, &param->param->gui.bindings, param->info.slot), _param(param)
-{ _gui->gui_state()->add_listener(_param->info.global, this); }
+{ _gui->automation_state()->add_listener(_param->info.global, this); }
 
 void
 param_component::state_changed(int index, plain_value plain)
@@ -369,7 +369,7 @@ void
 param_component::init()
 {
   // Must be called by subclass constructor as we dynamic_cast to Component inside.
-  state_changed(_param->info.global, _gui->gui_state()->get_plain_at_index(_param->info.global));
+  state_changed(_param->info.global, _gui->automation_state()->get_plain_at_index(_param->info.global));
 
   binding_component::init();
 
@@ -398,7 +398,7 @@ param_component::mouseUp(MouseEvent const& evt)
   std::unique_ptr<param_menu_handler> plugin_handler = {};
   param_menu_handler_factory plugin_handler_factory = _param->param->gui.menu_handler_factory;
   if(plugin_handler_factory)
-    plugin_handler = plugin_handler_factory(_gui->gui_state());
+    plugin_handler = plugin_handler_factory(_gui->automation_state());
   if (plugin_handler)
   {
     auto plugin_menus = plugin_handler->menus();
@@ -412,7 +412,7 @@ param_component::mouseUp(MouseEvent const& evt)
     }
   }
 
-  auto host_menu = _gui->gui_state()->desc().menu_handler->context_menu(_param->info.id_hash);
+  auto host_menu = _gui->automation_state()->desc().menu_handler->context_menu(_param->info.id_hash);
   if (host_menu && host_menu->root.children.size())
   {
     have_menu = true;
@@ -429,9 +429,9 @@ param_component::mouseUp(MouseEvent const& evt)
       auto plugin_menus = plugin_handler->menus();
       auto const& menu = plugin_menus[(id - 10000) / 1000];
       auto const& action_entry = menu.entries[((id - 10000) % 1000) / 100];
-      _gui->gui_state()->begin_undo_region();
+      _gui->automation_state()->begin_undo_region();
       std::string item = plugin_handler->execute(menu.menu_id, action_entry.action, _module->info.topo, _module->info.slot, _param->info.topo, _param->info.slot);      
-      _gui->gui_state()->end_undo_region(action_entry.title, item);
+      _gui->automation_state()->end_undo_region(action_entry.title, item);
     }
     delete host_menu;
     delete plugin_handler;
@@ -460,7 +460,7 @@ get_longest_module_name(plugin_gui* gui)
   std::string result;
   std::string full_name;
   std::string display_name;
-  auto const& desc = gui->gui_state()->desc();
+  auto const& desc = gui->automation_state()->desc();
 
   for (int i = 0; i < desc.modules.size(); i++)
     if(desc.modules[i].module->gui.visible)
@@ -485,7 +485,7 @@ autofit_label(lnf, get_longest_module_name(gui))
 void
 module_name_label::own_param_changed(plain_value plain)
 { 
-  auto const& desc = _gui->gui_state()->desc().modules[plain.step()];
+  auto const& desc = _gui->automation_state()->desc().modules[plain.step()];
   if (!desc.module->gui.visible)
   {
     setTooltip("");
@@ -646,7 +646,7 @@ param_combobox::comboBoxChanged(ComboBox* box)
   _gui->param_changed(_param->info.global, _param->param->domain.raw_to_plain(index));
   if (_param->param->gui.is_preset_selector)
   {
-    auto presets = _gui->gui_state()->desc().plugin->presets();
+    auto presets = _gui->automation_state()->desc().plugin->presets();
     if (0 <= index && index < presets.size())
       _gui->load_patch(presets[index].path, true);
   }
@@ -675,13 +675,13 @@ param_combobox::update_all_items_enabled_state()
   {
     auto m = _param->param->gui.item_enabled.param;
     if(m.param_slot == gui_item_binding::match_param_slot) m.param_slot = _param->info.slot;
-    auto other = _gui->gui_state()->get_plain_at(m.module_index, m.module_slot, m.param_index, m.param_slot);
+    auto other = _gui->automation_state()->get_plain_at(m.module_index, m.module_slot, m.param_index, m.param_slot);
     for(int i = 0; i < items.size(); i++)
       setItemEnabled(i + 1, _param->param->gui.item_enabled.selector(other.step(), _param->param->domain.min + i));
   }
   if (_param->param->gui.item_enabled.auto_bind)
   {
-    auto const& topo = *_gui->gui_state()->desc().plugin;
+    auto const& topo = *_gui->automation_state()->desc().plugin;
     for (int i = 0; i < items.size(); i++)
     {
       bool enabled = true;
@@ -708,7 +708,7 @@ param_combobox::update_all_items_enabled_state()
           else
             assert(that_bound_topo.info.slot_count == that_topo.info.slot_count);
 
-          that_values.push_back(_gui->gui_state()->get_plain_at(m).step());
+          that_values.push_back(_gui->automation_state()->get_plain_at(m).step());
         }
         enabled &= that_topo.gui.bindings.enabled.param_selector(that_values);
       }
@@ -729,7 +729,7 @@ param_combobox::update_all_items_enabled_state()
           else
             assert(that_bound_topo.info.slot_count == that_topo.info.slot_count);
 
-          that_values.push_back(_gui->gui_state()->get_plain_at(m).step());
+          that_values.push_back(_gui->automation_state()->get_plain_at(m).step());
         }
         enabled &= that_topo.gui.bindings.visible.param_selector(that_values);
       }
@@ -789,11 +789,11 @@ param_combobox::itemDropped(DragAndDropTarget::SourceDetails const& details)
   }
 
   int item_index = tag - 1;
-  _gui->gui_state()->begin_undo_region();
+  _gui->automation_state()->begin_undo_region();
 
   // found corresponding drop target, select it
   // dont do setSelectedId -- that triggers async update and gets us 2 items in the undo history
-  _gui->gui_state()->set_plain_at_index(_param->info.global,
+  _gui->automation_state()->set_plain_at_index(_param->info.global,
     _param->param->domain.raw_to_plain(item_index));
 
   // now figure out the matrix route enabled selector, and if its 0, set it to 1
@@ -807,13 +807,13 @@ param_combobox::itemDropped(DragAndDropTarget::SourceDetails const& details)
       int mi = _module->info.slot;
       int p = _module->module->params[i].info.index;
       int pi = _param->info.slot;
-      if (_gui->gui_state()->get_plain_at(m, mi, p, pi).step() == 0)
-        _gui->gui_state()->set_plain_at(m, mi, p, pi,
+      if (_gui->automation_state()->get_plain_at(m, mi, p, pi).step() == 0)
+        _gui->automation_state()->set_plain_at(m, mi, p, pi,
           _module->module->params[i].domain.raw_to_plain(_param->param->gui.drop_route_enabled_param_value));
       
       itemDragExit(details);
-      _gui->gui_state()->end_undo_region("Drop", _gui->gui_state()->plain_to_text_at_index(
-        false, _param->info.global, _gui->gui_state()->get_plain_at_index(_param->info.global)));
+      _gui->automation_state()->end_undo_region("Drop", _gui->automation_state()->plain_to_text_at_index(
+        false, _param->info.global, _gui->automation_state()->get_plain_at_index(_param->info.global)));
        return;
     }
   assert(false);

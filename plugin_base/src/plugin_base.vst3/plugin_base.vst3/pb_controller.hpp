@@ -35,7 +35,7 @@ public Steinberg::Vst::EditControllerEx1
   // needs to be first, everyone else needs it
   std::unique_ptr<plugin_desc> _desc;
   pb_editor* _editor = {};
-  plugin_state _gui_state = {};
+  plugin_state _automation_state = {};
   extra_state _extra_state;
   std::map<int, int> _midi_id_to_param = {};
 
@@ -71,8 +71,8 @@ public:
   REFCOUNT_METHODS(EditControllerEx1)
   PB_PREVENT_ACCIDENTAL_COPY(pb_controller);
 
-  plugin_state& gui_state() { return _gui_state; }
   extra_state& extra_state_() { return _extra_state; }
+  plugin_state& gui_state() { return _automation_state; }
   void editorDestroyed(Steinberg::Vst::EditorView*) override { _editor = nullptr; }
 
   std::unique_ptr<host_menu> context_menu(int param_id) const override;

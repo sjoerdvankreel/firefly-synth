@@ -91,7 +91,7 @@ public any_state_listener
   plugin_gui* const _gui;
 public:
   last_tweaked_label(plugin_gui* gui, lnf* lnf);
-  ~last_tweaked_label() { _gui->gui_state()->remove_any_listener(this); }
+  ~last_tweaked_label() { _gui->automation_state()->remove_any_listener(this); }
   void any_state_changed(int index, plain_value plain) override;
 };
 
@@ -136,7 +136,7 @@ public:
   param_desc const* param() const { return _param; }
   void mouseUp(juce::MouseEvent const& e) override;
   void state_changed(int index, plain_value plain) override;
-  virtual ~param_component() { _gui->gui_state()->remove_listener(_param->info.global, this); }
+  virtual ~param_component() { _gui->automation_state()->remove_listener(_param->info.global, this); }
 
 protected:
   void init() override;

@@ -93,14 +93,14 @@ param_section_container(plugin_gui* gui, lnf* lnf, module_desc const* module, pa
 tabbed_module_section_container::
 tabbed_module_section_container(plugin_gui* gui, int section_index,
   std::function<std::unique_ptr<juce::Component>(int module_index)> factory):
-extra_state_container(gui, module_section_tab_key(*gui->gui_state()->desc().plugin, section_index)),
+extra_state_container(gui, module_section_tab_key(*gui->automation_state()->desc().plugin, section_index)),
 _section_index(section_index), _factory(factory) {}
 
 std::unique_ptr<Component> 
 tabbed_module_section_container::create_child()
 {
   int tab_index = gui()->extra_state_()->get_int(state_key(), 0);
-  auto const& tab_order = gui()->gui_state()->desc().plugin->gui.module_sections[_section_index].tab_order;
+  auto const& tab_order = gui()->automation_state()->desc().plugin->gui.module_sections[_section_index].tab_order;
   tab_index = std::clamp(tab_index, 0, (int)tab_order.size() - 1);
   return _factory(tab_order[tab_index]);
 }

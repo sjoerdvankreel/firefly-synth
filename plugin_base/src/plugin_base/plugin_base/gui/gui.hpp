@@ -172,8 +172,8 @@ public:
   lnf const* get_lnf() const { return _lnf.get(); }
   void paint(juce::Graphics& g) override { g.fillAll(juce::Colours::black); }
 
-  plugin_state* gui_state() const { return _gui_state; }
   extra_state* extra_state_() const { return _extra_state; }
+  plugin_state* automation_state() const { return _automation_state; }
   std::vector<plugin_base::modulation_output> const* modulation_outputs() const { return _modulation_outputs; }
 
   void add_modulation_output_listener(modulation_output_listener* listener);
@@ -190,7 +190,7 @@ private:
 
   float _system_dpi_scale = 1.0f;
   std::unique_ptr<lnf> _lnf = {};
-  plugin_state* const _gui_state;
+  plugin_state* const _automation_state;
   gui_undo_listener _undo_listener;
   int _last_mouse_enter_param = -1;
   int _last_mouse_enter_module = -1;
