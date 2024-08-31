@@ -47,7 +47,7 @@ _extra_state(gui_extra_state_keyset(*_desc->plugin))
   for (int i = 0; i < modulation_output_param_count; i++)
   {
     _modulation_output_param_tags[i] = stable_hash(modulation_output_param_guids[i]);
-    _tag_to_modudulation_output_index[_modulation_output_param_tags[i]] = i;
+    _tag_to_modulation_output_index[_modulation_output_param_tags[i]] = i;
   }
 }
 
@@ -132,11 +132,11 @@ pb_controller::setParamNormalized(ParamID tag, ParamValue value)
     _modulation_output_count = *reinterpret_cast<std::size_t*>(&value);
     needs_mod_output_rescan = true;
   }
-  auto mod_ind_iter = _tag_to_modudulation_output_index.find(tag);
-  if (mod_ind_iter != _tag_to_modudulation_output_index.end())
+  auto mod_output_iter = _tag_to_modulation_output_index.find(tag);
+  if (mod_output_iter != _tag_to_modulation_output_index.end())
   {
-    _modulation_output_param_set[mod_ind_iter->second] = true;
-    _modulation_outputs_from_audio[mod_ind_iter->second].packed = *reinterpret_cast<std::uint64_t*>(&value);
+    _modulation_output_param_set[mod_output_iter->second] = true;
+    _modulation_outputs_from_audio[mod_output_iter->second].packed = *reinterpret_cast<std::uint64_t*>(&value);
     needs_mod_output_rescan = true;
   }
   if (needs_mod_output_rescan)

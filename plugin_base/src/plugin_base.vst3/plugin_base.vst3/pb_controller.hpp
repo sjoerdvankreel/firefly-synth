@@ -42,7 +42,7 @@ public Steinberg::Vst::EditControllerEx1
   // modulation output states
   int _modulation_output_count = 0;
   int _modulation_output_count_param_tag = -1;
-  std::map<int, int> _tag_to_modudulation_output_index = {};
+  std::map<int, int> _tag_to_modulation_output_index = {};
   std::array<bool, modulation_output_param_count> _modulation_output_param_set = {};
   std::array<int, modulation_output_param_count> _modulation_output_param_tags = {};
   std::vector<modulation_output> _modulation_outputs_to_gui = {};
