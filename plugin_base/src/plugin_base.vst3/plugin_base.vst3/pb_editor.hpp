@@ -41,7 +41,7 @@ public:
   Steinberg::uint32 PLUGIN_API release() override { return EditorView::release(); }
   Steinberg::tresult PLUGIN_API queryInterface(Steinberg::TUID const iid, void** obj) override;
 
-  void mod_indicator_states_changed() { if (_gui) _gui->mod_indicator_states_changed(); }
+  void modulation_outputs_changed() { if (_gui) _gui->modulation_outputs_changed(); }
 };
 
 }

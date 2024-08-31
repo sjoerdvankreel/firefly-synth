@@ -158,7 +158,7 @@ public:
   void theme_changed(std::string const& theme_name);
   
   // for anyone who wants to repaint on this stuff
-  void mod_indicator_states_changed();
+  void modulation_outputs_changed();
 
   void param_end_changes(int index);
   void param_begin_changes(int index);

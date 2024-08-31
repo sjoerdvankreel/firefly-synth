@@ -231,11 +231,11 @@ class param_slider:
 public param_component,
 public juce::Slider,
 public autofit_component,
-public mod_indicator_state_listener
+public modulation_output_listener
 {
-  float _min_mod_indicator = -1.0f;
-  float _max_mod_indicator = -1.0f;
-  double _mod_indicator_activated_time_seconds = {};
+  float _min_modulation_output = -1.0f;
+  float _max_modulation_output = -1.0f;
+  double _modulation_output_activated_time_seconds = {};
 
 protected:
   void own_param_changed(plain_value plain) override final
@@ -245,11 +245,11 @@ public:
   ~param_slider();
   param_slider(plugin_gui* gui, module_desc const* module, param_desc const* param);
 
-  // param modulation indicators
-  void mod_indicator_state_changed(std::vector<mod_indicator_state> const& states) override;
-  float min_mod_indicator() const { return _min_mod_indicator; }
-  float max_mod_indicator() const { return _max_mod_indicator; }
-  double mod_indicator_activated_time_seconds() const { return _mod_indicator_activated_time_seconds; }
+  // param modulation outputs
+  float min_modulation_output() const { return _min_modulation_output; }
+  float max_modulation_output() const { return _max_modulation_output; }
+  void modulation_outputs_changed(std::vector<modulation_output> const& outputs) override;
+  double modulation_output_activated_time_seconds() const { return _modulation_output_activated_time_seconds; }
 
   int fixed_width(int parent_w, int parent_h) const override;
   int fixed_height(int parent_w, int parent_h) const override { return -1; }

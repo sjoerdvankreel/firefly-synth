@@ -232,7 +232,7 @@ pb_component::process(ProcessData& data)
       queue->addPoint(0, event.normalized.value(), unused_index);
     }
 
-  // module modulation indicators
+  // module modulation outputs
   unused_index = 0;
   if (data.outputParameterChanges)
   {
@@ -242,9 +242,9 @@ pb_component::process(ProcessData& data)
     queue->addPoint(0, *reinterpret_cast<double*>(&num_modulation_outputs), unused_index);
     for (int e = 0; e < block.events.modulation_outputs.size(); e++)
     {
-      auto const& this_mod_indicator_state = block.events.modulation_outputs[e];
+      auto const& this_modulation_outputs = block.events.modulation_outputs[e];
       queue = data.outputParameterChanges->addParameterData(_mod_output_param_tags[e], unused_index);
-      queue->addPoint(0, *reinterpret_cast<double const*>(&this_mod_indicator_state.packed), unused_index);
+      queue->addPoint(0, *reinterpret_cast<double const*>(&this_modulation_outputs.packed), unused_index);
     }
   }
 

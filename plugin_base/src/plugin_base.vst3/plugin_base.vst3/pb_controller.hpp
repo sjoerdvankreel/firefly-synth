@@ -39,7 +39,7 @@ public Steinberg::Vst::EditControllerEx1
   extra_state _extra_state;
   std::map<int, int> _midi_id_to_param = {};
 
-  // modulation indicator states
+  // modulation output states
   int _modulation_output_count = 0;
   int _modulation_output_count_param_tag = -1;
   std::map<int, int> _tag_to_modudulation_output_index = {};

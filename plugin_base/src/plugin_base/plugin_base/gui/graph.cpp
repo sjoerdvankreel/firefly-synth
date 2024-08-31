@@ -14,7 +14,7 @@ module_graph::
   stopTimer();
   if(_module_params.render_on_tweak) _gui->gui_state()->remove_any_listener(this);
   if(_module_params.render_on_tab_change) _gui->remove_tab_selection_listener(this);
-  if (_module_params.render_on_mod_indicator_change) _gui->remove_mod_indicator_state_listener(this);
+  if (_module_params.render_on_modulation_output_change) _gui->remove_modulation_output_listener(this);
   if (_module_params.render_on_module_mouse_enter || _module_params.render_on_param_mouse_enter_modules.size())
     _gui->remove_gui_mouse_listener(this);
 }
@@ -30,8 +30,8 @@ graph(lnf, params), _gui(gui), _module_params(module_params)
   if (_module_params.render_on_tweak) gui->gui_state()->add_any_listener(this);
   if(_module_params.render_on_module_mouse_enter || _module_params.render_on_param_mouse_enter_modules.size())
     gui->add_gui_mouse_listener(this);
-  if (_module_params.render_on_mod_indicator_change)
-    _gui->add_mod_indicator_state_listener(this);
+  if (_module_params.render_on_modulation_output_change)
+    _gui->add_modulation_output_listener(this);
   if (_module_params.render_on_tab_change)
   {
     gui->add_tab_selection_listener(this);
@@ -56,7 +56,7 @@ module_graph::timerCallback()
 }
 
 void 
-module_graph::mod_indicator_state_changed(std::vector<mod_indicator_state> const& states)
+module_graph::modulation_outputs_changed(std::vector<modulation_output> const& outputs)
 {
   if (_data.type() != graph_data_type::series)
     return;
@@ -87,9 +87,9 @@ module_graph::mod_indicator_state_changed(std::vector<mod_indicator_state> const
     current_module_index = desc.param_mappings.params[_hovered_or_tweaked_param].topo.module_index;
   }
 
-  if (topo.modules[current_module_index].mod_indicator_source_selector != nullptr)
+  if (topo.modules[current_module_index].mod_output_source_selector != nullptr)
   {
-    auto selected = topo.modules[current_module_index].mod_indicator_source_selector(*_gui->gui_state(), mapping);
+    auto selected = topo.modules[current_module_index].mod_output_source_selector(*_gui->gui_state(), mapping);
     if (selected.module_index != -1 && selected.module_slot != -1)
     {
       current_module_slot = selected.module_slot;
@@ -97,35 +97,35 @@ module_graph::mod_indicator_state_changed(std::vector<mod_indicator_state> const
     }
   }
 
-  int current_indicator = 0;
+  int current_output = 0;
   int current_module_global = desc.module_topo_to_index.at(current_module_index) + current_module_slot;
-  for (int i = 0; i < states.size() && current_indicator < max_indicators; i++)
-    if (current_module_global == states[i].data.module_global && states[i].data.param_global == -1)
+  for (int i = 0; i < outputs.size() && current_output < max_mod_outputs; i++)
+    if (current_module_global == outputs[i].data.module_global && outputs[i].data.param_global == -1)
     {
-      float indicator_pos = states[i].data.value;      
-      float x = indicator_pos * w;
-      int point = std::clamp((int)(indicator_pos * (count - 1)), 0, count - 1);
+      float output_pos = outputs[i].data.value;
+      float x = output_pos * w;
+      int point = std::clamp((int)(output_pos * (count - 1)), 0, count - 1);
       float y = (1 - std::clamp(_data.series()[point], 0.0f, 1.0f)) * h;
-      _indicators[current_indicator]->activate();
-      _indicators[current_indicator]->setBounds(x - 3, y - 3, 6, 6);
-      _indicators[current_indicator]->repaint();
-      current_indicator++;
+      _mod_outputs[current_output]->activate();
+      _mod_outputs[current_output]->setBounds(x - 3, y - 3, 6, 6);
+      _mod_outputs[current_output]->repaint();
+      current_output++;
     }
 
-  if (current_indicator > 0)
+  if (current_output > 0)
   {
     // if any data found for this round, invalidate stuff from the previous round
-    for (int i = current_indicator; i < max_indicators; i++)
-      _indicators[i]->setVisible(false);
+    for (int i = current_output; i < max_mod_outputs; i++)
+      _mod_outputs[i]->setVisible(false);
   }
   else
   {
     // if no data found for this round, invalidate stuff that expired 
     double invalidate_after = 0.05;
     double time_now = seconds_since_epoch();
-    for (int i = 0; i < max_indicators; i++)
-      if (_indicators[i]->activated_time_seconds() < time_now - invalidate_after)
-        _indicators[i]->setVisible(false);
+    for (int i = 0; i < max_mod_outputs; i++)
+      if (_mod_outputs[i]->activated_time_seconds() < time_now - invalidate_after)
+        _mod_outputs[i]->setVisible(false);
   }
 }
 
@@ -212,8 +212,8 @@ module_graph::request_rerender(int param)
 
   // will be picked up on the next round, 
   // need them to disappear first otherwise they may hang around on module switch
-  for (int i = 0; i < max_indicators; i++)
-    _indicators[i]->setVisible(false);
+  for (int i = 0; i < max_mod_outputs; i++)
+    _mod_outputs[i]->setVisible(false);
 }
 
 bool
@@ -232,22 +232,22 @@ module_graph::render_if_dirty()
   return true;
 }
 
-graph_indicator::
-graph_indicator(lnf* lnf) : _lnf(lnf)
+graph_mod_output::
+graph_mod_output(lnf* lnf) : _lnf(lnf)
 {
   setSize(6, 6);
   setVisible(false);
 }
 
 void
-graph_indicator::paint(Graphics& g)
+graph_mod_output::paint(Graphics& g)
 {
-  g.setColour(_lnf->colors().graph_mod_indicator);
+  g.setColour(_lnf->colors().graph_modulation_bubble);
   g.fillEllipse(0, 0, 6, 6);
 }
 
 void 
-graph_indicator::activate()
+graph_mod_output::activate()
 {
   setVisible(true);
   _activated_time_seconds = seconds_since_epoch();
@@ -257,11 +257,11 @@ graph::
 graph(lnf* lnf, graph_params const& params) :
   _lnf(lnf), _data(graph_data_type::na, {}), _params(params)
 {
-  _indicators.resize(max_indicators);
-  for (int i = 0; i < max_indicators; i++)
+  _mod_outputs.resize(max_mod_outputs);
+  for (int i = 0; i < max_mod_outputs; i++)
   {
-    _indicators[i] = std::make_unique<graph_indicator>(_lnf);
-    addChildComponent(_indicators[i].get());
+    _mod_outputs[i] = std::make_unique<graph_mod_output>(_lnf);
+    addChildComponent(_mod_outputs[i].get());
   }
 }
 

@@ -580,17 +580,17 @@ env_engine::process(plugin_block& block, cv_cv_matrix_mixdown const* modulation)
   else
     process_mono<true>(block, modulation);
 
-  // only want the indicators for the actual audio engine
+  // only want the mod outputs for the actual audio engine
   if (block.graph) return;
 
   if (_stage == env_stage::end) return;
   float flt = block.state.own_block_automation[param_filter][0].real() / 1000.0f;
-  mod_indicator_state indicator_state = {};
-  indicator_state.data.param_global = -1;
-  indicator_state.data.voice_index = block.voice->state.slot;
-  indicator_state.data.module_global = block.module_desc_.info.global;
-  indicator_state.data.value = _total_pos / (_dly + _att + _hld + _dcy + _rls + flt);
-  block.push_mod_indicator_state(indicator_state);
+  modulation_output output = {};
+  output.data.param_global = -1;
+  output.data.voice_index = block.voice->state.slot;
+  output.data.module_global = block.module_desc_.info.global;
+  output.data.value = _total_pos / (_dly + _att + _hld + _dcy + _rls + flt);
+  block.push_modulation_output(output);
 }
 
 template <bool Monophonic>

@@ -336,8 +336,8 @@ plugin_gui::
 plugin_gui::
 plugin_gui(
   plugin_state* gui_state, plugin_base::extra_state* extra_state, 
-  std::vector<plugin_base::mod_indicator_state>* mod_indicator_states):
-_gui_state(gui_state), _undo_listener(this), _extra_state(extra_state), _mod_indicator_states(mod_indicator_states)
+  std::vector<plugin_base::modulation_output>* modulation_outputs):
+_gui_state(gui_state), _undo_listener(this), _extra_state(extra_state), _modulation_outputs(modulation_outputs)
 {
   PB_LOG_FUNC_ENTRY_EXIT();
   setOpaque(true);
@@ -516,24 +516,24 @@ plugin_gui::module_mouse_enter(int module)
 }
 
 void 
-plugin_gui::add_mod_indicator_state_listener(mod_indicator_state_listener* listener)
+plugin_gui::add_modulation_output_listener(modulation_output_listener* listener)
 {
-  auto& listeners = _mod_indicator_state_listeners;
+  auto& listeners = _modulation_output_listeners;
   assert(std::find(listeners.begin(), listeners.end(), listener) == listeners.end());
   listeners.push_back(listener);
 }
 
 void 
-plugin_gui::remove_mod_indicator_state_listener(mod_indicator_state_listener* listener)
+plugin_gui::remove_modulation_output_listener(modulation_output_listener* listener)
 {
-  auto& listeners = _mod_indicator_state_listeners;
+  auto& listeners = _modulation_output_listeners;
   auto iter = std::find(listeners.begin(), listeners.end(), listener);
   assert(iter != listeners.end());
   listeners.erase(iter);
 }
 
 void 
-plugin_gui::mod_indicator_states_changed()
+plugin_gui::modulation_outputs_changed()
 {
   auto compare = [](auto const& l, auto const& r) {
     if (l.data.module_global < r.data.module_global) return false;
@@ -542,18 +542,18 @@ plugin_gui::mod_indicator_states_changed()
     if (l.data.param_global > r.data.param_global) return true;
     return l.data.voice_index < r.data.voice_index;
   };
-  std::sort(_mod_indicator_states->begin(), _mod_indicator_states->end(), compare);
+  std::sort(_modulation_outputs->begin(), _modulation_outputs->end(), compare);
 
   auto pred = [](auto const& l, auto const& r) {
     if (l.data.module_global != r.data.module_global) return false;
     if (l.data.param_global != r.data.param_global) return false;
     return l.data.voice_index == r.data.voice_index;
   };
-  auto it = std::unique(_mod_indicator_states->begin(), _mod_indicator_states->end(), pred);
-  _mod_indicator_states->erase(it, _mod_indicator_states->end());
+  auto it = std::unique(_modulation_outputs->begin(), _modulation_outputs->end(), pred);
+  _modulation_outputs->erase(it, _modulation_outputs->end());
 
-  for(auto listener_it: _mod_indicator_state_listeners)
-    listener_it->mod_indicator_state_changed(*_mod_indicator_states);
+  for(auto listener_it: _modulation_output_listeners)
+    listener_it->modulation_outputs_changed(*_modulation_outputs);
 }
 
 void

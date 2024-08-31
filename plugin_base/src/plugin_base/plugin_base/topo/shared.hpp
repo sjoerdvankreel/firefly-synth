@@ -188,7 +188,7 @@ struct gui_colors final {
   juce::Colour graph_background = juce::Colour(0xFF00FF00);
   juce::Colour graph_area = juce::Colour(0xFF00FF00);
   juce::Colour graph_line = juce::Colour(0xFF00FF00);
-  juce::Colour graph_mod_indicator = juce::Colour(0xFF00FF00);
+  juce::Colour graph_modulation_bubble = juce::Colour(0xFF00FF00);
   juce::Colour bubble_outline = juce::Colour(0xFF00FF00);
   juce::Colour slider_background = juce::Colour(0xFF00FF00);
   juce::Colour slider_highlight = juce::Colour(0xFF00FF00);

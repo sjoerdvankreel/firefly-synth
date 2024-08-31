@@ -33,7 +33,7 @@
     "graph_grid": "40FFFFFF",
     "graph_text": "C0FFFFFF",
     "graph_background": "FF000000",
-    "graph_mod_indicator": "C0FFFFFF",
+    "graph_modulation_bubble": "C0FFFFFF",
     "bubble_outline": "FF999999",
     "slider_background": "FF333333",
     "slider_highlight": "FFFFFFFF",

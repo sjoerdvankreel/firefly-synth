@@ -20,14 +20,14 @@ struct graph_params
 };
 
 // draw on top of graph to prevent repaint the whole component in realtime
-class graph_indicator:
+class graph_mod_output:
 public juce::Component
 {
   lnf* const _lnf;
   double _activated_time_seconds;
 
 public:
-  graph_indicator(lnf* lnf);
+  graph_mod_output(lnf* lnf);
   
   void activate();
   void paint(juce::Graphics& g) override;
@@ -46,10 +46,10 @@ private:
     bool bipolar, float stroke_thickness, float midpoint);
 
 protected:
-  static int const max_indicators = 64;
+  static int const max_mod_outputs = 64;
 
   graph_data _data;
-  std::vector<std::unique_ptr<graph_indicator>> _indicators = {};
+  std::vector<std::unique_ptr<graph_mod_output>> _mod_outputs = {};
 
 public:
   void render(graph_data const& data);
@@ -65,7 +65,7 @@ struct module_graph_params
   bool render_on_tweak = false;
   bool render_on_tab_change = false;
   bool render_on_module_mouse_enter = false;
-  bool render_on_mod_indicator_change = false;
+  bool render_on_modulation_output_change = false;
   std::vector<int> render_on_param_mouse_enter_modules = {};
   // trigger also on changes in these
   std::vector<int> dependent_module_indices = {};
@@ -77,7 +77,7 @@ public graph,
 public any_state_listener,
 public gui_mouse_listener,
 public gui_tab_selection_listener,
-public mod_indicator_state_listener,
+public modulation_output_listener,
 public juce::Timer,
 public juce::SettableTooltipClient
 {
@@ -106,7 +106,7 @@ public:
   void module_mouse_enter(int module) override;
   void module_tab_changed(int module, int slot) override;
   void any_state_changed(int param, plain_value plain) override;  
-  void mod_indicator_state_changed(std::vector<mod_indicator_state> const& states) override;
+  void modulation_outputs_changed(std::vector<modulation_output> const& outputs) override;
 };
 
 }

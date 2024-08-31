@@ -76,7 +76,7 @@ make_plugin_dimension(bool is_fx, plugin_topo_gui_theme_settings const& settings
 
 static module_graph_params
 make_module_graph_params(int module, bool render_on_module_mouse_enter, 
-  bool render_on_param_mouse_enter, bool render_on_mod_indicator_change, 
+  bool render_on_param_mouse_enter, bool render_on_modulation_output_change,
   std::vector<int> const& dependent_module_indices)
 {
   module_graph_params result;
@@ -86,7 +86,7 @@ make_module_graph_params(int module, bool render_on_module_mouse_enter,
   result.render_on_tab_change = true;
   result.dependent_module_indices = dependent_module_indices;
   result.render_on_module_mouse_enter = render_on_module_mouse_enter;
-  result.render_on_mod_indicator_change = render_on_mod_indicator_change;
+  result.render_on_modulation_output_change = render_on_modulation_output_change;
   if(render_on_param_mouse_enter)
     result.render_on_param_mouse_enter_modules = { -1 };
   return result;
@@ -96,7 +96,7 @@ static Component&
 make_module_graph_section(
   plugin_gui* gui, lnf* lnf, component_store store, 
   int module, std::string const& name_in_theme, 
-  bool render_on_module_mouse_enter, bool render_on_param_mouse_enter, bool render_on_mod_indicator_change,
+  bool render_on_module_mouse_enter, bool render_on_param_mouse_enter, bool render_on_modulation_output_change,
   std::vector<int> const& dependent_module_indices, float partition_scale = 0.15f)
 {
   graph_params params;
@@ -104,7 +104,7 @@ make_module_graph_section(
   params.partition_scale = partition_scale;
   params.scale_type = graph_params::scale_w;
   module_graph_params module_params = make_module_graph_params(module, 
-    render_on_module_mouse_enter, render_on_param_mouse_enter, render_on_mod_indicator_change, dependent_module_indices);
+    render_on_module_mouse_enter, render_on_param_mouse_enter, render_on_modulation_output_change, dependent_module_indices);
   return store_component<module_graph>(store, gui, lnf, params, module_params);
 }
 
@@ -121,7 +121,7 @@ make_main_graph_section(plugin_gui* gui, lnf* lnf, component_store store)
   module_params.render_on_tweak = true;
   module_params.render_on_tab_change = false;
   module_params.render_on_module_mouse_enter = true;
-  module_params.render_on_mod_indicator_change = true;
+  module_params.render_on_modulation_output_change = true;
   module_params.render_on_param_mouse_enter_modules = {
     module_gcv_cv_matrix, module_global_in, module_master_settings, module_vcv_cv_matrix, module_voice_in, module_osc_osc_matrix,
     module_vaudio_audio_matrix, module_gaudio_audio_matrix, module_vcv_audio_matrix, module_gcv_audio_matrix };

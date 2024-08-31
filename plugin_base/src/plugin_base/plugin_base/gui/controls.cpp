@@ -530,9 +530,9 @@ param_component(gui, module, param), autofit_togglebutton(lnf, param->param->gui
 param_slider::
 ~param_slider()
 {
-  // parameter modulation indicators
+  // parameter modulation
   if (_param->param->dsp.can_modulate(_param->info.slot))
-    _gui->remove_mod_indicator_state_listener(this);
+    _gui->remove_modulation_output_listener(this);
 }
 
 param_slider::
@@ -549,9 +549,9 @@ param_component(gui, module, param), Slider()
   default: assert(false); break;
   }  
 
-  // parameter modulation indicators
+  // parameter modulation outputs
   if (param->param->dsp.can_modulate(param->info.slot))
-    gui->add_mod_indicator_state_listener(this);
+    gui->add_modulation_output_listener(this);
 
   setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
   if(param->param->domain.unit.size())
@@ -574,42 +574,42 @@ param_slider::fixed_width(int parent_w, int parent_h) const
 }
 
 void 
-param_slider::mod_indicator_state_changed(std::vector<mod_indicator_state> const& states)
+param_slider::modulation_outputs_changed(std::vector<modulation_output> const& outputs)
 {
-  float prev_min = _min_mod_indicator;
-  float prev_max = _max_mod_indicator;
+  float prev_min = _min_modulation_output;
+  float prev_max = _max_modulation_output;
 
-  if (states.size() > 0)
+  if (outputs.size() > 0)
   {
-    _min_mod_indicator = -1.0f;
-    _max_mod_indicator = -1.0f;
+    _min_modulation_output = -1.0f;
+    _max_modulation_output = -1.0f;
   }
 
-  bool any_indicator_found = false;
-  for(int i = 0; i < states.size(); i++)
-    if (states[i].data.param_global == _param->info.global)
+  bool any_mod_output_found = false;
+  for(int i = 0; i < outputs.size(); i++)
+    if (outputs[i].data.param_global == _param->info.global)
     {
-      any_indicator_found = true;
-      if (_min_mod_indicator < 0.0f) _min_mod_indicator = states[i].data.value;
-      if (_max_mod_indicator < 0.0f) _max_mod_indicator = states[i].data.value;
-      _min_mod_indicator = std::min(_min_mod_indicator, states[i].data.value);
-      _max_mod_indicator = std::max(_max_mod_indicator, states[i].data.value);
-      _mod_indicator_activated_time_seconds = seconds_since_epoch();
+      any_mod_output_found = true;
+      if (_min_modulation_output < 0.0f) _min_modulation_output = outputs[i].data.value;
+      if (_max_modulation_output < 0.0f) _max_modulation_output = outputs[i].data.value;
+      _min_modulation_output = std::min(_min_modulation_output, outputs[i].data.value);
+      _max_modulation_output = std::max(_max_modulation_output, outputs[i].data.value);
+      _modulation_output_activated_time_seconds = seconds_since_epoch();
     }
 
   // check if we expired
-  if (!any_indicator_found)
+  if (!any_mod_output_found)
   {
     double invalidate_after = 0.05;
     double time_now = seconds_since_epoch();
-    if (_mod_indicator_activated_time_seconds < time_now - invalidate_after)
+    if (_modulation_output_activated_time_seconds < time_now - invalidate_after)
     {
-      _min_mod_indicator = -1.0f;
-      _max_mod_indicator = -1.0f;
+      _min_modulation_output = -1.0f;
+      _max_modulation_output = -1.0f;
     }
   }
 
-  if (prev_min != _min_mod_indicator || prev_max != _max_mod_indicator)
+  if (prev_min != _min_modulation_output || prev_max != _max_modulation_output)
     repaint();
 }
 

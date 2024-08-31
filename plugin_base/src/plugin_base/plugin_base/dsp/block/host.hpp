@@ -51,7 +51,7 @@ struct host_events final {
   std::vector<accurate_event> accurate_modulation;
   // regular output params eg cpu usage, needs registering output params by the module
   std::vector<block_event> output_params;
-  // lfo / env / parameter modulator indicators
+  // lfo / env / parameter modulation outputs
   std::vector<modulation_output> modulation_outputs;
 
   // plugin_engine interpolates these as one

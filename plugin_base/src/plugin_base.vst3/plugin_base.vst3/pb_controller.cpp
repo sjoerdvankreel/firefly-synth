@@ -121,25 +121,25 @@ pb_controller::setParamNormalized(ParamID tag, ParamValue value)
   if(mapping_iter != gui_state().desc().param_mappings.tag_to_index.end())
     _gui_state.set_normalized_at_index(mapping_iter->second, normalized_value(value));
 
-  // mod indicator support
+  // modulation output support
   // this is a bit of a cop out but at least it should be working without resorting to messaging
   // upon receiving the "count" param, update the count
   // upon receiving any other param, set the fill bit
   // whenever the first N consecutive fill bits >= count, repaint and reset
-  bool needs_mod_indicator_rescan = false;
+  bool needs_mod_output_rescan = false;
   if (tag == _modulation_output_count_param_tag)
   {
     _modulation_output_count = *reinterpret_cast<std::size_t*>(&value);
-    needs_mod_indicator_rescan = true;
+    needs_mod_output_rescan = true;
   }
   auto mod_ind_iter = _tag_to_modudulation_output_index.find(tag);
   if (mod_ind_iter != _tag_to_modudulation_output_index.end())
   {
     _modulation_output_param_set[mod_ind_iter->second] = true;
     _modulation_outputs_from_audio[mod_ind_iter->second].packed = *reinterpret_cast<std::uint64_t*>(&value);
-    needs_mod_indicator_rescan = true;
+    needs_mod_output_rescan = true;
   }
-  if (needs_mod_indicator_rescan)
+  if (needs_mod_output_rescan)
   {
     bool filled_to_count = true;
     for (int i = 0; i < _modulation_output_count; i++)
@@ -155,9 +155,9 @@ pb_controller::setParamNormalized(ParamID tag, ParamValue value)
       _modulation_outputs_to_gui.insert(
         _modulation_outputs_to_gui.begin(),
         _modulation_outputs_from_audio.begin(), 
-        _modulation_outputs_from_audio.begin() + _modulation_output);
-      _mod_indicator_count = 0;
-      if (_editor) _editor->mod_indicator_states_changed();
+        _modulation_outputs_from_audio.begin() + _modulation_output_count);
+      _modulation_output_count = 0;
+      if (_editor) _editor->modulation_outputs_changed();
     }
   }
 
@@ -302,7 +302,7 @@ pb_controller::initialize(FUnknown* context)
     }
   }
 
-  // add fake mod indicator parameters
+  // add fake mod output parameters
   ParameterInfo mod_output_count_param = {};
   mod_output_count_param.unitId = kRootUnitId;
   mod_output_count_param.defaultNormalizedValue = 0;
@@ -313,13 +313,13 @@ pb_controller::initialize(FUnknown* context)
 
   for (int i = 0; i < modulation_output_param_count; i++)
   {
-    ParameterInfo mod_indicator_param = {};
-    mod_indicator_param.stepCount = 0;
-    mod_indicator_param.unitId = kRootUnitId;
-    mod_indicator_param.defaultNormalizedValue = 0;
-    mod_indicator_param.id = stable_hash(modulation_output_param_guids[i]);
-    mod_indicator_param.flags = ParameterInfo::kIsReadOnly | ParameterInfo::kIsHidden;
-    parameters.addParameter(new Parameter(mod_indicator_param));
+    ParameterInfo mod_output_param = {};
+    mod_output_param.stepCount = 0;
+    mod_output_param.unitId = kRootUnitId;
+    mod_output_param.defaultNormalizedValue = 0;
+    mod_output_param.id = stable_hash(modulation_output_param_guids[i]);
+    mod_output_param.flags = ParameterInfo::kIsReadOnly | ParameterInfo::kIsHidden;
+    parameters.addParameter(new Parameter(mod_output_param));
   }
 
   // make sure no clashes

@@ -32,8 +32,8 @@ enum { param_type, param_source, param_target, param_offset, param_scale, param_
 enum { type_off, type_mul_abs, type_mul_rel, type_mul_stk, type_add_abs, type_add_rel, type_add_stk, type_ab_abs, type_ab_rel, type_ab_stk };
 
 // for every param that gets modulated by the cv matrix,
-// we output the final value per block as parameter modulation indicator
-struct mod_indicator_usage
+// we output the final value per block as parameter modulation output
+struct mod_output_usage
 {
   bool in_use;
   int param_global;
@@ -342,8 +342,8 @@ scale_to_longest_mod_source(
 }
 
 // mapping to longest mod source, prefer envelope
-static mod_indicator_source
-select_mod_indicator_source(
+static modulation_output_source
+select_modulation_output_source(
   plugin_state const& state, param_topo_mapping const& mapping,
   std::vector<module_output_mapping> const& sources)
 {
@@ -456,9 +456,9 @@ cv_matrix_topo(
     auto const& state, auto* engine, int param, auto const& mapping) {
       return render_graph(state, engine, param, mapping, sm, tm);
     };
-  result.mod_indicator_source_selector = [sm = source_matrix.mappings](
+  result.mod_output_source_selector = [sm = source_matrix.mappings](
     auto const& state, auto const& mapping) {
-      return select_mod_indicator_source(state, mapping, sm);
+      return select_modulation_output_source(state, mapping, sm);
     };
   result.gui.menu_handler_factory = [](plugin_state* state) {
     return std::make_unique<tidy_matrix_menu_handler>(
@@ -662,8 +662,8 @@ cv_matrix_engine_base::perform_mixdown(plugin_block& block, int module, int slot
   int modulation_index = 0;
   int route_count = route_count_from_matrix_type(_global, _cv);
   jarray<float, 1>* modulated_curve_ptrs[max_any_route_count] = { nullptr };
-  mod_indicator_usage mod_indicator_usages[max_any_route_count];
-  std::memset(&mod_indicator_usages, 0, sizeof(mod_indicator_usages));
+  mod_output_usage mod_output_usages[max_any_route_count];
+  std::memset(&mod_output_usages, 0, sizeof(mod_output_usages));
 
   for (int r = 0; r < route_count; r++)
   {
@@ -696,10 +696,10 @@ cv_matrix_engine_base::perform_mixdown(plugin_block& block, int module, int slot
       _modulation_indices[tm][tmi][tp][tpi] = modulation_index;
       
       // set up for the visuals
-      mod_indicator_usages[modulation_index].in_use = true;
-      mod_indicator_usages[modulation_index].modulated_curve_ptr = modulated_curve_ptr;
-      mod_indicator_usages[modulation_index].module_global = block.plugin_desc_.module_topo_to_index.at(tm) + tmi;
-      mod_indicator_usages[modulation_index].param_global = block.plugin_desc_.param_mappings.topo_to_index[tm][tmi][tp][tpi];
+      mod_output_usages[modulation_index].in_use = true;
+      mod_output_usages[modulation_index].modulated_curve_ptr = modulated_curve_ptr;
+      mod_output_usages[modulation_index].module_global = block.plugin_desc_.module_topo_to_index.at(tm) + tmi;
+      mod_output_usages[modulation_index].param_global = block.plugin_desc_.param_mappings.topo_to_index[tm][tmi][tp][tpi];
       modulation_index++;
     }
 
@@ -806,17 +806,17 @@ cv_matrix_engine_base::perform_mixdown(plugin_block& block, int module, int slot
     if (modulated_curve_ptrs[r] != nullptr)
       modulated_curve_ptrs[r]->transform(block.start_frame, block.end_frame, [](float v) { return std::clamp(v, 0.0f, 1.0f); });
 
-  // push param mod indicators
+  // push param modulation outputs 
   if(!block.graph)
     for(int r = 0; r < route_count; r++)
-      if (mod_indicator_usages[r].in_use)
+      if (mod_output_usages[r].in_use)
       {
-        mod_indicator_state indicator_state;
-        indicator_state.data.voice_index = _global ? 0 : block.voice->state.slot;
-        indicator_state.data.param_global = mod_indicator_usages[r].param_global;
-        indicator_state.data.module_global = mod_indicator_usages[r].module_global;
-        indicator_state.data.value = (*mod_indicator_usages[r].modulated_curve_ptr)[block.end_frame - 1];
-        block.push_mod_indicator_state(indicator_state);
+        modulation_output output;
+        output.data.voice_index = _global ? 0 : block.voice->state.slot;
+        output.data.param_global = mod_output_usages[r].param_global;
+        output.data.module_global = mod_output_usages[r].module_global;
+        output.data.value = (*mod_output_usages[r].modulated_curve_ptr)[block.end_frame - 1];
+        block.push_modulation_output(output);
     }
 }
 
