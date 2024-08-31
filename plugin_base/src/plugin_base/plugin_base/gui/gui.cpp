@@ -335,15 +335,16 @@ plugin_gui::
 
 plugin_gui::
 plugin_gui(
-  plugin_state* gui_state, plugin_base::extra_state* extra_state, 
+  plugin_state* automation_state, plugin_base::extra_state* extra_state,
   std::vector<plugin_base::modulation_output>* modulation_outputs):
-_automation_state(gui_state), _undo_listener(this), _extra_state(extra_state), _modulation_outputs(modulation_outputs)
+_automation_state(automation_state), _modulation_state(&automation_state->desc(), false),
+_undo_listener(this), _extra_state(extra_state), _modulation_outputs(modulation_outputs)
 {
   PB_LOG_FUNC_ENTRY_EXIT();
   setOpaque(true);
   addMouseListener(&_undo_listener, true);
-  auto const& topo = *gui_state->desc().plugin;
-  theme_changed(user_io_load_list(topo.vendor, topo.full_name, user_io::base, user_state_theme_key, topo.gui.default_theme, gui_state->desc().plugin->themes()));
+  auto const& topo = *automation_state->desc().plugin;
+  theme_changed(user_io_load_list(topo.vendor, topo.full_name, user_io::base, user_state_theme_key, topo.gui.default_theme, automation_state->desc().plugin->themes()));
 }
 
 void
@@ -535,22 +536,41 @@ plugin_gui::remove_modulation_output_listener(modulation_output_listener* listen
 void 
 plugin_gui::modulation_outputs_changed()
 {
+  // take out the duplicates, this stuff is not handed to us deterministically
+  // because lockfree audio-to-gui queue (i.e. there might be multiple values and we want the last one)
   auto compare = [](auto const& l, auto const& r) {
     if (l.data.module_global < r.data.module_global) return false;
     if (l.data.module_global > r.data.module_global) return true;
     if (l.data.param_global < r.data.param_global) return false;
     if (l.data.param_global > r.data.param_global) return true;
-    return l.data.voice_index < r.data.voice_index;
-  };
+    return l.data.voice_index < r.data.voice_index; };
   std::sort(_modulation_outputs->begin(), _modulation_outputs->end(), compare);
-
   auto pred = [](auto const& l, auto const& r) {
     if (l.data.module_global != r.data.module_global) return false;
     if (l.data.param_global != r.data.param_global) return false;
-    return l.data.voice_index == r.data.voice_index;
-  };
+    return l.data.voice_index == r.data.voice_index; };
   auto it = std::unique(_modulation_outputs->begin(), _modulation_outputs->end(), pred);
   _modulation_outputs->erase(it, _modulation_outputs->end());
+
+  // copy over automation (static as represented in gui)
+  // to modulation (which takes audio engine activity into account)
+  // then copy over the realtime modulation values,
+  // then fire the listeners. they get the "what is new" info
+  // from *_modulation_outputs, used to paint the bubbles on 
+  // lfo/env graphs and current/active (audio engine) state of
+  // the params. they may also query automation_state() and
+  // modulation_state() from "this", some graphs use that
+  // to paint what the audio engine is actually doing 
+  // such as f.e. how the real/current filter state looks like,
+  // instead of just the static values from the gui
+
+  _modulation_state.copy_from(_automation_state->state(), false);
+  for (int i = 0; i < _modulation_outputs->size(); i++)
+  {
+    int param_index = (*_modulation_outputs)[i].data.param_global;
+    if (param_index != -1) // -1 is lfo/env state
+      _modulation_state.set_normalized_at_index(param_index, normalized_value((*_modulation_outputs)[i].data.value));
+  }
 
   for(auto listener_it: _modulation_output_listeners)
     listener_it->modulation_outputs_changed(*_modulation_outputs);

@@ -132,7 +132,7 @@ public:
   PB_PREVENT_ACCIDENTAL_COPY(plugin_gui);
   ~plugin_gui();
   plugin_gui(
-    plugin_state* gui_state, plugin_base::extra_state* extra_state, 
+    plugin_state* automation_state, plugin_base::extra_state* extra_state,
     std::vector<plugin_base::modulation_output>* modulation_outputs);
 
   void load_patch();
@@ -174,7 +174,7 @@ public:
 
   extra_state* extra_state_() const { return _extra_state; }
   plugin_state* automation_state() const { return _automation_state; }
-  std::vector<plugin_base::modulation_output> const* modulation_outputs() const { return _modulation_outputs; }
+  plugin_state const& modulation_state() const { return _modulation_state; }
 
   void add_modulation_output_listener(modulation_output_listener* listener);
   void remove_modulation_output_listener(modulation_output_listener* listener);
@@ -190,7 +190,14 @@ private:
 
   float _system_dpi_scale = 1.0f;
   std::unique_ptr<lnf> _lnf = {};
+
+  // this one mirrors the static values of the parameters
   plugin_state* const _automation_state;
+
+  // this one mirrors what the audio engine is actually doing on a per-block basis
+  // not a pointer since this is owned by us, while _automation_state is mutated from outside
+  plugin_state _modulation_state;
+
   gui_undo_listener _undo_listener;
   int _last_mouse_enter_param = -1;
   int _last_mouse_enter_module = -1;

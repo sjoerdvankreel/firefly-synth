@@ -55,14 +55,14 @@ void
 pb_controller::gui_param_begin_changes(int index) 
 { 
   _automation_state.begin_undo_region();
-  beginEdit(gui_state().desc().param_mappings.index_to_tag[index]); 
+  beginEdit(automation_state().desc().param_mappings.index_to_tag[index]);
 }
 
 void
 pb_controller::gui_param_end_changes(int index)
 {
-  endEdit(gui_state().desc().param_mappings.index_to_tag[index]);
-  gui_state().end_undo_region("Change", gui_state().desc().params[index]->full_name);
+  endEdit(automation_state().desc().param_mappings.index_to_tag[index]);
+  automation_state().end_undo_region("Change", automation_state().desc().params[index]->full_name);
 }
 
 IPlugView* PLUGIN_API
@@ -94,15 +94,15 @@ tresult PLUGIN_API
 pb_controller::setComponentState(IBStream* state)
 {
   PB_LOG_FUNC_ENTRY_EXIT();
-  gui_state().begin_undo_region();
-  if (!plugin_io_load_instance_state(load_ibstream(state), gui_state(), false).ok())
+  automation_state().begin_undo_region();
+  if (!plugin_io_load_instance_state(load_ibstream(state), automation_state(), false).ok())
   {
-    gui_state().discard_undo_region();
+    automation_state().discard_undo_region();
     return kResultFalse;
   }
-  for (int p = 0; p < gui_state().desc().param_count; p++)
-    gui_param_changed(p, gui_state().get_plain_at_index(p));
-  gui_state().discard_undo_region();
+  for (int p = 0; p < automation_state().desc().param_count; p++)
+    gui_param_changed(p, automation_state().get_plain_at_index(p));
+  automation_state().discard_undo_region();
   return kResultOk;
 }
 
@@ -117,8 +117,8 @@ pb_controller::setParamNormalized(ParamID tag, ParamValue value)
   }
   
   // fake midi params are not mapped
-  auto mapping_iter = gui_state().desc().param_mappings.tag_to_index.find(tag);
-  if(mapping_iter != gui_state().desc().param_mappings.tag_to_index.end())
+  auto mapping_iter = automation_state().desc().param_mappings.tag_to_index.find(tag);
+  if(mapping_iter != automation_state().desc().param_mappings.tag_to_index.end())
     _automation_state.set_normalized_at_index(mapping_iter->second, normalized_value(value));
 
   // modulation output support
@@ -180,8 +180,8 @@ pb_controller::param_state_changed(int index, plain_value plain)
 {
   if(_inside_set_param_normalized) return;
   if (_automation_state.desc().params[index]->param->dsp.direction == param_direction::output) return;
-  int tag = gui_state().desc().param_mappings.index_to_tag[index];
-  auto normalized = gui_state().desc().plain_to_normalized_at_index(index, plain).value();
+  int tag = automation_state().desc().param_mappings.index_to_tag[index];
+  auto normalized = automation_state().desc().plain_to_normalized_at_index(index, plain).value();
 
   // Per-the-spec we should not have to call setParamNormalized here but not all hosts agree.
   performEdit(tag, normalized);
@@ -248,9 +248,9 @@ pb_controller::initialize(FUnknown* context)
   if(EditController::initialize(context) != kResultTrue) 
     return kResultFalse;
 
-  for(int m = 0; m < gui_state().desc().modules.size(); m++)
+  for(int m = 0; m < automation_state().desc().modules.size(); m++)
   {
-    auto const& module = gui_state().desc().modules[m];
+    auto const& module = automation_state().desc().modules[m];
     UnitInfo unit_info;
     unit_info.id = unit_id++;
     unit_info.parentUnitId = kRootUnitId;
@@ -285,9 +285,9 @@ pb_controller::initialize(FUnknown* context)
 
   // be sure to append fake midi params *after* the real ones
   // to not mess up the tag to index mapping
-  for (int m = 0; m < gui_state().desc().modules.size(); m++)
+  for (int m = 0; m < automation_state().desc().modules.size(); m++)
   {
-    auto const& module = gui_state().desc().modules[m];
+    auto const& module = automation_state().desc().modules[m];
     for (int ms = 0; ms < module.midi_sources.size(); ms++)
     {
       ParameterInfo param_info = {};

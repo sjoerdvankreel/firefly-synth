@@ -72,7 +72,7 @@ public:
   PB_PREVENT_ACCIDENTAL_COPY(pb_controller);
 
   extra_state& extra_state_() { return _extra_state; }
-  plugin_state& gui_state() { return _automation_state; }
+  plugin_state& automation_state() { return _automation_state; }
   void editorDestroyed(Steinberg::Vst::EditorView*) override { _editor = nullptr; }
 
   std::unique_ptr<host_menu> context_menu(int param_id) const override;
