@@ -17,17 +17,19 @@ struct shared_block final {
   float const* const* audio_in;
 };
 
-struct mod_indicator_state_data final {
+// once per block output data
+// we send back from audio->gui
+// so it can paint fancy stuff
+struct modulation_output_data final {
   std::uint8_t voice_index;
   std::uint8_t module_global;
   std::int16_t param_global;
   float value;
 };
 
-// visual modulation indication
-union mod_indicator_state final {
+union modulation_output final {
   std::uint64_t packed;
-  mod_indicator_state_data data;
+  modulation_output_data data;
 };
 
 }

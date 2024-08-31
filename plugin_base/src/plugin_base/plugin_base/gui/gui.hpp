@@ -115,11 +115,11 @@ public:
   _gui(gui), _global_index(global_index), _type(type), _component(component) { _component->addMouseListener(this, true); }
 };
 
-class mod_indicator_state_listener
+class modulation_output_listener
 {
 public:
   virtual void 
-  mod_indicator_state_changed(std::vector<mod_indicator_state> const& states) = 0;
+  modulation_outputs_changed(std::vector<modulation_output> const& outputs) = 0;
 };
 
 class plugin_gui:
@@ -133,7 +133,7 @@ public:
   ~plugin_gui();
   plugin_gui(
     plugin_state* gui_state, plugin_base::extra_state* extra_state, 
-    std::vector<plugin_base::mod_indicator_state>* mod_indicator_states);
+    std::vector<plugin_base::modulation_output>* modulation_outputs);
 
   void load_patch();
   void save_patch();
@@ -174,10 +174,10 @@ public:
 
   plugin_state* gui_state() const { return _gui_state; }
   extra_state* extra_state_() const { return _extra_state; }
-  std::vector<plugin_base::mod_indicator_state> const* mod_indicator_states() const { return _mod_indicator_states; }
+  std::vector<plugin_base::modulation_output> const* modulation_outputs() const { return _modulation_outputs; }
 
-  void add_mod_indicator_state_listener(mod_indicator_state_listener* listener);
-  void remove_mod_indicator_state_listener(mod_indicator_state_listener* listener);
+  void add_modulation_output_listener(modulation_output_listener* listener);
+  void remove_modulation_output_listener(modulation_output_listener* listener);
   
   void remove_param_listener(gui_param_listener* listener);
   void remove_gui_mouse_listener(gui_mouse_listener* listener);
@@ -196,7 +196,7 @@ private:
   int _last_mouse_enter_module = -1;
   int _last_mouse_enter_custom = -1;
   plugin_base::extra_state* const _extra_state;
-  std::vector<plugin_base::mod_indicator_state>* _mod_indicator_states = {};
+  std::vector<plugin_base::modulation_output>* _modulation_outputs = {};
   std::unique_ptr<juce::TooltipWindow> _tooltip = {};
   std::map<int, std::unique_ptr<lnf>> _module_lnfs = {};
   std::map<int, std::unique_ptr<lnf>> _custom_lnfs = {};
@@ -204,7 +204,7 @@ private:
   std::vector<gui_param_listener*> _param_listeners = {};
   std::vector<gui_mouse_listener*> _gui_mouse_listeners = {};
   std::vector<gui_tab_selection_listener*> _tab_selection_listeners = {};
-  std::vector<mod_indicator_state_listener*> _mod_indicator_state_listeners = {};
+  std::vector<modulation_output_listener*> _modulation_output_listeners = {};
   // must be destructed first, will unregister listeners, mind order
   std::vector<std::unique_ptr<juce::Component>> _components = {};
   std::vector<std::unique_ptr<gui_hover_listener>> _hover_listeners = {};

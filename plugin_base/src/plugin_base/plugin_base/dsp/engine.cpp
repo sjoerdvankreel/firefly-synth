@@ -65,10 +65,10 @@ _voice_processor_context(voice_processor_context)
   _current_voice_tuning_channel.resize(_polyphony);
 
   // see also host_events::activate
-  _global_mod_indicator_states.resize(desc->module_count);
-  _voice_mod_indicator_states.resize(_polyphony);
+  _global_modulation_outputs.resize(desc->module_count);
+  _voice_modulation_outputs.resize(_polyphony);
   for(int i = 0; i < _polyphony; i++)
-    _voice_mod_indicator_states[i].resize(desc->module_count);
+    _voice_modulation_outputs[i].resize(desc->module_count);
 }
 
 engine_tuning_mode 

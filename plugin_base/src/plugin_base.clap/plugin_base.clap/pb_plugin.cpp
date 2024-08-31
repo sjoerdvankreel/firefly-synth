@@ -80,11 +80,11 @@ _extra_state(gui_extra_state_keyset(*_desc->plugin)),
 _gui_state(_desc.get(), true),
 _to_gui_events(std::make_unique<event_queue>(default_q_size)), 
 _to_audio_events(std::make_unique<event_queue>(default_q_size)),
-_mod_indicator_queue(std::make_unique<mod_indicator_queue>(default_q_size))
+_modulation_output_queue(std::make_unique<modulation_output_queue>(default_q_size))
 { 
   PB_LOG_FUNC_ENTRY_EXIT();
   _gui_state.add_any_listener(this);
-  _mod_indicator_states.reserve(default_q_size);
+  _modulation_outputs.reserve(default_q_size);
   _block_automation_seen.resize(_splice_engine.state().desc().param_count);
 }
 
@@ -130,11 +130,11 @@ pb_plugin::timerCallback()
   while (_to_gui_events->try_dequeue(sevent))
     _gui_state.set_plain_at_index(sevent.index, sevent.plain);
   
-  mod_indicator_state mostate;
-  _mod_indicator_states.clear();
-  while (_mod_indicator_queue->try_dequeue(mostate))
-    _mod_indicator_states.push_back(mostate);
-  if (_gui) _gui->mod_indicator_states_changed();
+  modulation_output mod_output;
+  _modulation_outputs.clear();
+  while (_modulation_output_queue->try_dequeue(mod_output))
+    _modulation_outputs.push_back(mod_output);
+  if (_gui) _gui->modulation_outputs_changed();
 
   _inside_timer_callback = false;
 }
@@ -276,7 +276,7 @@ bool
 pb_plugin::guiCreate(char const* api, bool is_floating) noexcept
 {
   PB_LOG_FUNC_ENTRY_EXIT();
-  _gui = std::make_unique<plugin_gui>(&_gui_state, &_extra_state, &_mod_indicator_states);
+  _gui = std::make_unique<plugin_gui>(&_gui_state, &_extra_state, &_modulation_outputs);
   return true;
 }
 
@@ -785,9 +785,9 @@ pb_plugin::process(clap_process const* process) noexcept
     _to_gui_events->enqueue(to_gui_event);
   }
 
-  // modulation indicators
-  for (int e = 0; e < block.events.mod_indicator_states.size(); e++)
-    _mod_indicator_queue->enqueue(block.events.mod_indicator_states[e]);
+  // modulation outputs
+  for (int e = 0; e < block.events.modulation_outputs.size(); e++)
+    _modulation_output_queue->enqueue(block.events.modulation_outputs[e]);
 
   _splice_engine.release_block();
   return CLAP_PROCESS_CONTINUE;

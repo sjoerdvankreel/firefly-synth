@@ -21,7 +21,7 @@ public Steinberg::IPlugViewContentScaleSupport
   pb_controller* const _controller = {};
 
 public: 
-  pb_editor(pb_controller* controller, std::vector<mod_indicator_state>* mod_indicator_states);
+  pb_editor(pb_controller* controller, std::vector<modulation_output>* outputs);
   PB_PREVENT_ACCIDENTAL_COPY(pb_editor);
 
 #if (defined __linux__) || (defined  __FreeBSD__)

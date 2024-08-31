@@ -134,7 +134,7 @@ struct plugin_block final {
 
   // for vst3 this is just the host block out events
   // but for clap threadpool we will have to consolidate after voice stage
-  std::vector<mod_indicator_state>* mod_indicator_states = {};
+  std::vector<modulation_output>* modulation_outputs = {};
 
   void* module_context(int mod, int slot) const;
   jarray<float, 3> const& module_cv(int mod, int slot) const;
@@ -145,8 +145,8 @@ struct plugin_block final {
   float pitch_to_freq_with_tuning(float pitch);
 
   void set_out_param(int param, int slot, double raw) const;
-  void push_mod_indicator_state(mod_indicator_state const& indicator_state) 
-  { mod_indicator_states->push_back(indicator_state); }
+  void push_modulation_output(modulation_output const& output)
+  { modulation_outputs->push_back(output); }
   
   template <domain_type DomainType>
   float normalized_to_raw_fast(int module_, int param_, float normalized) const;
