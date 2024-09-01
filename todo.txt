@@ -25,6 +25,8 @@ autobuilds:
 * integrate https://github.com/surge-synthesizer/monique-monosynth/blob/main/.github/workflows/build-pr.yml
 
 ui-vnext:
+* ditch after-mod, claim micro support ?
+* maybe just paint all of graphs on 60 fps ?
 * also do the audio matrix graphs
 * also include the mod-mod matrix events
 * test with disable/enable routes (param_is_modded event)
