@@ -584,12 +584,20 @@ plugin_gui::modulation_outputs_changed()
   // such as f.e. how the real/current filter state looks like,
   // instead of just the static values from the gui
 
+  // set all voices to automation by default,
+  // we will overwrite if that voice is active
+
   for (int i = 0; i < _modulation_outputs->size(); i++)
     if ((*_modulation_outputs)[i].event_type() == out_event_voice_activation)
     {
       auto const& voice_event = (*_modulation_outputs)[i].state.voice;
       _engine_voices_active[voice_event.voice_index] = voice_event.is_active;
       _engine_voices_activated[voice_event.voice_index] = voice_event.stream_time_low;
+
+      // revert to automation if needed
+      if (!voice_event.is_active)
+        _voice_modulation_states[voice_event.voice_index].copy_from(_automation_state->state(), false);
+
     } else if ((*_modulation_outputs)[i].event_type() == out_event_param_state)
     {
       auto const& param_event = (*_modulation_outputs)[i].state.param;
