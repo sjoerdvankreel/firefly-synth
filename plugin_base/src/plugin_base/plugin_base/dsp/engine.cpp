@@ -1280,6 +1280,7 @@ plugin_engine::process()
     for (int j = 0; j < _voice_modulation_outputs[i].size(); j++)
       _host_block->events.modulation_outputs.push_back(_voice_modulation_outputs[i][j]);
 
+  // TODO fill the voice states
   // Note: custom output events are already filled here.
   // It's up to the plugin bindings to communicate them back to the gui.
 

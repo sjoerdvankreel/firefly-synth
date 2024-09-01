@@ -807,17 +807,14 @@ cv_matrix_engine_base::perform_mixdown(plugin_block& block, int module, int slot
       modulated_curve_ptrs[r]->transform(block.start_frame, block.end_frame, [](float v) { return std::clamp(v, 0.0f, 1.0f); });
 
   // push param modulation outputs 
-  if(!block.graph)
-    for(int r = 0; r < route_count; r++)
+  if (!block.graph)
+    for (int r = 0; r < route_count; r++)
       if (mod_output_usages[r].in_use)
-      {
-        modulation_output output;
-        output.data.voice_index = _global ? 0 : block.voice->state.slot;
-        output.data.param_global = mod_output_usages[r].param_global;
-        output.data.module_global = mod_output_usages[r].module_global;
-        output.data.value = (*mod_output_usages[r].modulated_curve_ptr)[block.end_frame - 1];
-        block.push_modulation_output(output);
-    }
+        block.push_modulation_output(modulation_output::make_mod_output_param_state(
+          _global ? -1 : block.voice->state.slot,
+          mod_output_usages[r].module_global,
+          mod_output_usages[r].param_global,
+          (*mod_output_usages[r].modulated_curve_ptr)[block.end_frame - 1]));
 }
 
 }

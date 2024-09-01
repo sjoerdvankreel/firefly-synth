@@ -585,12 +585,10 @@ env_engine::process(plugin_block& block, cv_cv_matrix_mixdown const* modulation)
 
   if (_stage == env_stage::end) return;
   float flt = block.state.own_block_automation[param_filter][0].real() / 1000.0f;
-  modulation_output output = {};
-  output.data.param_global = -1;
-  output.data.voice_index = block.voice->state.slot;
-  output.data.module_global = block.module_desc_.info.global;
-  output.data.value = _total_pos / (_dly + _att + _hld + _dcy + _rls + flt);
-  block.push_modulation_output(output);
+  block.push_modulation_output(modulation_output::make_mod_output_cv_state(
+    block.voice->state.slot,
+    block.module_desc_.info.global,
+    _total_pos / (_dly + _att + _hld + _dcy + _rls + flt)));
 }
 
 template <bool Monophonic>

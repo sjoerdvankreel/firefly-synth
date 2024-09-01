@@ -581,14 +581,10 @@ lfo_engine::process(plugin_block& block, cv_cv_matrix_mixdown const* modulation)
 
   // only want the mod outputs for the actual audio engine
   if (!block.graph)
-  {
-    modulation_output output = {};
-    output.data.param_global = -1;
-    output.data.module_global = block.module_desc_.info.global;
-    output.data.voice_index = _global ? 0 : block.voice->state.slot;
-    output.data.value = type == type_repeat ? _ref_phase : _graph_phase;
-    block.push_modulation_output(output);
-  }
+    block.push_modulation_output(modulation_output::make_mod_output_cv_state(
+      _global ? -1 : block.voice->state.slot,
+      block.module_desc_.info.global,
+      type == type_repeat ? _ref_phase : _graph_phase));
 
   if(_stage == lfo_stage::end)
   {

@@ -25,6 +25,8 @@ autobuilds:
 * integrate https://github.com/surge-synthesizer/monique-monosynth/blob/main/.github/workflows/build-pr.yml
 
 ui-vnext:
+* also include the mod-mod matrix events
+* test with disable/enable routes (param_is_modded event)
 * todo show all voices or only last
 * make the cv graphs + bolletjes work in case of automation
 * global unit lfo phase offset not plot good
