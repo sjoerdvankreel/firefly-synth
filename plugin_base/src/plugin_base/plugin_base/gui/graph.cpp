@@ -77,11 +77,11 @@ module_graph::modulation_outputs_changed(std::vector<modulation_output> const& o
   int orig_module_global = desc.module_topo_to_index.at(current_orig_module_index) + current_orig_module_slot;
   int orig_param_first = desc.modules[orig_module_global].params[0].info.global;
 
-  if (_data.type() != graph_data_type::series)
-  {
-    request_rerender(orig_param_first);
-    return;
-  }
+  // TODO only on relevant events
+  request_rerender(orig_param_first);
+  int x0813 = 9;
+  if (x0813 == 9) return; // TODO
+  // also todo move the bolletjes painting to the actual painting
 
   // all stuff below is for the cv indicators (the dots that follow env/lfo)
 
@@ -252,9 +252,20 @@ module_graph::render_if_dirty()
   auto const& mappings = _gui->automation_state()->desc().param_mappings.params;
   param_topo_mapping mapping = mappings[_hovered_or_tweaked_param].topo;
   auto const& module = _gui->automation_state()->desc().plugin->modules[mapping.module_index];
+
+  // find the latest active voice, otherwise go with global
+  int voice_index = -1;
+  std::uint32_t latest_timestamp = 0;
+  if (module.dsp.stage == module_stage::voice)
+    for (int i = 0; i < _gui->engine_voices_active().size(); i++)
+      if (_gui->engine_voices_active()[i] != 0)
+        if (_gui->engine_voices_activated()[i] > latest_timestamp)
+          voice_index = i;
+
   if(module.graph_renderer != nullptr)
-    render(module.graph_renderer( // TODO
-      _gui->global_modulation_state(), _gui->get_module_graph_engine(module), _hovered_or_tweaked_param, mapping));
+    render(module.graph_renderer(
+      voice_index == -1? _gui->global_modulation_state(): _gui->voice_modulation_state(voice_index), 
+      _gui->get_module_graph_engine(module), _hovered_or_tweaked_param, mapping));
   _render_dirty = false;
   return true;
 }
