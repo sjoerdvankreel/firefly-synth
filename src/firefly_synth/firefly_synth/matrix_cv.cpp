@@ -810,11 +810,17 @@ cv_matrix_engine_base::perform_mixdown(plugin_block& block, int module, int slot
   if (!block.graph)
     for (int r = 0; r < route_count; r++)
       if (mod_output_usages[r].in_use)
+      {
+        // debugging
+        auto const& param_desc = block.plugin_desc_.params[mod_output_usages[r].param_global];
+        (void)param_desc;
+
         block.push_modulation_output(modulation_output::make_mod_output_param_state(
           _global ? -1 : block.voice->state.slot,
           mod_output_usages[r].module_global,
           mod_output_usages[r].param_global,
           (*mod_output_usages[r].modulated_curve_ptr)[block.end_frame - 1]));
+      }
 }
 
 }

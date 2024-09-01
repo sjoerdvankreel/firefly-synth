@@ -594,6 +594,11 @@ plugin_gui::modulation_outputs_changed()
     {
       auto const& param_event = (*_modulation_outputs)[i].state.param;
       int param_index = param_event.param_global;
+
+      // debugging
+      auto const& desc = _automation_state->desc().params[param_index];
+      (void)desc;
+
       if(param_event.voice_index == -1)
         _global_modulation_state.set_normalized_at_index(param_index, normalized_value(param_event.normalized_real()));
       else

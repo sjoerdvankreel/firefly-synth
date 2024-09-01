@@ -58,26 +58,12 @@ module_graph::timerCallback()
 void 
 module_graph::modulation_outputs_changed(std::vector<modulation_output> const& outputs)
 {
-  if (_data.type() != graph_data_type::series)
-    return;
-
   if (_hovered_or_tweaked_param == -1)
     return;
 
-  float w = getWidth();
-  float h = getHeight();
-  int count = _data.series().size();
-
   int current_orig_module_slot = -1;
   int current_orig_module_index = -1;
-  int current_mapped_module_slot = -1;
-  int current_mapped_module_index = -1;
-
   auto const& desc = _gui->automation_state()->desc();
-  auto const& topo = *desc.plugin;
-  auto const& mappings = desc.param_mappings.params;
-  param_topo_mapping mapping = mappings[_hovered_or_tweaked_param].topo;
-
   if (_module_params.module_index != -1)
   {
     current_orig_module_slot = _activated_module_slot;
@@ -88,6 +74,27 @@ module_graph::modulation_outputs_changed(std::vector<modulation_output> const& o
     current_orig_module_slot = desc.param_mappings.params[_hovered_or_tweaked_param].topo.module_slot;
     current_orig_module_index = desc.param_mappings.params[_hovered_or_tweaked_param].topo.module_index;
   }
+  int orig_module_global = desc.module_topo_to_index.at(current_orig_module_index) + current_orig_module_slot;
+  int orig_param_first = desc.modules[orig_module_global].params[0].info.global;
+
+  if (_data.type() != graph_data_type::series)
+  {
+    request_rerender(orig_param_first);
+    return;
+  }
+
+  // all stuff below is for the cv indicators (the dots that follow env/lfo)
+
+  float w = getWidth();
+  float h = getHeight();
+  int count = _data.series().size();
+
+  int current_mapped_module_slot = -1;
+  int current_mapped_module_index = -1;
+
+  auto const& topo = *desc.plugin;
+  auto const& mappings = desc.param_mappings.params;
+  param_topo_mapping mapping = mappings[_hovered_or_tweaked_param].topo;
   
   // this is for stuff when someone else wants to paint our bubbles
   // f.e. when cv matrix wants to paint the position of the longest env in the cv mixdown
@@ -146,8 +153,6 @@ module_graph::modulation_outputs_changed(std::vector<modulation_output> const& o
     //return;
   // TODO just repaint otherwise too complicated?
   // also where are the bolletjes
-  int orig_module_global = desc.module_topo_to_index.at(current_orig_module_index) + current_orig_module_slot;
-  int orig_param_first = desc.modules[orig_module_global].params[0].info.global;
   request_rerender(orig_param_first);
 }
 
