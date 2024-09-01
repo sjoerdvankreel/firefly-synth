@@ -457,6 +457,7 @@ pb_plugin::paramsFlush(clap_input_events const* in, clap_output_events const* ou
     if (main_thread)
     {
       _automation_state.set_normalized_at_index(index, normalized);
+      if(_gui) _gui->automation_state_changed(index, normalized);
       push_to_audio(index, param.domain.normalized_to_plain(normalized));
     } else
     {

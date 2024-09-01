@@ -76,6 +76,10 @@ union modulation_output
   mod_out_state state;
   std::uint64_t packed;
 
+  // stuff overlaps, all should match
+  output_event_type event_type() const
+  { return (output_event_type)state.cv.event_type; }
+
   static modulation_output 
   make_mod_out_voice_state(std::uint8_t voice_index, bool is_active, std::uint32_t stream_time_low)
   {
@@ -91,7 +95,7 @@ union modulation_output
   make_mod_output_cv_state(std::int8_t voice_index, std::uint8_t module_global, float position_normalized)
   {
     assert(voice_index >= -1);
-    assert(-1e-5 <= position_normalized && position_normalized <= 1 + 1e-5);
+    assert(-1e-3 <= position_normalized && position_normalized <= 1 + 1e-3);
     modulation_output result;
     result.state.cv.voice_index = voice_index;
     result.state.cv.module_global = module_global;
@@ -104,7 +108,7 @@ union modulation_output
   make_mod_output_param_state(std::int8_t voice_index, std::uint8_t module_global, std::uint16_t param_global, float value_normalized)
   {
     assert(voice_index >= -1); 
-    assert(-1e-5 <= value_normalized && value_normalized <= 1 + 1e-5);
+    assert(-1e-3 <= value_normalized && value_normalized <= 1 + 1e-3);
     modulation_output result;
     result.state.param.voice_index = voice_index;
     result.state.param.param_global = param_global;

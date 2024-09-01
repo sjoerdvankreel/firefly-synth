@@ -159,6 +159,9 @@ public:
   
   // for anyone who wants to repaint on this stuff
   void modulation_outputs_changed();
+  
+  // to keep track of what the audio engine is doing
+  void automation_state_changed(int param_index, normalized_value normalized);
 
   void param_end_changes(int index);
   void param_begin_changes(int index);
@@ -172,9 +175,13 @@ public:
   lnf const* get_lnf() const { return _lnf.get(); }
   void paint(juce::Graphics& g) override { g.fillAll(juce::Colours::black); }
 
+  std::vector<int> const& engine_voices_active() const { return _engine_voices_active; }
+  std::vector<std::uint32_t> const& engine_voices_activated() const { return _engine_voices_activated; }
+
   extra_state* extra_state_() const { return _extra_state; }
   plugin_state* automation_state() const { return _automation_state; }
-  plugin_state const& modulation_state() const { return _modulation_state; }
+  plugin_state const& global_modulation_state() const { return _global_modulation_state; }
+  plugin_state const& voice_modulation_state(int voice) const { return _voice_modulation_states[voice]; }
 
   void add_modulation_output_listener(modulation_output_listener* listener);
   void remove_modulation_output_listener(modulation_output_listener* listener);
@@ -194,15 +201,18 @@ private:
   // this one mirrors the static values of the parameters
   plugin_state* const _automation_state;
 
-  // this one mirrors what the audio engine is actually doing on a per-block basis
+  // these ones mirrors what the audio engine is actually doing on a per-block basis
   // not a pointer since this is owned by us, while _automation_state is mutated from outside
-  plugin_state _modulation_state;
+  plugin_state _global_modulation_state;
+  std::vector<plugin_state> _voice_modulation_states = {};
 
   gui_undo_listener _undo_listener;
   int _last_mouse_enter_param = -1;
   int _last_mouse_enter_module = -1;
   int _last_mouse_enter_custom = -1;
   plugin_base::extra_state* const _extra_state;
+  std::vector<int> _engine_voices_active = {}; // don't like vector bool
+  std::vector<std::uint32_t> _engine_voices_activated = {}; // don't like vector bool
   std::vector<plugin_base::modulation_output>* _modulation_outputs = {};
   std::unique_ptr<juce::TooltipWindow> _tooltip = {};
   std::map<int, std::unique_ptr<lnf>> _module_lnfs = {};

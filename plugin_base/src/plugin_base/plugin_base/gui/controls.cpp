@@ -587,13 +587,14 @@ param_slider::modulation_outputs_changed(std::vector<modulation_output> const& o
 
   bool any_mod_output_found = false;
   for(int i = 0; i < outputs.size(); i++)
-    if (outputs[i].data.param_global == _param->info.global)
+    if (outputs[i].event_type() == output_event_type::out_event_param_state && 
+      outputs[i].state.param.param_global == _param->info.global)
     {
       any_mod_output_found = true;
-      if (_min_modulation_output < 0.0f) _min_modulation_output = outputs[i].data.value;
-      if (_max_modulation_output < 0.0f) _max_modulation_output = outputs[i].data.value;
-      _min_modulation_output = std::min(_min_modulation_output, outputs[i].data.value);
-      _max_modulation_output = std::max(_max_modulation_output, outputs[i].data.value);
+      if (_min_modulation_output < 0.0f) _min_modulation_output = outputs[i].state.param.normalized_real();
+      if (_max_modulation_output < 0.0f) _max_modulation_output = outputs[i].state.param.normalized_real();
+      _min_modulation_output = std::min(_min_modulation_output, outputs[i].state.param.normalized_real());
+      _max_modulation_output = std::max(_max_modulation_output, outputs[i].state.param.normalized_real());
       _modulation_output_activated_time_seconds = seconds_since_epoch();
     }
 

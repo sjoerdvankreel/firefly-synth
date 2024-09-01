@@ -107,10 +107,11 @@ module_graph::modulation_outputs_changed(std::vector<modulation_output> const& o
   int current_output = 0;
   int current_module_global = desc.module_topo_to_index.at(current_mapped_module_index) + current_mapped_module_slot;
   for (int i = 0; i < outputs.size() && current_output < max_mod_outputs; i++)
-    if (current_module_global == outputs[i].data.module_global && outputs[i].data.param_global == -1)
+    if (outputs[i].event_type() == output_event_type::out_event_cv_state &&
+      current_module_global == outputs[i].state.cv.module_global)
     {
       need_full_repaint = true;
-      float output_pos = outputs[i].data.value;
+      float output_pos = outputs[i].state.cv.position_normalized;
       float x = output_pos * w;
       int point = std::clamp((int)(output_pos * (count - 1)), 0, count - 1);
       float y = (1 - std::clamp(_data.series()[point], 0.0f, 1.0f)) * h;
@@ -247,8 +248,8 @@ module_graph::render_if_dirty()
   param_topo_mapping mapping = mappings[_hovered_or_tweaked_param].topo;
   auto const& module = _gui->automation_state()->desc().plugin->modules[mapping.module_index];
   if(module.graph_renderer != nullptr)
-    render(module.graph_renderer(
-      _gui->modulation_state(), _gui->get_module_graph_engine(module), _hovered_or_tweaked_param, mapping));
+    render(module.graph_renderer( // TODO
+      _gui->global_modulation_state(), _gui->get_module_graph_engine(module), _hovered_or_tweaked_param, mapping));
   _render_dirty = false;
   return true;
 }

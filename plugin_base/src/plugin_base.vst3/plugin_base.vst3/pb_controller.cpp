@@ -117,9 +117,13 @@ pb_controller::setParamNormalized(ParamID tag, ParamValue value)
   }
   
   // fake midi params are not mapped
+  // TODO whould we also not take the mod output params into account ?
   auto mapping_iter = automation_state().desc().param_mappings.tag_to_index.find(tag);
-  if(mapping_iter != automation_state().desc().param_mappings.tag_to_index.end())
+  if (mapping_iter != automation_state().desc().param_mappings.tag_to_index.end())
+  {
     _automation_state.set_normalized_at_index(mapping_iter->second, normalized_value(value));
+    if (_editor) _editor->automation_state_changed(mapping_iter->second, normalized_value(value));
+  }
 
   // modulation output support
   // this is a bit of a cop out but at least it should be working without resorting to messaging

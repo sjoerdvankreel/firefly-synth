@@ -337,13 +337,22 @@ plugin_gui::
 plugin_gui(
   plugin_state* automation_state, plugin_base::extra_state* extra_state,
   std::vector<plugin_base::modulation_output>* modulation_outputs):
-_automation_state(automation_state), _modulation_state(&automation_state->desc(), false),
+_automation_state(automation_state), _global_modulation_state(&automation_state->desc(), false),
 _undo_listener(this), _extra_state(extra_state), _modulation_outputs(modulation_outputs)
 {
   PB_LOG_FUNC_ENTRY_EXIT();
   setOpaque(true);
   addMouseListener(&_undo_listener, true);
   auto const& topo = *automation_state->desc().plugin;
+  _engine_voices_active.resize(automation_state->desc().plugin->audio_polyphony);
+  _engine_voices_activated.resize(automation_state->desc().plugin->audio_polyphony);
+  _global_modulation_state.copy_from(automation_state->state(), false);
+  _voice_modulation_states.resize(automation_state->desc().plugin->audio_polyphony);
+  for (int i = 0; i < automation_state->desc().plugin->audio_polyphony; i++)
+  {
+    new(&_voice_modulation_states[i]) plugin_state(&automation_state->desc(), false);
+    _voice_modulation_states[i].copy_from(automation_state->state(), false);
+  }
   theme_changed(user_io_load_list(topo.vendor, topo.full_name, user_io::base, user_state_theme_key, topo.gui.default_theme, automation_state->desc().plugin->themes()));
 }
 
@@ -534,8 +543,17 @@ plugin_gui::remove_modulation_output_listener(modulation_output_listener* listen
 }
 
 void 
+plugin_gui::automation_state_changed(int param_index, normalized_value normalized)
+{
+  _global_modulation_state.set_normalized_at_index(param_index, normalized);
+  for (int i = 0; i < _voice_modulation_states.size(); i++)
+    _voice_modulation_states[i].set_normalized_at_index(param_index, normalized);
+}
+
+void 
 plugin_gui::modulation_outputs_changed()
 {
+#if 0 // TODO do the magic
   // take out the duplicates, this stuff is not handed to us deterministically
   // because lockfree audio-to-gui queue (i.e. there might be multiple values and we want the last one)
   auto compare = [](auto const& l, auto const& r) {
@@ -551,9 +569,11 @@ plugin_gui::modulation_outputs_changed()
     return l.data.voice_index == r.data.voice_index; };
   auto it = std::unique(_modulation_outputs->begin(), _modulation_outputs->end(), pred);
   _modulation_outputs->erase(it, _modulation_outputs->end());
+#endif
 
-  // copy over automation (static as represented in gui)
-  // to modulation (which takes audio engine activity into account)
+  // automation state is kept in check for all _global/_voice stuff
+  // only need to update modulation, see automation_state_changed
+
   // then copy over the realtime modulation values,
   // then fire the listeners. they get the "what is new" info
   // from *_modulation_outputs, used to paint the bubbles on 
@@ -564,13 +584,21 @@ plugin_gui::modulation_outputs_changed()
   // such as f.e. how the real/current filter state looks like,
   // instead of just the static values from the gui
 
-  _modulation_state.copy_from(_automation_state->state(), false);
   for (int i = 0; i < _modulation_outputs->size(); i++)
-  {
-    int param_index = (*_modulation_outputs)[i].data.param_global;
-    if (param_index != -1) // -1 is lfo/env state
-      _modulation_state.set_normalized_at_index(param_index, normalized_value((*_modulation_outputs)[i].data.value));
-  }
+    if ((*_modulation_outputs)[i].event_type() == out_event_voice_activation)
+    {
+      auto const& voice_event = (*_modulation_outputs)[i].state.voice;
+      _engine_voices_active[voice_event.voice_index] = voice_event.is_active;
+      _engine_voices_activated[voice_event.voice_index] = voice_event.stream_time_low;
+    } else if ((*_modulation_outputs)[i].event_type() == out_event_param_state)
+    {
+      auto const& param_event = (*_modulation_outputs)[i].state.param;
+      int param_index = param_event.param_global;
+      if(param_event.voice_index == -1)
+        _global_modulation_state.set_normalized_at_index(param_index, normalized_value(param_event.normalized_real()));
+      else
+        _voice_modulation_states[param_event.voice_index].set_normalized_at_index(param_index, normalized_value(param_event.normalized_real()));
+    }
 
   for(auto listener_it: _modulation_output_listeners)
     listener_it->modulation_outputs_changed(*_modulation_outputs);

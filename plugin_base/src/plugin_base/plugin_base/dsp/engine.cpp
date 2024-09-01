@@ -1280,9 +1280,14 @@ plugin_engine::process()
     for (int j = 0; j < _voice_modulation_outputs[i].size(); j++)
       _host_block->events.modulation_outputs.push_back(_voice_modulation_outputs[i][j]);
 
-  // TODO fill the voice states
   // Note: custom output events are already filled here.
   // It's up to the plugin bindings to communicate them back to the gui.
+  // Only need to communicate the voice states now.
+  for (int i = 0; i < _polyphony; i++)
+    _host_block->events.modulation_outputs.push_back(
+      modulation_output::make_mod_out_voice_state(
+        i, _voice_states[i].stage != voice_stage::unused,
+        (std::uint32_t)_voice_states[i].time));
 
   /*******************/
   /* STEP 9: Wrap-up */
