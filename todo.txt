@@ -28,6 +28,7 @@ ui-vnext:
 V show active modulation for the other graphs -> better to have a separate state copy including modulation
 V todo show all voices or only last
 * fix the clap
+* just fix the intermittent stuff by a timer on the gui side to reset to automation, too bad, too complicated
 * profile the whole thing 
 * deal with lfo overshoot
 * plot amp env in the bg of other env
