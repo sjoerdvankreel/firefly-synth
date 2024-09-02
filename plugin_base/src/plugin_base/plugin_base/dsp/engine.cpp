@@ -381,7 +381,7 @@ plugin_engine::activate_modules()
       if (factory)
       {
         plugin_block block(make_plugin_block(-1, -1, m, mi, engine_tuning_mode_no_tuning, 0, 0));
-        _input_engines[m][mi] = factory(*_state.desc().plugin, _sample_rate, _max_frame_count);
+        _input_engines[m][mi] = factory(_state.desc(), _sample_rate, _max_frame_count);
         _input_engines[m][mi]->reset(&block);
       }
     }
@@ -392,7 +392,7 @@ plugin_engine::activate_modules()
         for (int v = 0; v < _polyphony; v++)
         {
           auto& factory = _state.desc().plugin->modules[m].engine_factory;
-          if(factory) _voice_engines[v][m][mi] = factory(*_state.desc().plugin, _sample_rate, _max_frame_count);
+          if(factory) _voice_engines[v][m][mi] = factory(_state.desc(), _sample_rate, _max_frame_count);
         }
 
   for (int m = _state.desc().module_output_start; m < _state.desc().plugin->modules.size(); m++)
@@ -402,7 +402,7 @@ plugin_engine::activate_modules()
       if(factory)
       {
         plugin_block block(make_plugin_block(-1, -1, m, mi, engine_tuning_mode_no_tuning, 0, 0));
-        _output_engines[m][mi] = factory(*_state.desc().plugin, _sample_rate, _max_frame_count);
+        _output_engines[m][mi] = factory(_state.desc(), _sample_rate, _max_frame_count);
         _output_engines[m][mi]->reset(&block);
       }
     }
