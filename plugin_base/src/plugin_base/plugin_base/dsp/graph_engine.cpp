@@ -52,7 +52,7 @@ graph_engine::process_default(int module_index, int module_slot)
   auto const& module = _desc->plugin->modules[module_index];
   if (slot_map.find(module_slot) == slot_map.end())
   {
-    auto module_engine = module.engine_factory(*_desc, _sample_rate, _host_block->frame_count);
+    auto module_engine = module.engine_factory(*_desc->plugin, _sample_rate, _host_block->frame_count);
     engine = module_engine.get();
     slot_map[module_slot] = std::move(module_engine);
   } else

@@ -99,15 +99,10 @@ protected:
 
   bool const _cv;
   bool const _global;
-  plugin_desc const* const _desc = {};
   cv_matrix_mixdown _mixdown = {};
   jarray<int, 4> _modulation_indices = {};
   std::vector<param_topo_mapping> const _targets;
   std::vector<module_output_mapping> const _sources;
-
-  // dont like vector bool
-  std::vector<int> _param_was_modulated = {};
-  std::vector<int> _param_was_modulated_previous = {};
 
   // need to remember this for access during the cv->cv mix() call
   jarray<float, 3>* _own_cv = {};
@@ -116,11 +111,9 @@ protected:
   jarray<plain_value, 2> const* _own_block_automation = {};
 
   cv_matrix_engine_base(
-    bool cv, bool global, plugin_desc const& desc,
+    bool cv, bool global, plugin_topo const& topo,
     std::vector<module_output_mapping> const& sources,
     std::vector<param_topo_mapping> const& targets);
-
-  void after_process(plugin_block& block);
 
   // module/slot:-1 is all (for cv->audio)
   // or specific module (for cv->cv)
@@ -137,10 +130,10 @@ public cv_matrix_engine_base {
 
 public:
   cv_cv_matrix_engine(
-    bool global, plugin_desc const& desc,
+    bool global, plugin_topo const& topo,
     std::vector<module_output_mapping> const& sources,
     std::vector<param_topo_mapping> const& targets):
-  cv_matrix_engine_base(true, global, desc, sources, targets), _mixer(this) {}
+  cv_matrix_engine_base(true, global, topo, sources, targets), _mixer(this) {}
 
   PB_PREVENT_ACCIDENTAL_COPY(cv_cv_matrix_engine);
   void process(plugin_block& block) override;
@@ -152,10 +145,10 @@ class cv_audio_matrix_engine:
 public cv_matrix_engine_base {
 public:
   cv_audio_matrix_engine(
-    bool global, plugin_desc const& desc, 
+    bool global, plugin_topo const& topo, 
     std::vector<module_output_mapping> const& sources,
     std::vector<param_topo_mapping> const& targets):
-  cv_matrix_engine_base(false, global, desc, sources, targets) {}
+  cv_matrix_engine_base(false, global, topo, sources, targets) {}
 
   void process(plugin_block& block) override;
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(cv_audio_matrix_engine);
@@ -479,16 +472,16 @@ cv_matrix_topo(
   {
     result.gui.tabbed_name = "CV-CV";
     result.engine_factory = [global, sm = source_matrix.mappings, tm = target_matrix.mappings](
-      auto const& desc, int, int) {
-        return std::make_unique<cv_cv_matrix_engine>(global, desc, sm, tm);
+      auto const& topo, int, int) {
+        return std::make_unique<cv_cv_matrix_engine>(global, topo, sm, tm);
     };
   }
   else
   {
     result.gui.tabbed_name = "CV-Audio";
     result.engine_factory = [global, sm = source_matrix.mappings, tm = target_matrix.mappings](
-      auto const& desc, int, int) { 
-        return std::make_unique<cv_audio_matrix_engine>(global, desc, sm, tm);
+      auto const& topo, int, int) { 
+        return std::make_unique<cv_audio_matrix_engine>(global, topo, sm, tm);
     };
   }
 
@@ -593,29 +586,29 @@ cv_matrix_topo(
 
 cv_matrix_engine_base::
 cv_matrix_engine_base(
-  bool cv, bool global, plugin_desc const& desc,
+  bool cv, bool global, plugin_topo const& topo,
   std::vector<module_output_mapping> const& sources,
   std::vector<param_topo_mapping> const& targets):
-_cv(cv), _global(global), _desc(&desc), _sources(sources), _targets(targets)
+_cv(cv), _global(global), _sources(sources), _targets(targets)
 {
-  plugin_dims dims(*desc.plugin, desc.plugin->audio_polyphony);
+  plugin_dims dims(topo, topo.audio_polyphony);
   _mixdown.resize(dims.module_slot_param_slot);
   _modulation_indices.resize(dims.module_slot_param_slot);
-  _param_was_modulated.resize(desc.param_count);
-  _param_was_modulated_previous.resize(desc.param_count);
 }
 
 void 
 cv_cv_matrix_engine::process(plugin_block& block)
-{ 
-  *block.state.own_context = &_mixer; 
-  after_process(block);
-}
+{ *block.state.own_context = &_mixer; }
 
 cv_cv_matrix_mixdown const& 
 cv_cv_matrix_mixer::mix(plugin_block& block, int module, int slot)
-{ 
-  return _engine->mix(block, module, slot); 
+{ return _engine->mix(block, module, slot); }
+
+cv_cv_matrix_mixdown const&
+cv_cv_matrix_engine::mix(plugin_block& block, int module, int slot)
+{
+  perform_mixdown(block, module, slot);
+  return _mixdown[module][slot];
 }
 
 void
@@ -623,14 +616,6 @@ cv_audio_matrix_engine::process(plugin_block& block)
 {
   perform_mixdown(block, -1, -1);
   *block.state.own_context = &_mixdown;
-  after_process(block);
-}
-
-cv_cv_matrix_mixdown const&
-cv_cv_matrix_engine::mix(plugin_block& block, int module, int slot)
-{
-  perform_mixdown(block, module, slot);
-  return _mixdown[module][slot];
 }
 
 void 
@@ -643,39 +628,6 @@ cv_matrix_engine_base::reset(plugin_block const* block)
   _own_scratch = &block->state.own_scratch;
   _own_block_automation = &block->state.own_block_automation;
   _own_accurate_automation = &block->state.own_accurate_automation;
-
-  std::fill(_param_was_modulated.begin(), _param_was_modulated.end(), 0);
-  std::fill(_param_was_modulated_previous.begin(), _param_was_modulated_previous.end(), 0);
-}
-
-void
-cv_matrix_engine_base::after_process(plugin_block& block)
-{
-  // need to do this once in process call rather then in mixdown
-  // because that one is lazy eval'd for cv->cv (so called for each module individually)
-
-  // if it was modulated on the prev round, but not on the current round,
-  // insert a fake output event to force the ui to repaint back to automation state
-  for (int i = 0; i < _param_was_modulated.size(); i++)
-    if (_param_was_modulated_previous[i] != 0 && _param_was_modulated[i] == 0)
-    {
-      // debugging
-      auto const& param_desc = block.plugin_desc_.params[i];
-      (void)param_desc;
-
-      auto const& map = _desc->param_mappings.params[i];
-      block.push_modulation_output(modulation_output::make_mod_output_param_state(
-        _global ? -1 : block.voice->state.slot,
-        map.module_global,
-        i,
-        block.state.all_accurate_automation[map.topo.module_index][map.topo.module_slot][map.topo.param_index][map.topo.param_slot][block.end_frame - 1]));
-    }
-
-  for (int i = 0; i < _param_was_modulated.size(); i++)
-  {
-    _param_was_modulated_previous[i] = _param_was_modulated[i];
-    _param_was_modulated[i] = 0;
-  }
 }
 
 void
@@ -854,24 +806,21 @@ cv_matrix_engine_base::perform_mixdown(plugin_block& block, int module, int slot
     if (modulated_curve_ptrs[r] != nullptr)
       modulated_curve_ptrs[r]->transform(block.start_frame, block.end_frame, [](float v) { return std::clamp(v, 0.0f, 1.0f); });
 
-  if (block.graph) return;
-
   // push param modulation outputs 
-  for (int r = 0; r < route_count; r++)
-    if (mod_output_usages[r].in_use)
-    {
-      // debugging
-      auto const& param_desc = block.plugin_desc_.params[mod_output_usages[r].param_global];
-      (void)param_desc;
+  if (!block.graph)
+    for (int r = 0; r < route_count; r++)
+      if (mod_output_usages[r].in_use)
+      {
+        // debugging
+        auto const& param_desc = block.plugin_desc_.params[mod_output_usages[r].param_global];
+        (void)param_desc;
 
-      block.push_modulation_output(modulation_output::make_mod_output_param_state(
-        _global ? -1 : block.voice->state.slot,
-        mod_output_usages[r].module_global,
-        mod_output_usages[r].param_global,
-        (*mod_output_usages[r].modulated_curve_ptr)[block.end_frame - 1]));
-
-      _param_was_modulated[mod_output_usages[r].param_global] = 1;
-    }
+        block.push_modulation_output(modulation_output::make_mod_output_param_state(
+          _global ? -1 : block.voice->state.slot,
+          mod_output_usages[r].module_global,
+          mod_output_usages[r].param_global,
+          (*mod_output_usages[r].modulated_curve_ptr)[block.end_frame - 1]));
+      }
 }
 
 }

@@ -85,7 +85,7 @@ typedef std::function<void(
   plugin_state const& state, int slot, jarray<int, 3>& active)>
 midi_active_selector;
 typedef std::function<std::unique_ptr<module_engine>(
-  plugin_desc const& desc, int sample_rate, int max_frame_count)> 
+  plugin_topo const& topo, int sample_rate, int max_frame_count)> 
 module_engine_factory;
 typedef std::function<graph_data(
   plugin_state const& state, graph_engine* engine, 
