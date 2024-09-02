@@ -187,7 +187,8 @@ plugin_engine::make_plugin_block(
     _sample_rate, state, nullptr, nullptr, 
     _host_block->shared, _state.desc(), 
     _state.desc().modules[module_global],
-    modulation_outputs
+    modulation_outputs,
+    &_host_block->events
   };
 }
 

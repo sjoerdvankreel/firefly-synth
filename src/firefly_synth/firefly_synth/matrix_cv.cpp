@@ -115,6 +115,8 @@ protected:
     std::vector<module_output_mapping> const& sources,
     std::vector<param_topo_mapping> const& targets);
 
+  void before_process(plugin_block& block);
+
   // module/slot:-1 is all (for cv->audio)
   // or specific module (for cv->cv)
   void perform_mixdown(plugin_block& block, int module, int slot);
@@ -596,13 +598,11 @@ _cv(cv), _global(global), _sources(sources), _targets(targets)
   _modulation_indices.resize(dims.module_slot_param_slot);
 }
 
-void 
-cv_cv_matrix_engine::process(plugin_block& block)
-{ *block.state.own_context = &_mixer; }
-
 cv_cv_matrix_mixdown const& 
 cv_cv_matrix_mixer::mix(plugin_block& block, int module, int slot)
-{ return _engine->mix(block, module, slot); }
+{ 
+  return _engine->mix(block, module, slot); 
+}
 
 cv_cv_matrix_mixdown const&
 cv_cv_matrix_engine::mix(plugin_block& block, int module, int slot)
@@ -612,10 +612,67 @@ cv_cv_matrix_engine::mix(plugin_block& block, int module, int slot)
 }
 
 void
+cv_cv_matrix_engine::process(plugin_block& block)
+{
+  before_process(block);
+  *block.state.own_context = &_mixer;
+}
+
+void
 cv_audio_matrix_engine::process(plugin_block& block)
 {
+  before_process(block);
   perform_mixdown(block, -1, -1);
   *block.state.own_context = &_mixdown;
+}
+
+void
+cv_matrix_engine_base::before_process(plugin_block& block)
+{
+  // if any automation event touches a route op or target
+  // we must push the entire automation state to the gui
+  // for all targets which are possibly affected by this matrix
+  // this is because the gui state is sticky and otherwise
+  // it might stick to the last modulation value forever
+  // for example when op goes from mul->off
+  // the reason we need to push all targets is that on
+  // target change we cannot know the original target anymore
+  // im just assuming no one in their right mind is continuously
+  // automating these parameters through host, so we're dealing
+  // with user gui input here
+
+  // actually just fake it and do this whenever an automation
+  // event touched either op, source, or target
+  // as that (not) coincidentally corresponds to the
+  // case where there is *any* per-block automation at
+  // all for this module
+
+  // TODO this stuff is transmitted yes/no/maybe
+  // seems like we need to do the full reset on each round
+  // can this be made fast enough ?
+  //int this_module = _global ? module_gcv_cv_matrix : module_vcv_cv_matrix;
+  //if (!_cv) this_module = _global ? module_gcv_audio_matrix : module_vcv_audio_matrix;
+  //int this_module_global = block.plugin_desc_.module_topo_to_index.at(this_module) + 0; // always single slot
+  //int this_param_start = block.plugin_desc_.modules[this_module_global].params[0].info.global;
+  //int this_param_end = this_param_start + block.plugin_desc_.modules[this_module_global].params.size();
+  //for(int i = 0; i < block.host_events->block.size(); i++)
+    //if (this_param_start <= block.host_events->block[i].param && block.host_events->block[i].param < this_param_end)
+    //{
+  if(_global) // voice will pick up on (de)activate
+      for (int j = 0; j < _targets.size(); j++)
+      {
+        int that_param_global = block.plugin_desc_.param_mappings.topo_to_index[
+          _targets[j].module_index][_targets[j].module_slot][_targets[j].param_index][_targets[j].param_slot];
+        int that_module_global = block.plugin_desc_.module_topo_to_index.at(_targets[j].module_index) + _targets[j].module_slot;
+        block.push_modulation_output(modulation_output::make_mod_output_param_state(
+          _global ? -1 : block.voice->state.slot,
+          that_module_global,
+          that_param_global,
+          block.state.all_accurate_automation[
+            _targets[j].module_index][_targets[j].module_slot][_targets[j].param_index][_targets[j].param_slot][block.end_frame - 1]));
+      }
+      //break;
+    //}
 }
 
 void 
