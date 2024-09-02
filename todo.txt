@@ -27,6 +27,7 @@ autobuilds:
 ui-vnext:
 V show active modulation for the other graphs -> better to have a separate state copy including modulation
 V todo show all voices or only last
+* profile the whole thing 
 * deal with lfo overshoot
 * plot amp env in the bg of other env
 * not always paint the first matrix row
