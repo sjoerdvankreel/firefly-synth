@@ -25,6 +25,8 @@ autobuilds:
 * integrate https://github.com/surge-synthesizer/monique-monosynth/blob/main/.github/workflows/build-pr.yml
 
 ui-vnext:
+* deal with lfo overshoot
+* plot amp env in the bg of other env
 * not always paint the first matrix row
 * am bells clap reaper plots not good the cv-audio matrix
 * shit i still need param_was_modded_this_round/voice, otherwise stuff sticks
