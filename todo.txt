@@ -43,9 +43,9 @@ V not always paint the first matrix row
 * profile the whole thing 
 * recheck the is fx
 * redo the bubbles as overlays ? => yes
-* modulation distortion demo bolletjes not render good
 * i have to tweak shit for the mat graphs to work?
 * drop the mod indicators from matrices? -> repaint on_voice/_cv_param_changed
+* modulation distortion demo bolletjes not render good => need to filter event shit on the audio side. it goes backwards in time on the gui
 
 wishlist:
 filter microtuning
