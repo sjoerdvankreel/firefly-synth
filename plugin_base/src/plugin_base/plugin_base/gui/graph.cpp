@@ -97,87 +97,34 @@ module_graph::modulation_outputs_changed(std::vector<modulation_output> const& o
   int mapped_module_global = desc.module_topo_to_index.at(mapped_module_index) + mapped_module_slot;
   int orig_param_first = desc.modules[orig_module_global].params[0].info.global;
 
+  _mod_indicators.clear();
   for (int i = 0; i < outputs.size(); i++)
-    if (outputs[i].event_type() == output_event_type::out_event_param_state || 
-      outputs[i].event_type() == output_event_type::out_event_cv_state)
+    if (outputs[i].event_type() == output_event_type::out_event_cv_state)
+      if (mapped_module_global == outputs[i].state.cv.module_global)
+        _mod_indicators.push_back(outputs[i].state.cv.position_normalized);
+
+  bool rerender = false;
+  for (int i = 0; i < outputs.size(); i++)
+    if (outputs[i].event_type() == output_event_type::out_event_param_state)
     {
-      if (orig_module_global == outputs[i].state.param.module_global)
+      if (orig_module_global == outputs[i].state.param.module_global ||
+        mapped_module_global == outputs[i].state.param.module_global)
       {
-        request_rerender(orig_param_first);
-        return;
+        rerender = true;
+        break;
       }
-      if (mapped_module_global == outputs[i].state.param.module_global)
+    } else if (outputs[i].event_type() == output_event_type::out_event_cv_state)
+    {
+      if (orig_module_global == outputs[i].state.cv.module_global ||
+        mapped_module_global == outputs[i].state.cv.module_global)
       {
-        // dont feed the cv matrix with lfo params -- always orig
-        request_rerender(orig_param_first);
-        return;
+        rerender = true;
+        break;
       }
     }
 
-    int x = 0;
-    x++; // TODO;
-
-  int x0813 = 9;
-  if (x0813 == 9) return; // TODO
-
-#if 0
-  // TODO only on relevant events
-  request_rerender(orig_param_first);
-  // also todo move the bolletjes painting to the actual painting
-
-
-
-  // all stuff below is for the cv indicators (the dots that follow env/lfo)
-
-  float w = getWidth();
-  float h = getHeight();
-  int count = _data.series().size();
-
-  bool need_full_repaint = false;
-  int current_output = 0;
-  int current_module_global = desc.module_topo_to_index.at(current_mapped_module_index) + current_mapped_module_slot;
-  for (int i = 0; i < outputs.size() && current_output < max_mod_outputs; i++)
-    if (outputs[i].event_type() == output_event_type::out_event_cv_state &&
-      current_module_global == outputs[i].state.cv.module_global)
-    {
-      need_full_repaint = true;
-      float output_pos = outputs[i].state.cv.position_normalized;
-      float x = output_pos * w;
-      int point = std::clamp((int)(output_pos * (count - 1)), 0, count - 1);
-      float y = (1 - std::clamp(_data.series()[point], 0.0f, 1.0f)) * h;
-      _mod_outputs[current_output]->activate();
-      _mod_outputs[current_output]->setBounds(x - 3, y - 3, 6, 6);
-      _mod_outputs[current_output]->repaint();
-      current_output++;
-    }
-
-  if (current_output > 0)
-  {
-    // if any data found for this round, invalidate stuff from the previous round
-    for (int i = current_output; i < max_mod_outputs; i++)
-      _mod_outputs[i]->setVisible(false);
-  }
-  else
-  {
-    // if no data found for this round, invalidate stuff that expired 
-    double invalidate_after = 0.05;
-    double time_now = seconds_since_epoch();
-    for (int i = 0; i < max_mod_outputs; i++)
-      if (_mod_outputs[i]->activated_time_seconds() < time_now - invalidate_after)
-      {
-        if(_mod_outputs[i]->isVisible())
-          need_full_repaint = true;
-        _mod_outputs[i]->setVisible(false);
-      }
-  }
-
-  // dont always repaint, only when stuff happened
-  //if (!need_full_repaint)
-    //return;
-  // TODO just repaint otherwise too complicated?
-  // also where are the bolletjes
-  request_rerender(orig_param_first);
-#endif
+  if (rerender)
+    request_rerender(orig_param_first);
 }
 
 void 
@@ -260,11 +207,6 @@ module_graph::request_rerender(int param)
   
   _render_dirty = true;
   _hovered_or_tweaked_param = param;
-
-  // will be picked up on the next round, 
-  // need them to disappear first otherwise they may hang around on module switch
-  for (int i = 0; i < max_mod_outputs; i++)
-    _mod_outputs[i]->setVisible(false);
 }
 
 bool
@@ -294,38 +236,9 @@ module_graph::render_if_dirty()
   return true;
 }
 
-graph_mod_output::
-graph_mod_output(lnf* lnf) : _lnf(lnf)
-{
-  setSize(6, 6);
-  setVisible(false);
-}
-
-void
-graph_mod_output::paint(Graphics& g)
-{
-  g.setColour(_lnf->colors().graph_modulation_bubble);
-  g.fillEllipse(0, 0, 6, 6);
-}
-
-void 
-graph_mod_output::activate()
-{
-  setVisible(true);
-  _activated_time_seconds = seconds_since_epoch();
-}
-
 graph::
 graph(lnf* lnf, graph_params const& params) :
-  _lnf(lnf), _data(graph_data_type::na, {}), _params(params)
-{
-  _mod_outputs.resize(max_mod_outputs);
-  for (int i = 0; i < max_mod_outputs; i++)
-  {
-    _mod_outputs[i] = std::make_unique<graph_mod_output>(_lnf);
-    addChildComponent(_mod_outputs[i].get());
-  }
-}
+_lnf(lnf), _data(graph_data_type::na, {}), _params(params) {}
 
 void 
 graph::render(graph_data const& data)
@@ -467,11 +380,25 @@ graph::paint(Graphics& g)
   }  
 
   assert(_data.type() == graph_data_type::series);
+
+  // paint the series
   jarray<float, 1> series(_data.series());
   if(_data.bipolar())
     for(int i = 0; i < series.size(); i++)
       series[i] = bipolar_to_unipolar(series[i]);
   paint_series(g, series, _data.bipolar(), _data.stroke_thickness(), 0.5f);
+
+  // paint the indicator bubbles
+  int count = _data.series().size();
+  g.setColour(_lnf->colors().graph_modulation_bubble);
+  for (int i = 0; i < _mod_indicators.size(); i++)
+  {
+    float output_pos = _mod_indicators[i];
+    float x = output_pos * w;
+    int point = std::clamp((int)(output_pos * (count - 1)), 0, count - 1);
+    float y = (1 - std::clamp(_data.series()[point], 0.0f, 1.0f)) * h;
+    g.fillEllipse(x - 3, y - 3, 6, 6);
+  }
 }
 
 }

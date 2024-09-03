@@ -19,20 +19,18 @@ struct graph_params
   partition_scale_type scale_type = {};
 };
 
-// draw on top of graph to prevent repaint the whole component in realtime
-class graph_mod_output:
-public juce::Component
+struct module_graph_params
 {
-  lnf* const _lnf;
-  double _activated_time_seconds;
-
-public:
-  graph_mod_output(lnf* lnf);
-  
-  void activate();
-  void paint(juce::Graphics& g) override;
-  double activated_time_seconds() const { return _activated_time_seconds; }
-};
+  int fps = -1;
+  int module_index = -1;
+  bool render_on_tweak = false;
+  bool render_on_tab_change = false;
+  bool render_on_module_mouse_enter = false;
+  bool render_on_modulation_output_change = false; // TODO
+  std::vector<int> render_on_param_mouse_enter_modules = {};
+  // trigger also on changes in these
+  std::vector<int> dependent_module_indices = {};
+}; 
 
 class graph:
 public juce::Component
@@ -46,29 +44,16 @@ private:
     bool bipolar, float stroke_thickness, float midpoint);
 
 protected:
-  static int const max_mod_outputs = 64;
 
   graph_data _data;
-  std::vector<std::unique_ptr<graph_mod_output>> _mod_outputs = {};
+  // horizontal positions for lfo/env
+  std::vector<float> _mod_indicators = {}; 
 
 public:
   void render(graph_data const& data);
   void paint(juce::Graphics& g) override;
 
   graph(lnf* lnf, graph_params const& params);
-};
-
-struct module_graph_params
-{
-  int fps = -1;
-  int module_index = -1;
-  bool render_on_tweak = false;
-  bool render_on_tab_change = false;
-  bool render_on_module_mouse_enter = false;
-  bool render_on_modulation_output_change = false;
-  std::vector<int> render_on_param_mouse_enter_modules = {};
-  // trigger also on changes in these
-  std::vector<int> dependent_module_indices = {};
 };
 
 // taps into module_topo.graph_renderer based on task tweaked/hovered param
