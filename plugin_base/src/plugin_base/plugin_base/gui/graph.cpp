@@ -232,19 +232,23 @@ module_graph::render_if_dirty()
   param_topo_mapping mapping = mappings[_hovered_or_tweaked_param].topo;
   auto const& module = _gui->automation_state()->desc().plugin->modules[mapping.module_index];
 
-  // find the latest active voice, otherwise go with global
-  int voice_index = -1;
-  std::uint32_t latest_timestamp = 0;
-  if (module.dsp.stage == module_stage::voice)
-    for (int i = 0; i < _gui->engine_voices_active().size(); i++)
-      if (_gui->engine_voices_active()[i] != 0)
-        if (_gui->engine_voices_activated()[i] > latest_timestamp)
-          voice_index = i;
+  plugin_state const* plug_state = _gui->automation_state();
+  if (!_module_params.render_automation_state)
+  {
+    // find the latest active voice, otherwise go with global
+    int voice_index = -1;
+    std::uint32_t latest_timestamp = 0;
+    if (module.dsp.stage == module_stage::voice)
+      for (int i = 0; i < _gui->engine_voices_active().size(); i++)
+        if (_gui->engine_voices_active()[i] != 0)
+          if (_gui->engine_voices_activated()[i] > latest_timestamp)
+            voice_index = i;
+    plug_state = voice_index == -1 ? &_gui->global_modulation_state() : &_gui->voice_modulation_state(voice_index);
+  }
 
   if(module.graph_renderer != nullptr)
     render(module.graph_renderer(
-      voice_index == -1? _gui->global_modulation_state(): _gui->voice_modulation_state(voice_index), 
-      _gui->get_module_graph_engine(module), _hovered_or_tweaked_param, mapping));
+      *plug_state, _gui->get_module_graph_engine(module), _hovered_or_tweaked_param, mapping));
   _render_dirty = false;
   return true;
 }

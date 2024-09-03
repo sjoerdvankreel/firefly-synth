@@ -32,19 +32,16 @@ V see up :: shit i still need param_was_modded_this_round/voice, otherwise stuff
 V also do the audio matrix graphs
 V also include the mod-mod matrix events
 V make the cv graphs + bolletjes work in case of automation
-* fix the clap / limit the q
+V fix the clap / limit the q
+V am bells clap reaper plots not good the cv-audio matrix
+X maybe just paint all of graphs on 60 fps ?
+V test with disable/enable routes (param_is_modded event)
+X less ugly audio graphs
+* recheck the is fx
 * profile the whole thing 
 * not always paint the first matrix row
-* am bells clap reaper plots not good the cv-audio matrix
-* ditch after-mod, claim micro support ?
-* maybe just paint all of graphs on 60 fps ?
-* test with disable/enable routes (param_is_modded event)
-* global unit lfo phase offset not plot good
-* less ugly audio graphs
-* show clap mod indicator
 * repaint on waveform change (free running or random-per-voice)
 * bugfix: rerender graph on master in param hover?
-* show effective modulation in the ui for clap param mod
 
 wishlist:
 filter microtuning
@@ -52,6 +49,8 @@ DSF falloff to the left
 clap polyphonic modulation
 full-blown renoise support
 fix global unison for mono mode
+ditch after-mod, claim micro support ?
+show effective modulation in the ui for clap param mod
 Feedback FM - but needs per-sample processing, not block
 turn on stuff when dragging (e.g. basic sin, dist skew etc)
 arpeggiator - hard - but easy -> play multiple octaves on-note. or maybe allow 3/s, 5/s, whatever selection
@@ -64,7 +63,9 @@ cheby shaper
 phaser/flanger/chorus
 vst3 note expressions
 flstudio clap support
+show clap mod indicator
 visual routing indicators
 automated regression tests
 better studiorack integration
 do async clear delay lines etc on patch select
+global unit lfo phase offset not plot good
