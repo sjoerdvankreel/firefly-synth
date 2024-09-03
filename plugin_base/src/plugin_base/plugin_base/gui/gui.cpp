@@ -574,16 +574,17 @@ plugin_gui::modulation_outputs_changed()
 
   // automation state is kept in check for all _global/_voice stuff
   // only need to update modulation, see automation_state_changed
-
-  // then copy over the realtime modulation values,
-  // then fire the listeners. they get the "what is new" info
-  // from *_modulation_outputs, used to paint the bubbles on 
-  // lfo/env graphs and current/active (audio engine) state of
-  // the params. they may also query automation_state() and
-  // modulation_state() from "this", some graphs use that
-  // to paint what the audio engine is actually doing 
-  // such as f.e. how the real/current filter state looks like,
-  // instead of just the static values from the gui
+  // however modulation events may not be accurate (may skip events)
+  // so occasionally we need to reset to automation state 
+  // f.e. in case a modulator was disabled and we dont want to
+  // stick it to the last value (only for global -- voice will sort out itself)
+  const double mod_reset_interval = 1.0;
+  double seconds_now = seconds_since_epoch();
+  if (seconds_now - _last_mod_reset_seconds >= mod_reset_interval)
+  {
+    _global_modulation_state.copy_from(_automation_state->state(), false);
+    _last_mod_reset_seconds = seconds_now;
+  }
 
   // set all voices to automation by default,
   // we will overwrite if that voice is active

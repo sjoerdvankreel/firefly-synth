@@ -27,20 +27,20 @@ autobuilds:
 ui-vnext:
 V show active modulation for the other graphs -> better to have a separate state copy including modulation
 V todo show all voices or only last
-* just fix the intermittent stuff by a timer on the gui side to reset to automation, too bad, too complicated
+V just fix the intermittent stuff by a timer on the gui side to reset to automation, too bad, too complicated
+V see up :: shit i still need param_was_modded_this_round/voice, otherwise stuff sticks
+V also do the audio matrix graphs
+V also include the mod-mod matrix events
+* make the cv graphs + bolletjes work in case of automation
 * fix the clap
 * profile the whole thing 
 * deal with lfo overshoot
 * plot amp env in the bg of other env
 * not always paint the first matrix row
 * am bells clap reaper plots not good the cv-audio matrix
-* shit i still need param_was_modded_this_round/voice, otherwise stuff sticks
 * ditch after-mod, claim micro support ?
 * maybe just paint all of graphs on 60 fps ?
-* also do the audio matrix graphs
-* also include the mod-mod matrix events
 * test with disable/enable routes (param_is_modded event)
-* make the cv graphs + bolletjes work in case of automation
 * global unit lfo phase offset not plot good
 * less ugly audio graphs
 * show clap mod indicator
