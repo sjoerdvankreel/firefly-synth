@@ -14,7 +14,6 @@
 namespace plugin_base {
 
 struct plugin_topo;
-struct host_events;
 
 enum class voice_stage { unused, active, releasing, finishing };
 
@@ -136,10 +135,6 @@ struct plugin_block final {
   // for vst3 this is just the host block out events
   // but for clap threadpool we will have to consolidate after voice stage
   std::vector<modulation_output>* modulation_outputs = {};
-
-  // access to raw host events before we make
-  // nice continuous buffers et all of it
-  host_events const* host_events;
 
   void* module_context(int mod, int slot) const;
   jarray<float, 3> const& module_cv(int mod, int slot) const;

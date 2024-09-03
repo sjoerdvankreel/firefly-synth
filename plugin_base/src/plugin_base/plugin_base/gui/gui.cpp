@@ -554,7 +554,6 @@ void
 plugin_gui::modulation_outputs_changed()
 {
 #if 0 // TODO do the magic
-  // TODO also only take the last ones, order matters
   // take out the duplicates, this stuff is not handed to us deterministically
   // because lockfree audio-to-gui queue (i.e. there might be multiple values and we want the last one)
   auto compare = [](auto const& l, auto const& r) {

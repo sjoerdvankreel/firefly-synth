@@ -239,12 +239,12 @@ pb_component::process(ProcessData& data)
     auto num_modulation_outputs = block.events.modulation_outputs.size();
     num_modulation_outputs = std::min((int)num_modulation_outputs, modulation_output_param_count);
     queue = data.outputParameterChanges->addParameterData(_mod_output_count_param_tag, unused_index);
-    queue->addPoint(queue->getPointCount(), *reinterpret_cast<double*>(&num_modulation_outputs), unused_index);
+    queue->addPoint(0, *reinterpret_cast<double*>(&num_modulation_outputs), unused_index);
     for (int e = 0; e < block.events.modulation_outputs.size(); e++)
     {
       auto const& this_modulation_outputs = block.events.modulation_outputs[e];
       queue = data.outputParameterChanges->addParameterData(_mod_output_param_tags[e], unused_index);
-      queue->addPoint(queue->getPointCount(), *reinterpret_cast<double const*>(&this_modulation_outputs.packed), unused_index);
+      queue->addPoint(0, *reinterpret_cast<double const*>(&this_modulation_outputs.packed), unused_index);
     }
   }
 
