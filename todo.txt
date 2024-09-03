@@ -37,11 +37,10 @@ V am bells clap reaper plots not good the cv-audio matrix
 X maybe just paint all of graphs on 60 fps ?
 V test with disable/enable routes (param_is_modded event)
 X less ugly audio graphs
+V not always paint the first matrix row
+X profile the whole thing 
 * recheck the is fx
-* profile the whole thing 
-* not always paint the first matrix row
 * repaint on waveform change (free running or random-per-voice)
-* bugfix: rerender graph on master in param hover?
 
 wishlist:
 filter microtuning
@@ -54,6 +53,7 @@ show effective modulation in the ui for clap param mod
 Feedback FM - but needs per-sample processing, not block
 turn on stuff when dragging (e.g. basic sin, dist skew etc)
 arpeggiator - hard - but easy -> play multiple octaves on-note. or maybe allow 3/s, 5/s, whatever selection
+bugfix: rerender graph on master in param hover?
 
 wishlist sometime:
 mseg

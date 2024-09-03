@@ -137,7 +137,7 @@ module_graph::modulation_outputs_changed(std::vector<modulation_output> const& o
     }
 
   if (rerender)
-    request_rerender(orig_param_first);
+    request_rerender(orig_param_first, false);
 }
 
 void 
@@ -149,7 +149,7 @@ module_graph::module_tab_changed(int module, int slot)
   _activated_module_slot = slot;
   int index = desc.module_topo_to_index.at(module) + slot;
   _last_rerender_cause_param = desc.modules[index].params[0].info.global;
-  request_rerender(_last_rerender_cause_param);
+  request_rerender(_last_rerender_cause_param, false);
 }
 
 void 
@@ -163,7 +163,7 @@ module_graph::any_state_changed(int param, plain_value plain)
     {
       if(_module_params.module_index != -1)
         _last_rerender_cause_param = param;
-      request_rerender(param);
+      request_rerender(param, false);
     }
     return;
   }
@@ -178,11 +178,11 @@ module_graph::any_state_changed(int param, plain_value plain)
 
   if(_last_rerender_cause_param != -1)
   {
-    request_rerender(_last_rerender_cause_param);
+    request_rerender(_last_rerender_cause_param, false);
     return;
   }  
   int index = desc.module_topo_to_index.at(_module_params.module_index) + _activated_module_slot;
-  request_rerender(desc.modules[index].params[0].info.global);
+  request_rerender(desc.modules[index].params[0].info.global, false);
 }
 
 void
@@ -193,7 +193,7 @@ module_graph::module_mouse_enter(int module)
   if (_module_params.module_index != -1 && _module_params.module_index != desc.module->info.index) return;
   if(desc.params.size() == 0) return;
   if(_module_params.render_on_module_mouse_enter && !desc.module->force_rerender_on_param_hover)
-    request_rerender(desc.params[0].info.global);
+    request_rerender(desc.params[0].info.global, false);
 }
 
 void
@@ -206,11 +206,11 @@ module_graph::param_mouse_enter(int param)
   auto begin = _module_params.render_on_param_mouse_enter_modules.begin();
   if (std::find(begin, end, mapping.topo.module_index) != end ||
     std::find(begin, end, -1) != end)
-    request_rerender(param);
+    request_rerender(param, true);
 }
 
 void
-module_graph::request_rerender(int param)
+module_graph::request_rerender(int param, bool hover)
 {
   auto const& desc = _gui->automation_state()->desc();
   auto const& mapping = desc.param_mappings.params[param];
@@ -220,6 +220,7 @@ module_graph::request_rerender(int param)
   
   _render_dirty = true;
   _hovered_or_tweaked_param = param;
+  if (hover) _hovered_param = param;
 }
 
 bool
@@ -228,8 +229,13 @@ module_graph::render_if_dirty()
   if (!_render_dirty) return false;
   if (_hovered_or_tweaked_param == -1) return false;
 
+  int render_request_param = _hovered_or_tweaked_param;
+  if(_module_params.hover_selects_different_graph && _hovered_param != -1)
+    render_request_param = _hovered_param;
+  if (render_request_param == -1) return false;
+
   auto const& mappings = _gui->automation_state()->desc().param_mappings.params;
-  param_topo_mapping mapping = mappings[_hovered_or_tweaked_param].topo;
+  param_topo_mapping mapping = mappings[render_request_param].topo;
   auto const& module = _gui->automation_state()->desc().plugin->modules[mapping.module_index];
 
   plugin_state const* plug_state = _gui->automation_state();
@@ -248,7 +254,7 @@ module_graph::render_if_dirty()
 
   if(module.graph_renderer != nullptr)
     render(module.graph_renderer(
-      *plug_state, _gui->get_module_graph_engine(module), _hovered_or_tweaked_param, mapping));
+      *plug_state, _gui->get_module_graph_engine(module), render_request_param, mapping));
   _render_dirty = false;
   return true;
 }

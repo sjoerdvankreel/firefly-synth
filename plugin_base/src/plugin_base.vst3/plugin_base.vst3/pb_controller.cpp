@@ -117,7 +117,6 @@ pb_controller::setParamNormalized(ParamID tag, ParamValue value)
   }
   
   // fake midi params are not mapped
-  // TODO whould we also not take the mod output params into account ?
   auto mapping_iter = automation_state().desc().param_mappings.tag_to_index.find(tag);
   if (mapping_iter != automation_state().desc().param_mappings.tag_to_index.end())
   {
@@ -130,7 +129,6 @@ pb_controller::setParamNormalized(ParamID tag, ParamValue value)
   // upon receiving the "count" param, update the count
   // upon receiving any other param, set the fill bit
   // whenever the first N consecutive fill bits >= count, repaint and reset
-  // TODO also employ this scheme for clap! that one takes loads of mod events and floods the UI
   bool needs_mod_output_rescan = false;
   if (tag == _modulation_output_count_param_tag)
   {

@@ -27,6 +27,7 @@ struct module_graph_params
   bool render_on_tab_change = false;
   bool render_automation_state = false; // or modulation state
   bool render_on_module_mouse_enter = false;
+  bool hover_selects_different_graph = false; // for cv matrices
   std::vector<int> render_on_param_mouse_enter_modules = {};
   // trigger also on changes in these
   std::vector<int> dependent_module_indices = {};
@@ -70,6 +71,7 @@ public juce::SettableTooltipClient
   bool _done = false;
   bool _render_dirty = true;
   int _activated_module_slot = 0;
+  int _hovered_param = -1;
   int _hovered_or_tweaked_param = -1;
   int _last_rerender_cause_param = -1;
 
@@ -77,7 +79,7 @@ public juce::SettableTooltipClient
   module_graph_params const _module_params;
 
   bool render_if_dirty();
-  void request_rerender(int param);
+  void request_rerender(int param, bool hover);
 
 public:
   ~module_graph();
