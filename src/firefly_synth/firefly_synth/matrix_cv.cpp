@@ -658,7 +658,6 @@ cv_matrix_engine_base::before_process(plugin_block& block)
   //for(int i = 0; i < block.host_events->block.size(); i++)
     //if (this_param_start <= block.host_events->block[i].param && block.host_events->block[i].param < this_param_end)
     //{
-#if 0 // perf check
   if(_global) // voice will pick up on (de)activate
       for (int j = 0; j < _targets.size(); j++)
       {
@@ -674,7 +673,6 @@ cv_matrix_engine_base::before_process(plugin_block& block)
       }
       //break;
     //}
-#endif
 }
 
 void 
