@@ -42,7 +42,7 @@ V not always paint the first matrix row
 * make some options in the gui to draw mod or not
 * profile the whole thing 
 * recheck the is fx
-* redo the bubbles as overlays ?
+* redo the bubbles as overlays ? => yes
 * i have to tweak shit for the mat graphs to work?
 * drop the mod indicators from matrices? -> repaint on_voice/_cv_param_changed
 
