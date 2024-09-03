@@ -61,54 +61,77 @@ module_graph::modulation_outputs_changed(std::vector<modulation_output> const& o
   if (_hovered_or_tweaked_param == -1)
     return;
 
-  int current_orig_module_slot = -1;
-  int current_orig_module_index = -1;
+  int orig_module_slot = -1;
+  int orig_module_index = -1;
   auto const& desc = _gui->automation_state()->desc();
+  auto const& topo = *desc.plugin;
+  auto const& mappings = desc.param_mappings.params;
+  param_topo_mapping mapping = mappings[_hovered_or_tweaked_param].topo;
+
   if (_module_params.module_index != -1)
   {
-    current_orig_module_slot = _activated_module_slot;
-    current_orig_module_index = _module_params.module_index;
+    orig_module_slot = _activated_module_slot;
+    orig_module_index = _module_params.module_index;
   }
   else
   {
-    current_orig_module_slot = desc.param_mappings.params[_hovered_or_tweaked_param].topo.module_slot;
-    current_orig_module_index = desc.param_mappings.params[_hovered_or_tweaked_param].topo.module_index;
+    orig_module_slot = desc.param_mappings.params[_hovered_or_tweaked_param].topo.module_slot;
+    orig_module_index = desc.param_mappings.params[_hovered_or_tweaked_param].topo.module_index;
   }
-  int orig_module_global = desc.module_topo_to_index.at(current_orig_module_index) + current_orig_module_slot;
+
+  // this is for stuff when someone else wants to react to us (eg cv matrix to lfo)
+  // as well as to itself
+  int mapped_module_slot = orig_module_slot;
+  int mapped_module_index = orig_module_index;
+  if (topo.modules[orig_module_index].mod_output_source_selector != nullptr)
+  {
+    auto selected = topo.modules[orig_module_index].mod_output_source_selector(*_gui->automation_state(), mapping);
+    if (selected.module_index != -1 && selected.module_slot != -1)
+    {
+      mapped_module_slot = selected.module_slot;
+      mapped_module_index = selected.module_index;
+    }
+  }
+
+  int orig_module_global = desc.module_topo_to_index.at(orig_module_index) + orig_module_slot;
+  int mapped_module_global = desc.module_topo_to_index.at(mapped_module_index) + mapped_module_slot;
   int orig_param_first = desc.modules[orig_module_global].params[0].info.global;
 
-  // TODO only on relevant events
-  request_rerender(orig_param_first);
+  for (int i = 0; i < outputs.size(); i++)
+    if (outputs[i].event_type() == output_event_type::out_event_param_state || 
+      outputs[i].event_type() == output_event_type::out_event_cv_state)
+    {
+      if (orig_module_global == outputs[i].state.param.module_global)
+      {
+        request_rerender(orig_param_first);
+        return;
+      }
+      if (mapped_module_global == outputs[i].state.param.module_global)
+      {
+        // dont feed the cv matrix with lfo params -- always orig
+        request_rerender(orig_param_first);
+        return;
+      }
+    }
+
+    int x = 0;
+    x++; // TODO;
+
   int x0813 = 9;
   if (x0813 == 9) return; // TODO
+
+#if 0
+  // TODO only on relevant events
+  request_rerender(orig_param_first);
   // also todo move the bolletjes painting to the actual painting
+
+
 
   // all stuff below is for the cv indicators (the dots that follow env/lfo)
 
   float w = getWidth();
   float h = getHeight();
   int count = _data.series().size();
-
-  int current_mapped_module_slot = -1;
-  int current_mapped_module_index = -1;
-
-  auto const& topo = *desc.plugin;
-  auto const& mappings = desc.param_mappings.params;
-  param_topo_mapping mapping = mappings[_hovered_or_tweaked_param].topo;
-  
-  // this is for stuff when someone else wants to paint our bubbles
-  // f.e. when cv matrix wants to paint the position of the longest env in the cv mixdown
-  current_mapped_module_slot = current_orig_module_slot;
-  current_mapped_module_index = current_orig_module_index;
-  if (topo.modules[current_orig_module_index].mod_output_source_selector != nullptr)
-  {
-    auto selected = topo.modules[current_orig_module_index].mod_output_source_selector(*_gui->automation_state(), mapping);
-    if (selected.module_index != -1 && selected.module_slot != -1)
-    {
-      current_mapped_module_slot = selected.module_slot;
-      current_mapped_module_index = selected.module_index;
-    }
-  }
 
   bool need_full_repaint = false;
   int current_output = 0;
@@ -154,6 +177,7 @@ module_graph::modulation_outputs_changed(std::vector<modulation_output> const& o
   // TODO just repaint otherwise too complicated?
   // also where are the bolletjes
   request_rerender(orig_param_first);
+#endif
 }
 
 void 

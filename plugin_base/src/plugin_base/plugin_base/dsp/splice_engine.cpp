@@ -225,6 +225,8 @@ plugin_splice_engine::process()
       inner_block.events.output_params.end());
 
     // only care about the last one
+    // to not overwhelm the ui with events
+    // ui is written to take this stream as "not perfect, will catch up eventually"
     if (i == total_block_count - 1)
     {
       _host_block.events.modulation_outputs.insert(
