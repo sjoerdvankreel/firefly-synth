@@ -553,24 +553,10 @@ plugin_gui::automation_state_changed(int param_index, normalized_value normalize
 void 
 plugin_gui::modulation_outputs_changed()
 {
-#if 0 // TODO do the magic
-  // TODO also only take the last ones, order matters
-  // take out the duplicates, this stuff is not handed to us deterministically
-  // because lockfree audio-to-gui queue (i.e. there might be multiple values and we want the last one)
-  auto compare = [](auto const& l, auto const& r) {
-    if (l.data.module_global < r.data.module_global) return false;
-    if (l.data.module_global > r.data.module_global) return true;
-    if (l.data.param_global < r.data.param_global) return false;
-    if (l.data.param_global > r.data.param_global) return true;
-    return l.data.voice_index < r.data.voice_index; };
-  std::sort(_modulation_outputs->begin(), _modulation_outputs->end(), compare);
-  auto pred = [](auto const& l, auto const& r) {
-    if (l.data.module_global != r.data.module_global) return false;
-    if (l.data.param_global != r.data.param_global) return false;
-    return l.data.voice_index == r.data.voice_index; };
+  std::sort(_modulation_outputs->begin(), _modulation_outputs->end());
+  auto pred = [](auto const& l, auto const& r) { return !(l < r) && !(r < l); };
   auto it = std::unique(_modulation_outputs->begin(), _modulation_outputs->end(), pred);
   _modulation_outputs->erase(it, _modulation_outputs->end());
-#endif
 
   // automation state is kept in check for all _global/_voice stuff
   // only need to update modulation, see automation_state_changed

@@ -119,4 +119,39 @@ union modulation_output
   }
 };
 
+inline bool operator < 
+(modulation_output const& l, modulation_output const& r)
+{
+  if (l.event_type() < r.event_type()) return true;
+  if (l.event_type() > r.event_type()) return false;
+  if (l.event_type() == out_event_voice_activation)
+  {
+    if (l.state.voice.voice_index < r.state.voice.voice_index) return true;
+    if (l.state.voice.voice_index > r.state.voice.voice_index) return false;
+    if (l.state.voice.stream_time_low < r.state.voice.stream_time_low) return true;
+    if (l.state.voice.stream_time_low > r.state.voice.stream_time_low) return false;
+    return false;
+  }
+  if (l.event_type() == out_event_cv_state)
+  {
+    if (l.state.cv.module_global < r.state.cv.module_global) return true;
+    if (l.state.cv.module_global > r.state.cv.module_global) return false;
+    if (l.state.cv.voice_index < r.state.cv.voice_index) return true;
+    if (l.state.cv.voice_index > r.state.cv.voice_index) return false;
+    return false;
+  }
+  if (l.event_type() == out_event_param_state)
+  {
+    if (l.state.param.module_global < r.state.param.module_global) return true;
+    if (l.state.param.module_global > r.state.param.module_global) return false;
+    if (l.state.param.param_global < r.state.param.param_global) return true;
+    if (l.state.param.param_global > r.state.param.param_global) return false;
+    if (l.state.param.voice_index < r.state.param.voice_index) return true;
+    if (l.state.param.voice_index > r.state.param.voice_index) return false;
+    return false;
+  }
+  assert(false);
+  return false;
+}
+
 }

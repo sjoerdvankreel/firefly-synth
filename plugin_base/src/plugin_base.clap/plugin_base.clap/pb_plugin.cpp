@@ -344,7 +344,9 @@ pb_plugin::push_to_gui(int index, clap_value clap)
   e.index = index;
   e.type = sync_event_type::value_changing;
   e.plain = topo.domain.normalized_to_plain(clap_to_normalized(topo, clap));
-  _to_gui_events->enqueue(e);
+  bool enqueued = _to_gui_events->try_enqueue(e);
+  assert(enqueued);
+  (void)enqueued;
 }
 
 std::int32_t
@@ -783,12 +785,15 @@ pb_plugin::process(clap_process const* process) noexcept
     auto const& out_event = block.events.output_params[e];
     to_gui_event.index = out_event.param;
     to_gui_event.plain = _splice_engine.state().desc().normalized_to_plain_at_index(out_event.param, out_event.normalized);
-    _to_gui_events->enqueue(to_gui_event);
+    bool enqueued = _to_gui_events->try_enqueue(to_gui_event);
+    assert(enqueued);
+    (void)enqueued;
   }
 
-  // modulation outputs
+  // modulation outputs - dont check if it happened
+  // gui is written to deal with missing events, and there's a lot of them
   for (int e = 0; e < block.events.modulation_outputs.size(); e++)
-    _modulation_output_queue->enqueue(block.events.modulation_outputs[e]);
+    _modulation_output_queue->try_enqueue(block.events.modulation_outputs[e]);
 
   _splice_engine.release_block();
   return CLAP_PROCESS_CONTINUE;

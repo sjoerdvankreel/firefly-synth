@@ -197,7 +197,7 @@ private:
 
   std::unique_ptr<lnf> _lnf = {};
   float _system_dpi_scale = 1.0f;
-  double _last_mod_reset_seconds = 0.0;
+  double _last_mod_reset_seconds = 0.0;  
 
   // this one mirrors the static values of the parameters
   plugin_state* const _automation_state;
