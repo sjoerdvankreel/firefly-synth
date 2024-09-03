@@ -38,6 +38,7 @@ X maybe just paint all of graphs on 60 fps ?
 V test with disable/enable routes (param_is_modded event)
 X less ugly audio graphs
 V not always paint the first matrix row
+* make some options in the gui to draw mod or not
 * profile the whole thing 
 * recheck the is fx
 * drop the mod indicators from matrices? -> repaint on_voice/_cv_param_changed
