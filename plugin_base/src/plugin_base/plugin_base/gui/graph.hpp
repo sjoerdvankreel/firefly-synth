@@ -46,7 +46,8 @@ protected:
 
   graph_data _data;
   // horizontal positions for lfo/env
-  std::vector<float> _mod_indicators = {}; 
+  double _mod_indicators_activated = {};
+  std::vector<float> _mod_indicators = {};
 
 public:
   void render(graph_data const& data);

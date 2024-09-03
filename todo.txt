@@ -31,11 +31,9 @@ V just fix the intermittent stuff by a timer on the gui side to reset to automat
 V see up :: shit i still need param_was_modded_this_round/voice, otherwise stuff sticks
 V also do the audio matrix graphs
 V also include the mod-mod matrix events
-* make the cv graphs + bolletjes work in case of automation
-* fix the clap
+V make the cv graphs + bolletjes work in case of automation
+* fix the clap / limit the q
 * profile the whole thing 
-* deal with lfo overshoot
-* plot amp env in the bg of other env
 * not always paint the first matrix row
 * am bells clap reaper plots not good the cv-audio matrix
 * ditch after-mod, claim micro support ?

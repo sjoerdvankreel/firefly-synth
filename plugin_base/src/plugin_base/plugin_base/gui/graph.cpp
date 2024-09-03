@@ -96,13 +96,27 @@ module_graph::modulation_outputs_changed(std::vector<modulation_output> const& o
   int mapped_module_global = desc.module_topo_to_index.at(mapped_module_index) + mapped_module_slot;
   int orig_param_first = desc.modules[orig_module_global].params[0].info.global;
 
-  _mod_indicators.clear();
+  bool rerender = false;
+  bool any_mod_indicator_found = false;
   for (int i = 0; i < outputs.size(); i++)
     if (outputs[i].event_type() == output_event_type::out_event_cv_state)
       if (mapped_module_global == outputs[i].state.cv.module_global)
+      {
+        if (!any_mod_indicator_found)
+        {
+          any_mod_indicator_found = true;
+          _mod_indicators.clear();
+          _mod_indicators_activated = seconds_since_epoch();
+        }
         _mod_indicators.push_back(outputs[i].state.cv.position_normalized);
+      }
 
-  bool rerender = false;
+  if (!any_mod_indicator_found && seconds_since_epoch() >= _mod_indicators_activated + 1.0)
+  {
+    _mod_indicators.clear();
+    rerender = true;
+  }
+
   for (int i = 0; i < outputs.size(); i++)
     if (outputs[i].event_type() == output_event_type::out_event_param_state)
     {
