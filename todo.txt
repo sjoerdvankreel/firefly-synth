@@ -46,6 +46,7 @@ V not always paint the first matrix row
 * i have to tweak shit for the mat graphs to work?
 * drop the mod indicators from matrices? -> repaint on_voice/_cv_param_changed
 * modulation distortion demo bolletjes not render good => need to filter event shit on the audio side. it goes backwards in time on the gui
+* the repaint framerate is too slow probably bc it repaint slow..
 
 wishlist:
 filter microtuning
