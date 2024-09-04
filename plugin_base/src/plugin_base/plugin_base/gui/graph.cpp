@@ -109,7 +109,7 @@ module_graph::modulation_outputs_changed(std::vector<modulation_output> const& o
   int mapped_module_global = desc.module_topo_to_index.at(mapped_module_index) + mapped_module_slot;
   int orig_param_first = desc.modules[orig_module_global].params[0].info.global;
 
-  bool rerender = false;
+  bool rerender_indicators = false;
   bool any_mod_indicator_found = false;
   for (int i = 0; i < outputs.size(); i++)
     if (outputs[i].event_type() == output_event_type::out_event_cv_state)
@@ -127,16 +127,17 @@ module_graph::modulation_outputs_changed(std::vector<modulation_output> const& o
   if (!any_mod_indicator_found && seconds_since_epoch() >= _mod_indicators_activated + 1.0)
   {
     _mod_indicators.clear();
-    rerender = true;
+    rerender_indicators = true;
   }
 
+  bool rerender_full = false;
   for (int i = 0; i < outputs.size(); i++)
     if (outputs[i].event_type() == output_event_type::out_event_param_state)
     {
       if (orig_module_global == outputs[i].state.param.module_global ||
         mapped_module_global == outputs[i].state.param.module_global)
       {
-        rerender = true;
+        rerender_full = true;
         break;
       }
     } else if (outputs[i].event_type() == output_event_type::out_event_cv_state)
@@ -144,13 +145,15 @@ module_graph::modulation_outputs_changed(std::vector<modulation_output> const& o
       if (orig_module_global == outputs[i].state.cv.module_global ||
         mapped_module_global == outputs[i].state.cv.module_global)
       {
-        rerender = true;
+        rerender_indicators = true;
         break;
       }
     }
 
-  if (rerender)
+  if (rerender_full)
     request_rerender(orig_param_first, false);
+  else if(rerender_indicators)
+    repaint();
 }
 
 void 

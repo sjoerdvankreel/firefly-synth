@@ -122,7 +122,7 @@ gui_visuals_items()
 {
   std::vector<list_item> result;
   result.emplace_back("{998888CA-D63C-4FEE-8166-8A795DEE0F11}", "None", "Disabled (most efficient)");
-  result.emplace_back("{8A447F5B-D026-47CE-B0B4-0D4104973ACF}", "Params Only", "Show param modulation only (also efficient)");
+  result.emplace_back("{8A447F5B-D026-47CE-B0B4-0D4104973ACF}", "Params Only", "Show param modulation only (less efficient)");
   result.emplace_back("{9274A8EB-3FBE-4B72-89ED-0C841235949D}", "Params And Graphs", "Show param and graph modulation (expensive)");
   return result;
 }
