@@ -138,6 +138,8 @@ struct module_topo_gui final {
   bool enable_tab_menu = true;
   module_tab_menu_handler_factory menu_handler_factory;
 
+  bool render_automation_state = false; // or modulation state / for graphs
+
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(module_topo_gui);
 };
 

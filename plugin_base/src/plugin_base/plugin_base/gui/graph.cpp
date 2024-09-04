@@ -264,7 +264,9 @@ module_graph::render_if_dirty()
 
   gui_visuals_mode visuals_mode = _gui->get_visuals_mode();
   plugin_state const* plug_state = _gui->automation_state();
-  if (visuals_mode == gui_visuals_mode_full && !_module_params.render_automation_state)
+  int module_global = plug_state->desc().param_mappings.params[render_request_param].module_global;
+  bool render_automation_state = plug_state->desc().modules[module_global].module->gui.render_automation_state;
+  if (visuals_mode == gui_visuals_mode_full && !render_automation_state)
   {
     // find the latest active voice, otherwise go with global
     int voice_index = -1;

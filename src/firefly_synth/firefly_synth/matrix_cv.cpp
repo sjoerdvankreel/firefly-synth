@@ -449,6 +449,7 @@ cv_matrix_topo(
     make_module_dsp(stage, module_output::cv, scratch_count, {
       make_module_dsp_output(false, make_topo_info_basic("{3AEE42C9-691E-484F-B913-55EB05CFBB02}", "Output", 0, route_count)) }),
     make_module_gui(section, pos, { 1, 1 })));
+  result.gui.render_automation_state = true; // don't want the graph source to be modulating the graph
   
   result.graph_engine_factory = make_graph_engine;
   if(!cv && !is_fx) result.default_initializer = global ? init_audio_global_default : init_audio_voice_default;
