@@ -134,6 +134,14 @@ module_graph::modulation_outputs_changed(std::vector<modulation_output> const& o
   for (int i = 0; i < outputs.size(); i++)
     if (outputs[i].event_type() == output_event_type::out_event_param_state)
     {
+      // debugging
+      auto const& orig_desc = _gui->automation_state()->desc().modules[orig_module_global];
+      auto const& mapped_desc = _gui->automation_state()->desc().modules[mapped_module_global];
+      auto const& event_desc = _gui->automation_state()->desc().modules[outputs[i].state.param.module_global];
+      (void)orig_desc;
+      (void)mapped_desc;
+      (void)event_desc;
+
       if (orig_module_global == outputs[i].state.param.module_global ||
         mapped_module_global == outputs[i].state.param.module_global)
       {
