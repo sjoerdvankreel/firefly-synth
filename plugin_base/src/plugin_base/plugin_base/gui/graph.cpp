@@ -154,7 +154,7 @@ module_graph::modulation_outputs_changed(std::vector<modulation_output> const& o
         mapped_module_global == outputs[i].state.cv.module_global)
       {
         rerender_indicators = true;
-        break;
+        // DONT break -- full rerender trumps indicators
       }
     }
 
