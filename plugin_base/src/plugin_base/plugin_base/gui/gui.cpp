@@ -605,6 +605,8 @@ plugin_gui::modulation_outputs_changed()
   {
     _global_modulation_state.copy_from(_automation_state->state(), false);
     _last_mod_reset_seconds = seconds_now;
+    for (auto listener_it : _modulation_output_listeners)
+      listener_it->modulation_outputs_reset();
   }
 
   // set all voices to automation by default,
