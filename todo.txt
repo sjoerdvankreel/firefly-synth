@@ -40,6 +40,7 @@ X less ugly audio graphs
 V not always paint the first matrix row
 V make some options in the gui to draw mod or not
 V profile the whole thing 
+* limit listeners for params to that param?
 * the kick in demo 2 not renders good
 * recheck the is fx
 * redo the bubbles as overlays ? => yes
