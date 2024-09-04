@@ -12,6 +12,10 @@ It's fully resizable by scaling (by dragging the bottom right corner) and also r
 A knob with a circle in it or a slider with a small dot in it means it can be modulated by the CV matrices.<br/>
 Hover over a parameter to see a more detailed description.
 
+By default the UI shows the realtime state of the audio engine for both graphs and parameters.<br/>
+Since this is quite CPU expensive (sorry i didn't do fancy gpu offloading) there's an option to back down
+on the amount of realtime repainting, see Visuals dropdown in the master section.
+
 ### Drag-and-drop to mod matrix support
 
 - Drag any parameter that can act as a mod source (Aux N, Mod Wheel etc) by dragging the parameter label
