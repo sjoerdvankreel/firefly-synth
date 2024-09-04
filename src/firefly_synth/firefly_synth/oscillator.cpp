@@ -214,6 +214,8 @@ render_osc_graphs(plugin_state const& state, graph_engine* engine, int slot, boo
   int type = state.get_plain_at(module_osc, slot, param_type, 0).step();
   float cent = state.get_plain_at(module_osc, slot, param_cent, 0).real();
   float gain = state.get_plain_at(module_osc, slot, param_gain, 0).real();
+
+  // NOTE we do not take pitch modulators into account
   float freq = pitch_to_freq_no_tuning(note + cent);
   
   plugin_block const* block = nullptr;
