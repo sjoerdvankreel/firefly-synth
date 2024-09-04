@@ -39,8 +39,8 @@ V test with disable/enable routes (param_is_modded event)
 X less ugly audio graphs
 V not always paint the first matrix row
 V make some options in the gui to draw mod or not
+V profile the whole thing 
 * the kick in demo 2 not renders good
-* profile the whole thing 
 * recheck the is fx
 * redo the bubbles as overlays ? => yes
 * i have to tweak shit for the mat graphs to work?
