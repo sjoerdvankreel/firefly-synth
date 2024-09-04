@@ -20,7 +20,11 @@ class plugin_gui;
 class tab_component;
 class grid_component;
 
+std::vector<list_item>
+gui_visuals_items();
+
 enum class gui_hover_type { param, module, custom };
+enum gui_visuals_mode { gui_visuals_mode_off, gui_visuals_mode_params, gui_visuals_mode_full };
 
 // globally saved (across instances)
 inline std::string const user_state_scale_key = "scale";
