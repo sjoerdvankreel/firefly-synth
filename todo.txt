@@ -48,8 +48,9 @@ V limit listeners for params to that param?
 V the kick in demo 2 not renders good
 V modulation distortion demo bolletjes not render good => need to filter event shit on the audio side. it goes backwards in time on the gui
 V recheck the is fx and the clap
-* update the docs for cpu stuff
+V update the docs for cpu stuff
 * update the mod demo video
+* make a dedicated mod demo
 
 wishlist:
 filter microtuning
