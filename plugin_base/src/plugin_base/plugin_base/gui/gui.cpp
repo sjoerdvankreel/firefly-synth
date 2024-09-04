@@ -560,9 +560,34 @@ plugin_gui::automation_state_changed(int param_index, normalized_value normalize
     _voice_modulation_states[i].set_normalized_at_index(param_index, normalized);
 }
 
+gui_visuals_mode
+plugin_gui::get_visuals_mode() const
+{
+  auto const& visuals_params = _automation_state->desc().plugin->engine.visuals;
+  if (visuals_params.module_index != -1)
+    return (gui_visuals_mode)_automation_state->get_plain_at(visuals_params.module_index, 0, visuals_params.param_index, 0).step();
+  return gui_visuals_mode_off;
+}
+
 void 
 plugin_gui::modulation_outputs_changed()
 {
+  // clear stuff and possibly pick up on the next round
+  // needed when we go from not-off to off
+  gui_visuals_mode new_visuals_mode = get_visuals_mode();
+  if (new_visuals_mode != _prev_visual_mode)
+  {
+    for (auto listener_it : _modulation_output_listeners)
+      listener_it->modulation_outputs_reset();
+    _prev_visual_mode = new_visuals_mode;
+    return;
+  }
+
+  // no need to do anything
+  _prev_visual_mode = new_visuals_mode;
+  if (new_visuals_mode == gui_visuals_mode_off)
+    return;
+
   std::sort(_modulation_outputs->begin(), _modulation_outputs->end());
   auto pred = [](auto const& l, auto const& r) { return !(l < r) && !(r < l); };
   auto it = std::unique(_modulation_outputs->begin(), _modulation_outputs->end(), pred);

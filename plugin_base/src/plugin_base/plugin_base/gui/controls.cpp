@@ -574,6 +574,14 @@ param_slider::fixed_width(int parent_w, int parent_h) const
 }
 
 void 
+param_slider::modulation_outputs_reset()
+{
+  _min_modulation_output = -1.0f;
+  _max_modulation_output = -1.0f;
+  repaint();
+}
+
+void 
 param_slider::modulation_outputs_changed(std::vector<modulation_output> const& outputs)
 {
   float prev_min = _min_modulation_output;

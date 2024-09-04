@@ -248,6 +248,8 @@ public:
   // param modulation outputs
   float min_modulation_output() const { return _min_modulation_output; }
   float max_modulation_output() const { return _max_modulation_output; }
+  
+  void modulation_outputs_reset() override;
   void modulation_outputs_changed(std::vector<modulation_output> const& outputs) override;
   double modulation_output_activated_time_seconds() const { return _modulation_output_activated_time_seconds; }
 

@@ -142,8 +142,11 @@ struct engine_param
 
 struct engine_params
 {
+  // realtime visualization
+  engine_param visuals = {};
+
   // smooths parameter automation, midi and bpm changes, use -1 for defaults,
-  // must resolve to real parameter indicating nr of milliseconds to smooth  engine_param bpm_smoothing = {};
+  // must resolve to real parameter indicating nr of milliseconds to smooth
   engine_param bpm_smoothing = {};
   engine_param midi_smoothing = {};
   engine_param automation_smoothing = {};

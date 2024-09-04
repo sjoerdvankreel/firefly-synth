@@ -21,7 +21,7 @@ module_graph::
 
 module_graph::
 module_graph(plugin_gui* gui, lnf* lnf, graph_params const& params, module_graph_params const& module_params):
-graph(lnf, params), _gui(gui), _module_params(module_params)
+graph(gui, lnf, params), _module_params(module_params)
 { 
   assert(_module_params.fps > 0);
   assert(_module_params.render_on_tweak || _module_params.render_on_tab_change ||
@@ -54,10 +54,23 @@ module_graph::timerCallback()
     repaint();
 }
 
+void
+module_graph::modulation_outputs_reset()
+{
+  _mod_indicators.clear();
+  _render_dirty = true;
+  render_if_dirty();
+}
+
 void 
 module_graph::modulation_outputs_changed(std::vector<modulation_output> const& outputs)
 {
   if (_hovered_or_tweaked_param == -1)
+    return;
+
+  // we still get the events, so need to back off.
+  // it is this way because the param sliders still need the events for param-only mode
+  if (_gui->get_visuals_mode() != gui_visuals_mode_full)
     return;
 
   int orig_module_slot = -1;
@@ -238,8 +251,9 @@ module_graph::render_if_dirty()
   param_topo_mapping mapping = mappings[render_request_param].topo;
   auto const& module = _gui->automation_state()->desc().plugin->modules[mapping.module_index];
 
+  gui_visuals_mode visuals_mode = _gui->get_visuals_mode();
   plugin_state const* plug_state = _gui->automation_state();
-  if (!_module_params.render_automation_state)
+  if (visuals_mode == gui_visuals_mode_full && !_module_params.render_automation_state)
   {
     // find the latest active voice, otherwise go with global
     int voice_index = -1;
@@ -260,8 +274,8 @@ module_graph::render_if_dirty()
 }
 
 graph::
-graph(lnf* lnf, graph_params const& params) :
-_lnf(lnf), _data(graph_data_type::na, {}), _params(params) {}
+graph(plugin_gui* gui, lnf* lnf, graph_params const& params) :
+_lnf(lnf), _data(graph_data_type::na, {}), _params(params), _gui(gui) {}
 
 void 
 graph::render(graph_data const& data)
@@ -410,6 +424,8 @@ graph::paint(Graphics& g)
     for(int i = 0; i < series.size(); i++)
       series[i] = bipolar_to_unipolar(series[i]);
   paint_series(g, series, _data.bipolar(), _data.stroke_thickness(), 0.5f);
+
+  if (_gui->get_visuals_mode() != gui_visuals_mode_full) return;
 
   // paint the indicator bubbles
   int count = _data.series().size();

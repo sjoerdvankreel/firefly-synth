@@ -47,6 +47,8 @@ private:
 protected:
 
   graph_data _data;
+  plugin_gui* const _gui;
+
   // horizontal positions for lfo/env
   double _mod_indicators_activated = {};
   std::vector<float> _mod_indicators = {};
@@ -55,7 +57,7 @@ public:
   void render(graph_data const& data);
   void paint(juce::Graphics& g) override;
 
-  graph(lnf* lnf, graph_params const& params);
+  graph(plugin_gui* gui, lnf* lnf, graph_params const& params);
 };
 
 // taps into module_topo.graph_renderer based on task tweaked/hovered param
@@ -75,7 +77,6 @@ public juce::SettableTooltipClient
   int _hovered_or_tweaked_param = -1;
   int _last_rerender_cause_param = -1;
 
-  plugin_gui* const _gui;
   module_graph_params const _module_params;
 
   bool render_if_dirty();
@@ -94,6 +95,8 @@ public:
   void module_mouse_enter(int module) override;
   void module_tab_changed(int module, int slot) override;
   void any_state_changed(int param, plain_value plain) override;  
+
+  void modulation_outputs_reset() override;
   void modulation_outputs_changed(std::vector<modulation_output> const& outputs) override;
 };
 

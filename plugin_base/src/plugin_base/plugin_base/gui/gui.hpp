@@ -122,6 +122,8 @@ public:
 class modulation_output_listener
 {
 public:
+  virtual void
+  modulation_outputs_reset() = 0;
   virtual void 
   modulation_outputs_changed(std::vector<modulation_output> const& outputs) = 0;
 };
@@ -182,6 +184,7 @@ public:
   std::vector<int> const& engine_voices_active() const { return _engine_voices_active; }
   std::vector<std::uint32_t> const& engine_voices_activated() const { return _engine_voices_activated; }
 
+  gui_visuals_mode get_visuals_mode() const;
   extra_state* extra_state_() const { return _extra_state; }
   plugin_state* automation_state() const { return _automation_state; }
   plugin_state const& global_modulation_state() const { return _global_modulation_state; }
@@ -202,6 +205,7 @@ private:
   std::unique_ptr<lnf> _lnf = {};
   float _system_dpi_scale = 1.0f;
   double _last_mod_reset_seconds = 0.0;  
+  gui_visuals_mode _prev_visual_mode = (gui_visuals_mode)-1;
 
   // this one mirrors the static values of the parameters
   plugin_state* const _automation_state;

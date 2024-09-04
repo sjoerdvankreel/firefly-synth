@@ -353,6 +353,8 @@ synth_topo(format_basic_config const* config, bool is_fx, std::string const& ful
   result->version.patch = FF_SYNTH_VERSION_PATCH;
   result->engine.voice_mode.module_index = module_voice_in;
   result->engine.voice_mode.param_index = voice_in_param_mode;
+  result->engine.visuals.module_index = module_master_settings;
+  result->engine.visuals.param_index = master_settings_param_visuals;
   result->engine.bpm_smoothing.module_index = module_master_settings;
   result->engine.bpm_smoothing.param_index = master_settings_param_tempo_smooth;
   result->engine.midi_smoothing.module_index = module_master_settings;

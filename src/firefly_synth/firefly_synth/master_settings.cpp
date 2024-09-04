@@ -18,10 +18,11 @@ enum { section_tuning, section_preset, section_smoothing, section_visuals };
 enum { param_tuning_mode, param_preset, param_midi_smooth, param_tempo_smooth, param_auto_smooth, param_visuals, param_count };
 
 // we provide the buttons, everyone else needs to implement it
+extern int const master_settings_param_visuals = param_visuals;
+extern int const master_settings_param_tuning_mode = param_tuning_mode;
 extern int const master_settings_param_auto_smooth = param_auto_smooth;
 extern int const master_settings_param_midi_smooth = param_midi_smooth;
 extern int const master_settings_param_tempo_smooth = param_tempo_smooth;
-extern int const master_settings_param_tuning_mode = param_tuning_mode;
 
 static graph_data
 render_graph(plugin_state const& state, graph_engine* engine, int param, param_topo_mapping const& mapping)
