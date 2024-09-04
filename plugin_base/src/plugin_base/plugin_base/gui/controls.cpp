@@ -584,27 +584,30 @@ param_slider::modulation_outputs_reset()
 void 
 param_slider::modulation_outputs_changed(std::vector<modulation_output> const& outputs)
 {
+  _this_mod_outputs.clear();
+  std::copy_if(outputs.begin(), outputs.end(), std::back_inserter(_this_mod_outputs),
+    [this](auto const& output) { return output.event_type() == output_event_type::out_event_param_state &&
+    output.state.param.param_global == _param->info.global; });
+
   float prev_min = _min_modulation_output;
   float prev_max = _max_modulation_output;
 
-  if (outputs.size() > 0)
+  if (_this_mod_outputs.size() > 0)
   {
     _min_modulation_output = -1.0f;
     _max_modulation_output = -1.0f;
   }
 
   bool any_mod_output_found = false;
-  for(int i = 0; i < outputs.size(); i++)
-    if (outputs[i].event_type() == output_event_type::out_event_param_state && 
-      outputs[i].state.param.param_global == _param->info.global)
-    {
-      any_mod_output_found = true;
-      if (_min_modulation_output < 0.0f) _min_modulation_output = outputs[i].state.param.normalized_real();
-      if (_max_modulation_output < 0.0f) _max_modulation_output = outputs[i].state.param.normalized_real();
-      _min_modulation_output = std::min(_min_modulation_output, outputs[i].state.param.normalized_real());
-      _max_modulation_output = std::max(_max_modulation_output, outputs[i].state.param.normalized_real());
-      _modulation_output_activated_time_seconds = seconds_since_epoch();
-    }
+  for(int i = 0; i < _this_mod_outputs.size(); i++)
+  {
+    any_mod_output_found = true;
+    if (_min_modulation_output < 0.0f) _min_modulation_output = _this_mod_outputs[i].state.param.normalized_real();
+    if (_max_modulation_output < 0.0f) _max_modulation_output = _this_mod_outputs[i].state.param.normalized_real();
+    _min_modulation_output = std::min(_min_modulation_output, _this_mod_outputs[i].state.param.normalized_real());
+    _max_modulation_output = std::max(_max_modulation_output, _this_mod_outputs[i].state.param.normalized_real());
+    _modulation_output_activated_time_seconds = seconds_since_epoch();
+  }
 
   // check if we expired
   if (!any_mod_output_found)

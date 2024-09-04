@@ -48,7 +48,7 @@ V the repaint framerate is too slow probably bc it repaint slow..
 * update the mod demo video
 * limit listeners for params to that param?
 * the kick in demo 2 not renders good
-* recheck the is fx
+* recheck the is fx and the clap
 * modulation distortion demo bolletjes not render good => need to filter event shit on the audio side. it goes backwards in time on the gui
 
 wishlist:

@@ -236,6 +236,7 @@ public modulation_output_listener
   float _min_modulation_output = -1.0f;
   float _max_modulation_output = -1.0f;
   double _modulation_output_activated_time_seconds = {};
+  std::vector<modulation_output> _this_mod_outputs = {};
 
 protected:
   void own_param_changed(plain_value plain) override final
