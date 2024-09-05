@@ -24,37 +24,8 @@ autobuilds:
 * ask paul
 * integrate https://github.com/surge-synthesizer/monique-monosynth/blob/main/.github/workflows/build-pr.yml
 
-ui-vnext:
-V show active modulation for the other graphs -> better to have a separate state copy including modulation
-V todo show all voices or only last
-V just fix the intermittent stuff by a timer on the gui side to reset to automation, too bad, too complicated
-V see up :: shit i still need param_was_modded_this_round/voice, otherwise stuff sticks
-V also do the audio matrix graphs
-V also include the mod-mod matrix events
-V make the cv graphs + bolletjes work in case of automation
-V fix the clap / limit the q
-V am bells clap reaper plots not good the cv-audio matrix
-X maybe just paint all of graphs on 60 fps ?
-V test with disable/enable routes (param_is_modded event)
-X less ugly audio graphs
-V not always paint the first matrix row
-V make some options in the gui to draw mod or not
-V profile the whole thing 
-X redo the bubbles as overlays ?
-V i have to tweak shit for the mat graphs to work?
-X drop the mod indicators from matrices? -> repaint on_voice/_cv_param_changed
-V the repaint framerate is too slow probably bc it repaint slow..
-V limit listeners for params to that param?
-V the kick in demo 2 not renders good
-V modulation distortion demo bolletjes not render good => need to filter event shit on the audio side. it goes backwards in time on the gui
-V recheck the is fx and the clap
-V update the docs for cpu stuff
-V make a dedicated mod demo
-V update the vno
-* update the docs a bit for the mod uis
 * make a youtube video
 * update the mod demo video
-* retest everything debug/release/win/lin/mac
 
 wishlist:
 filter microtuning
