@@ -118,7 +118,7 @@ pb_plugin::init() noexcept
 
   // Need to start timer on the main thread. 
   // Constructor is not guaranteed to run there.
-  startTimerHz(60);
+  startTimerHz(20);
   return true;
 }
 
