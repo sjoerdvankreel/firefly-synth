@@ -51,6 +51,7 @@ V recheck the is fx and the clap
 V update the docs for cpu stuff
 V make a dedicated mod demo
 V update the vno
+* update the docs a bit for the mod uis
 * make a youtube video
 * update the mod demo video
 * retest everything debug/release/win/lin/mac
