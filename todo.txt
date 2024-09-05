@@ -50,7 +50,7 @@ V modulation distortion demo bolletjes not render good => need to filter event s
 V recheck the is fx and the clap
 V update the docs for cpu stuff
 V make a dedicated mod demo
-* update the vno
+V update the vno
 * make a youtube video
 * update the mod demo video
 * retest everything debug/release/win/lin/mac
