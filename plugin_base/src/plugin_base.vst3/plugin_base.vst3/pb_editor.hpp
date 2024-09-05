@@ -21,7 +21,7 @@ public Steinberg::IPlugViewContentScaleSupport
   pb_controller* const _controller = {};
 
 public: 
-  pb_editor(pb_controller* controller, std::vector<mod_indicator_state>* mod_indicator_states);
+  pb_editor(pb_controller* controller, std::vector<modulation_output>* outputs);
   PB_PREVENT_ACCIDENTAL_COPY(pb_editor);
 
 #if (defined __linux__) || (defined  __FreeBSD__)
@@ -41,7 +41,8 @@ public:
   Steinberg::uint32 PLUGIN_API release() override { return EditorView::release(); }
   Steinberg::tresult PLUGIN_API queryInterface(Steinberg::TUID const iid, void** obj) override;
 
-  void mod_indicator_states_changed() { if (_gui) _gui->mod_indicator_states_changed(); }
+  void modulation_outputs_changed() { if (_gui) _gui->modulation_outputs_changed(); }
+  void automation_state_changed(int param_index, normalized_value normalized) { if (_gui) _gui->automation_state_changed(param_index, normalized); }
 };
 
 }

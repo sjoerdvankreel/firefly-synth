@@ -39,10 +39,10 @@ _splice_engine(_desc.get(), false, nullptr, nullptr)
     }
   }
 
-  // fetch mod indicator param tags
-  _mod_indicator_count_param_tag = stable_hash(mod_indicator_count_param_guid);
-  for (int i = 0; i < mod_indicator_output_param_count; i++)
-    _mod_indicator_param_tags[i] = stable_hash(mod_indicator_param_guids[i]);
+  // fetch mod output param tags
+  _mod_output_count_param_tag = stable_hash(modulation_output_count_param_guid);
+  for (int i = 0; i < modulation_output_param_count; i++)
+    _mod_output_param_tags[i] = stable_hash(modulation_output_param_guids[i]);
 }
 
 tresult PLUGIN_API
@@ -232,19 +232,19 @@ pb_component::process(ProcessData& data)
       queue->addPoint(0, event.normalized.value(), unused_index);
     }
 
-  // module modulation indicators
+  // module modulation outputs
   unused_index = 0;
   if (data.outputParameterChanges)
   {
-    auto num_mod_indicators = block.events.mod_indicator_states.size();
-    num_mod_indicators = std::min((int)num_mod_indicators, mod_indicator_output_param_count);
-    queue = data.outputParameterChanges->addParameterData(_mod_indicator_count_param_tag, unused_index);
-    queue->addPoint(0, *reinterpret_cast<double*>(&num_mod_indicators), unused_index);
-    for (int e = 0; e < block.events.mod_indicator_states.size(); e++)
+    auto num_modulation_outputs = block.events.modulation_outputs.size();
+    num_modulation_outputs = std::min((int)num_modulation_outputs, modulation_output_param_count);
+    queue = data.outputParameterChanges->addParameterData(_mod_output_count_param_tag, unused_index);
+    queue->addPoint(0, *reinterpret_cast<double*>(&num_modulation_outputs), unused_index);
+    for (int e = 0; e < block.events.modulation_outputs.size(); e++)
     {
-      auto const& this_mod_indicator_state = block.events.mod_indicator_states[e];
-      queue = data.outputParameterChanges->addParameterData(_mod_indicator_param_tags[e], unused_index);
-      queue->addPoint(0, *reinterpret_cast<double const*>(&this_mod_indicator_state.packed), unused_index);
+      auto const& this_modulation_outputs = block.events.modulation_outputs[e];
+      queue = data.outputParameterChanges->addParameterData(_mod_output_param_tags[e], unused_index);
+      queue->addPoint(0, *reinterpret_cast<double const*>(&this_modulation_outputs.packed), unused_index);
     }
   }
 

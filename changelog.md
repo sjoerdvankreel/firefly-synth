@@ -1,3 +1,8 @@
+### September 5, 2024 - V1.9.1.
+
+- Add full realtime visual modulation for the graphs (so they show what the audio engine is actually doing if you f.e. set LFO to filter freq).
+- Also added the option to back down on realtime repaint (nothing / params only / graphs) since this is quite cpu expensive.
+
 ### August 29, 2024 - V1.9.0.
 
 - Load/save/init/clear patch split out to separate buttons again.

@@ -24,15 +24,8 @@ autobuilds:
 * ask paul
 * integrate https://github.com/surge-synthesizer/monique-monosynth/blob/main/.github/workflows/build-pr.yml
 
-ui-vnext:
-* make the cv graphs + bolletjes work in case of automation
-* global unit lfo phase offset not plot good
-* less ugly audio graphs
-* show clap mod indicator
-* repaint on waveform change (free running or random-per-voice)
-* show active modulation for the other graphs -> better to have a separate state copy including modulation
-* bugfix: rerender graph on master in param hover?
-* show effective modulation in the ui for clap param mod
+* make a youtube video
+* update the mod demo video
 
 wishlist:
 filter microtuning
@@ -40,9 +33,13 @@ DSF falloff to the left
 clap polyphonic modulation
 full-blown renoise support
 fix global unison for mono mode
+ditch after-mod, claim micro support ?
+show effective modulation in the ui for clap param mod
 Feedback FM - but needs per-sample processing, not block
 turn on stuff when dragging (e.g. basic sin, dist skew etc)
 arpeggiator - hard - but easy -> play multiple octaves on-note. or maybe allow 3/s, 5/s, whatever selection
+bugfix: rerender graph on master in param hover?
+repaint on waveform change (free running or random-per-voice)
 
 wishlist sometime:
 mseg
@@ -52,7 +49,9 @@ cheby shaper
 phaser/flanger/chorus
 vst3 note expressions
 flstudio clap support
+show clap mod indicator
 visual routing indicators
 automated regression tests
 better studiorack integration
 do async clear delay lines etc on patch select
+global unit lfo phase offset not plot good

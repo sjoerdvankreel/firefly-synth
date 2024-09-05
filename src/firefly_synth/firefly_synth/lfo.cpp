@@ -180,7 +180,7 @@ render_graph(
   float freq = lfo_frequency_from_state(state, mapping.module_index, mapping.module_slot, 120);
 
   // make sure we exactly plot 1 cycle otherwise
-  // we cannot not where to put the mod indicators
+  // we cannot know where to put the mod outputs
   sample_rate = params.max_frame_count * freq;
   if (!sync)
     partition = float_to_string(1 / freq, 2) + " Sec";
@@ -579,16 +579,12 @@ lfo_engine::process(plugin_block& block, cv_cv_matrix_mixdown const* modulation)
     return;
   }
 
-  // only want the indicators for the actual audio engine
+  // only want the mod outputs for the actual audio engine
   if (!block.graph)
-  {
-    mod_indicator_state indicator_state = {};
-    indicator_state.data.param_global = -1;
-    indicator_state.data.module_global = block.module_desc_.info.global;
-    indicator_state.data.voice_index = _global ? 0 : block.voice->state.slot;
-    indicator_state.data.value = type == type_repeat ? _ref_phase : _graph_phase;
-    block.push_mod_indicator_state(indicator_state);
-  }
+    block.push_modulation_output(modulation_output::make_mod_output_cv_state(
+      _global ? -1 : block.voice->state.slot,
+      block.module_desc_.info.global,
+      type == type_repeat ? _ref_phase : _graph_phase));
 
   if(_stage == lfo_stage::end)
   {

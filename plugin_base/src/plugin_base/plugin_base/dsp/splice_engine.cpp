@@ -136,7 +136,7 @@ plugin_splice_engine::process()
   int total_block_count = spliced_block_count + (rest_block_frames == 0? 0: 1);
 
   _host_block.events.output_params.clear();
-  _host_block.events.mod_indicator_states.clear();
+  _host_block.events.modulation_outputs.clear();
 
   splice_accurate_events(
     _host_block.events.accurate_automation, _spliced_accurate_automation_events, 
@@ -225,12 +225,14 @@ plugin_splice_engine::process()
       inner_block.events.output_params.end());
 
     // only care about the last one
+    // to not overwhelm the ui with events
+    // ui is written to take this stream as "not perfect, will catch up eventually"
     if (i == total_block_count - 1)
     {
-      _host_block.events.mod_indicator_states.insert(
-        _host_block.events.mod_indicator_states.begin(),
-        inner_block.events.mod_indicator_states.begin(),
-        inner_block.events.mod_indicator_states.end());
+      _host_block.events.modulation_outputs.insert(
+        _host_block.events.modulation_outputs.begin(),
+        inner_block.events.modulation_outputs.begin(),
+        inner_block.events.modulation_outputs.end());
     }
 
     _engine.release_block();

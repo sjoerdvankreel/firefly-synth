@@ -28,7 +28,7 @@ class state_converter;
 enum class module_output { none, cv, audio };
 enum class module_stage { input, voice, output };
 
-struct mod_indicator_source
+struct modulation_output_source
 {
   int module_index;
   int module_slot;
@@ -93,9 +93,9 @@ typedef std::function<graph_data(
 module_graph_renderer;
 
 // in case we want to plot someone elses mod indicators
-typedef std::function<mod_indicator_source(
+typedef std::function<modulation_output_source(
   plugin_state const& state, param_topo_mapping const& mapping)>
-  module_mod_indicator_source_selector;
+  modulation_output_source_selector;
 
 // module topo mapping
 struct module_topo_mapping final {
@@ -137,6 +137,8 @@ struct module_topo_gui final {
   int autofit_column = 0;
   bool enable_tab_menu = true;
   module_tab_menu_handler_factory menu_handler_factory;
+
+  bool render_automation_state = false; // or modulation state / for graphs
 
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(module_topo_gui);
 };
@@ -190,7 +192,7 @@ struct module_topo final {
   module_engine_factory engine_factory;
   module_graph_engine_factory graph_engine_factory;
   module_state_converter_factory state_converter_factory;
-  module_mod_indicator_source_selector mod_indicator_source_selector;
+  modulation_output_source_selector mod_output_source_selector;
 
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(module_topo);
   void validate(plugin_topo const& plugin, int index) const;

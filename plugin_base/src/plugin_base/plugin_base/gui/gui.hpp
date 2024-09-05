@@ -20,7 +20,11 @@ class plugin_gui;
 class tab_component;
 class grid_component;
 
+std::vector<list_item>
+gui_visuals_items();
+
 enum class gui_hover_type { param, module, custom };
+enum gui_visuals_mode { gui_visuals_mode_off, gui_visuals_mode_params, gui_visuals_mode_full };
 
 // globally saved (across instances)
 inline std::string const user_state_scale_key = "scale";
@@ -115,11 +119,13 @@ public:
   _gui(gui), _global_index(global_index), _type(type), _component(component) { _component->addMouseListener(this, true); }
 };
 
-class mod_indicator_state_listener
+class modulation_output_listener
 {
 public:
+  virtual void
+  modulation_outputs_reset() = 0;
   virtual void 
-  mod_indicator_state_changed(std::vector<mod_indicator_state> const& states) = 0;
+  modulation_outputs_changed(std::vector<modulation_output> const& outputs) = 0;
 };
 
 class plugin_gui:
@@ -132,8 +138,8 @@ public:
   PB_PREVENT_ACCIDENTAL_COPY(plugin_gui);
   ~plugin_gui();
   plugin_gui(
-    plugin_state* gui_state, plugin_base::extra_state* extra_state, 
-    std::vector<plugin_base::mod_indicator_state>* mod_indicator_states);
+    plugin_state* automation_state, plugin_base::extra_state* extra_state,
+    std::vector<plugin_base::modulation_output>* modulation_outputs);
 
   void load_patch();
   void save_patch();
@@ -158,7 +164,10 @@ public:
   void theme_changed(std::string const& theme_name);
   
   // for anyone who wants to repaint on this stuff
-  void mod_indicator_states_changed();
+  void modulation_outputs_changed();
+  
+  // to keep track of what the audio engine is doing
+  void automation_state_changed(int param_index, normalized_value normalized);
 
   void param_end_changes(int index);
   void param_begin_changes(int index);
@@ -172,12 +181,17 @@ public:
   lnf const* get_lnf() const { return _lnf.get(); }
   void paint(juce::Graphics& g) override { g.fillAll(juce::Colours::black); }
 
-  plugin_state* gui_state() const { return _gui_state; }
-  extra_state* extra_state_() const { return _extra_state; }
-  std::vector<plugin_base::mod_indicator_state> const* mod_indicator_states() const { return _mod_indicator_states; }
+  std::vector<int> const& engine_voices_active() const { return _engine_voices_active; }
+  std::vector<std::uint32_t> const& engine_voices_activated() const { return _engine_voices_activated; }
 
-  void add_mod_indicator_state_listener(mod_indicator_state_listener* listener);
-  void remove_mod_indicator_state_listener(mod_indicator_state_listener* listener);
+  gui_visuals_mode get_visuals_mode() const;
+  extra_state* extra_state_() const { return _extra_state; }
+  plugin_state* automation_state() const { return _automation_state; }
+  plugin_state const& global_modulation_state() const { return _global_modulation_state; }
+  plugin_state const& voice_modulation_state(int voice) const { return _voice_modulation_states[voice]; }
+
+  void add_modulation_output_listener(modulation_output_listener* listener);
+  void remove_modulation_output_listener(modulation_output_listener* listener);
   
   void remove_param_listener(gui_param_listener* listener);
   void remove_gui_mouse_listener(gui_mouse_listener* listener);
@@ -188,15 +202,27 @@ public:
   
 private:
 
-  float _system_dpi_scale = 1.0f;
   std::unique_ptr<lnf> _lnf = {};
-  plugin_state* const _gui_state;
+  float _system_dpi_scale = 1.0f;
+  double _last_mod_reset_seconds = 0.0;  
+  gui_visuals_mode _prev_visual_mode = (gui_visuals_mode)-1;
+
+  // this one mirrors the static values of the parameters
+  plugin_state* const _automation_state;
+
+  // these ones mirrors what the audio engine is actually doing on a per-block basis
+  // not a pointer since this is owned by us, while _automation_state is mutated from outside
+  plugin_state _global_modulation_state;
+  std::vector<plugin_state> _voice_modulation_states = {};
+
   gui_undo_listener _undo_listener;
   int _last_mouse_enter_param = -1;
   int _last_mouse_enter_module = -1;
   int _last_mouse_enter_custom = -1;
   plugin_base::extra_state* const _extra_state;
-  std::vector<plugin_base::mod_indicator_state>* _mod_indicator_states = {};
+  std::vector<int> _engine_voices_active = {}; // don't like vector bool
+  std::vector<std::uint32_t> _engine_voices_activated = {}; // don't like vector bool
+  std::vector<plugin_base::modulation_output>* _modulation_outputs = {};
   std::unique_ptr<juce::TooltipWindow> _tooltip = {};
   std::map<int, std::unique_ptr<lnf>> _module_lnfs = {};
   std::map<int, std::unique_ptr<lnf>> _custom_lnfs = {};
@@ -204,7 +230,7 @@ private:
   std::vector<gui_param_listener*> _param_listeners = {};
   std::vector<gui_mouse_listener*> _gui_mouse_listeners = {};
   std::vector<gui_tab_selection_listener*> _tab_selection_listeners = {};
-  std::vector<mod_indicator_state_listener*> _mod_indicator_state_listeners = {};
+  std::vector<modulation_output_listener*> _modulation_output_listeners = {};
   // must be destructed first, will unregister listeners, mind order
   std::vector<std::unique_ptr<juce::Component>> _components = {};
   std::vector<std::unique_ptr<gui_hover_listener>> _hover_listeners = {};

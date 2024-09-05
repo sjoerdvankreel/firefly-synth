@@ -28,9 +28,9 @@ public Steinberg::Vst::AudioEffect {
   std::vector<float> _scratch_out_l;
   std::vector<float> _scratch_out_r;
 
-  // for modulation indicators
-  int _mod_indicator_count_param_tag = -1;
-  std::array<int, mod_indicator_output_param_count> _mod_indicator_param_tags = {};
+  // for modulation outputs
+  int _mod_output_count_param_tag = -1;
+  std::array<int, modulation_output_param_count> _mod_output_param_tags = {};
 
 public:
   PB_PREVENT_ACCIDENTAL_COPY(pb_component);

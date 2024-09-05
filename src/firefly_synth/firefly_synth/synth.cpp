@@ -75,9 +75,9 @@ make_plugin_dimension(bool is_fx, plugin_topo_gui_theme_settings const& settings
 }
 
 static module_graph_params
-make_module_graph_params(int module, bool render_on_module_mouse_enter, 
-  bool render_on_param_mouse_enter, bool render_on_mod_indicator_change, 
-  std::vector<int> const& dependent_module_indices)
+make_module_graph_params(int module, 
+  bool render_on_module_mouse_enter, bool render_on_param_mouse_enter,
+  bool hover_selects_different_graph, std::vector<int> const& dependent_module_indices)
 {
   module_graph_params result;
   result.fps = 10;
@@ -86,7 +86,7 @@ make_module_graph_params(int module, bool render_on_module_mouse_enter,
   result.render_on_tab_change = true;
   result.dependent_module_indices = dependent_module_indices;
   result.render_on_module_mouse_enter = render_on_module_mouse_enter;
-  result.render_on_mod_indicator_change = render_on_mod_indicator_change;
+  result.hover_selects_different_graph = hover_selects_different_graph;
   if(render_on_param_mouse_enter)
     result.render_on_param_mouse_enter_modules = { -1 };
   return result;
@@ -96,7 +96,7 @@ static Component&
 make_module_graph_section(
   plugin_gui* gui, lnf* lnf, component_store store, 
   int module, std::string const& name_in_theme, 
-  bool render_on_module_mouse_enter, bool render_on_param_mouse_enter, bool render_on_mod_indicator_change,
+  bool render_on_module_mouse_enter, bool render_on_param_mouse_enter, bool hover_selects_different_graph,
   std::vector<int> const& dependent_module_indices, float partition_scale = 0.15f)
 {
   graph_params params;
@@ -104,7 +104,7 @@ make_module_graph_section(
   params.partition_scale = partition_scale;
   params.scale_type = graph_params::scale_w;
   module_graph_params module_params = make_module_graph_params(module, 
-    render_on_module_mouse_enter, render_on_param_mouse_enter, render_on_mod_indicator_change, dependent_module_indices);
+    render_on_module_mouse_enter, render_on_param_mouse_enter, hover_selects_different_graph, dependent_module_indices);
   return store_component<module_graph>(store, gui, lnf, params, module_params);
 }
 
@@ -121,7 +121,6 @@ make_main_graph_section(plugin_gui* gui, lnf* lnf, component_store store)
   module_params.render_on_tweak = true;
   module_params.render_on_tab_change = false;
   module_params.render_on_module_mouse_enter = true;
-  module_params.render_on_mod_indicator_change = true;
   module_params.render_on_param_mouse_enter_modules = {
     module_gcv_cv_matrix, module_global_in, module_master_settings, module_vcv_cv_matrix, module_voice_in, module_osc_osc_matrix,
     module_vaudio_audio_matrix, module_gaudio_audio_matrix, module_vcv_audio_matrix, module_gcv_audio_matrix };
@@ -139,19 +138,11 @@ make_matrix_graphs_section(
       params.name_in_theme = name_in_theme;
       params.scale_type = graph_params::scale_h;
       params.partition_scale = 0.33f;
-
-      if (is_fx)
-      {
-        assert(module_section == module_section_global_matrices);
-        return std::make_unique<module_graph>(gui, lnf, params, make_module_graph_params(module_index, false, true, true,
-          { module_global_in, module_glfo, module_gfx, module_gaudio_audio_matrix, module_global_out, module_gcv_audio_matrix }));
-      }
-
       switch (module_index)
       {
-      case module_vaudio_audio_matrix: return std::make_unique<module_graph>(gui, lnf, params, make_module_graph_params(module_index, false, true, false, { }));
-      case module_gaudio_audio_matrix: return std::make_unique<module_graph>(gui, lnf, params, make_module_graph_params(module_index, false, true, false, { }));
-      case module_osc_osc_matrix: return std::make_unique<module_graph>(gui, lnf, params, make_module_graph_params(module_index, true, false, false,
+      case module_vaudio_audio_matrix: return std::make_unique<module_graph>(gui, lnf, params, make_module_graph_params(module_index, false, true, true, { }));
+      case module_gaudio_audio_matrix: return std::make_unique<module_graph>(gui, lnf, params, make_module_graph_params(module_index, false, true, true, { }));
+      case module_osc_osc_matrix: return std::make_unique<module_graph>(gui, lnf, params, make_module_graph_params(module_index, true, false, true,
         { module_osc, module_voice_in }));
       case module_vcv_audio_matrix: return std::make_unique<module_graph>(gui, lnf, params, make_module_graph_params(module_index, false, true, true,
         { module_global_in, module_glfo, module_vlfo, module_env, module_voice_in, module_voice_out,
@@ -215,7 +206,7 @@ make_edit_controls_section(plugin_gui* gui, lnf* lnf, component_store store)
   result.add(tweak_value_label, { 1, 0 });
   auto& tweak = store_component<last_tweaked_label>(store, gui, lnf);
   result.add(tweak, { 0, 1, 1, 3 });
-  result.add(store_component<last_tweaked_editor>(store, gui->gui_state(), lnf), { 1, 1, 1, 3 });
+  result.add(store_component<last_tweaked_editor>(store, gui->automation_state(), lnf), { 1, 1, 1, 3 });
   return result;
 } 
 
@@ -230,7 +221,7 @@ make_title_section(plugin_gui* gui, lnf* lnf, component_store store, bool is_fx)
   title_label.setColour(Label::ColourIds::textColourId, colors.control_text);
   title_label.setJustificationType(Justification::left);
   grid.add(title_label, { 0, 0, 1, 1 });
-  std::string version_text = std::string(FF_SYNTH_VERSION_TEXT) + " " + gui->gui_state()->desc().plugin->config->format_name() + " ";
+  std::string version_text = std::string(FF_SYNTH_VERSION_TEXT) + " " + gui->automation_state()->desc().plugin->config->format_name() + " ";
 #ifdef __aarch64__
   version_text += "ARM";
 #else
@@ -241,7 +232,7 @@ make_title_section(plugin_gui* gui, lnf* lnf, component_store store, bool is_fx)
   version_label.setColour(Label::ColourIds::textColourId, colors.control_text);
   grid.add(version_label, { 1, 0, 1, 1 });
   grid.add(store_component<image_component>(
-    store, gui->gui_state()->desc().plugin->config,
+    store, gui->automation_state()->desc().plugin->config,
     lnf->theme(), "header.png", RectanglePlacement::xRight), { 0, 1, 2, 1 });
   return grid;
 }
@@ -360,6 +351,8 @@ synth_topo(format_basic_config const* config, bool is_fx, std::string const& ful
   result->version.patch = FF_SYNTH_VERSION_PATCH;
   result->engine.voice_mode.module_index = module_voice_in;
   result->engine.voice_mode.param_index = voice_in_param_mode;
+  result->engine.visuals.module_index = module_master_settings;
+  result->engine.visuals.param_index = master_settings_param_visuals;
   result->engine.bpm_smoothing.module_index = module_master_settings;
   result->engine.bpm_smoothing.param_index = master_settings_param_tempo_smooth;
   result->engine.midi_smoothing.module_index = module_master_settings;
@@ -416,7 +409,7 @@ synth_topo(format_basic_config const* config, bool is_fx, std::string const& ful
     -> Component& { return make_module_graph_section(gui, lnf, store, module_gfx, gfx_graph_name, false, false, false, {}); });
   result->gui.custom_sections[custom_section_glfo_graph] = make_custom_section_gui(
     custom_section_glfo_graph, glfo_graph_name, { 4, 3, 1, 1 }, [](auto* gui, auto* lnf, auto store)
-    -> Component& { return make_module_graph_section(gui, lnf, store, module_glfo, glfo_graph_name, false, false, true, {}); });
+    -> Component& { return make_module_graph_section(gui, lnf, store, module_glfo, glfo_graph_name, false, false, false, {}); });
   if (is_fx)
   {
     result->gui.custom_sections[custom_section_global_matrix_graphs] = make_custom_section_gui(
@@ -433,10 +426,10 @@ synth_topo(format_basic_config const* config, bool is_fx, std::string const& ful
       -> Component& { return make_module_graph_section(gui, lnf, store, module_vfx, vfx_graph_name, false, false, false, {}); });
     result->gui.custom_sections[custom_section_vlfo_graph] = make_custom_section_gui(
       custom_section_vlfo_graph, vlfo_graph_name, { 8, 3, 1, 1 }, [](auto* gui, auto* lnf, auto store)
-      -> Component& { return make_module_graph_section(gui, lnf, store, module_vlfo, vlfo_graph_name, false, false, true, {}); });
+      -> Component& { return make_module_graph_section(gui, lnf, store, module_vlfo, vlfo_graph_name, false, false, false, {}); });
     result->gui.custom_sections[custom_section_env_graph] = make_custom_section_gui(
       custom_section_env_graph, env_graph_name, { 9, 3, 1, 1 }, [](auto* gui, auto* lnf, auto store)
-      -> Component& { return make_module_graph_section(gui, lnf, store, module_env, env_graph_name, false, false, true, {}); });
+      -> Component& { return make_module_graph_section(gui, lnf, store, module_env, env_graph_name, false, false, false, {}); });
     result->gui.custom_sections[custom_section_global_matrix_graphs] = make_custom_section_gui(
       custom_section_global_matrix_graphs, global_matrix_graphs_name, { 4, 4, 1, 2 }, [](auto* gui, auto* lnf, auto store)
       -> Component& { return make_matrix_graphs_section(gui, lnf, store, false, module_section_global_matrices, global_matrix_graphs_name); });

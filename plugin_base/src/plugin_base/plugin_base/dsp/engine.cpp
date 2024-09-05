@@ -65,10 +65,10 @@ _voice_processor_context(voice_processor_context)
   _current_voice_tuning_channel.resize(_polyphony);
 
   // see also host_events::activate
-  _global_mod_indicator_states.resize(desc->module_count);
-  _voice_mod_indicator_states.resize(_polyphony);
+  _global_modulation_outputs.resize(desc->module_count);
+  _voice_modulation_outputs.resize(_polyphony);
   for(int i = 0; i < _polyphony; i++)
-    _voice_mod_indicator_states[i].resize(desc->module_count);
+    _voice_modulation_outputs[i].resize(desc->module_count);
 }
 
 engine_tuning_mode 
@@ -140,9 +140,9 @@ plugin_engine::make_plugin_block(
     ? _block_automation.state()
     : _voice_automation[voice].state();
 
-  std::vector<mod_indicator_state>* mod_indicator_states = voice < 0 
-    ? &_global_mod_indicator_states 
-    : &_voice_mod_indicator_states[voice];
+  std::vector<modulation_output>* modulation_outputs = voice < 0
+    ? &_global_modulation_outputs
+    : &_voice_modulation_outputs[voice];
 
   plugin_block_state state = {
     _last_note_key, context_out, _mono_note_stream,
@@ -187,7 +187,7 @@ plugin_engine::make_plugin_block(
     _sample_rate, state, nullptr, nullptr, 
     _host_block->shared, _state.desc(), 
     _state.desc().modules[module_global],
-    mod_indicator_states
+    modulation_outputs
   };
 }
 
@@ -658,10 +658,10 @@ plugin_engine::process()
   int frame_count = _host_block->frame_count;
 
   _host_block->events.output_params.clear();
-  _host_block->events.mod_indicator_states.clear();
-  _global_mod_indicator_states.clear();
+  _host_block->events.modulation_outputs.clear();
+  _global_modulation_outputs.clear();
   for (int i = 0; i < _polyphony; i++)
-    _voice_mod_indicator_states[i].clear();
+    _voice_modulation_outputs[i].clear();
   std::pair<std::uint32_t, std::uint32_t> denormal_state = disable_denormals();  
 
   // set automation values to current state, events may overwrite
@@ -1272,16 +1272,22 @@ plugin_engine::process()
     }
   }
 
-  // fill output mod indicators
+  // fill modulation outputs
   // these are proteced by mfence in case of clap threadpool
-  for (int i = 0; i < _global_mod_indicator_states.size(); i++)
-    _host_block->events.mod_indicator_states.push_back(_global_mod_indicator_states[i]);
+  for (int i = 0; i < _global_modulation_outputs.size(); i++)
+    _host_block->events.modulation_outputs.push_back(_global_modulation_outputs[i]);
   for (int i = 0; i < _polyphony; i++)
-    for (int j = 0; j < _voice_mod_indicator_states[i].size(); j++)
-      _host_block->events.mod_indicator_states.push_back(_voice_mod_indicator_states[i][j]);
+    for (int j = 0; j < _voice_modulation_outputs[i].size(); j++)
+      _host_block->events.modulation_outputs.push_back(_voice_modulation_outputs[i][j]);
 
   // Note: custom output events are already filled here.
   // It's up to the plugin bindings to communicate them back to the gui.
+  // Only need to communicate the voice states now.
+  for (int i = 0; i < _polyphony; i++)
+    _host_block->events.modulation_outputs.push_back(
+      modulation_output::make_mod_out_voice_state(
+        i, _voice_states[i].stage != voice_stage::unused,
+        (std::uint32_t)_voice_states[i].time));
 
   /*******************/
   /* STEP 9: Wrap-up */

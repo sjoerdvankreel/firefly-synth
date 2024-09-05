@@ -12,31 +12,30 @@ module_graph::
 { 
   _done = true;
   stopTimer();
-  if(_module_params.render_on_tweak) _gui->gui_state()->remove_any_listener(this);
+  _gui->remove_modulation_output_listener(this);
+  if(_module_params.render_on_tweak) _gui->automation_state()->remove_any_listener(this);
   if(_module_params.render_on_tab_change) _gui->remove_tab_selection_listener(this);
-  if (_module_params.render_on_mod_indicator_change) _gui->remove_mod_indicator_state_listener(this);
   if (_module_params.render_on_module_mouse_enter || _module_params.render_on_param_mouse_enter_modules.size())
     _gui->remove_gui_mouse_listener(this);
 }
 
 module_graph::
 module_graph(plugin_gui* gui, lnf* lnf, graph_params const& params, module_graph_params const& module_params):
-graph(lnf, params), _gui(gui), _module_params(module_params)
+graph(gui, lnf, params), _module_params(module_params)
 { 
   assert(_module_params.fps > 0);
   assert(_module_params.render_on_tweak || _module_params.render_on_tab_change ||
     _module_params.render_on_module_mouse_enter || _module_params.render_on_param_mouse_enter_modules.size());
   if(_module_params.render_on_tab_change) assert(_module_params.module_index != -1);
-  if (_module_params.render_on_tweak) gui->gui_state()->add_any_listener(this);
+  if (_module_params.render_on_tweak) gui->automation_state()->add_any_listener(this);
   if(_module_params.render_on_module_mouse_enter || _module_params.render_on_param_mouse_enter_modules.size())
     gui->add_gui_mouse_listener(this);
-  if (_module_params.render_on_mod_indicator_change)
-    _gui->add_mod_indicator_state_listener(this);
   if (_module_params.render_on_tab_change)
   {
     gui->add_tab_selection_listener(this);
     module_tab_changed(_module_params.module_index, 0);
   }
+  _gui->add_modulation_output_listener(this);
   startTimerHz(_module_params.fps);
 }
 
@@ -55,96 +54,132 @@ module_graph::timerCallback()
     repaint();
 }
 
-void 
-module_graph::mod_indicator_state_changed(std::vector<mod_indicator_state> const& states)
+void
+module_graph::modulation_outputs_reset()
 {
-  if (_data.type() != graph_data_type::series)
-    return;
+  _mod_indicators.clear();
+  _render_dirty = true;
+  render_if_dirty();
+}
 
+void 
+module_graph::modulation_outputs_changed(std::vector<modulation_output> const& outputs)
+{
   if (_hovered_or_tweaked_param == -1)
     return;
 
-  float w = getWidth();
-  float h = getHeight();
-  int count = _data.series().size();
+  // we still get the events, so need to back off.
+  // it is this way because the param sliders still need the events for param-only mode
+  if (_gui->get_visuals_mode() != gui_visuals_mode_full)
+    return;
 
-  int current_module_slot = -1;
-  int current_module_index = -1;
-
-  auto const& desc = _gui->gui_state()->desc();
+  int orig_module_slot = -1;
+  int orig_module_index = -1;
+  auto const& desc = _gui->automation_state()->desc();
   auto const& topo = *desc.plugin;
   auto const& mappings = desc.param_mappings.params;
   param_topo_mapping mapping = mappings[_hovered_or_tweaked_param].topo;
 
   if (_module_params.module_index != -1)
   {
-    current_module_slot = _activated_module_slot;
-    current_module_index = _module_params.module_index;
+    orig_module_slot = _activated_module_slot;
+    orig_module_index = _module_params.module_index;
   }
   else
   {
-    current_module_slot = desc.param_mappings.params[_hovered_or_tweaked_param].topo.module_slot;
-    current_module_index = desc.param_mappings.params[_hovered_or_tweaked_param].topo.module_index;
+    orig_module_slot = desc.param_mappings.params[_hovered_or_tweaked_param].topo.module_slot;
+    orig_module_index = desc.param_mappings.params[_hovered_or_tweaked_param].topo.module_index;
   }
 
-  if (topo.modules[current_module_index].mod_indicator_source_selector != nullptr)
+  // this is for stuff when someone else wants to react to us (eg cv matrix to lfo)
+  // as well as to itself
+  int mapped_module_slot = orig_module_slot;
+  int mapped_module_index = orig_module_index;
+  if (topo.modules[orig_module_index].mod_output_source_selector != nullptr)
   {
-    auto selected = topo.modules[current_module_index].mod_indicator_source_selector(*_gui->gui_state(), mapping);
+    auto selected = topo.modules[orig_module_index].mod_output_source_selector(*_gui->automation_state(), mapping);
     if (selected.module_index != -1 && selected.module_slot != -1)
     {
-      current_module_slot = selected.module_slot;
-      current_module_index = selected.module_index;
+      mapped_module_slot = selected.module_slot;
+      mapped_module_index = selected.module_index;
     }
   }
 
-  int current_indicator = 0;
-  int current_module_global = desc.module_topo_to_index.at(current_module_index) + current_module_slot;
-  for (int i = 0; i < states.size() && current_indicator < max_indicators; i++)
-    if (current_module_global == states[i].data.module_global && states[i].data.param_global == -1)
+  int orig_module_global = desc.module_topo_to_index.at(orig_module_index) + orig_module_slot;
+  int mapped_module_global = desc.module_topo_to_index.at(mapped_module_index) + mapped_module_slot;
+  int orig_param_first = desc.modules[orig_module_global].params[0].info.global;
+
+  bool rerender_indicators = false;
+  bool any_mod_indicator_found = false;
+  for (int i = 0; i < outputs.size(); i++)
+    if (outputs[i].event_type() == output_event_type::out_event_cv_state)
+      if (mapped_module_global == outputs[i].state.cv.module_global)
+      {
+        if (!any_mod_indicator_found)
+        {
+          any_mod_indicator_found = true;
+          _mod_indicators.clear();
+          _mod_indicators_activated = seconds_since_epoch();
+        }
+        _mod_indicators.push_back(outputs[i].state.cv.position_normalized);
+      }
+
+  if (!any_mod_indicator_found && seconds_since_epoch() >= _mod_indicators_activated + 1.0)
+  {
+    _mod_indicators.clear();
+    rerender_indicators = true;
+  }
+
+  bool rerender_full = false;
+  for (int i = 0; i < outputs.size(); i++)
+    if (outputs[i].event_type() == output_event_type::out_event_param_state)
     {
-      float indicator_pos = states[i].data.value;      
-      float x = indicator_pos * w;
-      int point = std::clamp((int)(indicator_pos * (count - 1)), 0, count - 1);
-      float y = (1 - std::clamp(_data.series()[point], 0.0f, 1.0f)) * h;
-      _indicators[current_indicator]->activate();
-      _indicators[current_indicator]->setBounds(x - 3, y - 3, 6, 6);
-      _indicators[current_indicator]->repaint();
-      current_indicator++;
+      // debugging
+      auto const& orig_desc = _gui->automation_state()->desc().modules[orig_module_global];
+      auto const& mapped_desc = _gui->automation_state()->desc().modules[mapped_module_global];
+      auto const& event_desc = _gui->automation_state()->desc().modules[outputs[i].state.param.module_global];
+      (void)orig_desc;
+      (void)mapped_desc;
+      (void)event_desc;
+
+      if (orig_module_global == outputs[i].state.param.module_global ||
+        mapped_module_global == outputs[i].state.param.module_global)
+      {
+        rerender_full = true;
+        break;
+      }
+    } else if (outputs[i].event_type() == output_event_type::out_event_cv_state)
+    {
+      if (orig_module_global == outputs[i].state.cv.module_global ||
+        mapped_module_global == outputs[i].state.cv.module_global)
+      {
+        rerender_indicators = true;
+        // DONT break -- full rerender trumps indicators
+      }
     }
 
-  if (current_indicator > 0)
-  {
-    // if any data found for this round, invalidate stuff from the previous round
-    for (int i = current_indicator; i < max_indicators; i++)
-      _indicators[i]->setVisible(false);
-  }
-  else
-  {
-    // if no data found for this round, invalidate stuff that expired 
-    double invalidate_after = 0.05;
-    double time_now = seconds_since_epoch();
-    for (int i = 0; i < max_indicators; i++)
-      if (_indicators[i]->activated_time_seconds() < time_now - invalidate_after)
-        _indicators[i]->setVisible(false);
-  }
+  if (rerender_full)
+    request_rerender(orig_param_first, false);
+  else if(rerender_indicators)
+    repaint();
 }
 
 void 
 module_graph::module_tab_changed(int module, int slot)
 {
   // trigger re-render based on first new module param
-  auto const& desc = _gui->gui_state()->desc();
+  auto const& desc = _gui->automation_state()->desc();
   if(_module_params.module_index != -1 && _module_params.module_index != module) return;
   _activated_module_slot = slot;
   int index = desc.module_topo_to_index.at(module) + slot;
   _last_rerender_cause_param = desc.modules[index].params[0].info.global;
-  request_rerender(_last_rerender_cause_param);
+  request_rerender(_last_rerender_cause_param, false);
 }
 
 void 
 module_graph::any_state_changed(int param, plain_value plain) 
 {
-  auto const& desc = _gui->gui_state()->desc();
+  auto const& desc = _gui->automation_state()->desc();
   auto const& mapping = desc.param_mappings.params[param];
   if(_module_params.module_index == -1 || _module_params.module_index == mapping.topo.module_index)
   {
@@ -152,7 +187,7 @@ module_graph::any_state_changed(int param, plain_value plain)
     {
       if(_module_params.module_index != -1)
         _last_rerender_cause_param = param;
-      request_rerender(param);
+      request_rerender(param, false);
     }
     return;
   }
@@ -167,41 +202,41 @@ module_graph::any_state_changed(int param, plain_value plain)
 
   if(_last_rerender_cause_param != -1)
   {
-    request_rerender(_last_rerender_cause_param);
+    request_rerender(_last_rerender_cause_param, false);
     return;
   }  
   int index = desc.module_topo_to_index.at(_module_params.module_index) + _activated_module_slot;
-  request_rerender(desc.modules[index].params[0].info.global);
+  request_rerender(desc.modules[index].params[0].info.global, false);
 }
 
 void
 module_graph::module_mouse_enter(int module)
 {
   // trigger re-render based on first new module param
-  auto const& desc = _gui->gui_state()->desc().modules[module];
+  auto const& desc = _gui->automation_state()->desc().modules[module];
   if (_module_params.module_index != -1 && _module_params.module_index != desc.module->info.index) return;
   if(desc.params.size() == 0) return;
   if(_module_params.render_on_module_mouse_enter && !desc.module->force_rerender_on_param_hover)
-    request_rerender(desc.params[0].info.global);
+    request_rerender(desc.params[0].info.global, false);
 }
 
 void
 module_graph::param_mouse_enter(int param)
 {
   // trigger re-render based on specific param
-  auto const& mapping = _gui->gui_state()->desc().param_mappings.params[param];
+  auto const& mapping = _gui->automation_state()->desc().param_mappings.params[param];
   if (_module_params.module_index != -1 && _module_params.module_index != mapping.topo.module_index) return;
   auto end = _module_params.render_on_param_mouse_enter_modules.end();
   auto begin = _module_params.render_on_param_mouse_enter_modules.begin();
   if (std::find(begin, end, mapping.topo.module_index) != end ||
     std::find(begin, end, -1) != end)
-    request_rerender(param);
+    request_rerender(param, true);
 }
 
 void
-module_graph::request_rerender(int param)
+module_graph::request_rerender(int param, bool hover)
 {
-  auto const& desc = _gui->gui_state()->desc();
+  auto const& desc = _gui->automation_state()->desc();
   auto const& mapping = desc.param_mappings.params[param];
   int m = mapping.topo.module_index;
   int p = mapping.topo.param_index;
@@ -209,11 +244,7 @@ module_graph::request_rerender(int param)
   
   _render_dirty = true;
   _hovered_or_tweaked_param = param;
-
-  // will be picked up on the next round, 
-  // need them to disappear first otherwise they may hang around on module switch
-  for (int i = 0; i < max_indicators; i++)
-    _indicators[i]->setVisible(false);
+  if (hover) _hovered_param = param;
 }
 
 bool
@@ -222,48 +253,42 @@ module_graph::render_if_dirty()
   if (!_render_dirty) return false;
   if (_hovered_or_tweaked_param == -1) return false;
 
-  auto const& mappings = _gui->gui_state()->desc().param_mappings.params;
-  param_topo_mapping mapping = mappings[_hovered_or_tweaked_param].topo;
-  auto const& module = _gui->gui_state()->desc().plugin->modules[mapping.module_index];
+  int render_request_param = _hovered_or_tweaked_param;
+  if(_module_params.hover_selects_different_graph && _hovered_param != -1)
+    render_request_param = _hovered_param;
+  if (render_request_param == -1) return false;
+
+  auto const& mappings = _gui->automation_state()->desc().param_mappings.params;
+  param_topo_mapping mapping = mappings[render_request_param].topo;
+  auto const& module = _gui->automation_state()->desc().plugin->modules[mapping.module_index];
+
+  gui_visuals_mode visuals_mode = _gui->get_visuals_mode();
+  plugin_state const* plug_state = _gui->automation_state();
+  int module_global = plug_state->desc().param_mappings.params[render_request_param].module_global;
+  bool render_automation_state = plug_state->desc().modules[module_global].module->gui.render_automation_state;
+  if (visuals_mode == gui_visuals_mode_full && !render_automation_state)
+  {
+    // find the latest active voice, otherwise go with global
+    int voice_index = -1;
+    std::uint32_t latest_timestamp = 0;
+    if (module.dsp.stage == module_stage::voice)
+      for (int i = 0; i < _gui->engine_voices_active().size(); i++)
+        if (_gui->engine_voices_active()[i] != 0)
+          if (_gui->engine_voices_activated()[i] > latest_timestamp)
+            voice_index = i;
+    plug_state = voice_index == -1 ? &_gui->global_modulation_state() : &_gui->voice_modulation_state(voice_index);
+  }
+
   if(module.graph_renderer != nullptr)
     render(module.graph_renderer(
-      *_gui->gui_state(), _gui->get_module_graph_engine(module), _hovered_or_tweaked_param, mapping));
+      *plug_state, _gui->get_module_graph_engine(module), render_request_param, mapping));
   _render_dirty = false;
   return true;
 }
 
-graph_indicator::
-graph_indicator(lnf* lnf) : _lnf(lnf)
-{
-  setSize(6, 6);
-  setVisible(false);
-}
-
-void
-graph_indicator::paint(Graphics& g)
-{
-  g.setColour(_lnf->colors().graph_mod_indicator);
-  g.fillEllipse(0, 0, 6, 6);
-}
-
-void 
-graph_indicator::activate()
-{
-  setVisible(true);
-  _activated_time_seconds = seconds_since_epoch();
-}
-
 graph::
-graph(lnf* lnf, graph_params const& params) :
-  _lnf(lnf), _data(graph_data_type::na, {}), _params(params)
-{
-  _indicators.resize(max_indicators);
-  for (int i = 0; i < max_indicators; i++)
-  {
-    _indicators[i] = std::make_unique<graph_indicator>(_lnf);
-    addChildComponent(_indicators[i].get());
-  }
-}
+graph(plugin_gui* gui, lnf* lnf, graph_params const& params) :
+_lnf(lnf), _data(graph_data_type::na, {}), _params(params), _gui(gui) {}
 
 void 
 graph::render(graph_data const& data)
@@ -405,11 +430,27 @@ graph::paint(Graphics& g)
   }  
 
   assert(_data.type() == graph_data_type::series);
+
+  // paint the series
   jarray<float, 1> series(_data.series());
   if(_data.bipolar())
     for(int i = 0; i < series.size(); i++)
       series[i] = bipolar_to_unipolar(series[i]);
   paint_series(g, series, _data.bipolar(), _data.stroke_thickness(), 0.5f);
+
+  if (_gui->get_visuals_mode() != gui_visuals_mode_full) return;
+
+  // paint the indicator bubbles
+  int count = _data.series().size();
+  g.setColour(_lnf->colors().graph_modulation_bubble);
+  for (int i = 0; i < _mod_indicators.size(); i++)
+  {
+    float output_pos = _mod_indicators[i];
+    float x = output_pos * w;
+    int point = std::clamp((int)(output_pos * (count - 1)), 0, count - 1);
+    float y = (1 - std::clamp(_data.series()[point], 0.0f, 1.0f)) * h;
+    g.fillEllipse(x - 3, y - 3, 6, 6);
+  }
 }
 
 }

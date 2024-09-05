@@ -77,7 +77,7 @@ override_colors(gui_colors const& base, var const& json)
   result.tab_header = override_color_if_present(json, "tab_header", result.tab_header);
   result.graph_grid = override_color_if_present(json, "graph_grid", result.graph_grid);
   result.graph_text = override_color_if_present(json, "graph_text", result.graph_text);
-  result.graph_mod_indicator = override_color_if_present(json, "graph_mod_indicator", result.graph_mod_indicator);
+  result.graph_modulation_bubble = override_color_if_present(json, "graph_modulation_bubble", result.graph_modulation_bubble);
   result.graph_background = override_color_if_present(json, "graph_background", result.graph_background);
   result.graph_area = override_color_if_present(json, "graph_area", result.graph_area);
   result.graph_line = override_color_if_present(json, "graph_line", result.graph_line);
@@ -828,33 +828,33 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
 
   if (!ps) return;
     
-  // modulatable indicator
+  // can modulate indicator
   if(ps->param()->param->dsp.can_modulate(ps->param()->info.slot))
   {
     g.setColour(colors().slider_can_modulate);
     g.fillEllipse(left + size / 3, top + size / 3, size / 3, size / 3);
   }
 
-  if (ps->max_mod_indicator() < 0.0f) return;
+  if (ps->max_modulation_output() < 0.0f) return;
 
-  // modulation indication
+  // actual modulation outputs
   Path path;  
   auto modulation_color = colors().slider_modulation;
   if (!s.isEnabled()) modulation_color = color_to_grayscale(modulation_color);
   g.setColour(modulation_color);
   float half_mod_angle = start_angle + 0.5f * angle_range;
-  float min_mod_angle = start_angle + ps->min_mod_indicator() * angle_range;
-  float max_mod_angle = start_angle + ps->max_mod_indicator() * angle_range;
+  float min_mod_angle = start_angle + ps->min_modulation_output() * angle_range;
+  float max_mod_angle = start_angle + ps->max_modulation_output() * angle_range;
   if (!bipolar)
   {
-    if(ps->max_mod_indicator() - ps->min_mod_indicator() <= 0.05f)
+    if(ps->max_modulation_output() - ps->min_modulation_output() <= 0.05f)
       path.addArc(left - 3, top - 3, size + 6, size + 6, start_angle, max_mod_angle, true);
     else
       path.addArc(left - 3, top - 3, size + 6, size + 6, min_mod_angle, max_mod_angle, true);
   }
-  else if(ps->max_mod_indicator() - ps->min_mod_indicator() > 0.05f)
+  else if(ps->max_modulation_output() - ps->min_modulation_output() > 0.05f)
     path.addArc(left - 3, top - 3, size + 6, size + 6, min_mod_angle, max_mod_angle, true);
-  else if(ps->max_mod_indicator() >= 0.5f)
+  else if(ps->max_modulation_output() >= 0.5f)
     path.addArc(left - 3, top - 3, size + 6, size + 6, half_mod_angle, max_mod_angle, true);
   else
     path.addArc(left - 3, top - 3, size + 6, size + 6, max_mod_angle, half_mod_angle, true);
@@ -877,8 +877,8 @@ lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, f
   float width = s.getWidth() - padh;
   float centerx = left + width / 2;
 
-  float min_mod_pos = ps ? ps->min_mod_indicator() : -1.0f;
-  float max_mod_pos = ps ? ps->max_mod_indicator() : -1.0f;
+  float min_mod_pos = ps ? ps->min_modulation_output() : -1.0f;
+  float max_mod_pos = ps ? ps->max_modulation_output() : -1.0f;
 
   assert(style == Slider::SliderStyle::LinearHorizontal);
 
@@ -916,7 +916,7 @@ lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, f
   g.setColour(colors().slider_background);
   g.fillRoundedRectangle(left + 1, top + 1, width - 2, height - 2, 2);
 
-  // modulation indicator
+  // actual modulation outputs
   g.setColour(colors().slider_background);
   if(max_mod_pos >= 0.0f)
     if(!bipolar)

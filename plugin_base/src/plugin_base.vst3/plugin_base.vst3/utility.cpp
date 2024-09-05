@@ -24,8 +24,8 @@ load_ibstream(IBStream* stream)
   return data;
 }
 
-extern char const* mod_indicator_count_param_guid = "{0ED52D09-8FD0-4A4A-8D71-BEDED941ADAF}";
-char const* mod_indicator_param_guids[mod_indicator_output_param_count] = {
+extern char const* modulation_output_count_param_guid = "{0ED52D09-8FD0-4A4A-8D71-BEDED941ADAF}";
+char const* modulation_output_param_guids[modulation_output_param_count] = {
 "{00F56C57-6B95-4117-8DA1-D011CC0CC042}",
 "{2F254575-DBDC-4916-9E37-58B59A606DBD}",
 "{05FBD39B-9C33-4D4F-8C12-287F4F878645}",

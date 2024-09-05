@@ -214,6 +214,8 @@ render_osc_graphs(plugin_state const& state, graph_engine* engine, int slot, boo
   int type = state.get_plain_at(module_osc, slot, param_type, 0).step();
   float cent = state.get_plain_at(module_osc, slot, param_cent, 0).real();
   float gain = state.get_plain_at(module_osc, slot, param_gain, 0).real();
+
+  // NOTE we do not take pitch modulators into account
   float freq = pitch_to_freq_no_tuning(note + cent);
   
   plugin_block const* block = nullptr;
@@ -290,6 +292,7 @@ osc_topo(int section, gui_position const& pos)
   result.graph_engine_factory = make_osc_graph_engine;
   result.gui.menu_handler_factory = make_osc_routing_menu_handler;
   result.engine_factory = [](auto const&, int sr, int max_frame_count) { return std::make_unique<osc_engine>(max_frame_count, sr); };
+  result.mod_output_source_selector = [](auto const& state, auto const& mapping) { return modulation_output_source { module_osc_osc_matrix, 0 }; };
 
   result.sections.emplace_back(make_param_section(section_type,
     make_topo_tag_basic("{A64046EE-82EB-4C02-8387-4B9EFF69E06A}", "Type"),

@@ -36,7 +36,7 @@ public any_state_listener,
 public gui_param_listener
 {
   typedef moodycamel::ReaderWriterQueue<sync_event, default_q_size> event_queue;
-  typedef moodycamel::ReaderWriterQueue<mod_indicator_state, default_q_size> mod_indicator_queue;
+  typedef moodycamel::ReaderWriterQueue<modulation_output, default_q_size> modulation_output_queue;
 
   // MTS-ESP support
   MTSClient* _mts_client = {};
@@ -45,14 +45,14 @@ public gui_param_listener
   std::unique_ptr<plugin_desc> _desc;
   plugin_splice_engine _splice_engine;
   extra_state _extra_state;
-  plugin_state _gui_state = {};
+  plugin_state _automation_state = {};
   std::atomic<bool> _is_active = {};
   std::unique_ptr<plugin_gui> _gui = {};
   std::vector<int> _block_automation_seen = {};
   std::unique_ptr<event_queue> _to_gui_events = {};
   std::unique_ptr<event_queue> _to_audio_events = {};
-  std::unique_ptr<mod_indicator_queue> _mod_indicator_queue = {};
-  std::vector<mod_indicator_state> _mod_indicator_states = {};
+  std::vector<modulation_output> _modulation_outputs = {};
+  std::unique_ptr<modulation_output_queue> _modulation_output_queue = {};
 
   // see param_state_changed and timerCallback()
   // and vst3 pb_controller _inside_set_param_normalized
