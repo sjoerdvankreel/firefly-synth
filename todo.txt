@@ -25,7 +25,6 @@ autobuilds:
 * integrate https://github.com/surge-synthesizer/monique-monosynth/blob/main/.github/workflows/build-pr.yml
 
 * make a youtube video
-* update the mod demo video
 * update the manuals routing overview image with new colors
 
 wishlist:
