@@ -28,6 +28,7 @@ autobuilds:
 * update the manuals routing overview image with new colors
 
 wishlist:
+multi-layer distortion (or -- use a dsf generator as waveshaper! cannot do osc-to-fx so, how to fit in the gui?)
 filter microtuning
 DSF falloff to the left
 clap polyphonic modulation
