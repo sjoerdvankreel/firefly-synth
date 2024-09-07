@@ -304,6 +304,9 @@ public module_engine {
   template <bool Graph, int Mode, class SkewX, class SkewY, bool ClipIsExp, class Clip, class Shape>
   void process_dist_mode_xy_clip_shape(plugin_block& block,
     jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation, SkewX skew_x, SkewY skew_y, Clip clip, Shape shape);
+  template <bool Graph, int Mode, class SkewX, class SkewY, bool ClipIsExp, class Clip, class Clamp>
+  void process_dist_mode_xy_clip_clamp(plugin_block& block,
+    jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation, SkewX skew_x, SkewY skew_y, Clip clip, Clamp clamp);
   void dist_svf_next(plugin_block const& block, int oversmp_factor, double freq_hz, double res, float& left, float& right);
 
   // https://cytomic.com/files/dsp/SvfLinearTrapOptimised2.pdf
@@ -2009,19 +2012,49 @@ fx_engine::process_dist_mode_xy_clip(plugin_block& block,
 {
   // from here we deviate for DSF distortion - shaper is fixed to the DSF function
   auto const& block_auto = block.state.own_block_automation;
-  if (block.state.own_block_automation[param_type][0].step() == type_dsf_dst)
+  if (block_auto[param_type][0].step() == type_dsf_dst)
   {
-    int dsf_parts = block_auto[param_dist_dsf_parts][0].step();
-    process_dist_mode_xy_clip_shape<Graph, Mode, SkewX, SkewY, ClipIsExp, Clip>(
-      block, audio_in, modulation, skew_x, skew_y, clip,
-      [dsf_parts](float in, float inc, float sr, float dsf_freq, float dsf_dist, float dsf_dcy) {
-        // input may exceed -1/+1, need to get into 0..1 to use as a phase
-        // todo select pre-clipper and dsf frequency
-        return generate_dsf(bipolar_to_unipolar(std::tanh(in)), inc, sr, dsf_freq, dsf_parts, dsf_dist, dsf_dcy); });
+    // NOTE: keep this stuff in sync with clip above
+    switch (block.state.own_block_automation[param_dist_clamp][0].step())
+    {
+    case dist_clip_tanh: process_dist_mode_xy_clip_clamp<Graph, Mode, SkewX, SkewY, ClipIsExp, Clip>(
+      block, audio_in, modulation, skew_x, skew_y, clip, [](float in, float exp) {
+        return std::tanh(in);
+      }); break;
+    case dist_clip_hard: process_dist_mode_xy_clip_clamp<Graph, Mode, SkewX, SkewY, ClipIsExp, Clip>(
+      block, audio_in, modulation, skew_x, skew_y, clip, [](float in, float exp) {
+        return std::clamp(in, -1.0f, 1.0f);
+      }); break;
+    case dist_clip_inv: process_dist_mode_xy_clip_clamp<Graph, Mode, SkewX, SkewY, ClipIsExp, Clip>(
+      block, audio_in, modulation, skew_x, skew_y, clip, [](float in, float exp) {
+        return signum(in) * (1.0f - (1.0f / (1.0f + std::fabs(30.0f * in))));
+      }); break;
+    case dist_clip_sin: process_dist_mode_xy_clip_clamp<Graph, Mode, SkewX, SkewY, ClipIsExp, Clip>(
+      block, audio_in, modulation, skew_x, skew_y, clip, [](float in, float exp) {
+        float sgn = signum(in);
+        if (std::fabs(in) > 2.0f / 3.0f) return sgn;
+        return std::sin((in * 3.0f * pi32) / 4.0f);
+      }); break;
+    case dist_clip_cube: process_dist_mode_xy_clip_clamp<Graph, Mode, SkewX, SkewY, ClipIsExp, Clip>(
+      block, audio_in, modulation, skew_x, skew_y, clip, [](float in, float exp) {
+        float sgn = signum(in);
+        if (std::fabs(in) > 2.0f / 3.0f) return sgn;
+        return (9 * in * 0.25f) - (27 * in * in * in / 16.0f);
+      }); break;
+    case dist_clip_tsq: process_dist_mode_xy_clip_clamp<Graph, Mode, SkewX, SkewY, ClipIsExp, Clip>(
+      block, audio_in, modulation, skew_x, skew_y, clip, [](float in, float exp) {
+        float sgn = signum(in);
+        if (std::fabs(in) > 2.0f / 3.0f) return sgn;
+        if (-1.0f / 3.0f < in && in < 1.0f / 3.0f) return 2.0f * in;
+        float y = 2.0f - std::fabs(3.0f * in);
+        return sgn * (3.0f - y * y) / 3.0f;
+      }); break;
+    default: assert(false); break;
+    }
     return;
   }
 
-  switch (block.state.own_block_automation[param_dist_shaper][0].step())
+  switch (block_auto[param_dist_shaper][0].step())
   {
   case wave_shape_type_saw: process_dist_mode_xy_clip_shape<Graph, Mode, SkewX, SkewY, ClipIsExp, Clip>(
     block, audio_in, modulation, skew_x, skew_y, clip, wave_shape_bi_saw); break;
@@ -2059,6 +2092,21 @@ fx_engine::process_dist_mode_xy_clip(plugin_block& block,
     block, audio_in, modulation, skew_x, skew_y, clip, wave_shape_bi_fold); break;
   default: assert(false); break;
   }
+}
+
+template <bool Graph, int Mode, class SkewX, class SkewY, bool ClipIsExp, class Clip, class Clamp> void
+fx_engine::process_dist_mode_xy_clip_clamp(plugin_block& block,
+  jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation, SkewX skew_x, SkewY skew_y, Clip clip, Clamp clamp)
+{
+  // for the dsf shaper
+  auto const& block_auto = block.state.own_block_automation;
+  int dsf_parts = block_auto[param_dist_dsf_parts][0].step();
+  process_dist_mode_xy_clip_shape<Graph, Mode, SkewX, SkewY, ClipIsExp, Clip>(
+    block, audio_in, modulation, skew_x, skew_y, clip,
+    [dsf_parts, clamp](float in, float inc, float sr, float dsf_freq, float dsf_dist, float dsf_dcy) {
+      // input may exceed -1/+1, need to get into 0..1 to use as a phase
+      // note: the pre-clip (clamper) is never "exp", so 2nd arg dont matter
+      return generate_dsf(bipolar_to_unipolar(clamp(in, 0.0f)), inc, sr, dsf_freq, dsf_parts, dsf_dist, dsf_dcy); });
 }
 
 template <bool Graph, int Mode, class SkewX, class SkewY, bool ClipIsExp, class Clip, class Shape> void 
