@@ -70,31 +70,33 @@ inline float wave_shape_uni_cos_sin_cos(float in) { return bipolar_to_unipolar(s
 inline float wave_shape_uni_cos_cos_sin(float in) { return bipolar_to_unipolar(std::cos(in * 2 * pi32 + std::cos(in * 2 * pi32 + std::sin(in * 2 * pi32)))); }
 inline float wave_shape_uni_cos_cos_cos(float in) { return bipolar_to_unipolar(std::cos(in * 2 * pi32 + std::cos(in * 2 * pi32 + std::cos(in * 2 * pi32)))); }
 
-inline float wave_shape_bi_saw(float in) { return in; }
-inline float wave_shape_bi_sqr(float in) { return in < 0 ? -1.0f : 1.0f; }
-inline float wave_shape_bi_tri(float in) { return in < -1? in: in > 1? -in: unipolar_to_bipolar(1 - std::fabs(in)); }
-inline float wave_shape_bi_sin(float in) { return std::sin(in * pi32); }
-inline float wave_shape_bi_cos(float in) { return std::cos(in * pi32); }
-inline float wave_shape_bi_sin_sin(float in) { return std::sin(in * pi32 + std::sin(in * pi32)); }
-inline float wave_shape_bi_sin_cos(float in) { return std::sin(in * pi32 + std::cos(in * pi32)); }
-inline float wave_shape_bi_cos_sin(float in) { return std::cos(in * pi32 + std::sin(in * pi32)); }
-inline float wave_shape_bi_cos_cos(float in) { return std::cos(in * pi32 + std::cos(in * pi32)); }
-inline float wave_shape_bi_sin_sin_sin(float in) { return std::sin(in * pi32 + std::sin(in * pi32 + std::sin(in * pi32))); }
-inline float wave_shape_bi_sin_sin_cos(float in) { return std::sin(in * pi32 + std::sin(in * pi32 + std::cos(in * pi32))); }
-inline float wave_shape_bi_sin_cos_sin(float in) { return std::sin(in * pi32 + std::cos(in * pi32 + std::sin(in * pi32))); }
-inline float wave_shape_bi_sin_cos_cos(float in) { return std::sin(in * pi32 + std::cos(in * pi32 + std::cos(in * pi32))); }
-inline float wave_shape_bi_cos_sin_sin(float in) { return std::cos(in * pi32 + std::sin(in * pi32 + std::sin(in * pi32))); }
-inline float wave_shape_bi_cos_sin_cos(float in) { return std::cos(in * pi32 + std::sin(in * pi32 + std::cos(in * pi32))); }
-inline float wave_shape_bi_cos_cos_sin(float in) { return std::cos(in * pi32 + std::cos(in * pi32 + std::sin(in * pi32))); }
-inline float wave_shape_bi_cos_cos_cos(float in) { return std::cos(in * pi32 + std::cos(in * pi32 + std::cos(in * pi32))); }
+// bipolar versions are used in the waveshaper
+// we need inc/sr/freq/dsf_dcy to accomodate the DSF "shaper"
+inline float wave_shape_bi_saw(float in, float inc, float sr, float freq, float dsf_dcy) { return in; }
+inline float wave_shape_bi_sqr(float in, float inc, float sr, float freq, float dsf_dcy) { return in < 0 ? -1.0f : 1.0f; }
+inline float wave_shape_bi_tri(float in, float inc, float sr, float freq, float dsf_dcy) { return in < -1? in: in > 1? -in: unipolar_to_bipolar(1 - std::fabs(in)); }
+inline float wave_shape_bi_sin(float in, float inc, float sr, float freq, float dsf_dcy) { return std::sin(in * pi32); }
+inline float wave_shape_bi_cos(float in, float inc, float sr, float freq, float dsf_dcy) { return std::cos(in * pi32); }
+inline float wave_shape_bi_sin_sin(float in, float inc, float sr, float freq, float dsf_dcy) { return std::sin(in * pi32 + std::sin(in * pi32)); }
+inline float wave_shape_bi_sin_cos(float in, float inc, float sr, float freq, float dsf_dcy) { return std::sin(in * pi32 + std::cos(in * pi32)); }
+inline float wave_shape_bi_cos_sin(float in, float inc, float sr, float freq, float dsf_dcy) { return std::cos(in * pi32 + std::sin(in * pi32)); }
+inline float wave_shape_bi_cos_cos(float in, float inc, float sr, float freq, float dsf_dcy) { return std::cos(in * pi32 + std::cos(in * pi32)); }
+inline float wave_shape_bi_sin_sin_sin(float in, float inc, float sr, float freq, float dsf_dcy) { return std::sin(in * pi32 + std::sin(in * pi32 + std::sin(in * pi32))); }
+inline float wave_shape_bi_sin_sin_cos(float in, float inc, float sr, float freq, float dsf_dcy) { return std::sin(in * pi32 + std::sin(in * pi32 + std::cos(in * pi32))); }
+inline float wave_shape_bi_sin_cos_sin(float in, float inc, float sr, float freq, float dsf_dcy) { return std::sin(in * pi32 + std::cos(in * pi32 + std::sin(in * pi32))); }
+inline float wave_shape_bi_sin_cos_cos(float in, float inc, float sr, float freq, float dsf_dcy) { return std::sin(in * pi32 + std::cos(in * pi32 + std::cos(in * pi32))); }
+inline float wave_shape_bi_cos_sin_sin(float in, float inc, float sr, float freq, float dsf_dcy) { return std::cos(in * pi32 + std::sin(in * pi32 + std::sin(in * pi32))); }
+inline float wave_shape_bi_cos_sin_cos(float in, float inc, float sr, float freq, float dsf_dcy) { return std::cos(in * pi32 + std::sin(in * pi32 + std::cos(in * pi32))); }
+inline float wave_shape_bi_cos_cos_sin(float in, float inc, float sr, float freq, float dsf_dcy) { return std::cos(in * pi32 + std::cos(in * pi32 + std::sin(in * pi32))); }
+inline float wave_shape_bi_cos_cos_cos(float in, float inc, float sr, float freq, float dsf_dcy) { return std::cos(in * pi32 + std::cos(in * pi32 + std::cos(in * pi32))); }
 
 template <class Custom>
 inline float wave_shape_uni_custom(float in, Custom custom) { return custom(in); }
 
 inline float
-wave_shape_bi_fold(float in)
+wave_shape_bi_fold(float in, float inc, float sr, float freq, float dsf_dcy)
 {
-  // expo shapers can spiral out of control
+  // fold shapers can spiral out of control
   in = std::clamp(in, -32.0f, 32.0f);
   while (true)
     if (in > 1.0f) in -= 2.0f * (in - 1.0f);
@@ -116,13 +118,13 @@ inline float wave_calc_uni(float in, float x, float y, Shape shape, SkewIn skew_
 
 // anti-aliased dsf generator for oscis and dsf distortion
 inline float
-generate_dsf(float phase, float increment, float sr, float freq, int parts, float dist_parts, float decay)
+generate_dsf(float phase, float increment, float sr, float freq, int parts, float dist, float decay)
 {
   // -1: Fundamental is implicit. 
   int ps = parts - 1;
   float const decay_range = 0.99f;
   float const scale_factor = 0.975f;
-  float dist_freq = freq * dist_parts;
+  float dist_freq = freq * dist;
   float max_parts = (sr * 0.5f - freq) / dist_freq;
   ps = std::min(ps, (int)max_parts);
 

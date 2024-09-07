@@ -1295,8 +1295,7 @@ fx_engine::process(plugin_block& block,
   case type_cmb: process_comb(block, *audio_in, *modulation); break;
   case type_delay: process_delay(block, *audio_in, *modulation); break;
   case type_reverb: process_reverb(block, *audio_in, *modulation); break;
-  case type_dst: process_dist<Graph>(block, *audio_in, *modulation); break;
-  case type_dsf_dst: break;
+  case type_dst: case type_dsf_dst: process_dist<Graph>(block, *audio_in, *modulation); break;
   default: assert(false); break;
   }
 }
@@ -1943,7 +1942,24 @@ template <bool Graph, int Mode, class SkewX, class SkewY> void
 fx_engine::process_dist_mode_xy(plugin_block& block,
   jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation, SkewX skew_x, SkewY skew_y)
 {
+  // from here we deviate for DSF distortion
+  // shaper is the DSF function and clip is fixed to tanh
   auto const& block_auto = block.state.own_block_automation;
+  if (block.state.own_block_automation[param_type][0].step() == type_dsf_dst)
+  {
+    float dsf_dist = block_auto[param_dist_dsf_dist][0].real();
+    int dsf_parts = (int)std::round(block_auto[param_dist_dsf_parts][0].real());
+    process_dist_mode_xy_clip_shape<Graph, Mode, SkewX, SkewY, false>(
+      block, audio_in, modulation, skew_x, skew_y, 
+      [](float in, float exp) { return std::tanh(in); },
+      [dsf_dist, dsf_parts](float in, float inc, float sr, float dsf_freq, float dsf_dcy) {
+      // input may exceed -1/+1, need to get into 0..1 to use as a phase
+      // todo select pre-clipper and dsf frequency
+      // also less partials
+      return generate_dsf(bipolar_to_unipolar(std::tanh(in)), inc, sr, dsf_freq, dsf_parts, dsf_dist, dsf_dcy); });
+    return;
+  }
+
   switch (block_auto[param_dist_clip][0].step())
   {
   case dist_clip_tanh: process_dist_mode_xy_clip<Graph, Mode, SkewX, SkewY, false>(
@@ -2045,6 +2061,7 @@ fx_engine::process_dist_mode_xy_clip_shape(plugin_block& block,
 
   auto const& mix_curve = *modulation[this_module][block.module_slot][param_dist_mix][0];
   auto const& res_curve = *modulation[this_module][block.module_slot][param_dist_lp_res][0];
+  auto const& dsf_dcy_curve = *modulation[this_module][block.module_slot][param_dist_dsf_dcy][0];
   auto const& x_curve_plain = *modulation[this_module][block.module_slot][param_dist_skew_x_amt][0];
   auto const& y_curve_plain = *modulation[this_module][block.module_slot][param_dist_skew_y_amt][0];
 
@@ -2093,6 +2110,12 @@ fx_engine::process_dist_mode_xy_clip_shape(plugin_block& block,
 
   std::array<jarray<float, 2>*, 1> lanes;
   lanes[0] = &block.state.own_audio[0][0];
+
+  // only used for dsf
+  //float dsf_freq = 1000.0f; // TODO
+  float ovrsmp_rate = block.sample_rate * oversmp_factor;
+  //float ovrsmp_inc = dsf_freq / ovrsmp_rate;
+
   _dst_oversampler.process(oversmp_stages, lanes, 1, block.start_frame, block.end_frame, true, [&](float** lanes_channels, int frame)
     { 
       float left_in = lanes_channels[0][frame];
@@ -2105,12 +2128,16 @@ fx_engine::process_dist_mode_xy_clip_shape(plugin_block& block,
       // so mind the bookkeeping
       int mod_index = block.start_frame + frame / oversmp_factor;
 
+      float dsf_freq = gain_curve[mod_index] * 2000;
+      float ovrsmp_inc = dsf_freq / ovrsmp_rate; // TODO
+      // ALSO TODO make dist/osc dsf dist fake modulatable param
+
       left = skew_x(left * gain_curve[mod_index], (*x_curve)[mod_index]);
       right = skew_x(right * gain_curve[mod_index], (*x_curve)[mod_index]);
       if constexpr(Mode == dist_mode_filt_to_shape)
         dist_svf_next(block, oversmp_factor, freq_curve[mod_index], res_curve[mod_index], left, right);
-      left = shape(left);
-      right = shape(right);
+      left = shape(left, ovrsmp_inc, ovrsmp_rate, dsf_freq, dsf_dcy_curve[mod_index]);
+      right = shape(right, ovrsmp_inc, ovrsmp_rate, dsf_freq, dsf_dcy_curve[mod_index]);
       if constexpr (Mode == dist_mode_shape_to_filt)
         dist_svf_next(block, oversmp_factor, freq_curve[mod_index], res_curve[mod_index], left, right);
 
