@@ -48,10 +48,10 @@ static float const reverb_comb_length[reverb_comb_count] = {
 
 enum { dly_mode_fdbk, dly_mode_multi };
 enum { meq_mode_serial, meq_mode_parallel };
-enum { dist_mode_a, dist_mode_b, dist_mode_c };
+enum { dist_mode_no_filter, dist_mode_filt_to_shape, dist_mode_shape_to_filt };
 enum { dist_over_1, dist_over_2, dist_over_4 };
 enum { comb_mode_feedforward, comb_mode_feedback, comb_mode_both };
-enum { type_off, type_svf, type_cmb, type_dst, type_meq, type_delay, type_reverb };
+enum { type_off, type_svf, type_cmb, type_dst, type_dsf_dst, type_meq, type_delay, type_reverb };
 enum { dist_clip_hard, dist_clip_tanh, dist_clip_sin, dist_clip_exp, dist_clip_tsq, dist_clip_cube, dist_clip_inv };
 enum { svf_mode_lpf, svf_mode_hpf, svf_mode_bpf, svf_mode_bsf, svf_mode_apf, svf_mode_peq, svf_mode_bll, svf_mode_lsh, svf_mode_hsh };
 enum { meq_flt_mode_off, meq_flt_mode_lpf, meq_flt_mode_hpf, meq_flt_mode_bpf, meq_flt_mode_bsf, meq_flt_mode_apf, meq_flt_mode_peq, meq_flt_mode_bll, meq_flt_mode_lsh, meq_flt_mode_hsh };
@@ -74,6 +74,7 @@ enum { param_type,
   param_comb_mode, param_comb_dly_plus, param_comb_dly_min, param_comb_gain_plus, param_comb_gain_min,
   param_dist_mode, param_dist_lp_frq, param_dist_lp_res, param_dist_skew_x, param_dist_skew_x_amt, param_dist_skew_y, param_dist_skew_y_amt, 
   param_dist_over, param_dist_gain, param_dist_mix, param_dist_shaper, param_dist_clip, param_dist_clip_exp,
+  param_dist_dsf_parts, param_dist_dsf_dist, param_dist_dsf_dcy,
   param_meq_mode, param_meq_flt_mode, param_meq_gain, param_meq_freq, param_meq_res,
   param_dly_mode, param_dly_sync, param_dly_amt, param_dly_mix, param_dly_sprd, param_dly_hold_time, param_dly_hold_tempo,
   param_dly_fdbk_time_l, param_dly_fdbk_tempo_l, param_dly_fdbk_time_r, param_dly_fdbk_tempo_r,
@@ -82,6 +83,7 @@ enum { param_type,
 };
 
 static bool svf_has_gain(int svf_mode) { return svf_mode >= svf_mode_bll; }
+static bool type_is_dst(int type) { return type == type_dst || type == type_dsf_dst; }
 static constexpr bool meq_has_gain(int meq_flt_mode) { return meq_flt_mode >= meq_flt_mode_bll; }
 static bool comb_has_feedback(int comb_mode) { return comb_mode == comb_mode_feedback || comb_mode == comb_mode_both; }
 static bool comb_has_feedforward(int comb_mode) { return comb_mode == comb_mode_feedforward || comb_mode == comb_mode_both; }
@@ -94,6 +96,7 @@ type_items(bool global)
   result.emplace_back("{9CB55AC0-48CB-43ED-B81E-B97C08771815}", "SV Filter");
   result.emplace_back("{8140F8BC-E4FD-48A1-B147-CD63E9616450}", "Comb Filter");
   result.emplace_back("{277BDD6B-C1F8-4C33-90DB-F4E144FE06A6}", "Distortion");
+  result.emplace_back("{006D70FA-F374-440F-9B29-1B693F80DB56}", "DSF Distortion");
   result.emplace_back("{FED71DAA-343D-4B50-8891-B0474901D109}", "Multi EQ");
   if(!global) return result;
   result.emplace_back("{789D430C-9636-4FFF-8C75-11B839B9D80D}", "Delay");
@@ -371,7 +374,7 @@ render_graph(
   int const shp_cycle_length = 200;
 
   auto const params = make_graph_engine_params();
-  if (type == type_dst)
+  if (type_is_dst(type))
   {
     // need many samples for filters to stabilize
     sample_rate = 48000;
@@ -447,7 +450,7 @@ render_graph(
   }
   
   // distortion - pick result of the last cycle (after filters kick in)
-  if (type == type_dst)
+  if (type_is_dst(type))
   {
     int last_cycle_start = (shp_cycle_count - 1) * shp_cycle_length;
     std::vector<float> series(audio[0].cbegin() + last_cycle_start, audio[0].cbegin() + frame_count);
@@ -604,11 +607,11 @@ fx_state_converter::post_process_existing(load_handler const& handler, plugin_st
         // Distortion B
         if (old_value == "{6CCE41B3-3A74-4F6A-9AB1-660BF492C8E7}")
           new_state.set_plain_at(this_module, i, param_dist_mode, 0,
-            _desc->raw_to_plain_at(this_module, param_dist_mode, dist_mode_b));
+            _desc->raw_to_plain_at(this_module, param_dist_mode, dist_mode_filt_to_shape));
         // Distortion C
         if (old_value == "{4A7A2979-0E1F-49E9-87CC-6E82355CFEA7}")
           new_state.set_plain_at(this_module, i, param_dist_mode, 0,
-            _desc->raw_to_plain_at(this_module, param_dist_mode, dist_mode_c));
+            _desc->raw_to_plain_at(this_module, param_dist_mode, dist_mode_shape_to_filt));
       }
 
       // pick up skew in/skew out mode from old combined shaper + skew x/y
@@ -674,6 +677,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
   type.gui.submenu->indices.push_back(type_svf);
   type.gui.submenu->indices.push_back(type_cmb);
   type.gui.submenu->indices.push_back(type_dst);
+  type.gui.submenu->indices.push_back(type_dsf_dst);
   type.gui.submenu->indices.push_back(type_meq);
   if (global) type.gui.submenu->indices.push_back(type_delay);
   if (global) type.gui.submenu->indices.push_back(type_reverb);
@@ -783,8 +787,8 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_param_dsp_automate_if_voice(!global), make_domain_item(dist_mode_items(), ""),
     make_param_gui_single(section_main, gui_edit_type::autofit_list, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  dist_mode.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
-  dist_mode.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
+  dist_mode.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return type_is_dst(vs[0]); });
+  dist_mode.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return type_is_dst(vs[0]); });
   dist_mode.info.description = std::string("Affects where the filter is placed.<br/ >") +
     "No Filter: filter is not used, schema is Input => Gain => Skew In => Shape => Skew Out => Clip => Mix.<br/>" +
     "Filter To Shaper: filter before shape, schema is Input => Gain => Skew In => Filter => Shape => Skew Out => Clip => Mix.<br/>" +
@@ -795,20 +799,20 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_param_section_gui({ 0, 1, 2, 1 }, { { 1, 1 }, {
       gui_dimension::auto_size_all, gui_dimension::auto_size_all } }, gui_label_edit_cell_split::horizontal)));
   dist_flt.gui.merge_with_section = section_dist_skew;
-  dist_flt.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
+  dist_flt.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return type_is_dst(vs[0]); });
   auto& dist_lp = result.params.emplace_back(make_param(
     make_topo_info("{C82BC20D-2F1E-4001-BCFB-0C8945D1B329}", true, "Dist LPF Freq", "LPF", "Dist LPF", param_dist_lp_frq, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_log(flt_min_freq, flt_max_freq, flt_max_freq, 1000, 0, "Hz"),
     make_param_gui_single(section_dist_flt, gui_edit_type::knob, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  dist_lp.gui.bindings.enabled.bind_params({ param_type, param_dist_mode }, [](auto const& vs) { return vs[0] == type_dst && vs[1] != dist_mode_a; });
+  dist_lp.gui.bindings.enabled.bind_params({ param_type, param_dist_mode }, [](auto const& vs) { return type_is_dst(vs[0]) && vs[1] != dist_mode_no_filter; });
   dist_lp.info.description = "Lowpass filter frequency inside the oversampling stage.";
   auto& dist_res = result.params.emplace_back(make_param(
     make_topo_info("{A9F6D41F-3C99-44DD-AAAA-BDC1FEEFB250}", true, "Dist LPF Reso", "Res", "Dist Reso", param_dist_lp_res, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0, 0, true),
     make_param_gui_single(section_dist_flt, gui_edit_type::knob, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  dist_res.gui.bindings.enabled.bind_params({ param_type, param_dist_mode }, [](auto const& vs) { return vs[0] == type_dst && vs[1] != dist_mode_a; });
+  dist_res.gui.bindings.enabled.bind_params({ param_type, param_dist_mode }, [](auto const& vs) { return type_is_dst(vs[0]) && vs[1] != dist_mode_no_filter; });
   dist_res.info.description = "Lowpass filter resonance inside the oversampling stage.";
 
   auto& dist_skew = result.sections.emplace_back(make_param_section(section_dist_skew,
@@ -816,20 +820,20 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_param_section_gui({ 0, 2, 2, 1 }, { { 1, 1 }, { 
       gui_dimension::auto_size_all, gui_dimension::auto_size_all, gui_dimension::auto_size_all } }, gui_label_edit_cell_split::horizontal)));
   dist_skew.gui.merge_with_section = section_dist_flt;
-  dist_skew.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
+  dist_skew.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return type_is_dst(vs[0]); });
   auto& dist_skew_in = result.params.emplace_back(make_param(
     make_topo_info("{DAF94A21-BCA4-4D49-BEC0-F0D70CE4F118}", true, "Dist Skew X Mode", "Skew X", "Skew X Mode", param_dist_skew_x, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(wave_skew_type_items(), "Off"),
     make_param_gui_single(section_dist_skew, gui_edit_type::autofit_list, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  dist_skew_in.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
+  dist_skew_in.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return type_is_dst(vs[0]); });
   dist_skew_in.info.description = "Before-shape skew: off (cpu efficient, so use it if you dont need the extra control), linear, scale unipolar/bipolar and exponential unipolar/bipolar.";
   auto& dist_skew_in_amt = result.params.emplace_back(make_param(
     make_topo_info("{94A94B06-6217-4EF5-8BA1-9F77AE54076B}", true, "Dist Skew X Amt", "Skew X Amt", "Dist Skew X", param_dist_skew_x_amt, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
     make_param_gui_single(section_dist_skew, gui_edit_type::knob, { 0, 2 }, make_label_none())));
   dist_skew_in_amt.gui.bindings.enabled.bind_params({ param_type, param_dist_skew_x }, [](auto const& vs) {
-    return vs[0] == type_dst && vs[1] != wave_skew_type_off; });
+    return type_is_dst(vs[0]) && vs[1] != wave_skew_type_off; });
   dist_skew_in_amt.info.description = "Before-shape skew amount.";
   dist_skew_in.gui.alternate_drag_param_id = dist_skew_in_amt.info.tag.id;
   auto& dist_skew_out = result.params.emplace_back(make_param(
@@ -837,14 +841,14 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_param_dsp_automate_if_voice(!global), make_domain_item(wave_skew_type_items(), "Off"),
     make_param_gui_single(section_dist_skew, gui_edit_type::autofit_list, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  dist_skew_out.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
+  dist_skew_out.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return type_is_dst(vs[0]); });
   dist_skew_out.info.description = "After-shape skew: off (cpu efficient, so use it if you dont need the extra control), linear, scale unipolar/bipolar and exponential unipolar/bipolar.";
   auto& dist_skew_out_amt = result.params.emplace_back(make_param(
     make_topo_info("{042570BF-6F02-4F91-9805-6C49FE9A3954}", true, "Dist Skew Y Amt", "Skew Y Amt", "Dist Skew Y", param_dist_skew_y_amt, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
     make_param_gui_single(section_dist_skew, gui_edit_type::knob, { 1, 2 }, make_label_none())));
   dist_skew_out_amt.gui.bindings.enabled.bind_params({ param_type, param_dist_skew_y }, [](auto const& vs) {
-    return vs[0] == type_dst && vs[1] != wave_skew_type_off; });
+    return type_is_dst(vs[0]) && vs[1] != wave_skew_type_off; });
   dist_skew_out_amt.info.description = "After-shape skew amount.";
   dist_skew_out.gui.alternate_drag_param_id = dist_skew_out_amt.info.tag.id;
 
@@ -853,21 +857,21 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_param_section_gui({ 0, 3, 2, 2 }, { { 1, 1 }, {
       gui_dimension::auto_size_all, gui_dimension::auto_size_all, gui_dimension::auto_size_all,
       gui_dimension::auto_size, gui_dimension::auto_size_all, 1 } }, gui_label_edit_cell_split::horizontal)));
-  dist_right.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
+  dist_right.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return type_is_dst(vs[0]); });
   dist_right.gui.autofit_row = 1;
   auto& dist_over = result.params.emplace_back(make_param(
     make_topo_info("{99C6E4A8-F90A-41DC-8AC7-4078A6DE0031}", true, "Dist Oversampling", "OvrSmp", "Dist OvrSmp", param_dist_over, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(dist_over_items(), ""),
     make_param_gui_single(section_dist_right, gui_edit_type::autofit_list, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  dist_over.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
+  dist_over.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return type_is_dst(vs[0]); });
   dist_over.info.description = "Oversampling factor. If you go really crazy with distortion, this might tip the scale from just-not-acceptible to just-acceptible.";
   auto& dist_gain = result.params.emplace_back(make_param(
     make_topo_info("{3FC57F28-075F-44A2-8D0D-6908447AE87C}", true, "Dist Gain", "Gain", "Dist Gain", param_dist_gain, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_log(0.1, 32, 1, 1, 2, ""),
     make_param_gui_single(section_dist_right, gui_edit_type::knob, { 0, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  dist_gain.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
+  dist_gain.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return type_is_dst(vs[0]); });
   dist_gain.info.description = std::string("Gain amount to drive the shaper and X/Y parameters. ") +
     "Use an Osc with gain envelope to have the effect of the distortion gradually fall-off.";
   auto& dist_mix = result.params.emplace_back(make_param(
@@ -875,7 +879,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(1, 0, true),
     make_param_gui_single(section_dist_right, gui_edit_type::knob, { 0, 4 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  dist_mix.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
+  dist_mix.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return type_is_dst(vs[0]); });
   dist_mix.info.description = "Dry/wet mix between input and output signal.";
   auto& dist_shaper = result.params.emplace_back(make_param(
     make_topo_info("{BFB5A04F-5372-4259-8198-6761BA52ADEB}", true, "Dist Shape", "Shape", "Dist Shape", param_dist_shaper, 1),
@@ -1855,9 +1859,9 @@ fx_engine::process_dist(plugin_block& block,
   auto const& block_auto = block.state.own_block_automation;
   switch (block_auto[param_dist_mode][0].step())
   {
-  case dist_mode_a: process_dist_mode<Graph, dist_mode_a>(block, audio_in, modulation); break;
-  case dist_mode_b: process_dist_mode<Graph, dist_mode_b>(block, audio_in, modulation); break;
-  case dist_mode_c: process_dist_mode<Graph, dist_mode_c>(block, audio_in, modulation); break;
+  case dist_mode_no_filter: process_dist_mode<Graph, dist_mode_no_filter>(block, audio_in, modulation); break;
+  case dist_mode_filt_to_shape: process_dist_mode<Graph, dist_mode_filt_to_shape>(block, audio_in, modulation); break;
+  case dist_mode_shape_to_filt: process_dist_mode<Graph, dist_mode_shape_to_filt>(block, audio_in, modulation); break;
   default: assert(false); break;
   }
 }
@@ -2004,7 +2008,7 @@ fx_engine::process_dist_mode_clip_shape_xy(plugin_block& block,
 
   auto& freq_curve = block.state.own_scratch[scratch_dist_svf_freq];
   auto const& freq_curve_plain = *modulation[this_module][block.module_slot][param_dist_lp_frq][0];
-  if constexpr (Mode == dist_mode_b || Mode == dist_mode_c)
+  if constexpr (Mode == dist_mode_filt_to_shape || Mode == dist_mode_shape_to_filt)
     block.normalized_to_raw_block<domain_type::log>(this_module, param_dist_lp_frq, freq_curve_plain, freq_curve);
 
   auto& clip_exp_curve = block.state.own_scratch[scratch_dist_clip_exp];
@@ -2039,11 +2043,11 @@ fx_engine::process_dist_mode_clip_shape_xy(plugin_block& block,
 
       left = skew_x(left * gain_curve[mod_index], (*x_curve)[mod_index]);
       right = skew_x(right * gain_curve[mod_index], (*x_curve)[mod_index]);
-      if constexpr(Mode == dist_mode_b)
+      if constexpr(Mode == dist_mode_filt_to_shape)
         dist_svf_next(block, oversmp_factor, freq_curve[mod_index], res_curve[mod_index], left, right);
       left = shape(left);
       right = shape(right);
-      if constexpr (Mode == dist_mode_c)
+      if constexpr (Mode == dist_mode_shape_to_filt)
         dist_svf_next(block, oversmp_factor, freq_curve[mod_index], res_curve[mod_index], left, right);
 
       float exp = 0.0f;
