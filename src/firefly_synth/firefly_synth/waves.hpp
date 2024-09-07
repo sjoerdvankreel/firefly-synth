@@ -7,10 +7,10 @@
 #include <cmath>
 #include <cassert>
 
-// waveforms for lfos and shapers
 namespace firefly_synth
 {
 
+// non-antialised waveforms for lfos and shapers
 using plugin_base::unipolar_to_bipolar;
 using plugin_base::bipolar_to_unipolar;
 inline float const pi32 = plugin_base::pi32;
@@ -94,7 +94,7 @@ inline float wave_shape_uni_custom(float in, Custom custom) { return custom(in);
 inline float
 wave_shape_bi_fold(float in)
 {
-  // expo shapers can spiral in out of control
+  // expo shapers can spiral out of control
   in = std::clamp(in, -32.0f, 32.0f);
   while (true)
     if (in > 1.0f) in -= 2.0f * (in - 1.0f);
@@ -112,6 +112,30 @@ inline float wave_calc_uni(float in, float x, float y, Shape shape, SkewIn skew_
   float skewed_in = check_unipolar(skew_in(in, x));
   float shaped = check_unipolar(shape(skewed_in));
   return check_unipolar(skew_out(shaped, y));
+}
+
+// anti-aliased dsf generator for oscis and dsf distortion
+inline float
+generate_dsf(float phase, float increment, float sr, float freq, int parts, float dist_parts, float decay)
+{
+  // -1: Fundamental is implicit. 
+  int ps = parts - 1;
+  float const decay_range = 0.99f;
+  float const scale_factor = 0.975f;
+  float dist_freq = freq * dist_parts;
+  float max_parts = (sr * 0.5f - freq) / dist_freq;
+  ps = std::min(ps, (int)max_parts);
+
+  float n = static_cast<float>(ps);
+  float w = decay * decay_range;
+  float w_pow_np1 = std::pow(w, n + 1);
+  float u = 2.0f * pi32 * phase;
+  float v = 2.0f * pi32 * dist_freq * phase / freq;
+  float a = w * std::sin(u + n * v) - std::sin(u + (n + 1) * v);
+  float x = (w * std::sin(v - u) + std::sin(u)) + w_pow_np1 * a;
+  float y = 1 + w * w - 2 * w * std::cos(v);
+  float scale = (1.0f - w_pow_np1) / (1.0f - w);
+  return plugin_base::check_bipolar(x * scale_factor / (y * scale));
 }
 
 }
