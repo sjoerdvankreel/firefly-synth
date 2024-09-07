@@ -52,7 +52,7 @@ enum { dist_mode_no_filter, dist_mode_filt_to_shape, dist_mode_shape_to_filt };
 enum { dist_over_1, dist_over_2, dist_over_4 };
 enum { comb_mode_feedforward, comb_mode_feedback, comb_mode_both };
 enum { type_off, type_svf, type_cmb, type_dst, type_dsf_dst, type_meq, type_delay, type_reverb };
-enum { dist_clip_hard, dist_clip_tanh, dist_clip_sin, dist_clip_exp, dist_clip_tsq, dist_clip_cube, dist_clip_inv };
+enum { dist_clip_hard, dist_clip_tanh, dist_clip_sin, dist_clip_tsq, dist_clip_cube, dist_clip_inv, dist_clip_exp };
 enum { svf_mode_lpf, svf_mode_hpf, svf_mode_bpf, svf_mode_bsf, svf_mode_apf, svf_mode_peq, svf_mode_bll, svf_mode_lsh, svf_mode_hsh };
 enum { meq_flt_mode_off, meq_flt_mode_lpf, meq_flt_mode_hpf, meq_flt_mode_bpf, meq_flt_mode_bsf, meq_flt_mode_apf, meq_flt_mode_peq, meq_flt_mode_bll, meq_flt_mode_lsh, meq_flt_mode_hsh };
 enum { section_main, section_svf_left, section_svf_right, section_comb_left, section_comb_right, section_dist_flt, section_dist_mid, 
@@ -881,7 +881,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
   dist_right.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return type_is_dst(vs[0]); });
   dist_right.gui.autofit_row = 1;
   auto& dist_clip = result.params.emplace_back(make_param(
-    make_topo_info("{810325E4-C3AB-48DA-A770-65887DF57845}", true, "Dist Clip Mode", "Clip", "Dist Clip", param_dist_clip, 1),
+    make_topo_info("{810325E4-C3AB-48DA-A770-65887DF57845}", true, "Dist Clip Mode", "Clp", "Dist Clip", param_dist_clip, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(dist_clip_items(false), "Tanh"),
     make_param_gui_single(section_dist_right, gui_edit_type::autofit_list, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
@@ -895,7 +895,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
   dist_clip_expo.gui.bindings.enabled.bind_params({ param_type, param_dist_clip }, [](auto const& vs) { return type_is_dst(vs[0]) && vs[1] == dist_clip_exp; });
   dist_clip_expo.info.description = "Exponential clipper amount.";
   auto& dist_shaper = result.params.emplace_back(make_param(
-    make_topo_info("{BFB5A04F-5372-4259-8198-6761BA52ADEB}", true, "Dist Shape", "Shape", "Dist Shape", param_dist_shaper, 1),
+    make_topo_info("{BFB5A04F-5372-4259-8198-6761BA52ADEB}", true, "Dist Shape", "Shp", "Dist Shape", param_dist_shaper, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(wave_shape_type_items(true, global), ""),
     make_param_gui_single(section_dist_right, gui_edit_type::autofit_list, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
@@ -903,7 +903,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
   dist_shaper.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   dist_shaper.info.description = "Selects waveshaper type: various periodic functions plus foldback distortion.";
   auto& dist_clamp = result.params.emplace_back(make_param(
-    make_topo_info("{11CEE5D2-2A7D-494C-879D-9199E11C95BC}", true, "Dist Clamp Mode", "Clamp", "Dist Clamp", param_dist_clamp, 1),
+    make_topo_info("{11CEE5D2-2A7D-494C-879D-9199E11C95BC}", true, "Dist Clamp Mode", "Clmp", "Dist Clamp", param_dist_clamp, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(dist_clip_items(true), "Tanh"),
     make_param_gui_single(section_dist_right, gui_edit_type::autofit_list, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
@@ -911,7 +911,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
   dist_clamp.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dsf_dst; });
   dist_clamp.info.description = "Used to bring the input signal into [-1, 1] to be used as the DSF distortion phase.";
   auto& dist_over = result.params.emplace_back(make_param(
-    make_topo_info("{99C6E4A8-F90A-41DC-8AC7-4078A6DE0031}", true, "Dist Oversampling", "OvrSmp", "Dist OvrSmp", param_dist_over, 1),
+    make_topo_info("{99C6E4A8-F90A-41DC-8AC7-4078A6DE0031}", true, "Dist Oversampling", "OS", "Dist OvrSmp", param_dist_over, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(dist_over_items(), ""),
     make_param_gui_single(section_dist_right, gui_edit_type::autofit_list, { 1, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
