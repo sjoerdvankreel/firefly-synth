@@ -289,18 +289,18 @@ public module_engine {
   template <bool Graph, int Mode>
   void process_dist_mode(plugin_block& block, 
     jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation);
-  template <bool Graph, int Mode, bool ClipIsExp, class Clip>
-  void process_dist_mode_clip(plugin_block& block, 
-    jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation, Clip clip);
-  template <bool Graph, int Mode, bool ClipIsExp, class Clip, class Shape>
-  void process_dist_mode_clip_shape(plugin_block& block, 
-    jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation, Clip clip, Shape shape);
-  template <bool Graph, int Mode, bool ClipIsExp, class Clip, class Shape, class SkewX>
-  void process_dist_mode_clip_shape_x(plugin_block& block,
-    jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation, Clip clip, Shape shape, SkewX skew_x);
-  template <bool Graph, int Mode, bool ClipIsExp, class Clip, class Shape, class SkewX, class SkewY>
-  void process_dist_mode_clip_shape_xy(plugin_block& block,
-    jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation, Clip clip, Shape shape, SkewX skew_x, SkewY skew_y);
+  template <bool Graph, int Mode, class SkewX>
+  void process_dist_mode_x(plugin_block& block,
+    jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation, SkewX skew_x);
+  template <bool Graph, int Mode, class SkewX, class SkewY>
+  void process_dist_mode_xy(plugin_block& block,
+    jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation, SkewX skew_x, SkewY skew_y);
+  template <bool Graph, int Mode, class SkewX, class SkewY, bool ClipIsExp, class Clip>
+  void process_dist_mode_xy_clip(plugin_block& block,
+    jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation, SkewX skew_x, SkewY skew_y, Clip clip);
+  template <bool Graph, int Mode, class SkewX, class SkewY, bool ClipIsExp, class Clip, class Shape>
+  void process_dist_mode_xy_clip_shape(plugin_block& block,
+    jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation, SkewX skew_x, SkewY skew_y, Clip clip, Shape shape);
   void dist_svf_next(plugin_block const& block, int oversmp_factor, double freq_hz, double res, float& left, float& right);
 
   // https://cytomic.com/files/dsp/SvfLinearTrapOptimised2.pdf
@@ -1899,106 +1899,142 @@ template <bool Graph, int Mode> void
 fx_engine::process_dist_mode(plugin_block& block, 
   jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation)
 {
+  switch (block.state.own_block_automation[param_dist_skew_x][0].step())
+  {
+  case wave_skew_type_off: process_dist_mode_x<Graph, Mode>(
+    block, audio_in, modulation, wave_skew_bi_off); break;
+  case wave_skew_type_lin: process_dist_mode_x<Graph, Mode>(
+    block, audio_in, modulation, wave_skew_bi_lin); break;
+  case wave_skew_type_scu: process_dist_mode_x<Graph, Mode>(
+    block, audio_in, modulation, wave_skew_bi_scu); break;
+  case wave_skew_type_scb: process_dist_mode_x<Graph, Mode>(
+    block, audio_in, modulation, wave_skew_bi_scb); break;
+  case wave_skew_type_xpu: process_dist_mode_x<Graph, Mode>(
+    block, audio_in, modulation, wave_skew_bi_xpu); break;
+  case wave_skew_type_xpb: process_dist_mode_x<Graph, Mode>(
+    block, audio_in, modulation, wave_skew_bi_xpb); break;
+  default: assert(false); break;
+  }
+}
+
+template <bool Graph, int Mode, class SkewX> void 
+fx_engine::process_dist_mode_x(plugin_block& block,
+  jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation, SkewX skew_x)
+{
+  switch (block.state.own_block_automation[param_dist_skew_y][0].step())
+  {
+  case wave_skew_type_off: process_dist_mode_xy<Graph, Mode, SkewX>(
+    block, audio_in, modulation, skew_x, wave_skew_bi_off); break;
+  case wave_skew_type_lin: process_dist_mode_xy<Graph, Mode, SkewX>(
+    block, audio_in, modulation, skew_x, wave_skew_bi_lin); break;
+  case wave_skew_type_scu: process_dist_mode_xy<Graph, Mode, SkewX>(
+    block, audio_in, modulation, skew_x, wave_skew_bi_scu); break;
+  case wave_skew_type_scb: process_dist_mode_xy<Graph, Mode, SkewX>(
+    block, audio_in, modulation, skew_x, wave_skew_bi_scb); break;
+  case wave_skew_type_xpu: process_dist_mode_xy<Graph, Mode, SkewX>(
+    block, audio_in, modulation, skew_x, wave_skew_bi_xpu); break;
+  case wave_skew_type_xpb: process_dist_mode_xy<Graph, Mode, SkewX>(
+    block, audio_in, modulation, skew_x, wave_skew_bi_xpb); break;
+  default: assert(false); break;
+  }
+}
+
+template <bool Graph, int Mode, class SkewX, class SkewY> void 
+fx_engine::process_dist_mode_xy(plugin_block& block,
+  jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation, SkewX skew_x, SkewY skew_y)
+{
   auto const& block_auto = block.state.own_block_automation;
   switch (block_auto[param_dist_clip][0].step())
   {
-  case dist_clip_tanh: process_dist_mode_clip<Graph, Mode, false>(block, audio_in, modulation, [](float in, float exp) {
-    return std::tanh(in); 
-  }); break;
-  case dist_clip_hard: process_dist_mode_clip<Graph, Mode, false>(block, audio_in, modulation, [](float in, float exp) { 
-    return std::clamp(in, -1.0f, 1.0f); 
-  }); break;
-  case dist_clip_inv: process_dist_mode_clip<Graph, Mode, false>(block, audio_in, modulation, [](float in, float exp) {
+  case dist_clip_tanh: process_dist_mode_xy_clip<Graph, Mode, SkewX, SkewY, false>(
+    block, audio_in, modulation, skew_x, skew_y, [](float in, float exp) {
+    return std::tanh(in);
+    }); break;
+  case dist_clip_hard: process_dist_mode_xy_clip<Graph, Mode, SkewX, SkewY, false>(
+    block, audio_in, modulation, skew_x, skew_y, [](float in, float exp) {
+    return std::clamp(in, -1.0f, 1.0f);
+    }); break;
+  case dist_clip_inv: process_dist_mode_xy_clip<Graph, Mode, SkewX, SkewY, false>(
+    block, audio_in, modulation, skew_x, skew_y, [](float in, float exp) {
     return signum(in) * (1.0f - (1.0f / (1.0f + std::fabs(30.0f * in))));
-  }); break;
-  case dist_clip_sin: process_dist_mode_clip<Graph, Mode, false>(block, audio_in, modulation, [](float in, float exp) {
+    }); break;
+  case dist_clip_sin: process_dist_mode_xy_clip<Graph, Mode, SkewX, SkewY, false>(
+    block, audio_in, modulation, skew_x, skew_y, [](float in, float exp) {
     float sgn = signum(in);
-    if(std::fabs(in) > 2.0f / 3.0f) return sgn;
-    return std::sin((in * 3.0f * pi32) / 4.0f); 
-  }); break;
-  case dist_clip_exp: process_dist_mode_clip<Graph, Mode, true>(block, audio_in, modulation, [](float in, float exp) { 
+    if (std::fabs(in) > 2.0f / 3.0f) return sgn;
+    return std::sin((in * 3.0f * pi32) / 4.0f);
+    }); break;
+  case dist_clip_exp: process_dist_mode_xy_clip<Graph, Mode, SkewX, SkewY, true>(
+    block, audio_in, modulation, skew_x, skew_y, [](float in, float exp) {
     float sgn = signum(in);
     if (std::fabs(in) > 2.0f / 3.0f) return sgn;
     return sgn * (1.0f - std::pow(std::fabs(1.5f * in - sgn), exp));
-  }); break;
-  case dist_clip_cube: process_dist_mode_clip<Graph, Mode, false>(block, audio_in, modulation, [](float in, float exp) {
+    }); break;
+  case dist_clip_cube: process_dist_mode_xy_clip<Graph, Mode, SkewX, SkewY, false>(
+    block, audio_in, modulation, skew_x, skew_y, [](float in, float exp) {
     float sgn = signum(in);
     if (std::fabs(in) > 2.0f / 3.0f) return sgn;
     return (9 * in * 0.25f) - (27 * in * in * in / 16.0f);
-  }); break;
-  case dist_clip_tsq: process_dist_mode_clip<Graph, Mode, false>(block, audio_in, modulation, [](float in, float exp) {
+    }); break;
+  case dist_clip_tsq: process_dist_mode_xy_clip<Graph, Mode, SkewX, SkewY, false>(
+    block, audio_in, modulation, skew_x, skew_y, [](float in, float exp) {
     float sgn = signum(in);
     if (std::fabs(in) > 2.0f / 3.0f) return sgn;
     if (-1.0f / 3.0f < in && in < 1.0f / 3.0f) return 2.0f * in;
     float y = 2.0f - std::fabs(3.0f * in);
     return sgn * (3.0f - y * y) / 3.0f;
-  }); break;
+    }); break;
   default: assert(false); break;
   }
 }
 
-template <bool Graph, int Mode, bool ClipIsExp, class Clip> void
-fx_engine::process_dist_mode_clip(plugin_block& block, 
-  jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation, Clip clip)
+template <bool Graph, int Mode, class SkewX, class SkewY, bool ClipIsExp, class Clip> void 
+fx_engine::process_dist_mode_xy_clip(plugin_block& block,
+  jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation, SkewX skew_x, SkewY skew_y, Clip clip)
 {
   switch (block.state.own_block_automation[param_dist_shaper][0].step())
   {
-  case wave_shape_type_saw: process_dist_mode_clip_shape<Graph, Mode, ClipIsExp>(block, audio_in, modulation, clip, wave_shape_bi_saw); break;
-  case wave_shape_type_tri: process_dist_mode_clip_shape<Graph, Mode, ClipIsExp>(block, audio_in, modulation, clip, wave_shape_bi_tri); break;
-  case wave_shape_type_sin: process_dist_mode_clip_shape<Graph, Mode, ClipIsExp>(block, audio_in, modulation, clip, wave_shape_bi_sin); break;
-  case wave_shape_type_cos: process_dist_mode_clip_shape<Graph, Mode, ClipIsExp>(block, audio_in, modulation, clip, wave_shape_bi_cos); break;
-  case wave_shape_type_sin_sin: process_dist_mode_clip_shape<Graph, Mode, ClipIsExp>(block, audio_in, modulation, clip, wave_shape_bi_sin_sin); break;
-  case wave_shape_type_sin_cos: process_dist_mode_clip_shape<Graph, Mode, ClipIsExp>(block, audio_in, modulation, clip, wave_shape_bi_sin_cos); break;
-  case wave_shape_type_cos_sin: process_dist_mode_clip_shape<Graph, Mode, ClipIsExp>(block, audio_in, modulation, clip, wave_shape_bi_cos_sin); break;
-  case wave_shape_type_cos_cos: process_dist_mode_clip_shape<Graph, Mode, ClipIsExp>(block, audio_in, modulation, clip, wave_shape_bi_cos_cos); break;
-  case wave_shape_type_sin_sin_sin: process_dist_mode_clip_shape<Graph, Mode, ClipIsExp>(block, audio_in, modulation, clip, wave_shape_bi_sin_sin_sin); break;
-  case wave_shape_type_sin_sin_cos: process_dist_mode_clip_shape<Graph, Mode, ClipIsExp>(block, audio_in, modulation, clip, wave_shape_bi_sin_sin_cos); break;
-  case wave_shape_type_sin_cos_sin: process_dist_mode_clip_shape<Graph, Mode, ClipIsExp>(block, audio_in, modulation, clip, wave_shape_bi_sin_cos_sin); break;
-  case wave_shape_type_sin_cos_cos: process_dist_mode_clip_shape<Graph, Mode, ClipIsExp>(block, audio_in, modulation, clip, wave_shape_bi_sin_cos_cos); break;
-  case wave_shape_type_cos_sin_sin: process_dist_mode_clip_shape<Graph, Mode, ClipIsExp>(block, audio_in, modulation, clip, wave_shape_bi_cos_sin_sin); break;
-  case wave_shape_type_cos_sin_cos: process_dist_mode_clip_shape<Graph, Mode, ClipIsExp>(block, audio_in, modulation, clip, wave_shape_bi_cos_sin_cos); break;
-  case wave_shape_type_cos_cos_sin: process_dist_mode_clip_shape<Graph, Mode, ClipIsExp>(block, audio_in, modulation, clip, wave_shape_bi_cos_cos_sin); break;
-  case wave_shape_type_cos_cos_cos: process_dist_mode_clip_shape<Graph, Mode, ClipIsExp>(block, audio_in, modulation, clip, wave_shape_bi_cos_cos_cos); break;
-  case wave_shape_type_sqr_or_fold: process_dist_mode_clip_shape<Graph, Mode, ClipIsExp>(block, audio_in, modulation, clip, wave_shape_bi_fold); break;
+  case wave_shape_type_saw: process_dist_mode_xy_clip_shape<Graph, Mode, SkewX, SkewY, ClipIsExp, Clip>(
+    block, audio_in, modulation, skew_x, skew_y, clip, wave_shape_bi_saw); break;
+  case wave_shape_type_tri: process_dist_mode_xy_clip_shape<Graph, Mode, SkewX, SkewY, ClipIsExp, Clip>(
+    block, audio_in, modulation, skew_x, skew_y, clip, wave_shape_bi_tri); break;
+  case wave_shape_type_sin: process_dist_mode_xy_clip_shape<Graph, Mode, SkewX, SkewY, ClipIsExp, Clip>(
+    block, audio_in, modulation, skew_x, skew_y, clip, wave_shape_bi_sin); break;
+  case wave_shape_type_cos: process_dist_mode_xy_clip_shape<Graph, Mode, SkewX, SkewY, ClipIsExp, Clip>(
+    block, audio_in, modulation, skew_x, skew_y, clip, wave_shape_bi_cos); break;
+  case wave_shape_type_sin_sin: process_dist_mode_xy_clip_shape<Graph, Mode, SkewX, SkewY, ClipIsExp, Clip>(
+    block, audio_in, modulation, skew_x, skew_y, clip, wave_shape_bi_sin_sin); break;
+  case wave_shape_type_sin_cos: process_dist_mode_xy_clip_shape<Graph, Mode, SkewX, SkewY, ClipIsExp, Clip>(
+    block, audio_in, modulation, skew_x, skew_y, clip, wave_shape_bi_sin_cos); break;
+  case wave_shape_type_cos_sin: process_dist_mode_xy_clip_shape<Graph, Mode, SkewX, SkewY, ClipIsExp, Clip>(
+    block, audio_in, modulation, skew_x, skew_y, clip, wave_shape_bi_cos_sin); break;
+  case wave_shape_type_cos_cos: process_dist_mode_xy_clip_shape<Graph, Mode, SkewX, SkewY, ClipIsExp, Clip>(
+    block, audio_in, modulation, skew_x, skew_y, clip, wave_shape_bi_cos_cos); break;
+  case wave_shape_type_sin_sin_sin: process_dist_mode_xy_clip_shape<Graph, Mode, SkewX, SkewY, ClipIsExp, Clip>(
+    block, audio_in, modulation, skew_x, skew_y, clip, wave_shape_bi_sin_sin_sin); break;
+  case wave_shape_type_sin_sin_cos: process_dist_mode_xy_clip_shape<Graph, Mode, SkewX, SkewY, ClipIsExp, Clip>(
+    block, audio_in, modulation, skew_x, skew_y, clip, wave_shape_bi_sin_sin_cos); break;
+  case wave_shape_type_sin_cos_sin: process_dist_mode_xy_clip_shape<Graph, Mode, SkewX, SkewY, ClipIsExp, Clip>(
+    block, audio_in, modulation, skew_x, skew_y, clip, wave_shape_bi_sin_cos_sin); break;
+  case wave_shape_type_sin_cos_cos: process_dist_mode_xy_clip_shape<Graph, Mode, SkewX, SkewY, ClipIsExp, Clip>(
+    block, audio_in, modulation, skew_x, skew_y, clip, wave_shape_bi_sin_cos_cos); break;
+  case wave_shape_type_cos_sin_sin: process_dist_mode_xy_clip_shape<Graph, Mode, SkewX, SkewY, ClipIsExp, Clip>(
+    block, audio_in, modulation, skew_x, skew_y, clip, wave_shape_bi_cos_sin_sin); break;
+  case wave_shape_type_cos_sin_cos: process_dist_mode_xy_clip_shape<Graph, Mode, SkewX, SkewY, ClipIsExp, Clip>(
+    block, audio_in, modulation, skew_x, skew_y, clip, wave_shape_bi_cos_sin_cos); break;
+  case wave_shape_type_cos_cos_sin: process_dist_mode_xy_clip_shape<Graph, Mode, SkewX, SkewY, ClipIsExp, Clip>(
+    block, audio_in, modulation, skew_x, skew_y, clip, wave_shape_bi_cos_cos_sin); break;
+  case wave_shape_type_cos_cos_cos: process_dist_mode_xy_clip_shape<Graph, Mode, SkewX, SkewY, ClipIsExp, Clip>(
+    block, audio_in, modulation, skew_x, skew_y, clip, wave_shape_bi_cos_cos_cos); break;
+  case wave_shape_type_sqr_or_fold: process_dist_mode_xy_clip_shape<Graph, Mode, SkewX, SkewY, ClipIsExp, Clip>(
+    block, audio_in, modulation, skew_x, skew_y, clip, wave_shape_bi_fold); break;
   default: assert(false); break;
   }
 }
 
-template <bool Graph, int Mode, bool ClipIsExp, class Clip, class Shape> void
-fx_engine::process_dist_mode_clip_shape(plugin_block& block, 
-  jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation, Clip clip, Shape shape)
-{
-  switch (block.state.own_block_automation[param_dist_skew_x][0].step())
-  {
-  case wave_skew_type_off: process_dist_mode_clip_shape_x<Graph, Mode, ClipIsExp>(block, audio_in, modulation, clip, shape, wave_skew_bi_off); break;
-  case wave_skew_type_lin: process_dist_mode_clip_shape_x<Graph, Mode, ClipIsExp>(block, audio_in, modulation, clip, shape, wave_skew_bi_lin); break;
-  case wave_skew_type_scu: process_dist_mode_clip_shape_x<Graph, Mode, ClipIsExp>(block, audio_in, modulation, clip, shape, wave_skew_bi_scu); break;
-  case wave_skew_type_scb: process_dist_mode_clip_shape_x<Graph, Mode, ClipIsExp>(block, audio_in, modulation, clip, shape, wave_skew_bi_scb); break;
-  case wave_skew_type_xpu: process_dist_mode_clip_shape_x<Graph, Mode, ClipIsExp>(block, audio_in, modulation, clip, shape, wave_skew_bi_xpu); break;
-  case wave_skew_type_xpb: process_dist_mode_clip_shape_x<Graph, Mode, ClipIsExp>(block, audio_in, modulation, clip, shape, wave_skew_bi_xpb); break;
-  default: assert(false); break;
-  }
-}
-
-template <bool Graph, int Mode, bool ClipIsExp, class Clip, class Shape, class SkewX> void
-fx_engine::process_dist_mode_clip_shape_x(plugin_block& block, 
-  jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation, Clip clip, Shape shape, SkewX skew_x)
-{
-  switch (block.state.own_block_automation[param_dist_skew_y][0].step())
-  {
-  case wave_skew_type_off: process_dist_mode_clip_shape_xy<Graph, Mode, ClipIsExp>(block, audio_in, modulation, clip, shape, skew_x, wave_skew_bi_off); break;
-  case wave_skew_type_lin: process_dist_mode_clip_shape_xy<Graph, Mode, ClipIsExp>(block, audio_in, modulation, clip, shape, skew_x, wave_skew_bi_lin); break;
-  case wave_skew_type_scu: process_dist_mode_clip_shape_xy<Graph, Mode, ClipIsExp>(block, audio_in, modulation, clip, shape, skew_x, wave_skew_bi_scu); break;
-  case wave_skew_type_scb: process_dist_mode_clip_shape_xy<Graph, Mode, ClipIsExp>(block, audio_in, modulation, clip, shape, skew_x, wave_skew_bi_scb); break;
-  case wave_skew_type_xpu: process_dist_mode_clip_shape_xy<Graph, Mode, ClipIsExp>(block, audio_in, modulation, clip, shape, skew_x, wave_skew_bi_xpu); break;
-  case wave_skew_type_xpb: process_dist_mode_clip_shape_xy<Graph, Mode, ClipIsExp>(block, audio_in, modulation, clip, shape, skew_x, wave_skew_bi_xpb); break;
-  default: assert(false); break;
-  }
-}
-
-template <bool Graph, int Mode, bool ClipIsExp, class Clip, class Shape, class SkewX, class SkewY> void
-fx_engine::process_dist_mode_clip_shape_xy(plugin_block& block, 
-  jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation, Clip clip, Shape shape, SkewX skew_x, SkewY skew_y)
+template <bool Graph, int Mode, class SkewX, class SkewY, bool ClipIsExp, class Clip, class Shape> void 
+fx_engine::process_dist_mode_xy_clip_shape(plugin_block& block,
+  jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation, SkewX skew_x, SkewY skew_y, Clip clip, Shape shape)
 {
   int this_module = _global ? module_gfx : module_vfx;
   auto const& block_auto = block.state.own_block_automation;
