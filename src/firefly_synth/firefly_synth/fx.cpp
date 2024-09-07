@@ -61,7 +61,7 @@ enum { section_main, section_svf_left, section_svf_right, section_comb_left, sec
 enum { scratch_dly_fdbk_l, scratch_dly_fdbk_r, scratch_dly_fdbk_count };
 enum { scratch_reverb_damp, scratch_reverb_size, scratch_reverb_in, scratch_reverb_count };
 enum { scratch_dly_multi_hold, scratch_dly_multi_time, scratch_dly_multi_sprd, scratch_dly_multi_count };
-enum { scratch_dist_x, scratch_dist_y, scratch_dist_gain_raw, scratch_dist_svf_freq, scratch_dist_clip_exp, scratch_dist_count };
+enum { scratch_dist_x, scratch_dist_y, scratch_dist_gain_raw, scratch_dist_svf_freq, scratch_dist_clip_exp, scratch_dist_dsf_freq, scratch_dist_count };
 enum { scratch_flt_stvar_freq, scratch_flt_stvar_kbd, scratch_flt_stvar_gain, scratch_flt_stvar_count };
 enum { scratch_flt_comb_dly_plus, scratch_flt_comb_gain_plus, scratch_flt_comb_dly_min, scratch_flt_comb_gain_min, scratch_flt_comb_gain_count };
 enum { scratch_meq_freq, scratch_meq_gain = meq_flt_count, scratch_meq_audio_l = meq_flt_count * 2, scratch_meq_audio_r, scratch_meq_count };
@@ -2111,6 +2111,11 @@ fx_engine::process_dist_mode_xy_clip_shape(plugin_block& block,
   if constexpr (ClipIsExp)
     block.normalized_to_raw_block<domain_type::linear>(this_module, param_dist_clip_exp, clip_exp_curve_plain, clip_exp_curve);
 
+  auto& dsf_freq_curve = block.state.own_scratch[scratch_dist_dsf_freq];
+  auto const& dsf_freq_curve_plain = *modulation[this_module][block.module_slot][param_dist_dsf_freq][0];
+  if(block_auto[param_type][0].step() == type_dsf_dst)
+    block.normalized_to_raw_block<domain_type::log>(this_module, param_dist_dsf_freq, dsf_freq_curve_plain, dsf_freq_curve);
+
   // dont oversample for graphs
   if constexpr(Graph) 
   {
@@ -2118,17 +2123,14 @@ fx_engine::process_dist_mode_xy_clip_shape(plugin_block& block,
     oversmp_factor = 1;
   }
 
+  float ovrsmp_rate = block.sample_rate * oversmp_factor;
+
   // oversampling is destructive
   audio_in[0].copy_to(block.start_frame, block.end_frame, block.state.own_audio[0][0][0]);
   audio_in[1].copy_to(block.start_frame, block.end_frame, block.state.own_audio[0][0][1]);
 
   std::array<jarray<float, 2>*, 1> lanes;
   lanes[0] = &block.state.own_audio[0][0];
-
-  // only used for dsf
-  //float dsf_freq = 1000.0f; // TODO
-  float ovrsmp_rate = block.sample_rate * oversmp_factor;
-  //float ovrsmp_inc = dsf_freq / ovrsmp_rate;
 
   _dst_oversampler.process(oversmp_stages, lanes, 1, block.start_frame, block.end_frame, true, [&](float** lanes_channels, int frame)
     { 
@@ -2142,8 +2144,8 @@ fx_engine::process_dist_mode_xy_clip_shape(plugin_block& block,
       // so mind the bookkeeping
       int mod_index = block.start_frame + frame / oversmp_factor;
 
-      float dsf_freq = gain_curve[mod_index] * 2000;
-      float ovrsmp_inc = dsf_freq / ovrsmp_rate; // TODO
+      float dsf_freq = dsf_freq_curve[mod_index];
+      float ovrsmp_inc = dsf_freq / ovrsmp_rate;
       // ALSO TODO make dist/osc dsf dist fake modulatable param
 
       left = skew_x(left * gain_curve[mod_index], (*x_curve)[mod_index]);
