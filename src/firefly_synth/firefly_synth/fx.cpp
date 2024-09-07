@@ -918,21 +918,21 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
   dist_over.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return type_is_dst(vs[0]); });
   dist_over.info.description = "Oversampling factor. If you go really crazy with distortion, this might tip the scale from just-not-acceptible to just-acceptible.";
   auto& dist_dsf_partials = result.params.emplace_back(make_param(
-    make_topo_info("{D0867433-93E6-43FF-87F0-2ED248BC978F}", true, "Dist DSF Partials", "Parts", "Dist Parts", param_dist_dsf_parts, 1),
-    make_param_dsp_automate_if_voice(!global), make_domain_log(1, 1000, 2, 20, 0, ""), // TODO integer + less max
+    make_topo_info("{D0867433-93E6-43FF-87F0-2ED248BC978F}", true, "Dist DSF Partials", "Parts", "Dist DSF Parts", param_dist_dsf_parts, 1),
+    make_param_dsp_automate_if_voice(!global), make_domain_step(1, 32, 2, 0),
     make_param_gui_single(section_dist_right, gui_edit_type::knob, { 0, 4 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   dist_dsf_partials.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dsf_dst; });
   dist_dsf_partials.info.description = "Controls the number of partials (overtones).";
   auto& dist_dsf_dist = result.params.emplace_back(make_param(
-    make_topo_info("{90720101-17BA-4326-9982-E46D7CD4F83D}", true, "Dist DSF Distance", "Dist", "Dist Dist", param_dist_dsf_dist, 1),
+    make_topo_info("{90720101-17BA-4326-9982-E46D7CD4F83D}", true, "Dist DSF Distance", "Dist", "Dist DSF Dist", param_dist_dsf_dist, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_linear(0.05, 20, 1, 2, ""),
     make_param_gui_single(section_dist_right, gui_edit_type::knob, { 1, 4 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   dist_dsf_dist.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dsf_dst; });
   dist_dsf_dist.info.description = "Controls the frequency distance between the base frequency and subsequent partials.";
   auto& dist_dsf_dcy = result.params.emplace_back(make_param(
-    make_topo_info("{7AE31A39-19F2-4F1D-8626-66B76C2BF2D1}", true, "Dist DSF Decay", "Dcy", "Dist Dcy", param_dist_dsf_dcy, 1),
+    make_topo_info("{7AE31A39-19F2-4F1D-8626-66B76C2BF2D1}", true, "Dist DSF Decay", "Dcy", "Dist DSF Dcy", param_dist_dsf_dcy, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
     make_param_gui_single(section_dist_right, gui_edit_type::knob, { 0, 6 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
@@ -1958,25 +1958,7 @@ template <bool Graph, int Mode, class SkewX, class SkewY> void
 fx_engine::process_dist_mode_xy(plugin_block& block,
   jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation, SkewX skew_x, SkewY skew_y)
 {
-  // from here we deviate for DSF distortion
-  // shaper is the DSF function and clip is fixed to tanh
-  auto const& block_auto = block.state.own_block_automation;
-  if (block.state.own_block_automation[param_type][0].step() == type_dsf_dst)
-  {
-    float dsf_dist = block_auto[param_dist_dsf_dist][0].real();
-    int dsf_parts = (int)std::round(block_auto[param_dist_dsf_parts][0].real());
-    process_dist_mode_xy_clip_shape<Graph, Mode, SkewX, SkewY, false>(
-      block, audio_in, modulation, skew_x, skew_y, 
-      [](float in, float exp) { return std::tanh(in); },
-      [dsf_dist, dsf_parts](float in, float inc, float sr, float dsf_freq, float dsf_dcy) {
-      // input may exceed -1/+1, need to get into 0..1 to use as a phase
-      // todo select pre-clipper and dsf frequency
-      // also less partials
-      return generate_dsf(bipolar_to_unipolar(std::tanh(in)), inc, sr, dsf_freq, dsf_parts, dsf_dist, dsf_dcy); });
-    return;
-  }
-
-  switch (block_auto[param_dist_clip][0].step())
+  switch (block.state.own_block_automation[param_dist_clip][0].step())
   {
   case dist_clip_tanh: process_dist_mode_xy_clip<Graph, Mode, SkewX, SkewY, false>(
     block, audio_in, modulation, skew_x, skew_y, [](float in, float exp) {
@@ -2024,6 +2006,22 @@ template <bool Graph, int Mode, class SkewX, class SkewY, bool ClipIsExp, class 
 fx_engine::process_dist_mode_xy_clip(plugin_block& block,
   jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation, SkewX skew_x, SkewY skew_y, Clip clip)
 {
+  // from here we deviate for DSF distortion - shaper is fixed to the DSF function
+  auto const& block_auto = block.state.own_block_automation;
+  if (block.state.own_block_automation[param_type][0].step() == type_dsf_dst)
+  {
+    int dsf_parts = block_auto[param_dist_dsf_parts][0].step();
+    float dsf_dist = block_auto[param_dist_dsf_dist][0].real();
+    process_dist_mode_xy_clip_shape<Graph, Mode, SkewX, SkewY, ClipIsExp, Clip>(
+      block, audio_in, modulation, skew_x, skew_y, clip,
+      [dsf_dist, dsf_parts](float in, float inc, float sr, float dsf_freq, float dsf_dcy) {
+        // input may exceed -1/+1, need to get into 0..1 to use as a phase
+        // todo select pre-clipper and dsf frequency
+        // also less partials
+        return generate_dsf(bipolar_to_unipolar(std::tanh(in)), inc, sr, dsf_freq, dsf_parts, dsf_dist, dsf_dcy); });
+    return;
+  }
+
   switch (block.state.own_block_automation[param_dist_shaper][0].step())
   {
   case wave_shape_type_saw: process_dist_mode_xy_clip_shape<Graph, Mode, SkewX, SkewY, ClipIsExp, Clip>(
