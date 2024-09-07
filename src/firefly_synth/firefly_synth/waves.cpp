@@ -16,8 +16,8 @@ wave_make_name_skew(int skew)
   case wave_skew_type_lin: return "Linear";
   case wave_skew_type_xpb: return "Exp Bi";
   case wave_skew_type_xpu: return "Exp Uni";
-  case wave_skew_type_scb: return "Scale Bi";
-  case wave_skew_type_scu: return "Scale Uni";
+  case wave_skew_type_scb: return "Scl Bi";
+  case wave_skew_type_scu: return "Scl Uni";
   default: assert(false); return {};
   }
 }
