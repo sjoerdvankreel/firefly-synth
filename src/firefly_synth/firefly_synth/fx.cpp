@@ -74,7 +74,7 @@ enum { param_type,
   param_comb_mode, param_comb_dly_plus, param_comb_dly_min, param_comb_gain_plus, param_comb_gain_min,
   param_dist_mode, param_dist_lp_frq, param_dist_lp_res, 
   param_dist_gain, param_dist_mix, param_dist_skew_x, param_dist_skew_x_amt, param_dist_skew_y, param_dist_skew_y_amt,  
-  param_dist_clip, param_dist_clip_exp, param_dist_over, param_dist_shaper, param_dist_clamp,
+  param_dist_clip, param_dist_clip_exp, param_dist_shaper, param_dist_clamp, param_dist_over,
   param_dist_dsf_parts, param_dist_dsf_dist, param_dist_dsf_dcy, param_dist_dsf_freq,
   param_meq_mode, param_meq_flt_mode, param_meq_gain, param_meq_freq, param_meq_res,
   param_dly_mode, param_dly_sync, param_dly_amt, param_dly_mix, param_dly_sprd, param_dly_hold_time, param_dly_hold_tempo,
@@ -894,17 +894,10 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   dist_clip_expo.gui.bindings.enabled.bind_params({ param_type, param_dist_clip }, [](auto const& vs) { return type_is_dst(vs[0]) && vs[1] == dist_clip_exp; });
   dist_clip_expo.info.description = "Exponential clipper amount.";
-  auto& dist_over = result.params.emplace_back(make_param(
-    make_topo_info("{99C6E4A8-F90A-41DC-8AC7-4078A6DE0031}", true, "Dist Oversampling", "OvrSmp", "Dist OvrSmp", param_dist_over, 1),
-    make_param_dsp_automate_if_voice(!global), make_domain_item(dist_over_items(), ""),
-    make_param_gui_single(section_dist_right, gui_edit_type::autofit_list, { 0, 4 },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  dist_over.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return type_is_dst(vs[0]); });
-  dist_over.info.description = "Oversampling factor. If you go really crazy with distortion, this might tip the scale from just-not-acceptible to just-acceptible.";
   auto& dist_shaper = result.params.emplace_back(make_param(
     make_topo_info("{BFB5A04F-5372-4259-8198-6761BA52ADEB}", true, "Dist Shape", "Shape", "Dist Shape", param_dist_shaper, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(wave_shape_type_items(true, global), ""),
-    make_param_gui_single(section_dist_right, gui_edit_type::autofit_list, { 0, 6 },
+    make_param_gui_single(section_dist_right, gui_edit_type::autofit_list, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   dist_shaper.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   dist_shaper.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
@@ -912,29 +905,36 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
   auto& dist_clamp = result.params.emplace_back(make_param(
     make_topo_info("{11CEE5D2-2A7D-494C-879D-9199E11C95BC}", true, "Dist Clamp Mode", "Clamp", "Dist Clamp", param_dist_clamp, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(dist_clip_items(true), "Tanh"),
-    make_param_gui_single(section_dist_right, gui_edit_type::autofit_list, { 0, 6 },
+    make_param_gui_single(section_dist_right, gui_edit_type::autofit_list, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   dist_clamp.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dsf_dst; });
   dist_clamp.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dsf_dst; });
   dist_clamp.info.description = "Used to bring the input signal into [-1, 1] to be used as the DSF distortion phase.";
+  auto& dist_over = result.params.emplace_back(make_param(
+    make_topo_info("{99C6E4A8-F90A-41DC-8AC7-4078A6DE0031}", true, "Dist Oversampling", "OvrSmp", "Dist OvrSmp", param_dist_over, 1),
+    make_param_dsp_automate_if_voice(!global), make_domain_item(dist_over_items(), ""),
+    make_param_gui_single(section_dist_right, gui_edit_type::autofit_list, { 1, 2 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
+  dist_over.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return type_is_dst(vs[0]); });
+  dist_over.info.description = "Oversampling factor. If you go really crazy with distortion, this might tip the scale from just-not-acceptible to just-acceptible.";
   auto& dist_dsf_partials = result.params.emplace_back(make_param(
     make_topo_info("{D0867433-93E6-43FF-87F0-2ED248BC978F}", true, "Dist DSF Partials", "Parts", "Dist Parts", param_dist_dsf_parts, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_log(1, 1000, 2, 20, 0, ""), // TODO integer + less max
-    make_param_gui_single(section_dist_right, gui_edit_type::knob, { 1, 0 },
+    make_param_gui_single(section_dist_right, gui_edit_type::knob, { 0, 4 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   dist_dsf_partials.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dsf_dst; });
   dist_dsf_partials.info.description = "Controls the number of partials (overtones).";
   auto& dist_dsf_dist = result.params.emplace_back(make_param(
     make_topo_info("{90720101-17BA-4326-9982-E46D7CD4F83D}", true, "Dist DSF Distance", "Dist", "Dist Dist", param_dist_dsf_dist, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_linear(0.05, 20, 1, 2, ""),
-    make_param_gui_single(section_dist_right, gui_edit_type::knob, { 1, 2 },
+    make_param_gui_single(section_dist_right, gui_edit_type::knob, { 1, 4 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   dist_dsf_dist.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dsf_dst; });
   dist_dsf_dist.info.description = "Controls the frequency distance between the base frequency and subsequent partials.";
   auto& dist_dsf_dcy = result.params.emplace_back(make_param(
     make_topo_info("{7AE31A39-19F2-4F1D-8626-66B76C2BF2D1}", true, "Dist DSF Decay", "Dcy", "Dist Dcy", param_dist_dsf_dcy, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
-    make_param_gui_single(section_dist_right, gui_edit_type::knob, { 1, 4 },
+    make_param_gui_single(section_dist_right, gui_edit_type::knob, { 0, 6 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   dist_dsf_dcy.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dsf_dst; });
   dist_dsf_dcy.info.description = "Controls the amplitude decay of successive partials.";
