@@ -1978,12 +1978,6 @@ fx_engine::process_dist_mode_xy(plugin_block& block,
     if (std::fabs(in) > 2.0f / 3.0f) return sgn;
     return std::sin((in * 3.0f * pi32) / 4.0f);
     }); break;
-  case dist_clip_exp: process_dist_mode_xy_clip<Graph, Mode, SkewX, SkewY, true>(
-    block, audio_in, modulation, skew_x, skew_y, [](float in, float exp) {
-    float sgn = signum(in);
-    if (std::fabs(in) > 2.0f / 3.0f) return sgn;
-    return sgn * (1.0f - std::pow(std::fabs(1.5f * in - sgn), exp));
-    }); break;
   case dist_clip_cube: process_dist_mode_xy_clip<Graph, Mode, SkewX, SkewY, false>(
     block, audio_in, modulation, skew_x, skew_y, [](float in, float exp) {
     float sgn = signum(in);
@@ -1997,6 +1991,12 @@ fx_engine::process_dist_mode_xy(plugin_block& block,
     if (-1.0f / 3.0f < in && in < 1.0f / 3.0f) return 2.0f * in;
     float y = 2.0f - std::fabs(3.0f * in);
     return sgn * (3.0f - y * y) / 3.0f;
+    }); break;
+  case dist_clip_exp: process_dist_mode_xy_clip<Graph, Mode, SkewX, SkewY, true>(
+    block, audio_in, modulation, skew_x, skew_y, [](float in, float exp) {
+      float sgn = signum(in);
+      if (std::fabs(in) > 2.0f / 3.0f) return sgn;
+      return sgn * (1.0f - std::pow(std::fabs(1.5f * in - sgn), exp));
     }); break;
   default: assert(false); break;
   }
