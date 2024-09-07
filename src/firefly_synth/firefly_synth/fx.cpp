@@ -855,8 +855,8 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
   auto& dist_right = result.sections.emplace_back(make_param_section(section_dist_right,
     make_topo_tag_basic("{4FD908CC-0EBA-4ADD-8622-EB95013CD429}", "Distortion Right"),
     make_param_section_gui({ 0, 3, 2, 2 }, { { 1, 1 }, {
-      gui_dimension::auto_size_all, gui_dimension::auto_size_all, gui_dimension::auto_size_all,
-      gui_dimension::auto_size, gui_dimension::auto_size_all, 1 } }, gui_label_edit_cell_split::horizontal)));
+      gui_dimension::auto_size_all, 1, gui_dimension::auto_size_all,
+      gui_dimension::auto_size, gui_dimension::auto_size_all, gui_dimension::auto_size_all } }, gui_label_edit_cell_split::horizontal)));
   dist_right.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return type_is_dst(vs[0]); });
   dist_right.gui.autofit_row = 1;
   auto& dist_over = result.params.emplace_back(make_param(
@@ -887,6 +887,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_param_gui_single(section_dist_right, gui_edit_type::autofit_list, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   dist_shaper.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
+  dist_shaper.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   dist_shaper.info.description = "Selects waveshaper type: various periodic functions plus foldback distortion.";  
   auto& dist_clip = result.params.emplace_back(make_param(
     make_topo_info("{810325E4-C3AB-48DA-A770-65887DF57845}", true, "Dist Clip Mode", "Clip", "Dist Clip", param_dist_clip, 1),
@@ -894,6 +895,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_param_gui_single(section_dist_right, gui_edit_type::autofit_list, { 1, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   dist_clip.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
+  dist_clip.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   dist_clip.info.description = "Selects hard clipping (clamp to [-1, 1]) or various soft clipping functions.";
   auto& dist_clip_expo = result.params.emplace_back(make_param(
     make_topo_info("{A0C0BCE3-1BC3-495F-950B-8849C802B4EA}", true, "Dist Clip Exp", "Exp", "Dist Exp", param_dist_clip_exp, 1),
@@ -901,7 +903,32 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_param_gui_single(section_dist_right, gui_edit_type::knob, { 1, 4 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   dist_clip_expo.gui.bindings.enabled.bind_params({ param_type, param_dist_clip }, [](auto const& vs) { return vs[0] == type_dst && vs[1] == dist_clip_exp; });
+  dist_clip_expo.gui.bindings.visible.bind_params({ param_type, param_dist_clip }, [](auto const& vs) { return vs[0] == type_dst; });
   dist_clip_expo.info.description = "Exponential clipper amount.";
+  auto& dist_dsf_partials = result.params.emplace_back(make_param(
+    make_topo_info("{D0867433-93E6-43FF-87F0-2ED248BC978F}", true, "Dist DSF Partials", "Parts", "Dist Parts", param_dist_dsf_parts, 1),
+    make_param_dsp_automate_if_voice(!global), make_domain_log(1, 1000, 2, 20, 0, ""),
+    make_param_gui_single(section_dist_right, gui_edit_type::hslider, { 1, 0 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
+  dist_dsf_partials.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dsf_dst; });
+  dist_dsf_partials.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dsf_dst; });
+  dist_dsf_partials.info.description = "Controls the number of partials (overtones).";
+  auto& dist_dsf_dist = result.params.emplace_back(make_param(
+    make_topo_info("{90720101-17BA-4326-9982-E46D7CD4F83D}", true, "Dist DSF Distance", "Dist", "Dist Dist", param_dist_dsf_dist, 1),
+    make_param_dsp_automate_if_voice(!global), make_domain_linear(0.05, 20, 1, 2, ""),
+    make_param_gui_single(section_dist_right, gui_edit_type::knob, { 1, 2 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
+  dist_dsf_dist.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dsf_dst; });
+  dist_dsf_dist.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dsf_dst; });
+  dist_dsf_dist.info.description = "Controls the frequency distance between the base frequency and subsequent partials.";
+  auto& dist_dsf_dcy = result.params.emplace_back(make_param(
+    make_topo_info("{7AE31A39-19F2-4F1D-8626-66B76C2BF2D1}", true, "Dist DSF Decay", "Dcy", "Dist Dcy", param_dist_dsf_dcy, 1),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
+    make_param_gui_single(section_dist_right, gui_edit_type::knob, { 1, 4 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
+  dist_dsf_dcy.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dsf_dst; });
+  dist_dsf_dcy.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dsf_dst; });
+  dist_dsf_dcy.info.description = "Controls the amplitude decay of successive partials.";
 
   auto& meq_mode = result.params.emplace_back(make_param(
     make_topo_info("{178BC16A-0AC1-435F-9972-ADF4E50393CA}", true, "Multi EQ Mode", "Mode", "MEQ Mode", param_meq_mode, 1),
@@ -1269,6 +1296,7 @@ fx_engine::process(plugin_block& block,
   case type_delay: process_delay(block, *audio_in, *modulation); break;
   case type_reverb: process_reverb(block, *audio_in, *modulation); break;
   case type_dst: process_dist<Graph>(block, *audio_in, *modulation); break;
+  case type_dsf_dst: break;
   default: assert(false); break;
   }
 }
