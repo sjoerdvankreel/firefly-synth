@@ -849,7 +849,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
   auto& dist_skew_in_amt = result.params.emplace_back(make_param(
     make_topo_info("{94A94B06-6217-4EF5-8BA1-9F77AE54076B}", true, "Dist Skew X Amt", "Skew X Amt", "Dist Skew X", param_dist_skew_x_amt, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
-    make_param_gui_single(section_dist_mid, gui_edit_type::knob, { 0, 3 }, make_label_none())));
+    make_param_gui_single(section_dist_mid, gui_edit_type::knob, { 0, 4 }, make_label_none())));
   dist_skew_in_amt.gui.bindings.enabled.bind_params({ param_type, param_dist_skew_x }, [](auto const& vs) {
     return type_is_dst(vs[0]) && vs[1] != wave_skew_type_off; });
   dist_skew_in_amt.info.description = "Before-shape skew amount.";
@@ -864,11 +864,11 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
   auto& dist_skew_out_amt = result.params.emplace_back(make_param(
     make_topo_info("{042570BF-6F02-4F91-9805-6C49FE9A3954}", true, "Dist Skew Y Amt", "Skew Y Amt", "Dist Skew Y", param_dist_skew_y_amt, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
-    make_param_gui_single(section_dist_mid, gui_edit_type::knob, { 1, 3 }, make_label_none())));
+    make_param_gui_single(section_dist_mid, gui_edit_type::knob, { 1, 4 }, make_label_none())));
   dist_skew_out_amt.gui.bindings.enabled.bind_params({ param_type, param_dist_skew_y }, [](auto const& vs) {
     return type_is_dst(vs[0]) && vs[1] != wave_skew_type_off; });
   dist_skew_out_amt.info.description = "After-shape skew amount.";
-  dist_skew_out.gui.alternate_drag_param_id = dist_skew_out_amt.info.tag.id;
+  result.params[param_dist_skew_y].gui.alternate_drag_param_id = dist_skew_out_amt.info.tag.id;
 
   auto& dist_right = result.sections.emplace_back(make_param_section(section_dist_right,
     make_topo_tag_basic("{4FD908CC-0EBA-4ADD-8622-EB95013CD429}", "Distortion Right"),
