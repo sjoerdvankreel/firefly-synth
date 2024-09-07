@@ -904,7 +904,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
   dist_shaper.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   dist_shaper.info.description = "Selects waveshaper type: various periodic functions plus foldback distortion.";
   auto& dist_clamp = result.params.emplace_back(make_param(
-    make_topo_info("{11CEE5D2-2A7D-494C-879D-9199E11C95BC}", true, "Dist Clamp Mode", "Clmp", "Dist Clamp", param_dist_clamp, 1),
+    make_topo_info("{11CEE5D2-2A7D-494C-879D-9199E11C95BC}", true, "Dist DSF Clamp Mode", "Clmp", "Dist DSF Clamp", param_dist_clamp, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(dist_clip_items(true), "Tanh"),
     make_param_gui_single(section_dist_right, gui_edit_type::autofit_list, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
