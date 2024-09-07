@@ -73,7 +73,7 @@ enum { param_type,
   param_svf_mode, param_svf_kbd, param_svf_gain, param_svf_freq, param_svf_res,
   param_comb_mode, param_comb_dly_plus, param_comb_dly_min, param_comb_gain_plus, param_comb_gain_min,
   param_dist_mode, param_dist_lp_frq, param_dist_lp_res, param_dist_skew_x, param_dist_skew_x_amt, param_dist_skew_y, param_dist_skew_y_amt, 
-  param_dist_shaper, param_dist_over, param_dist_clip, param_dist_clip_exp, param_dist_gain, param_dist_mix,
+  param_dist_over, param_dist_gain, param_dist_mix, param_dist_shaper, param_dist_clip, param_dist_clip_exp,
   param_meq_mode, param_meq_flt_mode, param_meq_gain, param_meq_freq, param_meq_res,
   param_dly_mode, param_dly_sync, param_dly_amt, param_dly_mix, param_dly_sprd, param_dly_hold_time, param_dly_hold_tempo,
   param_dly_fdbk_time_l, param_dly_fdbk_tempo_l, param_dly_fdbk_time_r, param_dly_fdbk_tempo_r,
@@ -852,40 +852,20 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_topo_tag_basic("{4FD908CC-0EBA-4ADD-8622-EB95013CD429}", "Distortion Right"),
     make_param_section_gui({ 0, 3, 2, 2 }, { { 1, 1 }, {
       gui_dimension::auto_size_all, gui_dimension::auto_size_all, gui_dimension::auto_size_all,
-      1, gui_dimension::auto_size_all, gui_dimension::auto_size_all } }, gui_label_edit_cell_split::horizontal)));
+      gui_dimension::auto_size, gui_dimension::auto_size_all, 1 } }, gui_label_edit_cell_split::horizontal)));
   dist_right.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
-  auto& dist_shaper = result.params.emplace_back(make_param(
-    make_topo_info("{BFB5A04F-5372-4259-8198-6761BA52ADEB}", true, "Dist Shape", "Shape", "Dist Shape", param_dist_shaper, 1),
-    make_param_dsp_automate_if_voice(!global), make_domain_item(wave_shape_type_items(true, global), ""),
-    make_param_gui_single(section_dist_right, gui_edit_type::autofit_list, { 0, 0 },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  dist_shaper.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
-  dist_shaper.info.description = "Selects waveshaper type: various periodic functions plus foldback distortion.";  
+  dist_right.gui.autofit_row = 1;
   auto& dist_over = result.params.emplace_back(make_param(
     make_topo_info("{99C6E4A8-F90A-41DC-8AC7-4078A6DE0031}", true, "Dist Oversampling", "OvrSmp", "Dist OvrSmp", param_dist_over, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(dist_over_items(), ""),
-    make_param_gui_single(section_dist_right, gui_edit_type::autofit_list, { 1, 0 },
+    make_param_gui_single(section_dist_right, gui_edit_type::autofit_list, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   dist_over.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   dist_over.info.description = "Oversampling factor. If you go really crazy with distortion, this might tip the scale from just-not-acceptible to just-acceptible.";
-  auto& dist_clip = result.params.emplace_back(make_param(
-    make_topo_info("{810325E4-C3AB-48DA-A770-65887DF57845}", true, "Dist Clip Mode", "Clip", "Dist Clip", param_dist_clip, 1),
-    make_param_dsp_automate_if_voice(!global), make_domain_item(dist_clip_items(), "Tanh"),
-    make_param_gui_single(section_dist_right, gui_edit_type::autofit_list, { 0, 2 },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  dist_clip.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
-  dist_clip.info.description = "Selects hard clipping (clamp to [-1, 1]) or various soft clipping functions.";
-  auto& dist_clip_expo = result.params.emplace_back(make_param(
-    make_topo_info("{A0C0BCE3-1BC3-495F-950B-8849C802B4EA}", true, "Dist Clip Exp", "Exp", "Dist Exp", param_dist_clip_exp, 1),
-    make_param_dsp_accurate(param_automate::modulate), make_domain_linear(0.1, 10, 1, 1, ""),
-    make_param_gui_single(section_dist_right, gui_edit_type::hslider, { 1, 2 },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  dist_clip_expo.gui.bindings.enabled.bind_params({ param_type, param_dist_clip }, [](auto const& vs) { return vs[0] == type_dst && vs[1] == dist_clip_exp; });
-  dist_clip_expo.info.description = "Exponential clipper amount.";
   auto& dist_gain = result.params.emplace_back(make_param(
     make_topo_info("{3FC57F28-075F-44A2-8D0D-6908447AE87C}", true, "Dist Gain", "Gain", "Dist Gain", param_dist_gain, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_log(0.1, 32, 1, 1, 2, ""),
-    make_param_gui_single(section_dist_right, gui_edit_type::knob, { 0, 4 },
+    make_param_gui_single(section_dist_right, gui_edit_type::knob, { 0, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   dist_gain.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   dist_gain.info.description = std::string("Gain amount to drive the shaper and X/Y parameters. ") +
@@ -893,10 +873,31 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
   auto& dist_mix = result.params.emplace_back(make_param(
     make_topo_info("{667D9997-5BE1-48C7-9B50-4F178E2D9FE5}", true, "Dist Mix", "Mix", "Dist Mix", param_dist_mix, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(1, 0, true),
-    make_param_gui_single(section_dist_right, gui_edit_type::knob, { 1, 4 },
+    make_param_gui_single(section_dist_right, gui_edit_type::knob, { 0, 4 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   dist_mix.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   dist_mix.info.description = "Dry/wet mix between input and output signal.";
+  auto& dist_shaper = result.params.emplace_back(make_param(
+    make_topo_info("{BFB5A04F-5372-4259-8198-6761BA52ADEB}", true, "Dist Shape", "Shape", "Dist Shape", param_dist_shaper, 1),
+    make_param_dsp_automate_if_voice(!global), make_domain_item(wave_shape_type_items(true, global), ""),
+    make_param_gui_single(section_dist_right, gui_edit_type::autofit_list, { 1, 0 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
+  dist_shaper.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
+  dist_shaper.info.description = "Selects waveshaper type: various periodic functions plus foldback distortion.";  
+  auto& dist_clip = result.params.emplace_back(make_param(
+    make_topo_info("{810325E4-C3AB-48DA-A770-65887DF57845}", true, "Dist Clip Mode", "Clip", "Dist Clip", param_dist_clip, 1),
+    make_param_dsp_automate_if_voice(!global), make_domain_item(dist_clip_items(), "Tanh"),
+    make_param_gui_single(section_dist_right, gui_edit_type::autofit_list, { 1, 2 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
+  dist_clip.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
+  dist_clip.info.description = "Selects hard clipping (clamp to [-1, 1]) or various soft clipping functions.";
+  auto& dist_clip_expo = result.params.emplace_back(make_param(
+    make_topo_info("{A0C0BCE3-1BC3-495F-950B-8849C802B4EA}", true, "Dist Clip Exp", "Exp", "Dist Exp", param_dist_clip_exp, 1),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_linear(0.1, 10, 1, 1, ""),
+    make_param_gui_single(section_dist_right, gui_edit_type::knob, { 1, 4 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
+  dist_clip_expo.gui.bindings.enabled.bind_params({ param_type, param_dist_clip }, [](auto const& vs) { return vs[0] == type_dst && vs[1] == dist_clip_exp; });
+  dist_clip_expo.info.description = "Exponential clipper amount.";
 
   auto& meq_mode = result.params.emplace_back(make_param(
     make_topo_info("{178BC16A-0AC1-435F-9972-ADF4E50393CA}", true, "Multi EQ Mode", "Mode", "MEQ Mode", param_meq_mode, 1),

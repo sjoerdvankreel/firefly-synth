@@ -1013,7 +1013,8 @@ plugin_gui::make_param_section(module_desc const& module, param_section const& s
 {
   auto const& params = module.params;
   bool is_parent_grid_param = false;
-  grid_component& grid = make_component<grid_component>(section.gui.dimension, margin_param, margin_param, 0, 0);
+  grid_component& grid = make_component<grid_component>(section.gui.dimension, 
+    margin_param, margin_param, section.gui.autofit_row, section.gui.autofit_column);
   
   for(int p = 0; p < module.module->params.size(); p++)
     if(module.module->params[p].gui.section == section.index)

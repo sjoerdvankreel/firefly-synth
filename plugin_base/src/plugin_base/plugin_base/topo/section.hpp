@@ -18,6 +18,8 @@ struct param_section_gui final {
   gui_label_edit_cell_split cell_split = gui_label_edit_cell_split::no_split;
   bool wrap_in_container = true; // see multi_own_grid
   int merge_with_section = -1;
+  int autofit_row = 0;
+  int autofit_column = 0;
 
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(param_section_gui);
 };
