@@ -930,7 +930,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
   dist_dsf_partials.info.description = "Controls the number of partials (overtones).";
   auto& dist_dsf_dist = result.params.emplace_back(make_param(
     make_topo_info("{90720101-17BA-4326-9982-E46D7CD4F83D}", true, "Dist DSF Distance", "Dist", "Dist DSF Dist", param_dist_dsf_dist, 1),
-    make_param_dsp_accurate(param_automate::modulate), make_domain_linear(0.05, 20, 1, 2, ""),
+    make_param_dsp_automate_if_voice(!global), make_domain_step(1, 20, 1, 0),
     make_param_gui_single(section_dist_right, gui_edit_type::knob, { 1, 4 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   dist_dsf_dist.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dsf_dst; });
@@ -2100,10 +2100,11 @@ fx_engine::process_dist_mode_xy_clip_clamp(plugin_block& block,
 {
   // for the dsf shaper
   auto const& block_auto = block.state.own_block_automation;
+  int dsf_dist = block_auto[param_dist_dsf_dist][0].step();
   int dsf_parts = block_auto[param_dist_dsf_parts][0].step();
   process_dist_mode_xy_clip_shape<Graph, Mode, SkewX, SkewY, ClipIsExp, Clip>(
     block, audio_in, modulation, skew_x, skew_y, clip,
-    [dsf_parts, clamp](float in, float inc, float sr, float dsf_freq, float dsf_dist, float dsf_dcy) {
+    [dsf_parts, dsf_dist, clamp](float in, float inc, float sr, float dsf_freq, float dsf_dcy) {
       // input may exceed -1/+1, need to get into 0..1 to use as a phase
       // note: the pre-clip (clamper) is never "exp", so 2nd arg dont matter
       return generate_dsf(bipolar_to_unipolar(clamp(in, 0.0f)), inc, sr, dsf_freq, dsf_parts, dsf_dist, dsf_dcy); });
@@ -2158,11 +2159,6 @@ fx_engine::process_dist_mode_xy_clip_shape(plugin_block& block,
   if constexpr (ClipIsExp)
     block.normalized_to_raw_block<domain_type::linear>(this_module, param_dist_clip_exp, clip_exp_curve_plain, clip_exp_curve);
 
-  auto& dsf_dist_curve = block.state.own_scratch[scratch_dist_dsf_dist];
-  auto const& dsf_dist_curve_plain = *modulation[this_module][block.module_slot][param_dist_dsf_dist][0];
-  if (block_auto[param_type][0].step() == type_dsf_dst)
-    block.normalized_to_raw_block<domain_type::linear>(this_module, param_dist_dsf_dist, dsf_dist_curve_plain, dsf_dist_curve);
-
   auto& dsf_freq_curve = block.state.own_scratch[scratch_dist_dsf_freq];
   auto const& dsf_freq_curve_plain = *modulation[this_module][block.module_slot][param_dist_dsf_freq][0];
   if(block_auto[param_type][0].step() == type_dsf_dst)
@@ -2203,8 +2199,8 @@ fx_engine::process_dist_mode_xy_clip_shape(plugin_block& block,
       right = skew_x(right * gain_curve[mod_index], (*x_curve)[mod_index]);
       if constexpr(Mode == dist_mode_filt_to_shape)
         dist_svf_next(block, oversmp_factor, freq_curve[mod_index], res_curve[mod_index], left, right);
-      left = shape(left, ovrsmp_inc, ovrsmp_rate, dsf_freq, dsf_dist_curve[mod_index], dsf_dcy_curve[mod_index]);
-      right = shape(right, ovrsmp_inc, ovrsmp_rate, dsf_freq, dsf_dist_curve[mod_index], dsf_dcy_curve[mod_index]);
+      left = shape(left, ovrsmp_inc, ovrsmp_rate, dsf_freq, dsf_dcy_curve[mod_index]);
+      right = shape(right, ovrsmp_inc, ovrsmp_rate, dsf_freq, dsf_dcy_curve[mod_index]);
       if constexpr (Mode == dist_mode_shape_to_filt)
         dist_svf_next(block, oversmp_factor, freq_curve[mod_index], res_curve[mod_index], left, right);
 
