@@ -27,8 +27,6 @@ autobuilds:
 * make a youtube video
 * update the manuals routing overview image with new colors
 
-* not modulate dist dsf dist
-
 wishlist:
 make a patch cleanup button
 multi-layer distortion (or -- use a dsf generator as waveshaper! cannot do osc-to-fx so, how to fit in the gui?)
