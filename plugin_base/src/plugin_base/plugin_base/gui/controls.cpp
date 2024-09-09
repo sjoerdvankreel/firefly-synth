@@ -574,6 +574,15 @@ param_slider::fixed_width(int parent_w, int parent_h) const
 }
 
 void 
+param_slider::valueChanged() 
+{
+  _gui->param_changing(_param->info.global, _param->param->domain.raw_to_plain(getValue())); 
+  
+  // need realtime repaint when user drags
+  _gui->modulation_outputs_changed(_param->info.global);
+}
+
+void 
 param_slider::modulation_outputs_reset()
 {
   _min_modulation_output = -1.0f;

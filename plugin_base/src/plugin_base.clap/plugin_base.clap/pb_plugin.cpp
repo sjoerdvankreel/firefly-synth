@@ -134,7 +134,7 @@ pb_plugin::timerCallback()
   _modulation_outputs.clear();
   while (_modulation_output_queue->try_dequeue(mod_output))
     _modulation_outputs.push_back(mod_output);
-  if (_gui) _gui->modulation_outputs_changed();
+  if (_gui) _gui->modulation_outputs_changed(-1);
 
   _inside_timer_callback = false;
 }

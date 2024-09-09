@@ -257,9 +257,9 @@ public:
   int fixed_width(int parent_w, int parent_h) const override;
   int fixed_height(int parent_w, int parent_h) const override { return -1; }
 
+  void valueChanged() override;
   void stoppedDragging() override { _gui->param_end_changes(_param->info.global); }
   void startedDragging() override { _gui->param_begin_changes(_param->info.global); }
-  void valueChanged() override { _gui->param_changing(_param->info.global, _param->param->domain.raw_to_plain(getValue())); }
 
   juce::String getTextFromValue(double value) override 
   { return juce::String(_param->info.name + ": ") + juce::Slider::getTextFromValue(value * (_param->param->domain.display == domain_display::percentage ? 100 : 1)); }

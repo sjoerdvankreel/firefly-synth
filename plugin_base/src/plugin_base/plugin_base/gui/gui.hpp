@@ -164,7 +164,7 @@ public:
   void theme_changed(std::string const& theme_name);
   
   // for anyone who wants to repaint on this stuff
-  void modulation_outputs_changed();
+  void modulation_outputs_changed(int force_requery_automation_param);
   
   // to keep track of what the audio engine is doing
   void automation_state_changed(int param_index, normalized_value normalized);
