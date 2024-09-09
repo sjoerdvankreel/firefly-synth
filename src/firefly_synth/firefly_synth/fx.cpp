@@ -26,7 +26,6 @@ static double const comb_min_ms = 0.1;
 static double const flt_max_res = 0.99;
 static double const flt_min_freq = 20;
 static double const flt_max_freq = 20000;
-static double const flt_max_dsf_freq = 3000;
 static double const dly_max_sec = 10;
 static double const dly_max_filter_time_ms = 500;
 
@@ -944,7 +943,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
   dist_dsf_dcy.info.description = "Controls the amplitude decay of successive partials.";
   auto& dist_dsf_freq = result.params.emplace_back(make_param(
     make_topo_info("{5F774577-8354-4292-B1DA-EB84AEC979B3}", true, "Dist DSF Freq", "Freq", "Dist DSF Freq", param_dist_dsf_freq, 1),
-    make_param_dsp_accurate(param_automate::modulate), make_domain_log(flt_min_freq, flt_max_dsf_freq, flt_min_freq, 500, 0, "Hz"),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_log(1.0f, 10000.0f, 100.0f, 1000.0f, 0, "Hz"),
     make_param_gui_single(section_dist_right, gui_edit_type::knob, { 1, 6 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   dist_dsf_freq.gui.bindings.enabled.bind_params({ param_type, param_dist_mode }, [](auto const& vs) { return vs[0] == type_dsf_dst; });
