@@ -27,6 +27,12 @@ autobuilds:
 * make a youtube video
 * update the manuals routing overview image with new colors
 
+dsf dist:
+* make the kick demo
+* make the vst3/clap reaper demo
+* make freq not mod
+* make parts mod by interpolate
+
 wishlist:
 make a patch cleanup button
 multi-layer distortion (or -- use a dsf generator as waveshaper! cannot do osc-to-fx so, how to fit in the gui?)
