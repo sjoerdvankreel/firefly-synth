@@ -30,8 +30,8 @@ autobuilds:
 dsf dist:
 V make freq not mod
 V make parts mod by interpolate
-* make the kick demo
-* make the vst3/clap reaper demo
+* make the vst3/clap reaper demo 
++ render
 * fix the userstate repainting
 
 wishlist:
