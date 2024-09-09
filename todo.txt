@@ -33,6 +33,8 @@ V make parts mod by interpolate
 V fix the userstate repainting
 V make the vst3/clap reaper demo 
 + render
+* retest everything
+* make another visual mod demo for the dsf dist demo, looks cool
 
 wishlist:
 make a patch cleanup button
