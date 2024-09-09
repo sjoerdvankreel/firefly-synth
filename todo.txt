@@ -28,10 +28,11 @@ autobuilds:
 * update the manuals routing overview image with new colors
 
 dsf dist:
+V make freq not mod
 * make the kick demo
 * make the vst3/clap reaper demo
-* make freq not mod
-* make parts mod by interpolate
+* make parts mod by interpolate + also in the osc
+* fix the userstate repainting
 
 wishlist:
 make a patch cleanup button

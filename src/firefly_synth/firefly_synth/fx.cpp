@@ -943,7 +943,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
   dist_dsf_dcy.info.description = "Controls the amplitude decay of successive partials.";
   auto& dist_dsf_freq = result.params.emplace_back(make_param(
     make_topo_info("{5F774577-8354-4292-B1DA-EB84AEC979B3}", true, "Dist DSF Freq", "Freq", "Dist DSF Freq", param_dist_dsf_freq, 1),
-    make_param_dsp_accurate(param_automate::modulate), make_domain_log(1.0f, 10000.0f, 100.0f, 1000.0f, 0, "Hz"),
+    make_param_dsp_automate_if_voice(!global), make_domain_log(1.0f, 10000.0f, 100.0f, 1000.0f, 0, "Hz"),
     make_param_gui_single(section_dist_right, gui_edit_type::knob, { 1, 6 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   dist_dsf_freq.gui.bindings.enabled.bind_params({ param_type, param_dist_mode }, [](auto const& vs) { return vs[0] == type_dsf_dst; });
@@ -2099,14 +2099,19 @@ fx_engine::process_dist_mode_xy_clip_clamp(plugin_block& block,
 {
   // for the dsf shaper
   auto const& block_auto = block.state.own_block_automation;
+  int oversmp_stages = block_auto[param_dist_over][0].step();
+  int oversmp_factor = 1 << oversmp_stages;
   int dsf_dist = block_auto[param_dist_dsf_dist][0].step();
   int dsf_parts = block_auto[param_dist_dsf_parts][0].step();
+  float dsf_freq = block_auto[param_dist_dsf_freq][0].real();
+  float oversmp_rate = block.sample_rate * oversmp_factor;
+  float dsf_inc = dsf_freq / oversmp_rate;
   process_dist_mode_xy_clip_shape<Graph, Mode, SkewX, SkewY, ClipIsExp, Clip>(
     block, audio_in, modulation, skew_x, skew_y, clip,
-    [dsf_parts, dsf_dist, clamp](float in, float inc, float sr, float dsf_freq, float dsf_dcy) {
+    [dsf_parts, dsf_dist, dsf_freq, dsf_inc, oversmp_rate, clamp](float in, float dsf_dcy) {
       // input may exceed -1/+1, need to get into 0..1 to use as a phase
       // note: the pre-clip (clamper) is never "exp", so 2nd arg dont matter
-      return generate_dsf(bipolar_to_unipolar(clamp(in, 0.0f)), inc, sr, dsf_freq, dsf_parts, dsf_dist, dsf_dcy); });
+      return generate_dsf(bipolar_to_unipolar(clamp(in, 0.0f)), dsf_inc, oversmp_rate, dsf_freq, dsf_parts, dsf_dist, dsf_dcy); });
 }
 
 template <bool Graph, int Mode, class SkewX, class SkewY, bool ClipIsExp, class Clip, class Shape> void 
@@ -2121,7 +2126,7 @@ fx_engine::process_dist_mode_xy_clip_shape(plugin_block& block,
   int skew_y_type = block_auto[param_dist_skew_y][0].step();
 
   auto const& mix_curve = *modulation[this_module][block.module_slot][param_dist_mix][0];
-  auto const& res_curve = *modulation[this_module][block.module_slot][param_dist_lp_res][0];
+  auto const& lp_res_curve = *modulation[this_module][block.module_slot][param_dist_lp_res][0];
   auto const& dsf_dcy_curve = *modulation[this_module][block.module_slot][param_dist_dsf_dcy][0];
   auto const& x_curve_plain = *modulation[this_module][block.module_slot][param_dist_skew_x_amt][0];
   auto const& y_curve_plain = *modulation[this_module][block.module_slot][param_dist_skew_y_amt][0];
@@ -2148,20 +2153,15 @@ fx_engine::process_dist_mode_xy_clip_shape(plugin_block& block,
   auto const& gain_curve_plain = *modulation[this_module][block.module_slot][param_dist_gain][0];
   block.normalized_to_raw_block<domain_type::log>(this_module, param_dist_gain, gain_curve_plain, gain_curve);
 
-  auto& freq_curve = block.state.own_scratch[scratch_dist_svf_freq];
-  auto const& freq_curve_plain = *modulation[this_module][block.module_slot][param_dist_lp_frq][0];
+  auto& lp_freq_curve = block.state.own_scratch[scratch_dist_svf_freq];
+  auto const& lp_freq_curve_plain = *modulation[this_module][block.module_slot][param_dist_lp_frq][0];
   if constexpr (Mode == dist_mode_filt_to_shape || Mode == dist_mode_shape_to_filt)
-    block.normalized_to_raw_block<domain_type::log>(this_module, param_dist_lp_frq, freq_curve_plain, freq_curve);
+    block.normalized_to_raw_block<domain_type::log>(this_module, param_dist_lp_frq, lp_freq_curve_plain, lp_freq_curve);
 
   auto& clip_exp_curve = block.state.own_scratch[scratch_dist_clip_exp];
   auto const& clip_exp_curve_plain = *modulation[this_module][block.module_slot][param_dist_clip_exp][0];
   if constexpr (ClipIsExp)
     block.normalized_to_raw_block<domain_type::linear>(this_module, param_dist_clip_exp, clip_exp_curve_plain, clip_exp_curve);
-
-  auto& dsf_freq_curve = block.state.own_scratch[scratch_dist_dsf_freq];
-  auto const& dsf_freq_curve_plain = *modulation[this_module][block.module_slot][param_dist_dsf_freq][0];
-  if(block_auto[param_type][0].step() == type_dsf_dst)
-    block.normalized_to_raw_block<domain_type::log>(this_module, param_dist_dsf_freq, dsf_freq_curve_plain, dsf_freq_curve);
 
   // dont oversample for graphs
   if constexpr(Graph) 
@@ -2169,8 +2169,6 @@ fx_engine::process_dist_mode_xy_clip_shape(plugin_block& block,
     oversmp_stages = 0;
     oversmp_factor = 1;
   }
-
-  float ovrsmp_rate = block.sample_rate * oversmp_factor;
 
   // oversampling is destructive
   audio_in[0].copy_to(block.start_frame, block.end_frame, block.state.own_audio[0][0][0]);
@@ -2191,17 +2189,14 @@ fx_engine::process_dist_mode_xy_clip_shape(plugin_block& block,
       // so mind the bookkeeping
       int mod_index = block.start_frame + frame / oversmp_factor;
 
-      float dsf_freq = dsf_freq_curve[mod_index];
-      float ovrsmp_inc = dsf_freq / ovrsmp_rate;
-
       left = skew_x(left * gain_curve[mod_index], (*x_curve)[mod_index]);
       right = skew_x(right * gain_curve[mod_index], (*x_curve)[mod_index]);
       if constexpr(Mode == dist_mode_filt_to_shape)
-        dist_svf_next(block, oversmp_factor, freq_curve[mod_index], res_curve[mod_index], left, right);
-      left = shape(left, ovrsmp_inc, ovrsmp_rate, dsf_freq, dsf_dcy_curve[mod_index]);
-      right = shape(right, ovrsmp_inc, ovrsmp_rate, dsf_freq, dsf_dcy_curve[mod_index]);
+        dist_svf_next(block, oversmp_factor, lp_freq_curve[mod_index], lp_res_curve[mod_index], left, right);
+      left = shape(left, dsf_dcy_curve[mod_index]);
+      right = shape(right, dsf_dcy_curve[mod_index]);
       if constexpr (Mode == dist_mode_shape_to_filt)
-        dist_svf_next(block, oversmp_factor, freq_curve[mod_index], res_curve[mod_index], left, right);
+        dist_svf_next(block, oversmp_factor, lp_freq_curve[mod_index], lp_res_curve[mod_index], left, right);
 
       float exp = 0.0f;
       if constexpr (ClipIsExp)
