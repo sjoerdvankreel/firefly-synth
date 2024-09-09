@@ -1,3 +1,7 @@
+### ?, ? - V1.9.2.
+
+- Allow to use the DSF function for distortion (basically a waveshaper with more knobs to play with).
+
 ### September 5, 2024 - V1.9.1.
 
 - Add full realtime visual modulation for the graphs (so they show what the audio engine is actually doing if you f.e. set LFO to filter freq).
