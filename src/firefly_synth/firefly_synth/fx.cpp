@@ -61,7 +61,7 @@ enum { section_main, section_svf_left, section_svf_right, section_comb_left, sec
 enum { scratch_dly_fdbk_l, scratch_dly_fdbk_r, scratch_dly_fdbk_count };
 enum { scratch_reverb_damp, scratch_reverb_size, scratch_reverb_in, scratch_reverb_count };
 enum { scratch_dly_multi_hold, scratch_dly_multi_time, scratch_dly_multi_sprd, scratch_dly_multi_count };
-enum { scratch_dist_x, scratch_dist_y, scratch_dist_gain_raw, scratch_dist_svf_freq, scratch_dist_clip_exp, scratch_dist_dsf_dist, scratch_dist_dsf_freq, scratch_dist_count };
+enum { scratch_dist_x, scratch_dist_y, scratch_dist_gain_raw, scratch_dist_svf_freq, scratch_dist_clip_exp, scratch_dist_dsf_dist, scratch_dist_dsf_parts, scratch_dist_count };
 enum { scratch_flt_stvar_freq, scratch_flt_stvar_kbd, scratch_flt_stvar_gain, scratch_flt_stvar_count };
 enum { scratch_flt_comb_dly_plus, scratch_flt_comb_gain_plus, scratch_flt_comb_dly_min, scratch_flt_comb_gain_min, scratch_flt_comb_gain_count };
 enum { scratch_meq_freq, scratch_meq_gain = meq_flt_count, scratch_meq_audio_l = meq_flt_count * 2, scratch_meq_audio_r, scratch_meq_count };
@@ -920,13 +920,17 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   dist_over.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return type_is_dst(vs[0]); });
   dist_over.info.description = "Oversampling factor. If you go really crazy with distortion, this might tip the scale from just-not-acceptible to just-acceptible.";
+
+  // differs from the osci in that it is linear modulatable instead of stepped
+  // we lerp it in the dsp code, probably wont work for osci as part count is a log parameter there
   auto& dist_dsf_partials = result.params.emplace_back(make_param(
     make_topo_info("{D0867433-93E6-43FF-87F0-2ED248BC978F}", true, "Dist DSF Partials", "Parts", "Dist DSF Parts", param_dist_dsf_parts, 1),
-    make_param_dsp_automate_if_voice(!global), make_domain_step(1, 32, 2, 0),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_linear(1.0f, 32.0f, 2.0f, 2, ""),
     make_param_gui_single(section_dist_right, gui_edit_type::knob, { 0, 4 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   dist_dsf_partials.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dsf_dst; });
   dist_dsf_partials.info.description = "Controls the number of partials (overtones).";
+
   auto& dist_dsf_dist = result.params.emplace_back(make_param(
     make_topo_info("{90720101-17BA-4326-9982-E46D7CD4F83D}", true, "Dist DSF Distance", "Dist", "Dist DSF Dist", param_dist_dsf_dist, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_step(1, 20, 1, 0),
@@ -2102,16 +2106,23 @@ fx_engine::process_dist_mode_xy_clip_clamp(plugin_block& block,
   int oversmp_stages = block_auto[param_dist_over][0].step();
   int oversmp_factor = 1 << oversmp_stages;
   int dsf_dist = block_auto[param_dist_dsf_dist][0].step();
-  int dsf_parts = block_auto[param_dist_dsf_parts][0].step();
   float dsf_freq = block_auto[param_dist_dsf_freq][0].real();
   float oversmp_rate = block.sample_rate * oversmp_factor;
   float dsf_inc = dsf_freq / oversmp_rate;
   process_dist_mode_xy_clip_shape<Graph, Mode, SkewX, SkewY, ClipIsExp, Clip>(
     block, audio_in, modulation, skew_x, skew_y, clip,
-    [dsf_parts, dsf_dist, dsf_freq, dsf_inc, oversmp_rate, clamp](float in, float dsf_dcy) {
+    [dsf_dist, dsf_freq, dsf_inc, oversmp_rate, clamp](float in, float dsf_parts, float dsf_dcy) {
       // input may exceed -1/+1, need to get into 0..1 to use as a phase
       // note: the pre-clip (clamper) is never "exp", so 2nd arg dont matter
-      return generate_dsf(bipolar_to_unipolar(clamp(in, 0.0f)), dsf_inc, oversmp_rate, dsf_freq, dsf_parts, dsf_dist, dsf_dcy); });
+      // lerp 2 dsf's over integer #partials
+      float phase = bipolar_to_unipolar(clamp(in, 0.0f));
+      int parts_hi = (int)std::ceil(dsf_parts);
+      int parts_low = (int)std::floor(dsf_parts);
+      float parts_lerp = dsf_parts - parts_low;
+      float out_low = generate_dsf(phase, dsf_inc, oversmp_rate, dsf_freq, parts_low, dsf_dist, dsf_dcy);
+      float out_hi = generate_dsf(phase, dsf_inc, oversmp_rate, dsf_freq, parts_hi, dsf_dist, dsf_dcy);
+      return (1.0f - parts_lerp) * out_low + parts_lerp * out_hi;
+    });
 }
 
 template <bool Graph, int Mode, class SkewX, class SkewY, bool ClipIsExp, class Clip, class Shape> void 
@@ -2163,6 +2174,11 @@ fx_engine::process_dist_mode_xy_clip_shape(plugin_block& block,
   if constexpr (ClipIsExp)
     block.normalized_to_raw_block<domain_type::linear>(this_module, param_dist_clip_exp, clip_exp_curve_plain, clip_exp_curve);
 
+  auto& dsf_parts_curve = block.state.own_scratch[scratch_dist_dsf_parts];
+  auto const& dsf_parts_curve_plain = *modulation[this_module][block.module_slot][param_dist_dsf_parts][0];
+  if (block_auto[param_type][0].step() == type_dsf_dst)
+    block.normalized_to_raw_block<domain_type::linear>(this_module, param_dist_dsf_parts, dsf_parts_curve_plain, dsf_parts_curve);
+
   // dont oversample for graphs
   if constexpr(Graph) 
   {
@@ -2193,8 +2209,8 @@ fx_engine::process_dist_mode_xy_clip_shape(plugin_block& block,
       right = skew_x(right * gain_curve[mod_index], (*x_curve)[mod_index]);
       if constexpr(Mode == dist_mode_filt_to_shape)
         dist_svf_next(block, oversmp_factor, lp_freq_curve[mod_index], lp_res_curve[mod_index], left, right);
-      left = shape(left, dsf_dcy_curve[mod_index]);
-      right = shape(right, dsf_dcy_curve[mod_index]);
+      left = shape(left, dsf_parts_curve[mod_index], dsf_dcy_curve[mod_index]);
+      right = shape(right, dsf_parts_curve[mod_index], dsf_dcy_curve[mod_index]);
       if constexpr (Mode == dist_mode_shape_to_filt)
         dist_svf_next(block, oversmp_factor, lp_freq_curve[mod_index], lp_res_curve[mod_index], left, right);
 

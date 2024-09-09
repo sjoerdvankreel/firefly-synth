@@ -29,9 +29,9 @@ autobuilds:
 
 dsf dist:
 V make freq not mod
+V make parts mod by interpolate
 * make the kick demo
 * make the vst3/clap reaper demo
-* make parts mod by interpolate + also in the osc
 * fix the userstate repainting
 
 wishlist:
