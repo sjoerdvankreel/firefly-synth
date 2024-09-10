@@ -25,6 +25,7 @@ autobuilds:
 * integrate https://github.com/surge-synthesizer/monique-monosynth/blob/main/.github/workflows/build-pr.yml
 
 * make a youtube video 
+* global aux 6 not fit cvaudio gui
 * better not modulate the partials at all. either noise or too expensive => then also not float anymore => actually i already knew that from the osci. only decay is mod friendly
 * big_pad_2 is acting weird ==> F*ME its the osci dsf
 * update the manuals routing overview image with new colors
