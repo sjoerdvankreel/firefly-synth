@@ -24,8 +24,8 @@ autobuilds:
 * ask paul
 * integrate https://github.com/surge-synthesizer/monique-monosynth/blob/main/.github/workflows/build-pr.yml
 
-* make a youtube video
-* big_pad_2 is acting weird
+* make a youtube video 
+* big_pad_2 is acting weird ==> F*ME its the osci dsf
 * update the manuals routing overview image with new colors
 
 dsf dist:
