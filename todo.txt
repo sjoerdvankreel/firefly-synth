@@ -32,6 +32,7 @@ V make freq not mod
 V make parts mod by interpolate
 V fix the userstate repainting
 V make the vst3/clap reaper demo 
+V can merge 2 dsf calls?
 + render
 * retest everything
 * make another visual mod demo for the dsf dist demo, looks cool

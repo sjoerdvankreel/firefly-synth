@@ -118,17 +118,17 @@ inline float wave_calc_uni(float in, float x, float y, Shape shape, SkewIn skew_
 
 // anti-aliased dsf generator for oscis and dsf distortion
 inline float
-generate_dsf(float phase, float increment, float sr, float freq, int parts, float dist, float decay)
+generate_dsf(float phase, float increment, float sr, float freq, float parts, float dist, float decay)
 {
   // -1: Fundamental is implicit. 
-  int ps = parts - 1;
+  float ps = parts - 1;
   float const decay_range = 0.99f;
   float const scale_factor = 0.975f;
   float dist_freq = freq * dist;
   float max_parts = (sr * 0.5f - freq) / dist_freq;
-  ps = std::min(ps, (int)max_parts);
+  ps = std::min(ps, max_parts);
 
-  float n = static_cast<float>(ps);
+  float n = ps;
   float w = decay * decay_range;
   float w_pow_np1 = std::pow(w, n + 1);
   float u = 2.0f * pi32 * phase;
@@ -137,7 +137,13 @@ generate_dsf(float phase, float increment, float sr, float freq, int parts, floa
   float x = (w * std::sin(v - u) + std::sin(u)) + w_pow_np1 * a;
   float y = 1 + w * w - 2 * w * std::cos(v);
   float scale = (1.0f - w_pow_np1) / (1.0f - w);
-  return plugin_base::check_bipolar(x * scale_factor / (y * scale));
+  float result = x * scale_factor / (y * scale);
+
+  // cannot change the scale factor b/c breaking change
+  // oscis are allowed to go out bounds 
+  // apparently non-integer partial count has a high chance of doing so
+  assert(-1.5f <= result && result <= 1.5f);
+  return result;
 }
 
 }

@@ -2114,14 +2114,8 @@ fx_engine::process_dist_mode_xy_clip_clamp(plugin_block& block,
     [dsf_dist, dsf_freq, dsf_inc, oversmp_rate, clamp](float in, float dsf_parts, float dsf_dcy) {
       // input may exceed -1/+1, need to get into 0..1 to use as a phase
       // note: the pre-clip (clamper) is never "exp", so 2nd arg dont matter
-      // lerp 2 dsf's over integer #partials
       float phase = bipolar_to_unipolar(clamp(in, 0.0f));
-      int parts_hi = (int)std::ceil(dsf_parts);
-      int parts_low = (int)std::floor(dsf_parts);
-      float parts_lerp = dsf_parts - parts_low;
-      float out_low = generate_dsf(phase, dsf_inc, oversmp_rate, dsf_freq, parts_low, dsf_dist, dsf_dcy);
-      float out_hi = generate_dsf(phase, dsf_inc, oversmp_rate, dsf_freq, parts_hi, dsf_dist, dsf_dcy);
-      return (1.0f - parts_lerp) * out_low + parts_lerp * out_hi;
+      return generate_dsf(phase, dsf_inc, oversmp_rate, dsf_freq, dsf_parts, dsf_dist, dsf_dcy);
     });
 }
 
