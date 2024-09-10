@@ -30,7 +30,8 @@ enum output_event_type
 { 
   out_event_voice_activation,
   out_event_cv_state,
-  out_event_param_state
+  out_event_param_state,
+  out_event_custom_state
 };
 
 struct mod_out_voice_state
@@ -64,11 +65,21 @@ struct mod_out_param_state
   { return std::clamp((float)value_normalized / std::numeric_limits<std::uint16_t>::max(), 0.0f, 1.0f); }
 };
 
+struct mod_out_custom_state
+{
+  std::uint8_t event_type;
+  std::int8_t voice_index; // -1 for global
+  std::uint8_t module_global;
+  std::uint8_t padding;
+  std::int32_t value_custom;
+};
+
 union mod_out_state 
 {
   mod_out_cv_state cv;
   mod_out_voice_state voice;
   mod_out_param_state param;
+  mod_out_custom_state custom;
 };
 
 union modulation_output 
@@ -101,6 +112,18 @@ union modulation_output
     result.state.cv.module_global = module_global;
     result.state.cv.event_type = out_event_cv_state;
     result.state.cv.position_normalized = position_normalized;
+    return result;
+  }
+
+  static modulation_output
+  make_mod_output_custom_state(std::int8_t voice_index, std::uint8_t module_global, std::int32_t value_custom)
+  {
+    assert(voice_index >= -1);
+    modulation_output result;
+    result.state.custom.voice_index = voice_index;
+    result.state.custom.value_custom = value_custom;
+    result.state.custom.module_global = module_global;
+    result.state.custom.event_type = out_event_custom_state;
     return result;
   }
   
@@ -138,6 +161,14 @@ inline bool operator <
     if (l.state.cv.module_global > r.state.cv.module_global) return false;
     if (l.state.cv.voice_index < r.state.cv.voice_index) return true;
     if (l.state.cv.voice_index > r.state.cv.voice_index) return false;
+    return false;
+  }
+  if (l.event_type() == out_event_custom_state)
+  {
+    if (l.state.custom.module_global < r.state.custom.module_global) return true;
+    if (l.state.custom.module_global > r.state.custom.module_global) return false;
+    if (l.state.custom.voice_index < r.state.custom.voice_index) return true;
+    if (l.state.custom.voice_index > r.state.custom.voice_index) return false;
     return false;
   }
   if (l.event_type() == out_event_param_state)

@@ -34,7 +34,8 @@ public:
 
 static graph_data
 render_graph(
-  plugin_state const& state, graph_engine* engine, int param, param_topo_mapping const& mapping)
+  plugin_state const& state, graph_engine* engine, int param, 
+  param_topo_mapping const& mapping, std::vector<mod_out_custom_state> const& custom_outputs)
 {
   std::string partition = mapping.module_index == module_global_out? "Global": "Voice";
   float bal = state.get_plain_at(mapping.module_index, mapping.module_slot, param_bal, 0).real();

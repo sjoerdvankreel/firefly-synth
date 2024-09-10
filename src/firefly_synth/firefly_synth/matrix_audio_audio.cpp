@@ -166,7 +166,7 @@ audio_audio_matrix_topo(
 
   result.gui.tabbed_name = "Audio";
   result.graph_renderer = [tm = target_matrix.items](
-    auto const& state, auto* engine, int param, auto const& mapping) {
+    auto const& state, auto* engine, int param, auto const& mapping, auto const& mods) {
       return render_graph(state, engine, param, mapping, tm); };
   if (global)
   {

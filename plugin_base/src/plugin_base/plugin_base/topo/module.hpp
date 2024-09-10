@@ -89,7 +89,8 @@ typedef std::function<std::unique_ptr<module_engine>(
 module_engine_factory;
 typedef std::function<graph_data(
   plugin_state const& state, graph_engine* engine, 
-  int param, param_topo_mapping const& mapping)>
+  int param, param_topo_mapping const& mapping, 
+  std::vector<mod_out_custom_state> const& custom_outputs)>
 module_graph_renderer;
 
 // in case we want to plot someone elses mod indicators

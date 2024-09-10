@@ -263,7 +263,8 @@ render_osc_graphs(plugin_state const& state, graph_engine* engine, int slot, boo
 
 static graph_data
 render_osc_graph(
-  plugin_state const& state, graph_engine* engine, int param, param_topo_mapping const& mapping)
+  plugin_state const& state, graph_engine* engine, int param, 
+  param_topo_mapping const& mapping, std::vector<mod_out_custom_state> const& custom_outputs)
 {
   graph_engine_params params = {};
   int type = state.get_plain_at(module_osc, mapping.module_slot, param_type, 0).step();

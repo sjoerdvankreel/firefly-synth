@@ -58,6 +58,7 @@ void
 module_graph::modulation_outputs_reset()
 {
   _mod_indicators.clear();
+  _custom_outputs.clear();
   _render_dirty = true;
   render_if_dirty();
 }
@@ -131,32 +132,53 @@ module_graph::modulation_outputs_changed(std::vector<modulation_output> const& o
   }
 
   bool rerender_full = false;
+  bool any_custom_found = false;
   for (int i = 0; i < outputs.size(); i++)
-    if (outputs[i].event_type() == output_event_type::out_event_param_state)
-    {
-      // debugging
-      auto const& orig_desc = _gui->automation_state()->desc().modules[orig_module_global];
-      auto const& mapped_desc = _gui->automation_state()->desc().modules[mapped_module_global];
-      auto const& event_desc = _gui->automation_state()->desc().modules[outputs[i].state.param.module_global];
-      (void)orig_desc;
-      (void)mapped_desc;
-      (void)event_desc;
+    if (outputs[i].event_type() == output_event_type::out_event_custom_state)
+      if (mapped_module_global == outputs[i].state.custom.module_global)
+      {
+        if (!any_custom_found)
+        {
+          any_custom_found = true;
+          _custom_outputs.clear();
+          _custom_outputs_activated = seconds_since_epoch();
+        }
+        _custom_outputs.push_back(outputs[i].state.custom);
+      }
 
-      if (orig_module_global == outputs[i].state.param.module_global ||
-        mapped_module_global == outputs[i].state.param.module_global)
+  if (!any_custom_found && seconds_since_epoch() >= _custom_outputs_activated + 1.0)
+  {
+    _custom_outputs.clear();
+    rerender_full = true; // because we just dont know what else to do
+  }
+
+  if(!rerender_full)
+    for (int i = 0; i < outputs.size(); i++)
+      if (outputs[i].event_type() == output_event_type::out_event_param_state)
       {
-        rerender_full = true;
-        break;
-      }
-    } else if (outputs[i].event_type() == output_event_type::out_event_cv_state)
-    {
-      if (orig_module_global == outputs[i].state.cv.module_global ||
-        mapped_module_global == outputs[i].state.cv.module_global)
+        // debugging
+        auto const& orig_desc = _gui->automation_state()->desc().modules[orig_module_global];
+        auto const& mapped_desc = _gui->automation_state()->desc().modules[mapped_module_global];
+        auto const& event_desc = _gui->automation_state()->desc().modules[outputs[i].state.param.module_global];
+        (void)orig_desc;
+        (void)mapped_desc;
+        (void)event_desc;
+
+        if (orig_module_global == outputs[i].state.param.module_global ||
+          mapped_module_global == outputs[i].state.param.module_global)
+        {
+          rerender_full = true;
+          break;
+        }
+      } else if (outputs[i].event_type() == output_event_type::out_event_cv_state)
       {
-        rerender_indicators = true;
-        // DONT break -- full rerender trumps indicators
+        if (orig_module_global == outputs[i].state.cv.module_global ||
+          mapped_module_global == outputs[i].state.cv.module_global)
+        {
+          rerender_indicators = true;
+          // DONT break -- full rerender trumps indicators
+        }
       }
-    }
 
   if (rerender_full)
     request_rerender(orig_param_first, false);
@@ -281,7 +303,7 @@ module_graph::render_if_dirty()
 
   if(module.graph_renderer != nullptr)
     render(module.graph_renderer(
-      *plug_state, _gui->get_module_graph_engine(module), render_request_param, mapping));
+      *plug_state, _gui->get_module_graph_engine(module), render_request_param, mapping, _custom_outputs));
   _render_dirty = false;
   return true;
 }

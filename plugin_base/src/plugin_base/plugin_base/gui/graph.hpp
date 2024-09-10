@@ -52,6 +52,10 @@ protected:
   double _mod_indicators_activated = {};
   std::vector<float> _mod_indicators = {};
 
+  // anything really, but currently used for free-running or continuous-update-seed random lfos
+  double _custom_outputs_activated = {};
+  std::vector<mod_out_custom_state> _custom_outputs = {};
+
 public:
   void render(graph_data const& data);
   void paint(juce::Graphics& g) override;

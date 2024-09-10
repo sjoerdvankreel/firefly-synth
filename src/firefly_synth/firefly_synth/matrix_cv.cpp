@@ -454,7 +454,7 @@ cv_matrix_topo(
   result.graph_engine_factory = make_graph_engine;
   if(!cv && !is_fx) result.default_initializer = global ? init_audio_global_default : init_audio_voice_default;
   result.graph_renderer = [sm = source_matrix.mappings, tm = target_matrix](
-    auto const& state, auto* engine, int param, auto const& mapping) {
+    auto const& state, auto* engine, int param, auto const& mapping, auto const& mods) {
       return render_graph(state, engine, param, mapping, sm, tm);
     };
   result.mod_output_source_selector = [sm = source_matrix.mappings](
