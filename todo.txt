@@ -25,6 +25,7 @@ autobuilds:
 * integrate https://github.com/surge-synthesizer/monique-monosynth/blob/main/.github/workflows/build-pr.yml
 
 * make a youtube video 
+* better not modulate the partials at all. either noise or too expensive
 * big_pad_2 is acting weird ==> F*ME its the osci dsf
 * update the manuals routing overview image with new colors
 
