@@ -24,11 +24,6 @@ autobuilds:
 * ask paul
 * integrate https://github.com/surge-synthesizer/monique-monosynth/blob/main/.github/workflows/build-pr.yml
 
-* make a youtube video 
-* global aux 6 not fit cvaudio gui
-* better not modulate the partials at all. either noise or too expensive => then also not float anymore => actually i already knew that from the osci. only decay is mod friendly
-* big_pad_2 is acting weird ==> F*ME its the osci dsf
-* update the manuals routing overview image with new colors
 
 dsf dist:
 V make freq not mod
@@ -36,13 +31,12 @@ V make parts mod by interpolate
 V fix the userstate repainting
 V make the vst3/clap reaper demo 
 V can merge 2 dsf calls?
-+ render
-* retest everything
 * make another visual mod demo for the dsf dist demo, looks cool
 
 wishlist:
+global aux 6 not fit cvaudio gui
 make a patch cleanup button
-multi-layer distortion (or -- use a dsf generator as waveshaper! cannot do osc-to-fx so, how to fit in the gui?)
+update the manuals routing overview image with new colors
 filter microtuning
 DSF falloff to the left
 clap polyphonic modulation
