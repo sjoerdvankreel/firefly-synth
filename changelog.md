@@ -1,4 +1,4 @@
-### September 10, 2024 - V1.9.2.
+### September 11, 2024 - V1.9.2.
 
 - Bugfix: modulated params would be slow to visually react to user input.
 - Allow to use the DSF function for distortion (basically a waveshaper with more knobs to play with).

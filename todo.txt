@@ -24,15 +24,6 @@ autobuilds:
 * ask paul
 * integrate https://github.com/surge-synthesizer/monique-monosynth/blob/main/.github/workflows/build-pr.yml
 
-
-dsf dist:
-V make freq not mod
-V make parts mod by interpolate
-V fix the userstate repainting
-V make the vst3/clap reaper demo 
-V can merge 2 dsf calls?
-* make another visual mod demo for the dsf dist demo, looks cool
-
 wishlist:
 global aux 6 not fit cvaudio gui
 make a patch cleanup button
