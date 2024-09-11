@@ -1,10 +1,10 @@
 <html>
 <head>
-<title>Firefly Synth 1.9.1</title>
+<title>Firefly Synth 1.9.2</title>
 <style>th, td { padding: 3px; }a, a:visited { color: #666666; }.description { background:#EEEEEE; }h1 { font-size: 19px; color: black; }h2 { font-size: 17px; color: black; }h3 { font-size: 15px; color: black; }body { font-family: Verdana; color: black; }html { position: relative; max-width: 1024px; margin: auto; }tr td { width: auto; white-space: nowrap; } tr th { width: auto; white-space: nowrap; }table, th, td { font-size: 13px; border: 1px solid gray; border-collapse: collapse; text-align: left; }tr td:last-child { width: 100%; white-space: wrap; } tr th:last-child { width: 100%; white-space: wrap; }</style>
 </head>
 <body>
-<h1>Firefly Synth 1.9.1</h1>
+<h1>Firefly Synth 1.9.2</h1>
 <h2>Module Overview</h2>
 <table>
 <tr>
@@ -3267,7 +3267,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Dist Skew X Mode</td>
-<td>Distortion Skew</td>
+<td>Distortion Mid</td>
 <td>Yes</td>
 <td>Patch</td>
 <td>1</td>
@@ -3284,7 +3284,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Dist Skew X Amt</td>
-<td>Distortion Skew</td>
+<td>Distortion Mid</td>
 <td>Yes</td>
 <td>Patch</td>
 <td>1</td>
@@ -3301,7 +3301,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Dist Skew Y Mode</td>
-<td>Distortion Skew</td>
+<td>Distortion Mid</td>
 <td>Yes</td>
 <td>Patch</td>
 <td>1</td>
@@ -3318,7 +3318,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Dist Skew Y Amt</td>
-<td>Distortion Skew</td>
+<td>Distortion Mid</td>
 <td>Yes</td>
 <td>Patch</td>
 <td>1</td>
@@ -3334,38 +3334,38 @@
 <td colspan='11' class='description'>After-shape skew amount.</td>
 </tr>
 <tr>
-<td rowspan='2'>Dist Shape</td>
-<td>Distortion Right</td>
+<td rowspan='2'>Dist Gain</td>
+<td>Distortion Mid</td>
 <td>Yes</td>
 <td>Patch</td>
 <td>1</td>
 <td>Input</td>
-<td>Voice</td>
-<td>Automate</td>
-<td>Off</td>
-<td>Foldback</td>
-<td>Off</td>
-<td>N/A</td>
+<td>Accurate</td>
+<td>Modulate</td>
+<td>0.10</td>
+<td>32.00</td>
+<td>1.00</td>
+<td>1.00</td>
 </tr>
 <tr>
-<td colspan='11' class='description'>Selects waveshaper type: various periodic functions plus foldback distortion.</td>
+<td colspan='11' class='description'>Gain amount to drive the shaper and X/Y parameters. Use an Osc with gain envelope to have the effect of the distortion gradually fall-off.</td>
 </tr>
 <tr>
-<td rowspan='2'>Dist Oversampling</td>
-<td>Distortion Right</td>
+<td rowspan='2'>Dist Mix</td>
+<td>Distortion Mid</td>
 <td>Yes</td>
 <td>Patch</td>
 <td>1</td>
 <td>Input</td>
-<td>Voice</td>
-<td>Automate</td>
-<td>1X</td>
-<td>4X</td>
-<td>1X</td>
+<td>Accurate</td>
+<td>Modulate</td>
+<td>0 %</td>
+<td>100 %</td>
+<td>100 %</td>
 <td>N/A</td>
 </tr>
 <tr>
-<td colspan='11' class='description'>Oversampling factor. If you go really crazy with distortion, this might tip the scale from just-not-acceptible to just-acceptible.</td>
+<td colspan='11' class='description'>Dry/wet mix between input and output signal.</td>
 </tr>
 <tr>
 <td rowspan='2'>Dist Clip Mode</td>
@@ -3377,7 +3377,7 @@
 <td>Voice</td>
 <td>Automate</td>
 <td>Hard</td>
-<td>Inv</td>
+<td>Exp</td>
 <td>Tanh</td>
 <td>N/A</td>
 </tr>
@@ -3402,7 +3402,58 @@
 <td colspan='11' class='description'>Exponential clipper amount.</td>
 </tr>
 <tr>
-<td rowspan='2'>Dist Gain</td>
+<td rowspan='2'>Dist Shape</td>
+<td>Distortion Right</td>
+<td>Yes</td>
+<td>Patch</td>
+<td>1</td>
+<td>Input</td>
+<td>Voice</td>
+<td>Automate</td>
+<td>Off</td>
+<td>Fldbk</td>
+<td>Off</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Selects waveshaper type: various periodic functions plus foldback distortion.</td>
+</tr>
+<tr>
+<td rowspan='2'>Dist DSF Clamp Mode</td>
+<td>Distortion Right</td>
+<td>Yes</td>
+<td>Patch</td>
+<td>1</td>
+<td>Input</td>
+<td>Voice</td>
+<td>Automate</td>
+<td>Hard</td>
+<td>Inv</td>
+<td>Tanh</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Used to bring the input signal into [-1, 1] to be used as the DSF distortion phase.</td>
+</tr>
+<tr>
+<td rowspan='2'>Dist Oversampling</td>
+<td>Distortion Right</td>
+<td>Yes</td>
+<td>Patch</td>
+<td>1</td>
+<td>Input</td>
+<td>Voice</td>
+<td>Automate</td>
+<td>1X</td>
+<td>4X</td>
+<td>1X</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Oversampling factor. If you go really crazy with distortion, this might tip the scale from just-not-acceptible to just-acceptible.</td>
+</tr>
+<tr>
+<td rowspan='2'>Dist DSF Partials</td>
 <td>Distortion Right</td>
 <td>Yes</td>
 <td>Patch</td>
@@ -3410,16 +3461,33 @@
 <td>Input</td>
 <td>Accurate</td>
 <td>Modulate</td>
-<td>0.10</td>
+<td>1.00</td>
 <td>32.00</td>
-<td>1.00</td>
-<td>1.00</td>
+<td>2.00</td>
+<td>N/A</td>
 </tr>
 <tr>
-<td colspan='11' class='description'>Gain amount to drive the shaper and X/Y parameters. Use an Osc with gain envelope to have the effect of the distortion gradually fall-off.</td>
+<td colspan='11' class='description'>Controls the number of partials (overtones).</td>
 </tr>
 <tr>
-<td rowspan='2'>Dist Mix</td>
+<td rowspan='2'>Dist DSF Distance</td>
+<td>Distortion Right</td>
+<td>Yes</td>
+<td>Patch</td>
+<td>1</td>
+<td>Input</td>
+<td>Voice</td>
+<td>Automate</td>
+<td>1</td>
+<td>20</td>
+<td>1</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Controls the frequency distance between the base frequency and subsequent partials.</td>
+</tr>
+<tr>
+<td rowspan='2'>Dist DSF Decay</td>
 <td>Distortion Right</td>
 <td>Yes</td>
 <td>Patch</td>
@@ -3429,11 +3497,28 @@
 <td>Modulate</td>
 <td>0 %</td>
 <td>100 %</td>
-<td>100 %</td>
+<td>50 %</td>
 <td>N/A</td>
 </tr>
 <tr>
-<td colspan='11' class='description'>Dry/wet mix between input and output signal.</td>
+<td colspan='11' class='description'>Controls the amplitude decay of successive partials.</td>
+</tr>
+<tr>
+<td rowspan='2'>Dist DSF Freq</td>
+<td>Distortion Right</td>
+<td>Yes</td>
+<td>Patch</td>
+<td>1</td>
+<td>Input</td>
+<td>Voice</td>
+<td>Automate</td>
+<td>1 Hz</td>
+<td>10000 Hz</td>
+<td>100 Hz</td>
+<td>1000 Hz</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Controls the base frequency for the DSF waveshaper.</td>
 </tr>
 <tr>
 <td rowspan='2'>Multi EQ Mode</td>
@@ -3933,7 +4018,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Dist Skew X Mode</td>
-<td>Distortion Skew</td>
+<td>Distortion Mid</td>
 <td>Yes</td>
 <td>Patch</td>
 <td>1</td>
@@ -3950,7 +4035,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Dist Skew X Amt</td>
-<td>Distortion Skew</td>
+<td>Distortion Mid</td>
 <td>Yes</td>
 <td>Patch</td>
 <td>1</td>
@@ -3967,7 +4052,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Dist Skew Y Mode</td>
-<td>Distortion Skew</td>
+<td>Distortion Mid</td>
 <td>Yes</td>
 <td>Patch</td>
 <td>1</td>
@@ -3984,7 +4069,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Dist Skew Y Amt</td>
-<td>Distortion Skew</td>
+<td>Distortion Mid</td>
 <td>Yes</td>
 <td>Patch</td>
 <td>1</td>
@@ -4000,38 +4085,38 @@
 <td colspan='11' class='description'>After-shape skew amount.</td>
 </tr>
 <tr>
-<td rowspan='2'>Dist Shape</td>
-<td>Distortion Right</td>
+<td rowspan='2'>Dist Gain</td>
+<td>Distortion Mid</td>
 <td>Yes</td>
 <td>Patch</td>
 <td>1</td>
 <td>Input</td>
-<td>Block</td>
-<td>None</td>
-<td>Off</td>
-<td>Foldback</td>
-<td>Off</td>
-<td>N/A</td>
+<td>Accurate</td>
+<td>Modulate</td>
+<td>0.10</td>
+<td>32.00</td>
+<td>1.00</td>
+<td>1.00</td>
 </tr>
 <tr>
-<td colspan='11' class='description'>Selects waveshaper type: various periodic functions plus foldback distortion.</td>
+<td colspan='11' class='description'>Gain amount to drive the shaper and X/Y parameters. Use an Osc with gain envelope to have the effect of the distortion gradually fall-off.</td>
 </tr>
 <tr>
-<td rowspan='2'>Dist Oversampling</td>
-<td>Distortion Right</td>
+<td rowspan='2'>Dist Mix</td>
+<td>Distortion Mid</td>
 <td>Yes</td>
 <td>Patch</td>
 <td>1</td>
 <td>Input</td>
-<td>Block</td>
-<td>None</td>
-<td>1X</td>
-<td>4X</td>
-<td>1X</td>
+<td>Accurate</td>
+<td>Modulate</td>
+<td>0 %</td>
+<td>100 %</td>
+<td>100 %</td>
 <td>N/A</td>
 </tr>
 <tr>
-<td colspan='11' class='description'>Oversampling factor. If you go really crazy with distortion, this might tip the scale from just-not-acceptible to just-acceptible.</td>
+<td colspan='11' class='description'>Dry/wet mix between input and output signal.</td>
 </tr>
 <tr>
 <td rowspan='2'>Dist Clip Mode</td>
@@ -4043,7 +4128,7 @@
 <td>Block</td>
 <td>None</td>
 <td>Hard</td>
-<td>Inv</td>
+<td>Exp</td>
 <td>Tanh</td>
 <td>N/A</td>
 </tr>
@@ -4068,7 +4153,58 @@
 <td colspan='11' class='description'>Exponential clipper amount.</td>
 </tr>
 <tr>
-<td rowspan='2'>Dist Gain</td>
+<td rowspan='2'>Dist Shape</td>
+<td>Distortion Right</td>
+<td>Yes</td>
+<td>Patch</td>
+<td>1</td>
+<td>Input</td>
+<td>Block</td>
+<td>None</td>
+<td>Off</td>
+<td>Fldbk</td>
+<td>Off</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Selects waveshaper type: various periodic functions plus foldback distortion.</td>
+</tr>
+<tr>
+<td rowspan='2'>Dist DSF Clamp Mode</td>
+<td>Distortion Right</td>
+<td>Yes</td>
+<td>Patch</td>
+<td>1</td>
+<td>Input</td>
+<td>Block</td>
+<td>None</td>
+<td>Hard</td>
+<td>Inv</td>
+<td>Tanh</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Used to bring the input signal into [-1, 1] to be used as the DSF distortion phase.</td>
+</tr>
+<tr>
+<td rowspan='2'>Dist Oversampling</td>
+<td>Distortion Right</td>
+<td>Yes</td>
+<td>Patch</td>
+<td>1</td>
+<td>Input</td>
+<td>Block</td>
+<td>None</td>
+<td>1X</td>
+<td>4X</td>
+<td>1X</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Oversampling factor. If you go really crazy with distortion, this might tip the scale from just-not-acceptible to just-acceptible.</td>
+</tr>
+<tr>
+<td rowspan='2'>Dist DSF Partials</td>
 <td>Distortion Right</td>
 <td>Yes</td>
 <td>Patch</td>
@@ -4076,16 +4212,33 @@
 <td>Input</td>
 <td>Accurate</td>
 <td>Modulate</td>
-<td>0.10</td>
+<td>1.00</td>
 <td>32.00</td>
-<td>1.00</td>
-<td>1.00</td>
+<td>2.00</td>
+<td>N/A</td>
 </tr>
 <tr>
-<td colspan='11' class='description'>Gain amount to drive the shaper and X/Y parameters. Use an Osc with gain envelope to have the effect of the distortion gradually fall-off.</td>
+<td colspan='11' class='description'>Controls the number of partials (overtones).</td>
 </tr>
 <tr>
-<td rowspan='2'>Dist Mix</td>
+<td rowspan='2'>Dist DSF Distance</td>
+<td>Distortion Right</td>
+<td>Yes</td>
+<td>Patch</td>
+<td>1</td>
+<td>Input</td>
+<td>Block</td>
+<td>None</td>
+<td>1</td>
+<td>20</td>
+<td>1</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Controls the frequency distance between the base frequency and subsequent partials.</td>
+</tr>
+<tr>
+<td rowspan='2'>Dist DSF Decay</td>
 <td>Distortion Right</td>
 <td>Yes</td>
 <td>Patch</td>
@@ -4095,11 +4248,28 @@
 <td>Modulate</td>
 <td>0 %</td>
 <td>100 %</td>
-<td>100 %</td>
+<td>50 %</td>
 <td>N/A</td>
 </tr>
 <tr>
-<td colspan='11' class='description'>Dry/wet mix between input and output signal.</td>
+<td colspan='11' class='description'>Controls the amplitude decay of successive partials.</td>
+</tr>
+<tr>
+<td rowspan='2'>Dist DSF Freq</td>
+<td>Distortion Right</td>
+<td>Yes</td>
+<td>Patch</td>
+<td>1</td>
+<td>Input</td>
+<td>Block</td>
+<td>None</td>
+<td>1 Hz</td>
+<td>10000 Hz</td>
+<td>100 Hz</td>
+<td>1000 Hz</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Controls the base frequency for the DSF waveshaper.</td>
 </tr>
 <tr>
 <td rowspan='2'>Multi EQ Mode</td>

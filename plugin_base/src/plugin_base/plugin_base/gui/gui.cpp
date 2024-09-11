@@ -570,7 +570,7 @@ plugin_gui::get_visuals_mode() const
 }
 
 void 
-plugin_gui::modulation_outputs_changed()
+plugin_gui::modulation_outputs_changed(int force_requery_automation_param)
 {
   // clear stuff and possibly pick up on the next round
   // needed when we go from not-off to off
@@ -588,6 +588,21 @@ plugin_gui::modulation_outputs_changed()
   if (new_visuals_mode == gui_visuals_mode_off)
     return;
 
+  // if forced, need to output a dummy event, note that both us and the plug bindings are dancing
+  // on *_modulation_outputs thats ok as all is on the ui thread (though bit nasty)
+  // this is needed to not wait for the 1 second timer below that syncs up mod state with auto state
+  // which is kinda nice when user is draggin a knob / slider
+  if (force_requery_automation_param != -1)
+  {
+    int module_global = _automation_state->desc().param_mappings.params[force_requery_automation_param].module_global;
+    _modulation_outputs->push_back(modulation_output::make_mod_output_param_state(-1, module_global, force_requery_automation_param, 
+      _automation_state->get_normalized_at_index(force_requery_automation_param).value()));
+    for (int i = 0; i < _voice_modulation_states.size(); i++)
+      _modulation_outputs->push_back(modulation_output::make_mod_output_param_state(i, module_global, force_requery_automation_param,
+        _automation_state->get_normalized_at_index(force_requery_automation_param).value()));
+  }
+
+  // then clean it up
   std::sort(_modulation_outputs->begin(), _modulation_outputs->end());
   auto pred = [](auto const& l, auto const& r) { return !(l < r) && !(r < l); };
   auto it = std::unique(_modulation_outputs->begin(), _modulation_outputs->end(), pred);
@@ -607,7 +622,7 @@ plugin_gui::modulation_outputs_changed()
     _last_mod_reset_seconds = seconds_now;
     for (auto listener_it : _modulation_output_listeners)
       listener_it->modulation_outputs_reset();
-  }
+  } 
 
   // set all voices to automation by default,
   // we will overwrite if that voice is active
@@ -1013,7 +1028,8 @@ plugin_gui::make_param_section(module_desc const& module, param_section const& s
 {
   auto const& params = module.params;
   bool is_parent_grid_param = false;
-  grid_component& grid = make_component<grid_component>(section.gui.dimension, margin_param, margin_param, 0, 0);
+  grid_component& grid = make_component<grid_component>(section.gui.dimension, 
+    margin_param, margin_param, section.gui.autofit_row, section.gui.autofit_column);
   
   for(int p = 0; p < module.module->params.size(); p++)
     if(module.module->params[p].gui.section == section.index)

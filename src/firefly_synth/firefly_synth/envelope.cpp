@@ -588,7 +588,7 @@ env_engine::process(plugin_block& block, cv_cv_matrix_mixdown const* modulation)
   block.push_modulation_output(modulation_output::make_mod_output_cv_state(
     block.voice->state.slot,
     block.module_desc_.info.global,
-    _total_pos / (_dly + _att + _hld + _dcy + _rls + flt)));
+    std::clamp(_total_pos / (_dly + _att + _hld + _dcy + _rls + flt), 0.0, 1.0)));
 }
 
 template <bool Monophonic>
