@@ -35,7 +35,7 @@ It's basically [InfernalSynth](https://github.com/sjoerdvankreel/infernal-synth)
 
 # Screenshots / Demo videos
 
-Realtime modulation animation examples:
+Realtime modulation animation videos:
 
 - [saw_to_dsf_distortion_demo.mp4](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/video/saw_to_dsf_distortion_demo.mp4)
 - [modulation_visualization_demo.mp4](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/video/modulation_visualization_demo.mp4)
