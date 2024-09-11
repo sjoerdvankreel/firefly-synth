@@ -1163,7 +1163,7 @@ osc_engine::process_tuning_mode_unison(plugin_block& block, cv_audio_matrix_mixd
       if constexpr (Sin) synced_sample += std::sin(2.0f * pi32 * _sync_phases[v]) * sin_mix_curve[mod_index];
       if constexpr (Tri) synced_sample += generate_triangle(_sync_phases[v], inc_sync) * tri_mix_curve[mod_index];
       if constexpr (Sqr) synced_sample += generate_sqr(_sync_phases[v], inc_sync, pw_curve[mod_index]) * sqr_mix_curve[mod_index];
-      if constexpr (DSF) synced_sample = generate_dsf(_sync_phases[v], inc_sync, oversampled_rate, freq_sync, dsf_parts, dsf_dist, dsf_dcy_curve[mod_index]);
+      if constexpr (DSF) synced_sample = generate_dsf<int>(_sync_phases[v], oversampled_rate, freq_sync, dsf_parts, dsf_dist, dsf_dcy_curve[mod_index]);
 
       // generate the unsynced sample and crossover
       float unsynced_sample = 0;
@@ -1183,7 +1183,7 @@ osc_engine::process_tuning_mode_unison(plugin_block& block, cv_audio_matrix_mixd
           if constexpr (Sin) unsynced_sample += std::sin(2.0f * pi32 * _unsync_phases[v]) * sin_mix_curve[mod_index];
           if constexpr (Tri) unsynced_sample += generate_triangle(_unsync_phases[v], inc_sync) * tri_mix_curve[mod_index];
           if constexpr (Sqr) unsynced_sample += generate_sqr(_unsync_phases[v], inc_sync, pw_curve[mod_index]) * sqr_mix_curve[mod_index];
-          if constexpr (DSF) unsynced_sample = generate_dsf(_unsync_phases[v], inc_sync, oversampled_rate, freq_sync, dsf_parts, dsf_dist, dsf_dcy_curve[mod_index]);
+          if constexpr (DSF) unsynced_sample = generate_dsf<int>(_unsync_phases[v], oversampled_rate, freq_sync, dsf_parts, dsf_dist, dsf_dcy_curve[mod_index]);
 
           increment_and_wrap_phase(_unsync_phases[v], inc_sync);
           float unsynced_weight = _unsync_samples[v]-- / (sync_over_samples + 1.0f);

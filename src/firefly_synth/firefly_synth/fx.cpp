@@ -2108,14 +2108,13 @@ fx_engine::process_dist_mode_xy_clip_clamp(plugin_block& block,
   int dsf_dist = block_auto[param_dist_dsf_dist][0].step();
   float dsf_freq = block_auto[param_dist_dsf_freq][0].real();
   float oversmp_rate = block.sample_rate * oversmp_factor;
-  float dsf_inc = dsf_freq / oversmp_rate;
   process_dist_mode_xy_clip_shape<Graph, Mode, SkewX, SkewY, ClipIsExp, Clip>(
     block, audio_in, modulation, skew_x, skew_y, clip,
-    [dsf_dist, dsf_freq, dsf_inc, oversmp_rate, clamp](float in, float dsf_parts, float dsf_dcy) {
+    [dsf_dist, dsf_freq, oversmp_rate, clamp](float in, float dsf_parts, float dsf_dcy) {
       // input may exceed -1/+1, need to get into 0..1 to use as a phase
       // note: the pre-clip (clamper) is never "exp", so 2nd arg dont matter
       float phase = bipolar_to_unipolar(clamp(in, 0.0f));
-      return generate_dsf(phase, dsf_inc, oversmp_rate, dsf_freq, dsf_parts, dsf_dist, dsf_dcy);
+      return generate_dsf<float>(phase, oversmp_rate, dsf_freq, dsf_parts, dsf_dist, dsf_dcy);
     });
 }
 
