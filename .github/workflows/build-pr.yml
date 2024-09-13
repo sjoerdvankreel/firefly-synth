@@ -1,0 +1,28 @@
+name: Build Pull Request
+on:
+  pull_request:
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  build_plugin:
+    name: PR - ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+          - os: macos-latest
+          - os: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Build pull request version
+        run: |
+          cmake -S . -B ./build -DCMAKE_BUILD_TYPE=Debug
+          cmake --build ./build --config Debug
