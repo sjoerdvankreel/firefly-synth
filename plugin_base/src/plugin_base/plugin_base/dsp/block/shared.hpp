@@ -70,7 +70,7 @@ struct mod_out_custom_state
   std::uint8_t event_type;
   std::int8_t voice_index; // -1 for global
   std::uint8_t module_global;
-  std::uint8_t padding;
+  std::uint8_t tag_custom;
   std::int32_t value_custom;
 };
 
@@ -116,10 +116,11 @@ union modulation_output
   }
 
   static modulation_output
-  make_mod_output_custom_state(std::int8_t voice_index, std::uint8_t module_global, std::int32_t value_custom)
+  make_mod_output_custom_state(std::int8_t voice_index, std::uint8_t module_global, std::uint8_t tag_custom, std::int32_t value_custom)
   {
     assert(voice_index >= -1);
     modulation_output result;
+    result.state.custom.tag_custom = tag_custom;
     result.state.custom.voice_index = voice_index;
     result.state.custom.value_custom = value_custom;
     result.state.custom.module_global = module_global;
@@ -169,6 +170,8 @@ inline bool operator <
     if (l.state.custom.module_global > r.state.custom.module_global) return false;
     if (l.state.custom.voice_index < r.state.custom.voice_index) return true;
     if (l.state.custom.voice_index > r.state.custom.voice_index) return false;
+    if (l.state.custom.tag_custom < r.state.custom.tag_custom) return true;
+    if (l.state.custom.tag_custom > r.state.custom.tag_custom) return false;
     return false;
   }
   if (l.event_type() == out_event_param_state)
