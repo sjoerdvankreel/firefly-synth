@@ -117,16 +117,18 @@ inline float wave_calc_uni(float in, float x, float y, Shape shape, SkewIn skew_
 }
 
 // anti-aliased dsf generator for oscis and dsf distortion
-inline float
-generate_dsf(float phase, float increment, float sr, float freq, float parts, float dist, float decay)
+// for osci we use PartialCount = int (float sounds ugly)
+// for distortion PartialCount = float (works as a distortion effect)
+template <class PartialCount> inline float
+generate_dsf(float phase, float sr, float freq, PartialCount parts, float dist, float decay)
 {
   // -1: Fundamental is implicit. 
-  float ps = parts - 1;
+  PartialCount ps = parts - static_cast<PartialCount>(1);
   float const decay_range = 0.99f;
   float const scale_factor = 0.975f;
   float dist_freq = freq * dist;
   float max_parts = (sr * 0.5f - freq) / dist_freq;
-  ps = std::min(ps, max_parts);
+  ps = std::min(ps, static_cast<PartialCount>(max_parts));
 
   float n = ps;
   float w = decay * decay_range;

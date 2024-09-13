@@ -33,9 +33,12 @@ It's basically [InfernalSynth](https://github.com/sjoerdvankreel/infernal-synth)
   </tr>
 </table>
 
-# Screenshots / Demo video
+# Screenshots / Demo videos
 
-See [modulation_visualization_demo.mp4](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/video/modulation_visualization_demo.mp4) for an example of real-time modulation visualizers.
+Realtime modulation animation videos:
+
+- [saw_to_dsf_distortion_demo.mp4](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/video/saw_to_dsf_distortion_demo.mp4)
+- [modulation_visualization_demo.mp4](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/video/modulation_visualization_demo.mp4)
 
 ![Screenshot](static/screenshot_synth_hot.png)
 ![Screenshot](static/screenshot_synth_cold.png)
@@ -91,6 +94,7 @@ Demo tunes:
 
 Other:
 - FX Demo: [fx_demo_reaper_clap.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/fx_demo_reaper_clap.mp3)
+- DSF distortion: [saw_to_dsf_distortion_demo.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/saw_to_dsf_distortion_demo.mp3)
 - Noise generator demo: [stereo_noise_reaper_clap.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/stereo_noise_reaper_clap.mp3)
 - Distortion modulation demo: [distortion_modulation.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/distortion_modulation.mp3)
 - I Love Distortion + Global Unison: [i_love_distortion_global_unison.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/i_love_distortion_global_unison.mp3)
