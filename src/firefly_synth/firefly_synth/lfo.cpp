@@ -588,11 +588,22 @@ lfo_engine::process(plugin_block& block, cv_cv_matrix_mixdown const* modulation)
   }
 
   // only want the mod outputs for the actual audio engine
+  int shape = block_auto[param_shape][0].step();
   if (!block.graph)
+  {
     block.push_modulation_output(modulation_output::make_mod_output_cv_state(
       _global ? -1 : block.voice->state.slot,
       block.module_desc_.info.global,
       type == type_repeat ? _ref_phase : _graph_phase));
+
+    // constant for the lifetime of the voice, but the ui
+    // expects a somewhat stable event-stream otherwise reverts to automation state
+    if(!_global && is_noise(shape) && !is_noise_not_voice_rand(shape))
+      block.push_modulation_output(modulation_output::make_mod_output_custom_state(
+        _global ? -1 : block.voice->state.slot,
+        block.module_desc_.info.global,
+        _per_voice_seed));
+  }
 
   if(_stage == lfo_stage::end)
   {
@@ -615,7 +626,6 @@ lfo_engine::process(plugin_block& block, cv_cv_matrix_mixdown const* modulation)
   else
   {
     // cannot do this in reset() because we depend on output of the on-note module
-    int shape = block_auto[param_shape][0].step();
     if (!_per_voice_seed_was_initialized)
     {
       if (is_noise(shape))
@@ -629,13 +639,6 @@ lfo_engine::process(plugin_block& block, cv_cv_matrix_mixdown const* modulation)
           // noise generators hate zero seed
           float on_note_rnd_cv = block.module_cv(module_voice_on_note, 0)[on_voice_random_output_index][source_index][0];
           _per_voice_seed = (int)(1 + (on_note_rnd_cv * (RAND_MAX - 1)));
-
-          // only want for not graphing
-          if(!block.graph)
-            block.push_modulation_output(modulation_output::make_mod_output_custom_state(
-              _global ? -1 : block.voice->state.slot,
-              block.module_desc_.info.global,
-              _per_voice_seed));
         }
         _static_noise.reset(_per_voice_seed);
         reset_smooth_noise(_per_voice_seed, block_auto[param_steps][0].step());
