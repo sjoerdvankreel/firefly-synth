@@ -128,9 +128,9 @@ public:
   lfo_engine(bool global) : 
   _global(global), _smooth_noise(1, 1) {}
 
+  void init_voice_seed_for_graph(int seed, int steps);
   void process(plugin_block& block) override { process(block, nullptr); }
   void process(plugin_block& block, cv_cv_matrix_mixdown const* modulation);
-  void init_voice_seed_for_graph(int seed) { _per_voice_seed_was_initialized = true; _per_voice_seed = seed; }
 };
 
 static void
@@ -172,6 +172,7 @@ render_graph(
   param_topo_mapping const& mapping, std::vector<mod_out_custom_state> const& custom_outputs)
 {
   int type = state.get_plain_at(mapping.module_index, mapping.module_slot, param_type, mapping.param_slot).step();
+  int steps = state.get_plain_at(mapping.module_index, mapping.module_slot, param_steps, mapping.param_slot).step();
   bool sync = state.get_plain_at(mapping.module_index, mapping.module_slot, param_sync, mapping.param_slot).step() != 0;
   if(type == type_off) return graph_data(graph_data_type::off, {});
   
@@ -200,13 +201,13 @@ render_graph(
   // but nice to see the effect of source selection
   engine->process_default(module_voice_on_note, 0);
 
-  auto const* block = engine->process(mapping.module_index, mapping.module_slot, [global, mapping, custom_outputs](plugin_block& block) {
+  auto const* block = engine->process(mapping.module_index, mapping.module_slot, [global, mapping, steps, custom_outputs](plugin_block& block) {
     lfo_engine engine(global);
     engine.reset(&block);
     for (int i = custom_outputs.size() - 1; i >= 0; i++)
       if (custom_outputs[i].event_type == out_event_custom_state)
       {
-        engine.init_voice_seed_for_graph(custom_outputs[i].value_custom);
+        engine.init_voice_seed_for_graph(custom_outputs[i].value_custom, steps);
         break;
       }
     cv_cv_matrix_mixdown modulation(make_static_cv_matrix_mixdown(block)[mapping.module_index][mapping.module_slot]);
@@ -538,6 +539,15 @@ lfo_engine::update_block_params(plugin_block const* block)
   auto const& block_auto = block->state.own_block_automation;
   float filter = block_auto[param_filter][0].real();
   _filter.init(block->sample_rate, filter / 1000.0f);
+}
+
+void 
+lfo_engine::init_voice_seed_for_graph(int seed, int steps) 
+{ 
+  _per_voice_seed = seed; 
+  _per_voice_seed_was_initialized = true;
+  _static_noise.reset(_per_voice_seed);
+  reset_smooth_noise(_per_voice_seed, steps);
 }
 
 void

@@ -139,6 +139,7 @@ module_graph::modulation_outputs_changed(std::vector<modulation_output> const& o
       {
         if (!any_custom_found)
         {
+          rerender_full = true;
           any_custom_found = true;
           _custom_outputs.clear();
           _custom_outputs_activated = seconds_since_epoch();
