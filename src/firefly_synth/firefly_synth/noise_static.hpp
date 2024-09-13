@@ -18,7 +18,6 @@ class static_noise
 public:
   void reset(int seed);
   void update(float sr, float rate, int steps);
-  std::uint32_t state() const { return _state; }
   template <bool Free> float next(float phase, int seed);
 };
 

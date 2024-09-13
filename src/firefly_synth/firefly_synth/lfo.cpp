@@ -20,7 +20,6 @@ namespace firefly_synth {
                      
 static float const max_filter_time_ms = 500; 
 static float const log_half = std::log(0.5f);
-enum { tag_custom_voice_rand, tag_custom_free_running };
 
 enum class lfo_stage { cycle, filter, end };
 enum { scratch_rate, scratch_count };
@@ -45,13 +44,6 @@ is_noise_not_voice_rand(int shape)
   return shape == wave_shape_type_smooth_1 ||
     shape == wave_shape_type_static_1 ||
     shape == wave_shape_type_static_free_1;
-}
-
-static bool
-is_noise_free_running(int shape)
-{
-  return shape == wave_shape_type_static_free_1 ||
-    shape == wave_shape_type_static_free_2;
 }
 
 static bool
@@ -106,9 +98,8 @@ public module_engine {
   int _smooth_noise_total_samples = 0;
 
   int _per_voice_seed = -1;
+  int _prev_global_seed = -1;
   bool _per_voice_seed_was_initialized = false;
-  bool _prev_global_seed_was_initialized = false;
-  std::uint32_t _prev_global_seed = (std::uint32_t)-1;
 
   void reset_smooth_noise(int seed, int steps);
   void update_block_params(plugin_block const* block);
@@ -138,8 +129,6 @@ public:
   _global(global), _smooth_noise(1, 1) {}
 
   void init_voice_seed_for_graph(int seed, int steps);
-  void init_free_static_seed_for_graph(std::uint32_t seed);
-
   void process(plugin_block& block) override { process(block, nullptr); }
   void process(plugin_block& block, cv_cv_matrix_mixdown const* modulation);
 };
@@ -215,18 +204,12 @@ render_graph(
   auto const* block = engine->process(mapping.module_index, mapping.module_slot, [global, mapping, steps, custom_outputs](plugin_block& block) {
     lfo_engine engine(global);
     engine.reset(&block);
-    if(custom_outputs.size())
-      for (int i = custom_outputs.size() - 1; i >= 0; i++)
-        if (custom_outputs[i].event_type == out_event_custom_state)
-        {
-          switch (custom_outputs[i].tag_custom)
-          {
-          case tag_custom_voice_rand: engine.init_voice_seed_for_graph(custom_outputs[i].value_custom, steps); break;
-          case tag_custom_free_running: engine.init_free_static_seed_for_graph(*reinterpret_cast<std::uint32_t const*>(&custom_outputs[i].value_custom)); break;
-          default: assert(false); break;
-          }
-          break;
-        }
+    for (int i = custom_outputs.size() - 1; i >= 0; i++)
+      if (custom_outputs[i].event_type == out_event_custom_state)
+      {
+        engine.init_voice_seed_for_graph(custom_outputs[i].value_custom, steps);
+        break;
+      }
     cv_cv_matrix_mixdown modulation(make_static_cv_matrix_mixdown(block)[mapping.module_index][mapping.module_slot]);
     engine.process(block, &modulation);
   });
@@ -568,14 +551,6 @@ lfo_engine::init_voice_seed_for_graph(int seed, int steps)
 }
 
 void
-lfo_engine::init_free_static_seed_for_graph(std::uint32_t seed)
-{
-  _prev_global_seed = seed;
-  _prev_global_seed_was_initialized = true;
-  _static_noise.reset(seed);
-}
-
-void
 lfo_engine::reset(plugin_block const* block) 
 { 
   _ref_phase = 0;
@@ -588,7 +563,6 @@ lfo_engine::reset(plugin_block const* block)
   _per_voice_seed = -1;
   _prev_global_seed = -1;
   _per_voice_seed_was_initialized = false;
-  _prev_global_seed_was_initialized = false;
 
   update_block_params(block);
   auto const& block_auto = block->state.own_block_automation;
@@ -632,23 +606,12 @@ lfo_engine::process(plugin_block& block, cv_cv_matrix_mixdown const* modulation)
       block.module_desc_.info.global,
       type == type_repeat ? _ref_phase : _graph_phase));
 
-    if (is_noise_free_running(shape) && !is_noise_voice_rand(shape))
-    {
-      std::uint32_t state = _static_noise.state();
-      block.push_modulation_output(modulation_output::make_mod_output_custom_state(
-        _global ? -1 : block.voice->state.slot,
-        block.module_desc_.info.global,
-        tag_custom_free_running,
-        *reinterpret_cast<int*>(&state)));
-    }
-
     // constant for the lifetime of the voice, but the ui
     // expects a somewhat stable event-stream otherwise reverts to automation state
-    else if(!_global && is_noise(shape) && is_noise_voice_rand(shape))
+    if(!_global && is_noise(shape) && !is_noise_not_voice_rand(shape))
       block.push_modulation_output(modulation_output::make_mod_output_custom_state(
         _global ? -1 : block.voice->state.slot,
         block.module_desc_.info.global,
-        tag_custom_voice_rand,
         _per_voice_seed));
   }
 
@@ -663,12 +626,11 @@ lfo_engine::process(plugin_block& block, cv_cv_matrix_mixdown const* modulation)
     update_block_params(&block);
     int seed = block_auto[param_seed][0].step();
     int steps = block_auto[param_steps][0].step();
-    if (seed != _prev_global_seed && !_prev_global_seed_was_initialized)
+    if (seed != _prev_global_seed)
     {
       _prev_global_seed = seed;
       _static_noise.reset(seed);
       reset_smooth_noise(seed, steps);
-      _prev_global_seed_was_initialized = true;
     }
   }
   else
