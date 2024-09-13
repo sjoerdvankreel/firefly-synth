@@ -204,12 +204,13 @@ render_graph(
   auto const* block = engine->process(mapping.module_index, mapping.module_slot, [global, mapping, steps, custom_outputs](plugin_block& block) {
     lfo_engine engine(global);
     engine.reset(&block);
-    for (int i = custom_outputs.size() - 1; i >= 0; i++)
-      if (custom_outputs[i].event_type == out_event_custom_state)
-      {
-        engine.init_voice_seed_for_graph(custom_outputs[i].value_custom, steps);
-        break;
-      }
+    if (custom_outputs.size())
+      for (int i = custom_outputs.size() - 1; i >= 0; i++)
+        if (custom_outputs[i].event_type == out_event_custom_state)
+        {
+          engine.init_voice_seed_for_graph(custom_outputs[i].value_custom, steps);
+          break;
+        }
     cv_cv_matrix_mixdown modulation(make_static_cv_matrix_mixdown(block)[mapping.module_index][mapping.module_slot]);
     engine.process(block, &modulation);
   });
