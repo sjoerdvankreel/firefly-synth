@@ -23,6 +23,7 @@ microtuning:
 autobuilds:
 * ask paul
 * integrate https://github.com/surge-synthesizer/monique-monosynth/blob/main/.github/workflows/build-pr.yml
+- get it to produce release mode distribution zips for win/lin/mac (ubuntu 18!)
 
 wishlist:
 global aux 6 not fit cvaudio gui
