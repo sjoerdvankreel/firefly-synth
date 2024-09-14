@@ -20,6 +20,7 @@ namespace firefly_synth {
                      
 static float const max_filter_time_ms = 500; 
 static float const log_half = std::log(0.5f);
+enum { tag_custom_voice_rand, tag_custom_free_running };
 
 enum class lfo_stage { cycle, filter, end };
 enum { scratch_rate, scratch_count };
@@ -44,6 +45,13 @@ is_noise_not_voice_rand(int shape)
   return shape == wave_shape_type_smooth_1 ||
     shape == wave_shape_type_static_1 ||
     shape == wave_shape_type_static_free_1;
+}
+
+static bool
+is_noise_free_running(int shape)
+{
+  return shape == wave_shape_type_static_free_1 ||
+    shape == wave_shape_type_static_free_2;
 }
 
 static bool
@@ -205,10 +213,15 @@ render_graph(
     lfo_engine engine(global);
     engine.reset(&block);
     if (custom_outputs.size())
-      for (int i = custom_outputs.size() - 1; i >= 0; i++)
-        if (custom_outputs[i].event_type == out_event_custom_state)
+      for (int i = (int)custom_outputs.size() - 1; i >= 0; i--)
+        switch (custom_outputs[i].tag_custom)
         {
-          engine.init_voice_seed_for_graph(custom_outputs[i].value_custom, steps);
+        case tag_custom_free_running: 
+        case tag_custom_voice_rand: 
+          engine.init_voice_seed_for_graph(custom_outputs[i].value_custom, steps); 
+          break;
+        default: 
+          assert(false); 
           break;
         }
     cv_cv_matrix_mixdown modulation(make_static_cv_matrix_mixdown(block)[mapping.module_index][mapping.module_slot]);
@@ -607,12 +620,23 @@ lfo_engine::process(plugin_block& block, cv_cv_matrix_mixdown const* modulation)
       block.module_desc_.info.global,
       type == type_repeat ? _ref_phase : _graph_phase));
 
-    // constant for the lifetime of the voice, but the ui
-    // expects a somewhat stable event-stream otherwise reverts to automation state
-    if(!_global && is_noise(shape) && !is_noise_not_voice_rand(shape))
+    // keep animating ui for free running lfos
+    if (is_noise_free_running(shape))
+    {
       block.push_modulation_output(modulation_output::make_mod_output_custom_state(
         _global ? -1 : block.voice->state.slot,
         block.module_desc_.info.global,
+        tag_custom_free_running,
+        _static_noise.state()));
+    }
+
+    // constant for the lifetime of the voice, but the ui
+    // expects a somewhat stable event-stream otherwise reverts to automation state
+    else if(!_global && is_noise(shape) && !is_noise_not_voice_rand(shape))
+      block.push_modulation_output(modulation_output::make_mod_output_custom_state(
+        _global ? -1 : block.voice->state.slot,
+        block.module_desc_.info.global,
+        tag_custom_voice_rand,
         _per_voice_seed));
   }
 

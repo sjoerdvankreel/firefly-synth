@@ -16,6 +16,9 @@ class static_noise
   std::uint32_t _state = 1;
 
 public:
+  std::uint32_t state() const { return _state; }
+  void state(std::uint32_t val) { _state = val; }
+
   void reset(int seed);
   void update(float sr, float rate, int steps);
   template <bool Free> float next(float phase, int seed);
