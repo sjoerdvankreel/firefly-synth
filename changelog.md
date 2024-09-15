@@ -1,3 +1,8 @@
+### ?, ? - V1.9.3.
+
+- Bugfix: random-type lfo's would not properly reset when switching modes.
+- Bugfix: random-type global lfo's would not reset when the reference phase wraps, causing audio/gui to become slowly out of sync over time.
+
 ### September 11, 2024 - V1.9.2.
 
 - Bugfix: modulated params would be slow to visually react to user input.

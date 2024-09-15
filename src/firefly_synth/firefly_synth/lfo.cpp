@@ -97,6 +97,7 @@ public module_engine {
   int _smooth_noise_total_pos = 0;
   int _smooth_noise_total_samples = 0;
 
+  int _prev_shape = -1;
   int _per_voice_seed = -1;
   int _prev_global_seed = -1;
   bool _per_voice_seed_was_initialized = false;
@@ -545,6 +546,7 @@ lfo_engine::reset(plugin_block const* block)
   _end_filter_stage_samples = 0;
   _per_voice_seed = -1;
   _prev_global_seed = -1;
+  _prev_shape = -1;
   _per_voice_seed_was_initialized = false;
 
   update_block_params(block);
@@ -574,6 +576,7 @@ lfo_engine::process(plugin_block& block, cv_cv_matrix_mixdown const* modulation)
  
   auto const& block_auto = block.state.own_block_automation;
   int type = block_auto[param_type][0].step();
+  int shape = block_auto[param_shape][0].step();
   if (type == type_off)
   {
     block.state.own_cv[0][0].fill(block.start_frame, block.end_frame, 0.0f);
@@ -598,8 +601,10 @@ lfo_engine::process(plugin_block& block, cv_cv_matrix_mixdown const* modulation)
     update_block_params(&block);
     int seed = block_auto[param_seed][0].step();
     int steps = block_auto[param_steps][0].step();
-    if (seed != _prev_global_seed)
+    if (seed != _prev_global_seed || shape != _prev_shape)
     {
+      reset(&block);
+      _prev_shape = shape;
       _prev_global_seed = seed;
       _static_noise.reset(seed);
       reset_smooth_noise(seed, steps);
@@ -608,7 +613,6 @@ lfo_engine::process(plugin_block& block, cv_cv_matrix_mixdown const* modulation)
   else
   {
     // cannot do this in reset() because we depend on output of the on-note module
-    int shape = block_auto[param_shape][0].step();
     if (!_per_voice_seed_was_initialized)
     {
       if (is_noise(shape))
@@ -847,6 +851,14 @@ void lfo_engine::process_loop(plugin_block& block, cv_cv_matrix_mixdown const* m
     bool phase_wrapped = increment_and_wrap_phase(_phase, rate_curve[f], block.sample_rate);
     bool ref_wrapped = increment_and_wrap_phase(_ref_phase, rate_curve[f], block.sample_rate);
     bool ended = ref_wrapped && Type == type_one_shot || phase_wrapped && Type == type_one_phase;
+
+    // prevent global random-type lfos from getting out of sync with the gui
+    // for per-voice its not a problem
+    // for free-running we do continuous update
+    int shape = block_auto[param_shape][0].step();
+    if (_global && ref_wrapped && (shape == wave_shape_type_static_1 || shape == wave_shape_type_smooth_1))
+      reset(&block);
+
     if (ended)
     {
       _stage = lfo_stage::filter;
