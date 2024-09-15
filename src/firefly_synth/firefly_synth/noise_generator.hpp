@@ -34,6 +34,7 @@ public:
   void init(int seed, int steps);
   
   // returns seed to reproduce state for gui
+  std::uint32_t state() const { return _state; }
   std::uint32_t sample_table();
   void sample_table(std::uint32_t state);
 

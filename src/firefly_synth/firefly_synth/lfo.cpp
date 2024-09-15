@@ -614,6 +614,12 @@ lfo_engine::process_internal(plugin_block& block, cv_cv_matrix_mixdown const* mo
       _prev_global_shape = shape;
       _static_noise = noise_generator<false>(seed, steps);
       _smooth_noise = noise_generator<true>(seed, steps);
+
+      if(!block.graph && (shape == wave_shape_type_static_free_1 || shape == wave_shape_type_static_free_2))
+      {
+        _need_resample_table_for_graph = true;
+        _seed_resample_table_for_graph = _static_noise.state();
+      }
     }
 
     if (block.graph && _need_resample_table_for_graph)

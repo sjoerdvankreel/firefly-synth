@@ -25,6 +25,8 @@ autobuilds:
 * integrate https://github.com/surge-synthesizer/monique-monosynth/blob/main/.github/workflows/build-pr.yml
 
 modvis take 3:
+* also test the on-note-sampling of glfo
+* also test the on-note (static) random
 * retest all the graphs
 * retest all the osci rand modes
 * extra retest the multi-slot cv matrix
