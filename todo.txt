@@ -25,6 +25,7 @@ autobuilds:
 * integrate https://github.com/surge-synthesizer/monique-monosynth/blob/main/.github/workflows/build-pr.yml
 
 modvis take 3:
+* retest all random osci / kps
 * per-voice-rand-seed
 * free-running lfos
 * fix per-voice-seed distribution

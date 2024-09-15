@@ -9,7 +9,6 @@
 #include <firefly_synth/svf.hpp>
 #include <firefly_synth/synth.hpp>
 #include <firefly_synth/waves.hpp>
-#include <firefly_synth/noise_static.hpp>
 
 #include <cmath>
 
@@ -51,7 +50,45 @@ static bool can_do_phase(int type)
 static bool can_do_pitch(int type)
 { return type == type_basic || type == type_dsf || is_kps(type); }
 
-static void 
+// bit different for osci and lfo
+// lfo is bucket based but for this one we'd need up to SR/2 buckets
+class static_noise
+{
+  int _pos = 0;
+  int _samples = 0;
+  float _level = 0;
+  std::uint32_t _state = 1;
+
+public:
+
+  float next();
+  void reset(int seed);
+  void update(float sr, float rate) { _samples = std::ceil(sr / rate); }
+};
+
+inline void
+static_noise::reset(int seed)
+{
+  _pos = 0;
+  _state = plugin_base::fast_rand_seed(seed);
+  _level = plugin_base::fast_rand_next(_state);
+}
+
+inline float
+static_noise::next()
+{
+  _pos++;
+  float result = _level;
+  if (_pos >= _samples)
+  {
+    _level = plugin_base::fast_rand_next(_state);
+    _level = bipolar_to_unipolar(unipolar_to_bipolar(_level));
+    _pos = 0;
+  }
+  return result;
+}
+
+static void
 get_oversmp_info(plugin_block const& block, int& stages, int& factor)
 {
   auto const& block_auto = block.state.own_block_automation;
@@ -749,7 +786,7 @@ osc_engine::real_reset(plugin_block& block, cv_audio_matrix_mixdown const* modul
   // below 50 hz gives barely any results
   float rate = 50 + (kps_rate * 0.01) * (block.sample_rate * 0.5f - 50);
   static_noise_.reset(kps_seed);
-  static_noise_.update(block.sample_rate, rate, 1);
+  static_noise_.update(block.sample_rate, rate);
   double w = pi64 * kps_freq / block.sample_rate;
   switch (kps_svf)
   {
@@ -768,7 +805,7 @@ osc_engine::real_reset(plugin_block& block, cv_audio_matrix_mixdown const* modul
     _kps_positions[v] = 0;
     for (int f = 0; f < _kps_max_length; f++)
     {
-      float noise = static_noise_.next<true>(1, kps_seed);
+      float noise = static_noise_.next();
       _kps_lines[v][f] = filter.next(0, unipolar_to_bipolar(noise));
     }
   }
@@ -777,8 +814,8 @@ osc_engine::real_reset(plugin_block& block, cv_audio_matrix_mixdown const* modul
 template <int SVFType>
 float osc_engine::generate_static(int voice, float sr, float freq_hz, float res, int seed, float rate_hz)
 {
-  _static_noises[voice].update(sr, rate_hz, 1);
-  float result = unipolar_to_bipolar(_static_noises[voice].next<true>(1, seed));
+  _static_noises[voice].update(sr, rate_hz);
+  float result = unipolar_to_bipolar(_static_noises[voice].next());
 
   float const max_res = 0.99f;
   double w = pi64 * freq_hz / sr;
