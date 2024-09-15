@@ -121,15 +121,21 @@ public module_engine {
   template <bool GlobalUnison, int Type, bool Sync, class Calc, class Quantize>
   void process_loop(plugin_block& block, cv_cv_matrix_mixdown const* modulation, Calc calc, Quantize quantize);
 
+  void process_internal(plugin_block& block, cv_cv_matrix_mixdown const* modulation);
+
 public:
   PB_PREVENT_ACCIDENTAL_COPY(lfo_engine);
-  void reset_audio(plugin_block const*) override;
   lfo_engine(bool global) : 
   _global(global), _smooth_noise(1, 1) {}
 
-  void process_audio(plugin_block& block) override { process(block, nullptr); }
-  void process(plugin_block& block, cv_cv_matrix_mixdown const* modulation);
-  void static_noise_sample_table_for_graph(std::uint32_t state) { _need_resample_table_for_graph = true; _seed_resample_table_for_graph = state; }
+  void reset_audio(plugin_block const*) override;
+  void reset_graph(plugin_block const* block, std::vector<mod_out_custom_state> const& custom_outputs, void* context) override;
+
+  void process_audio(plugin_block& block) override { process_internal(block, nullptr); }
+  void static_noise_sample_table_for_graph(std::uint32_t state) 
+  { _need_resample_table_for_graph = true; _seed_resample_table_for_graph = state; }
+  void process_graph(plugin_block& block, std::vector<mod_out_custom_state> const& custom_outputs, void* context) override 
+  { process_internal(block, static_cast<cv_cv_matrix_mixdown const*>(context)); }
 };
 
 static void
@@ -201,11 +207,9 @@ render_graph(
 
   auto const* block = engine->process(mapping.module_index, mapping.module_slot, custom_outputs, nullptr, [&](plugin_block& block) {
     lfo_engine engine(global);
-    engine.reset_audio(&block); // TODO
-    if (custom_outputs.size()) // TODO move to proc-graph
-      engine.static_noise_sample_table_for_graph(custom_outputs[custom_outputs.size() - 1].value_custom);
     cv_cv_matrix_mixdown modulation(make_static_cv_matrix_mixdown(block)[mapping.module_index][mapping.module_slot]);
-    engine.process(block, &modulation);
+    engine.reset_graph(&block, custom_outputs, &modulation);
+    engine.process_graph(block, custom_outputs, &modulation);
   });
   engine->process_end();
   jarray<float, 1> series(block->state.own_cv[0][0]);
@@ -519,6 +523,22 @@ lfo_engine::update_block_params(plugin_block const* block)
   _filter.init(block->sample_rate, filter / 1000.0f);
 }
 
+void 
+lfo_engine::reset_graph(
+  plugin_block const* block, 
+  std::vector<mod_out_custom_state> const& custom_outputs, 
+  void* context)
+{
+  reset_audio(block);
+  if (custom_outputs.size())
+    for (int i = (int)custom_outputs.size() - 1; i >= 0; i--)
+      if(custom_outputs[i].module_global == block->module_desc_.info.global)
+      {
+        static_noise_sample_table_for_graph(custom_outputs[i].value_custom);
+        break;
+      }
+}
+
 void
 lfo_engine::reset_audio(plugin_block const* block) 
 { 
@@ -550,7 +570,7 @@ lfo_engine::reset_audio(plugin_block const* block)
 }
 
 void
-lfo_engine::process(plugin_block& block, cv_cv_matrix_mixdown const* modulation)
+lfo_engine::process_internal(plugin_block& block, cv_cv_matrix_mixdown const* modulation)
 {
   // allow custom data for graphs
   if (modulation == nullptr)
@@ -581,7 +601,6 @@ lfo_engine::process(plugin_block& block, cv_cv_matrix_mixdown const* modulation)
     return; 
   }
 
-  // todo reset the noise gens once per block if appropriate
   int steps = block_auto[param_steps][0].step();
   if(_global)
   {
@@ -593,8 +612,6 @@ lfo_engine::process(plugin_block& block, cv_cv_matrix_mixdown const* modulation)
       _prev_global_seed = seed;
       _prev_global_steps = steps;
       _prev_global_shape = shape;
-
-      // TODO check out, it should not! reset the phase, also todo, it should respect the phase offset
       _static_noise = noise_generator<false>(seed, steps);
       _smooth_noise = noise_generator<true>(seed, steps);
     }

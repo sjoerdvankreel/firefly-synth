@@ -135,9 +135,15 @@ module_graph::modulation_outputs_changed(std::vector<modulation_output> const& o
 
   bool rerender_full = false;
   bool any_custom_found = false;
+  auto const& dependent_custom_outputs_module_topo_indices = desc.modules[this_module_global].module->dependent_custom_outputs_module_topo_indices;
   for (int i = 0; i < outputs.size(); i++)
     if (outputs[i].event_type() == output_event_type::out_event_custom_state)
-      if (this_module_global == outputs[i].state.custom.module_global)
+    {
+      int event_module_topo_index = desc.modules[outputs[i].state.custom.module_global].module->info.index;
+      if (this_module_global == outputs[i].state.custom.module_global ||
+        (std::find(dependent_custom_outputs_module_topo_indices.begin(),
+          dependent_custom_outputs_module_topo_indices.end(),
+          event_module_topo_index) != dependent_custom_outputs_module_topo_indices.end()))
       {
         if (!any_custom_found)
         {
@@ -146,8 +152,13 @@ module_graph::modulation_outputs_changed(std::vector<modulation_output> const& o
           _custom_outputs.clear();
           _custom_outputs_activated = seconds_since_epoch();
         }
+
+        // note this builds up a list of stuff for us
+        // plus stuff for anyone we want to repaint on (eg lfo stuff happens, we want to repaint cv matrix)
+        // client code should take into account that stuff might not be their own module
         _custom_outputs.push_back(outputs[i].state.custom);
       }
+    }
 
   if (!any_custom_found && seconds_since_epoch() >= _custom_outputs_activated + 1.0)
   {

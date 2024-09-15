@@ -335,7 +335,7 @@ osc_topo(int section, gui_position const& pos)
   result.gui.menu_handler_factory = make_osc_routing_menu_handler;
   result.engine_factory = [](auto const&, int sr, int max_frame_count) { return std::make_unique<osc_engine>(max_frame_count, sr); };
   // TODO make this a dependent module
-  result.mod_indicator_output_source_selector_ = [](auto const& state, auto const& mapping) { return mod_indicator_output_source { module_osc_osc_matrix, 0 }; };
+  result.mod_indicator_output_source_selector_ = [](auto const& state, auto const& mapping) { return alternate_mod_source { module_osc_osc_matrix, 0 }; };
 
   result.sections.emplace_back(make_param_section(section_type,
     make_topo_tag_basic("{A64046EE-82EB-4C02-8387-4B9EFF69E06A}", "Type"),

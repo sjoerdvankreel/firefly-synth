@@ -2,8 +2,8 @@
 
 - Breaking change: noise generators become phase-based sampling functions to prevent drift.
 * Small audible differences for the lfos, sorry, but needed to keep engine and ui in check.
-- Bugfix: Static LFO would drift between audio engine/UI.
-- Free-running lfo is now properly visualized.
+- Voice random lfo's now correctly respond to phase offset.
+- LFO graphs and CV matrix graphs now properly respond to free-running LFOs.
 
 ### September 11, 2024 - V1.9.2.
 

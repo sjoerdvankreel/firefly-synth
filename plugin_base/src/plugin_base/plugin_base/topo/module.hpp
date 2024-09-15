@@ -29,7 +29,8 @@ enum class module_output { none, cv, audio };
 enum class module_stage { input, voice, output };
 
 // for the small dots that follow lfo/env
-struct mod_indicator_output_source
+// and also for free-running and per-voice rand to mirror in the cv graphs
+struct alternate_mod_source
 {
   int module_index;
   int module_slot;
@@ -95,7 +96,7 @@ typedef std::function<graph_data(
 module_graph_renderer;
 
 // in case we want to plot someone elses mod indicators
-typedef std::function<mod_indicator_output_source(
+typedef std::function<alternate_mod_source(
   plugin_state const& state, param_topo_mapping const& mapping)>
   mod_indicator_output_source_selector;
 
@@ -194,6 +195,7 @@ struct module_topo final {
   module_engine_factory engine_factory;
   module_graph_engine_factory graph_engine_factory;
   module_state_converter_factory state_converter_factory;
+  std::vector<int> dependent_custom_outputs_module_topo_indices;
   mod_indicator_output_source_selector mod_indicator_output_source_selector_;
 
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(module_topo);

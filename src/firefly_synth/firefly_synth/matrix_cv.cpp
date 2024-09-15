@@ -342,7 +342,7 @@ scale_to_longest_mod_source(
 }
 
 // mapping to longest mod source, prefer envelope
-static mod_indicator_output_source
+static alternate_mod_source
 select_mod_indicator_output_source(
   plugin_state const& state, param_topo_mapping const& mapping,
   std::vector<module_output_mapping> const& sources)
@@ -460,6 +460,11 @@ cv_matrix_topo(
     auto const& state, auto* engine, int param, auto const& mapping, auto const& mods) {
       return render_graph(state, engine, param, mapping, mods, sm, tm);
     };
+
+  // need these for repaint on note-random or free-running
+  result.dependent_custom_outputs_module_topo_indices = { module_glfo };
+  if (!global) result.dependent_custom_outputs_module_topo_indices = { module_vlfo };
+
   result.mod_indicator_output_source_selector_ = [sm = source_matrix.mappings](
     auto const& state, auto const& mapping) {
       return select_mod_indicator_output_source(state, mapping, sm);
