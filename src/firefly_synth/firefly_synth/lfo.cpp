@@ -603,7 +603,7 @@ lfo_engine::process(plugin_block& block, cv_cv_matrix_mixdown const* modulation)
     {
       _static_noise.sample_table(_seed_resample_table_for_graph);
       _need_resample_table_for_graph = false;
-    }
+    } 
 
     if (!block.graph && (shape == wave_shape_type_static_free_1 || shape == wave_shape_type_static_free_2))
     {
