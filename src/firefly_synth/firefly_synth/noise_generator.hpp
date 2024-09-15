@@ -32,8 +32,11 @@ class noise_generator
 public:
   float at(float phase) const;
   void init(int seed, int steps);
+  
+  // returns seed to reproduce state for gui
+  std::uint32_t sample_table();
+  void sample_table(std::uint32_t state);
 
-  void sample_table();
   noise_generator() {} // needs init
   noise_generator(int seed, int steps) { init(seed, steps); }
 };
@@ -47,10 +50,19 @@ noise_generator<Smooth>::init(int seed, int steps)
 }
 
 template <bool Smooth> inline void
+noise_generator<Smooth>::sample_table(std::uint32_t state)
+{
+  _state = state;
+  sample_table();
+}
+
+template <bool Smooth> inline std::uint32_t
 noise_generator<Smooth>::sample_table()
 {
+  auto result = _state;
   for (int i = 0; i < _steps; ++i)
     _r[i] = plugin_base::fast_rand_next(_state);
+  return result;
 }
 
 template <bool Smooth> inline float

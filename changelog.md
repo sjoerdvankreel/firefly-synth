@@ -1,8 +1,9 @@
 ### ?, ? - V1.9.3.
 
-- Breaking change: noise generators become phase-based sampling functions to prevent drift (audible differences, sorry, but needed to keep engine and ui in check).
-* Shouln't be a problem when using the random generator for osci (sonic content/spectrum hasnt changed).
-* Might be a problem if you rely heavily on the particular shape of a random lfo. On the upside, it now does proper phase offset.
+- Breaking change: noise generators become phase-based sampling functions to prevent drift.
+* Small audible differences for the lfos, sorry, but needed to keep engine and ui in check.
+- Bugfix: Static LFO would drift between audio engine/UI.
+- Free-running lfo is now properly visualized.
 
 ### September 11, 2024 - V1.9.2.
 

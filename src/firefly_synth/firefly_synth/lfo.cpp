@@ -99,6 +99,10 @@ public module_engine {
   int _prev_global_shape = -1;
   bool _per_voice_seed_was_initialized = false;
 
+  // graphing
+  bool _need_resample_table_for_graph = false;
+  std::uint32_t _seed_resample_table_for_graph = 0;
+
   void update_block_params(plugin_block const* block);
   template <bool GlobalUnison>
   void process_uni(plugin_block& block, cv_cv_matrix_mixdown const* modulation);
@@ -125,6 +129,7 @@ public:
 
   void process(plugin_block& block) override { process(block, nullptr); }
   void process(plugin_block& block, cv_cv_matrix_mixdown const* modulation);
+  void static_noise_sample_table_for_graph(std::uint32_t state) { _need_resample_table_for_graph = true; _seed_resample_table_for_graph = state; }
 };
 
 static void
@@ -194,9 +199,11 @@ render_graph(
   // but nice to see the effect of source selection
   engine->process_default(module_voice_on_note, 0);
 
-  auto const* block = engine->process(mapping.module_index, mapping.module_slot, [global, mapping](plugin_block& block) {
+  auto const* block = engine->process(mapping.module_index, mapping.module_slot, [&](plugin_block& block) {
     lfo_engine engine(global);
     engine.reset(&block);
+    if (custom_outputs.size())
+      engine.static_noise_sample_table_for_graph(custom_outputs[custom_outputs.size() - 1].value_custom);
     cv_cv_matrix_mixdown modulation(make_static_cv_matrix_mixdown(block)[mapping.module_index][mapping.module_slot]);
     engine.process(block, &modulation);
   });
@@ -591,6 +598,24 @@ lfo_engine::process(plugin_block& block, cv_cv_matrix_mixdown const* modulation)
       _static_noise = noise_generator<false>(seed, steps);
       _smooth_noise = noise_generator<true>(seed, steps);
     }
+
+    if (block.graph && _need_resample_table_for_graph)
+    {
+      _static_noise.sample_table(_seed_resample_table_for_graph);
+      _need_resample_table_for_graph = false;
+    }
+
+    if (!block.graph && (shape == wave_shape_type_static_free_1 || shape == wave_shape_type_static_free_2))
+    {
+      if (_need_resample_table_for_graph)
+      {
+        block.push_modulation_output(modulation_output::make_mod_output_custom_state(
+          _global ? -1 : block.voice->state.slot,
+          block.module_desc_.info.global,
+          0,
+          _seed_resample_table_for_graph));
+      }
+    }
   }
   else
   {
@@ -822,7 +847,10 @@ void lfo_engine::process_loop(plugin_block& block, cv_cv_matrix_mixdown const* m
 
     bool phase_wrapped = increment_and_wrap_phase(_phase, rate_curve[f], block.sample_rate);
     if (phase_wrapped && (shape == wave_shape_type_static_free_1 || shape == wave_shape_type_static_free_2))
-      _static_noise.sample_table();
+    {
+      _need_resample_table_for_graph = true;
+      _seed_resample_table_for_graph = _static_noise.sample_table();
+    }
 
     bool ref_wrapped = increment_and_wrap_phase(_ref_phase, rate_curve[f], block.sample_rate);
     bool ended = ref_wrapped && Type == type_one_shot || phase_wrapped && Type == type_one_phase;
