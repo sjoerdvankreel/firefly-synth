@@ -25,10 +25,11 @@ autobuilds:
 * integrate https://github.com/surge-synthesizer/monique-monosynth/blob/main/.github/workflows/build-pr.yml
 
 modvis take 3:
-V per-voice-rand-seed
+* per-voice-rand-seed
 * free-running lfos
 * fix per-voice-seed distribution
 * fix all also for the cv graphs
+* actually everything regarding painting random stuff seems effed
 
 wishlist:
 global aux 6 not fit cvaudio gui

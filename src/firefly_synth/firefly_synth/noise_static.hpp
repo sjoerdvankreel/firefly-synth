@@ -16,9 +16,6 @@ class static_noise
   std::uint32_t _state = 1;
 
 public:
-  int step_pos() const { return _step_pos; }
-  int total_pos() const { return _total_pos; }
-  std::uint32_t state() const { return _state; }
 
   void reset(int seed);
   void update(float sr, float rate, int steps);
