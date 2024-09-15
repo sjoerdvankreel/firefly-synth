@@ -27,7 +27,7 @@ class smooth_noise
   std::vector<float> _r;
 
 public:
-  float next(float x);
+  float at(float phase);
   smooth_noise(int seed, int steps);
 };
 
@@ -41,8 +41,9 @@ _steps(steps), _r(steps, 0.0f)
 }
 
 inline float 
-smooth_noise::next(float x)
+smooth_noise::at(float phase)
 {
+  float x = phase * _steps;
   int xi = (int)x - (x < 0 && x != (int)x);
   float t = x - xi;
   int x_min = xi % _steps;
