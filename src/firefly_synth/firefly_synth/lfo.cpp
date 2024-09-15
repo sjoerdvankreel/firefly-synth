@@ -771,6 +771,7 @@ void lfo_engine::process_loop(plugin_block& block, cv_cv_matrix_mixdown const* m
   int this_module = _global ? module_glfo : module_vlfo;
   auto const& block_auto = block.state.own_block_automation;
   int steps = block_auto[param_steps][0].step();
+  int shape = block_auto[param_shape][0].step();
 
   auto const& x_curve = *(*modulation)[param_skew_x_amt][0];
   auto const& y_curve = *(*modulation)[param_skew_y_amt][0];
@@ -815,13 +816,14 @@ void lfo_engine::process_loop(plugin_block& block, cv_cv_matrix_mixdown const* m
       continue;
     }
 
-    // TODO if phase wrapped, update the free runners
-
     _lfo_end_value = quantize(calc(_phase, x_curve[f], y_curve[f]), steps);
     _filter_end_value = _filter.next(check_unipolar(_lfo_end_value));
     block.state.own_cv[0][0][f] = _filter_end_value;
 
     bool phase_wrapped = increment_and_wrap_phase(_phase, rate_curve[f], block.sample_rate);
+    if (phase_wrapped && (shape == wave_shape_type_static_free_1 || shape == wave_shape_type_static_free_2))
+      _static_noise.sample_table();
+
     bool ref_wrapped = increment_and_wrap_phase(_ref_phase, rate_curve[f], block.sample_rate);
     bool ended = ref_wrapped && Type == type_one_shot || phase_wrapped && Type == type_one_phase;
     if (ended)
