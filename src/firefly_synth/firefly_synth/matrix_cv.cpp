@@ -342,8 +342,8 @@ scale_to_longest_mod_source(
 }
 
 // mapping to longest mod source, prefer envelope
-static modulation_output_source
-select_modulation_output_source(
+static mod_indicator_output_source
+select_mod_indicator_output_source(
   plugin_state const& state, param_topo_mapping const& mapping,
   std::vector<module_output_mapping> const& sources)
 {
@@ -457,9 +457,9 @@ cv_matrix_topo(
     auto const& state, auto* engine, int param, auto const& mapping, auto const& mods) {
       return render_graph(state, engine, param, mapping, sm, tm);
     };
-  result.mod_output_source_selector = [sm = source_matrix.mappings](
+  result.mod_indicator_output_source_selector_ = [sm = source_matrix.mappings](
     auto const& state, auto const& mapping) {
-      return select_modulation_output_source(state, mapping, sm);
+      return select_mod_indicator_output_source(state, mapping, sm);
     };
   result.gui.menu_handler_factory = [](plugin_state* state) {
     return std::make_unique<tidy_matrix_menu_handler>(

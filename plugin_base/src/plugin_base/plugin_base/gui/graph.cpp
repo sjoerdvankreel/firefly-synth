@@ -77,8 +77,8 @@ module_graph::modulation_outputs_changed(std::vector<modulation_output> const& o
   if (_gui->get_visuals_mode() != gui_visuals_mode_full)
     return;
 
-  int orig_module_slot = -1;
-  int orig_module_index = -1;
+  int this_module_slot = -1;
+  int this_module_index = -1;
   auto const& desc = _gui->automation_state()->desc();
   auto const& topo = *desc.plugin;
   auto const& mappings = desc.param_mappings.params;
@@ -86,38 +86,37 @@ module_graph::modulation_outputs_changed(std::vector<modulation_output> const& o
 
   if (_module_params.module_index != -1)
   {
-    orig_module_slot = _activated_module_slot;
-    orig_module_index = _module_params.module_index;
+    this_module_slot = _activated_module_slot;
+    this_module_index = _module_params.module_index;
   }
   else
   {
-    orig_module_slot = desc.param_mappings.params[_hovered_or_tweaked_param].topo.module_slot;
-    orig_module_index = desc.param_mappings.params[_hovered_or_tweaked_param].topo.module_index;
+    this_module_slot = desc.param_mappings.params[_hovered_or_tweaked_param].topo.module_slot;
+    this_module_index = desc.param_mappings.params[_hovered_or_tweaked_param].topo.module_index;
   }
 
-  // this is for stuff when someone else wants to react to us (eg cv matrix to lfo)
-  // as well as to itself
-  int mapped_module_slot = orig_module_slot;
-  int mapped_module_index = orig_module_index;
-  if (topo.modules[orig_module_index].mod_output_source_selector != nullptr)
+  // this is for stuff when someone else wants to react to our indicators (eg cv matrix to lfo)
+  int indicator_module_slot = this_module_slot;
+  int indicator_module_index = this_module_index;
+  if (topo.modules[this_module_index].mod_indicator_output_source_selector_ != nullptr)
   {
-    auto selected = topo.modules[orig_module_index].mod_output_source_selector(*_gui->automation_state(), mapping);
+    auto selected = topo.modules[this_module_index].mod_indicator_output_source_selector_(*_gui->automation_state(), mapping);
     if (selected.module_index != -1 && selected.module_slot != -1)
     {
-      mapped_module_slot = selected.module_slot;
-      mapped_module_index = selected.module_index;
+      indicator_module_slot = selected.module_slot;
+      indicator_module_index = selected.module_index;
     }
   }
 
-  int orig_module_global = desc.module_topo_to_index.at(orig_module_index) + orig_module_slot;
-  int mapped_module_global = desc.module_topo_to_index.at(mapped_module_index) + mapped_module_slot;
-  int orig_param_first = desc.modules[orig_module_global].params[0].info.global;
+  int this_module_global = desc.module_topo_to_index.at(this_module_index) + this_module_slot;
+  int indicator_module_global = desc.module_topo_to_index.at(indicator_module_index) + indicator_module_slot;
+  int this_param_first = desc.modules[this_module_global].params[0].info.global;
 
   bool rerender_indicators = false;
   bool any_mod_indicator_found = false;
   for (int i = 0; i < outputs.size(); i++)
     if (outputs[i].event_type() == output_event_type::out_event_cv_state)
-      if (mapped_module_global == outputs[i].state.cv.module_global)
+      if (indicator_module_global == outputs[i].state.cv.module_global)
       {
         if (!any_mod_indicator_found)
         {
@@ -138,7 +137,7 @@ module_graph::modulation_outputs_changed(std::vector<modulation_output> const& o
   bool any_custom_found = false;
   for (int i = 0; i < outputs.size(); i++)
     if (outputs[i].event_type() == output_event_type::out_event_custom_state)
-      if (mapped_module_global == outputs[i].state.custom.module_global)
+      if (this_module_global == outputs[i].state.custom.module_global)
       {
         if (!any_custom_found)
         {
@@ -160,24 +159,14 @@ module_graph::modulation_outputs_changed(std::vector<modulation_output> const& o
     for (int i = 0; i < outputs.size(); i++)
       if (outputs[i].event_type() == output_event_type::out_event_param_state)
       {
-        // debugging
-        auto const& orig_desc = _gui->automation_state()->desc().modules[orig_module_global];
-        auto const& mapped_desc = _gui->automation_state()->desc().modules[mapped_module_global];
-        auto const& event_desc = _gui->automation_state()->desc().modules[outputs[i].state.param.module_global];
-        (void)orig_desc;
-        (void)mapped_desc;
-        (void)event_desc;
-
-        if (orig_module_global == outputs[i].state.param.module_global ||
-          mapped_module_global == outputs[i].state.param.module_global)
+        if (this_module_global == outputs[i].state.param.module_global)
         {
           rerender_full = true;
           break;
         }
       } else if (outputs[i].event_type() == output_event_type::out_event_cv_state)
       {
-        if (orig_module_global == outputs[i].state.cv.module_global ||
-          mapped_module_global == outputs[i].state.cv.module_global)
+        if (indicator_module_global == outputs[i].state.cv.module_global)
         {
           rerender_indicators = true;
           // DONT break -- full rerender trumps indicators
@@ -185,7 +174,7 @@ module_graph::modulation_outputs_changed(std::vector<modulation_output> const& o
       }
 
   if (rerender_full)
-    request_rerender(orig_param_first, false);
+    request_rerender(this_param_first, false);
   else if(rerender_indicators)
     repaint();
 }
