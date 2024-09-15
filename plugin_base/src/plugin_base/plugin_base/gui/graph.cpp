@@ -57,6 +57,9 @@ module_graph::timerCallback()
 void
 module_graph::modulation_outputs_reset()
 {
+  if (_hovered_or_tweaked_param == -1)
+    return;
+
   _mod_indicators.clear();
   _custom_outputs.clear();
   _render_dirty = true;
