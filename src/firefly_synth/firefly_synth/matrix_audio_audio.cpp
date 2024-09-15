@@ -38,8 +38,8 @@ public:
     std::vector<module_topo_mapping> const& targets): 
     _global(global), _mixer(this), _sources(sources), _targets(targets) {}
 
-  void reset(plugin_block const*) override {}
-  void process(plugin_block& block) override;
+  void reset_audio(plugin_block const*) override {}
+  void process_audio(plugin_block& block) override;
   jarray<float, 2> const& mix(plugin_block& block, int module, int slot);
 };
 
@@ -253,7 +253,7 @@ audio_audio_matrix_mixer::mix(plugin_block& block, int module, int slot)
 { return _engine->mix(block, module, slot); }
 
 void 
-audio_audio_matrix_engine::process(plugin_block& block)
+audio_audio_matrix_engine::process_audio(plugin_block& block)
 { 
   // need to capture own audio here because when we start 
   // mixing "own" does not refer to us but to the caller

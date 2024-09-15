@@ -23,8 +23,19 @@ class plugin_engine;
 class module_engine { 
 public: 
   virtual ~module_engine() {}
-  virtual void process(plugin_block& block) = 0;
-  virtual void reset(plugin_block const* block) = 0;
+  virtual void process_audio(plugin_block& block) = 0;
+  virtual void reset_audio(plugin_block const* block) = 0;
+
+  // careful -- ui thread only
+  // these are meant to do some optional preprocessing then reroute to audio
+  virtual void process_graph(
+    plugin_block& block, 
+    std::vector<mod_out_custom_state> const& custom_outputs, 
+    void* context) { process_audio(block); }
+  virtual void reset_graph(
+    plugin_block const* block, 
+    std::vector<mod_out_custom_state> const& custom_outputs, 
+    void* context) { reset_audio(block); }
 };
 
 // catering to clap

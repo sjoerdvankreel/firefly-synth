@@ -19,8 +19,8 @@ class monitor_engine:
 public module_engine {
 public:
   monitor_engine() = default;
-  void process(plugin_block& block) override;
-  void reset(plugin_block const*) override {}
+  void process_audio(plugin_block& block) override;
+  void reset_audio(plugin_block const*) override {}
   PB_PREVENT_ACCIDENTAL_COPY(monitor_engine);
 };
 
@@ -101,7 +101,7 @@ monitor_topo(int section, gui_position const& pos, int polyphony, bool is_fx)
 }
 
 void
-monitor_engine::process(plugin_block& block)
+monitor_engine::process_audio(plugin_block& block)
 {
   float max_out = 0.0f;
   for (int c = 0; c < 2; c++)  

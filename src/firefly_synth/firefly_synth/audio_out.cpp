@@ -16,8 +16,8 @@ enum { scratch_bal, scratch_count };
 class global_audio_out_engine :
 public module_engine {
 public:
-  void reset(plugin_block const*) override {}
-  void process(plugin_block& block) override;
+  void reset_audio(plugin_block const*) override {}
+  void process_audio(plugin_block& block) override;
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(global_audio_out_engine);
 };
 
@@ -27,8 +27,8 @@ public module_engine {
   template <bool GlobalUnison>
   void process_unison(plugin_block& block);
 public:
-  void reset(plugin_block const*) override {}
-  void process(plugin_block& block) override;
+  void reset_audio(plugin_block const*) override {}
+  void process_audio(plugin_block& block) override;
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(voice_audio_out_engine);
 };
 
@@ -107,7 +107,7 @@ audio_out_topo(int section, gui_position const& pos, bool global)
 } 
 
 void
-global_audio_out_engine::process(plugin_block& block)
+global_audio_out_engine::process_audio(plugin_block& block)
 {
   auto& mixer = get_audio_audio_matrix_mixer(block, true);
   auto const& audio_in = mixer.mix(block, module_global_out, 0);
@@ -126,7 +126,7 @@ global_audio_out_engine::process(plugin_block& block)
 
 
 void
-voice_audio_out_engine::process(plugin_block& block)
+voice_audio_out_engine::process_audio(plugin_block& block)
 {
   if(block.voice->state.sub_voice_count > 1)
     process_unison<true>(block);

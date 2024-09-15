@@ -30,8 +30,8 @@ public module_engine {
   std::array<float, on_voice_random_count> _random_values;
   std::vector<module_output_mapping> const _global_outputs;
 public:
-  void process(plugin_block& block) override;
-  void reset(plugin_block const* block) override;
+  void process_audio(plugin_block& block) override;
+  void reset_audio(plugin_block const* block) override;
   PB_PREVENT_ACCIDENTAL_COPY(voice_on_note_engine);
   voice_on_note_engine(std::vector<module_output_mapping> const& global_outputs) : 
   _on_note_values(global_outputs.size(), 0.0f), _global_outputs(global_outputs) {}
@@ -62,7 +62,7 @@ voice_on_note_topo(plugin_topo const* topo, int section)
 }
 
 void
-voice_on_note_engine::process(plugin_block& block)
+voice_on_note_engine::process_audio(plugin_block& block)
 {
   for(int i = 0; i < on_voice_random_count; i++)
     block.state.own_cv[on_voice_random_output_index][i].fill(block.start_frame, block.end_frame, _random_values[i]);
@@ -71,7 +71,7 @@ voice_on_note_engine::process(plugin_block& block)
 }
 
 void 
-voice_on_note_engine::reset(plugin_block const* block)
+voice_on_note_engine::reset_audio(plugin_block const* block)
 {   
   for(int i = 0; i < on_voice_random_count; i++)
     _random_values[i] = block->graph? (i / (on_voice_random_count - 1.0f)) : thread_random_next();

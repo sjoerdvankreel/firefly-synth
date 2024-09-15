@@ -17,8 +17,8 @@ enum { output_key_pitch, output_velo, output_count };
 class voice_note_engine :
 public module_engine {
 public:
-  void process(plugin_block& block) override;
-  void reset(plugin_block const*) override {}
+  void process_audio(plugin_block& block) override;
+  void reset_audio(plugin_block const*) override {}
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(voice_note_engine);
 };
 
@@ -37,7 +37,7 @@ voice_note_topo(int section)
 }
 
 void
-voice_note_engine::process(plugin_block& block)
+voice_note_engine::process_audio(plugin_block& block)
 {  
   block.state.own_cv[output_velo][0].fill(block.start_frame, block.end_frame, block.voice->state.velocity);
   // we don't have a default 12-tet tuning table

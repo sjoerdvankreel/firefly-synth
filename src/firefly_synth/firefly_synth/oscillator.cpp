@@ -167,8 +167,8 @@ public:
   PB_PREVENT_ACCIDENTAL_COPY(osc_engine);
   osc_engine(int max_frame_count, float sample_rate);
 
-  void reset(plugin_block const*) override;
-  void process(plugin_block& block) override { process<false>(block, nullptr); }
+  void reset_audio(plugin_block const*) override;
+  void process_audio(plugin_block& block) override { process<false>(block, nullptr); }
   
   template <bool Graph> 
   void process(plugin_block& block, cv_audio_matrix_mixdown const* modulation);
@@ -244,7 +244,10 @@ make_osc_graph_engine(plugin_desc const* desc)
 }
 
 std::vector<graph_data>
-render_osc_graphs(plugin_state const& state, graph_engine* engine, int slot, bool for_osc_osc_matrix)
+render_osc_graphs(
+  plugin_state const& state, graph_engine* engine, 
+  int slot, bool for_osc_osc_matrix, 
+  std::vector<mod_out_custom_state> const& custom_outputs)
 {
   std::vector<graph_data> result;
   int note = state.get_plain_at(module_osc, slot, param_note, 0).step();
@@ -269,12 +272,12 @@ render_osc_graphs(plugin_state const& state, graph_engine* engine, int slot, boo
   // we use an alternate means to access the modulation
   // signal inside matrix_osc::modulate_fm
   engine->process_begin(&state, sample_rate, params.max_frame_count, -1);
-  engine->process_default(module_osc_osc_matrix, 0);
+  engine->process_default(module_osc_osc_matrix, 0, custom_outputs, nullptr);
   for (int i = 0; i <= slot; i++)
   {
-    block = engine->process(module_osc, i, [max_frame_count = params.max_frame_count, sample_rate](plugin_block& block) {
+    block = engine->process(module_osc, i, custom_outputs, nullptr, [max_frame_count = params.max_frame_count, sample_rate](plugin_block& block) {
       osc_engine engine(max_frame_count, sample_rate);
-      engine.reset(&block);
+      engine.reset_audio(&block); // TODO
       cv_audio_matrix_mixdown modulation(make_static_cv_matrix_mixdown(block));
       engine.process<true>(block, &modulation);
     });
@@ -303,11 +306,12 @@ render_osc_graph(
   plugin_state const& state, graph_engine* engine, int param, 
   param_topo_mapping const& mapping, std::vector<mod_out_custom_state> const& custom_outputs)
 {
+  // TODO drop template <bool graph>
   graph_engine_params params = {};
   int type = state.get_plain_at(module_osc, mapping.module_slot, param_type, 0).step();
   if(state.get_plain_at(mapping.module_index, mapping.module_slot, param_type, 0).step() == type_off) 
     return graph_data(graph_data_type::off, {});
-  auto data = render_osc_graphs(state, engine, mapping.module_slot, false)[mapping.module_slot];
+  auto data = render_osc_graphs(state, engine, mapping.module_slot, false, custom_outputs)[mapping.module_slot];
   std::string partition = is_random(type)? "5 Cycles": "First Cycle";
   return graph_data(data.audio(), 1.0f, false, { partition });
 }
@@ -714,7 +718,7 @@ _oversampler(max_frame_count)
 }
 
 void
-osc_engine::reset(plugin_block const* block)
+osc_engine::reset_audio(plugin_block const* block)
 {
   // publish the oversampler ptrs
   // note: it is important to do this during reset() rather than process()

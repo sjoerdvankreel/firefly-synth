@@ -43,7 +43,10 @@ graph_engine::process_begin(plugin_state const* state, int sample_rate, int fram
 }
 
 plugin_block*
-graph_engine::process_default(int module_index, int module_slot)
+graph_engine::process_default(
+  int module_index, int module_slot,
+  std::vector<mod_out_custom_state> const& custom_outputs,
+  void* context)
 {
   assert(_sample_rate > 0);
   assert(_host_block != nullptr);
@@ -58,14 +61,17 @@ graph_engine::process_default(int module_index, int module_slot)
   } else
     engine = slot_map[module_slot].get();
   bool voice = module.dsp.stage == module_stage::voice;
-  return process(module_index, module_slot, [engine, voice](auto& block) { 
-    engine->reset(&block);
-    engine->process(block); 
+  return process(module_index, module_slot, custom_outputs, context, [engine, voice, &custom_outputs, context](auto& block) {
+    engine->reset_graph(&block, custom_outputs, context);
+    engine->process_graph(block, custom_outputs, context);
   });
 }
 
 plugin_block*
-graph_engine::process(int module_index, int module_slot, graph_processor processor)
+graph_engine::process(
+  int module_index, int module_slot, 
+  std::vector<mod_out_custom_state> const& custom_outputs, 
+  void* context, graph_processor processor)
 {
   int voice = _desc->plugin->modules[module_index].dsp.stage == module_stage::voice ? 0 : -1;
   _last_block = std::make_unique<plugin_block>(

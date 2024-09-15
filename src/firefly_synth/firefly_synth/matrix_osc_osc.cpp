@@ -36,7 +36,9 @@ enum {
 static int const route_count = 10;
 
 std::unique_ptr<graph_engine> make_osc_graph_engine(plugin_desc const* desc);
-std::vector<graph_data> render_osc_graphs(plugin_state const& state, graph_engine* engine, int slot, bool for_osc_osc_matrix);
+std::vector<graph_data> render_osc_graphs(
+  plugin_state const& state, graph_engine* engine, int slot, 
+  bool for_osc_osc_matrix, std::vector<mod_out_custom_state> const& custom_outputs);
 
 static std::vector<list_item>
 fm_mode_items()
@@ -61,8 +63,8 @@ public:
   osc_osc_matrix_engine(int max_frame_count);
   PB_PREVENT_ACCIDENTAL_COPY(osc_osc_matrix_engine);
 
-  void reset(plugin_block const*) override {}
-  void process(plugin_block& block) override;
+  void reset_audio(plugin_block const*) override {}
+  void process_audio(plugin_block& block) override;
 
   jarray<float, 3> const& modulate_am(
     plugin_block& block, int slot, 
@@ -77,7 +79,8 @@ public:
 static graph_data
 render_graph(
   plugin_state const& state, graph_engine* engine, int param, 
-  param_topo_mapping const& mapping, std::vector<mod_out_custom_state> const& custom_outputs)
+  param_topo_mapping const& mapping, 
+  std::vector<mod_out_custom_state> const& custom_outputs)
 {
   int max_osc = 0;
   std::vector<float> result_l;
@@ -88,7 +91,7 @@ render_graph(
   for (int r = 0; r < route_count; r++)
     if (state.get_plain_at(module_osc_osc_matrix, 0, param_fm_on, r).step() != 0)
       max_osc = std::max(max_osc, state.get_plain_at(module_osc_osc_matrix, 0, param_fm_target, r).step());
-  auto graphs(render_osc_graphs(state, engine, max_osc, true));
+  auto graphs(render_osc_graphs(state, engine, max_osc, true, custom_outputs));
   for (int mi = 0; mi <= max_osc; mi++)
   {
     result_l.insert(result_l.end(), graphs[mi].audio()[0].cbegin(), graphs[mi].audio()[0].cend());
@@ -291,7 +294,7 @@ jarray<float, 2> const&
 osc_osc_matrix_fm_modulator::modulate_fm<true>(plugin_block& block, int slot, cv_audio_matrix_mixdown const* cv_modulation);
 
 void
-osc_osc_matrix_engine::process(plugin_block& block)
+osc_osc_matrix_engine::process_audio(plugin_block& block)
 {
   // need to capture stuff here because when we start 
   // modulating "own" does not refer to us but to the caller

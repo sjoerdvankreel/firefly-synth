@@ -123,11 +123,11 @@ public module_engine {
 
 public:
   PB_PREVENT_ACCIDENTAL_COPY(lfo_engine);
-  void reset(plugin_block const*) override;
+  void reset_audio(plugin_block const*) override;
   lfo_engine(bool global) : 
   _global(global), _smooth_noise(1, 1) {}
 
-  void process(plugin_block& block) override { process(block, nullptr); }
+  void process_audio(plugin_block& block) override { process(block, nullptr); }
   void process(plugin_block& block, cv_cv_matrix_mixdown const* modulation);
   void static_noise_sample_table_for_graph(std::uint32_t state) { _need_resample_table_for_graph = true; _seed_resample_table_for_graph = state; }
 };
@@ -197,12 +197,12 @@ render_graph(
   // we need this for the on-voice-random
   // although it's just mapped to fixed values
   // but nice to see the effect of source selection
-  engine->process_default(module_voice_on_note, 0);
+  engine->process_default(module_voice_on_note, 0, custom_outputs, nullptr);
 
-  auto const* block = engine->process(mapping.module_index, mapping.module_slot, [&](plugin_block& block) {
+  auto const* block = engine->process(mapping.module_index, mapping.module_slot, custom_outputs, nullptr, [&](plugin_block& block) {
     lfo_engine engine(global);
-    engine.reset(&block);
-    if (custom_outputs.size())
+    engine.reset_audio(&block); // TODO
+    if (custom_outputs.size()) // TODO move to proc-graph
       engine.static_noise_sample_table_for_graph(custom_outputs[custom_outputs.size() - 1].value_custom);
     cv_cv_matrix_mixdown modulation(make_static_cv_matrix_mixdown(block)[mapping.module_index][mapping.module_slot]);
     engine.process(block, &modulation);
@@ -520,7 +520,7 @@ lfo_engine::update_block_params(plugin_block const* block)
 }
 
 void
-lfo_engine::reset(plugin_block const* block) 
+lfo_engine::reset_audio(plugin_block const* block) 
 { 
   _ref_phase = 0;
   _graph_phase = 0;

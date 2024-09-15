@@ -85,9 +85,9 @@ public module_engine {
 
 public:
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(env_engine);
-  void reset(plugin_block const* block) override;
-  void process(plugin_block& block) override { process(block, nullptr); }
-  void process(plugin_block& block, cv_cv_matrix_mixdown const* modulation);
+  void reset_audio(plugin_block const* block) override;
+  void process_audio(plugin_block& block) override { process(block, nullptr); }
+  void process(plugin_block& block, cv_cv_matrix_mixdown const* modulation); // TODO
 
 private:
 
@@ -191,11 +191,11 @@ render_graph(
   int voice_release_at = dahd / dahdrf * params.max_frame_count;
 
   engine->process_begin(&state, sample_rate, params.max_frame_count, voice_release_at);
-  auto const* block = engine->process(module_env, mapping.module_slot, [mapping](plugin_block& block) {
+  auto const* block = engine->process(module_env, mapping.module_slot, custom_outputs, nullptr, [mapping](plugin_block& block) {
     env_engine engine;
-    engine.reset(&block);
+    engine.reset_audio(&block); // TODO
     cv_cv_matrix_mixdown modulation(make_static_cv_matrix_mixdown(block)[module_env][mapping.module_slot]);
-    engine.process(block, &modulation);
+    engine.process(block, &modulation); // TODO
   });
   engine->process_end();
 
@@ -528,7 +528,7 @@ calc_slope_exp_splt(double slope_pos, double splt_bnd, double exp)
 }
 
 void
-env_engine::reset(plugin_block const* block)
+env_engine::reset_audio(plugin_block const* block)
 {
   _stage_pos = 0;
   _total_pos = 0;
