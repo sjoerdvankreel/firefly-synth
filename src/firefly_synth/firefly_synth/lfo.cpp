@@ -108,6 +108,7 @@ public module_engine {
   int _per_voice_seed = -1;
   int _prev_global_seed = -1;
   bool _seed_was_initialized = false;
+  std::uint32_t _current_static_state = 0;
 
   void reset_smooth_noise(int seed, int steps);
   void update_block_params(plugin_block const* block);
@@ -214,9 +215,7 @@ render_graph(
     engine.reset(&block);
     if (custom_outputs.size())
       for (int i = (int)custom_outputs.size() - 1; i >= 0; i--)
-      {
         engine.init_rand_state_for_graph(custom_outputs[i].value_custom, steps);
-      }
     cv_cv_matrix_mixdown modulation(make_static_cv_matrix_mixdown(block)[mapping.module_index][mapping.module_slot]);
     engine.process(block, &modulation);
   });
@@ -621,8 +620,7 @@ lfo_engine::process(plugin_block& block, cv_cv_matrix_mixdown const* modulation)
         _global ? -1 : block.voice->state.slot,
         block.module_desc_.info.global,
         tag_custom_rand_state,
-        _static_noise.state()));
-      // todo if wrapped
+        _current_static_state));
     }
 
     // constant for the lifetime of the voice, but the ui
@@ -899,6 +897,11 @@ void lfo_engine::process_loop(plugin_block& block, cv_cv_matrix_mixdown const* m
     bool phase_wrapped = increment_and_wrap_phase(_phase, rate_curve[f], block.sample_rate);
     bool ref_wrapped = increment_and_wrap_phase(_ref_phase, rate_curve[f], block.sample_rate);
     bool ended = ref_wrapped && Type == type_one_shot || phase_wrapped && Type == type_one_phase;
+
+    // for graph - free-running
+    if (ref_wrapped)
+      _current_static_state = _static_noise.state();
+
     if (ended)
     {
       _stage = lfo_stage::filter;
