@@ -1,7 +1,8 @@
 ### ?, ? - V1.9.3.
 
-- Bugfix: random-type lfo's would not properly reset when switching modes.
-- Bugfix: random-type global lfo's would not reset when the reference phase wraps, causing audio/gui to become slowly out of sync over time.
+- Breaking change: noise generators become phase-based sampling functions to prevent drift (audible differences, sorry, but needed to keep engine and ui in check).
+* Shouln't be a problem when using the random generator for osci (sonic content/spectrum hasnt changed).
+* Might be a problem if you rely heavily on the particular shape of a random lfo. On the upside, it now does proper phase offset.
 
 ### September 11, 2024 - V1.9.2.
 

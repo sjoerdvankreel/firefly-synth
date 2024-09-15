@@ -97,6 +97,8 @@ public module_engine {
 
   int _per_voice_seed = -1;
   int _prev_global_seed = -1;
+  int _prev_global_steps = -1;
+  int _prev_global_shape = -1;
   bool _per_voice_seed_was_initialized = false;
 
   void update_block_params(plugin_block const* block);
@@ -523,8 +525,10 @@ lfo_engine::reset(plugin_block const* block)
   _stage = lfo_stage::cycle;
   _end_filter_stage_samples = 0;
   _per_voice_seed = -1;
-  _prev_global_seed = -1;
   _per_voice_seed_was_initialized = false;
+  _prev_global_seed = -1;
+  _prev_global_shape = -1;
+  _prev_global_steps = -1;
 
   update_block_params(block);
   auto const& block_auto = block->state.own_block_automation;
@@ -577,10 +581,17 @@ lfo_engine::process(plugin_block& block, cv_cv_matrix_mixdown const* modulation)
   {
     update_block_params(&block);
     int seed = block_auto[param_seed][0].step();
-    if (seed != _prev_global_seed)
+    int steps = block_auto[param_steps][0].step();
+    int shape = block_auto[param_shape][0].step();
+    if (seed != _prev_global_seed || steps != _prev_global_steps || shape != _prev_global_shape)
     {
       _prev_global_seed = seed;
+      _prev_global_steps = steps;
+      _prev_global_shape = shape;
+
+      // TODO check out, it should not! reset the phase, also todo, it should respect the phase offset
       _static_noise.reset(seed);
+      _smooth_noise = smooth_noise(seed, steps);
     }
   }
   else
