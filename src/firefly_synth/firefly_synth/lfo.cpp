@@ -167,7 +167,8 @@ lfo_frequency_from_state(plugin_state const& state, int module_index, int module
 
 static graph_data
 render_graph(
-  plugin_state const& state, graph_engine* engine, int param, param_topo_mapping const& mapping)
+  plugin_state const& state, graph_engine* engine, int param, 
+  param_topo_mapping const& mapping, std::vector<mod_out_custom_state> const& custom_outputs)
 {
   int type = state.get_plain_at(mapping.module_index, mapping.module_slot, param_type, mapping.param_slot).step();
   bool sync = state.get_plain_at(mapping.module_index, mapping.module_slot, param_sync, mapping.param_slot).step() != 0;
