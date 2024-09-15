@@ -60,7 +60,7 @@ module_graph::modulation_outputs_reset()
   _mod_indicators.clear();
   _custom_outputs.clear();
   _render_dirty = true;
-  render_if_dirty();
+  request_rerender(_hovered_or_tweaked_param, false);
 }
 
 void 
