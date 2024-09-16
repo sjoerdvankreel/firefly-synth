@@ -19,6 +19,9 @@ namespace firefly_synth {
 static float const max_filter_time_ms = 500; 
 static float const log_half = std::log(0.5f);
 
+// need for realtime animation
+enum { custom_tag_ref_phase, custom_tag_rand_state };
+
 enum class lfo_stage { cycle, filter, end };
 enum { scratch_rate, scratch_count };
 enum { type_off, type_repeat, type_one_shot, type_one_phase };
@@ -100,7 +103,8 @@ public module_engine {
   bool _per_voice_seed_was_initialized = false;
 
   // graphing
-  bool _need_resample_table_for_graph = false;
+  float _new_phase_for_graph = 0.0f;
+  bool _need_new_phase_for_graph = false;
   std::uint32_t _seed_resample_table_for_graph = 0;
 
   void update_block_params(plugin_block const* block);
@@ -132,8 +136,8 @@ public:
   void reset_graph(plugin_block const* block, std::vector<mod_out_custom_state> const& custom_outputs, void* context) override;
 
   void process_audio(plugin_block& block) override { process_internal(block, nullptr); }
-  void static_noise_sample_table_for_graph(std::uint32_t state) 
-  { _need_resample_table_for_graph = true; _seed_resample_table_for_graph = state; }
+  void reset_phase_for_graph(float phase, std::uint32_t state) 
+  { _need_new_phase_for_graph = true; _new_phase_for_graph = phase, _seed_resample_table_for_graph = state; }
   void process_graph(plugin_block& block, std::vector<mod_out_custom_state> const& custom_outputs, void* context) override 
   { process_internal(block, static_cast<cv_cv_matrix_mixdown const*>(context)); }
 };
@@ -530,13 +534,31 @@ lfo_engine::reset_graph(
   void* context)
 {
   reset_audio(block);
+  int new_rand_state = 0;
+  float new_ref_phase = 0.0f;
+  bool seen_ref_phase = false;
+  bool seen_rand_state = false;
+
+  // TODO probably also for voice
   if (custom_outputs.size())
     for (int i = (int)custom_outputs.size() - 1; i >= 0; i--)
-      if(custom_outputs[i].module_global == block->module_desc_.info.global)
-      {
-        static_noise_sample_table_for_graph(custom_outputs[i].value_custom);
+    {
+      if (custom_outputs[i].module_global == block->module_desc_.info.global)
+        if (custom_outputs[i].tag_custom == custom_tag_rand_state)
+        {
+          seen_rand_state = true;
+          new_rand_state = custom_outputs[i].value_custom;
+        }
+        else if (custom_outputs[i].tag_custom == custom_tag_ref_phase)
+        {
+          seen_ref_phase = true;
+          new_ref_phase = custom_outputs[i].value_custom / (float)std::numeric_limits<int>::max();
+        }
+      if (seen_rand_state && seen_ref_phase)
         break;
-      }
+    }
+  if (seen_ref_phase)
+    reset_phase_for_graph(new_ref_phase, new_rand_state);
 }
 
 void
@@ -615,29 +637,35 @@ lfo_engine::process_internal(plugin_block& block, cv_cv_matrix_mixdown const* mo
       _static_noise = noise_generator<false>(seed, steps);
       _smooth_noise = noise_generator<true>(seed, steps);
 
-      if(!block.graph && (shape == wave_shape_type_static_free_1 || shape == wave_shape_type_static_free_2))
+      if(!block.graph)
       {
-        _need_resample_table_for_graph = true;
+        _need_new_phase_for_graph = true;
+        _new_phase_for_graph = _phase;
         _seed_resample_table_for_graph = _static_noise.state();
       }
     }
 
-    if (block.graph && _need_resample_table_for_graph)
+    if (block.graph && _need_new_phase_for_graph)
     {
-      _static_noise.sample_table(_seed_resample_table_for_graph);
-      _need_resample_table_for_graph = false;
+      _phase = _new_phase_for_graph;
+      if(shape == wave_shape_type_static_free_1 || shape == wave_shape_type_static_free_2)
+        _static_noise.sample_table(_seed_resample_table_for_graph);
+      _need_new_phase_for_graph = false;
     } 
 
-    if (!block.graph && (shape == wave_shape_type_static_free_1 || shape == wave_shape_type_static_free_2))
+    if (!block.graph && _need_new_phase_for_graph)
     {
-      if (_need_resample_table_for_graph)
-      {
+      block.push_modulation_output(modulation_output::make_mod_output_custom_state(
+        _global ? -1 : block.voice->state.slot,
+        block.module_desc_.info.global,
+        custom_tag_ref_phase,
+        (int)(_ref_phase * std::numeric_limits<int>::max())));
+      if(shape == wave_shape_type_static_free_1 || shape == wave_shape_type_static_free_2)
         block.push_modulation_output(modulation_output::make_mod_output_custom_state(
           _global ? -1 : block.voice->state.slot,
           block.module_desc_.info.global,
-          0,
+          custom_tag_rand_state,
           _seed_resample_table_for_graph));
-      }
     }
   }
   else
@@ -874,12 +902,13 @@ void lfo_engine::process_loop(plugin_block& block, cv_cv_matrix_mixdown const* m
     // for free-running stuff to get actually free-running when used in the cv plot.
     // we don't want that, the current lfo shape should be repeated and updated whenever
     // the free-running lfo "cycled"
-    if (phase_wrapped && (shape == wave_shape_type_static_free_1 || shape == wave_shape_type_static_free_2))
-      if (!block.graph)
-      {
-        _need_resample_table_for_graph = true;
+    if (phase_wrapped && !block.graph)
+    {
+      _need_new_phase_for_graph = true;
+      _new_phase_for_graph = _phase;
+      if(shape == wave_shape_type_static_free_1 || shape == wave_shape_type_static_free_2)
         _seed_resample_table_for_graph = _static_noise.sample_table();
-      }
+    }
 
     bool ref_wrapped = increment_and_wrap_phase(_ref_phase, rate_curve[f], block.sample_rate);
     bool ended = ref_wrapped && Type == type_one_shot || phase_wrapped && Type == type_one_phase;
