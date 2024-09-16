@@ -25,6 +25,8 @@ autobuilds:
 * integrate https://github.com/surge-synthesizer/monique-monosynth/blob/main/.github/workflows/build-pr.yml
 
 modvis take 3:
+* shit is super expensive again so do another profiling session
+* the 1 second timer to copy from automation state is actually visible
 * stuff goes not good when cv->cv mod by free-rand
 * also test the on-note-sampling of glfo
 * also test the on-note (static) random
