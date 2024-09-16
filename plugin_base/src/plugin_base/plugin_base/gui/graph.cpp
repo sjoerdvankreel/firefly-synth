@@ -80,7 +80,6 @@ module_graph::modulation_outputs_changed(std::vector<modulation_output> const& o
   int this_module_slot = -1;
   int this_module_index = -1;
   auto const& desc = _gui->automation_state()->desc();
-  auto const& topo = *desc.plugin;
   auto const& mappings = desc.param_mappings.params;
   param_topo_mapping mapping = mappings[_hovered_or_tweaked_param].topo;
 
@@ -95,28 +94,14 @@ module_graph::modulation_outputs_changed(std::vector<modulation_output> const& o
     this_module_index = desc.param_mappings.params[_hovered_or_tweaked_param].topo.module_index;
   }
 
-  // this is for stuff when someone else wants to react to our indicators (eg cv matrix to lfo)
-  int indicator_module_slot = this_module_slot;
-  int indicator_module_index = this_module_index;
-  if (topo.modules[this_module_index].mod_indicator_output_source_selector_ != nullptr)
-  {
-    auto selected = topo.modules[this_module_index].mod_indicator_output_source_selector_(*_gui->automation_state(), mapping);
-    if (selected.module_index != -1 && selected.module_slot != -1)
-    {
-      indicator_module_slot = selected.module_slot;
-      indicator_module_index = selected.module_index;
-    }
-  }
-
   int this_module_global = desc.module_topo_to_index.at(this_module_index) + this_module_slot;
-  int indicator_module_global = desc.module_topo_to_index.at(indicator_module_index) + indicator_module_slot;
   int this_param_first = desc.modules[this_module_global].params[0].info.global;
 
   bool rerender_indicators = false;
   bool any_mod_indicator_found = false;
   for (int i = 0; i < outputs.size(); i++)
     if (outputs[i].event_type() == output_event_type::out_event_cv_state)
-      if (indicator_module_global == outputs[i].state.cv.module_global)
+      if (this_module_global == outputs[i].state.cv.module_global)
       {
         if (!any_mod_indicator_found)
         {
@@ -177,7 +162,7 @@ module_graph::modulation_outputs_changed(std::vector<modulation_output> const& o
         }
       } else if (outputs[i].event_type() == output_event_type::out_event_cv_state)
       {
-        if (indicator_module_global == outputs[i].state.cv.module_global)
+        if (this_module_global == outputs[i].state.cv.module_global)
         {
           rerender_indicators = true;
           // DONT break -- full rerender trumps indicators

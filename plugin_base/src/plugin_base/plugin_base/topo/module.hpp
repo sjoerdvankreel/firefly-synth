@@ -28,14 +28,6 @@ class state_converter;
 enum class module_output { none, cv, audio };
 enum class module_stage { input, voice, output };
 
-// for the small dots that follow lfo/env
-// and also for free-running and per-voice rand to mirror in the cv graphs
-struct alternate_mod_source
-{
-  int module_index;
-  int module_slot;
-};
-
 class module_tab_menu_result {
   bool _show_warning = false;
   std::string _item = "";
@@ -94,11 +86,6 @@ typedef std::function<graph_data(
   int param, param_topo_mapping const& mapping, 
   std::vector<mod_out_custom_state> const& custom_outputs)>
 module_graph_renderer;
-
-// in case we want to plot someone elses mod indicators
-typedef std::function<alternate_mod_source(
-  plugin_state const& state, param_topo_mapping const& mapping)>
-  mod_indicator_output_source_selector;
 
 // module topo mapping
 struct module_topo_mapping final {
@@ -196,7 +183,6 @@ struct module_topo final {
   module_graph_engine_factory graph_engine_factory;
   module_state_converter_factory state_converter_factory;
   std::vector<int> dependent_custom_outputs_module_topo_indices;
-  mod_indicator_output_source_selector mod_indicator_output_source_selector_;
 
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(module_topo);
   void validate(plugin_topo const& plugin, int index) const;

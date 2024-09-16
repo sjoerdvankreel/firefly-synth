@@ -341,18 +341,6 @@ scale_to_longest_mod_source(
   return result;
 }
 
-// mapping to longest mod source, prefer envelope
-static alternate_mod_source
-select_mod_indicator_output_source(
-  plugin_state const& state, param_topo_mapping const& mapping,
-  std::vector<module_output_mapping> const& sources)
-{
-  float max_dahd, max_dahdrf;
-  int module_index, module_slot;
-  scale_to_longest_mod_source(state, mapping, sources, max_dahd, max_dahdrf, module_index, module_slot);
-  return { module_index, module_slot };
-}
-
 static graph_data
 render_graph(
   plugin_state const& state, graph_engine* engine, int param, 
@@ -469,11 +457,6 @@ cv_matrix_topo(
   // need these for repaint on note-random or free-running
   result.dependent_custom_outputs_module_topo_indices = { module_glfo };
   if (!global) result.dependent_custom_outputs_module_topo_indices = { module_vlfo };
-
-  result.mod_indicator_output_source_selector_ = [sm = source_matrix.mappings](
-    auto const& state, auto const& mapping) {
-      return select_mod_indicator_output_source(state, mapping, sm);
-    };
   result.gui.menu_handler_factory = [](plugin_state* state) {
     return std::make_unique<tidy_matrix_menu_handler>(
       state, 1, param_type, type_off, std::vector<std::vector<int>>({{ param_target, param_source }})); 
