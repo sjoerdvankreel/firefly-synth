@@ -16,9 +16,6 @@ class osc_osc_matrix_engine;
 class osc_osc_matrix_am_modulator;
 class osc_osc_matrix_fm_modulator;
 
-// shared tags for custom mod outputs
-enum { shared_tag_custom_out_render_for_cv_graph = 128 };
-
 // for osc and voice in
 inline int const max_osc_unison_voices = 8;
 // global unison, very memory hungry so only 4

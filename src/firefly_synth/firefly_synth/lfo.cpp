@@ -15,8 +15,7 @@
 using namespace plugin_base;
 
 namespace firefly_synth {
-
-static int lfo_custom_tag_rand_state = 1;                     
+                     
 static float const max_filter_time_ms = 500; 
 static float const log_half = std::log(0.5f);
 
@@ -101,8 +100,6 @@ public module_engine {
   bool _per_voice_seed_was_initialized = false;
 
   // graphing
-  bool _is_render_for_cv_graph = false;
-  bool _was_rendered_for_cv_graph = false;
   bool _need_resample_table_for_graph = false;
   std::uint32_t _seed_resample_table_for_graph = 0;
 
@@ -533,21 +530,12 @@ lfo_engine::reset_graph(
   void* context)
 {
   reset_audio(block);
-  bool seen_noise_state = false;
   if (custom_outputs.size())
     for (int i = (int)custom_outputs.size() - 1; i >= 0; i--)
-      if(custom_outputs[i].tag_custom == lfo_custom_tag_rand_state &&
-        custom_outputs[i].module_global == block->module_desc_.info.global)
+      if(custom_outputs[i].module_global == block->module_desc_.info.global)
       {
-        if (!seen_noise_state)
-        {
-          seen_noise_state = true;
-          static_noise_sample_table_for_graph(custom_outputs[i].value_custom);
-        }
-      }
-      else if (custom_outputs[i].tag_custom == shared_tag_custom_out_render_for_cv_graph)
-      {
-        _is_render_for_cv_graph = true;
+        static_noise_sample_table_for_graph(custom_outputs[i].value_custom);
+        break;
       }
 }
 
@@ -634,12 +622,10 @@ lfo_engine::process_internal(plugin_block& block, cv_cv_matrix_mixdown const* mo
       }
     }
 
-    // do this only once for cv plotting because otherwise the graph runs ahead of the audio engine
-    if (block.graph && _need_resample_table_for_graph && (!_is_render_for_cv_graph || !_was_rendered_for_cv_graph))
+    if (block.graph && _need_resample_table_for_graph)
     {
       _static_noise.sample_table(_seed_resample_table_for_graph);
       _need_resample_table_for_graph = false;
-      _was_rendered_for_cv_graph = true;
     } 
 
     if (!block.graph && (shape == wave_shape_type_static_free_1 || shape == wave_shape_type_static_free_2))
@@ -649,7 +635,7 @@ lfo_engine::process_internal(plugin_block& block, cv_cv_matrix_mixdown const* mo
         block.push_modulation_output(modulation_output::make_mod_output_custom_state(
           _global ? -1 : block.voice->state.slot,
           block.module_desc_.info.global,
-          lfo_custom_tag_rand_state,
+          0,
           _seed_resample_table_for_graph));
       }
     }
