@@ -869,11 +869,17 @@ void lfo_engine::process_loop(plugin_block& block, cv_cv_matrix_mixdown const* m
     block.state.own_cv[0][0][f] = _filter_end_value;
 
     bool phase_wrapped = increment_and_wrap_phase(_phase, rate_curve[f], block.sample_rate);
+
+    // dont set the resample flag when graphing because that causes the lfo plot
+    // for free-running stuff to get actually free-running when used in the cv plot.
+    // we don't want that, the current lfo shape should be repeated and updated whenever
+    // the free-running lfo "cycled"
     if (phase_wrapped && (shape == wave_shape_type_static_free_1 || shape == wave_shape_type_static_free_2))
-    {
-      _need_resample_table_for_graph = true;
-      _seed_resample_table_for_graph = _static_noise.sample_table();
-    }
+      if (!block.graph)
+      {
+        _need_resample_table_for_graph = true;
+        _seed_resample_table_for_graph = _static_noise.sample_table();
+      }
 
     bool ref_wrapped = increment_and_wrap_phase(_ref_phase, rate_curve[f], block.sample_rate);
     bool ended = ref_wrapped && Type == type_one_shot || phase_wrapped && Type == type_one_phase;
