@@ -104,6 +104,7 @@ public module_engine {
 
   // graphing
   float _new_phase_for_graph = 0.0f;
+  bool _is_render_for_cv_graph = false;
   bool _need_new_phase_for_graph = false;
   std::uint32_t _seed_resample_table_for_graph = 0;
 
@@ -136,8 +137,7 @@ public:
   void reset_graph(plugin_block const* block, std::vector<mod_out_custom_state> const& custom_outputs, void* context) override;
 
   void process_audio(plugin_block& block) override { process_internal(block, nullptr); }
-  void reset_phase_for_graph(float phase, std::uint32_t state) 
-  { _need_new_phase_for_graph = true; _new_phase_for_graph = phase, _seed_resample_table_for_graph = state; }
+  void reset_phase_for_graph(float phase, std::uint32_t state, bool is_render_for_cv_graph);
   void process_graph(plugin_block& block, std::vector<mod_out_custom_state> const& custom_outputs, void* context) override 
   { process_internal(block, static_cast<cv_cv_matrix_mixdown const*>(context)); }
 };
@@ -538,12 +538,15 @@ lfo_engine::reset_graph(
   float new_ref_phase = 0.0f;
   bool seen_ref_phase = false;
   bool seen_rand_state = false;
+  bool is_render_for_cv_graph = false;
+  bool seen_render_for_cv_graph = false;
 
   // TODO probably also for voice
   if (custom_outputs.size())
     for (int i = (int)custom_outputs.size() - 1; i >= 0; i--)
     {
       if (custom_outputs[i].module_global == block->module_desc_.info.global)
+      {
         if (custom_outputs[i].tag_custom == custom_tag_rand_state)
         {
           seen_rand_state = true;
@@ -554,11 +557,27 @@ lfo_engine::reset_graph(
           seen_ref_phase = true;
           new_ref_phase = custom_outputs[i].value_custom / (float)std::numeric_limits<int>::max();
         }
-      if (seen_rand_state && seen_ref_phase)
+      }
+      else if (custom_outputs[i].tag_custom == custom_out_shared_render_for_cv_graph)
+      {
+        is_render_for_cv_graph = true;
+        seen_render_for_cv_graph = true;
+      }
+      if (seen_rand_state && seen_ref_phase && seen_render_for_cv_graph)
         break;
     }
   if (seen_ref_phase)
-    reset_phase_for_graph(new_ref_phase, new_rand_state);
+    reset_phase_for_graph(new_ref_phase, new_rand_state, is_render_for_cv_graph);
+}
+
+void 
+lfo_engine::reset_phase_for_graph(float phase, std::uint32_t state, bool is_render_for_cv_graph)
+{
+  // TODO remove the bolletjes for the cv
+  _need_new_phase_for_graph = true; 
+  _new_phase_for_graph = phase;
+  _seed_resample_table_for_graph = state; 
+  _is_render_for_cv_graph = is_render_for_cv_graph;
 }
 
 void
@@ -647,7 +666,9 @@ lfo_engine::process_internal(plugin_block& block, cv_cv_matrix_mixdown const* mo
 
     if (block.graph && _need_new_phase_for_graph)
     {
-      _phase = _new_phase_for_graph;
+      // TODO is this all theres to it?
+      if(_is_render_for_cv_graph)
+        _phase = _new_phase_for_graph;
       if(shape == wave_shape_type_static_free_1 || shape == wave_shape_type_static_free_2)
         _static_noise.sample_table(_seed_resample_table_for_graph);
       _need_new_phase_for_graph = false;
