@@ -357,7 +357,7 @@ static graph_data
 render_graph(
   plugin_state const& state, graph_engine* engine, int param, 
   param_topo_mapping const& mapping, 
-  std::vector<mod_out_custom_state> const& custom_outputs, // todo NOT filter on target module
+  std::vector<mod_out_custom_state> const& custom_outputs,
   std::vector<module_output_mapping> const& sources, 
   routing_matrix<param_topo_mapping> const& targets)
 {
@@ -385,14 +385,19 @@ render_graph(
   int voice_release_at = max_dahd / max_dahdrf * params.max_frame_count;
   int ti = state.get_plain_at(map.module_index, map.module_slot, param_target, map.param_slot).step();
 
+  // this is a hint to dependent graph renderers that the paint is part of a cv plot
+  std::vector<mod_out_custom_state> custom_cv_outputs(custom_outputs);
+  custom_cv_outputs.push_back(modulation_output::make_mod_output_custom_state(
+    -1, -1, shared_tag_custom_out_render_for_cv_graph, -1).state.custom);
+
   engine->process_begin(&state, sample_rate, params.max_frame_count, voice_release_at);  
   std::vector<int> relevant_modules({ module_gcv_cv_matrix, module_global_in, module_glfo });
   if(map.module_index == module_vcv_audio_matrix || map.module_index == module_vcv_cv_matrix)
     relevant_modules.insert(relevant_modules.end(), { module_vcv_cv_matrix, module_voice_on_note, module_vlfo, module_env });
   for(int m = 0; m < relevant_modules.size(); m++)
     for(int mi = 0; mi < state.desc().plugin->modules[relevant_modules[m]].info.slot_count; mi++)
-      engine->process_default(relevant_modules[m], mi, custom_outputs, nullptr);
-  auto* block = engine->process_default(map.module_index, map.module_slot, custom_outputs, nullptr);
+      engine->process_default(relevant_modules[m], mi, custom_cv_outputs, nullptr);
+  auto* block = engine->process_default(map.module_index, map.module_slot, custom_cv_outputs, nullptr);
   engine->process_end();
 
   std::string partition = float_to_string(max_total, 1) + " Sec " + targets.items[ti].name;
