@@ -541,7 +541,6 @@ lfo_engine::reset_graph(
   bool is_render_for_cv_graph = false;
   bool seen_render_for_cv_graph = false;
 
-  // TODO probably also for voice
   if (custom_outputs.size())
     for (int i = (int)custom_outputs.size() - 1; i >= 0; i--)
     {
@@ -573,7 +572,6 @@ lfo_engine::reset_graph(
 void 
 lfo_engine::reset_phase_for_graph(float phase, std::uint32_t state, bool is_render_for_cv_graph)
 {
-  // TODO remove the bolletjes for the cv
   _need_new_phase_for_graph = true; 
   _new_phase_for_graph = phase;
   _seed_resample_table_for_graph = state; 
@@ -666,7 +664,6 @@ lfo_engine::process_internal(plugin_block& block, cv_cv_matrix_mixdown const* mo
 
     if (block.graph && _need_new_phase_for_graph)
     {
-      // TODO is this all theres to it?
       if(_is_render_for_cv_graph)
         _phase = _new_phase_for_graph;
       if(shape == wave_shape_type_static_free_1 || shape == wave_shape_type_static_free_2)
