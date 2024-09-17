@@ -36,6 +36,8 @@ V fix the distribution
 V also test the on-note-sampling of glfo
 V also test the on-note (static) random
 V per-voice-rand-seed
+* fix the envs
+* add note key and velo as vismods
 * retest the oneshot lfos
 * test the clap
 * fix the cv paint for envs
@@ -44,6 +46,8 @@ V per-voice-rand-seed
 * retest all the osci rand modes
 * retest all random osci / kps
 * fix all also for the cv graphs
+* make cv sources fit better
+* add a this-is-here-indicator for the cv graph (maybe just a bolletje on the linkerkant)
 
 wishlist:
 global aux 6 not fit cvaudio gui
