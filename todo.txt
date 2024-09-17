@@ -42,9 +42,7 @@ V fix the distribution
 * retest all the osci rand modes
 * retest all random osci / kps
 * per-voice-rand-seed
-* fix per-voice-seed distribution
 * fix all also for the cv graphs
-* actually everything regarding painting random stuff seems effed
 
 wishlist:
 global aux 6 not fit cvaudio gui

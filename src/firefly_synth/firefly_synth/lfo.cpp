@@ -700,7 +700,14 @@ lfo_engine::process_internal(plugin_block& block, cv_cv_matrix_mixdown const* mo
         _static_noise = noise_generator<false>(_per_voice_seed, steps);
         _smooth_noise = noise_generator<true>(_per_voice_seed, steps);
       }
+      
       _per_voice_seed_was_initialized = true;
+      if (!block.graph)
+      {
+        _need_new_phase_for_graph = true;
+        _new_phase_for_graph = _phase;
+        _seed_resample_table_for_graph = _per_voice_seed;
+      }
     }
   }
 
@@ -708,7 +715,7 @@ lfo_engine::process_internal(plugin_block& block, cv_cv_matrix_mixdown const* mo
   {
     if (_is_render_for_cv_graph)
       _phase = _new_phase_for_graph;
-    if (is_noise_free_running(shape))
+    if (noise_needs_continuous_repaint(shape))
       _static_noise.sample_table(_seed_resample_table_for_graph);
     _need_new_phase_for_graph = false;
   }
