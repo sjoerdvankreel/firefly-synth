@@ -33,16 +33,16 @@ V the cv-audio graph is acting weird
 V free-running lfos
 V also for voice
 V fix the distribution
+V also test the on-note-sampling of glfo
+V also test the on-note (static) random
+V per-voice-rand-seed
 * retest the oneshot lfos
 * test the clap
 * fix the cv paint for envs
 * recheck the osci->osci am/fm graph modulation goes it still good?
-* also test the on-note-sampling of glfo
-* also test the on-note (static) random
 * retest all the graphs
 * retest all the osci rand modes
 * retest all random osci / kps
-* per-voice-rand-seed
 * fix all also for the cv graphs
 
 wishlist:

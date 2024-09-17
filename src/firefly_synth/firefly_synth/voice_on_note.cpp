@@ -25,6 +25,7 @@ public module_engine {
 public:
   void process_audio(plugin_block& block) override;
   void reset_audio(plugin_block const* block) override;
+  void reset_graph(plugin_block const* block, std::vector<mod_out_custom_state> const& custom_outputs, void* context) override;
   PB_PREVENT_ACCIDENTAL_COPY(voice_on_note_engine);
 
   // need a different seed for each voice!
@@ -59,10 +60,51 @@ voice_on_note_topo(plugin_topo const* topo, int section)
 void
 voice_on_note_engine::process_audio(plugin_block& block)
 {
-  for(int i = 0; i < on_voice_random_count; i++)
+  for (int i = 0; i < on_voice_random_count; i++)
+  {
     block.state.own_cv[on_voice_random_output_index][i].fill(block.start_frame, block.end_frame, _random_values[i]);
+
+    if(!block.graph)
+      block.push_modulation_output(modulation_output::make_mod_output_custom_state(
+        block.voice->state.slot,
+        block.module_desc_.info.global,
+        i,
+        (int)(_random_values[i] * std::numeric_limits<int>::max())));
+  }
   for (int i = 0; i < _global_outputs.size(); i++)
+  {
     block.state.own_cv[i + on_voice_random_output_index + 1][0].fill(block.start_frame, block.end_frame, _on_note_values[i]);
+
+    if(!block.graph && _global_outputs[i].module_index == module_glfo)
+      block.push_modulation_output(modulation_output::make_mod_output_custom_state(
+        block.voice->state.slot,
+        block.module_desc_.info.global,
+        on_voice_random_count + _global_outputs[i].module_slot,
+        (int)(_on_note_values[i] * std::numeric_limits<int>::max())));
+  }
+}
+
+void 
+voice_on_note_engine::reset_graph(
+  plugin_block const* block, 
+  std::vector<mod_out_custom_state> const& custom_outputs, 
+  void* context)
+{
+  // do reset_audio then overwrite with live values from process_audio
+  reset_audio(block);
+
+  for (int i = 0; i < custom_outputs.size(); i++)
+    if (custom_outputs[i].module_global == block->module_desc_.info.global)
+    {
+      int tag = custom_outputs[i].tag_custom;
+      float val = custom_outputs[i].value_custom / (float)std::numeric_limits<int>::max();
+      if (0 <= tag && tag < on_voice_random_count)
+        _random_values[tag] = val;
+      else // dealing with on-note-global-lfo-N
+        for (int j = 0; j < _global_outputs.size(); j++)
+          if (_global_outputs[j].module_index == module_glfo && _global_outputs[j].module_slot == tag - on_voice_random_count)
+            _on_note_values[j] = val;
+    }
 }
 
 void 
