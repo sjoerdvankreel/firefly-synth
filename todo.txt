@@ -32,7 +32,7 @@ V extra retest the multi-slot cv matrix
 V the cv-audio graph is acting weird
 V free-running lfos
 V also for voice
-* fix the distribution!
+V fix the distribution
 * test the clap
 * fix the cv paint for envs
 * recheck the osci->osci am/fm graph modulation goes it still good?

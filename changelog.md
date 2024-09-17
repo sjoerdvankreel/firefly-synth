@@ -3,6 +3,7 @@
 - Breaking change: noise generators become phase-based sampling functions to prevent drift.
 * This causes small and possibly audible differences for the (free-) static and smooth lfos, sorry, but was needed to keep engine and ui in check.
 - LFO and CV matrix graphs now correctly react to free-running static noise.
+- Bugfix in drawing random numbers for the per-voice-random cv source (they weren't all that random).
 - CV matrix graphs are now animated in all cases, replaced phase indicators (because they were wrong) by a continuous moving signal.
 
 ### September 11, 2024 - V1.9.2.

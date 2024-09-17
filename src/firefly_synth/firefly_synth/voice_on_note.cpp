@@ -13,19 +13,12 @@ using namespace plugin_base;
 
 namespace firefly_synth {
 
-// https://stackoverflow.com/questions/21237905/how-do-i-generate-thread-safe-uniform-random-numbers
-static float 
-thread_random_next() 
-{
-  static thread_local std::mt19937 generator;
-  std::uniform_real_distribution<float> distribution(0.0f, 1.0f);
-  auto result = distribution(generator);
-  assert(0 <= result && result <= 1);
-  return result;
-}
-
 class voice_on_note_engine :
 public module_engine {
+
+  std::mt19937 _rand_generator;
+  std::uniform_real_distribution<float> _rand_distribution;
+
   std::vector<float> _on_note_values;
   std::array<float, on_voice_random_count> _random_values;
   std::vector<module_output_mapping> const _global_outputs;
@@ -33,8 +26,10 @@ public:
   void process_audio(plugin_block& block) override;
   void reset_audio(plugin_block const* block) override;
   PB_PREVENT_ACCIDENTAL_COPY(voice_on_note_engine);
+
+  // need a different seed for each voice!
   voice_on_note_engine(std::vector<module_output_mapping> const& global_outputs) : 
-  _on_note_values(global_outputs.size(), 0.0f), _global_outputs(global_outputs) {}
+  _rand_generator(rand()), _rand_distribution(0.0f, 1.0f), _on_note_values(global_outputs.size(), 0.0f), _global_outputs(global_outputs) {}
 };
 
 module_topo
@@ -73,8 +68,13 @@ voice_on_note_engine::process_audio(plugin_block& block)
 void 
 voice_on_note_engine::reset_audio(plugin_block const* block)
 {   
-  for(int i = 0; i < on_voice_random_count; i++)
-    _random_values[i] = block->graph? (i / (on_voice_random_count - 1.0f)) : thread_random_next();
+  for (int i = 0; i < on_voice_random_count; i++)
+  {
+    // do *not* reset the rand stream itself since that kinda defeats the purpose
+    auto next_draw = _rand_distribution(_rand_generator);
+    assert(0 <= next_draw && next_draw <= 1);
+    _random_values[i] = block->graph ? (i / (on_voice_random_count - 1.0f)) : next_draw;
+  }
   for(int i = 0; i < _global_outputs.size(); i++)
   {
     auto const& o = _global_outputs[i];
