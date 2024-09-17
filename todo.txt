@@ -33,6 +33,7 @@ V the cv-audio graph is acting weird
 V free-running lfos
 V also for voice
 V fix the distribution
+* retest the oneshot lfos
 * test the clap
 * fix the cv paint for envs
 * recheck the osci->osci am/fm graph modulation goes it still good?
