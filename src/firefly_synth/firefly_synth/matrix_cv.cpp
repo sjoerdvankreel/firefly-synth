@@ -456,7 +456,7 @@ cv_matrix_topo(
 
   // need these for repaint on note-random or free-running
   result.dependent_custom_outputs_module_topo_indices = { module_glfo };
-  if (!global) result.dependent_custom_outputs_module_topo_indices = { module_vlfo };
+  if (!global) result.dependent_custom_outputs_module_topo_indices.push_back(module_vlfo);
   result.gui.menu_handler_factory = [](plugin_state* state) {
     return std::make_unique<tidy_matrix_menu_handler>(
       state, 1, param_type, type_off, std::vector<std::vector<int>>({{ param_target, param_source }})); 

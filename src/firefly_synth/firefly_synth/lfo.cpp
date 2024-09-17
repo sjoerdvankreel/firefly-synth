@@ -641,11 +641,12 @@ lfo_engine::process_internal(plugin_block& block, cv_cv_matrix_mixdown const* mo
   }
 
   int steps = block_auto[param_steps][0].step();
+  int seed = block_auto[param_seed][0].step();
+  int shape = block_auto[param_shape][0].step();
+
   if(_global)
   {
     update_block_params(&block);
-    int seed = block_auto[param_seed][0].step();
-    int shape = block_auto[param_shape][0].step();
     if (seed != _prev_global_seed || steps != _prev_global_steps || shape != _prev_global_shape)
     {
       _prev_global_seed = seed;
@@ -661,35 +662,10 @@ lfo_engine::process_internal(plugin_block& block, cv_cv_matrix_mixdown const* mo
         _seed_resample_table_for_graph = _static_noise.state();
       }
     }
-
-    if (block.graph && _need_new_phase_for_graph)
-    {
-      if(_is_render_for_cv_graph)
-        _phase = _new_phase_for_graph;
-      if(shape == wave_shape_type_static_free_1 || shape == wave_shape_type_static_free_2)
-        _static_noise.sample_table(_seed_resample_table_for_graph);
-      _need_new_phase_for_graph = false;
-    } 
-
-    if (!block.graph && _need_new_phase_for_graph)
-    {
-      block.push_modulation_output(modulation_output::make_mod_output_custom_state(
-        _global ? -1 : block.voice->state.slot,
-        block.module_desc_.info.global,
-        custom_tag_ref_phase,
-        (int)(_ref_phase * std::numeric_limits<int>::max())));
-      if(shape == wave_shape_type_static_free_1 || shape == wave_shape_type_static_free_2)
-        block.push_modulation_output(modulation_output::make_mod_output_custom_state(
-          _global ? -1 : block.voice->state.slot,
-          block.module_desc_.info.global,
-          custom_tag_rand_state,
-          _seed_resample_table_for_graph));
-    }
   }
   else
   {
     // cannot do this in reset() because we depend on output of the on-note module
-    int shape = block_auto[param_shape][0].step();
     if (!_per_voice_seed_was_initialized)
     {
       if (is_noise(shape))
@@ -709,6 +685,30 @@ lfo_engine::process_internal(plugin_block& block, cv_cv_matrix_mixdown const* mo
       }
       _per_voice_seed_was_initialized = true;
     }
+  }
+
+  if (block.graph && _need_new_phase_for_graph)
+  {
+    if (_is_render_for_cv_graph)
+      _phase = _new_phase_for_graph;
+    if (shape == wave_shape_type_static_free_1 || shape == wave_shape_type_static_free_2)
+      _static_noise.sample_table(_seed_resample_table_for_graph);
+    _need_new_phase_for_graph = false;
+  }
+
+  if (!block.graph && _need_new_phase_for_graph)
+  {
+    block.push_modulation_output(modulation_output::make_mod_output_custom_state(
+      _global ? -1 : block.voice->state.slot,
+      block.module_desc_.info.global,
+      custom_tag_ref_phase,
+      (int)(_ref_phase * std::numeric_limits<int>::max())));
+    if (shape == wave_shape_type_static_free_1 || shape == wave_shape_type_static_free_2)
+      block.push_modulation_output(modulation_output::make_mod_output_custom_state(
+        _global ? -1 : block.voice->state.slot,
+        block.module_desc_.info.global,
+        custom_tag_rand_state,
+        _seed_resample_table_for_graph));
   }
 
   if(!_global && block.voice->state.sub_voice_count > 1)
