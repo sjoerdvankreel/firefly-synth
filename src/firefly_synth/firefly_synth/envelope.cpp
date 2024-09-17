@@ -85,9 +85,12 @@ public module_engine {
 
 public:
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(env_engine);
-  void reset_audio(plugin_block const* block) override;
+
+  void process(plugin_block& block, cv_cv_matrix_mixdown const* modulation);
   void process_audio(plugin_block& block) override { process(block, nullptr); }
-  void process(plugin_block& block, cv_cv_matrix_mixdown const* modulation); // TODO
+
+  void reset_audio(plugin_block const* block) override;
+  void reset_graph(plugin_block const* block, std::vector<mod_out_custom_state> const& custom_outputs, void* context) override;
 
 private:
 
@@ -114,6 +117,10 @@ private:
   double _slp_rls_splt_bnd = 0;
 
   bool _voice_initialized = false;
+
+  // graphing
+  bool _is_ffwd_run_for_graph = false;
+  float _ffwd_target_total_pos = 0.0f;
 
   static inline double const slope_min = 0.0001;
   static inline double const slope_max = 0.9999;
@@ -542,6 +549,26 @@ env_engine::reset_audio(plugin_block const* block)
   _filter.init(block->sample_rate, filter / 1000.0f);
 }
 
+void 
+env_engine::reset_graph(
+  plugin_block const* block, 
+  std::vector<mod_out_custom_state> const& custom_outputs, 
+  void* context)
+{
+  reset_audio(block);
+
+  // now forward the entire state to where the audio engine is
+  // this seems too complicated to derive in any other way
+  if (custom_outputs.size())
+    for (int i = (int)custom_outputs.size() - 1; i >= 0; i--)
+      if (custom_outputs[i].module_global == block->module_desc_.info.global)
+      {
+        _is_ffwd_run_for_graph = true;
+        _ffwd_target_total_pos = custom_outputs[i].value_custom / (float)std::numeric_limits<int>::max();
+        break;
+      }
+}
+
 void
 env_engine::init_slope_exp(double slope, double& exp)
 {
@@ -584,12 +611,23 @@ env_engine::process(plugin_block& block, cv_cv_matrix_mixdown const* modulation)
   // only want the mod outputs for the actual audio engine
   if (block.graph) return;
 
+  // need to push the total pos for graph (for the moving cv matrix signal)
+  // since sample rates are different for audio and GUI, need a normalized float value
+  // reset_graph then needs to derive the env state by just running the entire thing to that position
+  block.push_modulation_output(modulation_output::make_mod_output_custom_state(
+    block.voice->state.slot,
+    block.module_desc_.info.global,
+    0,
+    (int)(_total_pos * std::numeric_limits<int>::max())));
+
+  // drop the mod indicators when we ended
   if (_stage == env_stage::end) return;
   float flt = block.state.own_block_automation[param_filter][0].real() / 1000.0f;
+  float normalized_pos = std::clamp(_total_pos / (_dly + _att + _hld + _dcy + _rls + flt), 0.0, 1.0);
   block.push_modulation_output(modulation_output::make_mod_output_cv_state(
     block.voice->state.slot,
     block.module_desc_.info.global,
-    std::clamp(_total_pos / (_dly + _att + _hld + _dcy + _rls + flt), 0.0, 1.0)));
+    normalized_pos));
 }
 
 template <bool Monophonic>
