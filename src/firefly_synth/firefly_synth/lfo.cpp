@@ -47,9 +47,26 @@ is_noise_not_voice_rand(int shape)
     shape == wave_shape_type_static_free_1;
 }
 
+static bool 
+is_noise_free_running(int shape)
+{
+  return shape == wave_shape_type_static_free_1 ||
+    shape == wave_shape_type_static_free_2;
+}
+
 static bool
 is_noise(int shape) 
-{ return is_noise_voice_rand(shape) || is_noise_not_voice_rand(shape); }
+{ 
+  return is_noise_voice_rand(shape) || 
+    is_noise_not_voice_rand(shape); 
+}
+
+static bool
+noise_needs_continuous_repaint(int shape)
+{
+  return is_noise_free_running(shape) ||
+    is_noise_voice_rand(shape);
+}
 
 static std::vector<list_item>
 type_items()
@@ -691,7 +708,7 @@ lfo_engine::process_internal(plugin_block& block, cv_cv_matrix_mixdown const* mo
   {
     if (_is_render_for_cv_graph)
       _phase = _new_phase_for_graph;
-    if (shape == wave_shape_type_static_free_1 || shape == wave_shape_type_static_free_2)
+    if (is_noise_free_running(shape))
       _static_noise.sample_table(_seed_resample_table_for_graph);
     _need_new_phase_for_graph = false;
   }
@@ -703,7 +720,7 @@ lfo_engine::process_internal(plugin_block& block, cv_cv_matrix_mixdown const* mo
       block.module_desc_.info.global,
       custom_tag_ref_phase,
       (int)(_ref_phase * std::numeric_limits<int>::max())));
-    if (shape == wave_shape_type_static_free_1 || shape == wave_shape_type_static_free_2)
+    if (noise_needs_continuous_repaint(shape))
       block.push_modulation_output(modulation_output::make_mod_output_custom_state(
         _global ? -1 : block.voice->state.slot,
         block.module_desc_.info.global,
@@ -924,7 +941,7 @@ void lfo_engine::process_loop(plugin_block& block, cv_cv_matrix_mixdown const* m
     {
       _need_new_phase_for_graph = true;
       _new_phase_for_graph = _phase;
-      if(shape == wave_shape_type_static_free_1 || shape == wave_shape_type_static_free_2)
+      if(is_noise_free_running(shape))
         _seed_resample_table_for_graph = _static_noise.sample_table();
     }
 

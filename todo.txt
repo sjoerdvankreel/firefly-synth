@@ -31,7 +31,10 @@ V stuff goes not good when cv->cv mod by free-rand
 V extra retest the multi-slot cv matrix
 V the cv-audio graph is acting weird
 V free-running lfos
-+ also for voice
+V also for voice
+* fix the distribution!
+* test the clap
+* fix the cv paint for envs
 * recheck the osci->osci am/fm graph modulation goes it still good?
 * also test the on-note-sampling of glfo
 * also test the on-note (static) random
