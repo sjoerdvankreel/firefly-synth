@@ -86,10 +86,11 @@ public module_engine {
 public:
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(env_engine);
 
+  void reset_audio(plugin_block const* block) override;
   void process(plugin_block& block, cv_cv_matrix_mixdown const* modulation);
   void process_audio(plugin_block& block) override { process(block, nullptr); }
 
-  void reset_audio(plugin_block const* block) override;
+  void process_graph(plugin_block& block, std::vector<mod_out_custom_state> const& custom_outputs, void* context) override;
   void reset_graph(plugin_block const* block, std::vector<mod_out_custom_state> const& custom_outputs, void* context) override;
 
 private:
@@ -119,6 +120,7 @@ private:
   bool _voice_initialized = false;
 
   // graphing
+  int _ffwd_stopped_at_samples = -1;
   bool _is_ffwd_run_for_graph = false;
   float _ffwd_target_total_pos = 0.0f;
 
@@ -557,7 +559,11 @@ env_engine::reset_graph(
 {
   reset_audio(block);
 
-  // now forward the entire state to where the audio engine is
+  _ffwd_stopped_at_samples = -1;
+  _ffwd_target_total_pos = 0.0f;
+  _is_ffwd_run_for_graph = false;
+
+  // see how much to forward
   // this seems too complicated to derive in any other way
   if (custom_outputs.size())
     for (int i = (int)custom_outputs.size() - 1; i >= 0; i--)
@@ -567,6 +573,20 @@ env_engine::reset_graph(
         _ffwd_target_total_pos = custom_outputs[i].value_custom / (float)std::numeric_limits<int>::max();
         break;
       }
+}
+
+void 
+env_engine::process_graph(
+  plugin_block& block, 
+  std::vector<mod_out_custom_state> const& custom_outputs, 
+  void* context)
+{
+  process_audio(block);
+  if (!_is_ffwd_run_for_graph || _ffwd_stopped_at_samples < 0) return;
+  for (int f = block.start_frame; f < block.end_frame - _ffwd_stopped_at_samples; f++)
+    block.state.own_cv[0][0][f] = block.state.own_cv[0][0][f + _ffwd_stopped_at_samples];
+  for (int f = block.end_frame - _ffwd_stopped_at_samples; f < block.end_frame; f++)
+    block.state.own_cv[0][0][f] = 0.0f;
 }
 
 void
@@ -612,8 +632,8 @@ env_engine::process(plugin_block& block, cv_cv_matrix_mixdown const* modulation)
   if (block.graph) return;
 
   // need to push the total pos for graph (for the moving cv matrix signal)
-  // since sample rates are different for audio and GUI, need a normalized float value
-  // reset_graph then needs to derive the env state by just running the entire thing to that position
+  // since sample rates are different for audio and GUI, need a value in seconds not frames
+  // reset_graph+render_graph then need to derive the env state by just truncating the entire thing to that position
   block.push_modulation_output(modulation_output::make_mod_output_custom_state(
     block.voice->state.slot,
     block.module_desc_.info.global,
@@ -748,6 +768,10 @@ void env_engine::process_mono_type_sync_trigger_mode(plugin_block& block, cv_cv_
 
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
+    if (_is_ffwd_run_for_graph)
+      if (_total_pos >= _ffwd_target_total_pos && _ffwd_stopped_at_samples == -1)
+        _ffwd_stopped_at_samples = _total_pos * block.sample_rate;
+
     if (_stage == env_stage::end)
     {
       _current_level = 0;

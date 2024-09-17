@@ -27,7 +27,7 @@ public:
   virtual void reset_audio(plugin_block const* block) = 0;
 
   // careful -- ui thread only
-  // these are meant to do some optional preprocessing then reroute to audio
+  // these are meant to do some optional pre/postprocessing and reroute to audio
   virtual void process_graph(
     plugin_block& block, 
     std::vector<mod_out_custom_state> const& custom_outputs, 
