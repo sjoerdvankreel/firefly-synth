@@ -379,6 +379,8 @@ render_graph(
     -1, -1, custom_out_shared_render_for_cv_graph, -1).state.custom);
 
   engine->process_begin(&state, sample_rate, params.max_frame_count, voice_release_at);  
+
+  // TODO is this processing order correct ?
   std::vector<int> relevant_modules({ module_gcv_cv_matrix, module_global_in, module_glfo });
   if(map.module_index == module_vcv_audio_matrix || map.module_index == module_vcv_cv_matrix)
     relevant_modules.insert(relevant_modules.end(), { module_vcv_cv_matrix, module_voice_on_note, module_vlfo, module_env });
