@@ -40,16 +40,15 @@ V fix the envs -> not render highest voice index but latest start time
 V fix the cv paint for envs
 V recheck the osci->osci am/fm graph modulation goes it still good?
 V retest the oneshot lfos
-* retest the legato/retrig envs
+V retest the legato/retrig envs
+V fix all also for the cv graphs
+* add a this-is-here-indicator for the cv graph (maybe just a bolletje on the linkerkant)
 * retest everything once the code seems stable
 * add note key and velo as vismods also midi
 * test the clap
 * retest all the graphs
 * retest all the osci rand modes
 * retest all random osci / kps
-* fix all also for the cv graphs
-* make cv sources fit better
-* add a this-is-here-indicator for the cv graph (maybe just a bolletje on the linkerkant)
 
 wishlist:
 global aux 6 not fit cvaudio gui
