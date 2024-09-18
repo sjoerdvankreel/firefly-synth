@@ -589,7 +589,7 @@ env_engine::reset_graph(
         if (!seen_multitrig && custom_outputs[i].tag_custom == custom_tag_multitrig_level)
         {
           seen_multitrig = true;
-          float trig_level = custom_outputs[i].value_custom / std::numeric_limits<int>::max();
+          float trig_level = custom_outputs[i].value_custom / (float)std::numeric_limits<int>::max();
           _current_level = trig_level;
           _multitrig_level = trig_level;
         }
