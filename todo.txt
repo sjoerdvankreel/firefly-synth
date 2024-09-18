@@ -41,6 +41,7 @@ V fix the cv paint for envs
 V recheck the osci->osci am/fm graph modulation goes it still good?
 V retest the oneshot lfos
 * retest the legato/retrig envs
+* retest everything once the code seems stable
 * add note key and velo as vismods also midi
 * test the clap
 * retest all the graphs

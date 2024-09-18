@@ -824,6 +824,7 @@ void env_engine::process_mono_type_sync_trigger_mode(plugin_block& block, cv_cv_
           if(_stage < env_stage::release)
           {
             _stage_pos = 0;
+            _total_pos = 0;
             _stage = env_stage::delay;
             if constexpr (Trigger == trigger_retrig)
             {
