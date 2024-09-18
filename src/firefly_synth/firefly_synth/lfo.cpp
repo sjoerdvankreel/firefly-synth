@@ -988,8 +988,15 @@ void lfo_engine::process_loop(plugin_block& block, cv_cv_matrix_mixdown const* m
     {
       _need_new_phase_for_graph = true;
       _new_ref_phase_for_graph = _ref_phase;
-      if(is_noise_free_running(shape))
+      if (is_noise_free_running(shape))
         _seed_resample_table_for_graph = _static_noise.sample_table();
+      else if (is_noise_voice_rand(shape))
+      {
+        if (shape == wave_shape_type_smooth_2)
+          _seed_resample_table_for_graph = _smooth_noise.state();
+        else
+          _seed_resample_table_for_graph = _static_noise.state();
+      }
     }
 
     bool ended = ref_wrapped && Type == type_one_shot || phase_wrapped && Type == type_one_phase;
