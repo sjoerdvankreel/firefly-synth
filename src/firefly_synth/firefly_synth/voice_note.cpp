@@ -51,23 +51,27 @@ voice_note_engine::reset_graph(
   reset_audio(block);
 
   // fix to current live values
+  // backwards loop, outputs are sorted, latest-in-time are at the end
   bool seen_velo = false;
   bool seen_pitch = false;
-  for (int i = 0; i < custom_outputs.size(); i++)
-    if (custom_outputs[i].module_global == block->module_desc_.info.global)
+  if (custom_outputs.size())
+    for (int i = (int)custom_outputs.size() - 1; i >= 0; i--)
     {
-      if (!seen_velo && custom_outputs[i].tag_custom == custom_tag_velo)
+      if (custom_outputs[i].module_global == block->module_desc_.info.global)
       {
-        seen_velo = true;
-        _graph_velo = *reinterpret_cast<float const*>(&custom_outputs[i].value_custom);
+        if (!seen_velo && custom_outputs[i].tag_custom == custom_tag_velo)
+        {
+          seen_velo = true;
+          _graph_velo = *reinterpret_cast<float const*>(&custom_outputs[i].value_custom);
+        }
+        if (!seen_pitch && custom_outputs[i].tag_custom == custom_tag_pitch)
+        {
+          seen_pitch = true;
+          _graph_pitch = *reinterpret_cast<float const*>(&custom_outputs[i].value_custom);
+        }
+        if (seen_velo && seen_pitch)
+          break;
       }
-      if (!seen_pitch && custom_outputs[i].tag_custom == custom_tag_pitch)
-      {
-        seen_pitch = true;
-        _graph_pitch = *reinterpret_cast<float const*>(&custom_outputs[i].value_custom);
-      }
-      if (seen_velo && seen_pitch)
-        break;
     }
 }
 

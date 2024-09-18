@@ -66,18 +66,21 @@ voice_on_note_engine::reset_graph(
   // do reset_audio then overwrite with live values from process_audio
   reset_audio(block);
 
-  for (int i = 0; i < custom_outputs.size(); i++)
-    if (custom_outputs[i].module_global == block->module_desc_.info.global)
-    {
-      int tag = custom_outputs[i].tag_custom;
-      float val = custom_outputs[i].value_custom / (float)std::numeric_limits<int>::max();
-      if (0 <= tag && tag < on_voice_random_count)
-        _random_values[tag] = val;
-      else // dealing with on-note-global-lfo-N
-        for (int j = 0; j < _global_outputs.size(); j++)
-          if (_global_outputs[j].module_index == module_glfo && _global_outputs[j].module_slot == tag - on_voice_random_count)
-            _on_note_values[j] = val;
-    }
+  // fix to current live values
+  // backwards loop, outputs are sorted, latest-in-time are at the end
+  if (custom_outputs.size())
+    for (int i = (int)custom_outputs.size() - 1; i >= 0; i--)
+      if (custom_outputs[i].module_global == block->module_desc_.info.global)
+      {
+        int tag = custom_outputs[i].tag_custom;
+        float val = custom_outputs[i].value_custom / (float)std::numeric_limits<int>::max();
+        if (0 <= tag && tag < on_voice_random_count)
+          _random_values[tag] = val;
+        else // dealing with on-note-global-lfo-N
+          for (int j = 0; j < _global_outputs.size(); j++)
+            if (_global_outputs[j].module_index == module_glfo && _global_outputs[j].module_slot == tag - on_voice_random_count)
+              _on_note_values[j] = val;
+      }
 }
 
 void 
