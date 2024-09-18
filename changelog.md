@@ -2,7 +2,7 @@
 
 - Bugfix in generating random numbers for the per-voice-random cv source (they weren't all that random).
 - Breaking change: lfo noise generators become phase-based sampling functions to prevent drift.
-* This causes small and possibly audible differences for the (free-) static and smooth lfos, sorry, but was needed to keep engine and ui in check.
+* This causes small and possibly audible differences for the (free-running-) static and smooth lfos, sorry, but was needed to keep engine and ui in check.
 * On the upside, they now correctly respond to phase offset.
 - LFO graphs now respond to per-voice-seeded random generators.
 - LFO and CV graphs now respond to free-running random generators.

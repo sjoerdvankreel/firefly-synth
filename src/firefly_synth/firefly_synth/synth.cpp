@@ -81,7 +81,7 @@ make_module_graph_params(int module,
   std::vector<int> const& dependent_module_indices)
 {
   module_graph_params result;
-  result.fps = 10;
+  result.fps = 20;
   result.module_index = module;
   result.render_on_tweak = true;
   result.render_on_tab_change = true;
@@ -120,7 +120,7 @@ make_main_graph_section(plugin_gui* gui, lnf* lnf, component_store store)
   params.name_in_theme = main_graph_name;
   params.scale_type = graph_params::scale_w;
   module_graph_params module_params;
-  module_params.fps = 10;
+  module_params.fps = 20;
   module_params.module_index = -1;
   module_params.render_on_tweak = true;
   module_params.render_on_tab_change = false;

@@ -44,11 +44,15 @@ V retest the legato/retrig envs
 V fix all also for the cv graphs
 V add note key and velo as vismods
 V add a this-is-here-indicator for the cv graph (maybe just a bolletje on the linkerkant)
-* retest everything once the code seems stable
-* test the clap
-* retest all the graphs
-* retest all the osci rand modes
+V retest everything once the code seems stable
+V test the clap
+V retest all the graphs
+V retest all the osci rand modes
+* smooth 2 not react
+* recheck the 20 fps perf
 * retest all random osci / kps
+* remake existing vismod demos
+* make a new one for free-run and on-voice-rand
 
 wishlist:
 make a patch cleanup button
