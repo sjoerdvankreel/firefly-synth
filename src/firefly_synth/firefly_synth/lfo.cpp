@@ -20,7 +20,7 @@ static float const max_filter_time_ms = 500;
 static float const log_half = std::log(0.5f);
 
 // need for realtime animation
-enum { custom_tag_ref_phase, custom_tag_rand_state };
+enum { custom_tag_ref_phase, custom_tag_rand_state, custom_tag_end_value };
 
 enum class lfo_stage { cycle, filter, end };
 enum { scratch_rate, scratch_count };
@@ -154,7 +154,6 @@ public:
   void reset_graph(plugin_block const* block, std::vector<mod_out_custom_state> const& custom_outputs, void* context) override;
 
   void process_audio(plugin_block& block) override { process_internal(block, nullptr); }
-  void reset_phase_for_graph(float phase, std::uint32_t state, bool is_render_for_cv_graph);
   void process_graph(plugin_block& block, std::vector<mod_out_custom_state> const& custom_outputs, void* context) override 
   { process_internal(block, static_cast<cv_cv_matrix_mixdown const*>(context)); }
 };
@@ -553,9 +552,12 @@ lfo_engine::reset_graph(
   reset_audio(block);
   int new_rand_state = 0;
   float new_ref_phase = 0.0f;
+  float new_end_value = 0.0f;
+  bool is_render_for_cv_graph = false;
+
+  bool seen_end_value = false;
   bool seen_ref_phase = false;
   bool seen_rand_state = false;
-  bool is_render_for_cv_graph = false;
   bool seen_render_for_cv_graph = false;
 
   // backwards loop, outputs are sorted, latest-in-time are at the end
@@ -574,26 +576,33 @@ lfo_engine::reset_graph(
           seen_ref_phase = true;
           new_ref_phase = custom_outputs[i].value_custom / (float)std::numeric_limits<int>::max();
         }
+        if (!seen_end_value && custom_outputs[i].tag_custom == custom_tag_end_value)
+        {
+          seen_end_value = true;
+          new_end_value = custom_outputs[i].value_custom / (float)std::numeric_limits<int>::max();
+        }
       }
       if (!seen_render_for_cv_graph && custom_outputs[i].tag_custom == custom_out_shared_render_for_cv_graph)
       {
         is_render_for_cv_graph = true;
         seen_render_for_cv_graph = true;
       }
-      if (seen_rand_state && seen_ref_phase && seen_render_for_cv_graph)
+      if (seen_rand_state && seen_ref_phase && seen_render_for_cv_graph && seen_end_value)
         break;
     }
-  if (seen_ref_phase)
-    reset_phase_for_graph(new_ref_phase, new_rand_state, is_render_for_cv_graph);
-}
 
-void 
-lfo_engine::reset_phase_for_graph(float phase, std::uint32_t state, bool is_render_for_cv_graph)
-{
-  _need_new_phase_for_graph = true; 
-  _new_ref_phase_for_graph = phase;
-  _seed_resample_table_for_graph = state; 
-  _is_render_for_cv_graph = is_render_for_cv_graph;
+  if (seen_ref_phase)
+  {
+    _need_new_phase_for_graph = true;
+    _new_ref_phase_for_graph = new_ref_phase;
+    _seed_resample_table_for_graph = new_rand_state;
+    _is_render_for_cv_graph = is_render_for_cv_graph;
+  }
+  if (seen_end_value && _is_render_for_cv_graph)
+  {
+    _stage = lfo_stage::end;
+    _filter_end_value = check_unipolar(new_end_value);
+  }
 }
 
 void
@@ -654,7 +663,23 @@ lfo_engine::process_internal(plugin_block& block, cv_cv_matrix_mixdown const* mo
 
   if(_stage == lfo_stage::end)
   {
+    // need to keep updating the ui in this case
+    // as long as the phase is wrapping we'll push out
+    // notifications but if we dont keep reporting the end
+    // value then ui will reset (because it is not sticky)
     block.state.own_cv[0][0].fill(block.start_frame, block.end_frame, _filter_end_value);
+    if (block.graph) return;
+
+    block.push_modulation_output(modulation_output::make_mod_output_custom_state(
+      _global ? -1 : block.voice->state.slot,
+      block.module_desc_.info.global,
+      custom_tag_ref_phase,
+      (int)(_ref_phase * std::numeric_limits<int>::max())));
+    block.push_modulation_output(modulation_output::make_mod_output_custom_state(
+      _global ? -1 : block.voice->state.slot,
+      block.module_desc_.info.global,
+      custom_tag_end_value,
+      (int)(_filter_end_value * std::numeric_limits<int>::max())));
     return; 
   }
 

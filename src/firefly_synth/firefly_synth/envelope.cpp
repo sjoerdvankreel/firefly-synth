@@ -625,7 +625,7 @@ env_engine::process(plugin_block& block, cv_cv_matrix_mixdown const* modulation)
   {
     block.state.own_cv[0][0].fill(block.start_frame, block.end_frame, 0.0f);
     // CAUTION: microseconds
-    if(_stage == env_stage::end)
+    if(_stage == env_stage::end && !block.graph)
       block.push_modulation_output(modulation_output::make_mod_output_custom_state(
         block.voice->state.slot,
         block.module_desc_.info.global,

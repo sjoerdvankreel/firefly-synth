@@ -39,8 +39,9 @@ V per-voice-rand-seed
 V fix the envs -> not render highest voice index but latest start time
 V fix the cv paint for envs
 V recheck the osci->osci am/fm graph modulation goes it still good?
+V retest the oneshot lfos
+* retest the legato/retrig envs
 * add note key and velo as vismods also midi
-* retest the oneshot lfos
 * test the clap
 * retest all the graphs
 * retest all the osci rand modes

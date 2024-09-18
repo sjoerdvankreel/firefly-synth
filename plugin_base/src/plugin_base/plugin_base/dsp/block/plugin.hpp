@@ -145,8 +145,10 @@ struct plugin_block final {
   float pitch_to_freq_with_tuning(float pitch);
 
   void set_out_param(int param, int slot, double raw) const;
+
+  // this is meant for audio->ui communication
   void push_modulation_output(modulation_output const& output)
-  { modulation_outputs->push_back(output); }
+  { assert(!graph); modulation_outputs->push_back(output); }
   
   template <domain_type DomainType>
   float normalized_to_raw_fast(int module_, int param_, float normalized) const;
