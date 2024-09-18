@@ -1,13 +1,14 @@
-### ?, ? - V1.9.3.
+### September 18, 2024 - V1.9.3.
 
 - Bugfix in drawing random numbers for the per-voice-random cv source (they weren't all that random).
 - Breaking change: lfo noise generators become phase-based sampling functions to prevent drift.
 * This causes small and possibly audible differences for the (free-) static and smooth lfos, sorry, but was needed to keep engine and ui in check.
 * On the upside, they now correctly respond to phase offset.
-- LFO graphs now correctly respond to per-voice-seeded random generators.
-- LFO and CV graphs now correctly respond to free-running random generators.
-- Envelope and CV graphs now correctly respond to retriggered/multi-triggered envelopes.
-- CV graphs now correctly respond to on-note-global-lfo, on-voice-random-seed, MIDI key and velocity. TODO the rest
+- LFO graphs now respond to per-voice-seeded random generators.
+- LFO and CV graphs now respond to free-running random generators.
+- Envelope and CV graphs now respond to retriggered/multi-triggered envelopes.
+- CV graphs now respond to on-note-global-lfo, on-voice-random-seed, MIDI key and velocity.
+* Not! to MICI CC and CLAP modulation signals, maybe later.
 - CV graphs are now animated in all cases, replaced phase indicators (because they were wrong) by a continuous moving signal.
 
 ### September 11, 2024 - V1.9.2.
