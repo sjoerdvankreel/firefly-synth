@@ -49,7 +49,8 @@ V test the clap
 V retest all the graphs
 V retest all the osci rand modes
 V smooth 2 not react
-* recheck the 20 fps perf
+V recheck the 20 fps perf
+* 4 OUT OF 6 RANDOM LFO MODES ARE F'ED WRT PAINTING
 * retest all random osci / kps
 * remake existing vismod demos
 * make a new one for free-run and on-voice-rand
