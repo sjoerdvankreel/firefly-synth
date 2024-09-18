@@ -43,7 +43,7 @@ V retest the oneshot lfos
 V retest the legato/retrig envs
 V fix all also for the cv graphs
 V add note key and velo as vismods
-* add a this-is-here-indicator for the cv graph (maybe just a bolletje on the linkerkant)
+V add a this-is-here-indicator for the cv graph (maybe just a bolletje on the linkerkant)
 * retest everything once the code seems stable
 * test the clap
 * retest all the graphs
