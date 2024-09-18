@@ -7,7 +7,7 @@
 - LFO graphs now correctly respond to per-voice-seeded random generators.
 - LFO and CV graphs now correctly respond to free-running random generators.
 - Envelope and CV graphs now correctly respond to retriggered/multi-triggered envelopes.
-- CV graphs now correctly respond to on-note-global-lfo and on-voice-random-seed. TODO also the rest
+- CV graphs now correctly respond to on-note-global-lfo, on-voice-random-seed, MIDI key and velocity. TODO the rest
 - CV graphs are now animated in all cases, replaced phase indicators (because they were wrong) by a continuous moving signal.
 
 ### September 11, 2024 - V1.9.2.

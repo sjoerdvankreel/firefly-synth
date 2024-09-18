@@ -12,13 +12,19 @@ using namespace plugin_base;
 
 namespace firefly_synth {
 
+enum { custom_tag_pitch, custom_tag_velo };
 enum { output_key_pitch, output_velo, output_count };
 
 class voice_note_engine :
 public module_engine {
+
+  float _graph_velo = 0.0f;
+  float _graph_pitch = 0.0f;
+
 public:
   void process_audio(plugin_block& block) override;
   void reset_audio(plugin_block const*) override {}
+  void reset_graph(plugin_block const* block, std::vector<mod_out_custom_state> const& custom_outputs, void* context) override;
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(voice_note_engine);
 };
 
@@ -36,15 +42,70 @@ voice_note_topo(int section)
   return result;
 }
 
+void 
+voice_note_engine::reset_graph(
+  plugin_block const* block, 
+  std::vector<mod_out_custom_state> const& custom_outputs, 
+  void* context)
+{
+  reset_audio(block);
+
+  // fix to current live values
+  bool seen_velo = false;
+  bool seen_pitch = false;
+  for (int i = 0; i < custom_outputs.size(); i++)
+    if (custom_outputs[i].module_global == block->module_desc_.info.global)
+    {
+      if (!seen_velo && custom_outputs[i].tag_custom == custom_tag_velo)
+      {
+        seen_velo = true;
+        _graph_velo = *reinterpret_cast<float const*>(&custom_outputs[i].value_custom);
+      }
+      if (!seen_pitch && custom_outputs[i].tag_custom == custom_tag_pitch)
+      {
+        seen_pitch = true;
+        _graph_pitch = *reinterpret_cast<float const*>(&custom_outputs[i].value_custom);
+      }
+      if (seen_velo && seen_pitch)
+        break;
+    }
+}
+
 void
 voice_note_engine::process_audio(plugin_block& block)
 {  
-  block.state.own_cv[output_velo][0].fill(block.start_frame, block.end_frame, block.voice->state.velocity);
-  // we don't have a default 12-tet tuning table
-  if(block.current_tuning_mode == engine_tuning_mode_no_tuning)
-    block.state.own_cv[output_key_pitch][0].fill(block.start_frame, block.end_frame, block.voice->state.note_id_.key / 127.0f);
+  float velo;
+  float pitch;
+
+  if (block.graph)
+  {
+    velo = _graph_velo;
+    pitch = _graph_pitch;
+  }
   else
-    block.state.own_cv[output_key_pitch][0].fill(block.start_frame, block.end_frame, (*block.current_tuning)[block.voice->state.note_id_.key].retuned_semis / 127.0f);
+  {
+    velo = block.voice->state.velocity;
+    pitch = block.voice->state.note_id_.key / 127.0f;
+    // we don't have a default 12-tet tuning table
+    if (block.current_tuning_mode != engine_tuning_mode_no_tuning)
+      pitch = (*block.current_tuning)[block.voice->state.note_id_.key].retuned_semis / 127.0f;
+  }
+
+  block.state.own_cv[output_velo][0].fill(block.start_frame, block.end_frame, velo);
+  block.state.own_cv[output_key_pitch][0].fill(block.start_frame, block.end_frame, pitch);
+
+  if (block.graph) return;
+
+  block.push_modulation_output(modulation_output::make_mod_output_custom_state(
+    block.voice->state.slot,
+    block.module_desc_.info.global,
+    custom_tag_pitch,
+    *reinterpret_cast<int*>(&pitch)));
+  block.push_modulation_output(modulation_output::make_mod_output_custom_state(
+    block.voice->state.slot,
+    block.module_desc_.info.global,
+    custom_tag_velo,
+    *reinterpret_cast<int*>(&velo)));
 }
 
 }

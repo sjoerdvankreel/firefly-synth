@@ -57,33 +57,6 @@ voice_on_note_topo(plugin_topo const* topo, int section)
   return result;
 }
 
-void
-voice_on_note_engine::process_audio(plugin_block& block)
-{
-  for (int i = 0; i < on_voice_random_count; i++)
-  {
-    block.state.own_cv[on_voice_random_output_index][i].fill(block.start_frame, block.end_frame, _random_values[i]);
-
-    if(!block.graph)
-      block.push_modulation_output(modulation_output::make_mod_output_custom_state(
-        block.voice->state.slot,
-        block.module_desc_.info.global,
-        i,
-        (int)(_random_values[i] * std::numeric_limits<int>::max())));
-  }
-  for (int i = 0; i < _global_outputs.size(); i++)
-  {
-    block.state.own_cv[i + on_voice_random_output_index + 1][0].fill(block.start_frame, block.end_frame, _on_note_values[i]);
-
-    if(!block.graph && _global_outputs[i].module_index == module_glfo)
-      block.push_modulation_output(modulation_output::make_mod_output_custom_state(
-        block.voice->state.slot,
-        block.module_desc_.info.global,
-        on_voice_random_count + _global_outputs[i].module_slot,
-        (int)(_on_note_values[i] * std::numeric_limits<int>::max())));
-  }
-}
-
 void 
 voice_on_note_engine::reset_graph(
   plugin_block const* block, 
@@ -121,6 +94,33 @@ voice_on_note_engine::reset_audio(plugin_block const* block)
   {
     auto const& o = _global_outputs[i];
     _on_note_values[i] = block->state.all_global_cv[o.module_index][o.module_slot][o.output_index][o.output_slot][block->start_frame];
+  }
+}
+
+void
+voice_on_note_engine::process_audio(plugin_block& block)
+{
+  for (int i = 0; i < on_voice_random_count; i++)
+  {
+    block.state.own_cv[on_voice_random_output_index][i].fill(block.start_frame, block.end_frame, _random_values[i]);
+
+    if (!block.graph)
+      block.push_modulation_output(modulation_output::make_mod_output_custom_state(
+        block.voice->state.slot,
+        block.module_desc_.info.global,
+        i,
+        (int)(_random_values[i] * std::numeric_limits<int>::max())));
+  }
+  for (int i = 0; i < _global_outputs.size(); i++)
+  {
+    block.state.own_cv[i + on_voice_random_output_index + 1][0].fill(block.start_frame, block.end_frame, _on_note_values[i]);
+
+    if (!block.graph && _global_outputs[i].module_index == module_glfo)
+      block.push_modulation_output(modulation_output::make_mod_output_custom_state(
+        block.voice->state.slot,
+        block.module_desc_.info.global,
+        on_voice_random_count + _global_outputs[i].module_slot,
+        (int)(_on_note_values[i] * std::numeric_limits<int>::max())));
   }
 }
 
