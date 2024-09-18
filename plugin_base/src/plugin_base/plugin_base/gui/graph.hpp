@@ -27,6 +27,7 @@ struct module_graph_params
   bool render_on_tab_change = false;
   bool render_on_module_mouse_enter = false;
   bool hover_selects_different_graph = false; // for cv matrices
+  float fixed_graph_mod_indicator_pos = -1.0f; // for cv matrices
   std::vector<int> render_on_param_mouse_enter_modules = {};
   // trigger also on changes in these
   std::vector<int> dependent_module_indices = {};
@@ -55,6 +56,10 @@ protected:
   // anything really, but currently used for free-running or continuous-update-seed random lfos
   double _custom_outputs_activated = {};
   std::vector<mod_out_custom_state> _custom_outputs = {};
+  
+  // its probably better to merge graph and module_graph
+  // cant think of anything that is a "plain" graph
+  virtual float fixed_graph_mod_indicator_pos() const { return -1.0f; }
 
 public:
   void render(graph_data const& data);
@@ -84,6 +89,10 @@ public juce::SettableTooltipClient
 
   bool render_if_dirty();
   void request_rerender(int param, bool hover);
+
+protected:
+  float fixed_graph_mod_indicator_pos() const override
+  { return _module_params.fixed_graph_mod_indicator_pos; }
 
 public:
   ~module_graph();

@@ -819,13 +819,6 @@ cv_matrix_engine_base::perform_mixdown(plugin_block& block, int module, int slot
         mod_output_usages[r].param_global,
         (*mod_output_usages[r].modulated_curve_ptr)[block.end_frame - 1]));
     }
-
-  // always push position_normalized at 0 since the graph itself is moving
-  // and the very first value represents where we are currently at
-  block.push_modulation_output(modulation_output::make_mod_output_cv_state(
-    _global ? -1 : block.voice->state.slot,
-    block.module_desc_.info.global,
-    0.0f));
 }
 
 }

@@ -462,6 +462,13 @@ graph::paint(Graphics& g)
     float y = (1 - std::clamp(_data.series()[point], 0.0f, 1.0f)) * h;
     g.fillEllipse(x - 3, y - 3, 6, 6);
   }
+  if (fixed_graph_mod_indicator_pos() >= 0)
+  {
+    float x = fixed_graph_mod_indicator_pos() * w;
+    int point = std::clamp((int)(fixed_graph_mod_indicator_pos() * (count - 1)), 0, count - 1);
+    float y = (1 - std::clamp(_data.series()[point], 0.0f, 1.0f)) * h;
+    g.fillEllipse(x - 3, y - 3, 6, 6);
+  }
 }
 
 }
