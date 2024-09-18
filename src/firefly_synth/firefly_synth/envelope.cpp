@@ -566,7 +566,7 @@ env_engine::reset_graph(
   _is_ffwd_run_for_graph = false;
 
   bool new_ffwd_run_for_graph = false;
-  int new_ffwd_target_total_pos = 0;
+  float new_ffwd_target_total_pos = 0;
 
   bool seen_multitrig = false;
   bool is_render_for_cv_graph = false;

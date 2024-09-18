@@ -742,9 +742,14 @@ lfo_engine::process_internal(plugin_block& block, cv_cv_matrix_mixdown const* mo
     if (_is_render_for_cv_graph)
     {
       _ref_phase = _new_ref_phase_for_graph;
-      // need to derive the new actual phase
-      _phase = _ref_phase + block_auto[param_phase][0].real();
-      _phase -= std::floor(_phase);
+      _phase = _ref_phase;
+
+      if (!_global)
+      {
+        // need to derive the new actual phase
+        _phase += block_auto[param_phase][0].real();
+        _phase -= std::floor(_phase);
+      }
     }
     if (noise_needs_continuous_repaint(shape))
       _static_noise.sample_table(_seed_resample_table_for_graph);
