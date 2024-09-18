@@ -561,22 +561,29 @@ env_engine::reset_graph(
 {
   reset_audio(block);
 
-  bool seen_multitrig = false;
   _ffwd_stopped_at_samples = -1;
   _ffwd_target_total_pos = 0.0f;
   _is_ffwd_run_for_graph = false;
+
+  bool new_ffwd_run_for_graph = false;
+  int new_ffwd_target_total_pos = 0;
+
+  bool seen_multitrig = false;
+  bool is_render_for_cv_graph = false;
+  bool seen_render_for_cv_graph = false;
 
   // see how much to forward, this seems too complicated to derive in any other way
   // backwards loop, outputs are sorted, latest-in-time are at the end
   if (custom_outputs.size())
     for (int i = (int)custom_outputs.size() - 1; i >= 0; i--)
+    {
       if (custom_outputs[i].module_global == block->module_desc_.info.global)
       {
         if (!_is_ffwd_run_for_graph && custom_outputs[i].tag_custom == custom_tag_total_pos)
         {
           // microseconds, see below
-          _is_ffwd_run_for_graph = true;
-          _ffwd_target_total_pos = custom_outputs[i].value_custom / 1000000.0f;
+          new_ffwd_run_for_graph = true;
+          new_ffwd_target_total_pos = custom_outputs[i].value_custom / 1000000.0f;
           break;
         }
         if (!seen_multitrig && custom_outputs[i].tag_custom == custom_tag_multitrig_level)
@@ -586,9 +593,22 @@ env_engine::reset_graph(
           _current_level = trig_level;
           _multitrig_level = trig_level;
         }
-        if (_is_ffwd_run_for_graph && seen_multitrig)
-          break;
       }
+      if (!seen_render_for_cv_graph && custom_outputs[i].tag_custom == custom_out_shared_render_for_cv_graph)
+      {
+        is_render_for_cv_graph = true;
+        seen_render_for_cv_graph = true;
+      }
+      if (_is_ffwd_run_for_graph && seen_multitrig && seen_render_for_cv_graph)
+        break;
+    }
+
+  // dont want to do the moving image for the regular env plot, that one's got the moving mod indicator
+  if (is_render_for_cv_graph)
+  {
+    _is_ffwd_run_for_graph = new_ffwd_run_for_graph;
+    _ffwd_target_total_pos = new_ffwd_target_total_pos;
+  }
 }
 
 void 
