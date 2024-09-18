@@ -345,7 +345,7 @@ static graph_data
 render_graph(
   plugin_state const& state, graph_engine* engine, int param, 
   param_topo_mapping const& mapping, 
-  std::vector<mod_out_custom_state> const& custom_outputs, // todo NOT filter on target module
+  std::vector<mod_out_custom_state> const& custom_outputs,
   std::vector<module_output_mapping> const& sources, 
   routing_matrix<param_topo_mapping> const& targets)
 {
@@ -378,9 +378,7 @@ render_graph(
   custom_cv_outputs.push_back(modulation_output::make_mod_output_custom_state(
     -1, -1, custom_out_shared_render_for_cv_graph, -1).state.custom);
 
-  engine->process_begin(&state, sample_rate, params.max_frame_count, voice_release_at);  
-
-  // TODO is this processing order correct ?
+  engine->process_begin(&state, sample_rate, params.max_frame_count, voice_release_at);
   std::vector<int> relevant_modules({ module_gcv_cv_matrix, module_global_in, module_glfo });
   if(map.module_index == module_vcv_audio_matrix || map.module_index == module_vcv_cv_matrix)
     relevant_modules.insert(relevant_modules.end(), { module_vcv_cv_matrix, module_voice_on_note, module_vlfo, module_env });

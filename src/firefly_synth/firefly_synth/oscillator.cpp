@@ -277,7 +277,7 @@ render_osc_graphs(
   {
     block = engine->process(module_osc, i, custom_outputs, nullptr, [max_frame_count = params.max_frame_count, sample_rate](plugin_block& block) {
       osc_engine engine(max_frame_count, sample_rate);
-      engine.reset_audio(&block); // TODO
+      engine.reset_audio(&block);
       cv_audio_matrix_mixdown modulation(make_static_cv_matrix_mixdown(block));
       engine.process<true>(block, &modulation);
     });
@@ -306,7 +306,6 @@ render_osc_graph(
   plugin_state const& state, graph_engine* engine, int param, 
   param_topo_mapping const& mapping, std::vector<mod_out_custom_state> const& custom_outputs)
 {
-  // TODO drop template <bool graph>
   graph_engine_params params = {};
   int type = state.get_plain_at(module_osc, mapping.module_slot, param_type, 0).step();
   if(state.get_plain_at(mapping.module_index, mapping.module_slot, param_type, 0).step() == type_off) 
@@ -334,8 +333,7 @@ osc_topo(int section, gui_position const& pos)
   result.graph_engine_factory = make_osc_graph_engine;
   result.gui.menu_handler_factory = make_osc_routing_menu_handler;
   result.engine_factory = [](auto const&, int sr, int max_frame_count) { return std::make_unique<osc_engine>(max_frame_count, sr); };
-  // TODO there used to be a mod indicator selector here -- do we need to replace it ?  
-
+  
   result.sections.emplace_back(make_param_section(section_type,
     make_topo_tag_basic("{A64046EE-82EB-4C02-8387-4B9EFF69E06A}", "Type"),
     make_param_section_gui({ 0, 0, 2, 1 }, gui_dimension({ 1, 1 }, { 

@@ -696,7 +696,7 @@ env_engine::process_internal(plugin_block& block, cv_cv_matrix_mixdown const* mo
   if (_stage == env_stage::end) return;
   float flt = block.state.own_block_automation[param_filter][0].real() / 1000.0f;
   float normalized_pos = std::clamp(_total_pos / (_dly + _att + _hld + _dcy + _rls + flt), 0.0, 1.0);
-  block.push_modulation_output(modulation_output::make_mod_output_cv_state( // TODO multitrig?
+  block.push_modulation_output(modulation_output::make_mod_output_cv_state(
     block.voice->state.slot,
     block.module_desc_.info.global,
     normalized_pos));

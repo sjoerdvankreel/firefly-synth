@@ -435,7 +435,7 @@ render_graph(
     mapping.module_index, mapping.module_slot, custom_outputs, nullptr, [mapping, sample_rate, frame_count, &audio_in](plugin_block& block) {
     bool global = mapping.module_index == module_gfx;
     fx_engine engine(global, sample_rate, frame_count);
-    engine.reset_audio(&block); // TODO
+    engine.reset_audio(&block);
     cv_audio_matrix_mixdown modulation(make_static_cv_matrix_mixdown(block));
     engine.process<true>(block, &modulation, &audio_in);
   });
