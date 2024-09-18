@@ -120,7 +120,7 @@ public module_engine {
   bool _per_voice_seed_was_initialized = false;
 
   // graphing
-  float _new_phase_for_graph = 0.0f;
+  float _new_ref_phase_for_graph = 0.0f;
   bool _is_render_for_cv_graph = false;
   bool _need_new_phase_for_graph = false;
   std::uint32_t _seed_resample_table_for_graph = 0;
@@ -591,7 +591,7 @@ void
 lfo_engine::reset_phase_for_graph(float phase, std::uint32_t state, bool is_render_for_cv_graph)
 {
   _need_new_phase_for_graph = true; 
-  _new_phase_for_graph = phase;
+  _new_ref_phase_for_graph = phase;
   _seed_resample_table_for_graph = state; 
   _is_render_for_cv_graph = is_render_for_cv_graph;
 }
@@ -676,7 +676,7 @@ lfo_engine::process_internal(plugin_block& block, cv_cv_matrix_mixdown const* mo
       if(!block.graph)
       {
         _need_new_phase_for_graph = true;
-        _new_phase_for_graph = _phase;
+        _new_ref_phase_for_graph = _ref_phase;
         _seed_resample_table_for_graph = _static_noise.state();
       }
     }
@@ -706,7 +706,7 @@ lfo_engine::process_internal(plugin_block& block, cv_cv_matrix_mixdown const* mo
       if (!block.graph)
       {
         _need_new_phase_for_graph = true;
-        _new_phase_for_graph = _phase;
+        _new_ref_phase_for_graph = _ref_phase;
         _seed_resample_table_for_graph = _per_voice_seed;
       }
     }
@@ -715,7 +715,12 @@ lfo_engine::process_internal(plugin_block& block, cv_cv_matrix_mixdown const* mo
   if (block.graph && _need_new_phase_for_graph)
   {
     if (_is_render_for_cv_graph)
-      _phase = _new_phase_for_graph;
+    {
+      _ref_phase = _new_ref_phase_for_graph;
+      // need to derive the new actual phase
+      _phase = _ref_phase + block_auto[param_phase][0].real();
+      _phase -= std::floor(_phase);
+    }
     if (noise_needs_continuous_repaint(shape))
       _static_noise.sample_table(_seed_resample_table_for_graph);
     _need_new_phase_for_graph = false;
@@ -940,20 +945,20 @@ void lfo_engine::process_loop(plugin_block& block, cv_cv_matrix_mixdown const* m
     block.state.own_cv[0][0][f] = _filter_end_value;
 
     bool phase_wrapped = increment_and_wrap_phase(_phase, rate_curve[f], block.sample_rate);
+    bool ref_wrapped = increment_and_wrap_phase(_ref_phase, rate_curve[f], block.sample_rate);
 
     // dont set the resample flag when graphing because that causes the lfo plot
     // for free-running stuff to get actually free-running when used in the cv plot.
     // we don't want that, the current lfo shape should be repeated and updated whenever
     // the free-running lfo "cycled"
-    if (phase_wrapped && !block.graph)
+    if (ref_wrapped && !block.graph)
     {
       _need_new_phase_for_graph = true;
-      _new_phase_for_graph = _phase;
+      _new_ref_phase_for_graph = _ref_phase;
       if(is_noise_free_running(shape))
         _seed_resample_table_for_graph = _static_noise.sample_table();
     }
 
-    bool ref_wrapped = increment_and_wrap_phase(_ref_phase, rate_curve[f], block.sample_rate);
     bool ended = ref_wrapped && Type == type_one_shot || phase_wrapped && Type == type_one_phase;
     if (ended)
     {
