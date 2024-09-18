@@ -1,4 +1,4 @@
-### September 18, 2024 - V1.9.3.
+### ?, ? - V1.9.3.
 
 - Bugfix in generating random numbers for the per-voice-random cv source (they weren't all that random).
 - Breaking change: lfo noise generators become phase-based sampling functions to prevent drift.
