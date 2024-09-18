@@ -48,11 +48,12 @@ V retest everything once the code seems stable
 V test the clap
 V retest all the graphs
 V retest all the osci rand modes
-* smooth 2 not react
+V smooth 2 not react
 * recheck the 20 fps perf
 * retest all random osci / kps
 * remake existing vismod demos
 * make a new one for free-run and on-voice-rand
+* free-run and on-voice-rand gui is lagging behind
 
 wishlist:
 make a patch cleanup button

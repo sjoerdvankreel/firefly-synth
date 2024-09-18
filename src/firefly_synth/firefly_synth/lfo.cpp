@@ -752,7 +752,10 @@ lfo_engine::process_internal(plugin_block& block, cv_cv_matrix_mixdown const* mo
       }
     }
     if (noise_needs_continuous_repaint(shape))
+    {
       _static_noise.sample_table(_seed_resample_table_for_graph);
+      _smooth_noise.sample_table(_seed_resample_table_for_graph);
+    }
     _need_new_phase_for_graph = false;
   }
 
