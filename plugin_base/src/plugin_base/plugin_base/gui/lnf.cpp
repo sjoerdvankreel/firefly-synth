@@ -821,7 +821,7 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
 
   // automation indication
   if(!bipolar) g.setColour(automation_color.withAlpha(std::max(0.0f, 1.0f - pos * 10.0f)));
-  else g.setColour(automation_color.withAlpha(1.0f - std::max(0.0f, std::abs(0.5f - pos) * 20.0f)));
+  else g.setColour(automation_color.withAlpha(std::clamp(1.0f - std::max(0.0f, std::abs(0.5f - pos) * 20.0f), 0.0f, 1.0f)));
   float dot_y = top + size / 2.0f + size / 2.0f * std::sin(start_angle - pi32 * 0.25f + angle_gap + pos * angle_range) - 2.0f;
   float dot_x = left + size / 2.0f + size / 2.0f * std::cos(start_angle - pi32 * 0.25f + angle_gap + pos * angle_range) - 2.0f;
   g.fillEllipse(dot_x, dot_y, 4.0f, 4.0f);
