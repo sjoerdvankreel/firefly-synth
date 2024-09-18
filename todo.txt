@@ -51,7 +51,6 @@ V add a this-is-here-indicator for the cv graph (maybe just a bolletje on the li
 * retest all random osci / kps
 
 wishlist:
-global aux 6 not fit cvaudio gui
 make a patch cleanup button
 update the manuals routing overview image with new colors
 filter microtuning
