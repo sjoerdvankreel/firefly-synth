@@ -602,11 +602,27 @@ plugin_gui::modulation_outputs_changed(int force_requery_automation_param)
         _automation_state->get_normalized_at_index(force_requery_automation_param).value()));
   }
 
+  // match mod output timestamps against active voices for sorting/filtering
+  _timed_modulation_outputs.clear();
+  for (int i = 0; i < _modulation_outputs->size(); i++)
+  {
+    timed_modulation_output timed_output;
+    timed_output.output = (*_modulation_outputs)[i];
+    int voice = timed_output.output.voice_index();
+    timed_output.stream_time_low = (voice < 0 || _engine_voices_active[voice] == 0) ? 0 : _engine_voices_activated[voice];
+    _timed_modulation_outputs.push_back(timed_output);
+  }
+
   // then clean it up
-  std::sort(_modulation_outputs->begin(), _modulation_outputs->end());
+  std::sort(_timed_modulation_outputs.begin(), _timed_modulation_outputs.end());
   auto pred = [](auto const& l, auto const& r) { return !(l < r) && !(r < l); };
-  auto it = std::unique(_modulation_outputs->begin(), _modulation_outputs->end(), pred);
-  _modulation_outputs->erase(it, _modulation_outputs->end());
+  auto it = std::unique(_timed_modulation_outputs.begin(), _timed_modulation_outputs.end(), pred);
+  _timed_modulation_outputs.erase(it, _timed_modulation_outputs.end());
+
+  // and copy back, nobody needs the timestamp really, just the "last event"
+  _modulation_outputs->clear();
+  for (int i = 0; i < _timed_modulation_outputs.size(); i++)
+    _modulation_outputs->push_back(_timed_modulation_outputs[i].output);
 
   // automation state is kept in check for all _global/_voice stuff
   // only need to update modulation, see automation_state_changed

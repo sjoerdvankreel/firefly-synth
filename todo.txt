@@ -36,12 +36,12 @@ V fix the distribution
 V also test the on-note-sampling of glfo
 V also test the on-note (static) random
 V per-voice-rand-seed
-* fix the envs
-* add note key and velo as vismods
+V fix the envs -> not render highest voice index but latest start time
+V fix the cv paint for envs
+V recheck the osci->osci am/fm graph modulation goes it still good?
+* add note key and velo as vismods also midi
 * retest the oneshot lfos
 * test the clap
-* fix the cv paint for envs
-* recheck the osci->osci am/fm graph modulation goes it still good?
 * retest all the graphs
 * retest all the osci rand modes
 * retest all random osci / kps

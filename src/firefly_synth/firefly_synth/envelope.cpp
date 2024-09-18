@@ -563,14 +563,15 @@ env_engine::reset_graph(
   _ffwd_target_total_pos = 0.0f;
   _is_ffwd_run_for_graph = false;
 
-  // see how much to forward
-  // this seems too complicated to derive in any other way
+  // see how much to forward, this seems too complicated to derive in any other way
+  // backwards loop, outputs are sorted, latest-in-time are at the end
   if (custom_outputs.size())
     for (int i = (int)custom_outputs.size() - 1; i >= 0; i--)
       if (custom_outputs[i].module_global == block->module_desc_.info.global)
       {
+        // microseconds, see below
         _is_ffwd_run_for_graph = true;
-        _ffwd_target_total_pos = custom_outputs[i].value_custom / (float)std::numeric_limits<int>::max();
+        _ffwd_target_total_pos = custom_outputs[i].value_custom / 1000000.0f;
         break;
       }
 }
@@ -583,6 +584,9 @@ env_engine::process_graph(
 {
   process_audio(block);
   if (!_is_ffwd_run_for_graph || _ffwd_stopped_at_samples < 0) return;
+
+  // shift graph image to the left
+  _ffwd_stopped_at_samples = std::min(_ffwd_stopped_at_samples, block.end_frame - block.start_frame);
   for (int f = block.start_frame; f < block.end_frame - _ffwd_stopped_at_samples; f++)
     block.state.own_cv[0][0][f] = block.state.own_cv[0][0][f + _ffwd_stopped_at_samples];
   for (int f = block.end_frame - _ffwd_stopped_at_samples; f < block.end_frame; f++)
@@ -620,6 +624,13 @@ env_engine::process(plugin_block& block, cv_cv_matrix_mixdown const* modulation)
   if (_stage == env_stage::end || (!on && block.module_slot != 0))
   {
     block.state.own_cv[0][0].fill(block.start_frame, block.end_frame, 0.0f);
+    // CAUTION: microseconds
+    if(_stage == env_stage::end)
+      block.push_modulation_output(modulation_output::make_mod_output_custom_state(
+        block.voice->state.slot,
+        block.module_desc_.info.global,
+        0,
+        (int)(_total_pos * 1000000)));
     return;
   }
 
@@ -632,13 +643,14 @@ env_engine::process(plugin_block& block, cv_cv_matrix_mixdown const* modulation)
   if (block.graph) return;
 
   // need to push the total pos for graph (for the moving cv matrix signal)
-  // since sample rates are different for audio and GUI, need a value in seconds not frames
+  // since sample rates are different for audio and GUI, need a value in time not frames
   // reset_graph+render_graph then need to derive the env state by just truncating the entire thing to that position
+  // CAUTION: microseconds. cannot go with maxint because total_pos is not in [0, 1] (env can be > 1 second)
   block.push_modulation_output(modulation_output::make_mod_output_custom_state(
     block.voice->state.slot,
     block.module_desc_.info.global,
     0,
-    (int)(_total_pos * std::numeric_limits<int>::max())));
+    (int)(_total_pos * 1000000)));
 
   // drop the mod indicators when we ended
   if (_stage == env_stage::end) return;
@@ -768,10 +780,6 @@ void env_engine::process_mono_type_sync_trigger_mode(plugin_block& block, cv_cv_
 
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
-    if (_is_ffwd_run_for_graph)
-      if (_total_pos >= _ffwd_target_total_pos && _ffwd_stopped_at_samples == -1)
-        _ffwd_stopped_at_samples = _total_pos * block.sample_rate;
-
     if (_stage == env_stage::end)
     {
       _current_level = 0;
@@ -786,7 +794,12 @@ void env_engine::process_mono_type_sync_trigger_mode(plugin_block& block, cv_cv_
       _current_level = 0;
       _multitrig_level = 0;
       _stage_pos += 1.0 / block.sample_rate;
+      
       _total_pos += 1.0 / block.sample_rate;
+      if (_is_ffwd_run_for_graph)
+        if (_total_pos >= _ffwd_target_total_pos && _ffwd_stopped_at_samples == -1)
+          _ffwd_stopped_at_samples = _total_pos * block.sample_rate;
+
       float level = _filter.next(0);
       block.state.own_cv[0][0][f] = level;
       if (level < 1e-5)
@@ -882,7 +895,12 @@ void env_engine::process_mono_type_sync_trigger_mode(plugin_block& block, cv_cv_
     check_unipolar(_multitrig_level);
     block.state.own_cv[0][0][f] = _filter.next(out);
     _stage_pos += 1.0 / block.sample_rate;
+    
     _total_pos += 1.0 / block.sample_rate;
+    if (_is_ffwd_run_for_graph)
+      if (_total_pos >= _ffwd_target_total_pos && _ffwd_stopped_at_samples == -1)
+        _ffwd_stopped_at_samples = _total_pos * block.sample_rate;
+
     if (_stage_pos < stage_seconds) continue;
 
     _stage_pos = 0;

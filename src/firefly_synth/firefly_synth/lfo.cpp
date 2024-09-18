@@ -558,23 +558,24 @@ lfo_engine::reset_graph(
   bool is_render_for_cv_graph = false;
   bool seen_render_for_cv_graph = false;
 
+  // backwards loop, outputs are sorted, latest-in-time are at the end
   if (custom_outputs.size())
     for (int i = (int)custom_outputs.size() - 1; i >= 0; i--)
     {
       if (custom_outputs[i].module_global == block->module_desc_.info.global)
       {
-        if (custom_outputs[i].tag_custom == custom_tag_rand_state)
+        if (!seen_rand_state && custom_outputs[i].tag_custom == custom_tag_rand_state)
         {
           seen_rand_state = true;
           new_rand_state = custom_outputs[i].value_custom;
         }
-        else if (custom_outputs[i].tag_custom == custom_tag_ref_phase)
+        if (!seen_ref_phase && custom_outputs[i].tag_custom == custom_tag_ref_phase)
         {
           seen_ref_phase = true;
           new_ref_phase = custom_outputs[i].value_custom / (float)std::numeric_limits<int>::max();
         }
       }
-      else if (custom_outputs[i].tag_custom == custom_out_shared_render_for_cv_graph)
+      if (!seen_render_for_cv_graph && custom_outputs[i].tag_custom == custom_out_shared_render_for_cv_graph)
       {
         is_render_for_cv_graph = true;
         seen_render_for_cv_graph = true;
