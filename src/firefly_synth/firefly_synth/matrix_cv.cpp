@@ -804,20 +804,28 @@ cv_matrix_engine_base::perform_mixdown(plugin_block& block, int module, int slot
       modulated_curve_ptrs[r]->transform(block.start_frame, block.end_frame, [](float v) { return std::clamp(v, 0.0f, 1.0f); });
 
   // push param modulation outputs 
-  if (!block.graph)
-    for (int r = 0; r < route_count; r++)
-      if (mod_output_usages[r].in_use)
-      {
-        // debugging
-        auto const& param_desc = block.plugin_desc_.params[mod_output_usages[r].param_global];
-        (void)param_desc;
+  if (block.graph) return;
 
-        block.push_modulation_output(modulation_output::make_mod_output_param_state(
-          _global ? -1 : block.voice->state.slot,
-          mod_output_usages[r].module_global,
-          mod_output_usages[r].param_global,
-          (*mod_output_usages[r].modulated_curve_ptr)[block.end_frame - 1]));
-      }
+  for (int r = 0; r < route_count; r++)
+    if (mod_output_usages[r].in_use)
+    {
+      // debugging
+      auto const& param_desc = block.plugin_desc_.params[mod_output_usages[r].param_global];
+      (void)param_desc;
+
+      block.push_modulation_output(modulation_output::make_mod_output_param_state(
+        _global ? -1 : block.voice->state.slot,
+        mod_output_usages[r].module_global,
+        mod_output_usages[r].param_global,
+        (*mod_output_usages[r].modulated_curve_ptr)[block.end_frame - 1]));
+    }
+
+  // always push position_normalized at 0 since the graph itself is moving
+  // and the very first value represents where we are currently at
+  block.push_modulation_output(modulation_output::make_mod_output_cv_state(
+    _global ? -1 : block.voice->state.slot,
+    block.module_desc_.info.global,
+    0.0f));
 }
 
 }
