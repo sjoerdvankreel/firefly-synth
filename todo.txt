@@ -50,6 +50,7 @@ V retest all the graphs
 V retest all the osci rand modes
 V smooth 2 not react
 V recheck the 20 fps perf
+* what the heck, also do free-running smooth
 * 4 OUT OF 6 RANDOM LFO MODES ARE F'ED WRT PAINTING
 * retest all random osci / kps
 * remake existing vismod demos
