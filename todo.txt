@@ -50,7 +50,7 @@ V retest all the graphs
 V retest all the osci rand modes
 V smooth 2 not react
 V recheck the 20 fps perf
-* what the heck, also do free-running smooth
+* what the heck, also do free-running smooth => connect last to first on table resample. otherwise it is, you know, not smooth.
 * 4 OUT OF 6 RANDOM LFO MODES ARE F'ED WRT PAINTING ==> just re-do the lfo impl. its not sound. also be sure to use current_seed (not state()) to feed the gui tables
 * retest all random osci / kps
 * remake existing vismod demos
