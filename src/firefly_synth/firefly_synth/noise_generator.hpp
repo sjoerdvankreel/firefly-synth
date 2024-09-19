@@ -34,6 +34,7 @@ public:
   void init(int seed, int steps);
   
   // returns seed to reproduce state for gui
+  // TODO this is not sound -- from this we are feeding the gui an entire new table which is seeded from the *end* of the audio table
   std::uint32_t state() const { return _state; }
   std::uint32_t sample_table();
   void sample_table(std::uint32_t state);
