@@ -54,7 +54,7 @@ V recheck the 20 fps perf
 * retest all random osci / kps
 * remake existing vismod demos
 * make a new one for free-run and on-voice-rand
-* free-run and on-voice-rand gui is lagging behind ==> no the first cycle is not good
+* free-run and on-voice-rand gui is lagging behind ==> no the first cycle is not good ==> oh thats only for freerun. wtf is going on with the per voice seed?
 
 wishlist:
 make a patch cleanup button
