@@ -1,5 +1,6 @@
 ### ?, ? - V1.9.3.
 
+- Added free-running smooth noise as a new LFO type.
 - Bugfix in generating random numbers for the per-voice-random cv source (they weren't all that random).
 - Breaking change: lfo noise generators become phase-based sampling functions to prevent drift.
 * This causes small and possibly audible differences for the (free-running-) static and smooth lfos, sorry, but was needed to keep engine and ui in check.
