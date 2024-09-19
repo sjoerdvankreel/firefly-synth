@@ -1011,9 +1011,9 @@ void lfo_engine::process_loop(plugin_block& block, cv_cv_matrix_mixdown const* m
       if (is_noise_free_running(shape))
       {
         if(is_noise_static(shape))
-          _seed_resample_table_for_graph = _static_noise.sample_table();
+          _seed_resample_table_for_graph = _static_noise.sample_table(true);
         else
-          _seed_resample_table_for_graph = _smooth_noise.sample_table();
+          _seed_resample_table_for_graph = _smooth_noise.sample_table(true);
       }
       else if (is_noise_voice_rand(shape))
       {

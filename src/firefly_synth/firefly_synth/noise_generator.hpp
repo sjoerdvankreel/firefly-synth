@@ -35,9 +35,9 @@ public:
   
   // returns seed to reproduce state for gui
   // TODO this is not sound -- from this we are feeding the gui an entire new table which is seeded from the *end* of the audio table
-  std::uint32_t state() const { return _state; }
-  std::uint32_t sample_table();
   void sample_table(std::uint32_t state);
+  std::uint32_t sample_table(bool connect);
+  std::uint32_t state() const { return _state; }
 
   noise_generator() {} // needs init
   noise_generator(int seed, int steps) { init(seed, steps); }
@@ -48,22 +48,43 @@ noise_generator<Smooth>::init(int seed, int steps)
 {
   _steps = std::clamp(steps, 2, MAX_STEPS);
   _state = plugin_base::fast_rand_seed(seed);
-  sample_table();
+  sample_table(false);
 }
 
 template <bool Smooth> inline void
 noise_generator<Smooth>::sample_table(std::uint32_t state)
 {
   _state = state;
-  sample_table();
+  sample_table(true);
 }
 
 template <bool Smooth> inline std::uint32_t
-noise_generator<Smooth>::sample_table()
+noise_generator<Smooth>::sample_table(bool connect)
 {
   auto result = _state;
-  for (int i = 0; i < _steps; ++i)
-    _r[i] = plugin_base::fast_rand_next(_state);
+  if constexpr (Smooth)
+  {
+    if (connect)
+    {
+      // make it smooth - a bunch of unrelated cosine remapped functions
+      // stacked next to each other are not smooth. needs a bit of juggling.
+      // TODO start of the signal is defined by connecting [0] and [1]
+      // but for true random smooth noise cannot just keep [0] intact all the time
+      // but if i swap it then discontinuity -- what to do ?
+      for (int i = 1; i < _steps; ++i)
+        _r[i] = plugin_base::fast_rand_next(_state);
+    }
+    else
+    {
+      for (int i = 0; i < _steps; ++i)
+        _r[i] = plugin_base::fast_rand_next(_state);
+    }
+  }
+  else
+  {
+    for (int i = 0; i < _steps; ++i)
+      _r[i] = plugin_base::fast_rand_next(_state);
+  }
   return result;
 }
 
