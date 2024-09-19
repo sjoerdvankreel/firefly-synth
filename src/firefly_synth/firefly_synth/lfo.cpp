@@ -35,6 +35,7 @@ static bool
 is_noise_voice_rand(int shape)
 {
   return shape == wave_shape_type_smooth_2 || 
+    shape == wave_shape_type_smooth_free_2 ||
     shape == wave_shape_type_static_2 || 
     shape == wave_shape_type_static_free_2;
 }
@@ -43,6 +44,7 @@ static bool
 is_noise_not_voice_rand(int shape)
 {
   return shape == wave_shape_type_smooth_1 ||
+    shape == wave_shape_type_smooth_free_1 ||
     shape == wave_shape_type_static_1 ||
     shape == wave_shape_type_static_free_1;
 }
@@ -51,6 +53,17 @@ static bool
 is_noise_free_running(int shape)
 {
   return shape == wave_shape_type_static_free_1 ||
+    shape == wave_shape_type_static_free_2 ||
+    shape == wave_shape_type_smooth_free_1 ||
+    shape == wave_shape_type_smooth_free_2;
+}
+
+static bool
+is_noise_static(int shape)
+{
+  return shape == wave_shape_type_static_1 ||
+    shape == wave_shape_type_static_2 ||
+    shape == wave_shape_type_static_free_1 ||
     shape == wave_shape_type_static_free_2;
 }
 
@@ -702,7 +715,10 @@ lfo_engine::process_internal(plugin_block& block, cv_cv_matrix_mixdown const* mo
       {
         _need_new_phase_for_graph = true;
         _new_ref_phase_for_graph = _ref_phase;
-        _seed_resample_table_for_graph = _static_noise.state();
+        if(is_noise_static(shape))
+          _seed_resample_table_for_graph = _static_noise.state();
+        else
+          _seed_resample_table_for_graph = _smooth_noise.state();
       }
     }
   }
@@ -753,8 +769,10 @@ lfo_engine::process_internal(plugin_block& block, cv_cv_matrix_mixdown const* mo
     }
     if (noise_needs_continuous_repaint(shape))
     {
-      _static_noise.sample_table(_seed_resample_table_for_graph);
-      _smooth_noise.sample_table(_seed_resample_table_for_graph);
+      if(is_noise_static(shape))
+        _static_noise.sample_table(_seed_resample_table_for_graph);
+      else
+        _smooth_noise.sample_table(_seed_resample_table_for_graph);
     }
     _need_new_phase_for_graph = false;
   }
@@ -826,6 +844,8 @@ lfo_engine::process_uni_type_sync(plugin_block& block, cv_cv_matrix_mixdown cons
   case wave_shape_type_cos_cos_cos: process_uni_type_sync_shape<GlobalUnison, Type, Sync>(block, modulation, wave_shape_uni_cos_cos_cos); break;
   case wave_shape_type_smooth_1: 
   case wave_shape_type_smooth_2:
+  case wave_shape_type_smooth_free_1:
+  case wave_shape_type_smooth_free_2:
     process_uni_type_sync_shape<GlobalUnison, Type, Sync>(block, modulation, [this](float in) {
       return wave_shape_uni_custom(in, [this](float in) {
         return _smooth_noise.at(in); }); }); 
@@ -989,13 +1009,18 @@ void lfo_engine::process_loop(plugin_block& block, cv_cv_matrix_mixdown const* m
       _need_new_phase_for_graph = true;
       _new_ref_phase_for_graph = _ref_phase;
       if (is_noise_free_running(shape))
-        _seed_resample_table_for_graph = _static_noise.sample_table();
+      {
+        if(is_noise_static(shape))
+          _seed_resample_table_for_graph = _static_noise.sample_table();
+        else
+          _seed_resample_table_for_graph = _smooth_noise.sample_table();
+      }
       else if (is_noise_voice_rand(shape))
       {
-        if (shape == wave_shape_type_smooth_2)
-          _seed_resample_table_for_graph = _smooth_noise.state();
-        else
+        if (is_noise_static(shape))
           _seed_resample_table_for_graph = _static_noise.state();
+        else
+          _seed_resample_table_for_graph = _smooth_noise.state();
       }
     }
 
