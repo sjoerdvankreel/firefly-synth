@@ -592,7 +592,7 @@ lfo_engine::reset_graph(
     }
 
   auto const& block_auto = block->state.own_block_automation;
-  if (seen_ref_phase)
+  if (seen_ref_phase && is_render_for_cv_graph)
   {
     _ref_phase = new_ref_phase;
     _phase = _ref_phase;
