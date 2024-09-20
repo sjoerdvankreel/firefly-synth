@@ -68,10 +68,6 @@ noise_generator<Smooth>::sample_table(bool connect)
     {
       // make it smooth - a bunch of unrelated cosine remapped functions
       // stacked next to each other are not smooth. needs a bit of juggling.
-      // TODO start of the signal is defined by connecting [0] and [1]
-      // but for true random smooth noise cannot just keep [0] intact all the time
-      // but if i swap it then discontinuity -- what to do ?
-      // anyway this works
       for (int i = 1; i < _steps; ++i)
         _r[i] = plugin_base::fast_rand_next(_state);
     }
