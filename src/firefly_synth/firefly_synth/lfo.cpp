@@ -20,7 +20,7 @@ static float const max_filter_time_ms = 500;
 static float const log_half = std::log(0.5f);
 
 // need for realtime animation
-enum { custom_tag_ref_phase, custom_tag_rand_state, custom_tag_end_value };
+enum { custom_tag_ref_phase, custom_tag_rand_seed, custom_tag_end_value };
 
 enum class lfo_stage { cycle, filter, end };
 enum { scratch_rate, scratch_count };
@@ -49,7 +49,7 @@ is_noise_not_voice_rand(int shape)
     shape == wave_shape_type_static_free_1;
 }
 
-static bool 
+static bool
 is_noise_free_running(int shape)
 {
   return shape == wave_shape_type_static_free_1 ||
@@ -72,13 +72,6 @@ is_noise(int shape)
 { 
   return is_noise_voice_rand(shape) || 
     is_noise_not_voice_rand(shape); 
-}
-
-static bool
-noise_needs_continuous_repaint(int shape)
-{
-  return is_noise_free_running(shape) ||
-    is_noise_voice_rand(shape);
 }
 
 static std::vector<list_item>
@@ -113,7 +106,6 @@ class lfo_engine :
 public module_engine {
   float _phase;
   float _ref_phase;
-  float _graph_phase;
   float _lfo_end_value;
   float _filter_end_value;
   
@@ -131,12 +123,6 @@ public module_engine {
   int _prev_global_steps = -1;
   int _prev_global_shape = -1;
   bool _per_voice_seed_was_initialized = false;
-
-  // graphing
-  float _new_ref_phase_for_graph = 0.0f;
-  bool _is_render_for_cv_graph = false;
-  bool _need_new_phase_for_graph = false;
-  std::uint32_t _seed_resample_table_for_graph = 0;
 
   void update_block_params(plugin_block const* block);
   template <bool GlobalUnison>
@@ -563,14 +549,15 @@ lfo_engine::reset_graph(
   void* context)
 {
   reset_audio(block);
-  int new_rand_state = 0;
+
+  int new_rand_seed = 0;
   float new_ref_phase = 0.0f;
   float new_end_value = 0.0f;
   bool is_render_for_cv_graph = false;
 
   bool seen_end_value = false;
   bool seen_ref_phase = false;
-  bool seen_rand_state = false;
+  bool seen_rand_seed = false;
   bool seen_render_for_cv_graph = false;
 
   // backwards loop, outputs are sorted, latest-in-time are at the end
@@ -579,10 +566,10 @@ lfo_engine::reset_graph(
     {
       if (custom_outputs[i].module_global == block->module_desc_.info.global)
       {
-        if (!seen_rand_state && custom_outputs[i].tag_custom == custom_tag_rand_state)
+        if (!seen_rand_seed && custom_outputs[i].tag_custom == custom_tag_rand_seed)
         {
-          seen_rand_state = true;
-          new_rand_state = custom_outputs[i].value_custom;
+          seen_rand_seed = true;
+          new_rand_seed = custom_outputs[i].value_custom;
         }
         if (!seen_ref_phase && custom_outputs[i].tag_custom == custom_tag_ref_phase)
         {
@@ -600,29 +587,38 @@ lfo_engine::reset_graph(
         is_render_for_cv_graph = true;
         seen_render_for_cv_graph = true;
       }
-      if (seen_rand_state && seen_ref_phase && seen_render_for_cv_graph && seen_end_value)
+      if (seen_rand_seed && seen_ref_phase && seen_render_for_cv_graph && seen_end_value)
         break;
     }
 
+  auto const& block_auto = block->state.own_block_automation;
   if (seen_ref_phase)
   {
-    _need_new_phase_for_graph = true;
-    _new_ref_phase_for_graph = new_ref_phase;
-    _seed_resample_table_for_graph = new_rand_state;
-    _is_render_for_cv_graph = is_render_for_cv_graph;
+    _ref_phase = new_ref_phase;
+    _phase = _ref_phase;
+    if (!_global)
+    {
+      // need to derive the new actual phase
+      _phase += block_auto[param_phase][0].real();
+      _phase -= std::floor(_phase);
+    }
   }
-  if (seen_end_value && _is_render_for_cv_graph)
+
+  if (seen_rand_seed)
   {
-    _stage = lfo_stage::end;
-    _filter_end_value = check_unipolar(new_end_value);
+    if(is_noise_static(block_auto[param_shape][0].step()))
+      _static_noise.init(new_rand_seed, block_auto[param_steps][0].step(), false);
+    else
+      _smooth_noise.init(new_rand_seed, block_auto[param_steps][0].step(), false);
   }
+
+  // TODO stuff with end value and cv render
 }
 
 void
 lfo_engine::reset_audio(plugin_block const* block) 
 { 
   _ref_phase = 0;
-  _graph_phase = 0;
   _lfo_end_value = 0;
   _end_filter_pos = 0;
   _filter_end_value = 0;
@@ -661,6 +657,7 @@ lfo_engine::process_internal(plugin_block& block, cv_cv_matrix_mixdown const* mo
  
   auto const& block_auto = block.state.own_block_automation;
   int type = block_auto[param_type][0].step();
+  int shape = block_auto[param_shape][0].step();
   if (type == type_off)
   {
     block.state.own_cv[0][0].fill(block.start_frame, block.end_frame, 0.0f);
@@ -669,20 +666,11 @@ lfo_engine::process_internal(plugin_block& block, cv_cv_matrix_mixdown const* mo
 
   // only want the mod outputs for the actual audio engine
   if (!block.graph)
+  {
     block.push_modulation_output(modulation_output::make_mod_output_cv_state(
       _global ? -1 : block.voice->state.slot,
       block.module_desc_.info.global,
-      type == type_repeat ? _ref_phase : _graph_phase));
-
-  if(_stage == lfo_stage::end)
-  {
-    // need to keep updating the ui in this case
-    // as long as the phase is wrapping we'll push out
-    // notifications but if we dont keep reporting the end
-    // value then ui will reset (because it is not sticky)
-    block.state.own_cv[0][0].fill(block.start_frame, block.end_frame, _filter_end_value);
-    if (block.graph) return;
-
+      _ref_phase));
     block.push_modulation_output(modulation_output::make_mod_output_custom_state(
       _global ? -1 : block.voice->state.slot,
       block.module_desc_.info.global,
@@ -691,14 +679,27 @@ lfo_engine::process_internal(plugin_block& block, cv_cv_matrix_mixdown const* mo
     block.push_modulation_output(modulation_output::make_mod_output_custom_state(
       _global ? -1 : block.voice->state.slot,
       block.module_desc_.info.global,
+      custom_tag_rand_seed,
+      is_noise_static(shape) ? _static_noise.seed() : _smooth_noise.seed()));
+    block.push_modulation_output(modulation_output::make_mod_output_custom_state(
+      _global ? -1 : block.voice->state.slot,
+      block.module_desc_.info.global,
       custom_tag_end_value,
       (int)(_filter_end_value * std::numeric_limits<int>::max())));
+  }
+
+  if(_stage == lfo_stage::end)
+  {
+    // need to keep updating the ui in this case
+    // as long as the phase is wrapping we'll push out
+    // notifications but if we dont keep reporting the end
+    // value then ui will reset (because it is not sticky)
+    block.state.own_cv[0][0].fill(block.start_frame, block.end_frame, _filter_end_value);
     return; 
   }
 
   int steps = block_auto[param_steps][0].step();
   int seed = block_auto[param_seed][0].step();
-  int shape = block_auto[param_shape][0].step();
 
   if(_global)
   {
@@ -708,18 +709,8 @@ lfo_engine::process_internal(plugin_block& block, cv_cv_matrix_mixdown const* mo
       _prev_global_seed = seed;
       _prev_global_steps = steps;
       _prev_global_shape = shape;
-      _static_noise = noise_generator<false>(seed, steps);
       _smooth_noise = noise_generator<true>(seed, steps);
-
-      if(!block.graph)
-      {
-        _need_new_phase_for_graph = true;
-        _new_ref_phase_for_graph = _ref_phase;
-        if(is_noise_static(shape))
-          _seed_resample_table_for_graph = _static_noise.state();
-        else
-          _seed_resample_table_for_graph = _smooth_noise.state();
-      }
+      _static_noise = noise_generator<false>(seed, steps);
     }
   }
   else
@@ -739,57 +730,11 @@ lfo_engine::process_internal(plugin_block& block, cv_cv_matrix_mixdown const* mo
           float on_note_rnd_cv = block.module_cv(module_voice_on_note, 0)[on_voice_random_output_index][source_index][0];
           _per_voice_seed = (int)(1 + (on_note_rnd_cv * (RAND_MAX - 1)));
         }
-        _static_noise = noise_generator<false>(_per_voice_seed, steps);
         _smooth_noise = noise_generator<true>(_per_voice_seed, steps);
-      }
-      
+        _static_noise = noise_generator<false>(_per_voice_seed, steps);
+      }      
       _per_voice_seed_was_initialized = true;
-      if (!block.graph)
-      {
-        _need_new_phase_for_graph = true;
-        _new_ref_phase_for_graph = _ref_phase;
-        _seed_resample_table_for_graph = _per_voice_seed;
-      }
     }
-  }
-
-  if (block.graph && _need_new_phase_for_graph)
-  {
-    if (_is_render_for_cv_graph)
-    {
-      _ref_phase = _new_ref_phase_for_graph;
-      _phase = _ref_phase;
-
-      if (!_global)
-      {
-        // need to derive the new actual phase
-        _phase += block_auto[param_phase][0].real();
-        _phase -= std::floor(_phase);
-      }
-    }
-    if (noise_needs_continuous_repaint(shape))
-    {
-      if(is_noise_static(shape))
-        _static_noise.sample_table(_seed_resample_table_for_graph);
-      else
-        _smooth_noise.sample_table(_seed_resample_table_for_graph);
-    }
-    _need_new_phase_for_graph = false;
-  }
-
-  if (!block.graph && _need_new_phase_for_graph)
-  {
-    block.push_modulation_output(modulation_output::make_mod_output_custom_state(
-      _global ? -1 : block.voice->state.slot,
-      block.module_desc_.info.global,
-      custom_tag_ref_phase,
-      (int)(_ref_phase * std::numeric_limits<int>::max())));
-    if (noise_needs_continuous_repaint(shape))
-      block.push_modulation_output(modulation_output::make_mod_output_custom_state(
-        _global ? -1 : block.voice->state.slot,
-        block.module_desc_.info.global,
-        custom_tag_rand_state,
-        _seed_resample_table_for_graph));
   }
 
   if(!_global && block.voice->state.sub_voice_count > 1)
@@ -981,9 +926,6 @@ void lfo_engine::process_loop(plugin_block& block, cv_cv_matrix_mixdown const* m
       continue;
     }
 
-    if (_graph_phase < 1.0f)
-      _graph_phase += rate_curve[f] / block.sample_rate;
-
     if (_stage == lfo_stage::filter)
     {
       _filter_end_value = _filter.next(_lfo_end_value);
@@ -999,32 +941,15 @@ void lfo_engine::process_loop(plugin_block& block, cv_cv_matrix_mixdown const* m
 
     bool phase_wrapped = increment_and_wrap_phase(_phase, rate_curve[f], block.sample_rate);
     bool ref_wrapped = increment_and_wrap_phase(_ref_phase, rate_curve[f], block.sample_rate);
-
-    // dont set the resample flag when graphing because that causes the lfo plot
-    // for free-running stuff to get actually free-running when used in the cv plot.
-    // we don't want that, the current lfo shape should be repeated and updated whenever
-    // the free-running lfo "cycled"
-    if (ref_wrapped && !block.graph)
-    {
-      _need_new_phase_for_graph = true;
-      _new_ref_phase_for_graph = _ref_phase;
-      if (is_noise_free_running(shape))
-      {
-        if(is_noise_static(shape))
-          _seed_resample_table_for_graph = _static_noise.sample_table(true);
-        else
-          _seed_resample_table_for_graph = _smooth_noise.sample_table(true);
-      }
-      else if (is_noise_voice_rand(shape))
-      {
-        if (is_noise_static(shape))
-          _seed_resample_table_for_graph = _static_noise.state();
-        else
-          _seed_resample_table_for_graph = _smooth_noise.state();
-      }
-    }
-
     bool ended = ref_wrapped && Type == type_one_shot || phase_wrapped && Type == type_one_phase;
+
+    if (ref_wrapped && !block.graph)
+      if (is_noise_free_running(shape))
+        if (is_noise_static(shape))
+          _static_noise.resample();
+        else
+          _smooth_noise.resample();
+
     if (ended)
     {
       _stage = lfo_stage::filter;

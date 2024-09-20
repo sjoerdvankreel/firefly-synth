@@ -25,43 +25,27 @@ template <bool Smooth>
 class noise_generator
 {
   static int const MAX_STEPS = 100;
+  int _seed = 0;
   int _steps = -1;
   std::uint32_t _state = 0;
   std::array<float, MAX_STEPS> _r = {};
 
 public:
   float at(float phase) const;
-  void init(int seed, int steps);
-  
-  // returns seed to reproduce state for gui
-  // TODO this is not sound -- from this we are feeding the gui an entire new table which is seeded from the *end* of the audio table
-  void sample_table(std::uint32_t state);
-  std::uint32_t sample_table(bool connect);
-  std::uint32_t state() const { return _state; }
+  int seed() const { return _seed; }
+  void init(int seed, int steps, bool connect);
+  void resample() { init(_state, _steps, true); }; // for free-run
 
   noise_generator() {} // needs init
-  noise_generator(int seed, int steps) { init(seed, steps); }
+  noise_generator(int seed, int steps) { init(seed, steps, false); }
 };
 
 template <bool Smooth> inline void 
-noise_generator<Smooth>::init(int seed, int steps)
+noise_generator<Smooth>::init(int seed, int steps, bool connect)
 {
+  _seed = seed;
   _steps = std::clamp(steps, 2, MAX_STEPS);
   _state = plugin_base::fast_rand_seed(seed);
-  sample_table(false);
-}
-
-template <bool Smooth> inline void
-noise_generator<Smooth>::sample_table(std::uint32_t state)
-{
-  _state = state;
-  sample_table(true);
-}
-
-template <bool Smooth> inline std::uint32_t
-noise_generator<Smooth>::sample_table(bool connect)
-{
-  auto result = _state;
   if constexpr (Smooth)
   {
     if (connect)
@@ -82,7 +66,6 @@ noise_generator<Smooth>::sample_table(bool connect)
     for (int i = 0; i < _steps; ++i)
       _r[i] = plugin_base::fast_rand_next(_state);
   }
-  return result;
 }
 
 template <bool Smooth> inline float
