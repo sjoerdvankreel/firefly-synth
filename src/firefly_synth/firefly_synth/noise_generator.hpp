@@ -37,15 +37,16 @@ public:
   void resample() { init(_state, _steps, true); }; // for free-run
 
   noise_generator() {} // needs init
-  noise_generator(int seed, int steps) { init(seed, steps, false); }
+  noise_generator(int seed, int steps) 
+  { init(plugin_base::fast_rand_seed(seed), steps, false); }
 };
 
 template <bool Smooth> inline void 
 noise_generator<Smooth>::init(int seed, int steps, bool connect)
 {
   _seed = seed;
+  _state = seed;
   _steps = std::clamp(steps, 2, MAX_STEPS);
-  _state = plugin_base::fast_rand_seed(seed);
   if constexpr (Smooth)
   {
     if (connect)
