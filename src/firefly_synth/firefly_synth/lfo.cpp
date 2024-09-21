@@ -616,7 +616,11 @@ lfo_engine::reset_graph(
   }
 
   _noise_graph_was_init = true;
-  // TODO stuff with end value and cv render
+  if (seen_end_value && is_render_for_cv_graph)
+  {
+    _stage = lfo_stage::end;
+    _filter_end_value = check_unipolar(new_end_value);
+  }
 }
 
 void
@@ -686,11 +690,6 @@ lfo_engine::process_internal(plugin_block& block, cv_cv_matrix_mixdown const* mo
       block.module_desc_.info.global,
       custom_tag_rand_seed,
       is_noise_static(shape) ? _static_noise.seed() : _smooth_noise.seed()));
-    block.push_modulation_output(modulation_output::make_mod_output_custom_state(
-      _global ? -1 : block.voice->state.slot,
-      block.module_desc_.info.global,
-      custom_tag_end_value,
-      (int)(_filter_end_value * std::numeric_limits<int>::max())));
   }
 
   if(_stage == lfo_stage::end)
@@ -700,6 +699,14 @@ lfo_engine::process_internal(plugin_block& block, cv_cv_matrix_mixdown const* mo
     // notifications but if we dont keep reporting the end
     // value then ui will reset (because it is not sticky)
     block.state.own_cv[0][0].fill(block.start_frame, block.end_frame, _filter_end_value);
+
+    if (!block.graph)
+      block.push_modulation_output(modulation_output::make_mod_output_custom_state(
+        _global ? -1 : block.voice->state.slot,
+        block.module_desc_.info.global,
+        custom_tag_end_value,
+        (int)(_filter_end_value * std::numeric_limits<int>::max())));
+
     return; 
   }
 
