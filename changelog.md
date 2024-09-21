@@ -1,4 +1,4 @@
-### ?, ? - V1.9.3.
+### September 21, 2024 - V1.9.3.
 
 - Added free-running smooth noise as a new LFO type. Note - consecutive cycles are not smooth by themselves so you still need to use the LFO filter to get a real smooth signal.
 - Bugfix in generating random numbers for the per-voice-random cv source (they weren't all that random).
