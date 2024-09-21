@@ -124,6 +124,9 @@ public module_engine {
   int _prev_global_shape = -1;
   bool _per_voice_seed_was_initialized = false;
 
+  // graphing
+  bool _noise_graph_was_init = false;
+
   void update_block_params(plugin_block const* block);
   template <bool GlobalUnison>
   void process_uni(plugin_block& block, cv_cv_matrix_mixdown const* modulation);
@@ -612,6 +615,7 @@ lfo_engine::reset_graph(
       _smooth_noise.init(new_rand_seed, block_auto[param_steps][0].step(), false);
   }
 
+  _noise_graph_was_init = true;
   // TODO stuff with end value and cv render
 }
 
@@ -625,6 +629,7 @@ lfo_engine::reset_audio(plugin_block const* block)
   _stage = lfo_stage::cycle;
   _end_filter_stage_samples = 0;
   _per_voice_seed = -1;
+  _noise_graph_was_init = false;
   _per_voice_seed_was_initialized = false;
   _prev_global_seed = -1;
   _prev_global_shape = -1;
@@ -709,8 +714,11 @@ lfo_engine::process_internal(plugin_block& block, cv_cv_matrix_mixdown const* mo
       _prev_global_seed = seed;
       _prev_global_steps = steps;
       _prev_global_shape = shape;
-      _smooth_noise = noise_generator<true>(seed, steps);
-      _static_noise = noise_generator<false>(seed, steps);
+      if (!_noise_graph_was_init)
+      {
+        _smooth_noise = noise_generator<true>(seed, steps);
+        _static_noise = noise_generator<false>(seed, steps);
+      }
     }
   }
   else
@@ -730,8 +738,11 @@ lfo_engine::process_internal(plugin_block& block, cv_cv_matrix_mixdown const* mo
           float on_note_rnd_cv = block.module_cv(module_voice_on_note, 0)[on_voice_random_output_index][source_index][0];
           _per_voice_seed = (int)(1 + (on_note_rnd_cv * (RAND_MAX - 1)));
         }
-        _smooth_noise = noise_generator<true>(_per_voice_seed, steps);
-        _static_noise = noise_generator<false>(_per_voice_seed, steps);
+        if (!_noise_graph_was_init)
+        {
+          _smooth_noise = noise_generator<true>(_per_voice_seed, steps);
+          _static_noise = noise_generator<false>(_per_voice_seed, steps);
+        }
       }      
       _per_voice_seed_was_initialized = true;
     }

@@ -26,7 +26,7 @@ class noise_generator
 {
   static int const MAX_STEPS = 100;
   int _seed = 0;
-  int _steps = -1;
+  int _steps = 2;
   std::uint32_t _state = 0;
   std::array<float, MAX_STEPS> _r = {};
 
