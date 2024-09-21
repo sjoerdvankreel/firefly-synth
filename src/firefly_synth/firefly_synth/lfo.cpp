@@ -610,9 +610,9 @@ lfo_engine::reset_graph(
   if (seen_rand_seed)
   {
     if(is_noise_static(block_auto[param_shape][0].step()))
-      _static_noise.init(new_rand_seed, block_auto[param_steps][0].step(), false);
+      _static_noise.init(new_rand_seed, block_auto[param_steps][0].step());
     else
-      _smooth_noise.init(new_rand_seed, block_auto[param_steps][0].step(), false);
+      _smooth_noise.init(new_rand_seed, block_auto[param_steps][0].step());
   }
 
   _noise_graph_was_init = true;

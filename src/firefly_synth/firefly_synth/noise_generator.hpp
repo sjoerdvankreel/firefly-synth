@@ -32,17 +32,17 @@ class noise_generator
 
 public:
   float at(float phase) const;
+  void init(int seed, int steps);
   int seed() const { return _seed; }
-  void init(int seed, int steps, bool connect);
-  void resample() { init(_state, _steps, true); }; // for free-run
+  void resample() { init(_state, _steps); }; // for free-run
 
   noise_generator() {} // needs init
   noise_generator(int seed, int steps) 
-  { init(plugin_base::fast_rand_seed(seed), steps, false); }
+  { init(plugin_base::fast_rand_seed(seed), steps); }
 };
 
 template <bool Smooth> inline void 
-noise_generator<Smooth>::init(int seed, int steps, bool connect)
+noise_generator<Smooth>::init(int seed, int steps)
 {
   _seed = seed;
   _state = seed;
