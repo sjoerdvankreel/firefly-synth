@@ -25,37 +25,8 @@ autobuilds:
 * integrate https://github.com/surge-synthesizer/monique-monosynth/blob/main/.github/workflows/build-pr.yml
 
 modvis take 3:
-V shit is super expensive again so do another profiling session ==> oh nee toch niet dat was debug mode
-V the 1 second timer to copy from automation state is actually visible ==> oh nee toch niet dat was debug mode
-V stuff goes not good when cv->cv mod by free-rand
-V extra retest the multi-slot cv matrix
-V the cv-audio graph is acting weird
-V free-running lfos
-V also for voice
-V fix the distribution
-V also test the on-note-sampling of glfo
-V also test the on-note (static) random
-V per-voice-rand-seed
-V fix the envs -> not render highest voice index but latest start time
-V fix the cv paint for envs
-V recheck the osci->osci am/fm graph modulation goes it still good?
-V retest the oneshot lfos
-V retest the legato/retrig envs
-V fix all also for the cv graphs
-V add note key and velo as vismods
-V add a this-is-here-indicator for the cv graph (maybe just a bolletje on the linkerkant)
-V retest everything once the code seems stable
-V test the clap
-V retest all the graphs
-V retest all the osci rand modes
-V smooth 2 not react
-V recheck the 20 fps perf
-* what the heck, also do free-running smooth => connect last to first on table resample. otherwise it is, you know, not smooth.
-* 4 OUT OF 6 RANDOM LFO MODES ARE F'ED WRT PAINTING ==> just re-do the lfo impl. its not sound. also be sure to use current_seed (not state()) to feed the gui tables
-* retest all random osci / kps
 * remake existing vismod demos
 * make a new one for free-run and on-voice-rand
-* free-run and on-voice-rand gui is lagging behind ==> no the first cycle is not good ==> oh thats only for freerun. wtf is going on with the per voice seed?
 
 wishlist:
 make a patch cleanup button
