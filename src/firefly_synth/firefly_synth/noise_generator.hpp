@@ -47,26 +47,8 @@ noise_generator<Smooth>::init(int seed, int steps, bool connect)
   _seed = seed;
   _state = seed;
   _steps = std::clamp(steps, 2, MAX_STEPS);
-  if constexpr (Smooth)
-  {
-    if (connect)
-    {
-      // make it smooth - a bunch of unrelated cosine remapped functions
-      // stacked next to each other are not smooth. needs a bit of juggling.
-      for (int i = 1; i < _steps; ++i)
-        _r[i] = plugin_base::fast_rand_next(_state);
-    }
-    else
-    {
-      for (int i = 0; i < _steps; ++i)
-        _r[i] = plugin_base::fast_rand_next(_state);
-    }
-  }
-  else
-  {
-    for (int i = 0; i < _steps; ++i)
-      _r[i] = plugin_base::fast_rand_next(_state);
-  }
+  for (int i = 0; i < _steps; ++i)
+    _r[i] = plugin_base::fast_rand_next(_state);
 }
 
 template <bool Smooth> inline float
