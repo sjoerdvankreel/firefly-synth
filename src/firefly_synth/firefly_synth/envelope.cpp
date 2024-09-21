@@ -18,6 +18,8 @@ namespace firefly_synth {
 
 static float const log_half = std::log(0.5f); 
 static float const max_filter_time_ms = 500;
+
+enum { custom_tag_total_pos, custom_tag_multitrig_level };
 enum class env_stage { delay, attack, hold, decay, sustain, release, filter, end };
 
 enum { type_sustain, type_follow, type_release };
@@ -83,11 +85,15 @@ public:
 class env_engine:
 public module_engine {
 
+  void process_internal(plugin_block& block, cv_cv_matrix_mixdown const* modulation);
+
 public:
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(env_engine);
-  void reset(plugin_block const* block) override;
-  void process(plugin_block& block) override { process(block, nullptr); }
-  void process(plugin_block& block, cv_cv_matrix_mixdown const* modulation);
+
+  void reset_audio(plugin_block const* block) override;
+  void process_audio(plugin_block& block) override { process_internal(block, nullptr); }
+  void process_graph(plugin_block& block, std::vector<mod_out_custom_state> const& custom_outputs, void* context) override;
+  void reset_graph(plugin_block const* block, std::vector<mod_out_custom_state> const& custom_outputs, void* context) override;
 
 private:
 
@@ -114,6 +120,11 @@ private:
   double _slp_rls_splt_bnd = 0;
 
   bool _voice_initialized = false;
+
+  // graphing
+  int _ffwd_stopped_at_samples = -1;
+  bool _is_ffwd_run_for_graph = false;
+  float _ffwd_target_total_pos = 0.0f;
 
   static inline double const slope_min = 0.0001;
   static inline double const slope_max = 0.9999;
@@ -169,7 +180,8 @@ make_graph_engine(plugin_desc const* desc)
 
 static graph_data
 render_graph(
-  plugin_state const& state, graph_engine* engine, int param, param_topo_mapping const& mapping)
+  plugin_state const& state, graph_engine* engine, int param, 
+  param_topo_mapping const& mapping, std::vector<mod_out_custom_state> const& custom_outputs)
 {
   if (state.get_plain_at(module_env, mapping.module_slot, param_on, 0).step() == 0) 
     return graph_data(graph_data_type::off, {});
@@ -190,11 +202,11 @@ render_graph(
   int voice_release_at = dahd / dahdrf * params.max_frame_count;
 
   engine->process_begin(&state, sample_rate, params.max_frame_count, voice_release_at);
-  auto const* block = engine->process(module_env, mapping.module_slot, [mapping](plugin_block& block) {
+  auto const* block = engine->process(module_env, mapping.module_slot, custom_outputs, nullptr, [mapping, &custom_outputs](plugin_block& block) {
     env_engine engine;
-    engine.reset(&block);
+    engine.reset_graph(&block, custom_outputs, nullptr);
     cv_cv_matrix_mixdown modulation(make_static_cv_matrix_mixdown(block)[module_env][mapping.module_slot]);
-    engine.process(block, &modulation);
+    engine.process_graph(block, custom_outputs, &modulation);
   });
   engine->process_end();
 
@@ -527,7 +539,7 @@ calc_slope_exp_splt(double slope_pos, double splt_bnd, double exp)
 }
 
 void
-env_engine::reset(plugin_block const* block)
+env_engine::reset_audio(plugin_block const* block)
 {
   _stage_pos = 0;
   _total_pos = 0;
@@ -539,6 +551,81 @@ env_engine::reset(plugin_block const* block)
   auto const& block_auto = block->state.own_block_automation;
   float filter = block_auto[param_filter][0].real();
   _filter.init(block->sample_rate, filter / 1000.0f);
+}
+
+void 
+env_engine::reset_graph(
+  plugin_block const* block, 
+  std::vector<mod_out_custom_state> const& custom_outputs, 
+  void* context)
+{
+  reset_audio(block);
+
+  _ffwd_stopped_at_samples = -1;
+  _ffwd_target_total_pos = 0.0f;
+  _is_ffwd_run_for_graph = false;
+
+  bool new_ffwd_run_for_graph = false;
+  float new_ffwd_target_total_pos = 0;
+
+  bool seen_multitrig = false;
+  bool is_render_for_cv_graph = false;
+  bool seen_render_for_cv_graph = false;
+
+  // see how much to forward, this seems too complicated to derive in any other way
+  // backwards loop, outputs are sorted, latest-in-time are at the end
+  if (custom_outputs.size())
+    for (int i = (int)custom_outputs.size() - 1; i >= 0; i--)
+    {
+      if (custom_outputs[i].module_global == block->module_desc_.info.global)
+      {
+        if (!_is_ffwd_run_for_graph && custom_outputs[i].tag_custom == custom_tag_total_pos)
+        {
+          // microseconds, see below
+          new_ffwd_run_for_graph = true;
+          new_ffwd_target_total_pos = custom_outputs[i].value_custom / 1000000.0f;
+          break;
+        }
+        if (!seen_multitrig && custom_outputs[i].tag_custom == custom_tag_multitrig_level)
+        {
+          seen_multitrig = true;
+          float trig_level = custom_outputs[i].value_custom / (float)std::numeric_limits<int>::max();
+          _current_level = trig_level;
+          _multitrig_level = trig_level;
+        }
+      }
+      if (!seen_render_for_cv_graph && custom_outputs[i].tag_custom == custom_out_shared_render_for_cv_graph)
+      {
+        is_render_for_cv_graph = true;
+        seen_render_for_cv_graph = true;
+      }
+      if (_is_ffwd_run_for_graph && seen_multitrig && seen_render_for_cv_graph)
+        break;
+    }
+
+  // dont want to do the moving image for the regular env plot, that one's got the moving mod indicator
+  if (is_render_for_cv_graph)
+  {
+    _is_ffwd_run_for_graph = new_ffwd_run_for_graph;
+    _ffwd_target_total_pos = new_ffwd_target_total_pos;
+  }
+}
+
+void 
+env_engine::process_graph(
+  plugin_block& block, 
+  std::vector<mod_out_custom_state> const& custom_outputs, 
+  void* context)
+{
+  process_internal(block, static_cast<cv_cv_matrix_mixdown const*>(context));
+  if (!_is_ffwd_run_for_graph || _ffwd_stopped_at_samples < 0) return;
+
+  // shift graph image to the left
+  _ffwd_stopped_at_samples = std::min(_ffwd_stopped_at_samples, block.end_frame - block.start_frame);
+  for (int f = block.start_frame; f < block.end_frame - _ffwd_stopped_at_samples; f++)
+    block.state.own_cv[0][0][f] = block.state.own_cv[0][0][f + _ffwd_stopped_at_samples];
+  for (int f = block.end_frame - _ffwd_stopped_at_samples; f < block.end_frame; f++)
+    block.state.own_cv[0][0][f] = 0.0f;
 }
 
 void
@@ -558,7 +645,7 @@ env_engine::init_slope_exp_splt(double slope, double split_pos, double& exp, dou
 }
 
 void
-env_engine::process(plugin_block& block, cv_cv_matrix_mixdown const* modulation)
+env_engine::process_internal(plugin_block& block, cv_cv_matrix_mixdown const* modulation)
 {
   // allow custom data for graphs
   if (modulation == nullptr)
@@ -572,6 +659,13 @@ env_engine::process(plugin_block& block, cv_cv_matrix_mixdown const* modulation)
   if (_stage == env_stage::end || (!on && block.module_slot != 0))
   {
     block.state.own_cv[0][0].fill(block.start_frame, block.end_frame, 0.0f);
+    // CAUTION: microseconds
+    if(_stage == env_stage::end && !block.graph)
+      block.push_modulation_output(modulation_output::make_mod_output_custom_state(
+        block.voice->state.slot,
+        block.module_desc_.info.global,
+        0,
+        (int)(_total_pos * 1000000)));
     return;
   }
 
@@ -583,12 +677,29 @@ env_engine::process(plugin_block& block, cv_cv_matrix_mixdown const* modulation)
   // only want the mod outputs for the actual audio engine
   if (block.graph) return;
 
+  // need to push the total pos for graph (for the moving cv matrix signal)
+  // since sample rates are different for audio and GUI, need a value in time not frames
+  // reset_graph+render_graph then need to derive the env state by just truncating the entire thing to that position
+  // CAUTION: microseconds. cannot go with maxint because total_pos is not in [0, 1] (env can be > 1 second)
+  block.push_modulation_output(modulation_output::make_mod_output_custom_state(
+    block.voice->state.slot,
+    block.module_desc_.info.global,
+    custom_tag_total_pos,
+    (int)(_total_pos * 1000000)));
+  block.push_modulation_output(modulation_output::make_mod_output_custom_state(
+    block.voice->state.slot,
+    block.module_desc_.info.global,
+    custom_tag_multitrig_level,
+    (int)(_multitrig_level * std::numeric_limits<int>::max())));
+
+  // drop the mod indicators when we ended
   if (_stage == env_stage::end) return;
   float flt = block.state.own_block_automation[param_filter][0].real() / 1000.0f;
+  float normalized_pos = std::clamp(_total_pos / (_dly + _att + _hld + _dcy + _rls + flt), 0.0, 1.0);
   block.push_modulation_output(modulation_output::make_mod_output_cv_state(
     block.voice->state.slot,
     block.module_desc_.info.global,
-    std::clamp(_total_pos / (_dly + _att + _hld + _dcy + _rls + flt), 0.0, 1.0)));
+    normalized_pos));
 }
 
 template <bool Monophonic>
@@ -723,7 +834,12 @@ void env_engine::process_mono_type_sync_trigger_mode(plugin_block& block, cv_cv_
       _current_level = 0;
       _multitrig_level = 0;
       _stage_pos += 1.0 / block.sample_rate;
+      
       _total_pos += 1.0 / block.sample_rate;
+      if (_is_ffwd_run_for_graph)
+        if (_total_pos >= _ffwd_target_total_pos && _ffwd_stopped_at_samples == -1)
+          _ffwd_stopped_at_samples = _total_pos * block.sample_rate;
+
       float level = _filter.next(0);
       block.state.own_cv[0][0][f] = level;
       if (level < 1e-5)
@@ -748,6 +864,7 @@ void env_engine::process_mono_type_sync_trigger_mode(plugin_block& block, cv_cv_
           if(_stage < env_stage::release)
           {
             _stage_pos = 0;
+            _total_pos = 0;
             _stage = env_stage::delay;
             if constexpr (Trigger == trigger_retrig)
             {
@@ -819,7 +936,12 @@ void env_engine::process_mono_type_sync_trigger_mode(plugin_block& block, cv_cv_
     check_unipolar(_multitrig_level);
     block.state.own_cv[0][0][f] = _filter.next(out);
     _stage_pos += 1.0 / block.sample_rate;
+    
     _total_pos += 1.0 / block.sample_rate;
+    if (_is_ffwd_run_for_graph)
+      if (_total_pos >= _ffwd_target_total_pos && _ffwd_stopped_at_samples == -1)
+        _ffwd_stopped_at_samples = _total_pos * block.sample_rate;
+
     if (_stage_pos < stage_seconds) continue;
 
     _stage_pos = 0;

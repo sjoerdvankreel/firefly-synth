@@ -1,3 +1,17 @@
+### September 21, 2024 - V1.9.3.
+
+- Added free-running smooth noise as a new LFO type. Note - consecutive cycles are not smooth by themselves so you still need to use the LFO filter to get a real smooth signal.
+- Bugfix in generating random numbers for the per-voice-random cv source (they weren't all that random).
+- Breaking change: lfo noise generators become phase-based sampling functions to prevent drift.
+* This causes small and possibly audible differences for the (free-running-) static and smooth lfos, sorry, but was needed to keep engine and ui in check.
+* On the upside, they now correctly respond to phase offset.
+- LFO graphs now respond to per-voice-seeded random generators.
+- LFO and CV graphs now respond to free-running random generators.
+- Envelope and CV graphs now respond to retriggered/multi-triggered envelopes.
+- CV graphs now respond to on-note-global-lfo, on-voice-random-seed, MIDI key and velocity.
+* Not! to MICI CC and CLAP modulation signals, maybe later.
+- CV graphs are now animated in all cases, replaced phase indicators (because they were wrong) by a continuous moving signal.
+
 ### September 11, 2024 - V1.9.2.
 
 - Bugfix: modulated params would be slow to visually react to user input.

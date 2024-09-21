@@ -223,6 +223,7 @@ private:
   std::vector<int> _engine_voices_active = {}; // don't like vector bool
   std::vector<std::uint32_t> _engine_voices_activated = {}; // don't like vector bool
   std::vector<plugin_base::modulation_output>* _modulation_outputs = {};
+  std::vector<plugin_base::timed_modulation_output> _timed_modulation_outputs = {};
   std::unique_ptr<juce::TooltipWindow> _tooltip = {};
   std::map<int, std::unique_ptr<lnf>> _module_lnfs = {};
   std::map<int, std::unique_ptr<lnf>> _custom_lnfs = {};

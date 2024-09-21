@@ -120,7 +120,7 @@ protected:
   void perform_mixdown(plugin_block& block, int module, int slot);
 
 public:
-  void reset(plugin_block const*) override;
+  void reset_audio(plugin_block const*) override;
 };
 
 // mixes down into a single cv (entire module) on demand
@@ -136,7 +136,7 @@ public:
   cv_matrix_engine_base(true, global, topo, sources, targets), _mixer(this) {}
 
   PB_PREVENT_ACCIDENTAL_COPY(cv_cv_matrix_engine);
-  void process(plugin_block& block) override;
+  void process_audio(plugin_block& block) override;
   cv_cv_matrix_mixdown const& mix(plugin_block& block, int module, int slot);
 };
 
@@ -150,7 +150,7 @@ public:
     std::vector<param_topo_mapping> const& targets):
   cv_matrix_engine_base(false, global, topo, sources, targets) {}
 
-  void process(plugin_block& block) override;
+  void process_audio(plugin_block& block) override;
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(cv_audio_matrix_engine);
 };
 
@@ -341,22 +341,13 @@ scale_to_longest_mod_source(
   return result;
 }
 
-// mapping to longest mod source, prefer envelope
-static modulation_output_source
-select_modulation_output_source(
-  plugin_state const& state, param_topo_mapping const& mapping,
-  std::vector<module_output_mapping> const& sources)
-{
-  float max_dahd, max_dahdrf;
-  int module_index, module_slot;
-  scale_to_longest_mod_source(state, mapping, sources, max_dahd, max_dahdrf, module_index, module_slot);
-  return { module_index, module_slot };
-}
-
 static graph_data
 render_graph(
-  plugin_state const& state, graph_engine* engine, int param, param_topo_mapping const& mapping, 
-  std::vector<module_output_mapping> const& sources, routing_matrix<param_topo_mapping> const& targets)
+  plugin_state const& state, graph_engine* engine, int param, 
+  param_topo_mapping const& mapping, 
+  std::vector<mod_out_custom_state> const& custom_outputs,
+  std::vector<module_output_mapping> const& sources, 
+  routing_matrix<param_topo_mapping> const& targets)
 {
   auto const& map = mapping;
   int route_count = route_count_from_module(map.module_index);
@@ -366,7 +357,7 @@ render_graph(
     // try to always paint something
     for(int r = 0; r < route_count; r++)
       if(state.get_plain_at(map.module_index, map.module_slot, param_type, r).step() != type_off)
-        return render_graph(state, engine, -1, { map.module_index, map.module_slot, map.param_index, r }, sources, targets);
+        return render_graph(state, engine, -1, { map.module_index, map.module_slot, map.param_index, r }, custom_outputs, sources, targets);
     return graph_data(graph_data_type::off, {});
   }
 
@@ -382,14 +373,19 @@ render_graph(
   int voice_release_at = max_dahd / max_dahdrf * params.max_frame_count;
   int ti = state.get_plain_at(map.module_index, map.module_slot, param_target, map.param_slot).step();
 
-  engine->process_begin(&state, sample_rate, params.max_frame_count, voice_release_at);  
+  // make dependent renderers know they are plotting for us
+  std::vector<mod_out_custom_state> custom_cv_outputs(custom_outputs);
+  custom_cv_outputs.push_back(modulation_output::make_mod_output_custom_state(
+    -1, -1, custom_out_shared_render_for_cv_graph, -1).state.custom);
+
+  engine->process_begin(&state, sample_rate, params.max_frame_count, voice_release_at);
   std::vector<int> relevant_modules({ module_gcv_cv_matrix, module_global_in, module_glfo });
   if(map.module_index == module_vcv_audio_matrix || map.module_index == module_vcv_cv_matrix)
-    relevant_modules.insert(relevant_modules.end(), { module_vcv_cv_matrix, module_voice_on_note, module_vlfo, module_env });
+    relevant_modules.insert(relevant_modules.end(), { module_vcv_cv_matrix, module_voice_note, module_voice_on_note, module_vlfo, module_env });
   for(int m = 0; m < relevant_modules.size(); m++)
     for(int mi = 0; mi < state.desc().plugin->modules[relevant_modules[m]].info.slot_count; mi++)
-      engine->process_default(relevant_modules[m], mi);
-  auto* block = engine->process_default(map.module_index, map.module_slot);
+      engine->process_default(relevant_modules[m], mi, custom_cv_outputs, nullptr);
+  auto* block = engine->process_default(map.module_index, map.module_slot, custom_cv_outputs, nullptr);
   engine->process_end();
 
   std::string partition = float_to_string(max_total, 1) + " Sec " + targets.items[ti].name;
@@ -454,13 +450,13 @@ cv_matrix_topo(
   result.graph_engine_factory = make_graph_engine;
   if(!cv && !is_fx) result.default_initializer = global ? init_audio_global_default : init_audio_voice_default;
   result.graph_renderer = [sm = source_matrix.mappings, tm = target_matrix](
-    auto const& state, auto* engine, int param, auto const& mapping) {
-      return render_graph(state, engine, param, mapping, sm, tm);
+    auto const& state, auto* engine, int param, auto const& mapping, auto const& mods) {
+      return render_graph(state, engine, param, mapping, mods, sm, tm);
     };
-  result.mod_output_source_selector = [sm = source_matrix.mappings](
-    auto const& state, auto const& mapping) {
-      return select_modulation_output_source(state, mapping, sm);
-    };
+
+  // need these for continuous repaint
+  result.dependent_custom_outputs_module_topo_indices = { module_glfo };
+  if (!global) result.dependent_custom_outputs_module_topo_indices = { module_glfo, module_env, module_vlfo, module_voice_note, module_voice_on_note };
   result.gui.menu_handler_factory = [](plugin_state* state) {
     return std::make_unique<tidy_matrix_menu_handler>(
       state, 1, param_type, type_off, std::vector<std::vector<int>>({{ param_target, param_source }})); 
@@ -488,7 +484,7 @@ cv_matrix_topo(
 
   auto& main = result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag_basic("{A19E18F8-115B-4EAB-A3C7-43381424E7AB}", "Main"),
-    make_param_section_gui({ 0, 0 }, { { 1 }, { gui_dimension::auto_size, 3, gui_dimension::auto_size, 1, 1, 1, 1 } })));
+    make_param_section_gui({ 0, 0 }, { { 1 }, { gui_dimension::auto_size, 13, gui_dimension::auto_size, 4, 4, 4, 4 } })));
   main.gui.scroll_mode = gui_scroll_mode::vertical;
   
   auto& type = result.params.emplace_back(make_param(
@@ -598,7 +594,7 @@ _cv(cv), _global(global), _sources(sources), _targets(targets)
 }
 
 void 
-cv_cv_matrix_engine::process(plugin_block& block)
+cv_cv_matrix_engine::process_audio(plugin_block& block)
 { *block.state.own_context = &_mixer; }
 
 cv_cv_matrix_mixdown const& 
@@ -613,14 +609,14 @@ cv_cv_matrix_engine::mix(plugin_block& block, int module, int slot)
 }
 
 void
-cv_audio_matrix_engine::process(plugin_block& block)
+cv_audio_matrix_engine::process_audio(plugin_block& block)
 {
   perform_mixdown(block, -1, -1);
   *block.state.own_context = &_mixdown;
 }
 
 void 
-cv_matrix_engine_base::reset(plugin_block const* block)
+cv_matrix_engine_base::reset_audio(plugin_block const* block)
 {
   // need to capture stuff here because when we start 
   // mixing "own" does not refer to us but to the caller
@@ -808,20 +804,21 @@ cv_matrix_engine_base::perform_mixdown(plugin_block& block, int module, int slot
       modulated_curve_ptrs[r]->transform(block.start_frame, block.end_frame, [](float v) { return std::clamp(v, 0.0f, 1.0f); });
 
   // push param modulation outputs 
-  if (!block.graph)
-    for (int r = 0; r < route_count; r++)
-      if (mod_output_usages[r].in_use)
-      {
-        // debugging
-        auto const& param_desc = block.plugin_desc_.params[mod_output_usages[r].param_global];
-        (void)param_desc;
+  if (block.graph) return;
 
-        block.push_modulation_output(modulation_output::make_mod_output_param_state(
-          _global ? -1 : block.voice->state.slot,
-          mod_output_usages[r].module_global,
-          mod_output_usages[r].param_global,
-          (*mod_output_usages[r].modulated_curve_ptr)[block.end_frame - 1]));
-      }
+  for (int r = 0; r < route_count; r++)
+    if (mod_output_usages[r].in_use)
+    {
+      // debugging
+      auto const& param_desc = block.plugin_desc_.params[mod_output_usages[r].param_global];
+      (void)param_desc;
+
+      block.push_modulation_output(modulation_output::make_mod_output_param_state(
+        _global ? -1 : block.voice->state.slot,
+        mod_output_usages[r].module_global,
+        mod_output_usages[r].param_global,
+        (*mod_output_usages[r].modulated_curve_ptr)[block.end_frame - 1]));
+    }
 }
 
 }

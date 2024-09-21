@@ -9,7 +9,6 @@
 #include <firefly_synth/svf.hpp>
 #include <firefly_synth/synth.hpp>
 #include <firefly_synth/waves.hpp>
-#include <firefly_synth/noise_static.hpp>
 
 #include <cmath>
 
@@ -51,7 +50,45 @@ static bool can_do_phase(int type)
 static bool can_do_pitch(int type)
 { return type == type_basic || type == type_dsf || is_kps(type); }
 
-static void 
+// bit different for osci and lfo
+// lfo is bucket based but for this one we'd need up to SR/2 buckets
+class static_noise
+{
+  int _pos = 0;
+  int _samples = 0;
+  float _level = 0;
+  std::uint32_t _state = 1;
+
+public:
+
+  float next();
+  void reset(int seed);
+  void update(float sr, float rate) { _samples = std::ceil(sr / rate); }
+};
+
+inline void
+static_noise::reset(int seed)
+{
+  _pos = 0;
+  _state = plugin_base::fast_rand_seed(seed);
+  _level = plugin_base::fast_rand_next(_state);
+}
+
+inline float
+static_noise::next()
+{
+  _pos++;
+  float result = _level;
+  if (_pos >= _samples)
+  {
+    _level = plugin_base::fast_rand_next(_state);
+    _level = bipolar_to_unipolar(unipolar_to_bipolar(_level));
+    _pos = 0;
+  }
+  return result;
+}
+
+static void
 get_oversmp_info(plugin_block const& block, int& stages, int& factor)
 {
   auto const& block_auto = block.state.own_block_automation;
@@ -130,8 +167,8 @@ public:
   PB_PREVENT_ACCIDENTAL_COPY(osc_engine);
   osc_engine(int max_frame_count, float sample_rate);
 
-  void reset(plugin_block const*) override;
-  void process(plugin_block& block) override { process<false>(block, nullptr); }
+  void reset_audio(plugin_block const*) override;
+  void process_audio(plugin_block& block) override { process<false>(block, nullptr); }
   
   template <bool Graph> 
   void process(plugin_block& block, cv_audio_matrix_mixdown const* modulation);
@@ -207,7 +244,10 @@ make_osc_graph_engine(plugin_desc const* desc)
 }
 
 std::vector<graph_data>
-render_osc_graphs(plugin_state const& state, graph_engine* engine, int slot, bool for_osc_osc_matrix)
+render_osc_graphs(
+  plugin_state const& state, graph_engine* engine, 
+  int slot, bool for_osc_osc_matrix, 
+  std::vector<mod_out_custom_state> const& custom_outputs)
 {
   std::vector<graph_data> result;
   int note = state.get_plain_at(module_osc, slot, param_note, 0).step();
@@ -232,12 +272,12 @@ render_osc_graphs(plugin_state const& state, graph_engine* engine, int slot, boo
   // we use an alternate means to access the modulation
   // signal inside matrix_osc::modulate_fm
   engine->process_begin(&state, sample_rate, params.max_frame_count, -1);
-  engine->process_default(module_osc_osc_matrix, 0);
+  engine->process_default(module_osc_osc_matrix, 0, custom_outputs, nullptr);
   for (int i = 0; i <= slot; i++)
   {
-    block = engine->process(module_osc, i, [max_frame_count = params.max_frame_count, sample_rate](plugin_block& block) {
+    block = engine->process(module_osc, i, custom_outputs, nullptr, [max_frame_count = params.max_frame_count, sample_rate](plugin_block& block) {
       osc_engine engine(max_frame_count, sample_rate);
-      engine.reset(&block);
+      engine.reset_audio(&block);
       cv_audio_matrix_mixdown modulation(make_static_cv_matrix_mixdown(block));
       engine.process<true>(block, &modulation);
     });
@@ -263,13 +303,14 @@ render_osc_graphs(plugin_state const& state, graph_engine* engine, int slot, boo
 
 static graph_data
 render_osc_graph(
-  plugin_state const& state, graph_engine* engine, int param, param_topo_mapping const& mapping)
+  plugin_state const& state, graph_engine* engine, int param, 
+  param_topo_mapping const& mapping, std::vector<mod_out_custom_state> const& custom_outputs)
 {
   graph_engine_params params = {};
   int type = state.get_plain_at(module_osc, mapping.module_slot, param_type, 0).step();
   if(state.get_plain_at(mapping.module_index, mapping.module_slot, param_type, 0).step() == type_off) 
     return graph_data(graph_data_type::off, {});
-  auto data = render_osc_graphs(state, engine, mapping.module_slot, false)[mapping.module_slot];
+  auto data = render_osc_graphs(state, engine, mapping.module_slot, false, custom_outputs)[mapping.module_slot];
   std::string partition = is_random(type)? "5 Cycles": "First Cycle";
   return graph_data(data.audio(), 1.0f, false, { partition });
 }
@@ -292,8 +333,7 @@ osc_topo(int section, gui_position const& pos)
   result.graph_engine_factory = make_osc_graph_engine;
   result.gui.menu_handler_factory = make_osc_routing_menu_handler;
   result.engine_factory = [](auto const&, int sr, int max_frame_count) { return std::make_unique<osc_engine>(max_frame_count, sr); };
-  result.mod_output_source_selector = [](auto const& state, auto const& mapping) { return modulation_output_source { module_osc_osc_matrix, 0 }; };
-
+  
   result.sections.emplace_back(make_param_section(section_type,
     make_topo_tag_basic("{A64046EE-82EB-4C02-8387-4B9EFF69E06A}", "Type"),
     make_param_section_gui({ 0, 0, 2, 1 }, gui_dimension({ 1, 1 }, { 
@@ -675,7 +715,7 @@ _oversampler(max_frame_count)
 }
 
 void
-osc_engine::reset(plugin_block const* block)
+osc_engine::reset_audio(plugin_block const* block)
 {
   // publish the oversampler ptrs
   // note: it is important to do this during reset() rather than process()
@@ -748,7 +788,7 @@ osc_engine::real_reset(plugin_block& block, cv_audio_matrix_mixdown const* modul
   // below 50 hz gives barely any results
   float rate = 50 + (kps_rate * 0.01) * (block.sample_rate * 0.5f - 50);
   static_noise_.reset(kps_seed);
-  static_noise_.update(block.sample_rate, rate, 1);
+  static_noise_.update(block.sample_rate, rate);
   double w = pi64 * kps_freq / block.sample_rate;
   switch (kps_svf)
   {
@@ -767,7 +807,7 @@ osc_engine::real_reset(plugin_block& block, cv_audio_matrix_mixdown const* modul
     _kps_positions[v] = 0;
     for (int f = 0; f < _kps_max_length; f++)
     {
-      float noise = static_noise_.next<true>(1, kps_seed);
+      float noise = static_noise_.next();
       _kps_lines[v][f] = filter.next(0, unipolar_to_bipolar(noise));
     }
   }
@@ -776,8 +816,8 @@ osc_engine::real_reset(plugin_block& block, cv_audio_matrix_mixdown const* modul
 template <int SVFType>
 float osc_engine::generate_static(int voice, float sr, float freq_hz, float res, int seed, float rate_hz)
 {
-  _static_noises[voice].update(sr, rate_hz, 1);
-  float result = unipolar_to_bipolar(_static_noises[voice].next<true>(1, seed));
+  _static_noises[voice].update(sr, rate_hz);
+  float result = unipolar_to_bipolar(_static_noises[voice].next());
 
   float const max_res = 0.99f;
   double w = pi64 * freq_hz / sr;

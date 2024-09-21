@@ -26,14 +26,15 @@ extern int const global_in_param_pb_range = param_pb_range;
 class global_in_engine :
 public module_engine {
 public:
-  void reset(plugin_block const*) override {}
-  void process(plugin_block& block) override;
+  void reset_audio(plugin_block const*) override {}
+  void process_audio(plugin_block& block) override;
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(global_in_engine);
 };
 
 static graph_data
 render_graph(
-  plugin_state const& state, graph_engine* engine, int param, param_topo_mapping const& mapping)
+  plugin_state const& state, graph_engine* engine, int param, 
+  param_topo_mapping const& mapping, std::vector<mod_out_custom_state> const& custom_outputs)
 {
   if (mapping.param_index == param_pb_range)
     return graph_data(graph_data_type::na, {});
@@ -114,7 +115,7 @@ global_in_topo(int section, bool is_fx, gui_position const& pos)
 }
 
 void
-global_in_engine::process(plugin_block& block)
+global_in_engine::process_audio(plugin_block& block)
 {
   auto& own_cv = block.state.own_cv;  
   auto const& accurate = block.state.own_accurate_automation;

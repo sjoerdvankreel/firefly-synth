@@ -105,14 +105,15 @@ public module_engine {
   void process_voice_mode_tuning_mode_unison(plugin_block& block);
 
 public:
-  void reset(plugin_block const*) override;
-  void process(plugin_block& block) override;
+  void reset_audio(plugin_block const*) override;
+  void process_audio(plugin_block& block) override;
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(voice_in_engine);
 };
 
 static graph_data
 render_graph(
-  plugin_state const& state, graph_engine* engine, int param, param_topo_mapping const& mapping)
+  plugin_state const& state, graph_engine* engine, int param, 
+  param_topo_mapping const& mapping, std::vector<mod_out_custom_state> const& custom_outputs)
 {
   if (mapping.param_index == param_uni_voices)
     return graph_data(graph_data_type::na, {});
@@ -353,7 +354,7 @@ voice_in_engine::calc_current_porta_midi_note()
 }
 
 void
-voice_in_engine::reset(plugin_block const* block)
+voice_in_engine::reset_audio(plugin_block const* block)
 {
   _position = 0;
   _to_midi_note = block->voice->state.note_id_.key;
@@ -392,7 +393,7 @@ voice_in_engine::reset(plugin_block const* block)
 }
 
 void
-voice_in_engine::process(plugin_block& block)
+voice_in_engine::process_audio(plugin_block& block)
 {
   auto const& block_auto = block.state.own_block_automation;
   int voice_mode = block_auto[param_mode][0].step();
