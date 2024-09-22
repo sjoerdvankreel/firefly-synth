@@ -26,7 +26,6 @@ autobuilds:
 * integrate https://github.com/surge-synthesizer/monique-monosynth/blob/main/.github/workflows/build-pr.yml
 
 modvis take 3:
-* remake existing vismod demos
 * make a new one for free-run and on-voice-rand
 
 wishlist:
