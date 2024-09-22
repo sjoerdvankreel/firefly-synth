@@ -2,22 +2,36 @@
 <head>
 <title>Firefly Synth - An open-source semi-modular VST3 and CLAP synthesizer and FX plugin for Windows, Linux and Mac.</title>
 <style>
-h1 { 
-  color: #ff0040; 
+
+h3 {
+  font-size: 11pt
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+a {
+  color: #ffa040;
+  text-decoration: none;
+}
+
+h1, h3 {
+  color: #ff0040;
   margin-bottom: 0;
   margin-top: 0 }
 
 html, body { 
   height: 100%; 
-  margin: 0; 
-  padding: 0; 
+  margin: 0;
+  padding: 0;
   color: #ddd; }
 
 #container {
   width: 960px;
   margin: auto;
   background-color: #111;
-  padding: 10px 20px 10px 20px;
+  padding: 5px 20px 5px 20px;
   min-height: 100%; 
   background-position: top center;
   background-repeat: repeat-x, repeat;
@@ -37,7 +51,24 @@ body {
 <div id="container">
 <h1>Firefly Synth</h1>
 An open-source semi-modular VST3 and CLAP synthesizer and FX plugin for Windows, Linux and Mac.<br/><br/>
+<h3>Download</h3>
+See <a href="https://github.com/sjoerdvankreel/firefly-synth/releases">github releases</a>.
+<br/><br/>
+<h3>Support</h3>
+<a href="mailto:sjoerdvankreel@gmail.com"/>Mail me</a> or (preferably) open a <a href="https://github.com/sjoerdvankreel/firefly-synth/issues">github issue</a>.
+<br/><br/>
+<h3>Requirements</h3>
+Windows: 7+, X64, AVX1 support.<br/>
+MacOS: 10.15+, X64 (Intel) or 64-bit ARM (Silicon).<br/>
+Linux: Ubuntu 18.04+, X64, AVX1 support (known to work on other distros, actual requirement is glibc 2.25+).
+<br/><br/>
+<h3>Screenshot</h3>
 <img src="https://github.com/sjoerdvankreel/firefly-synth/raw/main/static/screenshot_synth_hot.png" width="100%"/>
+<br/><br/>
+<h3>Demo video</h3>
+<video width="100%" controls>
+  <source src="https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/video/big_pad_2_visual_demo.mp4" type="video/mp4">
+</video>
 </div>
 </body>
 </html>

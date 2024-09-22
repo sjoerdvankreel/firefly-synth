@@ -17,6 +17,7 @@ on release:
 11 dont forget to tag
 12 make a github release
 13 update kvr 
+14 update the website
 
 microtuning:
 * check up on andreyas comments
