@@ -4,21 +4,23 @@
 <style>
 
 h3 {
-  font-size: 11pt
-}
+  font-size: 11pt }
+
+table, tr, td {
+  margin: 0;
+  padding: 0;
+  border-spacing: 0px;
+  font-size: 10pt; }
 
 .header {
-  color: #ff0040
-}
+  color: #ff0040 }
 
 a:hover {
-  text-decoration: underline;
-}
+  text-decoration: underline; }
 
 a {
   color: #ffa040;
-  text-decoration: none;
-}
+  text-decoration: none; }
 
 h1, h3 {
   color: #ff0040;
@@ -51,26 +53,73 @@ body {
   background-repeat: repeat-x, repeat; }
 </style>
 </head>
+
 <body>
 <div id="container">
+
 <h1>Firefly Synth</h1>
 An open-source semi-modular VST3 and CLAP synthesizer and FX plugin for Windows, Linux and Mac.<br/><br/>
-<h3>Download</h3>
-See <a href="https://github.com/sjoerdvankreel/firefly-synth/releases">github releases</a>.<br/><br/>
-<span class="header">Support: </span><a href="mailto:sjoerdvankreel@gmail.com"/>Mail me</a> or (preferably) open a <a href="https://github.com/sjoerdvankreel/firefly-synth/issues">github issue</a>.<br/>
-<span class="header">Github: </span><a href="https://github.com/sjoerdvankreel/firefly-synth">https://github.com/sjoerdvankreel/firefly-synth</a>.<br/>
-<span class="header">KVR-Audio: </span><a href="https://www.kvraudio.com/product/firefly-synth-by-sjoerdvankreel">https://www.kvraudio.com/product/firefly-synth-by-sjoerdvankreel</a>.<br/>
-<span class="header">Manual: </span><a href="https://github.com/sjoerdvankreel/firefly-synth/blob/main/manual.md"/>https://github.com/sjoerdvankreel/firefly-synth/blob/main/manual.md</a>.<br/>
-<span class="header">Changelog: </span><a href="https://github.com/sjoerdvankreel/firefly-synth/blob/main/changelog.md"/>https://github.com/sjoerdvankreel/firefly-synth/blob/main/changelog.md</a>.<br/>
+
+<h3>Support</h3>
+<a href="mailto:sjoerdvankreel@gmail.com"/>Mail me</a> or preferably open a <a href="https://github.com/sjoerdvankreel/firefly-synth/issues">Github issue</a>.<br/><br/>
+
+<h3>Resources</h3>
+<a href="https://github.com/sjoerdvankreel/firefly-synth/blob/main/manual.md"/>Manual</a> /
+<a href="https://github.com/sjoerdvankreel/firefly-synth/blob/main/changelog.md">Changelog</a> /
+<a href="https://github.com/sjoerdvankreel/firefly-synth">Github</a> /
+<a href="https://www.kvraudio.com/product/firefly-synth-by-sjoerdvankreel">KVR-Audio</a>.<br/>
+Both the Github page and KVR product page contain some demo audio and video.
+<br/><br/>
+
+<table>
+<tr>
+<td><h3>Download&nbsp;</h3></td>
+<td>Synth</td>
+<td>FX</td>
+</tr>
+<tr>
+<td>VST3</td>
+<td>
+<a href="https://github.com/sjoerdvankreel/firefly-synth/releases/download/v1.9.3/firefly_synth_1.9.3_windows_vst3_instrument.zip">Windows</a> /
+<a href="https://github.com/sjoerdvankreel/firefly-synth/releases/download/v1.9.3/firefly_synth_1.9.3_linux_vst3_instrument.zip">Linux</a> /
+<a href="https://github.com/sjoerdvankreel/firefly-synth/releases/download/v1.9.3/firefly_synth_1.9.3_mac_vst3_instrument.zip">Mac</a> |&nbsp;
+</td>
+<td>
+<a href="https://github.com/sjoerdvankreel/firefly-synth/releases/download/v1.9.3/firefly_synth_1.9.3_windows_vst3_fx.zip">Windows</a> /
+<a href="https://github.com/sjoerdvankreel/firefly-synth/releases/download/v1.9.3/firefly_synth_1.9.3_linux_vst3_fx.zip">Linux</a> /
+<a href="https://github.com/sjoerdvankreel/firefly-synth/releases/download/v1.9.3/firefly_synth_1.9.3_mac_vst3_fx.zip">Mac</a>
+</td>
+</tr>
+<tr>
+<td>CLAP</td>
+<td>
+<a href="https://github.com/sjoerdvankreel/firefly-synth/releases/download/v1.9.3/firefly_synth_1.9.3_windows_clap_instrument.zip">Windows</a> /
+<a href="https://github.com/sjoerdvankreel/firefly-synth/releases/download/v1.9.3/firefly_synth_1.9.3_linux_clap_instrument.zip">Linux</a> /
+<a href="https://github.com/sjoerdvankreel/firefly-synth/releases/download/v1.9.3/firefly_synth_1.9.3_mac_clap_instrument.zip">Mac</a> |&nbsp;
+</td>
+<td>
+<a href="https://github.com/sjoerdvankreel/firefly-synth/releases/download/v1.9.3/firefly_synth_1.9.3_windows_clap_fx.zip">Windows</a> /
+<a href="https://github.com/sjoerdvankreel/firefly-synth/releases/download/v1.9.3/firefly_synth_1.9.3_linux_clap_fx.zip">Linux</a> /
+<a href="https://github.com/sjoerdvankreel/firefly-synth/releases/download/v1.9.3/firefly_synth_1.9.3_mac_clap_fx.zip">Mac</a>
+</td>
+</tr>
+</table>
 <br/>
+
+<h3>Install</h3>
+Download the zip file and copy it's contents (all of it, not just the dll/so/dylib) to you CLAP/VST3 folder.
+<br/><br/>
+
 <h3>System requirements</h3>
 Windows: 7+, X64, AVX1 support.<br/>
 MacOS: 10.15+, X64 (Intel) or 64-bit ARM (Silicon).<br/>
 Linux: Ubuntu 18.04+, X64, AVX1 support (known to work on other distros, actual requirement is glibc 2.25+).
 <br/><br/>
+
 <h3>Screenshot</h3>
 <img src="https://github.com/sjoerdvankreel/firefly-synth/raw/main/static/screenshot_synth_hot.png" width="100%"/>
 <br/><br/>
+
 <h3>Demo video</h3>
 <video width="100%" controls>
   <source src="https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/video/big_pad_2_visual_demo.mp4" type="video/mp4">
