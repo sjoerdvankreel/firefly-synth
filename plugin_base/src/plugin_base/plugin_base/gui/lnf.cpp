@@ -370,7 +370,7 @@ lnf::getTickShape(float h)
 Button* 
 lnf::createTabBarExtrasButton()
 {
-  // HACK: i dont know how else to get rid of this thing         
+  // HACK: i dont know how else to get rid of this thing            
   auto result = new TextButton();
   result->setAlpha(0);
   return result;

@@ -74,7 +74,7 @@
     {
       "module_sections": ["GAudio", "GCV-A", "GCV-CV"],
       "colors": {
-        "tab_button": "FF333333",
+        "tab_button": "FF555555",
         "tab_button_inactive": "FFFF0040",
         "tab_text": "FFFF0040",
         "tab_text_inactive": "FF111111",
@@ -92,7 +92,7 @@
       "custom_sections": ["Theme", "Global FX Graph", "Global LFO Graph", "Global Matrix Graphs"],
       "module_sections": ["Master", "Global", "Global Out", "Global FX", "Global LFO"],
       "colors": {
-        "tab_button": "FF333333",
+        "tab_button": "FF555555",
         "tab_button_inactive": "FFFF0040",
         "tab_text": "FFFF0040",
         "tab_text_inactive": "FF111111",
@@ -123,7 +123,7 @@
     {
       "module_sections": ["Osc Mod", "VAudio", "VCV-A", "VCV-CV"],
       "colors": {
-        "tab_button": "FF333333",
+        "tab_button": "FF555555",
         "tab_button_inactive": "FFFFA040",
         "tab_text": "FFFFA040",
         "tab_text_inactive": "FF111111",
@@ -141,7 +141,7 @@
       "custom_sections": ["Oscillator Graph", "Voice FX Graph", "Voice LFO Graph", "Envelope Graph", "Voice Matrix Graphs"],
       "module_sections": ["Voice", "Voice Out", "Osc", "Voice FX", "Voice LFO", "Env"],
       "colors": {
-        "tab_button": "FF333333",
+        "tab_button": "FF555555",
         "tab_button_inactive": "FFFFA040",
         "tab_text": "FFFFA040",
         "tab_text_inactive": "FF111111",
