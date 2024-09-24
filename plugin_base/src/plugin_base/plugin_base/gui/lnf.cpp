@@ -401,7 +401,7 @@ lnf::getTabButtonBestWidth(TabBarButton& b, int)
   int header_width = _default_settings.header_width;
   if(_module_settings.contains(full_name)) header_width = _module_settings.at(full_name).header_width;
   if(b.getIndex() == 0) result += header_width;
-  return result;     
+  return result;        
 }
 
 void 
