@@ -35,7 +35,7 @@
     "graph_background": "FF000000",
     "graph_modulation_bubble": "C0FFFFFF",
     "bubble_outline": "FF999999",
-    "slider_background": "FF333333",
+    "slider_background": "FF000000",
     "slider_highlight": "FFFFFFFF",
     "slider_shadow": "FF000000",
     "slider_can_modulate": "FF666666",
