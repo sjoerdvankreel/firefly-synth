@@ -55,6 +55,7 @@ public:
   juce::Font getTabButtonFont(juce::TabBarButton& b, float) override { return font(); }
   
   juce::Path getTickShape(float) override;
+  juce::Button* createTabBarExtrasButton() override;
   int	getTabButtonBestWidth(juce::TabBarButton&, int) override;
   void positionComboBoxText(juce::ComboBox&, juce::Label&) override;
   void getIdealPopupMenuItemSize(juce::String const&, bool, int, int& , int&) override;
