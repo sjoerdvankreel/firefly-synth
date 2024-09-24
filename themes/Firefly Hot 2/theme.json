@@ -111,7 +111,7 @@
     {
       "module_sections": ["Global"],
       "settings": {
-        "header_width": "378"
+        "header_width": "984"
       }
     },
     {
@@ -167,7 +167,7 @@
     {
       "module_sections": ["Voice"],
       "settings": {
-        "header_width": "378"
+        "header_width": "984"
       }
     },
     {
