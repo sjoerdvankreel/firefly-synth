@@ -182,6 +182,7 @@ struct gui_colors final {
   juce::Colour tab_text = juce::Colour(0xFF00FF00);
   juce::Colour tab_text_inactive = juce::Colour(0xFF00FF00);
   juce::Colour tab_button = juce::Colour(0xFF00FF00);
+  juce::Colour tab_button_inactive = juce::Colour(0xFF00FF00);
   juce::Colour tab_header = juce::Colour(0xFF00FF00);
   juce::Colour graph_grid = juce::Colour(0xFF00FF00);
   juce::Colour graph_text = juce::Colour(0xFF00FF00);

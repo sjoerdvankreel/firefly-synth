@@ -70,10 +70,11 @@ override_settings(section_topo_gui_theme_settings const& base, var const& json)
 static gui_colors 
 override_colors(gui_colors const& base, var const& json)
 {
-  gui_colors result = gui_colors(base);
+  gui_colors result = gui_colors(base); 
   result.tab_text = override_color_if_present(json, "tab_text", result.tab_text);
   result.tab_text_inactive = override_color_if_present(json, "tab_text_inactive", result.tab_text_inactive);
   result.tab_button = override_color_if_present(json, "tab_button", result.tab_button);
+  result.tab_button_inactive = override_color_if_present(json, "tab_button_inactive", result.tab_button_inactive);
   result.tab_header = override_color_if_present(json, "tab_header", result.tab_header);
   result.graph_grid = override_color_if_present(json, "graph_grid", result.graph_grid);
   result.graph_text = override_color_if_present(json, "graph_text", result.graph_text);
@@ -696,9 +697,14 @@ lnf::drawTabButton(TabBarButton& button, Graphics& g, bool isMouseOver, bool isM
   bool is_section = _module_section != -1 && _desc->plugin->gui.module_sections[_module_section].tabbed;
   auto justify = is_section ? Justification::left : Justification::centred;
   
-  float button_lighten = (button.getToggleState() || isMouseOver) ? _global_settings.lighten : 0;
-  auto text_color = (is_section || button.getToggleState()) ? colors().tab_text : colors().tab_text_inactive;
-  g.setColour(colors().tab_button.brighter(button_lighten));
+  auto button_bg = colors().tab_button_inactive;
+  auto button_text = colors().tab_text_inactive;
+  if (button.getToggleState() || isMouseOver)
+  {
+    button_bg = colors().tab_button;
+    button_text = colors().tab_text;
+  }
+  g.setColour(button_bg);
 
   // no header, evenly distributed, left tab has rounded corners
   // right tab always has rounded corners
@@ -723,7 +729,7 @@ lnf::drawTabButton(TabBarButton& button, Graphics& g, bool isMouseOver, bool isM
     g.setFont(font());
     auto text_area = button.getTextArea();
     if (is_section) text_area.removeFromLeft(strip_left);
-    g.setColour(text_color);
+    g.setColour(button_text);
     g.drawText(button.getButtonText(), text_area, justify, false);
     return;
   }
@@ -732,7 +738,7 @@ lnf::drawTabButton(TabBarButton& button, Graphics& g, bool isMouseOver, bool isM
   auto const& header = button.getTabbedButtonBar().getTitle();
   auto headerArea = button.getActiveArea().toFloat();
   auto buttonArea = headerArea.removeFromRight(tab_width());
-  g.setColour(colors().tab_button);
+  g.setColour(colors().tab_button_inactive);
   if(button.getTabbedButtonBar().getNumTabs() == 1)
     g.fillRoundedRectangle(headerArea, radius);
   else   
@@ -747,7 +753,7 @@ lnf::drawTabButton(TabBarButton& button, Graphics& g, bool isMouseOver, bool isM
   auto textArea = button.getTextArea();
   textArea.removeFromLeft(radius + 2);
   g.setFont(font());
-  g.setColour(button.findColour(TabbedButtonBar::tabTextColourId));
+  g.setColour(colors().tab_text_inactive);
   g.drawText(header, textArea, Justification::left, false);
 
   // case header only
@@ -755,10 +761,10 @@ lnf::drawTabButton(TabBarButton& button, Graphics& g, bool isMouseOver, bool isM
 
   // case tab header and first button
   buttonArea.removeFromLeft(1);
-  g.setColour(colors().tab_button.brighter(button_lighten));
+  g.setColour(button_bg); 
   g.fillRect(buttonArea);
   if (is_section) buttonArea.removeFromLeft(strip_left);
-  g.setColour(text_color);
+  g.setColour(button_text);
   g.drawText(button.getButtonText(), buttonArea, justify, false);
 }
 
