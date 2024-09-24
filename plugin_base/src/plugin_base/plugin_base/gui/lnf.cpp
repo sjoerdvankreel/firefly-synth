@@ -809,7 +809,7 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
   float end_angle = (180 + 340) * pi32 / 180;
   float start_angle = (180 + 20) * pi32 / 180;
   float angle_gap = end_angle - start_angle;
-  float angle_range = end_angle - start_angle;
+  float angle_range = end_angle - start_angle; 
 
   // background, shadow, highlight
   g.setColour(colors().slider_background);
