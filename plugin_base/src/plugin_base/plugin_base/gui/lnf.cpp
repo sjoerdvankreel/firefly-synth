@@ -681,7 +681,7 @@ lnf::drawToggleButton(Graphics& g, ToggleButton& tb, bool highlighted, bool down
   if (!tb.isEnabled()) automation_color = color_to_grayscale(automation_color);
 
   // background, shadow, highlight
-  g.setColour(colors().slider_background); 
+  g.setColour(colors().slider_background);  
   g.fillEllipse(boxBounds.toFloat());
   draw_conic_arc(g, boxBounds.getTopLeft().x, boxBounds.getTopLeft().y, boxBounds.getWidth(), 
     pi32, 1.5f * pi32, colors().slider_shadow, automation_color, conic_count / 2, 0.0f, 1.0f, 1.0f);
