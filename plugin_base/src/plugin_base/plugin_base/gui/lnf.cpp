@@ -767,7 +767,7 @@ lnf::drawTabButton(TabBarButton& button, Graphics& g, bool isMouseOver, bool isM
   auto textArea = button.getTextArea();
   textArea.removeFromLeft(radius + 2);
   g.setFont(font());
-  g.setColour(colors().tab_header_text); 
+  g.setColour(colors().tab_header_text);  
   g.drawText(header, textArea, Justification::left, false);
 
   // case header only
