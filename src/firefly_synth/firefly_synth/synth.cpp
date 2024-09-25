@@ -176,7 +176,7 @@ make_patch_controls_section(plugin_gui* gui, lnf* lnf, component_store store)
   result.add(gui->make_save_button(), { 0, 2 });
   result.add(gui->make_init_button(), { 1, 1 });
   result.add(gui->make_clear_button(), { 1, 2 });
-  return result;
+  return result;  
 }
 
 static Component&
