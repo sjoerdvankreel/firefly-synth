@@ -43,12 +43,20 @@ Realtime modulation animation videos:
 
 <table>
 <tr>
-<td><img alt="Screenshot" src="static/hot_dark.png"></td>
-<td><img alt="Screenshot" src="static/hot_light.png"></td>
+<td><img alt="Screenshot" src="static/screenshot_hot_dark.png"></td>
+<td><img alt="Screenshot" src="static/screenshot_hot_light.png"></td>
 </tr>
 <tr>
-<td><img alt="Screenshot" src="static/cold_dark.png"></td>
-<td><img alt="Screenshot" src="static/cold_light.png"></td>
+<td><img alt="Screenshot" src="static/screenshot_hot_dark_fx.png"></td>
+<td><img alt="Screenshot" src="static/screenshot_hot_light_fx.png"></td>
+</tr>
+<tr>
+<td><img alt="Screenshot" src="static/screenshot_cold_dark.png"></td>
+<td><img alt="Screenshot" src="static/screenshot_cold_light.png"></td>
+</tr>
+<tr>
+<td><img alt="Screenshot" src="static/screenshot_cold_dark_fx.png"></td>
+<td><img alt="Screenshot" src="static/screenshot_cold_light_fx.png"></td>
 </tr>
 </table>
 
