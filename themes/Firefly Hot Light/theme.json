@@ -35,10 +35,13 @@
     "graph_background": "FF000000",
     "graph_modulation_bubble": "C0FFFFFF",
     "bubble_outline": "FF999999",
-    "slider_background": "FF333333",
-    "slider_highlight": "FFFFFFFF",
-    "slider_shadow": "FF000000",
-    "slider_can_modulate": "FF666666",
+    "param_background": "FF333333",
+    "param_highlight": "FFFFFFFF",
+    "param_shadow1": "FF000000",
+    "param_shadow2": "00FFFFFF",
+    "param_can_modulate": "FF666666",
+    "param_meter1": "FF333333",
+    "param_meter2": "FF555555",
     "section_outline": "00000000",
     "section_background": "FFCCCCCC",
     "table_header_cell": "FF666666",
@@ -59,7 +62,7 @@
       "module_sections": ["Monitor"],
       "colors": {
         "tab_text": "FFCCCCCC",
-        "slider_automation": "FFCCCCCC",
+        "param_automation": "FFCCCCCC",
         "control_text": "FF3333333",
         "control_tick": "FF3333333",
         "button_text": "FFCCCCCC",
@@ -74,13 +77,18 @@
     {
       "module_sections": ["GAudio", "GCV-A", "GCV-CV"],
       "colors": {
-        "tab_text": "FF40A0FF",
-        "slider_automation": "FF40A0FF",
-        "slider_modulation": "FF40FFA0",
+        "tab_button": "FF555555",
+        "tab_button_inactive": "FF333333",
+        "tab_text": "FFFF0040",
+        "tab_header_text": "FFFF0040",
+        "tab_text_inactive": "FFAAAAAA",
+        "param_automation": "FFFF0040",
+        "param_modulation1": "FFC07830",
+        "param_modulation2": "FF333333",
         "control_text": "FFCCCCCC",
-        "control_tick": "FF40A0FF",
-        "bubble_outline": "FF40A0FF",
-        "scrollbar_thumb": "FF40A0FF",
+        "control_tick": "FFFF0040",
+        "bubble_outline": "FFFF0040",
+        "scrollbar_thumb": "FFFF0040",
         "table_header": "FFCCCCCC",
         "popup_text_highlighted": "FFCCCCCC"
       }
@@ -89,35 +97,51 @@
       "custom_sections": ["Theme", "Global FX Graph", "Global LFO Graph", "Global Matrix Graphs"],
       "module_sections": ["Master", "Global", "Global Out", "Global FX", "Global LFO"],
       "colors": {
-        "tab_text": "FF40A0FF",
-        "slider_automation": "FF40A0FF",
-        "slider_modulation": "FF40FFA0",
-        "control_text": "FF40A0FF",
-        "control_tick": "FF40A0FF",
-        "bubble_outline": "FF40A0FF",
-        "scrollbar_thumb": "FF40A0FF",
-        "graph_area": "8040A0FF",
-        "graph_line": "FF40A0FF",
+        "tab_button": "FF555555",
+        "tab_button_inactive": "FF333333",
+        "tab_text": "FFFF0040",
+        "tab_header_text": "FFFF0040",
+        "tab_text_inactive": "FFAAAAAA",
+        "param_automation": "FFFF0040",
+        "param_modulation1": "FFC07830",
+        "param_modulation2": "FF333333",
+        "control_text": "FFFF0040",
+        "control_tick": "FFFF0040",
+        "bubble_outline": "FFFF0040",
+        "scrollbar_thumb": "FFFF0040",
+        "graph_area": "80FF0040",
+        "graph_line": "FFFF0040",
         "table_header": "FFCCCCCC",
-        "popup_text_highlighted": "FF40A0FF"
+        "popup_text_highlighted": "FFFF0040"
       }
     },
     {
       "module_sections": ["Global"],
       "settings": {
-        "header_width": "378"
+        "header_width": "984"
+      }
+    },
+    {
+      "module_sections": ["Global Out"],
+      "settings": {
+        "header_width": "190"
       }
     },
     {
       "module_sections": ["Osc Mod", "VAudio", "VCV-A", "VCV-CV"],
       "colors": {
-        "tab_text": "FF40FFA0",
-        "slider_automation": "FF40FFA0",
-        "slider_modulation": "FF205080",
+        "tab_button": "FF555555",
+        "tab_button_inactive": "FF333333",
+        "tab_text": "FFFFA040",
+        "tab_header_text": "FFFFA040",
+        "tab_text_inactive": "FFAAAAAA",
+        "param_automation": "FFFFA040",
+        "param_modulation1": "FFFF0040",
+        "param_modulation2": "FF333333",
         "control_text": "FFCCCCCC",
-        "control_tick": "FF40FFA0",
-        "bubble_outline": "FF40FFA0",
-        "scrollbar_thumb": "FF40FFA0",
+        "control_tick": "FFFFA040",
+        "bubble_outline": "FFFFA040",
+        "scrollbar_thumb": "FFFFA040",
         "table_header": "FFCCCCCC",
         "popup_text_highlighted": "FFCCCCCC"
       }
@@ -126,17 +150,22 @@
       "custom_sections": ["Oscillator Graph", "Voice FX Graph", "Voice LFO Graph", "Envelope Graph", "Voice Matrix Graphs"],
       "module_sections": ["Voice", "Voice Out", "Osc", "Voice FX", "Voice LFO", "Env"],
       "colors": {
-        "tab_text": "FF40FFA0",
-        "slider_automation": "FF40FFA0",
-        "slider_modulation": "FF205080",
-        "control_text": "FF40FFA0",
-        "control_tick": "FF40FFA0",
-        "bubble_outline": "FF40FFA0",
-        "scrollbar_thumb": "FF40FFA0",
-        "graph_area": "8040FFA0",
-        "graph_line": "FF40FFA0",
+        "tab_button": "FF555555",
+        "tab_button_inactive": "FF333333",
+        "tab_text": "FFFFA040",
+        "tab_header_text": "FFFFA040",
+        "tab_text_inactive": "FFAAAAAA",
+        "param_automation": "FFFFA040",
+        "param_modulation1": "FFFF0040",
+        "param_modulation2": "FF333333",
+        "control_text": "FFFFA040",
+        "control_tick": "FFFFA040",
+        "bubble_outline": "FFFFA040",
+        "scrollbar_thumb": "FFFFA040",
+        "graph_area": "80FFA040",
+        "graph_line": "FFFFA040",
         "table_header": "FFCCCCCC",
-        "popup_text_highlighted": "FF40FFA0"
+        "popup_text_highlighted": "FFFFA040"
       }
     },
     {
@@ -149,7 +178,13 @@
     {
       "module_sections": ["Voice"],
       "settings": {
-        "header_width": "378"
+        "header_width": "984"
+      }
+    },
+    {
+      "module_sections": ["Voice Out"],
+      "settings": {
+        "header_width": "190"
       }
     }
   ]

@@ -29,23 +29,26 @@
   "default_colors": {
     "tab_text_inactive": "FFAAAAAA",
     "tab_button": "FF333333",
-    "tab_header": "FF222222",
+    "tab_header": "FF333333",
     "graph_grid": "40FFFFFF",
     "graph_text": "C0FFFFFF",
     "graph_background": "FF000000",
     "graph_modulation_bubble": "C0FFFFFF",
     "bubble_outline": "FF999999",
-    "slider_background": "FF333333",
-    "slider_highlight": "FFFFFFFF",
-    "slider_shadow": "FF000000",
-    "slider_can_modulate": "FF666666",
+    "param_background": "FF000000",
+    "param_highlight": "FFFFFFFF",
+    "param_shadow1": "FF333333",
+    "param_shadow2": "FF555555",
+    "param_can_modulate": "FF888888",
+    "param_meter1": "FFAAAAAA",
+    "param_meter2": "FF555555",
     "section_outline": "00000000",
-    "section_background": "FFCCCCCC",
-    "table_header_cell": "FF666666",
-    "table_cell": "FF999999",
+    "section_background": "FF222222",
+    "table_header_cell": "FF555555",
+    "table_cell": "FF333333",
     "edit_text": "FFEEEEEE",
-    "label_text": "FF333333",
-    "control_text": "FF999999",
+    "label_text": "FFDDDDDD",
+    "control_text": "FFDDDDDD",
     "control_tick": "FF999999",
     "control_outline": "FFCCCCCC",
     "control_background": "FF333333",
@@ -59,9 +62,9 @@
       "module_sections": ["Monitor"],
       "colors": {
         "tab_text": "FFCCCCCC",
-        "slider_automation": "FFCCCCCC",
-        "control_text": "FF3333333",
-        "control_tick": "FF3333333",
+        "param_automation": "FFCCCCCC",
+        "control_text": "FFAAAAAA",
+        "control_tick": "FFDDDDDD",
         "button_text": "FFCCCCCC",
         "bubble_outline": "FFCCCCCC",
         "scrollbar_thumb": "FFCCCCCC",
@@ -74,9 +77,14 @@
     {
       "module_sections": ["GAudio", "GCV-A", "GCV-CV"],
       "colors": {
+        "tab_button": "FF555555",
+        "tab_button_inactive": "FFFF0040",
         "tab_text": "FFFF0040",
-        "slider_automation": "FFFF0040",
-        "slider_modulation": "FFC07830",
+        "tab_header_text": "FF111111",
+        "tab_text_inactive": "FF111111",
+        "param_automation": "FFFF0040",
+        "param_modulation1": "FFFFA040",
+        "param_modulation2": "FFFFA040",
         "control_text": "FFCCCCCC",
         "control_tick": "FFFF0040",
         "bubble_outline": "FFFF0040",
@@ -89,9 +97,14 @@
       "custom_sections": ["Theme", "Global FX Graph", "Global LFO Graph", "Global Matrix Graphs"],
       "module_sections": ["Master", "Global", "Global Out", "Global FX", "Global LFO"],
       "colors": {
+        "tab_button": "FF555555",
+        "tab_button_inactive": "FFFF0040",
         "tab_text": "FFFF0040",
-        "slider_automation": "FFFF0040",
-        "slider_modulation": "FFC07830",
+        "tab_header_text": "FF111111",
+        "tab_text_inactive": "FF111111",
+        "param_automation": "FFFF0040",
+        "param_modulation1": "FFFFA040",
+        "param_modulation2": "FFFFA040",
         "control_text": "FFFF0040",
         "control_tick": "FFFF0040",
         "bubble_outline": "FFFF0040",
@@ -105,15 +118,26 @@
     {
       "module_sections": ["Global"],
       "settings": {
-        "header_width": "378"
+        "header_width": "984"
+      }
+    },
+    {
+      "module_sections": ["Global Out"],
+      "settings": {
+        "header_width": "190"
       }
     },
     {
       "module_sections": ["Osc Mod", "VAudio", "VCV-A", "VCV-CV"],
       "colors": {
+        "tab_button": "FF555555",
+        "tab_button_inactive": "FFFFA040",
         "tab_text": "FFFFA040",
-        "slider_automation": "FFFFA040",
-        "slider_modulation": "FFFF0040",
+        "tab_header_text": "FF111111",
+        "tab_text_inactive": "FF111111",
+        "param_automation": "FFFFA040",
+        "param_modulation1": "FFFF0040",
+        "param_modulation2": "FFFF0040",
         "control_text": "FFCCCCCC",
         "control_tick": "FFFFA040",
         "bubble_outline": "FFFFA040",
@@ -126,9 +150,14 @@
       "custom_sections": ["Oscillator Graph", "Voice FX Graph", "Voice LFO Graph", "Envelope Graph", "Voice Matrix Graphs"],
       "module_sections": ["Voice", "Voice Out", "Osc", "Voice FX", "Voice LFO", "Env"],
       "colors": {
+        "tab_button": "FF555555",
+        "tab_button_inactive": "FFFFA040",
         "tab_text": "FFFFA040",
-        "slider_automation": "FFFFA040",
-        "slider_modulation": "FFFF0040",
+        "tab_header_text": "FF111111",
+        "tab_text_inactive": "FF111111",
+        "param_automation": "FFFFA040",
+        "param_modulation1": "FFFF0040",
+        "param_modulation2": "FFFF0040",
         "control_text": "FFFFA040",
         "control_tick": "FFFFA040",
         "bubble_outline": "FFFFA040",
@@ -149,7 +178,13 @@
     {
       "module_sections": ["Voice"],
       "settings": {
-        "header_width": "378"
+        "header_width": "984"
+      }
+    },
+    {
+      "module_sections": ["Voice Out"],
+      "settings": {
+        "header_width": "190"
       }
     }
   ]

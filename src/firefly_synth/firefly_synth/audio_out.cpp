@@ -6,7 +6,7 @@
 #include <cmath>
 
 using namespace plugin_base;
-
+ 
 namespace firefly_synth {
 
 enum { section_main };
@@ -14,7 +14,7 @@ enum { param_gain, param_bal };
 enum { scratch_bal, scratch_count };
 
 class global_audio_out_engine :
-public module_engine {
+public module_engine {            
 public:
   void reset_audio(plugin_block const*) override {}
   void process_audio(plugin_block& block) override;

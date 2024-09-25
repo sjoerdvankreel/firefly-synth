@@ -686,11 +686,12 @@ env_engine::process_internal(plugin_block& block, cv_cv_matrix_mixdown const* mo
     block.module_desc_.info.global,
     custom_tag_total_pos,
     (int)(_total_pos * 1000000)));
-  block.push_modulation_output(modulation_output::make_mod_output_custom_state(
-    block.voice->state.slot,
-    block.module_desc_.info.global,
-    custom_tag_multitrig_level,
-    (int)(_multitrig_level * std::numeric_limits<int>::max())));
+  if(block_auto[param_trigger][0].step() == trigger_multi)
+    block.push_modulation_output(modulation_output::make_mod_output_custom_state(
+      block.voice->state.slot,
+      block.module_desc_.info.global,
+      custom_tag_multitrig_level,
+      (int)(_multitrig_level * std::numeric_limits<int>::max())));
 
   // drop the mod indicators when we ended
   if (_stage == env_stage::end) return;

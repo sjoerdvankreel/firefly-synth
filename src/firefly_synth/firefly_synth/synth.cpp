@@ -170,13 +170,13 @@ make_patch_controls_section(plugin_gui* gui, lnf* lnf, component_store store)
   auto& patch_label = store_component<autofit_label>(store, lnf, "Patch");
   patch_label.setText("Patch", juce::dontSendNotification);
   patch_label.setJustificationType(Justification::centredLeft);
-  patch_label.setColour(Label::ColourIds::textColourId, colors.label_text);
+  patch_label.setColour(Label::ColourIds::textColourId, colors.control_text);
   result.add(patch_label, { 0, 0, 2, 1 });
   result.add(gui->make_load_button(), { 0, 1 });
   result.add(gui->make_save_button(), { 0, 2 });
   result.add(gui->make_init_button(), { 1, 1 });
   result.add(gui->make_clear_button(), { 1, 2 });
-  return result;
+  return result;  
 }
 
 static Component&
@@ -215,7 +215,7 @@ make_edit_controls_section(plugin_gui* gui, lnf* lnf, component_store store)
 } 
 
 static Component&
-make_title_section(plugin_gui* gui, lnf* lnf, component_store store, bool is_fx)
+make_title_section(plugin_gui* gui, lnf* lnf, component_store store, bool is_fx) 
 {
   auto colors = lnf->section_gui_colors("Title Text");
   std::string name = is_fx? FF_SYNTH_FX_NAME: FF_SYNTH_INST_NAME;
@@ -223,7 +223,7 @@ make_title_section(plugin_gui* gui, lnf* lnf, component_store store, bool is_fx)
   auto& grid = store_component<grid_component>(store, gui_dimension({ { 2, 1 }, { synth_first_column_size, synth_second_column_size } }), 2, 2, 0, 1);
   auto& title_label = store_component<autofit_label>(store, lnf, name, true, 15);
   title_label.setColour(Label::ColourIds::textColourId, colors.control_text);
-  title_label.setJustificationType(Justification::left);
+  title_label.setJustificationType(Justification::left);  
   grid.add(title_label, { 0, 0, 1, 1 });
   std::string version_text = std::string(FF_SYNTH_VERSION_TEXT) + " " + gui->automation_state()->desc().plugin->config->format_name() + " ";
 #ifdef __aarch64__
@@ -389,7 +389,7 @@ synth_topo(format_basic_config const* config, bool is_fx, std::string const& ful
     result->tag = make_topo_tag_basic(FF_SYNTH_INST_ID, FF_SYNTH_INST_NAME);
   }
               
-  result->gui.default_theme = "Firefly Hot";                                   
+  result->gui.default_theme = "Firefly Hot Dark";                                   
   result->gui.custom_sections.resize(is_fx? custom_section_fx_count: custom_section_synth_count);
   result->gui.dimension_factory = [is_fx](auto const& settings) { return make_plugin_dimension(is_fx, settings); };
   auto make_title_section_ui = [is_fx](plugin_gui* gui, lnf* lnf, auto store) -> Component& {

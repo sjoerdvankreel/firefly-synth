@@ -1,3 +1,7 @@
+### September 25, 2024 - V1.9.4.
+
+- Added dark themes.
+
 ### September 21, 2024 - V1.9.3.
 
 - Added free-running smooth noise as a new LFO type. Note - consecutive cycles are not smooth by themselves so you still need to use the LFO filter to get a real smooth signal.

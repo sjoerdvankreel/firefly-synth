@@ -70,11 +70,13 @@ override_settings(section_topo_gui_theme_settings const& base, var const& json)
 static gui_colors 
 override_colors(gui_colors const& base, var const& json)
 {
-  gui_colors result = gui_colors(base);
+  gui_colors result = gui_colors(base); 
   result.tab_text = override_color_if_present(json, "tab_text", result.tab_text);
   result.tab_text_inactive = override_color_if_present(json, "tab_text_inactive", result.tab_text_inactive);
   result.tab_button = override_color_if_present(json, "tab_button", result.tab_button);
+  result.tab_button_inactive = override_color_if_present(json, "tab_button_inactive", result.tab_button_inactive);
   result.tab_header = override_color_if_present(json, "tab_header", result.tab_header);
+  result.tab_header_text = override_color_if_present(json, "tab_header_text", result.tab_header_text);
   result.graph_grid = override_color_if_present(json, "graph_grid", result.graph_grid);
   result.graph_text = override_color_if_present(json, "graph_text", result.graph_text);
   result.graph_modulation_bubble = override_color_if_present(json, "graph_modulation_bubble", result.graph_modulation_bubble);
@@ -82,12 +84,16 @@ override_colors(gui_colors const& base, var const& json)
   result.graph_area = override_color_if_present(json, "graph_area", result.graph_area);
   result.graph_line = override_color_if_present(json, "graph_line", result.graph_line);
   result.bubble_outline = override_color_if_present(json, "bubble_outline", result.bubble_outline);  
-  result.slider_background = override_color_if_present(json, "slider_background", result.slider_background);
-  result.slider_highlight = override_color_if_present(json, "slider_highlight", result.slider_highlight);
-  result.slider_shadow = override_color_if_present(json, "slider_shadow", result.slider_shadow);
-  result.slider_automation = override_color_if_present(json, "slider_automation", result.slider_automation);
-  result.slider_modulation = override_color_if_present(json, "slider_modulation", result.slider_modulation);
-  result.slider_can_modulate = override_color_if_present(json, "slider_can_modulate", result.slider_can_modulate);
+  result.param_background = override_color_if_present(json, "param_background", result.param_background);
+  result.param_highlight = override_color_if_present(json, "param_highlight", result.param_highlight);
+  result.param_shadow1 = override_color_if_present(json, "param_shadow1", result.param_shadow1);
+  result.param_shadow2 = override_color_if_present(json, "param_shadow2", result.param_shadow2);
+  result.param_automation = override_color_if_present(json, "param_automation", result.param_automation);
+  result.param_modulation1 = override_color_if_present(json, "param_modulation1", result.param_modulation1);
+  result.param_modulation2 = override_color_if_present(json, "param_modulation2", result.param_modulation2);
+  result.param_can_modulate = override_color_if_present(json, "param_can_modulate", result.param_can_modulate);
+  result.param_meter1 = override_color_if_present(json, "param_meter1", result.param_meter1);
+  result.param_meter2 = override_color_if_present(json, "param_meter2", result.param_meter2);
   result.section_outline = override_color_if_present(json, "section_outline", result.section_outline);
   result.section_background = override_color_if_present(json, "section_background", result.section_background);
   result.edit_text = override_color_if_present(json, "edit_text", result.edit_text);
@@ -366,6 +372,15 @@ lnf::getTickShape(float h)
   return result;
 }
 
+Button* 
+lnf::createTabBarExtrasButton()
+{
+  // HACK: i dont know how else to get rid of this thing             
+  auto result = new TextButton();
+  result->setAlpha(0);
+  return result;
+}
+
 void 
 lnf::positionComboBoxText(ComboBox& box, Label& label)
 {
@@ -391,7 +406,7 @@ lnf::getTabButtonBestWidth(TabBarButton& b, int)
   int header_width = _default_settings.header_width;
   if(_module_settings.contains(full_name)) header_width = _module_settings.at(full_name).header_width;
   if(b.getIndex() == 0) result += header_width;
-  return result;
+  return result;        
 }
 
 void 
@@ -615,11 +630,11 @@ lnf::drawComboBox(Graphics& g, int width, int height, bool, int, int, int, int, 
   int h = fixedHeight;
 
   // highlight
-  g.setGradientFill(ColourGradient(colors().slider_highlight.withAlpha(0.0f), x, 0, colors().slider_highlight, w, 0, false));
+  g.setGradientFill(ColourGradient(colors().param_shadow2, x, 0, colors().param_highlight, w, 0, false));
   g.fillRoundedRectangle(x, y, w, h, cornerSize);
 
   // background
-  g.setColour(colors().slider_background);
+  g.setColour(colors().param_background);
   g.fillRoundedRectangle(x + 1, y + 1, w - 2, h - 2, cornerSize);
 
   // dropdown arrow
@@ -667,20 +682,20 @@ lnf::drawToggleButton(Graphics& g, ToggleButton& tb, bool highlighted, bool down
   int const toggleTop = height < fixedHeight ? 0 : (height - fixedHeight) / 2;
   Rectangle<int> boxBounds(left + pad, toggleTop + pad, fixedHeight - pad * 2, fixedHeight - pad * 2);
   
-  auto automation_color = colors().slider_automation;
+  auto automation_color = colors().param_automation;
   if (!tb.isEnabled()) automation_color = color_to_grayscale(automation_color);
 
   // background, shadow, highlight
-  g.setColour(colors().slider_background);
+  g.setColour(colors().param_background);
   g.fillEllipse(boxBounds.toFloat());
   draw_conic_arc(g, boxBounds.getTopLeft().x, boxBounds.getTopLeft().y, boxBounds.getWidth(), 
-    pi32, 1.5f * pi32, colors().slider_shadow, automation_color, conic_count / 2, 0.0f, 1.0f, 1.0f);
+    pi32, 1.5f * pi32, colors().param_shadow1, automation_color, conic_count / 2, 0.0f, 1.0f, 1.0f);
   draw_conic_arc(g, boxBounds.getTopLeft().x, boxBounds.getTopLeft().y, boxBounds.getWidth(),
-    1.5f * pi32, 2.0f * pi32, automation_color, colors().slider_highlight, conic_count / 2, 0.0f, 1.0f, 1.0f);
+    1.5f * pi32, 2.0f * pi32, automation_color, colors().param_highlight, conic_count / 2, 0.0f, 1.0f, 1.0f);
   draw_conic_arc(g, boxBounds.getTopLeft().x, boxBounds.getTopLeft().y, boxBounds.getWidth(),
-    0.0f, 0.5f * pi32, colors().slider_highlight, automation_color, conic_count / 2, 0.0f, 1.0f, 1.0f);
+    0.0f, 0.5f * pi32, colors().param_highlight, automation_color, conic_count / 2, 0.0f, 1.0f, 1.0f);
   draw_conic_arc(g, boxBounds.getTopLeft().x, boxBounds.getTopLeft().y, boxBounds.getWidth(),
-    0.5f * pi32, pi32, automation_color, colors().slider_shadow, conic_count / 2, 0.0f, 1.0f, 1.0f);
+    0.5f * pi32, pi32, automation_color, colors().param_shadow1, conic_count / 2, 0.0f, 1.0f, 1.0f);
 
   // toggle
   if (!tb.getToggleState()) return;
@@ -696,9 +711,14 @@ lnf::drawTabButton(TabBarButton& button, Graphics& g, bool isMouseOver, bool isM
   bool is_section = _module_section != -1 && _desc->plugin->gui.module_sections[_module_section].tabbed;
   auto justify = is_section ? Justification::left : Justification::centred;
   
-  float button_lighten = (button.getToggleState() || isMouseOver) ? _global_settings.lighten : 0;
-  auto text_color = (is_section || button.getToggleState()) ? colors().tab_text : colors().tab_text_inactive;
-  g.setColour(colors().tab_button.brighter(button_lighten));
+  auto button_bg = colors().tab_button_inactive;
+  auto button_text = colors().tab_text_inactive;
+  if (button.getToggleState() || isMouseOver)
+  {
+    button_bg = colors().tab_button;
+    button_text = colors().tab_text;
+  }
+  g.setColour(button_bg);
 
   // no header, evenly distributed, left tab has rounded corners
   // right tab always has rounded corners
@@ -723,7 +743,7 @@ lnf::drawTabButton(TabBarButton& button, Graphics& g, bool isMouseOver, bool isM
     g.setFont(font());
     auto text_area = button.getTextArea();
     if (is_section) text_area.removeFromLeft(strip_left);
-    g.setColour(text_color);
+    g.setColour(button_text);
     g.drawText(button.getButtonText(), text_area, justify, false);
     return;
   }
@@ -732,7 +752,7 @@ lnf::drawTabButton(TabBarButton& button, Graphics& g, bool isMouseOver, bool isM
   auto const& header = button.getTabbedButtonBar().getTitle();
   auto headerArea = button.getActiveArea().toFloat();
   auto buttonArea = headerArea.removeFromRight(tab_width());
-  g.setColour(colors().tab_button);
+  g.setColour(colors().tab_button_inactive);
   if(button.getTabbedButtonBar().getNumTabs() == 1)
     g.fillRoundedRectangle(headerArea, radius);
   else   
@@ -747,18 +767,18 @@ lnf::drawTabButton(TabBarButton& button, Graphics& g, bool isMouseOver, bool isM
   auto textArea = button.getTextArea();
   textArea.removeFromLeft(radius + 2);
   g.setFont(font());
-  g.setColour(button.findColour(TabbedButtonBar::tabTextColourId));
+  g.setColour(colors().tab_header_text);  
   g.drawText(header, textArea, Justification::left, false);
 
-  // case header only
+  // case header only     
   if(button.getTabbedButtonBar().getNumTabs() == 1) return;
 
   // case tab header and first button
   buttonArea.removeFromLeft(1);
-  g.setColour(colors().tab_button.brighter(button_lighten));
+  g.setColour(button_bg); 
   g.fillRect(buttonArea);
   if (is_section) buttonArea.removeFromLeft(strip_left);
-  g.setColour(text_color);
+  g.setColour(button_text);
   g.drawText(button.getButtonText(), buttonArea, justify, false);
 }
 
@@ -794,15 +814,15 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
   float end_angle = (180 + 340) * pi32 / 180;
   float start_angle = (180 + 20) * pi32 / 180;
   float angle_gap = end_angle - start_angle;
-  float angle_range = end_angle - start_angle;
+  float angle_range = end_angle - start_angle; 
 
   // background, shadow, highlight
-  g.setColour(colors().slider_background);
+  g.setColour(colors().param_background);
   g.fillEllipse(left + 1, top + 1, size - 2, size - 2);
   draw_conic_arc(g, left, top, size, pi32, 2.0f * pi32, 
-    colors().slider_shadow, colors().slider_highlight, conic_count / 2, 0.0f, 1.0f, 1.0f);
+    colors().param_shadow1, colors().param_highlight, conic_count / 2, 0.0f, 1.0f, 1.0f);
   draw_conic_arc(g, left, top, size, 0.0f, pi32, 
-    colors().slider_highlight, colors().slider_shadow, conic_count / 2, 0.0f, 1.0f, 1.0f);
+    colors().param_highlight, colors().param_shadow1, conic_count / 2, 0.0f, 1.0f, 1.0f);
 
   left += 3;
   top += 3;
@@ -810,7 +830,7 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
   int stroke = 2;
 
   // automation indication
-  auto automation_color = colors().slider_automation;
+  auto automation_color = colors().param_automation;
   if (!s.isEnabled()) automation_color = color_to_grayscale(automation_color);
   if(!bipolar) draw_conic_arc(g, left, top, size, start_angle, end_angle,
     automation_color, automation_color, conic_count, 0, pos, stroke);
@@ -831,7 +851,7 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
   // can modulate indicator
   if(ps->param()->param->dsp.can_modulate(ps->param()->info.slot))
   {
-    g.setColour(colors().slider_can_modulate);
+    g.setColour(colors().param_can_modulate);
     g.fillEllipse(left + size / 3, top + size / 3, size / 3, size / 3);
   }
 
@@ -839,7 +859,7 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
 
   // actual modulation outputs
   Path path;  
-  auto modulation_color = colors().slider_modulation;
+  auto modulation_color = colors().param_modulation1;
   if (!s.isEnabled()) modulation_color = color_to_grayscale(modulation_color);
   g.setColour(modulation_color);
   float half_mod_angle = start_angle + 0.5f * angle_range;
@@ -894,10 +914,10 @@ lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, f
     float pos_adjust = pos * (param_topo.domain.max - param_topo.domain.min);
     int block_count_off = block_count * std::clamp(pos_adjust, 0.0f, 1.0f);
 
-    g.setColour(colors().control_background);
+    g.setColour(colors().param_meter1);
     for (int i = 0; i < block_count_off; i++)
       g.fillRect(left + i * actual_cell_width, top, actual_block_width, height);
-    g.setColour(colors().control_background.brighter());
+    g.setColour(colors().param_meter2);   
     for (int i = block_count_off; i < block_count; i++)
       g.fillRect(left + i * actual_cell_width, top, actual_block_width, height);
     return;
@@ -909,17 +929,17 @@ lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, f
     draw_tabular_cell_bg(g, colors().table_cell, &s, global_settings().table_cell_radius);
   
   // highlight
-  g.setGradientFill(ColourGradient(colors().slider_highlight.withAlpha(0.0f), left, 0, colors().slider_highlight, width, 0, false));
+  g.setGradientFill(ColourGradient(colors().param_shadow2, left, 0, colors().param_highlight, width, 0, false));
   g.fillRoundedRectangle(left, top, width, height, 2);
 
   // background
-  g.setColour(colors().slider_background);
+  g.setColour(colors().param_background);
   g.fillRoundedRectangle(left + 1, top + 1, width - 2, height - 2, 2);
 
   // actual modulation outputs
-  g.setColour(colors().slider_background);
+  g.setColour(colors().param_modulation2);   
   if(max_mod_pos >= 0.0f)
-    if(!bipolar)
+    if(!bipolar) 
     {
       if (max_mod_pos - min_mod_pos <= 0.05f)
       {
@@ -946,7 +966,7 @@ lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, f
       }
     }
 
-  auto automation_color = colors().slider_automation;
+  auto automation_color = colors().param_automation;
   if (!s.isEnabled()) automation_color = color_to_grayscale(automation_color);
 
   // automation indication
@@ -976,7 +996,7 @@ lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, f
   // modulatable indicator
   if (ps->param()->param->dsp.can_modulate(ps->param()->info.slot))
   {
-    g.setColour(colors().slider_can_modulate.withAlpha(0.75f));
+    g.setColour(colors().param_can_modulate.withAlpha(0.75f));
     g.fillEllipse(left + width - (height - 4) - 2, top + (height - 4) / 2, (height - 4), (height - 4));
   }
 }
