@@ -41,10 +41,16 @@ Realtime modulation animation videos:
 - [saw_to_dsf_distortion_demo.mp4](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/video/saw_to_dsf_distortion_demo.mp4)
 - [modulation_visualization_demo.mp4](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/video/modulation_visualization_demo.mp4)
 
-![Screenshot](static/screenshot_synth_hot.png)
-![Screenshot](static/screenshot_synth_cold.png)
-![Screenshot](static/screenshot_fx_hot.png)
-![Screenshot](static/screenshot_fx_cold.png)
+<table>
+<tr>
+<td>![Screenshot](static/screenshot_synth_hot.png)</td>
+<td>![Screenshot](static/screenshot_synth_cold.png)</td>
+</tr>
+<tr>
+<td>![Screenshot](static/screenshot_fx_hot.png)</td>
+<td>![Screenshot](static/screenshot_fx_cold.png)</td>
+</tr>
+</table>
 
 # Install
 Extract the zipped folder and copy/replace it (the entire folder, not just the .dll/.so/.dylib!) to your VST3/CLAP folder:
