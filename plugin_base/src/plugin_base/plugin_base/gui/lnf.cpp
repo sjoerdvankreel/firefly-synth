@@ -83,12 +83,12 @@ override_colors(gui_colors const& base, var const& json)
   result.graph_area = override_color_if_present(json, "graph_area", result.graph_area);
   result.graph_line = override_color_if_present(json, "graph_line", result.graph_line);
   result.bubble_outline = override_color_if_present(json, "bubble_outline", result.bubble_outline);  
-  result.slider_background = override_color_if_present(json, "slider_background", result.slider_background);
-  result.slider_highlight = override_color_if_present(json, "slider_highlight", result.slider_highlight);
-  result.slider_shadow = override_color_if_present(json, "slider_shadow", result.slider_shadow);
-  result.slider_automation = override_color_if_present(json, "slider_automation", result.slider_automation);
-  result.slider_modulation = override_color_if_present(json, "slider_modulation", result.slider_modulation);
-  result.slider_can_modulate = override_color_if_present(json, "slider_can_modulate", result.slider_can_modulate);
+  result.param_background = override_color_if_present(json, "param_background", result.param_background);
+  result.param_highlight = override_color_if_present(json, "param_highlight", result.param_highlight);
+  result.param_shadow = override_color_if_present(json, "param_shadow", result.param_shadow);
+  result.param_automation = override_color_if_present(json, "param_automation", result.param_automation);
+  result.param_modulation = override_color_if_present(json, "param_modulation", result.param_modulation);
+  result.param_can_modulate = override_color_if_present(json, "param_can_modulate", result.param_can_modulate);
   result.section_outline = override_color_if_present(json, "section_outline", result.section_outline);
   result.section_background = override_color_if_present(json, "section_background", result.section_background);
   result.edit_text = override_color_if_present(json, "edit_text", result.edit_text);
@@ -625,11 +625,11 @@ lnf::drawComboBox(Graphics& g, int width, int height, bool, int, int, int, int, 
   int h = fixedHeight;
 
   // highlight
-  g.setGradientFill(ColourGradient(colors().slider_highlight.withAlpha(0.0f), x, 0, colors().slider_highlight, w, 0, false));
+  g.setGradientFill(ColourGradient(colors().param_highlight.withAlpha(0.0f), x, 0, colors().param_highlight, w, 0, false));
   g.fillRoundedRectangle(x, y, w, h, cornerSize);
 
   // background
-  g.setColour(colors().slider_background);
+  g.setColour(colors().param_background);
   g.fillRoundedRectangle(x + 1, y + 1, w - 2, h - 2, cornerSize);
 
   // dropdown arrow
@@ -677,20 +677,20 @@ lnf::drawToggleButton(Graphics& g, ToggleButton& tb, bool highlighted, bool down
   int const toggleTop = height < fixedHeight ? 0 : (height - fixedHeight) / 2;
   Rectangle<int> boxBounds(left + pad, toggleTop + pad, fixedHeight - pad * 2, fixedHeight - pad * 2);
   
-  auto automation_color = colors().slider_automation;
+  auto automation_color = colors().param_automation;
   if (!tb.isEnabled()) automation_color = color_to_grayscale(automation_color);
 
   // background, shadow, highlight
-  g.setColour(colors().slider_background);  
+  g.setColour(colors().param_background);
   g.fillEllipse(boxBounds.toFloat());
   draw_conic_arc(g, boxBounds.getTopLeft().x, boxBounds.getTopLeft().y, boxBounds.getWidth(), 
-    pi32, 1.5f * pi32, colors().slider_shadow, automation_color, conic_count / 2, 0.0f, 1.0f, 1.0f);
+    pi32, 1.5f * pi32, colors().param_shadow, automation_color, conic_count / 2, 0.0f, 1.0f, 1.0f);
   draw_conic_arc(g, boxBounds.getTopLeft().x, boxBounds.getTopLeft().y, boxBounds.getWidth(),
-    1.5f * pi32, 2.0f * pi32, automation_color, colors().slider_highlight, conic_count / 2, 0.0f, 1.0f, 1.0f);
+    1.5f * pi32, 2.0f * pi32, automation_color, colors().param_highlight, conic_count / 2, 0.0f, 1.0f, 1.0f);
   draw_conic_arc(g, boxBounds.getTopLeft().x, boxBounds.getTopLeft().y, boxBounds.getWidth(),
-    0.0f, 0.5f * pi32, colors().slider_highlight, automation_color, conic_count / 2, 0.0f, 1.0f, 1.0f);
+    0.0f, 0.5f * pi32, colors().param_highlight, automation_color, conic_count / 2, 0.0f, 1.0f, 1.0f);
   draw_conic_arc(g, boxBounds.getTopLeft().x, boxBounds.getTopLeft().y, boxBounds.getWidth(),
-    0.5f * pi32, pi32, automation_color, colors().slider_shadow, conic_count / 2, 0.0f, 1.0f, 1.0f);
+    0.5f * pi32, pi32, automation_color, colors().param_shadow, conic_count / 2, 0.0f, 1.0f, 1.0f);
 
   // toggle
   if (!tb.getToggleState()) return;
@@ -812,12 +812,12 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
   float angle_range = end_angle - start_angle; 
 
   // background, shadow, highlight
-  g.setColour(colors().slider_background);
+  g.setColour(colors().param_background);
   g.fillEllipse(left + 1, top + 1, size - 2, size - 2);
   draw_conic_arc(g, left, top, size, pi32, 2.0f * pi32, 
-    colors().slider_shadow, colors().slider_highlight, conic_count / 2, 0.0f, 1.0f, 1.0f);
+    colors().param_shadow, colors().param_highlight, conic_count / 2, 0.0f, 1.0f, 1.0f);
   draw_conic_arc(g, left, top, size, 0.0f, pi32, 
-    colors().slider_highlight, colors().slider_shadow, conic_count / 2, 0.0f, 1.0f, 1.0f);
+    colors().param_highlight, colors().param_shadow, conic_count / 2, 0.0f, 1.0f, 1.0f);
 
   left += 3;
   top += 3;
@@ -825,7 +825,7 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
   int stroke = 2;
 
   // automation indication
-  auto automation_color = colors().slider_automation;
+  auto automation_color = colors().param_automation;
   if (!s.isEnabled()) automation_color = color_to_grayscale(automation_color);
   if(!bipolar) draw_conic_arc(g, left, top, size, start_angle, end_angle,
     automation_color, automation_color, conic_count, 0, pos, stroke);
@@ -846,7 +846,7 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
   // can modulate indicator
   if(ps->param()->param->dsp.can_modulate(ps->param()->info.slot))
   {
-    g.setColour(colors().slider_can_modulate);
+    g.setColour(colors().param_can_modulate);
     g.fillEllipse(left + size / 3, top + size / 3, size / 3, size / 3);
   }
 
@@ -854,7 +854,7 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
 
   // actual modulation outputs
   Path path;  
-  auto modulation_color = colors().slider_modulation;
+  auto modulation_color = colors().param_modulation;
   if (!s.isEnabled()) modulation_color = color_to_grayscale(modulation_color);
   g.setColour(modulation_color);
   float half_mod_angle = start_angle + 0.5f * angle_range;
@@ -924,15 +924,15 @@ lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, f
     draw_tabular_cell_bg(g, colors().table_cell, &s, global_settings().table_cell_radius);
   
   // highlight
-  g.setGradientFill(ColourGradient(colors().slider_highlight.withAlpha(0.0f), left, 0, colors().slider_highlight, width, 0, false));
+  g.setGradientFill(ColourGradient(colors().param_highlight.withAlpha(0.0f), left, 0, colors().param_highlight, width, 0, false));
   g.fillRoundedRectangle(left, top, width, height, 2);
 
   // background
-  g.setColour(colors().slider_background);
+  g.setColour(colors().param_background);
   g.fillRoundedRectangle(left + 1, top + 1, width - 2, height - 2, 2);
 
   // actual modulation outputs
-  g.setColour(colors().slider_background);
+  g.setColour(colors().param_background);
   if(max_mod_pos >= 0.0f)
     if(!bipolar)
     {
@@ -961,7 +961,7 @@ lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, f
       }
     }
 
-  auto automation_color = colors().slider_automation;
+  auto automation_color = colors().param_automation;
   if (!s.isEnabled()) automation_color = color_to_grayscale(automation_color);
 
   // automation indication
@@ -991,7 +991,7 @@ lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, f
   // modulatable indicator
   if (ps->param()->param->dsp.can_modulate(ps->param()->info.slot))
   {
-    g.setColour(colors().slider_can_modulate.withAlpha(0.75f));
+    g.setColour(colors().param_can_modulate.withAlpha(0.75f));
     g.fillEllipse(left + width - (height - 4) - 2, top + (height - 4) / 2, (height - 4), (height - 4));
   }
 }
