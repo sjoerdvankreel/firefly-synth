@@ -170,7 +170,7 @@ make_patch_controls_section(plugin_gui* gui, lnf* lnf, component_store store)
   auto& patch_label = store_component<autofit_label>(store, lnf, "Patch");
   patch_label.setText("Patch", juce::dontSendNotification);
   patch_label.setJustificationType(Justification::centredLeft);
-  patch_label.setColour(Label::ColourIds::textColourId, colors.label_text);
+  patch_label.setColour(Label::ColourIds::textColourId, colors.control_text);
   result.add(patch_label, { 0, 0, 2, 1 });
   result.add(gui->make_load_button(), { 0, 1 });
   result.add(gui->make_save_button(), { 0, 2 });
@@ -215,7 +215,7 @@ make_edit_controls_section(plugin_gui* gui, lnf* lnf, component_store store)
 } 
 
 static Component&
-make_title_section(plugin_gui* gui, lnf* lnf, component_store store, bool is_fx)
+make_title_section(plugin_gui* gui, lnf* lnf, component_store store, bool is_fx) 
 {
   auto colors = lnf->section_gui_colors("Title Text");
   std::string name = is_fx? FF_SYNTH_FX_NAME: FF_SYNTH_INST_NAME;
