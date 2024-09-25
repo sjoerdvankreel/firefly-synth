@@ -91,6 +91,8 @@ override_colors(gui_colors const& base, var const& json)
   result.param_modulation1 = override_color_if_present(json, "param_modulation1", result.param_modulation1);
   result.param_modulation2 = override_color_if_present(json, "param_modulation2", result.param_modulation2);
   result.param_can_modulate = override_color_if_present(json, "param_can_modulate", result.param_can_modulate);
+  result.param_meter1 = override_color_if_present(json, "param_meter1", result.param_meter1);
+  result.param_meter2 = override_color_if_present(json, "param_meter2", result.param_meter2);
   result.section_outline = override_color_if_present(json, "section_outline", result.section_outline);
   result.section_background = override_color_if_present(json, "section_background", result.section_background);
   result.edit_text = override_color_if_present(json, "edit_text", result.edit_text);
@@ -911,10 +913,10 @@ lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, f
     float pos_adjust = pos * (param_topo.domain.max - param_topo.domain.min);
     int block_count_off = block_count * std::clamp(pos_adjust, 0.0f, 1.0f);
 
-    g.setColour(colors().control_background);
+    g.setColour(colors().param_meter1);
     for (int i = 0; i < block_count_off; i++)
       g.fillRect(left + i * actual_cell_width, top, actual_block_width, height);
-    g.setColour(colors().control_background.brighter());
+    g.setColour(colors().param_meter2); 
     for (int i = block_count_off; i < block_count; i++)
       g.fillRect(left + i * actual_cell_width, top, actual_block_width, height);
     return;

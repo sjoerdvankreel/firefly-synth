@@ -199,6 +199,8 @@ struct gui_colors final {
   juce::Colour param_modulation1 = juce::Colour(0xFF00FF00);
   juce::Colour param_modulation2 = juce::Colour(0xFF00FF00);
   juce::Colour param_can_modulate = juce::Colour(0xFF00FF00);
+  juce::Colour param_meter1 = juce::Colour(0xFF00FF00);
+  juce::Colour param_meter2 = juce::Colour(0xFF00FF00);
   juce::Colour section_outline = juce::Colour(0xFF00FF00);
   juce::Colour section_background = juce::Colour(0xFF00FF00);
   juce::Colour edit_text = juce::Colour(0xFF00FF00);
