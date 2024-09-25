@@ -88,7 +88,8 @@ override_colors(gui_colors const& base, var const& json)
   result.param_shadow1 = override_color_if_present(json, "param_shadow1", result.param_shadow1);
   result.param_shadow2 = override_color_if_present(json, "param_shadow2", result.param_shadow2);
   result.param_automation = override_color_if_present(json, "param_automation", result.param_automation);
-  result.param_modulation = override_color_if_present(json, "param_modulation", result.param_modulation);
+  result.param_modulation1 = override_color_if_present(json, "param_modulation1", result.param_modulation1);
+  result.param_modulation2 = override_color_if_present(json, "param_modulation2", result.param_modulation2);
   result.param_can_modulate = override_color_if_present(json, "param_can_modulate", result.param_can_modulate);
   result.section_outline = override_color_if_present(json, "section_outline", result.section_outline);
   result.section_background = override_color_if_present(json, "section_background", result.section_background);
@@ -855,7 +856,7 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
 
   // actual modulation outputs
   Path path;  
-  auto modulation_color = colors().param_modulation;
+  auto modulation_color = colors().param_modulation1;
   if (!s.isEnabled()) modulation_color = color_to_grayscale(modulation_color);
   g.setColour(modulation_color);
   float half_mod_angle = start_angle + 0.5f * angle_range;
@@ -933,7 +934,7 @@ lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, f
   g.fillRoundedRectangle(left + 1, top + 1, width - 2, height - 2, 2);
 
   // actual modulation outputs
-  g.setColour(colors().param_background);
+  g.setColour(colors().param_modulation2);   
   if(max_mod_pos >= 0.0f)
     if(!bipolar)
     {
