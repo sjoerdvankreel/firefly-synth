@@ -193,7 +193,8 @@ struct gui_colors final {
   juce::Colour bubble_outline = juce::Colour(0xFF00FF00);
   juce::Colour param_background = juce::Colour(0xFF00FF00);
   juce::Colour param_highlight = juce::Colour(0xFF00FF00);
-  juce::Colour param_shadow = juce::Colour(0xFF00FF00);
+  juce::Colour param_shadow1 = juce::Colour(0xFF00FF00);
+  juce::Colour param_shadow2 = juce::Colour(0xFF00FF00);
   juce::Colour param_automation = juce::Colour(0xFF00FF00);
   juce::Colour param_modulation = juce::Colour(0xFF00FF00);
   juce::Colour param_can_modulate = juce::Colour(0xFF00FF00);

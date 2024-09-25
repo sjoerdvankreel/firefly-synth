@@ -85,7 +85,8 @@ override_colors(gui_colors const& base, var const& json)
   result.bubble_outline = override_color_if_present(json, "bubble_outline", result.bubble_outline);  
   result.param_background = override_color_if_present(json, "param_background", result.param_background);
   result.param_highlight = override_color_if_present(json, "param_highlight", result.param_highlight);
-  result.param_shadow = override_color_if_present(json, "param_shadow", result.param_shadow);
+  result.param_shadow1 = override_color_if_present(json, "param_shadow1", result.param_shadow1);
+  result.param_shadow2 = override_color_if_present(json, "param_shadow2", result.param_shadow2);
   result.param_automation = override_color_if_present(json, "param_automation", result.param_automation);
   result.param_modulation = override_color_if_present(json, "param_modulation", result.param_modulation);
   result.param_can_modulate = override_color_if_present(json, "param_can_modulate", result.param_can_modulate);
@@ -625,7 +626,7 @@ lnf::drawComboBox(Graphics& g, int width, int height, bool, int, int, int, int, 
   int h = fixedHeight;
 
   // highlight
-  g.setGradientFill(ColourGradient(colors().param_highlight.withAlpha(0.0f), x, 0, colors().param_highlight, w, 0, false));
+  g.setGradientFill(ColourGradient(colors().param_shadow2, x, 0, colors().param_highlight, w, 0, false));
   g.fillRoundedRectangle(x, y, w, h, cornerSize);
 
   // background
@@ -684,13 +685,13 @@ lnf::drawToggleButton(Graphics& g, ToggleButton& tb, bool highlighted, bool down
   g.setColour(colors().param_background);
   g.fillEllipse(boxBounds.toFloat());
   draw_conic_arc(g, boxBounds.getTopLeft().x, boxBounds.getTopLeft().y, boxBounds.getWidth(), 
-    pi32, 1.5f * pi32, colors().param_shadow, automation_color, conic_count / 2, 0.0f, 1.0f, 1.0f);
+    pi32, 1.5f * pi32, colors().param_shadow1, automation_color, conic_count / 2, 0.0f, 1.0f, 1.0f);
   draw_conic_arc(g, boxBounds.getTopLeft().x, boxBounds.getTopLeft().y, boxBounds.getWidth(),
     1.5f * pi32, 2.0f * pi32, automation_color, colors().param_highlight, conic_count / 2, 0.0f, 1.0f, 1.0f);
   draw_conic_arc(g, boxBounds.getTopLeft().x, boxBounds.getTopLeft().y, boxBounds.getWidth(),
     0.0f, 0.5f * pi32, colors().param_highlight, automation_color, conic_count / 2, 0.0f, 1.0f, 1.0f);
   draw_conic_arc(g, boxBounds.getTopLeft().x, boxBounds.getTopLeft().y, boxBounds.getWidth(),
-    0.5f * pi32, pi32, automation_color, colors().param_shadow, conic_count / 2, 0.0f, 1.0f, 1.0f);
+    0.5f * pi32, pi32, automation_color, colors().param_shadow1, conic_count / 2, 0.0f, 1.0f, 1.0f);
 
   // toggle
   if (!tb.getToggleState()) return;
@@ -815,9 +816,9 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
   g.setColour(colors().param_background);
   g.fillEllipse(left + 1, top + 1, size - 2, size - 2);
   draw_conic_arc(g, left, top, size, pi32, 2.0f * pi32, 
-    colors().param_shadow, colors().param_highlight, conic_count / 2, 0.0f, 1.0f, 1.0f);
+    colors().param_shadow1, colors().param_highlight, conic_count / 2, 0.0f, 1.0f, 1.0f);
   draw_conic_arc(g, left, top, size, 0.0f, pi32, 
-    colors().param_highlight, colors().param_shadow, conic_count / 2, 0.0f, 1.0f, 1.0f);
+    colors().param_highlight, colors().param_shadow1, conic_count / 2, 0.0f, 1.0f, 1.0f);
 
   left += 3;
   top += 3;
@@ -924,7 +925,7 @@ lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, f
     draw_tabular_cell_bg(g, colors().table_cell, &s, global_settings().table_cell_radius);
   
   // highlight
-  g.setGradientFill(ColourGradient(colors().param_highlight.withAlpha(0.0f), left, 0, colors().param_highlight, width, 0, false));
+  g.setGradientFill(ColourGradient(colors().param_shadow2, left, 0, colors().param_highlight, width, 0, false));
   g.fillRoundedRectangle(left, top, width, height, 2);
 
   // background
