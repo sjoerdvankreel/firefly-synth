@@ -35,10 +35,13 @@
     "graph_background": "FF000000",
     "graph_modulation_bubble": "C0FFFFFF",
     "bubble_outline": "FF999999",
-    "slider_background": "FF333333",
-    "slider_highlight": "FFFFFFFF",
-    "slider_shadow": "FF000000",
-    "slider_can_modulate": "FF666666",
+    "param_background": "FF333333",
+    "param_highlight": "FFFFFFFF",
+    "param_shadow1": "FF000000",
+    "param_shadow2": "00FFFFFF",
+    "param_can_modulate": "FF666666",
+    "param_meter1": "FF333333",
+    "param_meter2": "FF555555",
     "section_outline": "00000000",
     "section_background": "FFCCCCCC",
     "table_header_cell": "FF666666",
@@ -59,7 +62,7 @@
       "module_sections": ["Monitor"],
       "colors": {
         "tab_text": "FFCCCCCC",
-        "slider_automation": "FFCCCCCC",
+        "param_automation": "FFCCCCCC",
         "control_text": "FF3333333",
         "control_tick": "FF3333333",
         "button_text": "FFCCCCCC",
@@ -74,9 +77,13 @@
     {
       "module_sections": ["GAudio", "GCV-A", "GCV-CV"],
       "colors": {
+        "tab_button": "FF555555",
+        "tab_button_inactive": "FF333333",
         "tab_text": "FFFF0040",
-        "slider_automation": "FFFF0040",
-        "slider_modulation": "FFC07830",
+        "tab_text_inactive": "FFAAAAAA",
+        "param_automation": "FFFF0040",
+        "param_modulation1": "FFC07830",
+        "param_modulation2": "FF333333",
         "control_text": "FFCCCCCC",
         "control_tick": "FFFF0040",
         "bubble_outline": "FFFF0040",
@@ -89,9 +96,13 @@
       "custom_sections": ["Theme", "Global FX Graph", "Global LFO Graph", "Global Matrix Graphs"],
       "module_sections": ["Master", "Global", "Global Out", "Global FX", "Global LFO"],
       "colors": {
+        "tab_button": "FF555555",
+        "tab_button_inactive": "FF333333",
         "tab_text": "FFFF0040",
-        "slider_automation": "FFFF0040",
-        "slider_modulation": "FFC07830",
+        "tab_text_inactive": "FFAAAAAA",
+        "param_automation": "FFFF0040",
+        "param_modulation1": "FFC07830",
+        "param_modulation2": "FF333333",
         "control_text": "FFFF0040",
         "control_tick": "FFFF0040",
         "bubble_outline": "FFFF0040",
@@ -105,15 +116,25 @@
     {
       "module_sections": ["Global"],
       "settings": {
-        "header_width": "378"
+        "header_width": "984"
+      }
+    },
+    {
+      "module_sections": ["Global Out"],
+      "settings": {
+        "header_width": "190"
       }
     },
     {
       "module_sections": ["Osc Mod", "VAudio", "VCV-A", "VCV-CV"],
       "colors": {
+        "tab_button": "FF555555",
+        "tab_button_inactive": "FF333333",
         "tab_text": "FFFFA040",
-        "slider_automation": "FFFFA040",
-        "slider_modulation": "FFFF0040",
+        "tab_text_inactive": "FFAAAAAA",
+        "param_automation": "FFFFA040",
+        "param_modulation1": "FFFF0040",
+        "param_modulation2": "FF333333",
         "control_text": "FFCCCCCC",
         "control_tick": "FFFFA040",
         "bubble_outline": "FFFFA040",
@@ -126,9 +147,13 @@
       "custom_sections": ["Oscillator Graph", "Voice FX Graph", "Voice LFO Graph", "Envelope Graph", "Voice Matrix Graphs"],
       "module_sections": ["Voice", "Voice Out", "Osc", "Voice FX", "Voice LFO", "Env"],
       "colors": {
+        "tab_button": "FF555555",
+        "tab_button_inactive": "FF333333",
         "tab_text": "FFFFA040",
-        "slider_automation": "FFFFA040",
-        "slider_modulation": "FFFF0040",
+        "tab_text_inactive": "FFAAAAAA",
+        "param_automation": "FFFFA040",
+        "param_modulation1": "FFFF0040",
+        "param_modulation2": "FF333333",
         "control_text": "FFFFA040",
         "control_tick": "FFFFA040",
         "bubble_outline": "FFFFA040",
@@ -149,7 +174,13 @@
     {
       "module_sections": ["Voice"],
       "settings": {
-        "header_width": "378"
+        "header_width": "984"
+      }
+    },
+    {
+      "module_sections": ["Voice Out"],
+      "settings": {
+        "header_width": "190"
       }
     }
   ]

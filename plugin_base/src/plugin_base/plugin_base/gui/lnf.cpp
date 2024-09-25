@@ -938,7 +938,7 @@ lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, f
   // actual modulation outputs
   g.setColour(colors().param_modulation2);   
   if(max_mod_pos >= 0.0f)
-    if(!bipolar)
+    if(!bipolar) 
     {
       if (max_mod_pos - min_mod_pos <= 0.05f)
       {
