@@ -76,6 +76,7 @@ override_colors(gui_colors const& base, var const& json)
   result.tab_button = override_color_if_present(json, "tab_button", result.tab_button);
   result.tab_button_inactive = override_color_if_present(json, "tab_button_inactive", result.tab_button_inactive);
   result.tab_header = override_color_if_present(json, "tab_header", result.tab_header);
+  result.tab_header_text = override_color_if_present(json, "tab_header_text", result.tab_header_text);
   result.graph_grid = override_color_if_present(json, "graph_grid", result.graph_grid);
   result.graph_text = override_color_if_present(json, "graph_text", result.graph_text);
   result.graph_modulation_bubble = override_color_if_present(json, "graph_modulation_bubble", result.graph_modulation_bubble);
@@ -766,7 +767,7 @@ lnf::drawTabButton(TabBarButton& button, Graphics& g, bool isMouseOver, bool isM
   auto textArea = button.getTextArea();
   textArea.removeFromLeft(radius + 2);
   g.setFont(font());
-  g.setColour(colors().tab_text_inactive);
+  g.setColour(colors().tab_header_text); 
   g.drawText(header, textArea, Justification::left, false);
 
   // case header only
