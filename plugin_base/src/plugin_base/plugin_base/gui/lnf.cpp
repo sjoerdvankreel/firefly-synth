@@ -916,7 +916,7 @@ lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, f
     g.setColour(colors().param_meter1);
     for (int i = 0; i < block_count_off; i++)
       g.fillRect(left + i * actual_cell_width, top, actual_block_width, height);
-    g.setColour(colors().param_meter2); 
+    g.setColour(colors().param_meter2);   
     for (int i = block_count_off; i < block_count; i++)
       g.fillRect(left + i * actual_cell_width, top, actual_block_width, height);
     return;
