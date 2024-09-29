@@ -40,6 +40,7 @@ arp / seq
 * do some nice stuff with the global cv sources, they there for grabs already
 * check if shows up in the docs
 * write the manual
+* the osc mod controls are tiny ?
 
 wishlist:
 use fftw
