@@ -30,6 +30,7 @@ modvis take 3:
 * make a new one for free-run and on-voice-rand
 
 wishlist:
+use fftw
 make a patch cleanup button
 update the manuals routing overview image with new colors
 filter microtuning
