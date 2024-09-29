@@ -83,7 +83,7 @@ std::unique_ptr<plugin_base::plugin_topo> synth_topo(
 // For example env can modulate vlfo so env goes first.
 enum {
   module_master_settings, module_external_audio, module_midi, module_gcv_cv_matrix, module_global_in,
-  module_glfo, module_gcv_audio_matrix, module_vcv_cv_matrix, module_voice_note, module_voice_on_note, 
+  module_glfo, module_gcv_audio_matrix, module_arpeggiator, module_vcv_cv_matrix, module_voice_note, module_voice_on_note, 
   module_env, module_vlfo, module_vcv_audio_matrix, module_voice_in, module_vaudio_audio_matrix, 
   module_osc_osc_matrix, module_osc, module_vfx, module_voice_out, module_voice_mix, 
   module_gaudio_audio_matrix, module_gfx, module_global_out, module_monitor, module_count };
@@ -218,6 +218,7 @@ plugin_base::module_topo external_audio_topo(int section, bool is_fx);
 plugin_base::module_topo voice_on_note_topo(plugin_base::plugin_topo const* topo, int section);
 plugin_base::module_topo env_topo(int section, plugin_base::gui_position const& pos);
 plugin_base::module_topo osc_topo(int section, plugin_base::gui_position const& pos);
+plugin_base::module_topo arpeggiator_topo(int section, plugin_base::gui_position const& pos);
 plugin_base::module_topo voice_in_topo(int section, plugin_base::gui_position const& pos);
 plugin_base::module_topo global_in_topo(int section, bool is_fx, plugin_base::gui_position const& pos);
 plugin_base::module_topo fx_topo(int section, plugin_base::gui_position const& pos, bool global, bool is_fx);

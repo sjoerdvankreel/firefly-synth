@@ -156,6 +156,7 @@ struct engine_params
 
   // voice management is done by plugin_base so we need some cooperation
   engine_param voice_mode = {};
+  engine_param arpeggiator = {};
   sub_voice_counter_t sub_voice_counter = {};
 };
 

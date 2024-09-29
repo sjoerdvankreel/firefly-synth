@@ -148,7 +148,7 @@
     },
     {
       "custom_sections": ["Oscillator Graph", "Voice FX Graph", "Voice LFO Graph", "Envelope Graph", "Voice Matrix Graphs"],
-      "module_sections": ["Voice", "Voice Out", "Osc", "Voice FX", "Voice LFO", "Env"],
+      "module_sections": ["Voice", "Voice Out", "ARP / SEQ", "Osc", "Voice FX", "Voice LFO", "Env"],
       "colors": {
         "tab_button": "FF555555",
         "tab_button_inactive": "FFFFA040",
@@ -185,6 +185,12 @@
       "module_sections": ["Voice Out"],
       "settings": {
         "header_width": "190"
+      }
+    },
+    {
+      "module_sections": ["ARP / SEQ"],
+      "settings": {
+        "header_width": "680"
       }
     }
   ]

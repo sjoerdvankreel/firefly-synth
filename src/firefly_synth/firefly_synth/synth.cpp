@@ -53,7 +53,8 @@ enum {
   module_section_monitor, 
   module_section_global_matrices,
   module_section_fx_count,
-  module_section_voice_matrices = module_section_fx_count,
+  module_section_arp = module_section_fx_count,
+  module_section_voice_matrices,
   module_section_voice_in,
   module_section_voice_out,
   module_section_osc, 
@@ -479,13 +480,15 @@ synth_topo(format_basic_config const* config, bool is_fx, std::string const& ful
       "{FB435C64-8349-4F0F-84FC-FFC82002D69F}", module_section_voice_in, { 5, 0, 1, 3 }, { { 1 }, { 1 } });
     result->gui.module_sections[module_section_voice_out] = make_module_section_gui(
       "{2B764ECA-B745-4087-BB73-1B5952BC6B96}", module_section_voice_out, { 5, 3, 1, 1 }, { { 1 }, { 1 } });
+    result->gui.module_sections[module_section_arp] = make_module_section_gui(
+      "{BB3255E5-86BF-4685-803F-E990A14EFF2E}", module_section_arp, { 5, 4, 1, 2 }, { { 1 }, { 1 } });
 
     std::vector<int> global_matrix_modules = { module_gaudio_audio_matrix, module_gcv_audio_matrix, module_gcv_cv_matrix };
     std::vector<int> voice_matrix_modules = { module_osc_osc_matrix, module_vaudio_audio_matrix, module_vcv_audio_matrix, module_vcv_cv_matrix };
     result->gui.module_sections[module_section_global_matrices] = make_module_section_gui_tabbed(
       "{628D5FCB-0672-47A5-A23D-31257D4CCAF1}", module_section_global_matrices, { 2, 4, 2, 2 }, global_matrix_modules);
     result->gui.module_sections[module_section_voice_matrices] = make_module_section_gui_tabbed(
-      "{9BEB7D58-47AB-4E2D-891B-349607170508}", module_section_voice_matrices, { 5, 4, 4, 2 }, voice_matrix_modules);
+      "{9BEB7D58-47AB-4E2D-891B-349607170508}", module_section_voice_matrices, { 6, 4, 3, 2 }, voice_matrix_modules);
   }
 
   result->modules.resize(module_count);
@@ -501,8 +504,9 @@ synth_topo(format_basic_config const* config, bool is_fx, std::string const& ful
   result->modules[module_osc] = osc_topo(is_fx ? module_section_hidden : module_section_osc, { 0, 0 });
   result->modules[module_global_in] = global_in_topo(module_section_global_in, is_fx, { 0, 0 });
   result->modules[module_master_settings] = master_settings_topo(module_section_master_settings, { 0, 0 }, is_fx, result.get());
-  result->modules[module_voice_on_note] = voice_on_note_topo(result.get(), module_section_hidden); // must be after all global cv  
-  result->modules[module_voice_in] = voice_in_topo(is_fx ? module_section_hidden : module_section_voice_in, { 0, 0 }); // must be after all cv
+  result->modules[module_arpeggiator] = arpeggiator_topo(is_fx ? module_section_hidden : module_section_arp, { 0, 0 }); // voice stuff must be after global cv
+  result->modules[module_voice_on_note] = voice_on_note_topo(result.get(), module_section_hidden);
+  result->modules[module_voice_in] = voice_in_topo(is_fx ? module_section_hidden : module_section_voice_in, { 0, 0 });
   result->modules[module_voice_out] = audio_out_topo(is_fx ? module_section_hidden : module_section_voice_out, { 0, 0 }, false);
   result->modules[module_global_out] = audio_out_topo(module_section_global_out, { 0, 0 }, true);
   result->modules[module_monitor] = monitor_topo(module_section_monitor, { 0, 0 }, result->audio_polyphony, is_fx);
