@@ -41,6 +41,8 @@ arp / seq
 * check if shows up in the docs
 * write the manual
 * the osc mod controls are tiny ?
+* add arp table pos as a mod source
+* why only play single note, can be any combination out of the active chord (e.g. cdef = c, d, e, f or cd, de, ef, fc or cde, def, efc, fcd etc)
 
 wishlist:
 use fftw
