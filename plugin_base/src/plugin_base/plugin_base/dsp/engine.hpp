@@ -47,9 +47,6 @@ public:
     std::vector<note_event>& out) = 0;
 };
 
-typedef std::function<std::unique_ptr<arp_engine_base>()>
-arpeggiator_engine_factory;
-
 // catering to clap
 // but also a great way to see if voices are really independent
 typedef bool (*
