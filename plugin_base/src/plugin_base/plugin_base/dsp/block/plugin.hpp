@@ -124,6 +124,7 @@ struct plugin_block final {
   int end_frame;
   int module_slot;
   float sample_rate;
+  std::int64_t stream_time; // in frames
   plugin_block_state state;
 
   plugin_output_block* out;

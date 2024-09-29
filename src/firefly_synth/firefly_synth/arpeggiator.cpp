@@ -4,6 +4,7 @@
 
 #include <firefly_synth/synth.hpp>
 #include <cmath>
+#include <array>
 
 using namespace plugin_base;
  
@@ -12,9 +13,19 @@ namespace firefly_synth {
 enum { param_on };
 enum { section_main };
 
+struct arp_note_state
+{
+  bool on = {};
+  float velocity = {};
+};
+
 class arpeggiator_engine :
 public arp_engine_base
 {
+  // todo stuff with velo
+  std::int64_t _start_time = 0;
+  std::array<arp_note_state, 128> _current_chord = {};
+
 public:
   void process_notes(
     plugin_block const& block,
@@ -44,7 +55,7 @@ arpeggiator_topo(int section, gui_position const& pos)
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   mode.info.description = "TODO";
   return result;
-}             
+}         
 
 void 
 arpeggiator_engine::process_notes(
@@ -55,17 +66,37 @@ arpeggiator_engine::process_notes(
   // plugin_base clears on each round
   assert(out.size() == 0);
 
-  if (in.size() == 0) 
-    return;
-
+  // todo if switching block params, output a bunch of note offs
   auto const& block_auto = block.state.own_block_automation;
   if (block_auto[param_on][0].step() == 0)
   {
     out.insert(out.end(), in.begin(), in.end());
     return;
   }
+  
+  // todo do the reset-on-event-thing
+  // todo do the lookahead window thing / allow some time to accumulate the table
+  // buildup thing is for hw keyboards as i doubt anyone can hit keys sample-accurate
+  // TODO allow to cut vs off
+  
+  // this assumes notes are ordered by stream pos
+  // TODO ok this gets me an "active" table -- what now?
+  for (int i = 0; i < in.size(); i++)
+  {
+    _start_time = block.stream_time + in[i].frame;
+    if (in[i].type == note_event_type::on)
+    {
+      _current_chord[in[i].id.key].on = true;
+      _current_chord[in[i].id.key].velocity = in[i].velocity;
+    }
+    else
+    {
+      _current_chord[in[i].id.key].on = false;
+      _current_chord[in[i].id.key].velocity = 0.0f;
+    }
+  }
 
-  out.insert(out.end(), in.begin(), in.begin() + 1);
+
 }
 
 }

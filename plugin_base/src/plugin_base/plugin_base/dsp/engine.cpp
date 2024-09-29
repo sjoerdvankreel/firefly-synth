@@ -72,12 +72,6 @@ _voice_processor_context(voice_processor_context)
 
   // just a best guess, hope it wont allocate
   _arp_notes.resize(1024);
-  if (desc->plugin->engine.arpeggiator_module_index != -1)
-  {
-    assert(desc->plugin->engine.arpeggiator_factory_);
-    if (desc->plugin->engine.arpeggiator_factory_)
-      _arpeggiator = desc->plugin->engine.arpeggiator_factory_();
-  }
 }
 
 engine_tuning_mode 
@@ -193,7 +187,7 @@ plugin_engine::make_plugin_block(
     current_tuning,
     tuning_mode,
     start_frame, end_frame, slot,
-    _sample_rate, state, nullptr, nullptr, 
+    _sample_rate, _stream_time, state, nullptr, nullptr, 
     _host_block->shared, _state.desc(), 
     _state.desc().modules[module_global],
     modulation_outputs
@@ -305,6 +299,10 @@ plugin_engine::deactivate()
   for (int m = _state.desc().module_output_start; m < _state.desc().plugin->modules.size(); m++)
     for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
       _output_engines[m][mi].reset();
+
+
+  // arp
+  _arpeggiator.reset();
 }
 
 void
@@ -341,6 +339,13 @@ plugin_engine::activate(int max_frame_count)
   // set automation values to current state, events may overwrite
   automation_state_dirty();
   init_automation_from_state();
+
+  // arp
+  if (_state.desc().plugin->engine.arpeggiator_module_index != -1)
+  {
+    assert(_state.desc().plugin->engine.arpeggiator_factory_);
+    _arpeggiator = _state.desc().plugin->engine.arpeggiator_factory_();
+  }
 }
 
 void
