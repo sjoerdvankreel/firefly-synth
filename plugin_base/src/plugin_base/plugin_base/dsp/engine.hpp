@@ -38,6 +38,18 @@ public:
     void* context) { reset_audio(block); }
 };
 
+// arpeggiator processor (optional)
+class arp_engine_base { 
+public: 
+  virtual ~arp_engine_base() {}
+  virtual void process_notes(plugin_block const& block,
+    std::vector<note_event> const& in,
+    std::vector<note_event>& out) = 0;
+};
+
+typedef std::function<std::unique_ptr<arp_engine_base>()>
+arpeggiator_engine_factory;
+
 // catering to clap
 // but also a great way to see if voices are really independent
 typedef bool (*
@@ -99,6 +111,10 @@ class plugin_engine final {
   jarray<cv_filter, 4> _automation_lp_filters = {};
   jarray<block_filter, 4> _automation_lerp_filters = {};
   jarray<float, 4> _automation_state_last_round_end = {};
+
+  // arpeggiator
+  std::vector<note_event> _arp_notes = {};
+  std::unique_ptr<arp_engine_base> _arpeggiator = {};
 
   // offset wrt _state
   jarray<float, 4> _current_modulation = {};

@@ -354,6 +354,8 @@ synth_topo(format_basic_config const* config, bool is_fx, std::string const& ful
   result->version.major = FF_SYNTH_VERSION_MAJOR;
   result->version.minor = FF_SYNTH_VERSION_MINOR;
   result->version.patch = FF_SYNTH_VERSION_PATCH;
+  result->engine.arpeggiator_factory_ = make_arpeggiator;
+  result->engine.arpeggiator_module_index = module_arpeggiator;
   result->engine.voice_mode.module_index = module_voice_in;
   result->engine.voice_mode.param_index = voice_in_param_mode;
   result->engine.visuals.module_index = module_master_settings;

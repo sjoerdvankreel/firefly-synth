@@ -69,6 +69,15 @@ _voice_processor_context(voice_processor_context)
   _voice_modulation_outputs.resize(_polyphony);
   for(int i = 0; i < _polyphony; i++)
     _voice_modulation_outputs[i].resize(desc->module_count);
+
+  // just a best guess, hope it wont allocate
+  _arp_notes.resize(1024);
+  if (desc->plugin->engine.arpeggiator_module_index != -1)
+  {
+    assert(desc->plugin->engine.arpeggiator_factory_);
+    if (desc->plugin->engine.arpeggiator_factory_)
+      _arpeggiator = desc->plugin->engine.arpeggiator_factory_();
+  }
 }
 
 engine_tuning_mode 
@@ -976,6 +985,18 @@ plugin_engine::process()
   /* STEP 5: Voice management in case of polyphonic synth */
   /********************************************************/
 
+  // arpeggiator: plug is free to completely rewrite the note stream
+  if (_arpeggiator)
+  {
+    plugin_block block(make_plugin_block(-1, -1, _state.desc().plugin->engine.arpeggiator_module_index, 0, _current_block_tuning_mode, 0, frame_count));
+    _arpeggiator->process_notes(block, _host_block->events.notes, _arp_notes);
+  }
+  else
+  {
+    _arp_notes.clear();
+    _arp_notes.insert(_arp_notes.end(), _host_block->events.notes.begin(), _host_block->events.notes.end());
+  }
+
   if(_state.desc().plugin->type == plugin_type::synth)
   {
     // always take a voice for an entire block,
@@ -1010,9 +1031,9 @@ plugin_engine::process()
       if (topo.engine.sub_voice_counter) sub_voice_count = topo.engine.sub_voice_counter(_graph, _state);
 
       // poly mode: steal voices for incoming notes by age
-      for (int e = 0; e < _host_block->events.notes.size(); e++)
+      for (int e = 0; e < _arp_notes.size(); e++)
       {
-        auto const& event = _host_block->events.notes[e];
+        auto const& event = _arp_notes[e];
         if (event.type != note_event_type::on) continue;
 
         // mts-esp support
@@ -1042,14 +1063,14 @@ plugin_engine::process()
       // set up note-off stream, plugin will have to do something with it
       // so first check if there's a "real" note-off in there (not caused by an note-on at the same sample pos)
       int first_note_off_index = -1;
-      for (int e = 0; e < _host_block->events.notes.size(); e++)
-        if (_host_block->events.notes[e].type == note_event_type::off)
+      for (int e = 0; e < _arp_notes.size(); e++)
+        if (_arp_notes[e].type == note_event_type::off)
         {
           // if a note off is caused by another note on at the same sample position, ignore it
-          auto const& event = _host_block->events.notes[e];
+          auto const& event = _arp_notes[e];
           bool note_on_found_this_pos = false;
-          for (int e2 = 0; e2 < _host_block->events.notes.size(); e2++)
-            if (_host_block->events.notes[e2].type == note_event_type::on && _host_block->events.notes[e2].frame == event.frame)
+          for (int e2 = 0; e2 < _arp_notes.size(); e2++)
+            if (_arp_notes[e2].type == note_event_type::on && _arp_notes[e2].frame == event.frame)
             {
               note_on_found_this_pos = true;
               break;
@@ -1065,9 +1086,9 @@ plugin_engine::process()
       // if there's no true note-off in this block, check for note-on
       int first_note_on_index = -1;
       if(first_note_off_index == -1)
-        for (int e = 0; e < _host_block->events.notes.size(); e++)
+        for (int e = 0; e < _arp_notes.size(); e++)
         {
-          auto const& event = _host_block->events.notes[e];
+          auto const& event = _arp_notes[e];
           if (event.type == note_event_type::on)
           {
             // mts-esp support
@@ -1084,7 +1105,7 @@ plugin_engine::process()
       // and if it's there, proceed
       if(first_note_on_index != -1)
       {
-        auto& first_event = _host_block->events.notes[first_note_on_index];
+        auto& first_event = _arp_notes[first_note_on_index];
 
         int slot = -1;
         for(int v = 0; v < _voice_states.size(); v++)
@@ -1130,10 +1151,10 @@ plugin_engine::process()
         }
 
         // set up note-on stream, plugin will have to do something with it
-        for(int e = 0; e < _host_block->events.notes.size(); e++)
-          if(_host_block->events.notes[e].type == note_event_type::on)
+        for(int e = 0; e < _arp_notes.size(); e++)
+          if(_arp_notes[e].type == note_event_type::on)
           {
-            auto const& event = _host_block->events.notes[e]; 
+            auto const& event = _arp_notes[e];
             _last_note_key = event.id.key;
             _last_note_channel = event.id.channel;
             std::fill(_mono_note_stream.begin() + event.frame, _mono_note_stream.end(), mono_note_state { event.id.key, mono_note_stream_event::none });
@@ -1148,9 +1169,9 @@ plugin_engine::process()
     // clap on bitwig hands us note-on events with note id and note-off events without them
     // so i choose to allow note-off with note-id to only kill the same note-id
     // but allow note-off without note-id to kill any matching pck regardless of note-id
-    for (int e = 0; e < _host_block->events.notes.size(); e++)
+    for (int e = 0; e < _arp_notes.size(); e++)
     {
-      auto const& event = _host_block->events.notes[e];
+      auto const& event = _arp_notes[e];
       if (event.type == note_event_type::on) continue;
       for (int v = 0; v < _voice_states.size(); v++)
       {

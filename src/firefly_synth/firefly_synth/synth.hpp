@@ -16,6 +16,10 @@ class osc_osc_matrix_engine;
 class osc_osc_matrix_am_modulator;
 class osc_osc_matrix_fm_modulator;
 
+// arp support
+std::unique_ptr<plugin_base::arp_engine_base>
+make_arpeggiator();
+
 // shared custom output/repaint tags
 enum { custom_out_shared_render_for_cv_graph = 128 };
 

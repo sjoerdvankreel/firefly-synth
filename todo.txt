@@ -29,6 +29,17 @@ autobuilds:
 modvis take 3:
 * make a new one for free-run and on-voice-rand
 
+arp / seq
+* make sure globuni works
+* check automation works
+* do the lookahead window to bundle events
+* do up-down-updown-random
+* do octave counter + range
+* 16-step-seq
+* do some nice stuff with the global cv sources, they there for grabs already
+* check if shows up in the docs
+* write the manual
+
 wishlist:
 use fftw
 make a patch cleanup button
