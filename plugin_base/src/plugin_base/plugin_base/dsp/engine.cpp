@@ -986,16 +986,14 @@ plugin_engine::process()
   /********************************************************/
 
   // arpeggiator: plug is free to completely rewrite the note stream
+  _arp_notes.clear();
   if (_arpeggiator)
   {
     plugin_block block(make_plugin_block(-1, -1, _state.desc().plugin->engine.arpeggiator_module_index, 0, _current_block_tuning_mode, 0, frame_count));
     _arpeggiator->process_notes(block, _host_block->events.notes, _arp_notes);
   }
   else
-  {
-    _arp_notes.clear();
     _arp_notes.insert(_arp_notes.end(), _host_block->events.notes.begin(), _host_block->events.notes.end());
-  }
 
   if(_state.desc().plugin->type == plugin_type::synth)
   {

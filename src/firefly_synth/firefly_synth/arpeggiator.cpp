@@ -52,18 +52,19 @@ arpeggiator_engine::process_notes(
   std::vector<note_event> const& in,
   std::vector<note_event>& out)
 {
+  // plugin_base clears on each round
+  assert(out.size() == 0);
+
   if (in.size() == 0) 
     return;
 
   auto const& block_auto = block.state.own_block_automation;
   if (block_auto[param_on][0].step() == 0)
   {
-    out.clear();
     out.insert(out.end(), in.begin(), in.end());
     return;
   }
 
-  out.clear();
   out.insert(out.end(), in.begin(), in.begin() + 1);
 }
 
