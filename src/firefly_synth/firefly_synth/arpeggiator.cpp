@@ -19,14 +19,26 @@ struct arp_note_state
   float velocity = {};
 };
 
+struct arp_active_note
+{
+  int midi_key;
+  float velocity;
+};
+
 class arpeggiator_engine :
 public arp_engine_base
 {
   // todo stuff with velo
+  int _table_pos = 0;
+  int _note_remaining = 0;
   std::int64_t _start_time = 0;
+  std::vector<arp_active_note> _active_notes = {};
   std::array<arp_note_state, 128> _current_chord = {};
 
 public:
+
+  arpeggiator_engine();
+
   void process_notes(
     plugin_block const& block,
     std::vector<note_event> const& in,
@@ -57,6 +69,10 @@ arpeggiator_topo(int section, gui_position const& pos)
   return result;
 }         
 
+arpeggiator_engine::
+arpeggiator_engine()
+{ _active_notes.reserve(128); /* guess */ }
+
 void 
 arpeggiator_engine::process_notes(
   plugin_block const& block,
@@ -81,9 +97,12 @@ arpeggiator_engine::process_notes(
   
   // this assumes notes are ordered by stream pos
   // TODO ok this gets me an "active" table -- what now?
+  int table_changed_frame = 0;
+  bool table_changed = false; // make this TODO a bit more lenient
   for (int i = 0; i < in.size(); i++)
   {
-    _start_time = block.stream_time + in[i].frame;
+    table_changed = true;
+    table_changed_frame = in[i].frame;
     if (in[i].type == note_event_type::on)
     {
       _current_chord[in[i].id.key].on = true;
@@ -96,7 +115,54 @@ arpeggiator_engine::process_notes(
     }
   }
 
+  if (table_changed)
+  {
+    _table_pos = 0;
+    _note_remaining = 0;
+    _active_notes.clear();
+    for (int i = 0; i < 128; i++)
+      if(_current_chord[i].on)
+      {
+        arp_active_note aan;
+        aan.midi_key = i;
+        aan.velocity = _current_chord[i].velocity;
+        _active_notes.push_back(aan);
+      }
+  }
 
+  if (_active_notes.empty())
+    return;
+
+  // TODO what would actually happen when "play chord", release, wait, "play chord"
+  // TODO stuff with actual start pos of the table as based on note event frame
+  for (int f = block.start_frame; f < block.end_frame; f++)
+  {
+    if (_note_remaining == 0) // TODO make sure this is always 1+ frames
+    {
+      note_event end_old = {};
+      end_old.id.id = 0;
+      end_old.id.channel = 0; // TODO maybe ?
+      end_old.id.key = _active_notes[_table_pos].midi_key;
+      end_old.frame = f;
+      end_old.velocity = 0.0f;
+      end_old.type = note_event_type::off; // TODO
+      out.push_back(end_old);
+
+      _note_remaining = 4800; // TODO
+      _table_pos = (_table_pos + 1) % _active_notes.size();
+
+      note_event start_new = {};
+      start_new.id.id = 0;
+      start_new.id.channel = 0;
+      start_new.id.key = _active_notes[_table_pos].midi_key;
+      start_new.frame = f;
+      start_new.type = note_event_type::on;
+      start_new.velocity = _active_notes[_table_pos].velocity;
+      out.push_back(start_new);
+    }
+    
+    --_note_remaining;
+  }
 }
 
 }
