@@ -67,6 +67,7 @@ c4e4g4g5e5c5 or
 * make global/voice in uppercase
 * do the disable controls thing
 * up the vno
+* reset is still no good
 
 
 wishlist:
