@@ -274,6 +274,12 @@ arpeggiator_engine::process_notes(
       break;
     }
 
+    // make sure all is in check
+    // we cannot go out of bounds in pitch
+    // pitch 2 freq translator allows it, but we won't be able to kill MIDI -3 or MIDI 134 etc
+    for (int i = 0; i < _active_notes.size(); i++)
+      _active_notes[i].midi_key = std::clamp(_active_notes[i].midi_key, 0, 127);
+
     // and sort the thing
     auto comp = [](auto const& l, auto const& r) { return l.midi_key < r.midi_key; };
     std::sort(_active_notes.begin(), _active_notes.end(), comp);
