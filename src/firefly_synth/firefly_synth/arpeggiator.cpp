@@ -36,13 +36,6 @@ struct arp_table_note
   float velocity;
 };
 
-// what the actual engine is doing. i kinda need this to support variable note-lengths
-struct arp_engine_note
-{
-  int midi_key;
-  int ttl; // i.e. when to kill
-};
-
 static std::vector<list_item>
 type_items()
 {
@@ -77,7 +70,6 @@ public arp_engine_base
   int _table_pos = -1;
   int _note_remaining = 0;
   std::int64_t _start_time = 0;
-  std::vector<arp_engine_note> _active_notes = {};
   std::array<arp_user_note, 128> _current_user_chord = {};
   std::vector<arp_table_note> _current_arp_note_table = {};
 
@@ -170,10 +162,7 @@ arpeggiator_topo(int section, gui_position const& pos)
 
 arpeggiator_engine::
 arpeggiator_engine()
-{ 
-  _active_notes.reserve(1024); /* guess */
-  _current_arp_note_table.reserve(128); /* guess */
-}
+{ _current_arp_note_table.reserve(128); /* guess */ }
 
 void 
 arpeggiator_engine::hard_reset(std::vector<note_event>& out)
@@ -252,7 +241,6 @@ arpeggiator_engine::process_notes(
 
     _table_pos = -1; // before start, will get picked up
     _note_remaining = 0;
-    _active_notes.clear(); // ok because hard reset
     _current_arp_note_table.clear();
 
     // STEP 1: build up the base chord table
