@@ -72,6 +72,8 @@ public arp_engine_base
   std::array<arp_note_state, 128> _prev_chord = {};
   std::array<arp_note_state, 128> _current_chord = {};
 
+  void hard_reset(std::vector<note_event>& out);
+
 public:
 
   arpeggiator_engine();
@@ -144,6 +146,22 @@ arpeggiator_engine()
 { _active_notes.reserve(128); /* guess */ }
 
 void 
+arpeggiator_engine::hard_reset(std::vector<note_event>& out)
+{
+  for (int i = 0; i < 128; i++)
+  {
+    note_event off;
+    off.frame = 0;
+    off.id.id = 0;
+    off.id.key = i;
+    off.id.channel = 0; // TODO need this?
+    off.velocity = 0.0f;
+    off.type = note_event_type::off;
+    out.push_back(off);
+  }
+}
+
+void 
 arpeggiator_engine::process_notes(
   plugin_block const& block,
   std::vector<note_event> const& in,
@@ -162,19 +180,7 @@ arpeggiator_engine::process_notes(
   {
     _prev_type = type;
     _prev_mode = mode;
-    
-    // don't care what happened, do hard reset, this should not happen often
-    for (int i = 0; i < 128; i++)
-    {
-      note_event cut;
-      cut.frame = 0;
-      cut.id.id = 0;
-      cut.id.key = i;
-      cut.id.channel = 0; // TODO need this?
-      cut.velocity = 0.0f;
-      cut.type = note_event_type::cut;
-      out.push_back(cut);
-    }
+    hard_reset(out);
   }
 
   if (type == type_off)
@@ -209,18 +215,10 @@ arpeggiator_engine::process_notes(
 
   if (table_changed)
   {
-    // STEP 0: clear out the previous round
-    for (int i = 0; i < _active_notes.size(); i++)
-    {
-      note_event off;
-      off.frame = 0;
-      off.id.id = 0;
-      off.id.key = _active_notes[i].midi_key;
-      off.id.channel = 0; // TODO need this?
-      off.velocity = 0.0f;
-      off.type = note_event_type::off;
-      out.push_back(off);
-    }
+    // STEP 0: off all notes
+    // just active notes is not enough, 
+    // user may have been playing with voice/osc note/oct in the meantime
+    hard_reset(out);
 
     _table_pos = -1; // before start, will get picked up
     _note_remaining = 0;
