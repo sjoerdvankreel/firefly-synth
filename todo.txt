@@ -64,6 +64,7 @@ c4e4g4g5e5c5 or
 * the osc mod controls are tiny ?
 * add arp table pos as a mod source ==> yes do it
 * why only play single note, can be any combination out of the active chord (e.g. cdef = c, d, e, f or cd, de, ef, fc or cde, def, efc, fcd etc)
+* make global/voice in uppercase
 
 
 wishlist:
