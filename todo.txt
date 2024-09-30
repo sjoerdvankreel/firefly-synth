@@ -66,6 +66,7 @@ c4e4g4g5e5c5 or
 * why only play single note, can be any combination out of the active chord (e.g. cdef = c, d, e, f or cd, de, ef, fc or cde, def, efc, fcd etc)
 * make global/voice in uppercase
 * do the disable controls thing
+* up the vno
 
 
 wishlist:
