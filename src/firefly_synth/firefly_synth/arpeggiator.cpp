@@ -75,7 +75,7 @@ public arp_engine_base
 
   // todo stuff with velo
   int _table_pos = -1;
-  int _table_pos_remaining = 0;
+  int _note_remaining = 0;
   std::int64_t _start_time = 0;
   std::vector<arp_engine_note> _active_notes = {};
   std::array<arp_user_note, 128> _current_user_chord = {};
@@ -251,7 +251,7 @@ arpeggiator_engine::process_notes(
     hard_reset(out);
 
     _table_pos = -1; // before start, will get picked up
-    _table_pos_remaining = 0;
+    _note_remaining = 0;
     _active_notes.clear(); // ok because hard reset
     _current_arp_note_table.clear();
 
@@ -362,38 +362,23 @@ arpeggiator_engine::process_notes(
   // TODO stuff with actual start pos of the table as based on note event frame ??
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
-    // TODO this could get really expensive -- double check
-
-    // drop some old ones
-    for (int i = 0; i < _active_notes.size(); i++)
+    if (_note_remaining == 0) // TODO make sure this is always 1+ frames
     {
-      _active_notes[i].ttl--;
-      assert(_active_notes[i].ttl >= 0);
-
-      if (_active_notes[i].ttl == 0)
+      if (_table_pos != -1)
       {
-        // notify the audio engine
         note_event end_old = {};
         end_old.id.id = 0;
         end_old.id.channel = 0; // TODO maybe ?
-        end_old.id.key = _active_notes[i].midi_key;
+        end_old.id.key = _current_arp_note_table[_table_pos].midi_key;
         end_old.frame = f;
         end_old.velocity = 0.0f;
         end_old.type = note_event_type::off; // TODO
         out.push_back(end_old);
       }
-    }
 
-    // clear out the arp
-    std::erase_if(_active_notes, [](auto const& e) { return e.ttl == 0; });
-
-    // spawn some new ones
-    if (_table_pos_remaining == 0) // TODO make sure this is always 1+ frames
-    {
-      _table_pos_remaining = rate_frames;
+      _note_remaining = rate_frames; // TODO
       _table_pos = (_table_pos + 1) % _current_arp_note_table.size();
 
-      // notify the audio engine
       note_event start_new = {};
       start_new.id.id = 0;
       start_new.id.channel = 0;
@@ -402,15 +387,9 @@ arpeggiator_engine::process_notes(
       start_new.type = note_event_type::on;
       start_new.velocity = _current_arp_note_table[_table_pos].velocity;
       out.push_back(start_new);
-
-      // set up the arp
-      arp_engine_note aen;
-      aen.midi_key = _current_arp_note_table[_table_pos].midi_key;
-      aen.ttl = length_frames;
-      _active_notes.push_back(aen);
     }
-
-    --_table_pos_remaining;
+    
+    --_note_remaining;
   }
 }
 
