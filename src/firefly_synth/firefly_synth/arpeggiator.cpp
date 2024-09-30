@@ -10,8 +10,14 @@ using namespace plugin_base;
  
 namespace firefly_synth {
 
-enum { param_on };
 enum { section_main };
+enum { 
+  param_type, /* TODO param_cv_source, */ param_oct_down, param_oct_up//, param_sync, 
+  //param_rate_time, param_length_time, param_rate_tempo, param_length_tempo,
+  /* TODO param_rate_offset_source, amt, length_offset_source, amt */
+};
+
+enum { type_off, type_up, type_down, type_up_down, type_down_up, type_cv_source };
 
 struct arp_note_state
 {
@@ -24,6 +30,19 @@ struct arp_active_note
   int midi_key;
   float velocity;
 };
+
+static std::vector<list_item>
+type_items()
+{
+  std::vector<list_item> result;
+  result.emplace_back("{70109417-1525-48A6-AE1D-7AB0E5765310}", "Off");
+  result.emplace_back("{85A091D9-1283-4E67-961E-48C57BC68EB7}", "Up");
+  result.emplace_back("{20CDFF90-9D2D-4AFD-8138-1BCB61370F23}", "Down");
+  result.emplace_back("{4935E002-3745-4097-887F-C8ED52213658}", "UpDown");
+  result.emplace_back("{018FFDF0-AA2F-40BB-B449-34C8E93BCEB2}", "DownUp");
+  result.emplace_back("{E802C511-30E0-4B9B-A548-173D4C807AFF}", "CV Source");
+  return result;
+}
 
 class arpeggiator_engine :
 public arp_engine_base
@@ -60,12 +79,18 @@ arpeggiator_topo(int section, gui_position const& pos)
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag_basic("{6779AFA8-E0FE-482F-989B-6DE07263AEED}", "Main"),
     make_param_section_gui({ 0, 0 }, { 1, 1 })));
-  auto& mode = result.params.emplace_back(make_param(
-    make_topo_info_basic("{FF418A06-2017-4C23-BC65-19FAF226ABE8}", "Mode", param_on, 1),
-    make_param_dsp_block(param_automate::automate), make_domain_toggle(false),
-    make_param_gui_single(section_main, gui_edit_type::toggle, { 0, 0 },
+  auto& type = result.params.emplace_back(make_param(
+    make_topo_info_basic("{FF418A06-2017-4C23-BC65-19FAF226ABE8}", "Mode", param_type, 1),
+    make_param_dsp_block(param_automate::automate), make_domain_item(type_items(), "Off"),
+    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  mode.info.description = "TODO";
+  type.info.description = "TODO";
+  auto& oct_down = result.params.emplace_back(make_param(
+    make_topo_info_basic("{FF418A06-2017-4C23-BC65-19FAF226ABE8}", "Mode", param_type, 1),
+    make_param_dsp_block(param_automate::automate), make_domain_item(type_items(), "Off"),
+    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 0 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
+  type.info.description = "TODO";
   return result;
 }         
 
@@ -84,7 +109,7 @@ arpeggiator_engine::process_notes(
 
   // todo if switching block params, output a bunch of note offs
   auto const& block_auto = block.state.own_block_automation;
-  if (block_auto[param_on][0].step() == 0)
+  if (block_auto[param_type][0].step() == type_off)
   {
     out.insert(out.end(), in.begin(), in.end());
     return;
