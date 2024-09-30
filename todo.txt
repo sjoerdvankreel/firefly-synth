@@ -48,6 +48,7 @@ c4e4g4c5e5g5 or
 c4e4g4g5e5c5 or
 ... etc etc
 
+* shit cannot do note length --> that requires noteid not all hosts have it
 * jeez those lots of controls.
 * also maybe have some visualization! 
 * remove any mention of seq
