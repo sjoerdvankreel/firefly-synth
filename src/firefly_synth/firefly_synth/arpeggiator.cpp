@@ -68,9 +68,8 @@ public arp_engine_base
   int _table_pos = -1;
   int _note_remaining = 0;
   std::int64_t _start_time = 0;
-  std::vector<arp_active_note> _active_notes = {};
-  std::array<arp_note_state, 128> _prev_chord = {};
-  std::array<arp_note_state, 128> _current_chord = {};
+  std::array<arp_note_state, 128> _current_user_chord = {};
+  std::vector<arp_active_note> _current_arp_note_table = {};
 
   void hard_reset(std::vector<note_event>& out);
 
@@ -161,7 +160,7 @@ arpeggiator_topo(int section, gui_position const& pos)
 
 arpeggiator_engine::
 arpeggiator_engine()
-{ _active_notes.reserve(128); /* guess */ }
+{ _current_arp_note_table.reserve(128); /* guess */ }
 
 void 
 arpeggiator_engine::hard_reset(std::vector<note_event>& out)
@@ -221,13 +220,13 @@ arpeggiator_engine::process_notes(
     table_changed_frame = in[i].frame;
     if (in[i].type == note_event_type::on)
     {
-      _current_chord[in[i].id.key].on = true;
-      _current_chord[in[i].id.key].velocity = in[i].velocity;
+      _current_user_chord[in[i].id.key].on = true;
+      _current_user_chord[in[i].id.key].velocity = in[i].velocity;
     }
     else
     {
-      _current_chord[in[i].id.key].on = false;
-      _current_chord[in[i].id.key].velocity = 0.0f;
+      _current_user_chord[in[i].id.key].on = false;
+      _current_user_chord[in[i].id.key].velocity = 0.0f;
     }
   }
 
@@ -240,52 +239,52 @@ arpeggiator_engine::process_notes(
 
     _table_pos = -1; // before start, will get picked up
     _note_remaining = 0;
-    _active_notes.clear();
+    _current_arp_note_table.clear();
 
     // STEP 1: build up the base chord table
     for (int i = 0; i < 128; i++)
-      if(_current_chord[i].on)
+      if(_current_user_chord[i].on)
       {
         arp_active_note aan;
         aan.midi_key = i;
-        aan.velocity = _current_chord[i].velocity;
-        _active_notes.push_back(aan);
+        aan.velocity = _current_user_chord[i].velocity;
+        _current_arp_note_table.push_back(aan);
       }
 
-    if (_active_notes.size() == 0)
+    if (_current_arp_note_table.size() == 0)
       return;
 
     // STEP 2: take the +/- oct into account
-    int base_note_count = _active_notes.size();
+    int base_note_count = _current_arp_note_table.size();
     switch (type)
     {
     case type_straight: 
       break;
     case type_p1_oct:
       for (int i = 0; i < base_note_count; i++)
-        _active_notes.push_back({ _active_notes[i].midi_key + 12, _active_notes[i].velocity });
+        _current_arp_note_table.push_back({ _current_arp_note_table[i].midi_key + 12, _current_arp_note_table[i].velocity });
       break;
     case type_p2_oct:
       for (int i = 0; i < base_note_count; i++)
-        _active_notes.push_back({ _active_notes[i].midi_key + 12, _active_notes[i].velocity });
+        _current_arp_note_table.push_back({ _current_arp_note_table[i].midi_key + 12, _current_arp_note_table[i].velocity });
       for (int i = 0; i < base_note_count; i++)
-        _active_notes.push_back({ _active_notes[i].midi_key + 24, _active_notes[i].velocity });
+        _current_arp_note_table.push_back({ _current_arp_note_table[i].midi_key + 24, _current_arp_note_table[i].velocity });
       break;
     case type_m1p1_oct:
       for (int i = 0; i < base_note_count; i++)
-        _active_notes.push_back({ _active_notes[i].midi_key - 12, _active_notes[i].velocity });
+        _current_arp_note_table.push_back({ _current_arp_note_table[i].midi_key - 12, _current_arp_note_table[i].velocity });
       for (int i = 0; i < base_note_count; i++)
-        _active_notes.push_back({ _active_notes[i].midi_key + 12, _active_notes[i].velocity });
+        _current_arp_note_table.push_back({ _current_arp_note_table[i].midi_key + 12, _current_arp_note_table[i].velocity });
       break;
     case type_m2p2_oct:
       for (int i = 0; i < base_note_count; i++)
-        _active_notes.push_back({ _active_notes[i].midi_key - 12, _active_notes[i].velocity });
+        _current_arp_note_table.push_back({ _current_arp_note_table[i].midi_key - 12, _current_arp_note_table[i].velocity });
       for (int i = 0; i < base_note_count; i++)
-        _active_notes.push_back({ _active_notes[i].midi_key - 24, _active_notes[i].velocity });
+        _current_arp_note_table.push_back({ _current_arp_note_table[i].midi_key - 24, _current_arp_note_table[i].velocity });
       for (int i = 0; i < base_note_count; i++)
-        _active_notes.push_back({ _active_notes[i].midi_key + 12, _active_notes[i].velocity });
+        _current_arp_note_table.push_back({ _current_arp_note_table[i].midi_key + 12, _current_arp_note_table[i].velocity });
       for (int i = 0; i < base_note_count; i++)
-        _active_notes.push_back({ _active_notes[i].midi_key + 24, _active_notes[i].velocity });
+        _current_arp_note_table.push_back({ _current_arp_note_table[i].midi_key + 24, _current_arp_note_table[i].velocity });
       break;
     default:
       assert(false);
@@ -295,30 +294,30 @@ arpeggiator_engine::process_notes(
     // make sure all is in check
     // we cannot go out of bounds in pitch
     // pitch 2 freq translator allows it, but we won't be able to kill MIDI -3 or MIDI 134 etc
-    for (int i = 0; i < _active_notes.size(); i++)
-      _active_notes[i].midi_key = std::clamp(_active_notes[i].midi_key, 0, 127);
+    for (int i = 0; i < _current_arp_note_table.size(); i++)
+      _current_arp_note_table[i].midi_key = std::clamp(_current_arp_note_table[i].midi_key, 0, 127);
 
     // and sort the thing
     auto comp = [](auto const& l, auto const& r) { return l.midi_key < r.midi_key; };
-    std::sort(_active_notes.begin(), _active_notes.end(), comp);
+    std::sort(_current_arp_note_table.begin(), _current_arp_note_table.end(), comp);
 
     // STEP 3: take the up-down into account
-    int note_set_count = _active_notes.size();
+    int note_set_count = _current_arp_note_table.size();
     switch (mode)
     {
     case mode_up:
       break; // already sorted
     case mode_down:
-      std::reverse(_active_notes.begin(), _active_notes.end());
+      std::reverse(_current_arp_note_table.begin(), _current_arp_note_table.end());
       break;
     case mode_up_down:
       for (int i = note_set_count - 2; i >= 1; i--)
-        _active_notes.push_back({ _active_notes[i].midi_key, _active_notes[i].velocity });
+        _current_arp_note_table.push_back({ _current_arp_note_table[i].midi_key, _current_arp_note_table[i].velocity });
       break;
     case mode_down_up:
-      std::reverse(_active_notes.begin(), _active_notes.end());
+      std::reverse(_current_arp_note_table.begin(), _current_arp_note_table.end());
       for (int i = note_set_count - 2; i >= 1; i--)
-        _active_notes.push_back({ _active_notes[i].midi_key, _active_notes[i].velocity });
+        _current_arp_note_table.push_back({ _current_arp_note_table[i].midi_key, _current_arp_note_table[i].velocity });
       break;
     default:
       assert(false);
@@ -326,7 +325,7 @@ arpeggiator_engine::process_notes(
     }
   }
 
-  if (_active_notes.size() == 0)
+  if (_current_arp_note_table.size() == 0)
     return;
 
   // how often to output new notes
@@ -356,7 +355,7 @@ arpeggiator_engine::process_notes(
         note_event end_old = {};
         end_old.id.id = 0;
         end_old.id.channel = 0; // TODO maybe ?
-        end_old.id.key = _active_notes[_table_pos].midi_key;
+        end_old.id.key = _current_arp_note_table[_table_pos].midi_key;
         end_old.frame = f;
         end_old.velocity = 0.0f;
         end_old.type = note_event_type::off; // TODO
@@ -364,15 +363,15 @@ arpeggiator_engine::process_notes(
       }
 
       _note_remaining = rate_frames; // TODO
-      _table_pos = (_table_pos + 1) % _active_notes.size();
+      _table_pos = (_table_pos + 1) % _current_arp_note_table.size();
 
       note_event start_new = {};
       start_new.id.id = 0;
       start_new.id.channel = 0;
-      start_new.id.key = _active_notes[_table_pos].midi_key;
+      start_new.id.key = _current_arp_note_table[_table_pos].midi_key;
       start_new.frame = f;
       start_new.type = note_event_type::on;
-      start_new.velocity = _active_notes[_table_pos].velocity;
+      start_new.velocity = _current_arp_note_table[_table_pos].velocity;
       out.push_back(start_new);
     }
     
