@@ -18,7 +18,7 @@ enum {
   /* TODO param_rate_offset_source, amt, length_offset_source, amt */
 };
 
-enum { mode_up, mode_down, mode_up_down, mode_down_up, mode_cv_source };
+enum { mode_up, mode_down, mode_up_down, mode_down_up };
 enum { type_off, type_straight, type_p1_oct, type_p2_oct, type_m1p1_oct, type_m2p2_oct };
 
 struct arp_note_state
@@ -122,7 +122,9 @@ arpeggiator_engine::process_notes(
 
   // todo if switching block params, output a bunch of note offs
   auto const& block_auto = block.state.own_block_automation;
-  if (block_auto[param_type][0].step() == type_off)
+  int type = block_auto[param_type][0].step();
+  int mode = block_auto[param_mode][0].step();
+  if (type == type_off)
   {
     out.insert(out.end(), in.begin(), in.end());
     return;
@@ -134,8 +136,7 @@ arpeggiator_engine::process_notes(
   // TODO allow to cut vs off
   
   // this assumes notes are ordered by stream pos
-  // TODO ok this gets me an "active" table -- what now?
-  int table_changed_frame = 0;
+  int table_changed_frame = 0; // TODO something with this
   bool table_changed = false; // make this TODO a bit more lenient
   for (int i = 0; i < in.size(); i++)
   {
@@ -158,6 +159,8 @@ arpeggiator_engine::process_notes(
     _table_pos = 0;
     _note_remaining = 0;
     _active_notes.clear();
+
+    // STEP 1: build up the base chord table
     for (int i = 0; i < 128; i++)
       if(_current_chord[i].on)
       {
@@ -166,10 +169,74 @@ arpeggiator_engine::process_notes(
         aan.velocity = _current_chord[i].velocity;
         _active_notes.push_back(aan);
       }
-  }
 
-  if (_active_notes.empty())
-    return;
+    if (_active_notes.size() == 0)
+      return;
+
+    // STEP 2: take the +/- oct into account
+    int base_note_count = _active_notes.size();
+    switch (type)
+    {
+    case type_straight: 
+      break;
+    case type_p1_oct:
+      for (int i = 0; i < base_note_count; i++)
+        _active_notes.push_back({ _active_notes[i].midi_key + 12, _active_notes[i].velocity });
+      break;
+    case type_p2_oct:
+      for (int i = 0; i < base_note_count; i++)
+        _active_notes.push_back({ _active_notes[i].midi_key + 12, _active_notes[i].velocity });
+      for (int i = 0; i < base_note_count; i++)
+        _active_notes.push_back({ _active_notes[i].midi_key + 24, _active_notes[i].velocity });
+      break;
+    case type_m1p1_oct:
+      for (int i = 0; i < base_note_count; i++)
+        _active_notes.push_back({ _active_notes[i].midi_key - 12, _active_notes[i].velocity });
+      for (int i = 0; i < base_note_count; i++)
+        _active_notes.push_back({ _active_notes[i].midi_key + 12, _active_notes[i].velocity });
+      break;
+    case type_m2p2_oct:
+      for (int i = 0; i < base_note_count; i++)
+        _active_notes.push_back({ _active_notes[i].midi_key - 12, _active_notes[i].velocity });
+      for (int i = 0; i < base_note_count; i++)
+        _active_notes.push_back({ _active_notes[i].midi_key - 24, _active_notes[i].velocity });
+      for (int i = 0; i < base_note_count; i++)
+        _active_notes.push_back({ _active_notes[i].midi_key + 12, _active_notes[i].velocity });
+      for (int i = 0; i < base_note_count; i++)
+        _active_notes.push_back({ _active_notes[i].midi_key + 24, _active_notes[i].velocity });
+      break;
+    default:
+      assert(false);
+      break;
+    }
+
+    // and sort the thing
+    auto comp = [](auto const& l, auto const& r) { return l.midi_key < r.midi_key; };
+    std::sort(_active_notes.begin(), _active_notes.end(), comp);
+
+    // STEP 3: take the up-down into account
+    int note_set_count = _active_notes.size();
+    switch (mode)
+    {
+    case mode_up:
+      break; // already sorted
+    case mode_down:
+      std::reverse(_active_notes.begin(), _active_notes.end());
+      break;
+    case mode_up_down:
+      for (int i = note_set_count - 2; i >= 1; i--)
+        _active_notes.push_back({ _active_notes[i].midi_key, _active_notes[i].velocity });
+      break;
+    case mode_down_up:
+      std::reverse(_active_notes.begin(), _active_notes.end());
+      for (int i = note_set_count - 2; i >= 1; i--)
+        _active_notes.push_back({ _active_notes[i].midi_key, _active_notes[i].velocity });
+      break;
+    default:
+      assert(false);
+      break;
+    }
+  }
 
   // TODO what would actually happen when "play chord", release, wait, "play chord"
   // TODO stuff with actual start pos of the table as based on note event frame
@@ -186,7 +253,7 @@ arpeggiator_engine::process_notes(
       end_old.type = note_event_type::off; // TODO
       out.push_back(end_old);
 
-      _note_remaining = 4800; // TODO
+      _note_remaining = 12000; // TODO
       _table_pos = (_table_pos + 1) % _active_notes.size();
 
       note_event start_new = {};
