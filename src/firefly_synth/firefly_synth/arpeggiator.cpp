@@ -238,6 +238,9 @@ arpeggiator_engine::process_notes(
     }
   }
 
+  if (_active_notes.size() == 0)
+    return;
+
   // TODO what would actually happen when "play chord", release, wait, "play chord"
   // TODO stuff with actual start pos of the table as based on note event frame
   for (int f = block.start_frame; f < block.end_frame; f++)
