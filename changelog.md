@@ -1,3 +1,7 @@
+### ?, ? - V1.9.5.
+
+- Added arpeggiator.
+
 ### September 25, 2024 - V1.9.4.
 
 - Added dark themes.
