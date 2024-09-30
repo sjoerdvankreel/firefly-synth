@@ -60,11 +60,15 @@ mode_items()
 class arpeggiator_engine :
 public arp_engine_base
 {
+  int _prev_type = -1;
+  int _prev_mode = -1;
+
   // todo stuff with velo
-  int _table_pos = 0;
+  int _table_pos = -1;
   int _note_remaining = 0;
   std::int64_t _start_time = 0;
   std::vector<arp_active_note> _active_notes = {};
+  std::array<arp_note_state, 128> _prev_chord = {};
   std::array<arp_note_state, 128> _current_chord = {};
 
 public:
@@ -120,10 +124,30 @@ arpeggiator_engine::process_notes(
   // plugin_base clears on each round
   assert(out.size() == 0);
 
-  // todo if switching block params, output a bunch of note offs
   auto const& block_auto = block.state.own_block_automation;
   int type = block_auto[param_type][0].step();
   int mode = block_auto[param_mode][0].step();
+
+  // TODO for all params
+  if (type != _prev_type || mode != _prev_mode)
+  {
+    _prev_type = type;
+    _prev_mode = mode;
+    
+    // don't care what happened, do hard reset, this should not happen often
+    for (int i = 0; i < 128; i++)
+    {
+      note_event cut;
+      cut.frame = 0;
+      cut.id.id = 0;
+      cut.id.key = i;
+      cut.id.channel = 0; // TODO need this?
+      cut.velocity = 0.0f;
+      cut.type = note_event_type::cut;
+      out.push_back(cut);
+    }
+  }
+
   if (type == type_off)
   {
     out.insert(out.end(), in.begin(), in.end());
@@ -156,7 +180,20 @@ arpeggiator_engine::process_notes(
 
   if (table_changed)
   {
-    _table_pos = 0;
+    // STEP 0: clear out the previous round
+    for (int i = 0; i < _active_notes.size(); i++)
+    {
+      note_event off;
+      off.frame = 0;
+      off.id.id = 0;
+      off.id.key = _active_notes[i].midi_key;
+      off.id.channel = 0; // TODO need this?
+      off.velocity = 0.0f;
+      off.type = note_event_type::off;
+      out.push_back(off);
+    }
+
+    _table_pos = -1; // before start, will get picked up
     _note_remaining = 0;
     _active_notes.clear();
 
@@ -247,14 +284,17 @@ arpeggiator_engine::process_notes(
   {
     if (_note_remaining == 0) // TODO make sure this is always 1+ frames
     {
-      note_event end_old = {};
-      end_old.id.id = 0;
-      end_old.id.channel = 0; // TODO maybe ?
-      end_old.id.key = _active_notes[_table_pos].midi_key;
-      end_old.frame = f;
-      end_old.velocity = 0.0f;
-      end_old.type = note_event_type::off; // TODO
-      out.push_back(end_old);
+      if (_table_pos != -1)
+      {
+        note_event end_old = {};
+        end_old.id.id = 0;
+        end_old.id.channel = 0; // TODO maybe ?
+        end_old.id.key = _active_notes[_table_pos].midi_key;
+        end_old.frame = f;
+        end_old.velocity = 0.0f;
+        end_old.type = note_event_type::off; // TODO
+        out.push_back(end_old);
+      }
 
       _note_remaining = 12000; // TODO
       _table_pos = (_table_pos + 1) % _active_notes.size();
