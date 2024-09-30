@@ -12,12 +12,14 @@ namespace firefly_synth {
 
 enum { section_main };
 enum { 
-  param_type, /* TODO param_cv_source, */ param_oct_down, param_oct_up//, param_sync, 
+  param_type, param_mode,
+  ///* TODO param_cv_source, */ param_oct_down, param_oct_up//, param_sync, 
   //param_rate_time, param_length_time, param_rate_tempo, param_length_tempo,
   /* TODO param_rate_offset_source, amt, length_offset_source, amt */
 };
 
-enum { type_off, type_up, type_down, type_up_down, type_down_up, type_cv_source };
+enum { mode_up, mode_down, mode_up_down, mode_down_up, mode_cv_source };
+enum { type_off, type_straight, type_p1_oct, type_p2_oct, type_m1p1_oct, type_m2p2_oct };
 
 struct arp_note_state
 {
@@ -36,11 +38,22 @@ type_items()
 {
   std::vector<list_item> result;
   result.emplace_back("{70109417-1525-48A6-AE1D-7AB0E5765310}", "Off");
-  result.emplace_back("{85A091D9-1283-4E67-961E-48C57BC68EB7}", "Up");
-  result.emplace_back("{20CDFF90-9D2D-4AFD-8138-1BCB61370F23}", "Down");
-  result.emplace_back("{4935E002-3745-4097-887F-C8ED52213658}", "UpDown");
-  result.emplace_back("{018FFDF0-AA2F-40BB-B449-34C8E93BCEB2}", "DownUp");
-  result.emplace_back("{E802C511-30E0-4B9B-A548-173D4C807AFF}", "CV Source");
+  result.emplace_back("{85A091D9-1283-4E67-961E-48C57BC68EB7}", "Straight");
+  result.emplace_back("{20CDFF90-9D2D-4AFD-8138-1BCB61370F23}", "+1 Oct");
+  result.emplace_back("{4935E002-3745-4097-887F-C8ED52213658}", "+2 Oct");
+  result.emplace_back("{018FFDF0-AA2F-40BB-B449-34C8E93BCEB2}", "+/-1 Oct");
+  result.emplace_back("{E802C511-30E0-4B9B-A548-173D4C807AFF}", "+/-2 Oct");
+  return result;
+}
+
+static std::vector<list_item>
+mode_items()
+{
+  std::vector<list_item> result;
+  result.emplace_back("{25F4EF71-60E4-4F60-B613-8549C1BA074B}", "Up");
+  result.emplace_back("{1772EDDE-6EC2-4F72-AC98-5B521AFB0EF1}", "Down");
+  result.emplace_back("{1ECA59EC-B4B5-4EE9-A1E8-0169E7F32BCC}", "UpDown");
+  result.emplace_back("{B48727A2-E886-43D4-906D-D87F5E7EE3CD}", "DownUp");
   return result;
 }
 
@@ -78,19 +91,19 @@ arpeggiator_topo(int section, gui_position const& pos)
 
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag_basic("{6779AFA8-E0FE-482F-989B-6DE07263AEED}", "Main"),
-    make_param_section_gui({ 0, 0 }, { 1, 1 })));
+    make_param_section_gui({ 0, 0 }, { { 1 }, { gui_dimension::auto_size, gui_dimension::auto_size } })));
   auto& type = result.params.emplace_back(make_param(
-    make_topo_info_basic("{FF418A06-2017-4C23-BC65-19FAF226ABE8}", "Mode", param_type, 1),
+    make_topo_info_basic("{FF418A06-2017-4C23-BC65-19FAF226ABE8}", "Type", param_type, 1),
     make_param_dsp_block(param_automate::automate), make_domain_item(type_items(), "Off"),
     make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   type.info.description = "TODO";
-  auto& oct_down = result.params.emplace_back(make_param(
-    make_topo_info_basic("{FF418A06-2017-4C23-BC65-19FAF226ABE8}", "Mode", param_type, 1),
-    make_param_dsp_block(param_automate::automate), make_domain_item(type_items(), "Off"),
-    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 0 },
+  auto& mode = result.params.emplace_back(make_param(
+    make_topo_info_basic("{BCE75C3A-85B8-4946-A06B-68F8F5F36785}", "Mode", param_mode, 1),
+    make_param_dsp_block(param_automate::automate), make_domain_item(mode_items(), "Up"),
+    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 1 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  type.info.description = "TODO";
+  mode.info.description = "TODO";
   return result;
 }         
 

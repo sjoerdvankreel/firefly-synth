@@ -30,13 +30,15 @@ modvis take 3:
 * make a new one for free-run and on-voice-rand
 
 arp / seq
+* controls0 => once build up the table: PLAY = forward/backward/random-and-or-cv-sampling => also starting table pos would be nice ? => also random start pos nice
 * controls1: off-up-down-updown-downup-random (with what prng? or maybe rand + global cv's) ==> not random, just any cv source. let user model with random GLFO
 * controls2: oct low/oct high (or maybe just 1 combo for +1/+2/+3/-1/-2/-3/+-1,+-2 etc)
 * controls3: the timing thingy
 * controls4: the not-so-sequencer thingy
 * controls5: the speed (in time / bars / both) + allow some randomization and/or global-cv?
 * controls6: the length (in time / bars / both) + allow some randomization and/or global-cv?
-* controls7: some kinda step editor ==> also instead can do hold & skip ?
+* controls7: some kinda step editor ==> also instead can do hold & skip ? ==> scan & skip (e.g. scan 1, skip 0 plays as natural)
+* controls8: the how-many-notes-at-once thingy (cycling ceg as ce-eg-gc)
 
 i want something that can do this :
 
