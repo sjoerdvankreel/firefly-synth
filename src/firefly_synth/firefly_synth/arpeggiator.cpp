@@ -15,7 +15,7 @@ enum { section_main };
 enum { 
   param_type, param_mode,
   ///* TODO param_cv_source, */ param_oct_down, param_oct_up//, 
-  param_sync, param_rate_hz, param_rate_tempo, param_length_time, param_length_tempo
+  param_sync, param_rate_hz, param_rate_tempo,
   /* TODO param_rate_offset_source, amt, length_offset_source, amt */
 };
 
@@ -138,24 +138,7 @@ arpeggiator_topo(int section, gui_position const& pos)
   rate_tempo.gui.submenu = make_timesig_submenu(rate_tempo.domain.timesigs);
   rate_tempo.gui.bindings.enabled.bind_params({ param_type, param_sync }, [](auto const& vs) { return vs[0] != type_off && vs[1] != 0; });
   rate_tempo.gui.bindings.visible.bind_params({ param_type, param_sync }, [](auto const& vs) { return vs[1] != 0; });
-  rate_tempo.info.description = "TODO";
-  auto& length_sec = result.params.emplace_back(make_param(
-    make_topo_info_basic("{157B9BF0-4880-4E91-9E91-72DBDF15595B}", "Length", param_length_time, 1),
-    make_param_dsp_block(param_automate::automate), make_domain_log(0.05, 4, 0.25, 0.25, 2, "Sec"),
-    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 4 },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  length_sec.gui.bindings.enabled.bind_params({ param_type, param_sync }, [](auto const& vs) { return vs[0] != type_off && vs[1] == 0; });
-  length_sec.gui.bindings.visible.bind_params({ param_type, param_sync }, [](auto const& vs) { return vs[1] == 0; });
-  length_sec.info.description = "TODO";
-  auto& length_tempo = result.params.emplace_back(make_param(
-    make_topo_info_basic("{67178302-F2F3-449D-99B8-C769DC189B90}", "Release", param_length_tempo, 1),
-    make_param_dsp_block(param_automate::automate), make_domain_timesig_default(false, { 16, 1 }, { 1, 4 }), // TODO tune this
-    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 4 },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  length_tempo.gui.submenu = make_timesig_submenu(length_tempo.domain.timesigs);
-  length_tempo.gui.bindings.enabled.bind_params({ param_type, param_sync }, [](auto const& vs) { return vs[0] != type_off && vs[1] != 0; });
-  length_tempo.gui.bindings.visible.bind_params({ param_type, param_sync }, [](auto const& vs) { return vs[1] != 0; });
-  length_tempo.info.description = "TODO";
+  rate_tempo.info.description = "TODO";  
 
   return result;
 }         
@@ -337,14 +320,6 @@ arpeggiator_engine::process_notes(
   else
     rate_hz = timesig_to_freq(block.host.bpm, get_timesig_param_value(block, module_arpeggiator, param_rate_tempo));
   int rate_frames = block.sample_rate / rate_hz;
-
-  // hold time for notes (when to output off event)
-  float length_sec;
-  if (block_auto[param_sync][0].step() == 0)
-    length_sec = block_auto[param_length_time][0].real();
-  else
-    length_sec = timesig_to_time(block.host.bpm, get_timesig_param_value(block, module_arpeggiator, param_length_tempo));
-  int length_frames = block.sample_rate * length_sec;
 
   // TODO what would actually happen when "play chord", release, wait, "play chord"
   // TODO stuff with actual start pos of the table as based on note event frame ??
