@@ -22,13 +22,15 @@ enum {
 enum { mode_up, mode_down, mode_up_down, mode_down_up };
 enum { type_off, type_straight, type_p1_oct, type_p2_oct, type_m1p1_oct, type_m2p2_oct };
 
-struct arp_note_state
+// what the user is doing eg press ceg -> those are on, release e -> that one's off
+struct arp_user_note
 {
   bool on = {};
   float velocity = {};
 };
 
-struct arp_active_note
+// what the active table looks like eg press ceg with type = +1 oct, mode = up -> c4e4g4c5e5g5
+struct arp_table_note
 {
   int midi_key;
   float velocity;
@@ -68,8 +70,8 @@ public arp_engine_base
   int _table_pos = -1;
   int _note_remaining = 0;
   std::int64_t _start_time = 0;
-  std::array<arp_note_state, 128> _current_user_chord = {};
-  std::vector<arp_active_note> _current_arp_note_table = {};
+  std::array<arp_user_note, 128> _current_user_chord = {};
+  std::vector<arp_table_note> _current_arp_note_table = {};
 
   void hard_reset(std::vector<note_event>& out);
 
@@ -245,10 +247,10 @@ arpeggiator_engine::process_notes(
     for (int i = 0; i < 128; i++)
       if(_current_user_chord[i].on)
       {
-        arp_active_note aan;
-        aan.midi_key = i;
-        aan.velocity = _current_user_chord[i].velocity;
-        _current_arp_note_table.push_back(aan);
+        arp_table_note atn;
+        atn.midi_key = i;
+        atn.velocity = _current_user_chord[i].velocity;
+        _current_arp_note_table.push_back(atn);
       }
 
     if (_current_arp_note_table.size() == 0)
