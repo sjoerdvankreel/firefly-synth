@@ -30,6 +30,7 @@ modvis take 3:
 * make a new one for free-run and on-voice-rand
 
 arp / seq
+* still do something with note lengths/hold/stop/whatever
 * do updown/downup 2 modes (repeat end note or not)
 * do +-/3 oct
 * make a header section for the master section
