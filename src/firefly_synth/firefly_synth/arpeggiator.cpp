@@ -130,7 +130,9 @@ arpeggiator_topo(int section, gui_position const& pos)
 
   result.sections.emplace_back(make_param_section(section_table,
     make_topo_tag_basic("{6779AFA8-E0FE-482F-989B-6DE07263AEED}", "Table"),
-    make_param_section_gui({ 0, 0 }, { { 1, 1 }, { gui_dimension::auto_size_all, gui_dimension::auto_size_all } })));
+    make_param_section_gui({ 0, 0 }, { { 1, 1 }, { 
+      gui_dimension::auto_size_all, gui_dimension::auto_size_all,
+      gui_dimension::auto_size_all, gui_dimension::auto_size_all} }, gui_label_edit_cell_split::horizontal)));
   auto& type = result.params.emplace_back(make_param(
     make_topo_info_basic("{FF418A06-2017-4C23-BC65-19FAF226ABE8}", "Type", param_type, 1),
     make_param_dsp_block(param_automate::automate), make_domain_item(type_items(), "Off"),
@@ -140,7 +142,7 @@ arpeggiator_topo(int section, gui_position const& pos)
   auto& flip = result.params.emplace_back(make_param(
     make_topo_info_basic("{35217232-FFFF-4286-8C87-3E08D9817B8D}", "Flip", param_flip, 1),
     make_param_dsp_block(param_automate::automate), make_domain_step(1, 9, 1, 0),
-    make_param_gui_single(section_table, gui_edit_type::autofit_list, { 0, 1 },
+    make_param_gui_single(section_table, gui_edit_type::autofit_list, { 0, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   flip.info.description = "TODO";
   flip.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
@@ -154,7 +156,7 @@ arpeggiator_topo(int section, gui_position const& pos)
   auto& seed = result.params.emplace_back(make_param(
     make_topo_info_basic("{BCF494BD-5643-414C-863E-324F022770BE}", "Seed", param_seed, 1),
     make_param_dsp_block(param_automate::automate), make_domain_step(1, 255, 1, 0),
-    make_param_gui_single(section_table, gui_edit_type::knob, { 1, 1 },
+    make_param_gui_single(section_table, gui_edit_type::knob, { 1, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   seed.info.description = "TODO";
   seed.gui.bindings.enabled.bind_params({ param_type, param_mode }, [](auto const& vs) { return vs[0] != type_off && is_random(vs[1]); });
