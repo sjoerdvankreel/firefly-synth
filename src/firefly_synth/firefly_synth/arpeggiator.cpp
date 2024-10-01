@@ -119,6 +119,7 @@ public arp_engine_base
   std::vector<arp_table_note> _current_arp_note_table = {};
 
   int flipped_table_pos() const;
+  int selected_table_pos(int flipped_pos) const;
   void hard_reset(std::vector<note_event>& out);
 
 public:
@@ -251,6 +252,20 @@ arpeggiator_engine::flipped_table_pos() const
   int result = (base_pos + _prev_flip - n - 1) % _current_arp_note_table.size();
   assert(0 <= result && result < _current_arp_note_table.size());
   return result;
+}
+
+int
+arpeggiator_engine::selected_table_pos(int flipped_pos) const
+{
+  if (_prev_select == select_next)
+    return flipped_pos;
+  if (_prev_select == select_bounce)
+  {
+    if (flipped_pos % 2 == 0) return 0;
+    return ((flipped_pos + 1) / 2) % _current_arp_note_table.size();
+  }
+  assert(false);
+  return 0;
 }
 
 void 
@@ -448,11 +463,13 @@ arpeggiator_engine::process_notes(
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
     int flipped_pos;
+    int selected_pos;
     if (_note_remaining == 0)
     {
       if (_table_pos != -1)
       {
         flipped_pos = flipped_table_pos();
+        selected_pos = selected_table_pos(flipped_pos);
         for (int i = 0; i < notes; i++)
         {
           note_event end_old = {};
@@ -461,7 +478,7 @@ arpeggiator_engine::process_notes(
           end_old.type = note_event_type::off;
           end_old.id.id = 0;
           end_old.id.channel = 0; 
-          end_old.id.key = _current_arp_note_table[(flipped_pos + i) % _current_arp_note_table.size()].midi_key;
+          end_old.id.key = _current_arp_note_table[(selected_pos + i) % _current_arp_note_table.size()].midi_key;
           out.push_back(end_old);
         }
       }
@@ -469,6 +486,7 @@ arpeggiator_engine::process_notes(
       _table_pos++;
       _note_remaining = rate_frames;
       flipped_pos = flipped_table_pos();
+      selected_pos = selected_table_pos(flipped_pos);
 
       // TODO make the time continuous rate a modulatable target
       // TODO this better works WRT to note-off events ?
@@ -481,10 +499,10 @@ arpeggiator_engine::process_notes(
         note_event start_new = {};
         start_new.frame = f;
         start_new.type = note_event_type::on;
-        start_new.velocity = _current_arp_note_table[(flipped_pos + i) % _current_arp_note_table.size()].velocity;
+        start_new.velocity = _current_arp_note_table[(selected_pos + i) % _current_arp_note_table.size()].velocity;
         start_new.id.id = 0;
         start_new.id.channel = 0;
-        start_new.id.key = _current_arp_note_table[(flipped_pos + i) % _current_arp_note_table.size()].midi_key;
+        start_new.id.key = _current_arp_note_table[(selected_pos + i) % _current_arp_note_table.size()].midi_key;
         out.push_back(start_new);
       }
     }
