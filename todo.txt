@@ -33,6 +33,7 @@ arp / seq
 V do updown/downup 2 modes (repeat end note or not)
 V do +-/3 oct
 V do the flip-each-N control
+V do the multinote thing => NO it just not seems so useful
 * do something like note-mode + table-mode
 * do good tooltips
 * still not killing all the notes
@@ -40,7 +41,7 @@ V do the flip-each-N control
 * make a header section for the master section
 * order netjes de controls
 * can do note HOLD
-* do the multinote thing
+
 * compare perf with regular play notes
 * controls0 => once build up the table: PLAY = forward/backward/random-and-or-cv-sampling => also starting table pos would be nice ? => also random start pos nice
 * controls1: off-up-down-updown-downup-random (with what prng? or maybe rand + global cv's) ==> not random, just any cv source. let user model with random GLFO
