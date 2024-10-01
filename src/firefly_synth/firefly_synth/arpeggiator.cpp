@@ -125,14 +125,14 @@ arpeggiator_topo(int section, gui_position const& pos)
   module_topo result(make_module(
     make_topo_info_basic("{8A09B4CD-9768-4504-B9FE-5447B047854B}", "ARP / SEQ", module_arpeggiator, 1),
     make_module_dsp(module_stage::input, module_output::none, 0, {}),
-    make_module_gui(section, pos, { { 1 }, { 1, 1 } })));
+    make_module_gui(section, pos, { { 1 }, { 9, 12 } })));
   result.info.description = "Arpeggiator / Sequencer.";
 
   result.sections.emplace_back(make_param_section(section_table,
     make_topo_tag_basic("{6779AFA8-E0FE-482F-989B-6DE07263AEED}", "Table"),
     make_param_section_gui({ 0, 0 }, { { 1, 1 }, { 
       gui_dimension::auto_size_all, gui_dimension::auto_size_all,
-      gui_dimension::auto_size_all, gui_dimension::auto_size_all} }, gui_label_edit_cell_split::horizontal)));
+      gui_dimension::auto_size_all, 1 } }, gui_label_edit_cell_split::horizontal)));
   auto& type = result.params.emplace_back(make_param(
     make_topo_info_basic("{FF418A06-2017-4C23-BC65-19FAF226ABE8}", "Type", param_type, 1),
     make_param_dsp_block(param_automate::automate), make_domain_item(type_items(), "Off"),
