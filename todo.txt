@@ -30,15 +30,16 @@ modvis take 3:
 * make a new one for free-run and on-voice-rand
 
 arp / seq
+V do updown/downup 2 modes (repeat end note or not)
+V do +-/3 oct
+V do the flip-each-N control
+* do something like note-mode + table-mode
 * do good tooltips
 * still not killing all the notes
 * still do something with note lengths/hold/stop/whatever
-* do updown/downup 2 modes (repeat end note or not)
-* do +-/3 oct
 * make a header section for the master section
 * order netjes de controls
 * can do note HOLD
-* do the flip-each-N control
 * do the multinote thing
 * compare perf with regular play notes
 * controls0 => once build up the table: PLAY = forward/backward/random-and-or-cv-sampling => also starting table pos would be nice ? => also random start pos nice
