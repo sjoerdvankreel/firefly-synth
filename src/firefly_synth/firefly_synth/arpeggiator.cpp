@@ -4,8 +4,11 @@
 #include <plugin_base/helpers/dsp.hpp>
 
 #include <firefly_synth/synth.hpp>
+
 #include <cmath>
 #include <array>
+#include <random>
+#include <algorithm>
 
 using namespace plugin_base;
  
@@ -20,9 +23,10 @@ enum {
 };
 
 enum { 
-  mode_up, mode_down, 
+  mode_up, mode_down,
   mode_up_down1, mode_up_down2,
-  mode_down_up1, mode_down_up2 };
+  mode_down_up1, mode_down_up2,
+  mode_rand, mode_free_rand };
 
 enum { 
   type_off, type_straight, 
@@ -68,6 +72,8 @@ mode_items()
   result.emplace_back("{EB5FC7ED-DFA3-4DD5-A5F3-444469FDFBCF}", "UpDown2");
   result.emplace_back("{B48727A2-E886-43D4-906D-D87F5E7EE3CD}", "DownUp1");
   result.emplace_back("{86488834-DB23-4467-8EB6-4C4261989233}", "DownUp2");
+  result.emplace_back("{C9095A2C-3F11-4C4B-A428-6DC948DFDB2C}", "Random");
+  result.emplace_back("{C9095A2C-3F11-4C4B-A428-6DC948DFDB2C}", "FreeRnd");
   return result;
 }
 
@@ -79,9 +85,9 @@ public arp_engine_base
   int _prev_flip = -1;
   int _prev_notes = -1;
 
-  // todo stuff with velo
   int _table_pos = -1;
   int _note_remaining = 0;
+  std::default_random_engine _random = {};
 
   std::int64_t _start_time = 0;
   std::array<arp_user_note, 128> _current_user_chord = {};
@@ -344,6 +350,10 @@ arpeggiator_engine::process_notes(
     {
     case mode_up:
       break; // already sorted
+    case mode_rand:
+    case mode_free_rand:
+      std::shuffle(_current_arp_note_table.begin(), _current_arp_note_table.end(), _random);
+      break;
     case mode_down:
       std::reverse(_current_arp_note_table.begin(), _current_arp_note_table.end());
       break;
@@ -408,6 +418,12 @@ arpeggiator_engine::process_notes(
       _table_pos++;
       _note_remaining = rate_frames;
       flipped_pos = flipped_table_pos();
+
+      // TODO make the time continuous rate a modulatable target
+      // TODO this better works WRT to note-off events ?
+      if(mode == mode_free_rand)
+        if(_table_pos % _current_arp_note_table.size() == 0)
+          std::shuffle(_current_arp_note_table.begin(), _current_arp_note_table.end(), _random);
 
       for (int i = 0; i < notes; i++)
       {

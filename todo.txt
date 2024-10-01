@@ -44,7 +44,10 @@ V do octave counter + range
 V why only play single note, can be any combination out of the active chord (e.g. cdef = c, d, e, f or cd, de, ef, fc or cde, def, efc, fcd etc)
 V do the disable controls thing
 V up the vno
+X controls6: the length (in time / bars / both) + allow some randomization and/or global-cv?
 
+* do 4 random modes free yn/fix yn
+* do simple mod-by for the "lfo" time?
 * do something like note-mode + table-mode
 * do good tooltips
 * still not killing all the notes
@@ -59,7 +62,6 @@ V up the vno
 * controls3: the timing thingy
 * controls4: the not-so-sequencer thingy
 * controls5: the speed (in time / bars / both) + allow some randomization and/or global-cv?
-* controls6: the length (in time / bars / both) + allow some randomization and/or global-cv?
 * controls7: some kinda step editor ==> also instead can do hold & skip ? ==> scan & skip (e.g. scan 1, skip 0 plays as natural)
 
 * jeez those lots of controls.
