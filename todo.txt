@@ -33,7 +33,18 @@ arp / seq
 V do updown/downup 2 modes (repeat end note or not)
 V do +-/3 oct
 V do the flip-each-N control
-V do the multinote thing => NO it just not seems so useful
+V do the multinote thing
+V controls2: oct low/oct high (or maybe just 1 combo for +1/+2/+3/-1/-2/-3/+-1,+-2 etc)
+V controls8: the how-many-notes-at-once thingy (cycling ceg as ce-eg-gc)
+V shit cannot do note length --> that requires noteid not all hosts have it
+V what is up with the cpu usage?
+V make sure globuni works
+V do up-down-updown-random-seq(=custom)
+V do octave counter + range
+V why only play single note, can be any combination out of the active chord (e.g. cdef = c, d, e, f or cd, de, ef, fc or cde, def, efc, fcd etc)
+V do the disable controls thing
+V up the vno
+
 * do something like note-mode + table-mode
 * do good tooltips
 * still not killing all the notes
@@ -45,42 +56,24 @@ V do the multinote thing => NO it just not seems so useful
 * compare perf with regular play notes
 * controls0 => once build up the table: PLAY = forward/backward/random-and-or-cv-sampling => also starting table pos would be nice ? => also random start pos nice
 * controls1: off-up-down-updown-downup-random (with what prng? or maybe rand + global cv's) ==> not random, just any cv source. let user model with random GLFO
-* controls2: oct low/oct high (or maybe just 1 combo for +1/+2/+3/-1/-2/-3/+-1,+-2 etc)
 * controls3: the timing thingy
 * controls4: the not-so-sequencer thingy
 * controls5: the speed (in time / bars / both) + allow some randomization and/or global-cv?
 * controls6: the length (in time / bars / both) + allow some randomization and/or global-cv?
 * controls7: some kinda step editor ==> also instead can do hold & skip ? ==> scan & skip (e.g. scan 1, skip 0 plays as natural)
-* controls8: the how-many-notes-at-once thingy (cycling ceg as ce-eg-gc)
 
-i want something that can do this :
-
-c4e4g4 =>
-c4e4g4 or
-c4e4g4c5e5g5 or
-c4e4g4g5e5c5 or
-... etc etc
-
-* shit cannot do note length --> that requires noteid not all hosts have it
 * jeez those lots of controls.
 * also maybe have some visualization! 
 * remove any mention of seq
-* what is up with the cpu usage?
-* make sure globuni works
 * check automation works
 * do the lookahead window to bundle events
-* do up-down-updown-random-seq(=custom)
-* do octave counter + range
 * 16-step-seq
 * do some nice stuff with the global cv sources, they there for grabs already
 * check if shows up in the docs
 * write the manual
 * the osc mod controls are tiny ?
 * add arp table pos as a mod source ==> yes do it
-* why only play single note, can be any combination out of the active chord (e.g. cdef = c, d, e, f or cd, de, ef, fc or cde, def, efc, fcd etc)
 * make global/voice in uppercase
-* do the disable controls thing
-* up the vno
 * reset is still no good
 * or all tab headers in uppercase?
 
