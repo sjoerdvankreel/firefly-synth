@@ -14,13 +14,12 @@ using namespace plugin_base;
  
 namespace firefly_synth {
 
-enum { section_main };
+enum { section_table, section_sample };
 enum { 
-  param_type, param_mode, param_seed, param_flip, param_notes,
-  ///* TODO param_cv_source, */ param_oct_down, param_oct_up//, 
-  param_sync, param_rate_hz, param_rate_tempo,
-  /* TODO param_rate_offset_source, amt, length_offset_source, amt */
-};
+  param_type, param_flip,
+  param_mode, param_seed, 
+  param_notes, param_sync, 
+  param_rate_hz, param_rate_tempo };
 
 enum { 
   mode_up, mode_down,
@@ -126,59 +125,61 @@ arpeggiator_topo(int section, gui_position const& pos)
   module_topo result(make_module(
     make_topo_info_basic("{8A09B4CD-9768-4504-B9FE-5447B047854B}", "ARP / SEQ", module_arpeggiator, 1),
     make_module_dsp(module_stage::input, module_output::none, 0, {}),
-    make_module_gui(section, pos, { 1, 1 })));
+    make_module_gui(section, pos, { { 1 }, { 1, 1 } })));
   result.info.description = "Arpeggiator / Sequencer.";
 
-  result.sections.emplace_back(make_param_section(section_main,
-    make_topo_tag_basic("{6779AFA8-E0FE-482F-989B-6DE07263AEED}", "Main"),
-    make_param_section_gui({ 0, 0 }, { { 1 }, { 
-      gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size,
-      gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size } })));
+  result.sections.emplace_back(make_param_section(section_table,
+    make_topo_tag_basic("{6779AFA8-E0FE-482F-989B-6DE07263AEED}", "Table"),
+    make_param_section_gui({ 0, 0 }, { { 1, 1 }, { gui_dimension::auto_size_all, gui_dimension::auto_size_all } })));
   auto& type = result.params.emplace_back(make_param(
     make_topo_info_basic("{FF418A06-2017-4C23-BC65-19FAF226ABE8}", "Type", param_type, 1),
     make_param_dsp_block(param_automate::automate), make_domain_item(type_items(), "Off"),
-    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 0 },
+    make_param_gui_single(section_table, gui_edit_type::autofit_list, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   type.info.description = "TODO";
+  auto& flip = result.params.emplace_back(make_param(
+    make_topo_info_basic("{35217232-FFFF-4286-8C87-3E08D9817B8D}", "Flip", param_flip, 1),
+    make_param_dsp_block(param_automate::automate), make_domain_step(1, 9, 1, 0),
+    make_param_gui_single(section_table, gui_edit_type::autofit_list, { 0, 1 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
+  flip.info.description = "TODO";
+  flip.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   auto& mode = result.params.emplace_back(make_param(
     make_topo_info_basic("{BCE75C3A-85B8-4946-A06B-68F8F5F36785}", "Mode", param_mode, 1),
     make_param_dsp_block(param_automate::automate), make_domain_item(mode_items(), "Up"),
-    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 1 },
+    make_param_gui_single(section_table, gui_edit_type::autofit_list, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   mode.info.description = "TODO";
   mode.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   auto& seed = result.params.emplace_back(make_param(
     make_topo_info_basic("{BCF494BD-5643-414C-863E-324F022770BE}", "Seed", param_seed, 1),
     make_param_dsp_block(param_automate::automate), make_domain_step(1, 255, 1, 0),
-    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 2 },
+    make_param_gui_single(section_table, gui_edit_type::knob, { 1, 1 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   seed.info.description = "TODO";
   seed.gui.bindings.enabled.bind_params({ param_type, param_mode }, [](auto const& vs) { return vs[0] != type_off && is_random(vs[1]); });
-  auto& flip = result.params.emplace_back(make_param(
-    make_topo_info_basic("{35217232-FFFF-4286-8C87-3E08D9817B8D}", "Flip", param_flip, 1),
-    make_param_dsp_block(param_automate::automate), make_domain_step(1, 9, 1, 0),
-    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 3 },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  flip.info.description = "TODO";
-  flip.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
+
+  result.sections.emplace_back(make_param_section(section_sample,
+    make_topo_tag_basic("{63A54D7E-C4CE-4DFF-8E00-A9B8FAEC643E}", "Sample"),
+    make_param_section_gui({ 0, 1 }, { { 1, 1 }, { 1, 1 } })));
   auto& notes = result.params.emplace_back(make_param(
     make_topo_info_basic("{9E464846-650B-42DC-9E45-D8AFA2BADBDB}", "Notes", param_notes, 1),
     make_param_dsp_block(param_automate::automate), make_domain_step(1, 4, 1, 0),
-    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 4 },
+    make_param_gui_single(section_sample, gui_edit_type::autofit_list, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   notes.info.description = "TODO";
   notes.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   auto& sync = result.params.emplace_back(make_param(
     make_topo_info_basic("{8DE4D902-946C-41AA-BA1B-E0B645F8C87D}", "Sync", param_sync, 1),
     make_param_dsp_block(param_automate::automate), make_domain_toggle(true),
-    make_param_gui_single(section_main, gui_edit_type::toggle, { 0, 5 },
+    make_param_gui_single(section_sample, gui_edit_type::toggle, { 0, 1 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   sync.info.description = "TODO";
   sync.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   auto& rate_hz = result.params.emplace_back(make_param(
     make_topo_info_basic("{EE305C60-8D37-492D-A2BE-5BD9C80DC59D}", "Rate", param_rate_hz, 1),
     make_param_dsp_block(param_automate::automate), make_domain_log(0.25, 20, 4, 4, 2, "Hz"),
-    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 6 },
+    make_param_gui_single(section_sample, gui_edit_type::knob, { 1, 0, 1, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   rate_hz.gui.bindings.enabled.bind_params({ param_type, param_sync }, [](auto const& vs) { return vs[0] != type_off && vs[1] == 0; });
   rate_hz.gui.bindings.visible.bind_params({ param_type, param_sync }, [](auto const& vs) { return vs[1] == 0; });
@@ -186,7 +187,7 @@ arpeggiator_topo(int section, gui_position const& pos)
   auto& rate_tempo = result.params.emplace_back(make_param(
     make_topo_info_basic("{B1727889-9B55-4F93-8E0A-E2D4B791568B}", "Rate", param_rate_tempo, 1),
     make_param_dsp_block(param_automate::automate), make_domain_timesig_default(false, { 16, 1 }, { 1, 4 }), // TODO tune this
-    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 6 },
+    make_param_gui_single(section_sample, gui_edit_type::autofit_list, { 1, 1, 1, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   rate_tempo.gui.submenu = make_timesig_submenu(rate_tempo.domain.timesigs);
   rate_tempo.gui.bindings.enabled.bind_params({ param_type, param_sync }, [](auto const& vs) { return vs[0] != type_off && vs[1] != 0; });
