@@ -150,7 +150,7 @@ arpeggiator_topo(int section, gui_position const& pos)
   auto& seed = result.params.emplace_back(make_param(
     make_topo_info_basic("{BCF494BD-5643-414C-863E-324F022770BE}", "Seed", param_seed, 1),
     make_param_dsp_block(param_automate::automate), make_domain_step(1, 255, 1, 0),
-    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 2 },
+    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   seed.info.description = "TODO";
   seed.gui.bindings.enabled.bind_params({ param_type, param_mode }, [](auto const& vs) { return vs[0] != type_off && is_random(vs[1]); });
