@@ -19,8 +19,15 @@ enum {
   /* TODO param_rate_offset_source, amt, length_offset_source, amt */
 };
 
-enum { mode_up, mode_down, mode_up_down, mode_down_up };
-enum { type_off, type_straight, type_p1_oct, type_p2_oct, type_m1p1_oct, type_m2p2_oct };
+enum { 
+  mode_up, mode_down, 
+  mode_up_down1, mode_up_down2,
+  mode_down_up1, mode_down_up2 };
+
+enum { 
+  type_off, type_straight, 
+  type_p1_oct, type_p2_oct, type_p3_oct, 
+  type_m1p1_oct, type_m2p2_oct, type_m3p3_oct };
 
 // what the user is doing eg press ceg -> those are on, release e -> that one's off
 struct arp_user_note
@@ -44,8 +51,10 @@ type_items()
   result.emplace_back("{85A091D9-1283-4E67-961E-48C57BC68EB7}", "Straight");
   result.emplace_back("{20CDFF90-9D2D-4AFD-8138-1BCB61370F23}", "+1 Oct");
   result.emplace_back("{4935E002-3745-4097-887F-C8ED52213658}", "+2 Oct");
+  result.emplace_back("{DCC943F4-5447-413F-B741-A83F2B84C259}", "+3 Oct");
   result.emplace_back("{018FFDF0-AA2F-40BB-B449-34C8E93BCEB2}", "+/-1 Oct");
   result.emplace_back("{E802C511-30E0-4B9B-A548-173D4C807AFF}", "+/-2 Oct");
+  result.emplace_back("{7EA59B15-D0AE-4B6F-8A04-0AA4630F5E39}", "+/-3 Oct");
   return result;
 }
 
@@ -55,8 +64,10 @@ mode_items()
   std::vector<list_item> result;
   result.emplace_back("{25F4EF71-60E4-4F60-B613-8549C1BA074B}", "Up");
   result.emplace_back("{1772EDDE-6EC2-4F72-AC98-5B521AFB0EF1}", "Down");
-  result.emplace_back("{1ECA59EC-B4B5-4EE9-A1E8-0169E7F32BCC}", "UpDown");
-  result.emplace_back("{B48727A2-E886-43D4-906D-D87F5E7EE3CD}", "DownUp");
+  result.emplace_back("{1ECA59EC-B4B5-4EE9-A1E8-0169E7F32BCC}", "UpDown1");
+  result.emplace_back("{EB5FC7ED-DFA3-4DD5-A5F3-444469FDFBCF}", "UpDown2");
+  result.emplace_back("{B48727A2-E886-43D4-906D-D87F5E7EE3CD}", "DownUp1");
+  result.emplace_back("{86488834-DB23-4467-8EB6-4C4261989233}", "DownUp2");
   return result;
 }
 
@@ -269,41 +280,43 @@ arpeggiator_engine::process_notes(
       return;
 
     // STEP 2: take the +/- oct into account
-    int base_note_count = _current_arp_note_table.size();
+    bool add_m3 = false;
+    bool add_m2 = false;
+    bool add_m1 = false;
+    bool add_p1 = false;
+    bool add_p2 = false;
+    bool add_p3 = false;
     switch (type)
     {
-    case type_straight: 
-      break;
-    case type_p1_oct:
+    case type_straight: break;
+    case type_p1_oct: add_p1 = true; break;
+    case type_p2_oct: add_p1 = true; add_p2 = true; break;
+    case type_p3_oct: add_p1 = true; add_p2 = true; add_p3 = true; break;
+    case type_m1p1_oct: add_m1 = true; add_p1 = true; break;
+    case type_m2p2_oct: add_m1 = true; add_p1 = true; add_m2 = true; add_p2 = true; break;
+    case type_m3p3_oct: add_m1 = true; add_p1 = true; add_m2 = true; add_p2 = true; add_m3 = true; add_p3 = true; break;
+    default: assert(false); break;
+    }
+
+    int base_note_count = _current_arp_note_table.size();
+    if(add_m3)
       for (int i = 0; i < base_note_count; i++)
-        _current_arp_note_table.push_back({ _current_arp_note_table[i].midi_key + 12, _current_arp_note_table[i].velocity });
-      break;
-    case type_p2_oct:
-      for (int i = 0; i < base_note_count; i++)
-        _current_arp_note_table.push_back({ _current_arp_note_table[i].midi_key + 12, _current_arp_note_table[i].velocity });
-      for (int i = 0; i < base_note_count; i++)
-        _current_arp_note_table.push_back({ _current_arp_note_table[i].midi_key + 24, _current_arp_note_table[i].velocity });
-      break;
-    case type_m1p1_oct:
-      for (int i = 0; i < base_note_count; i++)
-        _current_arp_note_table.push_back({ _current_arp_note_table[i].midi_key - 12, _current_arp_note_table[i].velocity });
-      for (int i = 0; i < base_note_count; i++)
-        _current_arp_note_table.push_back({ _current_arp_note_table[i].midi_key + 12, _current_arp_note_table[i].velocity });
-      break;
-    case type_m2p2_oct:
-      for (int i = 0; i < base_note_count; i++)
-        _current_arp_note_table.push_back({ _current_arp_note_table[i].midi_key - 12, _current_arp_note_table[i].velocity });
+        _current_arp_note_table.push_back({ _current_arp_note_table[i].midi_key - 36, _current_arp_note_table[i].velocity });
+    if (add_m2)
       for (int i = 0; i < base_note_count; i++)
         _current_arp_note_table.push_back({ _current_arp_note_table[i].midi_key - 24, _current_arp_note_table[i].velocity });
+    if (add_m1)
+      for (int i = 0; i < base_note_count; i++)
+        _current_arp_note_table.push_back({ _current_arp_note_table[i].midi_key - 12, _current_arp_note_table[i].velocity });
+    if (add_p1)
       for (int i = 0; i < base_note_count; i++)
         _current_arp_note_table.push_back({ _current_arp_note_table[i].midi_key + 12, _current_arp_note_table[i].velocity });
+    if (add_p2)
       for (int i = 0; i < base_note_count; i++)
         _current_arp_note_table.push_back({ _current_arp_note_table[i].midi_key + 24, _current_arp_note_table[i].velocity });
-      break;
-    default:
-      assert(false);
-      break;
-    }
+    if (add_p3)
+      for (int i = 0; i < base_note_count; i++)
+        _current_arp_note_table.push_back({ _current_arp_note_table[i].midi_key + 36, _current_arp_note_table[i].velocity });
 
     // make sure all is in check
     // we cannot go out of bounds in pitch
@@ -324,13 +337,22 @@ arpeggiator_engine::process_notes(
     case mode_down:
       std::reverse(_current_arp_note_table.begin(), _current_arp_note_table.end());
       break;
-    case mode_up_down:
+    case mode_up_down1: // excluding first/last (ceg->cege)
       for (int i = note_set_count - 2; i >= 1; i--)
         _current_arp_note_table.push_back({ _current_arp_note_table[i].midi_key, _current_arp_note_table[i].velocity });
       break;
-    case mode_down_up:
+    case mode_up_down2:
+      for (int i = note_set_count - 1; i >= 0; i--) // including first/last (ceg->ceggec)
+        _current_arp_note_table.push_back({ _current_arp_note_table[i].midi_key, _current_arp_note_table[i].velocity });
+      break;
+    case mode_down_up1:
       std::reverse(_current_arp_note_table.begin(), _current_arp_note_table.end());
-      for (int i = note_set_count - 2; i >= 1; i--)
+      for (int i = note_set_count - 2; i >= 1; i--) // excluding first/last (ceg->gece)
+        _current_arp_note_table.push_back({ _current_arp_note_table[i].midi_key, _current_arp_note_table[i].velocity });
+      break;
+    case mode_down_up2:
+      std::reverse(_current_arp_note_table.begin(), _current_arp_note_table.end());
+      for (int i = note_set_count - 1; i >= 0; i--) // including first/last (ceg->gecceg)
         _current_arp_note_table.push_back({ _current_arp_note_table[i].midi_key, _current_arp_note_table[i].velocity });
       break;
     default:
