@@ -13,7 +13,7 @@ namespace firefly_synth {
 
 enum { section_main };
 enum { 
-  param_type, param_mode, param_flip, param_notes,
+  param_type, param_mode, param_flip,
   ///* TODO param_cv_source, */ param_oct_down, param_oct_up//, 
   param_sync, param_rate_hz, param_rate_tempo,
   /* TODO param_rate_offset_source, amt, length_offset_source, amt */
@@ -114,7 +114,7 @@ arpeggiator_topo(int section, gui_position const& pos)
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag_basic("{6779AFA8-E0FE-482F-989B-6DE07263AEED}", "Main"),
     make_param_section_gui({ 0, 0 }, { { 1 }, { 
-      gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size,
+      gui_dimension::auto_size, gui_dimension::auto_size,
       gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size } })));
   auto& type = result.params.emplace_back(make_param(
     make_topo_info_basic("{FF418A06-2017-4C23-BC65-19FAF226ABE8}", "Type", param_type, 1),
@@ -136,24 +136,17 @@ arpeggiator_topo(int section, gui_position const& pos)
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   flip.info.description = "TODO";
   flip.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
-  auto& notes = result.params.emplace_back(make_param(
-    make_topo_info_basic("{9E464846-650B-42DC-9E45-D8AFA2BADBDB}", "Notes", param_notes, 1),
-    make_param_dsp_block(param_automate::automate), make_domain_step(1, 4, 1, 0),
-    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 3 },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  notes.info.description = "TODO";
-  notes.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   auto& sync = result.params.emplace_back(make_param(
     make_topo_info_basic("{8DE4D902-946C-41AA-BA1B-E0B645F8C87D}", "Sync", param_sync, 1),
     make_param_dsp_block(param_automate::automate), make_domain_toggle(true),
-    make_param_gui_single(section_main, gui_edit_type::toggle, { 0, 4 },
+    make_param_gui_single(section_main, gui_edit_type::toggle, { 0, 3 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   sync.info.description = "TODO";
   sync.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   auto& rate_hz = result.params.emplace_back(make_param(
     make_topo_info_basic("{EE305C60-8D37-492D-A2BE-5BD9C80DC59D}", "Rate", param_rate_hz, 1),
     make_param_dsp_block(param_automate::automate), make_domain_log(0.25, 20, 4, 4, 2, "Hz"),
-    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 5 },
+    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 4 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   rate_hz.gui.bindings.enabled.bind_params({ param_type, param_sync }, [](auto const& vs) { return vs[0] != type_off && vs[1] == 0; });
   rate_hz.gui.bindings.visible.bind_params({ param_type, param_sync }, [](auto const& vs) { return vs[1] == 0; });
@@ -161,7 +154,7 @@ arpeggiator_topo(int section, gui_position const& pos)
   auto& rate_tempo = result.params.emplace_back(make_param(
     make_topo_info_basic("{B1727889-9B55-4F93-8E0A-E2D4B791568B}", "Rate", param_rate_tempo, 1),
     make_param_dsp_block(param_automate::automate), make_domain_timesig_default(false, { 16, 1 }, { 1, 4 }), // TODO tune this
-    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 5 },
+    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 4 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   rate_tempo.gui.submenu = make_timesig_submenu(rate_tempo.domain.timesigs);
   rate_tempo.gui.bindings.enabled.bind_params({ param_type, param_sync }, [](auto const& vs) { return vs[0] != type_off && vs[1] != 0; });
