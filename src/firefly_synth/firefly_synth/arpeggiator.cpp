@@ -75,6 +75,7 @@ public arp_engine_base
   std::array<arp_user_note, 128> _current_user_chord = {};
   std::vector<arp_table_note> _current_arp_note_table = {};
 
+  int flipped_table_pos() const;
   void hard_reset(std::vector<note_event>& out);
 
 public:
@@ -170,6 +171,18 @@ arpeggiator_engine::hard_reset(std::vector<note_event>& out)
     off.type = note_event_type::off;
     out.push_back(off);
   }
+}
+
+int
+arpeggiator_engine::flipped_table_pos() const
+{
+  int n = _table_pos % (_prev_flip * 2);
+  if (n < _prev_flip) return _table_pos % _current_arp_note_table.size();
+  n -= _prev_flip;
+  int base_pos = _table_pos - (_table_pos % _prev_flip);
+  int result = (base_pos + _prev_flip - n - 1) % _current_arp_note_table.size();
+  assert(0 <= result && result < _current_arp_note_table.size());
+  return result;
 }
 
 void 
@@ -342,30 +355,33 @@ arpeggiator_engine::process_notes(
   // TODO stuff with actual start pos of the table as based on note event frame ??
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
+    int flipped_pos;
     if (_note_remaining == 0) // TODO make sure this is always 1+ frames
     {
       if (_table_pos != -1)
       {
+        flipped_pos = flipped_table_pos();
         note_event end_old = {};
         end_old.id.id = 0;
         end_old.id.channel = 0; // TODO maybe ?
-        end_old.id.key = _current_arp_note_table[_table_pos].midi_key;
+        end_old.id.key = _current_arp_note_table[flipped_pos].midi_key;
         end_old.frame = f;
         end_old.velocity = 0.0f;
         end_old.type = note_event_type::off; // TODO
         out.push_back(end_old);
       }
 
+      _table_pos++;
       _note_remaining = rate_frames;
-      _table_pos = (_table_pos + 1) % _current_arp_note_table.size();
+      flipped_pos = flipped_table_pos();
 
       note_event start_new = {};
       start_new.id.id = 0;
       start_new.id.channel = 0;
-      start_new.id.key = _current_arp_note_table[_table_pos].midi_key;
+      start_new.id.key = _current_arp_note_table[flipped_pos].midi_key;
       start_new.frame = f;
       start_new.type = note_event_type::on;
-      start_new.velocity = _current_arp_note_table[_table_pos].velocity;
+      start_new.velocity = _current_arp_note_table[flipped_pos].velocity;
       out.push_back(start_new);
     }
     
