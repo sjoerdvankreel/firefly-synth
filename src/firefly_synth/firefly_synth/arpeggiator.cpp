@@ -16,7 +16,7 @@ namespace firefly_synth {
 
 enum { section_main };
 enum { 
-  param_type, param_mode, param_flip, param_notes,
+  param_type, param_mode, param_seed, param_flip, param_notes,
   ///* TODO param_cv_source, */ param_oct_down, param_oct_up//, 
   param_sync, param_rate_hz, param_rate_tempo,
   /* TODO param_rate_offset_source, amt, length_offset_source, amt */
@@ -26,12 +26,20 @@ enum {
   mode_up, mode_down,
   mode_up_down1, mode_up_down2,
   mode_down_up1, mode_down_up2,
-  mode_rand, mode_free_rand };
+  mode_rand, mode_fixrand,
+  mode_rand_free, mode_fixrand_free };
 
 enum { 
   type_off, type_straight, 
   type_p1_oct, type_p2_oct, type_p3_oct, 
   type_m1p1_oct, type_m2p2_oct, type_m3p3_oct };
+
+static bool 
+is_random(int mode)
+{
+  return mode == mode_rand || mode == mode_fixrand || 
+    mode == mode_rand_free || mode == mode_fixrand_free;
+}
 
 // what the user is doing eg press ceg -> those are on, release e -> that one's off
 struct arp_user_note
@@ -72,8 +80,10 @@ mode_items()
   result.emplace_back("{EB5FC7ED-DFA3-4DD5-A5F3-444469FDFBCF}", "UpDown2");
   result.emplace_back("{B48727A2-E886-43D4-906D-D87F5E7EE3CD}", "DownUp1");
   result.emplace_back("{86488834-DB23-4467-8EB6-4C4261989233}", "DownUp2");
-  result.emplace_back("{C9095A2C-3F11-4C4B-A428-6DC948DFDB2C}", "Random");
-  result.emplace_back("{C9095A2C-3F11-4C4B-A428-6DC948DFDB2C}", "FreeRnd");
+  result.emplace_back("{C9095A2C-3F11-4C4B-A428-6DC948DFDB2C}", "Rnd");
+  result.emplace_back("{05A6B86C-1DCC-41F0-BE03-03B7D932FE5B}", "FixRnd");
+  result.emplace_back("{DC858447-2FB6-4081-BE94-4C3F9FB835EB}", "RndFree");
+  result.emplace_back("{39619505-DD48-4B91-92F4-5CDDBECC8872}", "FixRndFree");
   return result;
 }
 
@@ -83,6 +93,7 @@ public arp_engine_base
   int _prev_type = -1;
   int _prev_mode = -1;
   int _prev_flip = -1;
+  int _prev_seed = -1;
   int _prev_notes = -1;
 
   int _table_pos = -1;
@@ -121,7 +132,7 @@ arpeggiator_topo(int section, gui_position const& pos)
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag_basic("{6779AFA8-E0FE-482F-989B-6DE07263AEED}", "Main"),
     make_param_section_gui({ 0, 0 }, { { 1 }, { 
-      gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size,
+      gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size,
       gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size } })));
   auto& type = result.params.emplace_back(make_param(
     make_topo_info_basic("{FF418A06-2017-4C23-BC65-19FAF226ABE8}", "Type", param_type, 1),
@@ -136,31 +147,38 @@ arpeggiator_topo(int section, gui_position const& pos)
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   mode.info.description = "TODO";
   mode.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
+  auto& seed = result.params.emplace_back(make_param(
+    make_topo_info_basic("{BCF494BD-5643-414C-863E-324F022770BE}", "Seed", param_seed, 1),
+    make_param_dsp_block(param_automate::automate), make_domain_step(1, 255, 1, 0),
+    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 2 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
+  seed.info.description = "TODO";
+  seed.gui.bindings.enabled.bind_params({ param_type, param_mode }, [](auto const& vs) { return vs[0] != type_off && is_random(vs[1]); });
   auto& flip = result.params.emplace_back(make_param(
     make_topo_info_basic("{35217232-FFFF-4286-8C87-3E08D9817B8D}", "Flip", param_flip, 1),
     make_param_dsp_block(param_automate::automate), make_domain_step(1, 9, 1, 0),
-    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 2 },
+    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 3 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   flip.info.description = "TODO";
   flip.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   auto& notes = result.params.emplace_back(make_param(
     make_topo_info_basic("{9E464846-650B-42DC-9E45-D8AFA2BADBDB}", "Notes", param_notes, 1),
     make_param_dsp_block(param_automate::automate), make_domain_step(1, 4, 1, 0),
-    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 3 },
+    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 4 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   notes.info.description = "TODO";
   notes.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   auto& sync = result.params.emplace_back(make_param(
     make_topo_info_basic("{8DE4D902-946C-41AA-BA1B-E0B645F8C87D}", "Sync", param_sync, 1),
     make_param_dsp_block(param_automate::automate), make_domain_toggle(true),
-    make_param_gui_single(section_main, gui_edit_type::toggle, { 0, 4 },
+    make_param_gui_single(section_main, gui_edit_type::toggle, { 0, 5 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   sync.info.description = "TODO";
   sync.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   auto& rate_hz = result.params.emplace_back(make_param(
     make_topo_info_basic("{EE305C60-8D37-492D-A2BE-5BD9C80DC59D}", "Rate", param_rate_hz, 1),
     make_param_dsp_block(param_automate::automate), make_domain_log(0.25, 20, 4, 4, 2, "Hz"),
-    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 5 },
+    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 6 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   rate_hz.gui.bindings.enabled.bind_params({ param_type, param_sync }, [](auto const& vs) { return vs[0] != type_off && vs[1] == 0; });
   rate_hz.gui.bindings.visible.bind_params({ param_type, param_sync }, [](auto const& vs) { return vs[1] == 0; });
@@ -168,7 +186,7 @@ arpeggiator_topo(int section, gui_position const& pos)
   auto& rate_tempo = result.params.emplace_back(make_param(
     make_topo_info_basic("{B1727889-9B55-4F93-8E0A-E2D4B791568B}", "Rate", param_rate_tempo, 1),
     make_param_dsp_block(param_automate::automate), make_domain_timesig_default(false, { 16, 1 }, { 1, 4 }), // TODO tune this
-    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 5 },
+    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 6 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   rate_tempo.gui.submenu = make_timesig_submenu(rate_tempo.domain.timesigs);
   rate_tempo.gui.bindings.enabled.bind_params({ param_type, param_sync }, [](auto const& vs) { return vs[0] != type_off && vs[1] != 0; });
@@ -227,15 +245,17 @@ arpeggiator_engine::process_notes(
   int flip = block_auto[param_flip][0].step();
   int type = block_auto[param_type][0].step();
   int mode = block_auto[param_mode][0].step();
+  int seed = block_auto[param_seed][0].step();
   int notes = block_auto[param_notes][0].step();
 
   // TODO for all params ??
   // maybe, but more probably only those that generate notes
-  if (type != _prev_type || mode != _prev_mode || flip != _prev_flip || notes != _prev_notes)
+  if (type != _prev_type || mode != _prev_mode || flip != _prev_flip || notes != _prev_notes || seed != _prev_seed)
   {
     _prev_type = type;
     _prev_mode = mode;
     _prev_flip = flip;
+    _prev_seed = seed;
     _prev_notes = notes;
     hard_reset(out);
   }
@@ -351,7 +371,11 @@ arpeggiator_engine::process_notes(
     case mode_up:
       break; // already sorted
     case mode_rand:
-    case mode_free_rand:
+    case mode_fixrand:
+    case mode_rand_free:
+    case mode_fixrand_free:
+      if (mode == mode_fixrand || mode == mode_fixrand_free)
+        _random.seed(seed);
       std::shuffle(_current_arp_note_table.begin(), _current_arp_note_table.end(), _random);
       break;
     case mode_down:
@@ -421,7 +445,7 @@ arpeggiator_engine::process_notes(
 
       // TODO make the time continuous rate a modulatable target
       // TODO this better works WRT to note-off events ?
-      if(mode == mode_free_rand)
+      if(mode == mode_rand_free || mode == mode_fixrand_free)
         if(_table_pos % _current_arp_note_table.size() == 0)
           std::shuffle(_current_arp_note_table.begin(), _current_arp_note_table.end(), _random);
 
