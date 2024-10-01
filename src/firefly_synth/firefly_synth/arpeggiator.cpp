@@ -13,7 +13,7 @@ namespace firefly_synth {
 
 enum { section_main };
 enum { 
-  param_type, param_mode, param_flip,
+  param_type, param_mode, param_flip, param_notes,
   ///* TODO param_cv_source, */ param_oct_down, param_oct_up//, 
   param_sync, param_rate_hz, param_rate_tempo,
   /* TODO param_rate_offset_source, amt, length_offset_source, amt */
@@ -77,6 +77,7 @@ public arp_engine_base
   int _prev_type = -1;
   int _prev_mode = -1;
   int _prev_flip = -1;
+  int _prev_notes = -1;
 
   // todo stuff with velo
   int _table_pos = -1;
@@ -114,7 +115,7 @@ arpeggiator_topo(int section, gui_position const& pos)
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag_basic("{6779AFA8-E0FE-482F-989B-6DE07263AEED}", "Main"),
     make_param_section_gui({ 0, 0 }, { { 1 }, { 
-      gui_dimension::auto_size, gui_dimension::auto_size,
+      gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size,
       gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size } })));
   auto& type = result.params.emplace_back(make_param(
     make_topo_info_basic("{FF418A06-2017-4C23-BC65-19FAF226ABE8}", "Type", param_type, 1),
@@ -136,17 +137,24 @@ arpeggiator_topo(int section, gui_position const& pos)
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   flip.info.description = "TODO";
   flip.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
+  auto& notes = result.params.emplace_back(make_param(
+    make_topo_info_basic("{9E464846-650B-42DC-9E45-D8AFA2BADBDB}", "Notes", param_notes, 1),
+    make_param_dsp_block(param_automate::automate), make_domain_step(1, 4, 1, 0),
+    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 3 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
+  notes.info.description = "TODO";
+  notes.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   auto& sync = result.params.emplace_back(make_param(
     make_topo_info_basic("{8DE4D902-946C-41AA-BA1B-E0B645F8C87D}", "Sync", param_sync, 1),
     make_param_dsp_block(param_automate::automate), make_domain_toggle(true),
-    make_param_gui_single(section_main, gui_edit_type::toggle, { 0, 3 },
+    make_param_gui_single(section_main, gui_edit_type::toggle, { 0, 4 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   sync.info.description = "TODO";
   sync.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   auto& rate_hz = result.params.emplace_back(make_param(
     make_topo_info_basic("{EE305C60-8D37-492D-A2BE-5BD9C80DC59D}", "Rate", param_rate_hz, 1),
     make_param_dsp_block(param_automate::automate), make_domain_log(0.25, 20, 4, 4, 2, "Hz"),
-    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 4 },
+    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 5 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   rate_hz.gui.bindings.enabled.bind_params({ param_type, param_sync }, [](auto const& vs) { return vs[0] != type_off && vs[1] == 0; });
   rate_hz.gui.bindings.visible.bind_params({ param_type, param_sync }, [](auto const& vs) { return vs[1] == 0; });
@@ -154,7 +162,7 @@ arpeggiator_topo(int section, gui_position const& pos)
   auto& rate_tempo = result.params.emplace_back(make_param(
     make_topo_info_basic("{B1727889-9B55-4F93-8E0A-E2D4B791568B}", "Rate", param_rate_tempo, 1),
     make_param_dsp_block(param_automate::automate), make_domain_timesig_default(false, { 16, 1 }, { 1, 4 }), // TODO tune this
-    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 4 },
+    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 5 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   rate_tempo.gui.submenu = make_timesig_submenu(rate_tempo.domain.timesigs);
   rate_tempo.gui.bindings.enabled.bind_params({ param_type, param_sync }, [](auto const& vs) { return vs[0] != type_off && vs[1] != 0; });
@@ -213,14 +221,16 @@ arpeggiator_engine::process_notes(
   int flip = block_auto[param_flip][0].step();
   int type = block_auto[param_type][0].step();
   int mode = block_auto[param_mode][0].step();
+  int notes = block_auto[param_notes][0].step();
 
   // TODO for all params ??
   // maybe, but more probably only those that generate notes
-  if (type != _prev_type || mode != _prev_mode || flip != _prev_flip)
+  if (type != _prev_type || mode != _prev_mode || flip != _prev_flip || notes != _prev_notes)
   {
     _prev_type = type;
     _prev_mode = mode;
     _prev_flip = flip;
+    _prev_notes = notes;
     hard_reset(out);
   }
 
@@ -364,7 +374,6 @@ arpeggiator_engine::process_notes(
   if (_current_arp_note_table.size() == 0)
     return;
 
-  // TODO more octs ?
   // how often to output new notes
   float rate_hz;
   if (block_auto[param_sync][0].step() == 0)
@@ -378,33 +387,39 @@ arpeggiator_engine::process_notes(
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
     int flipped_pos;
-    if (_note_remaining == 0) // TODO make sure this is always 1+ frames
+    if (_note_remaining == 0)
     {
       if (_table_pos != -1)
       {
         flipped_pos = flipped_table_pos();
-        note_event end_old = {};
-        end_old.id.id = 0;
-        end_old.id.channel = 0; // TODO maybe ?
-        end_old.id.key = _current_arp_note_table[flipped_pos].midi_key;
-        end_old.frame = f;
-        end_old.velocity = 0.0f;
-        end_old.type = note_event_type::off; // TODO
-        out.push_back(end_old);
+        for (int i = 0; i < notes; i++)
+        {
+          note_event end_old = {};
+          end_old.frame = f;
+          end_old.velocity = 0.0f;
+          end_old.type = note_event_type::off;
+          end_old.id.id = 0;
+          end_old.id.channel = 0; 
+          end_old.id.key = _current_arp_note_table[(flipped_pos + i) % _current_arp_note_table.size()].midi_key;
+          out.push_back(end_old);
+        }
       }
 
       _table_pos++;
       _note_remaining = rate_frames;
       flipped_pos = flipped_table_pos();
 
-      note_event start_new = {};
-      start_new.id.id = 0;
-      start_new.id.channel = 0;
-      start_new.id.key = _current_arp_note_table[flipped_pos].midi_key;
-      start_new.frame = f;
-      start_new.type = note_event_type::on;
-      start_new.velocity = _current_arp_note_table[flipped_pos].velocity;
-      out.push_back(start_new);
+      for (int i = 0; i < notes; i++)
+      {
+        note_event start_new = {};
+        start_new.frame = f;
+        start_new.type = note_event_type::on;
+        start_new.velocity = _current_arp_note_table[(flipped_pos + i) % _current_arp_note_table.size()].velocity;
+        start_new.id.id = 0;
+        start_new.id.channel = 0;
+        start_new.id.key = _current_arp_note_table[(flipped_pos + i) % _current_arp_note_table.size()].midi_key;
+        out.push_back(start_new);
+      }
     }
     
     --_note_remaining;
