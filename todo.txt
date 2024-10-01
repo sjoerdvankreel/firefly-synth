@@ -47,6 +47,7 @@ V up the vno
 X controls6: the length (in time / bars / both) + allow some randomization and/or global-cv?
 V do 4 random modes free yn/fix yn
 
+* can do hold each N + release yea/no as mini-sequ bc no ui space
 * do notes and select to first section
 * do "select" eg 1234  -> 12345, 12131415, 12123123412345 ==> next/bounce/build
 * do simple mod-by for the "lfo" time?

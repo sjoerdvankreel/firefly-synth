@@ -14,12 +14,13 @@ using namespace plugin_base;
  
 namespace firefly_synth {
 
-enum { section_table, section_sample };
 enum { 
-  param_type, param_flip,
-  param_mode, param_seed, 
-  param_notes, param_sync, 
-  param_rate_hz, param_rate_tempo };
+  section_table, section_sample };
+
+enum { 
+  param_type, param_flip, param_notes,
+  param_mode, param_seed, param_select, 
+  param_sync, param_rate_hz, param_rate_tempo };
 
 enum { 
   mode_up, mode_down,
@@ -27,6 +28,9 @@ enum {
   mode_down_up1, mode_down_up2,
   mode_rand, mode_fixrand,
   mode_rand_free, mode_fixrand_free };
+
+enum { 
+   select_next, select_bounce, select_build };
 
 enum { 
   type_off, type_straight, 
@@ -86,6 +90,16 @@ mode_items()
   return result;
 }
 
+static std::vector<list_item>
+select_items()
+{
+  std::vector<list_item> result;
+  result.emplace_back("{32273957-A301-4598-8366-042B2BF5A2C1}", "Next");
+  result.emplace_back("{15B75008-8C62-416E-8EF3-A2CBBC84EE8F}", "Bounce");
+  result.emplace_back("{B02E7C57-C141-4DA7-A97A-40324D9A88ED}", "Build");
+  return result;
+}
+
 class arpeggiator_engine :
 public arp_engine_base
 {
@@ -94,6 +108,7 @@ public arp_engine_base
   int _prev_flip = -1;
   int _prev_seed = -1;
   int _prev_notes = -1;
+  int _prev_select = -1;
 
   int _table_pos = -1;
   int _note_remaining = 0;
@@ -125,14 +140,14 @@ arpeggiator_topo(int section, gui_position const& pos)
   module_topo result(make_module(
     make_topo_info_basic("{8A09B4CD-9768-4504-B9FE-5447B047854B}", "ARP / SEQ", module_arpeggiator, 1),
     make_module_dsp(module_stage::input, module_output::none, 0, {}),
-    make_module_gui(section, pos, { { 1 }, { 9, 12 } })));
+    make_module_gui(section, pos, { { 1 }, { 2, 1 } })));
   result.info.description = "Arpeggiator / Sequencer.";
 
   result.sections.emplace_back(make_param_section(section_table,
     make_topo_tag_basic("{6779AFA8-E0FE-482F-989B-6DE07263AEED}", "Table"),
     make_param_section_gui({ 0, 0 }, { { 1, 1 }, { 
-      gui_dimension::auto_size_all, gui_dimension::auto_size_all,
-      gui_dimension::auto_size_all, 1 } }, gui_label_edit_cell_split::horizontal)));
+      gui_dimension::auto_size_all, gui_dimension::auto_size_all, gui_dimension::auto_size_all,
+      gui_dimension::auto_size_all, gui_dimension::auto_size_all, 1 } }, gui_label_edit_cell_split::horizontal)));
   auto& type = result.params.emplace_back(make_param(
     make_topo_info_basic("{FF418A06-2017-4C23-BC65-19FAF226ABE8}", "Type", param_type, 1),
     make_param_dsp_block(param_automate::automate), make_domain_item(type_items(), "Off"),
@@ -146,6 +161,13 @@ arpeggiator_topo(int section, gui_position const& pos)
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   flip.info.description = "TODO";
   flip.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
+  auto& notes = result.params.emplace_back(make_param(
+    make_topo_info_basic("{9E464846-650B-42DC-9E45-D8AFA2BADBDB}", "Notes", param_notes, 1),
+    make_param_dsp_block(param_automate::automate), make_domain_step(1, 4, 1, 0),
+    make_param_gui_single(section_table, gui_edit_type::autofit_list, { 0, 4 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
+  notes.info.description = "TODO";
+  notes.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   auto& mode = result.params.emplace_back(make_param(
     make_topo_info_basic("{BCE75C3A-85B8-4946-A06B-68F8F5F36785}", "Mode", param_mode, 1),
     make_param_dsp_block(param_automate::automate), make_domain_item(mode_items(), "Up"),
@@ -160,28 +182,28 @@ arpeggiator_topo(int section, gui_position const& pos)
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   seed.info.description = "TODO";
   seed.gui.bindings.enabled.bind_params({ param_type, param_mode }, [](auto const& vs) { return vs[0] != type_off && is_random(vs[1]); });
+  auto& select = result.params.emplace_back(make_param(
+    make_topo_info_basic("{A14BBE4B-083D-44E8-B6EE-0600AC3F2138}", "Select", param_select, 1),
+    make_param_dsp_block(param_automate::automate), make_domain_item(select_items(), "Next"),
+    make_param_gui_single(section_table, gui_edit_type::autofit_list, { 1, 4 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
+  select.info.description = "TODO";
+  select.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
 
   result.sections.emplace_back(make_param_section(section_sample,
     make_topo_tag_basic("{63A54D7E-C4CE-4DFF-8E00-A9B8FAEC643E}", "Sample"),
-    make_param_section_gui({ 0, 1 }, { { 1, 1 }, { 1, 1 } })));
-  auto& notes = result.params.emplace_back(make_param(
-    make_topo_info_basic("{9E464846-650B-42DC-9E45-D8AFA2BADBDB}", "Notes", param_notes, 1),
-    make_param_dsp_block(param_automate::automate), make_domain_step(1, 4, 1, 0),
-    make_param_gui_single(section_sample, gui_edit_type::autofit_list, { 0, 0 },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  notes.info.description = "TODO";
-  notes.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
+    make_param_section_gui({ 0, 1 }, { { 1, 1 }, { 1 } })));
   auto& sync = result.params.emplace_back(make_param(
     make_topo_info_basic("{8DE4D902-946C-41AA-BA1B-E0B645F8C87D}", "Sync", param_sync, 1),
     make_param_dsp_block(param_automate::automate), make_domain_toggle(true),
-    make_param_gui_single(section_sample, gui_edit_type::toggle, { 0, 1 },
+    make_param_gui_single(section_sample, gui_edit_type::toggle, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   sync.info.description = "TODO";
   sync.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   auto& rate_hz = result.params.emplace_back(make_param(
     make_topo_info_basic("{EE305C60-8D37-492D-A2BE-5BD9C80DC59D}", "Rate", param_rate_hz, 1),
     make_param_dsp_block(param_automate::automate), make_domain_log(0.25, 20, 4, 4, 2, "Hz"),
-    make_param_gui_single(section_sample, gui_edit_type::knob, { 1, 0, 1, 2 },
+    make_param_gui_single(section_sample, gui_edit_type::knob, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   rate_hz.gui.bindings.enabled.bind_params({ param_type, param_sync }, [](auto const& vs) { return vs[0] != type_off && vs[1] == 0; });
   rate_hz.gui.bindings.visible.bind_params({ param_type, param_sync }, [](auto const& vs) { return vs[1] == 0; });
@@ -189,7 +211,7 @@ arpeggiator_topo(int section, gui_position const& pos)
   auto& rate_tempo = result.params.emplace_back(make_param(
     make_topo_info_basic("{B1727889-9B55-4F93-8E0A-E2D4B791568B}", "Rate", param_rate_tempo, 1),
     make_param_dsp_block(param_automate::automate), make_domain_timesig_default(false, { 16, 1 }, { 1, 4 }), // TODO tune this
-    make_param_gui_single(section_sample, gui_edit_type::autofit_list, { 1, 1, 1, 2 },
+    make_param_gui_single(section_sample, gui_edit_type::autofit_list, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   rate_tempo.gui.submenu = make_timesig_submenu(rate_tempo.domain.timesigs);
   rate_tempo.gui.bindings.enabled.bind_params({ param_type, param_sync }, [](auto const& vs) { return vs[0] != type_off && vs[1] != 0; });
@@ -250,16 +272,18 @@ arpeggiator_engine::process_notes(
   int mode = block_auto[param_mode][0].step();
   int seed = block_auto[param_seed][0].step();
   int notes = block_auto[param_notes][0].step();
+  int select = block_auto[param_select][0].step();
 
   // TODO for all params ??
   // maybe, but more probably only those that generate notes
-  if (type != _prev_type || mode != _prev_mode || flip != _prev_flip || notes != _prev_notes || seed != _prev_seed)
+  if (type != _prev_type || mode != _prev_mode || flip != _prev_flip || notes != _prev_notes || seed != _prev_seed || _prev_select != select)
   {
     _prev_type = type;
     _prev_mode = mode;
     _prev_flip = flip;
     _prev_seed = seed;
     _prev_notes = notes;
+    _prev_select = select;
     hard_reset(out);
   }
 
