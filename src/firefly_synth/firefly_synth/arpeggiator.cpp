@@ -174,7 +174,7 @@ arpeggiator_topo(plugin_topo const* topo, int section, gui_position const& pos)
   module_topo result(make_module(
     make_topo_info_basic("{8A09B4CD-9768-4504-B9FE-5447B047854B}", "ARP / SEQ", module_arpeggiator, 1),
     make_module_dsp(module_stage::input, module_output::none, 0, {}),
-    make_module_gui(section, pos, { { 1 }, { 2, 1 } })));
+    make_module_gui(section, pos, { { 1 }, { 1, 1 } })));
   result.info.description = "Arpeggiator / Sequencer.";
 
   result.sections.emplace_back(make_param_section(section_table,
@@ -235,7 +235,9 @@ arpeggiator_topo(plugin_topo const* topo, int section, gui_position const& pos)
 
   result.sections.emplace_back(make_param_section(section_sample,
     make_topo_tag_basic("{63A54D7E-C4CE-4DFF-8E00-A9B8FAEC643E}", "Sample"),
-    make_param_section_gui({ 0, 1 }, { { 1, 1 }, { 1, 1 } })));
+    make_param_section_gui({ 0, 1 }, { { 1, 1 }, { 
+      gui_dimension::auto_size_all, gui_dimension::auto_size_all, 
+      gui_dimension::auto_size_all, gui_dimension::auto_size_all } }, gui_label_edit_cell_split::horizontal)));
   auto& rate_mod = result.params.emplace_back(make_param(
     make_topo_info_basic("{3545206C-7A5F-41A3-B418-1F270DF61505}", "Mod", param_rate_mod, 1),
     make_param_dsp_block(param_automate::automate), make_domain_item(rate_mod_items, "Off"),
@@ -246,7 +248,7 @@ arpeggiator_topo(plugin_topo const* topo, int section, gui_position const& pos)
   auto& rate_mod_amt = result.params.emplace_back(make_param(
     make_topo_info_basic("{90A4DCE9-9EEA-4156-AC9F-DAD82ED33048}", "Amt", param_rate_mod_amt, 1),
     make_param_dsp_block(param_automate::automate), make_domain_percentage(0, 10, 1, 0, true),
-    make_param_gui_single(section_sample, gui_edit_type::knob, { 0, 1 },
+    make_param_gui_single(section_sample, gui_edit_type::knob, { 0, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   rate_mod_amt.info.description = "TODO";
   rate_mod_amt.gui.bindings.enabled.bind_params({ param_type, param_rate_mod }, [](auto const& vs) { return vs[0] != type_off && vs[1] != 0; });
@@ -270,7 +272,7 @@ arpeggiator_topo(plugin_topo const* topo, int section, gui_position const& pos)
   auto& sync = result.params.emplace_back(make_param(
     make_topo_info_basic("{8DE4D902-946C-41AA-BA1B-E0B645F8C87D}", "Sync", param_sync, 1),
     make_param_dsp_block(param_automate::automate), make_domain_toggle(true),
-    make_param_gui_single(section_sample, gui_edit_type::toggle, { 1, 1 },
+    make_param_gui_single(section_sample, gui_edit_type::toggle, { 1, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   sync.info.description = "TODO";
   sync.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
