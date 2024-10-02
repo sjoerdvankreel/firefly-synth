@@ -57,6 +57,31 @@ struct arp_table_note
 };
 
 static std::vector<list_item>
+make_mod_sources(plugin_topo const* topo)
+{
+  // bit of manual juggling here since this stuff
+  // does not belong in any of the existing matrices
+  std::vector<list_item> result;
+  result.emplace_back("{E7BBFFE3-5105-453A-A40E-22B4FDEB1456}", "Off");
+
+  auto const& aux_outputs = topo->modules[module_global_in].dsp.outputs;
+  for(int i = 0; i < aux_outputs.size(); i++)
+    for (int j = 0; j < aux_outputs[i].info.slot_count; j++)
+    result.emplace_back("{AB65DAA5-6437-483D-8B71-37000B3451B4}-" + std::to_string(i) + "-" + std::to_string(j),
+      topo->modules[module_global_in].info.tag.display_name + " " + 
+      aux_outputs[i].info.tag.menu_display_name + (aux_outputs[i].info.slot_count == 1 ? "" : " " + std::to_string(j + 1)));
+
+  auto const& lfo_mod = topo->modules[module_glfo];
+  assert(lfo_mod.dsp.outputs.size() == 1);
+  assert(lfo_mod.dsp.outputs[0].info.slot_count == 1);
+  for (int i = 0; i < lfo_mod.info.slot_count; i++)
+    result.emplace_back("{93C5C173-3E67-41FE-B30D-8B3DCC5D8966}-" + std::to_string(i) + "-0-0",
+      lfo_mod.info.tag.menu_display_name + " " + std::to_string(i + 1));
+
+  return result;
+}
+
+static std::vector<list_item>
 type_items()
 {
   std::vector<list_item> result;
@@ -123,7 +148,7 @@ std::unique_ptr<arp_engine_base>
 make_arpeggiator() { return std::make_unique<arpeggiator_engine>(); }
 
 module_topo
-arpeggiator_topo(int section, gui_position const& pos)
+arpeggiator_topo(plugin_base::plugin_topo const* topo, int section, gui_position const& pos)
 {
   module_topo result(make_module(
     make_topo_info_basic("{8A09B4CD-9768-4504-B9FE-5447B047854B}", "ARP / SEQ", module_arpeggiator, 1),
@@ -216,8 +241,8 @@ arpeggiator_topo(int section, gui_position const& pos)
   rate_tempo.info.description = "TODO";  
   auto& rate_mod = result.params.emplace_back(make_param(
     make_topo_info_basic("{3545206C-7A5F-41A3-B418-1F270DF61505}", "Mod", param_rate_mod, 1),
-    make_param_dsp_block(param_automate::automate), make_domain_toggle(true),
-    make_param_gui_single(section_sample, gui_edit_type::toggle, { 0, 1 },
+    make_param_dsp_block(param_automate::automate), make_domain_item(make_mod_sources(topo), "Off"),
+    make_param_gui_single(section_sample, gui_edit_type::autofit_list, { 0, 1 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   rate_mod.info.description = "TODO";
   rate_mod.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });

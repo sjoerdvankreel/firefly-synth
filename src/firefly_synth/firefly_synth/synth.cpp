@@ -506,7 +506,7 @@ synth_topo(format_basic_config const* config, bool is_fx, std::string const& ful
   result->modules[module_osc] = osc_topo(is_fx ? module_section_hidden : module_section_osc, { 0, 0 });
   result->modules[module_global_in] = global_in_topo(module_section_global_in, is_fx, { 0, 0 });
   result->modules[module_master_settings] = master_settings_topo(module_section_master_settings, { 0, 0 }, is_fx, result.get());
-  result->modules[module_arpeggiator] = arpeggiator_topo(is_fx ? module_section_hidden : module_section_arp, { 0, 0 }); // voice stuff must be after global cv
+  result->modules[module_arpeggiator] = arpeggiator_topo(result.get(), is_fx ? module_section_hidden : module_section_arp, { 0, 0 }); // voice stuff must be after global cv
   result->modules[module_voice_on_note] = voice_on_note_topo(result.get(), module_section_hidden);
   result->modules[module_voice_in] = voice_in_topo(is_fx ? module_section_hidden : module_section_voice_in, { 0, 0 });
   result->modules[module_voice_out] = audio_out_topo(is_fx ? module_section_hidden : module_section_voice_out, { 0, 0 }, false);

@@ -222,7 +222,7 @@ plugin_base::module_topo external_audio_topo(int section, bool is_fx);
 plugin_base::module_topo voice_on_note_topo(plugin_base::plugin_topo const* topo, int section);
 plugin_base::module_topo env_topo(int section, plugin_base::gui_position const& pos);
 plugin_base::module_topo osc_topo(int section, plugin_base::gui_position const& pos);
-plugin_base::module_topo arpeggiator_topo(int section, plugin_base::gui_position const& pos);
+plugin_base::module_topo arpeggiator_topo(plugin_base::plugin_topo const* topo, int section, plugin_base::gui_position const& pos);
 plugin_base::module_topo voice_in_topo(int section, plugin_base::gui_position const& pos);
 plugin_base::module_topo global_in_topo(int section, bool is_fx, plugin_base::gui_position const& pos);
 plugin_base::module_topo fx_topo(int section, plugin_base::gui_position const& pos, bool global, bool is_fx);
