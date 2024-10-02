@@ -196,7 +196,7 @@ arpeggiator_topo(plugin_topo const* topo, int section, gui_position const& pos)
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   type.info.description = "TODO";
   auto& jump = result.params.emplace_back(make_param(
-    make_topo_info_basic("{41D984D0-2ECA-463C-B32E-0548562658AE}", "Jmp", param_jump, 1),
+    make_topo_info("{41D984D0-2ECA-463C-B32E-0548562658AE}", true, "Table Jumping", "Jmp", "Jmp", param_jump, 1),
     make_param_dsp_block(param_automate::automate), make_domain_toggle(false),
     make_param_gui_single(section_table, gui_edit_type::toggle, { 0, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
@@ -210,7 +210,7 @@ arpeggiator_topo(plugin_topo const* topo, int section, gui_position const& pos)
   mode.info.description = "TODO";
   mode.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   auto& flip = result.params.emplace_back(make_param(
-    make_topo_info_basic("{35217232-FFFF-4286-8C87-3E08D9817B8D}", "Flip", param_flip, 1),
+    make_topo_info("{35217232-FFFF-4286-8C87-3E08D9817B8D}", true, "Table Flip Count", "Flip", "Flip", param_flip, 1),
     make_param_dsp_block(param_automate::automate), make_domain_step(1, 9, 1, 0),
     make_param_gui_single(section_table, gui_edit_type::autofit_list, { 1, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
