@@ -230,7 +230,7 @@ arpeggiator_topo(plugin_topo const* topo, int section, gui_position const& pos)
   sync.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   auto& rate_mod = result.params.emplace_back(make_param(
     make_topo_info_basic("{3545206C-7A5F-41A3-B418-1F270DF61505}", "Mod", param_rate_mod, 1),
-    make_param_dsp_block(param_automate::automate), make_domain_item(wave_shape_type_items(false, true), "Saw"),
+    make_param_dsp_block(param_automate::automate), make_domain_item(wave_shape_type_items(wave_target::arp, true), "Saw"),
     make_param_gui_single(section_sample, gui_edit_type::autofit_list, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   rate_mod.info.description = "TODO";

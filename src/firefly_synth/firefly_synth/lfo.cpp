@@ -253,7 +253,7 @@ lfo_state_converter::handle_invalid_param_value(
     {
       // format is {guid}-{guid}-{guid}
       if (old_value.size() != 3 * 38 + 2) return false;
-      auto shape_items = wave_shape_type_items(false, _global);
+      auto shape_items = wave_shape_type_items(wave_target::lfo, _global);
       std::string old_shape_guid = old_value.substr(0, 38);
       
       // was smooth or fold
@@ -299,7 +299,7 @@ lfo_state_converter::handle_invalid_param_value(
     {
       // format is {guid}-{guid}-{guid}
       if (old_value.size() != 3 * 38 + 2) return false;
-      auto shape_items = wave_shape_type_items(false, _global);
+      auto shape_items = wave_shape_type_items(wave_target::lfo, _global);
       std::string old_shape_guid = old_value.substr(0, 38);
       for (int i = 0; i < shape_items.size(); i++)
         if (old_shape_guid == shape_items[i].id)
@@ -473,7 +473,7 @@ lfo_topo(int section, gui_position const& pos, bool global, bool is_fx)
   if(!global) shape_section.gui.merge_with_section = section_phase;
   auto& shape = result.params.emplace_back(make_param(
     make_topo_info_basic("{7D48C09B-AC99-4B88-B880-4633BC8DFB37}", "Shape", param_shape, 1),
-    make_param_dsp_automate_if_voice(!global), make_domain_item(wave_shape_type_items(false, global), "Sin"),
+    make_param_dsp_automate_if_voice(!global), make_domain_item(wave_shape_type_items(wave_target::lfo, global), "Sin"),
     make_param_gui_single(section_shape, gui_edit_type::autofit_list, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   shape.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });

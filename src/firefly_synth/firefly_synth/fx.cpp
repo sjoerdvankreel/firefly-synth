@@ -552,7 +552,7 @@ fx_state_converter::handle_invalid_param_value(
     {
       // format is {guid}-{guid}-{guid}
       if(old_value.size() != 3 * 38 + 2) return false;
-      auto shaper_items = wave_shape_type_items(true, _global);
+      auto shaper_items = wave_shape_type_items(wave_target::shaper, _global);
       std::string old_shaper_guid = old_value.substr(0, 38);
       for(int i = 0; i < shaper_items.size(); i++)
         if (old_shaper_guid == shaper_items[i].id)
@@ -900,7 +900,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
   dist_clip_expo.info.description = "Exponential clipper amount.";
   auto& dist_shaper = result.params.emplace_back(make_param(
     make_topo_info("{BFB5A04F-5372-4259-8198-6761BA52ADEB}", true, "Dist Shape", "Shp", "Dist Shape", param_dist_shaper, 1),
-    make_param_dsp_automate_if_voice(!global), make_domain_item(wave_shape_type_items(true, global), ""),
+    make_param_dsp_automate_if_voice(!global), make_domain_item(wave_shape_type_items(wave_target::shaper, global), ""),
     make_param_gui_single(section_dist_right, gui_edit_type::autofit_list, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   dist_shaper.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
