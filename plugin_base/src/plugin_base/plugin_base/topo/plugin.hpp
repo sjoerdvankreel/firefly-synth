@@ -35,7 +35,7 @@ struct preset_item
   std::string group;
 };
 
-typedef std::function<std::unique_ptr<arp_engine_base>(plugin_topo const*)>
+typedef std::function<std::unique_ptr<arp_engine_base>()>
 arpeggiator_factory;
 
 // global unison support
