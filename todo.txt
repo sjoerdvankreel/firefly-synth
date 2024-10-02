@@ -68,6 +68,7 @@ V controls5: the speed (in time / bars / both) + allow some randomization and/or
 X controls7: some kinda step editor ==> also instead can do hold & skip ? ==> scan & skip (e.g. scan 1, skip 0 plays as natural)
 V do some nice stuff with the global cv sources, they there for grabs already
 
+* lfo not usable ==> give it its own internal lfo, reset in table start
 * output the table pos as cv signal!
 * still not killing all the notes
 * still do something with note lengths/hold/stop/whatever ==> make the sequ
