@@ -344,7 +344,7 @@ plugin_engine::activate(int max_frame_count)
   if (_state.desc().plugin->engine.arpeggiator_module_index != -1)
   {
     assert(_state.desc().plugin->engine.arpeggiator_factory_);
-    _arpeggiator = _state.desc().plugin->engine.arpeggiator_factory_();
+    _arpeggiator = _state.desc().plugin->engine.arpeggiator_factory_(_state.desc().plugin);
   }
 }
 

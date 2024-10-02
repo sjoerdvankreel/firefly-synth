@@ -18,7 +18,7 @@ class osc_osc_matrix_fm_modulator;
 
 // arp support
 std::unique_ptr<plugin_base::arp_engine_base>
-make_arpeggiator();
+make_arpeggiator(plugin_base::plugin_topo const*);
 
 // shared custom output/repaint tags
 enum { custom_out_shared_render_for_cv_graph = 128 };
