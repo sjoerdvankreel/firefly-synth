@@ -19,7 +19,7 @@ enum {
 
 enum { 
   param_type, param_bounce, param_notes,
-  param_mode, param_flip, param_seed, param_selectTODO, // --> notes distance
+  param_mode, param_flip, param_seed, param_dist,
   param_sync, param_rate_hz, param_rate_tempo };
 
 enum { 
@@ -94,6 +94,7 @@ public arp_engine_base
   int _prev_mode = -1;
   int _prev_flip = -1;
   int _prev_seed = -1;
+  int _prev_dist = -1;
   int _prev_notes = -1;
   int _prev_bounce = -1;
 
@@ -178,13 +179,13 @@ arpeggiator_topo(int section, gui_position const& pos)
   seed.info.description = "TODO";
   seed.gui.bindings.visible.bind_params({ param_type, param_mode }, [](auto const& vs) { return is_random(vs[1]); });
   seed.gui.bindings.enabled.bind_params({ param_type, param_mode }, [](auto const& vs) { return vs[0] != type_off && is_random(vs[1]); });
-  auto& select = result.params.emplace_back(make_param(
-    make_topo_info_basic("{A14BBE4B-083D-44E8-B6EE-0600AC3F2138}", "Select", param_selectTODO, 1),
-    make_param_dsp_block(param_automate::automate), make_domain_toggle(false),
-    make_param_gui_single(section_table, gui_edit_type::toggle, { 1, 4 },
+  auto& dist = result.params.emplace_back(make_param(
+    make_topo_info_basic("{4EACE8F8-6B15-4336-9904-0375EE935CBD}", "Dist", param_dist, 1),
+    make_param_dsp_block(param_automate::automate), make_domain_step(1, 8, 1, 0),
+    make_param_gui_single(section_table, gui_edit_type::autofit_list, { 1, 4 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  select.info.description = "TODO";
-  select.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
+  dist.info.description = "TODO";
+  dist.gui.bindings.enabled.bind_params({ param_type, param_notes }, [](auto const& vs) { return vs[0] != type_off && vs[1] > 1; });
 
   result.sections.emplace_back(make_param_section(section_sample,
     make_topo_tag_basic("{63A54D7E-C4CE-4DFF-8E00-A9B8FAEC643E}", "Sample"),
@@ -267,17 +268,20 @@ arpeggiator_engine::process_notes(
   int type = block_auto[param_type][0].step();
   int mode = block_auto[param_mode][0].step();
   int seed = block_auto[param_seed][0].step();
+  int dist = block_auto[param_dist][0].step();
   int notes = block_auto[param_notes][0].step();
   int bounce = block_auto[param_bounce][0].step();
 
   // TODO for all params ??
   // maybe, but more probably only those that generate notes
-  if (type != _prev_type || mode != _prev_mode || flip != _prev_flip || notes != _prev_notes || seed != _prev_seed || bounce != _prev_bounce)
+  if (type != _prev_type || mode != _prev_mode || flip != _prev_flip || 
+    notes != _prev_notes || seed != _prev_seed || bounce != _prev_bounce || dist != _prev_dist)
   {
     _prev_type = type;
     _prev_mode = mode;
     _prev_flip = flip;
     _prev_seed = seed;
+    _prev_dist = dist;
     _prev_notes = notes;
     _prev_bounce = bounce;
     hard_reset(out);
@@ -465,7 +469,7 @@ arpeggiator_engine::process_notes(
           end_old.type = note_event_type::off;
           end_old.id.id = 0;
           end_old.id.channel = 0; 
-          end_old.id.key = _current_arp_note_table[(flipped_pos + i) % _current_arp_note_table.size()].midi_key;
+          end_old.id.key = _current_arp_note_table[(flipped_pos + i * dist) % _current_arp_note_table.size()].midi_key;
           out.push_back(end_old);
         }
       }
@@ -485,10 +489,10 @@ arpeggiator_engine::process_notes(
         note_event start_new = {};
         start_new.frame = f;
         start_new.type = note_event_type::on;
-        start_new.velocity = _current_arp_note_table[(flipped_pos + i) % _current_arp_note_table.size()].velocity;
+        start_new.velocity = _current_arp_note_table[(flipped_pos + i * dist) % _current_arp_note_table.size()].velocity;
         start_new.id.id = 0;
         start_new.id.channel = 0;
-        start_new.id.key = _current_arp_note_table[(flipped_pos + i) % _current_arp_note_table.size()].midi_key;
+        start_new.id.key = _current_arp_note_table[(flipped_pos + i * dist) % _current_arp_note_table.size()].midi_key;
         out.push_back(start_new);
       }
     }
