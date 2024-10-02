@@ -18,7 +18,7 @@ enum {
   section_table, section_sample, section_notes };
 
 enum {
-  param_type, param_bounce,
+  param_type, param_jump,
   param_mode, param_flip, param_seed,
   param_rate_hz, param_rate_tempo, param_sync,
   param_rate_mod, param_rate_mod_amt,
@@ -101,9 +101,9 @@ type_items()
   result.emplace_back("{20CDFF90-9D2D-4AFD-8138-1BCB61370F23}", "+1 Oct");
   result.emplace_back("{4935E002-3745-4097-887F-C8ED52213658}", "+2 Oct");
   result.emplace_back("{DCC943F4-5447-413F-B741-A83F2B84C259}", "+3 Oct");
-  result.emplace_back("{018FFDF0-AA2F-40BB-B449-34C8E93BCEB2}", "+/-1 Oct");
-  result.emplace_back("{E802C511-30E0-4B9B-A548-173D4C807AFF}", "+/-2 Oct");
-  result.emplace_back("{7EA59B15-D0AE-4B6F-8A04-0AA4630F5E39}", "+/-3 Oct");
+  result.emplace_back("{018FFDF0-AA2F-40BB-B449-34C8E93BCEB2}", "+/- 1");
+  result.emplace_back("{E802C511-30E0-4B9B-A548-173D4C807AFF}", "+/- 2");
+  result.emplace_back("{7EA59B15-D0AE-4B6F-8A04-0AA4630F5E39}", "+/- 3");
   return result;
 }
 
@@ -113,14 +113,14 @@ mode_items()
   std::vector<list_item> result;
   result.emplace_back("{25F4EF71-60E4-4F60-B613-8549C1BA074B}", "Up");
   result.emplace_back("{1772EDDE-6EC2-4F72-AC98-5B521AFB0EF1}", "Down");
-  result.emplace_back("{1ECA59EC-B4B5-4EE9-A1E8-0169E7F32BCC}", "Up Down 1");
-  result.emplace_back("{EB5FC7ED-DFA3-4DD5-A5F3-444469FDFBCF}", "Up Down 2");
-  result.emplace_back("{B48727A2-E886-43D4-906D-D87F5E7EE3CD}", "Down Up 1");
-  result.emplace_back("{86488834-DB23-4467-8EB6-4C4261989233}", "Down Up 2");
+  result.emplace_back("{1ECA59EC-B4B5-4EE9-A1E8-0169E7F32BCC}", "UpDn 1");
+  result.emplace_back("{EB5FC7ED-DFA3-4DD5-A5F3-444469FDFBCF}", "UpDn 2");
+  result.emplace_back("{B48727A2-E886-43D4-906D-D87F5E7EE3CD}", "DnUp 1");
+  result.emplace_back("{86488834-DB23-4467-8EB6-4C4261989233}", "DnUp 2");
   result.emplace_back("{C9095A2C-3F11-4C4B-A428-6DC948DFDB2C}", "Rnd");
-  result.emplace_back("{05A6B86C-1DCC-41F0-BE03-03B7D932FE5B}", "Fix Rnd");
-  result.emplace_back("{DC858447-2FB6-4081-BE94-4C3F9FB835EB}", "Rnd Free");
-  result.emplace_back("{39619505-DD48-4B91-92F4-5CDDBECC8872}", "Fix Rnd Free");
+  result.emplace_back("{05A6B86C-1DCC-41F0-BE03-03B7D932FE5B}", "FixRnd");
+  result.emplace_back("{DC858447-2FB6-4081-BE94-4C3F9FB835EB}", "RndFree");
+  result.emplace_back("{39619505-DD48-4B91-92F4-5CDDBECC8872}", "FixFree");
   return result;
 }
 
@@ -132,8 +132,8 @@ public arp_engine_base
   int _prev_flip = -1;
   int _prev_seed = -1;
   int _prev_dist = -1;
+  int _prev_jump = -1;
   int _prev_notes = -1;
-  int _prev_bounce = -1;
 
   int _table_pos = -1;
   int _note_remaining = 0;
@@ -189,13 +189,13 @@ arpeggiator_topo(plugin_topo const* topo, int section, gui_position const& pos)
     make_param_gui_single(section_table, gui_edit_type::autofit_list, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   type.info.description = "TODO";
-  auto& bounce = result.params.emplace_back(make_param(
-    make_topo_info_basic("{41D984D0-2ECA-463C-B32E-0548562658AE}", "Bounce", param_bounce, 1),
+  auto& jump = result.params.emplace_back(make_param(
+    make_topo_info_basic("{41D984D0-2ECA-463C-B32E-0548562658AE}", "Jmp", param_jump, 1),
     make_param_dsp_block(param_automate::automate), make_domain_toggle(false),
     make_param_gui_single(section_table, gui_edit_type::toggle, { 0, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  bounce.info.description = "TODO";
-  bounce.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
+  jump.info.description = "TODO";
+  jump.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   auto& mode = result.params.emplace_back(make_param(
     make_topo_info_basic("{BCE75C3A-85B8-4946-A06B-68F8F5F36785}", "Mode", param_mode, 1),
     make_param_dsp_block(param_automate::automate), make_domain_item(mode_items(), "Up"),
@@ -338,20 +338,20 @@ arpeggiator_engine::process_notes(
   int mode = block_auto[param_mode][0].step();
   int seed = block_auto[param_seed][0].step();
   int dist = block_auto[param_dist][0].step();
+  int jump = block_auto[param_jump][0].step();
   int notes = block_auto[param_notes][0].step();
-  int bounce = block_auto[param_bounce][0].step();
 
   // hard reset to make sure none of these are sticky
   if (type != _prev_type || mode != _prev_mode || flip != _prev_flip || 
-    notes != _prev_notes || seed != _prev_seed || bounce != _prev_bounce || dist != _prev_dist)
+    notes != _prev_notes || seed != _prev_seed || jump != _prev_jump || dist != _prev_dist)
   {
     _prev_type = type;
     _prev_mode = mode;
     _prev_flip = flip;
     _prev_seed = seed;
     _prev_dist = dist;
+    _prev_jump = jump;
     _prev_notes = notes;
-    _prev_bounce = bounce;
     hard_reset(out);
   }
 
@@ -492,8 +492,8 @@ arpeggiator_engine::process_notes(
       break;
     }
 
-    // STEP 4 bounce: cega -> cecgca
-    if (bounce != 0)
+    // STEP 4 jump: cega -> cecgca
+    if (jump != 0)
     {
       note_set_count = _current_arp_note_table.size();
       for (int i = 0; i < note_set_count - 2; i++)
