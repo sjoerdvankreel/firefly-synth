@@ -135,6 +135,7 @@ public arp_engine_base
   int _prev_flip = -1;
   int _prev_seed = -1;
   int _prev_dist = -1;
+  int _prev_sync = -1;
   int _prev_jump = -1;
   int _prev_notes = -1;
   int _prev_rate_mod = -1;
@@ -333,10 +334,6 @@ arpeggiator_engine::process_notes(
   // plugin_base clears on each round
   assert(out.size() == 0);
 
-  // e.g. if table is abcdefgh
-  // flip = 1 sequence is abcdefgh
-  // flip = 2 sequence is abdcefhg
-  // flip = 3 sequence is abcfedgh
   auto const& block_auto = block.state.own_block_automation;
   int flip = block_auto[param_flip][0].step();
   int type = block_auto[param_type][0].step();
@@ -344,12 +341,13 @@ arpeggiator_engine::process_notes(
   int seed = block_auto[param_seed][0].step();
   int dist = block_auto[param_dist][0].step();
   int jump = block_auto[param_jump][0].step();
+  int sync = block_auto[param_sync][0].step();
   int notes = block_auto[param_notes][0].step();
   int rate_mod = block_auto[param_rate_mod][0].step();
 
   // hard reset to make sure none of these are sticky
   if (type != _prev_type || mode != _prev_mode || flip != _prev_flip || rate_mod != _prev_rate_mod ||
-    notes != _prev_notes || seed != _prev_seed || jump != _prev_jump || dist != _prev_dist)
+    notes != _prev_notes || seed != _prev_seed || jump != _prev_jump || dist != _prev_dist || sync != _prev_sync)
   {
     _prev_type = type;
     _prev_mode = mode;
@@ -357,6 +355,7 @@ arpeggiator_engine::process_notes(
     _prev_seed = seed;
     _prev_dist = dist;
     _prev_jump = jump;
+    _prev_sync = sync;
     _prev_notes = notes;
     _prev_rate_mod = rate_mod;
     hard_reset(out);
@@ -523,7 +522,7 @@ arpeggiator_engine::process_notes(
 
   // how often to output new notes
   float rate_hz_base;
-  if (block_auto[param_sync][0].step() == 0)
+  if (sync == 0)
     rate_hz_base = block_auto[param_rate_hz][0].real();
   else
     rate_hz_base = timesig_to_freq(block.host.bpm, get_timesig_param_value(block, module_arpeggiator, param_rate_tempo));
@@ -559,12 +558,21 @@ arpeggiator_engine::process_notes(
         check_unipolar(mod_val);
         assert(min_mod_amt <= rate_mod_amt && rate_mod_amt <= max_mod_amt);
         float actual_mod_val = mod_val * rate_mod_amt;
-        rate_hz += (int)(actual_mod_val * rate_hz_base);
-      }
+        rate_hz += actual_mod_val * rate_hz_base;
 
-      // TODO quantize if synced
+        // if synced, make sure we are inv multiple of the bar size
+        if (sync)
+        {
+          int irate_hz = (int)rate_hz;
+          int irate_hz_base = (int)rate_hz_base;
+          int q = irate_hz % irate_hz_base;
+          int d = irate_hz / irate_hz_base;
+          int dir = q < irate_hz_base / 2 ? 0 : 1;
+          rate_hz = (d + dir) * irate_hz_base;
+        }
+      }      
+
       int rate_frames = block.sample_rate / rate_hz;
-
       _table_pos++;
       _note_remaining = rate_frames;
 
