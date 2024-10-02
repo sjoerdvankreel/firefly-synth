@@ -48,6 +48,10 @@ X controls6: the length (in time / bars / both) + allow some randomization and/o
 V do 4 random modes free yn/fix yn
 V do notes and select to first section
 V do "select" eg 1234  -> 12345, 12131415, 12123123412345 ==> next/bounce/build
+X do the lookahead window to bundle events
+X 16-step-seq
+X make global/voice in uppercase
+X or all tab headers in uppercase?
 
 * can do hold each N + release yea/no as mini-sequ bc no ui space
 * do simple mod-by for the "lfo" time?
@@ -59,6 +63,7 @@ V do "select" eg 1234  -> 12345, 12131415, 12123123412345 ==> next/bounce/build
 * order netjes de controls
 * can do note HOLD
 
+* do small graph under the VOICE OUT section
 * compare perf with regular play notes
 * controls0 => once build up the table: PLAY = forward/backward/random-and-or-cv-sampling => also starting table pos would be nice ? => also random start pos nice
 * controls1: off-up-down-updown-downup-random (with what prng? or maybe rand + global cv's) ==> not random, just any cv source. let user model with random GLFO
@@ -71,16 +76,13 @@ V do "select" eg 1234  -> 12345, 12131415, 12123123412345 ==> next/bounce/build
 * also maybe have some visualization! 
 * remove any mention of seq
 * check automation works
-* do the lookahead window to bundle events
-* 16-step-seq
 * do some nice stuff with the global cv sources, they there for grabs already
 * check if shows up in the docs
 * write the manual
 * the osc mod controls are tiny ?
 * add arp table pos as a mod source ==> yes do it
-* make global/voice in uppercase
 * reset is still no good
-* or all tab headers in uppercase?
+
 
 
 wishlist:
