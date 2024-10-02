@@ -52,39 +52,35 @@ X do the lookahead window to bundle events
 X 16-step-seq
 X make global/voice in uppercase
 X or all tab headers in uppercase?
+X can do hold each N + release yea/no as mini-sequ bc no ui space
+V do simple mod-by for the "lfo" time?
+X do something like note-mode + table-mode
+V do good tooltips
+X make a header section for the master section
+V order netjes de controls
+X can do note HOLD
+X do TOOLTIP when hover menu item
+V controls0 => once build up the table: PLAY = forward/backward/random-and-or-cv-sampling => also starting table pos would be nice ? => also random start pos nice
+V controls1: off-up-down-updown-downup-random (with what prng? or maybe rand + global cv's) ==> not random, just any cv source. let user model with random GLFO
+X controls3: the timing thingy
+X controls4: the not-so-sequencer thingy
+V controls5: the speed (in time / bars / both) + allow some randomization and/or global-cv?
+X controls7: some kinda step editor ==> also instead can do hold & skip ? ==> scan & skip (e.g. scan 1, skip 0 plays as natural)
+V do some nice stuff with the global cv sources, they there for grabs already
 
-* can do hold each N + release yea/no as mini-sequ bc no ui space
-* do simple mod-by for the "lfo" time?
-* do something like note-mode + table-mode
-* do good tooltips
+* output the table pos as cv signal!
 * still not killing all the notes
-* still do something with note lengths/hold/stop/whatever
-* make a header section for the master section
-* order netjes de controls
-* can do note HOLD
-
-* do TOOLTIP when hover menu item
+* still do something with note lengths/hold/stop/whatever ==> make the sequ
 * do small graph under the VOICE OUT section
 * compare perf with regular play notes
-* controls0 => once build up the table: PLAY = forward/backward/random-and-or-cv-sampling => also starting table pos would be nice ? => also random start pos nice
-* controls1: off-up-down-updown-downup-random (with what prng? or maybe rand + global cv's) ==> not random, just any cv source. let user model with random GLFO
-* controls3: the timing thingy
-* controls4: the not-so-sequencer thingy
-* controls5: the speed (in time / bars / both) + allow some randomization and/or global-cv?
-* controls7: some kinda step editor ==> also instead can do hold & skip ? ==> scan & skip (e.g. scan 1, skip 0 plays as natural)
-
-* jeez those lots of controls.
 * also maybe have some visualization! 
 * remove any mention of seq
 * check automation works
-* do some nice stuff with the global cv sources, they there for grabs already
 * check if shows up in the docs
 * write the manual
 * the osc mod controls are tiny ?
 * add arp table pos as a mod source ==> yes do it
 * reset is still no good
-
-
 
 wishlist:
 use fftw
