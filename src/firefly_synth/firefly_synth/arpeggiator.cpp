@@ -14,6 +14,9 @@ using namespace plugin_base;
  
 namespace firefly_synth {
 
+static float const min_mod_amt = 0.1f;
+static float const max_mod_amt = 10.0f;
+
 enum { 
   section_table, section_notes, section_sample };
 
@@ -134,6 +137,7 @@ public arp_engine_base
   int _prev_dist = -1;
   int _prev_jump = -1;
   int _prev_notes = -1;
+  int _prev_rate_mod = -1;
 
   int _table_pos = -1;
   int _note_remaining = 0;
@@ -162,6 +166,7 @@ make_arpeggiator(plugin_topo const* topo)
 { 
   std::vector<list_item> rate_mod_items;
   std::vector<module_output_mapping> rate_mod_output_mappings;
+  make_rate_mod_items(topo, rate_mod_items, rate_mod_output_mappings);
   return std::make_unique<arpeggiator_engine>(rate_mod_output_mappings);
 }
 
@@ -277,7 +282,7 @@ arpeggiator_topo(plugin_topo const* topo, int section, gui_position const& pos)
   rate_mod.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   auto& rate_mod_amt = result.params.emplace_back(make_param(
     make_topo_info_basic("{90A4DCE9-9EEA-4156-AC9F-DAD82ED33048}", "Amt", param_rate_mod_amt, 1),
-    make_param_dsp_block(param_automate::automate), make_domain_percentage(0, 10, 1, 0, true),
+    make_param_dsp_block(param_automate::automate), make_domain_percentage(min_mod_amt, max_mod_amt, 1, 0, true),
     make_param_gui_single(section_sample, gui_edit_type::knob, { 1, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   rate_mod_amt.info.description = "TODO";
@@ -340,9 +345,10 @@ arpeggiator_engine::process_notes(
   int dist = block_auto[param_dist][0].step();
   int jump = block_auto[param_jump][0].step();
   int notes = block_auto[param_notes][0].step();
+  int rate_mod = block_auto[param_rate_mod][0].step();
 
   // hard reset to make sure none of these are sticky
-  if (type != _prev_type || mode != _prev_mode || flip != _prev_flip || 
+  if (type != _prev_type || mode != _prev_mode || flip != _prev_flip || rate_mod != _prev_rate_mod ||
     notes != _prev_notes || seed != _prev_seed || jump != _prev_jump || dist != _prev_dist)
   {
     _prev_type = type;
@@ -352,6 +358,7 @@ arpeggiator_engine::process_notes(
     _prev_dist = dist;
     _prev_jump = jump;
     _prev_notes = notes;
+    _prev_rate_mod = rate_mod;
     hard_reset(out);
   }
 
@@ -504,13 +511,23 @@ arpeggiator_engine::process_notes(
   if (_current_arp_note_table.size() == 0)
     return;
 
+  // rate modulator, if in use
+  float rate_mod_amt = 0.0f;
+  jarray<float, 1> const* rate_mod_source = nullptr;
+  if (rate_mod != 0)
+  {
+    auto const& map = _rate_mod_output_mappings[rate_mod];
+    rate_mod_amt = block.state.own_block_automation[param_rate_mod_amt][0].real();
+    rate_mod_source = &block.module_cv(map.module_index, map.module_slot)[map.output_index][map.output_slot];
+  }
+
   // how often to output new notes
   float rate_hz;
   if (block_auto[param_sync][0].step() == 0)
     rate_hz = block_auto[param_rate_hz][0].real();
   else
     rate_hz = timesig_to_freq(block.host.bpm, get_timesig_param_value(block, module_arpeggiator, param_rate_tempo));
-  int rate_frames = block.sample_rate / rate_hz;
+  int rate_frames_base = block.sample_rate / rate_hz;
 
   // keep looping through the table, 
   // taking the flip parameter into account
@@ -535,15 +552,26 @@ arpeggiator_engine::process_notes(
         }
       }
 
+      // apply modulation to arp rate
+      int rate_frames = rate_frames_base;
+      if (rate_mod != 0)
+      {
+        float mod_val = (*rate_mod_source)[f];
+        check_unipolar(mod_val);
+        assert(min_mod_amt <= rate_mod_amt && rate_mod_amt <= max_mod_amt);
+        float actual_mod_val = mod_val * rate_mod_amt;
+        rate_frames += (int)(actual_mod_val * rate_frames_base);
+      }
+
       _table_pos++;
       _note_remaining = rate_frames;
-      flipped_pos = is_random(mode) ? _table_pos : flipped_table_pos();
 
-      // TODO make the time continuous rate a modulatable target
       // TODO this better works WRT to note-off events ?
-      if(mode == mode_rand_free || mode == mode_fixrand_free)
-        if(_table_pos % _current_arp_note_table.size() == 0)
+      if (mode == mode_rand_free || mode == mode_fixrand_free)
+        if (_table_pos % _current_arp_note_table.size() == 0)
           std::shuffle(_current_arp_note_table.begin(), _current_arp_note_table.end(), _random);
+
+      flipped_pos = is_random(mode) ? _table_pos : flipped_table_pos();
 
       for (int i = 0; i < notes; i++)
       {
