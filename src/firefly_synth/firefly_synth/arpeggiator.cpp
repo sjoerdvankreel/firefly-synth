@@ -522,12 +522,11 @@ arpeggiator_engine::process_notes(
   }
 
   // how often to output new notes
-  float rate_hz;
+  float rate_hz_base;
   if (block_auto[param_sync][0].step() == 0)
-    rate_hz = block_auto[param_rate_hz][0].real();
+    rate_hz_base = block_auto[param_rate_hz][0].real();
   else
-    rate_hz = timesig_to_freq(block.host.bpm, get_timesig_param_value(block, module_arpeggiator, param_rate_tempo));
-  int rate_frames_base = block.sample_rate / rate_hz;
+    rate_hz_base = timesig_to_freq(block.host.bpm, get_timesig_param_value(block, module_arpeggiator, param_rate_tempo));
 
   // keep looping through the table, 
   // taking the flip parameter into account
@@ -553,15 +552,18 @@ arpeggiator_engine::process_notes(
       }
 
       // apply modulation to arp rate
-      int rate_frames = rate_frames_base;
+      float rate_hz = rate_hz_base;
       if (rate_mod != 0)
       {
         float mod_val = (*rate_mod_source)[f];
         check_unipolar(mod_val);
         assert(min_mod_amt <= rate_mod_amt && rate_mod_amt <= max_mod_amt);
         float actual_mod_val = mod_val * rate_mod_amt;
-        rate_frames += (int)(actual_mod_val * rate_frames_base);
+        rate_hz += (int)(actual_mod_val * rate_hz_base);
       }
+
+      // TODO quantize if synced
+      int rate_frames = block.sample_rate / rate_hz;
 
       _table_pos++;
       _note_remaining = rate_frames;
