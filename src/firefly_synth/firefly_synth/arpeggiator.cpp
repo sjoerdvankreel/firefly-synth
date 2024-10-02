@@ -102,7 +102,6 @@ public arp_engine_base
   int _note_remaining = 0;
   std::default_random_engine _random = {};
 
-  std::int64_t _start_time = 0; // TODO??
   std::array<arp_user_note, 128> _current_user_chord = {};
   std::vector<arp_table_note> _current_arp_note_table = {};
 
@@ -272,8 +271,7 @@ arpeggiator_engine::process_notes(
   int notes = block_auto[param_notes][0].step();
   int bounce = block_auto[param_bounce][0].step();
 
-  // TODO for all params ??
-  // maybe, but more probably only those that generate notes
+  // hard reset to make sure none of these are sticky
   if (type != _prev_type || mode != _prev_mode || flip != _prev_flip || 
     notes != _prev_notes || seed != _prev_seed || bounce != _prev_bounce || dist != _prev_dist)
   {
@@ -293,18 +291,11 @@ arpeggiator_engine::process_notes(
     return;
   }
   
-  // todo do the reset-on-event-thing
-  // todo do the lookahead window thing / allow some time to accumulate the table
-  // buildup thing is for hw keyboards as i doubt anyone can hit keys sample-accurate
-  // TODO allow to cut vs off
-  
   // this assumes notes are ordered by stream pos
-  int table_changed_frame = 0; // TODO something with this
-  bool table_changed = false; // make this TODO a bit more lenient
+  bool table_changed = false;
   for (int i = 0; i < in.size(); i++)
   {
     table_changed = true;
-    table_changed_frame = in[i].frame;
     if (in[i].type == note_event_type::on)
     {
       _current_user_chord[in[i].id.key].on = true;
@@ -431,7 +422,7 @@ arpeggiator_engine::process_notes(
       break;
     }
 
-    // cega -> cecgca
+    // STEP 4 bounce: cega -> cecgca
     if (bounce != 0)
     {
       note_set_count = _current_arp_note_table.size();
@@ -451,8 +442,8 @@ arpeggiator_engine::process_notes(
     rate_hz = timesig_to_freq(block.host.bpm, get_timesig_param_value(block, module_arpeggiator, param_rate_tempo));
   int rate_frames = block.sample_rate / rate_hz;
 
-  // TODO what would actually happen when "play chord", release, wait, "play chord"
-  // TODO stuff with actual start pos of the table as based on note event frame ??
+  // keep looping through the table, 
+  // taking the flip parameter into account
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
     int flipped_pos;
