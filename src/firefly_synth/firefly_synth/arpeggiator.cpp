@@ -19,18 +19,16 @@ enum {
 
 enum { 
   param_type, param_flip, param_notes,
-  param_mode, param_seed, param_select, 
+  param_mode, param_seed, param_selectTODO, 
   param_sync, param_rate_hz, param_rate_tempo };
 
 enum { 
   mode_up, mode_down,
+  mode_bounce_up, mode_bounce_down,
   mode_up_down1, mode_up_down2,
   mode_down_up1, mode_down_up2,
   mode_rand, mode_fixrand,
   mode_rand_free, mode_fixrand_free };
-
-enum { 
-   select_next, select_bounce, select_build };
 
 enum { 
   type_off, type_straight, 
@@ -63,7 +61,7 @@ type_items()
 {
   std::vector<list_item> result;
   result.emplace_back("{70109417-1525-48A6-AE1D-7AB0E5765310}", "Off");
-  result.emplace_back("{85A091D9-1283-4E67-961E-48C57BC68EB7}", "Straight");
+  result.emplace_back("{85A091D9-1283-4E67-961E-48C57BC68EB7}", "Plain");
   result.emplace_back("{20CDFF90-9D2D-4AFD-8138-1BCB61370F23}", "+1 Oct");
   result.emplace_back("{4935E002-3745-4097-887F-C8ED52213658}", "+2 Oct");
   result.emplace_back("{DCC943F4-5447-413F-B741-A83F2B84C259}", "+3 Oct");
@@ -79,24 +77,16 @@ mode_items()
   std::vector<list_item> result;
   result.emplace_back("{25F4EF71-60E4-4F60-B613-8549C1BA074B}", "Up");
   result.emplace_back("{1772EDDE-6EC2-4F72-AC98-5B521AFB0EF1}", "Down");
-  result.emplace_back("{1ECA59EC-B4B5-4EE9-A1E8-0169E7F32BCC}", "UpDown1");
-  result.emplace_back("{EB5FC7ED-DFA3-4DD5-A5F3-444469FDFBCF}", "UpDown2");
-  result.emplace_back("{B48727A2-E886-43D4-906D-D87F5E7EE3CD}", "DownUp1");
-  result.emplace_back("{86488834-DB23-4467-8EB6-4C4261989233}", "DownUp2");
+  result.emplace_back("{7FB23D5F-A803-4B83-A5A7-7ADD2891C0D4}", "Bounce Up");
+  result.emplace_back("{7753051E-39B0-4BB5-BB71-F884191901AE}", "Bounce Down");
+  result.emplace_back("{1ECA59EC-B4B5-4EE9-A1E8-0169E7F32BCC}", "Up Down 1");
+  result.emplace_back("{EB5FC7ED-DFA3-4DD5-A5F3-444469FDFBCF}", "Up Down 2");
+  result.emplace_back("{B48727A2-E886-43D4-906D-D87F5E7EE3CD}", "Down Up 1");
+  result.emplace_back("{86488834-DB23-4467-8EB6-4C4261989233}", "Down Up 2");
   result.emplace_back("{C9095A2C-3F11-4C4B-A428-6DC948DFDB2C}", "Rnd");
-  result.emplace_back("{05A6B86C-1DCC-41F0-BE03-03B7D932FE5B}", "FixRnd");
-  result.emplace_back("{DC858447-2FB6-4081-BE94-4C3F9FB835EB}", "RndFree");
-  result.emplace_back("{39619505-DD48-4B91-92F4-5CDDBECC8872}", "FixRndFree");
-  return result;
-}
-
-static std::vector<list_item>
-select_items()
-{
-  std::vector<list_item> result;
-  result.emplace_back("{32273957-A301-4598-8366-042B2BF5A2C1}", "Next");
-  result.emplace_back("{15B75008-8C62-416E-8EF3-A2CBBC84EE8F}", "Bounce");
-  result.emplace_back("{B02E7C57-C141-4DA7-A97A-40324D9A88ED}", "Build");
+  result.emplace_back("{05A6B86C-1DCC-41F0-BE03-03B7D932FE5B}", "Fix Rnd");
+  result.emplace_back("{DC858447-2FB6-4081-BE94-4C3F9FB835EB}", "Rnd Free");
+  result.emplace_back("{39619505-DD48-4B91-92F4-5CDDBECC8872}", "Fix Rnd Free");
   return result;
 }
 
@@ -108,7 +98,6 @@ public arp_engine_base
   int _prev_flip = -1;
   int _prev_seed = -1;
   int _prev_notes = -1;
-  int _prev_select = -1;
 
   int _table_pos = -1;
   int _note_remaining = 0;
@@ -119,7 +108,6 @@ public arp_engine_base
   std::vector<arp_table_note> _current_arp_note_table = {};
 
   int flipped_table_pos() const;
-  int selected_table_pos(int flipped_pos) const;
   void hard_reset(std::vector<note_event>& out);
 
 public:
@@ -184,9 +172,9 @@ arpeggiator_topo(int section, gui_position const& pos)
   seed.info.description = "TODO";
   seed.gui.bindings.enabled.bind_params({ param_type, param_mode }, [](auto const& vs) { return vs[0] != type_off && is_random(vs[1]); });
   auto& select = result.params.emplace_back(make_param(
-    make_topo_info_basic("{A14BBE4B-083D-44E8-B6EE-0600AC3F2138}", "Select", param_select, 1),
-    make_param_dsp_block(param_automate::automate), make_domain_item(select_items(), "Next"),
-    make_param_gui_single(section_table, gui_edit_type::autofit_list, { 1, 4 },
+    make_topo_info_basic("{A14BBE4B-083D-44E8-B6EE-0600AC3F2138}", "Select", param_selectTODO, 1),
+    make_param_dsp_block(param_automate::automate), make_domain_toggle(false),
+    make_param_gui_single(section_table, gui_edit_type::toggle, { 1, 4 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   select.info.description = "TODO";
   select.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
@@ -254,20 +242,6 @@ arpeggiator_engine::flipped_table_pos() const
   return result;
 }
 
-int
-arpeggiator_engine::selected_table_pos(int flipped_pos) const
-{
-  if (_prev_select == select_next)
-    return flipped_pos;
-  if (_prev_select == select_bounce)
-  {
-    if (flipped_pos % 2 == 0) return 0;
-    return ((flipped_pos + 1) / 2) % _current_arp_note_table.size();
-  }
-  assert(false);
-  return 0;
-}
-
 void 
 arpeggiator_engine::process_notes(
   plugin_block const& block,
@@ -287,18 +261,16 @@ arpeggiator_engine::process_notes(
   int mode = block_auto[param_mode][0].step();
   int seed = block_auto[param_seed][0].step();
   int notes = block_auto[param_notes][0].step();
-  int select = block_auto[param_select][0].step();
 
   // TODO for all params ??
   // maybe, but more probably only those that generate notes
-  if (type != _prev_type || mode != _prev_mode || flip != _prev_flip || notes != _prev_notes || seed != _prev_seed || _prev_select != select)
+  if (type != _prev_type || mode != _prev_mode || flip != _prev_flip || notes != _prev_notes || seed != _prev_seed)
   {
     _prev_type = type;
     _prev_mode = mode;
     _prev_flip = flip;
     _prev_seed = seed;
     _prev_notes = notes;
-    _prev_select = select;
     hard_reset(out);
   }
 
@@ -410,8 +382,6 @@ arpeggiator_engine::process_notes(
     int note_set_count = _current_arp_note_table.size();
     switch (mode)
     {
-    case mode_up:
-      break; // already sorted
     case mode_rand:
     case mode_fixrand:
     case mode_rand_free:
@@ -420,8 +390,19 @@ arpeggiator_engine::process_notes(
         _random.seed(seed);
       std::shuffle(_current_arp_note_table.begin(), _current_arp_note_table.end(), _random);
       break;
+    case mode_up:
+      break; // already sorted
     case mode_down:
       std::reverse(_current_arp_note_table.begin(), _current_arp_note_table.end());
+      break;
+    case mode_bounce_up: // cega -> cecgca
+      for (int i = 0; i < note_set_count - 2; i++)
+        _current_arp_note_table.insert(_current_arp_note_table.begin() + 2 + 2 * i, _current_arp_note_table[0]);
+      break;
+    case mode_bounce_down: // cega -> agaeac
+      std::reverse(_current_arp_note_table.begin(), _current_arp_note_table.end());
+      for (int i = 0; i < note_set_count - 2; i++)
+        _current_arp_note_table.insert(_current_arp_note_table.begin() + 2 + 2 * i, _current_arp_note_table[0]);
       break;
     case mode_up_down1: // excluding first/last (ceg->cege)
       for (int i = note_set_count - 2; i >= 1; i--)
@@ -463,13 +444,11 @@ arpeggiator_engine::process_notes(
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
     int flipped_pos;
-    int selected_pos;
     if (_note_remaining == 0)
     {
       if (_table_pos != -1)
       {
         flipped_pos = flipped_table_pos();
-        selected_pos = selected_table_pos(flipped_pos);
         for (int i = 0; i < notes; i++)
         {
           note_event end_old = {};
@@ -478,7 +457,7 @@ arpeggiator_engine::process_notes(
           end_old.type = note_event_type::off;
           end_old.id.id = 0;
           end_old.id.channel = 0; 
-          end_old.id.key = _current_arp_note_table[(selected_pos + i) % _current_arp_note_table.size()].midi_key;
+          end_old.id.key = _current_arp_note_table[(flipped_pos + i) % _current_arp_note_table.size()].midi_key;
           out.push_back(end_old);
         }
       }
@@ -486,7 +465,6 @@ arpeggiator_engine::process_notes(
       _table_pos++;
       _note_remaining = rate_frames;
       flipped_pos = flipped_table_pos();
-      selected_pos = selected_table_pos(flipped_pos);
 
       // TODO make the time continuous rate a modulatable target
       // TODO this better works WRT to note-off events ?
@@ -499,10 +477,10 @@ arpeggiator_engine::process_notes(
         note_event start_new = {};
         start_new.frame = f;
         start_new.type = note_event_type::on;
-        start_new.velocity = _current_arp_note_table[(selected_pos + i) % _current_arp_note_table.size()].velocity;
+        start_new.velocity = _current_arp_note_table[(flipped_pos + i) % _current_arp_note_table.size()].velocity;
         start_new.id.id = 0;
         start_new.id.channel = 0;
-        start_new.id.key = _current_arp_note_table[(selected_pos + i) % _current_arp_note_table.size()].midi_key;
+        start_new.id.key = _current_arp_note_table[(flipped_pos + i) % _current_arp_note_table.size()].midi_key;
         out.push_back(start_new);
       }
     }
