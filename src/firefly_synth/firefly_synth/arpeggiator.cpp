@@ -15,13 +15,14 @@ using namespace plugin_base;
 namespace firefly_synth {
 
 enum { 
-  section_table, section_sample };
+  section_table, section_sample, section_notes };
 
 enum {
-  param_type, param_bounce, param_notes,
-  param_mode, param_flip, param_seed, param_dist,
+  param_type, param_bounce,
+  param_mode, param_flip, param_seed,
   param_rate_hz, param_rate_tempo, param_sync,
-  param_rate_mod, param_rate_mod_amt };
+  param_rate_mod, param_rate_mod_amt,
+  param_notes, param_dist };
 
 enum { 
   mode_up, mode_down,
@@ -174,14 +175,14 @@ arpeggiator_topo(plugin_topo const* topo, int section, gui_position const& pos)
   module_topo result(make_module(
     make_topo_info_basic("{8A09B4CD-9768-4504-B9FE-5447B047854B}", "ARP / SEQ", module_arpeggiator, 1),
     make_module_dsp(module_stage::input, module_output::none, 0, {}),
-    make_module_gui(section, pos, { { 1 }, { 9, 7 } })));
+    make_module_gui(section, pos, { { 1 }, { 24, 28, 11 } })));
   result.info.description = "Arpeggiator / Sequencer.";
 
   result.sections.emplace_back(make_param_section(section_table,
     make_topo_tag_basic("{6779AFA8-E0FE-482F-989B-6DE07263AEED}", "Table"),
     make_param_section_gui({ 0, 0 }, { { 1, 1 }, { 
-      gui_dimension::auto_size_all, gui_dimension::auto_size_all, gui_dimension::auto_size_all,
-      gui_dimension::auto_size_all, gui_dimension::auto_size_all, 1 } }, gui_label_edit_cell_split::horizontal)));
+      gui_dimension::auto_size_all, gui_dimension::auto_size_all, 
+      gui_dimension::auto_size_all, 1 } }, gui_label_edit_cell_split::horizontal)));
   auto& type = result.params.emplace_back(make_param(
     make_topo_info_basic("{FF418A06-2017-4C23-BC65-19FAF226ABE8}", "Type", param_type, 1),
     make_param_dsp_block(param_automate::automate), make_domain_item(type_items(), "Off"),
@@ -195,13 +196,6 @@ arpeggiator_topo(plugin_topo const* topo, int section, gui_position const& pos)
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   bounce.info.description = "TODO";
   bounce.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
-  auto& notes = result.params.emplace_back(make_param(
-    make_topo_info_basic("{9E464846-650B-42DC-9E45-D8AFA2BADBDB}", "Notes", param_notes, 1),
-    make_param_dsp_block(param_automate::automate), make_domain_step(1, 4, 1, 0),
-    make_param_gui_single(section_table, gui_edit_type::autofit_list, { 0, 4 },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  notes.info.description = "TODO";
-  notes.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   auto& mode = result.params.emplace_back(make_param(
     make_topo_info_basic("{BCE75C3A-85B8-4946-A06B-68F8F5F36785}", "Mode", param_mode, 1),
     make_param_dsp_block(param_automate::automate), make_domain_item(mode_items(), "Up"),
@@ -225,13 +219,6 @@ arpeggiator_topo(plugin_topo const* topo, int section, gui_position const& pos)
   seed.info.description = "TODO";
   seed.gui.bindings.visible.bind_params({ param_type, param_mode }, [](auto const& vs) { return is_random(vs[1]); });
   seed.gui.bindings.enabled.bind_params({ param_type, param_mode }, [](auto const& vs) { return vs[0] != type_off && is_random(vs[1]); });
-  auto& dist = result.params.emplace_back(make_param(
-    make_topo_info_basic("{4EACE8F8-6B15-4336-9904-0375EE935CBD}", "Dist", param_dist, 1),
-    make_param_dsp_block(param_automate::automate), make_domain_step(1, 8, 1, 0),
-    make_param_gui_single(section_table, gui_edit_type::autofit_list, { 1, 4 },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  dist.info.description = "TODO";
-  dist.gui.bindings.enabled.bind_params({ param_type, param_notes }, [](auto const& vs) { return vs[0] != type_off && vs[1] > 1; });
 
   result.sections.emplace_back(make_param_section(section_sample,
     make_topo_tag_basic("{63A54D7E-C4CE-4DFF-8E00-A9B8FAEC643E}", "Sample"),
@@ -276,6 +263,25 @@ arpeggiator_topo(plugin_topo const* topo, int section, gui_position const& pos)
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   rate_mod_amt.info.description = "TODO";
   rate_mod_amt.gui.bindings.enabled.bind_params({ param_type, param_rate_mod }, [](auto const& vs) { return vs[0] != type_off && vs[1] != 0; });
+
+  result.sections.emplace_back(make_param_section(section_notes,
+    make_topo_tag_basic("{46584D75-5785-4475-A7E5-1EDEB3E925B1}", "Notes"),
+    make_param_section_gui({ 0, 2 }, { { 1, 1 }, {
+      gui_dimension::auto_size_all, 1 } }, gui_label_edit_cell_split::horizontal)));
+  auto& notes = result.params.emplace_back(make_param(
+    make_topo_info_basic("{9E464846-650B-42DC-9E45-D8AFA2BADBDB}", "Notes", param_notes, 1),
+    make_param_dsp_block(param_automate::automate), make_domain_step(1, 4, 1, 0),
+    make_param_gui_single(section_notes, gui_edit_type::autofit_list, { 0, 0 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
+  notes.info.description = "TODO";
+  notes.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
+  auto& dist = result.params.emplace_back(make_param(
+    make_topo_info_basic("{4EACE8F8-6B15-4336-9904-0375EE935CBD}", "Dist", param_dist, 1),
+    make_param_dsp_block(param_automate::automate), make_domain_step(1, 8, 1, 0),
+    make_param_gui_single(section_notes, gui_edit_type::autofit_list, { 1, 0 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
+  dist.info.description = "TODO";
+  dist.gui.bindings.enabled.bind_params({ param_type, param_notes }, [](auto const& vs) { return vs[0] != type_off && vs[1] > 1; });
 
   return result;
 }         
