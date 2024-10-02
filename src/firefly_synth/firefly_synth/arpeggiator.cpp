@@ -269,8 +269,8 @@ arpeggiator_topo(plugin_topo const* topo, int section, gui_position const& pos)
   rate_mod.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   auto& rate_mod_amt = result.params.emplace_back(make_param(
     make_topo_info_basic("{90A4DCE9-9EEA-4156-AC9F-DAD82ED33048}", "Amt", param_rate_mod_amt, 1),
-    make_param_dsp_block(param_automate::automate), make_domain_toggle(true),
-    make_param_gui_single(section_sample, gui_edit_type::toggle, { 1, 1 },
+    make_param_dsp_block(param_automate::automate), make_domain_percentage(0, 10, 1, 0, true),
+    make_param_gui_single(section_sample, gui_edit_type::knob, { 1, 1 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   rate_mod_amt.info.description = "TODO";
   rate_mod_amt.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
