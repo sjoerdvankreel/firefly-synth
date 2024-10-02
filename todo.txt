@@ -63,6 +63,7 @@ X or all tab headers in uppercase?
 * order netjes de controls
 * can do note HOLD
 
+* do TOOLTIP when hover menu item
 * do small graph under the VOICE OUT section
 * compare perf with regular play notes
 * controls0 => once build up the table: PLAY = forward/backward/random-and-or-cv-sampling => also starting table pos would be nice ? => also random start pos nice

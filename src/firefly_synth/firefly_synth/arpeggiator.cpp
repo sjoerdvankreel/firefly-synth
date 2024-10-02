@@ -99,14 +99,14 @@ static std::vector<list_item>
 type_items()
 {
   std::vector<list_item> result;
-  result.emplace_back("{70109417-1525-48A6-AE1D-7AB0E5765310}", "Off");
-  result.emplace_back("{85A091D9-1283-4E67-961E-48C57BC68EB7}", "Plain");
-  result.emplace_back("{20CDFF90-9D2D-4AFD-8138-1BCB61370F23}", "+1 Oct");
-  result.emplace_back("{4935E002-3745-4097-887F-C8ED52213658}", "+2 Oct");
-  result.emplace_back("{DCC943F4-5447-413F-B741-A83F2B84C259}", "+3 Oct");
-  result.emplace_back("{018FFDF0-AA2F-40BB-B449-34C8E93BCEB2}", "+/- 1");
-  result.emplace_back("{E802C511-30E0-4B9B-A548-173D4C807AFF}", "+/- 2");
-  result.emplace_back("{7EA59B15-D0AE-4B6F-8A04-0AA4630F5E39}", "+/- 3");
+  result.emplace_back("{70109417-1525-48A6-AE1D-7AB0E5765310}", "Off", "Off");
+  result.emplace_back("{85A091D9-1283-4E67-961E-48C57BC68EB7}", "Plain", "Chord plain");
+  result.emplace_back("{20CDFF90-9D2D-4AFD-8138-1BCB61370F23}", "+1 Oct", "Chord + 1 octave up");
+  result.emplace_back("{4935E002-3745-4097-887F-C8ED52213658}", "+2 Oct", "Chord + 2 octaves up");
+  result.emplace_back("{DCC943F4-5447-413F-B741-A83F2B84C259}", "+3 Oct", "Chord + 3 octaves up");
+  result.emplace_back("{018FFDF0-AA2F-40BB-B449-34C8E93BCEB2}", "+/- 1", "Chord + 1 octave up/down");
+  result.emplace_back("{E802C511-30E0-4B9B-A548-173D4C807AFF}", "+/- 2", "Chord + 2 octaves up/down");
+  result.emplace_back("{7EA59B15-D0AE-4B6F-8A04-0AA4630F5E39}", "+/- 3", "Chord + 3 octaves up/down");
   return result;
 }
 
@@ -114,16 +114,16 @@ static std::vector<list_item>
 mode_items()
 {
   std::vector<list_item> result;
-  result.emplace_back("{25F4EF71-60E4-4F60-B613-8549C1BA074B}", "Up");
-  result.emplace_back("{1772EDDE-6EC2-4F72-AC98-5B521AFB0EF1}", "Down");
-  result.emplace_back("{1ECA59EC-B4B5-4EE9-A1E8-0169E7F32BCC}", "UpDn 1");
-  result.emplace_back("{EB5FC7ED-DFA3-4DD5-A5F3-444469FDFBCF}", "UpDn 2");
-  result.emplace_back("{B48727A2-E886-43D4-906D-D87F5E7EE3CD}", "DnUp 1");
-  result.emplace_back("{86488834-DB23-4467-8EB6-4C4261989233}", "DnUp 2");
-  result.emplace_back("{C9095A2C-3F11-4C4B-A428-6DC948DFDB2C}", "Rnd");
-  result.emplace_back("{05A6B86C-1DCC-41F0-BE03-03B7D932FE5B}", "FixRnd");
-  result.emplace_back("{DC858447-2FB6-4081-BE94-4C3F9FB835EB}", "RndFree");
-  result.emplace_back("{39619505-DD48-4B91-92F4-5CDDBECC8872}", "FixFree");
+  result.emplace_back("{25F4EF71-60E4-4F60-B613-8549C1BA074B}", "Up", "Low to high");
+  result.emplace_back("{1772EDDE-6EC2-4F72-AC98-5B521AFB0EF1}", "Down", "High to low");
+  result.emplace_back("{1ECA59EC-B4B5-4EE9-A1E8-0169E7F32BCC}", "UpDn 1", "Low to high to low, don't repeat first and last");
+  result.emplace_back("{EB5FC7ED-DFA3-4DD5-A5F3-444469FDFBCF}", "UpDn 2", "Low to high to low, repeat first and last");
+  result.emplace_back("{B48727A2-E886-43D4-906D-D87F5E7EE3CD}", "DnUp 1", "High to low to high, don't repeat first and last");
+  result.emplace_back("{86488834-DB23-4467-8EB6-4C4261989233}", "DnUp 2", "High to low to high, repeat first and last");
+  result.emplace_back("{C9095A2C-3F11-4C4B-A428-6DC948DFDB2C}", "Rnd", "New pattern on chord, fix pattern on repeat");
+  result.emplace_back("{05A6B86C-1DCC-41F0-BE03-03B7D932FE5B}", "FixRnd", "Fix pattern on chord, fix pattern on repeat");
+  result.emplace_back("{DC858447-2FB6-4081-BE94-4C3F9FB835EB}", "RndFree", "New pattern on chord, new pattern on repeat");
+  result.emplace_back("{39619505-DD48-4B91-92F4-5CDDBECC8872}", "FixFree", "Fix pattern on chord, new pattern on repeat");
   return result;
 }
 
