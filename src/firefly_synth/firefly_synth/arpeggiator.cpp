@@ -273,7 +273,7 @@ arpeggiator_topo(plugin_topo const* topo, int section, gui_position const& pos)
     make_param_gui_single(section_sample, gui_edit_type::knob, { 1, 1 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   rate_mod_amt.info.description = "TODO";
-  rate_mod_amt.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
+  rate_mod_amt.gui.bindings.enabled.bind_params({ param_type, param_rate_mod }, [](auto const& vs) { return vs[0] != type_off && vs[1] != 0; });
 
   return result;
 }         
