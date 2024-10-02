@@ -231,14 +231,14 @@ arpeggiator_topo(plugin_topo const* topo, int section, gui_position const& pos)
     make_param_section_gui({ 0, 1 }, { { 1, 1 }, {
       gui_dimension::auto_size_all, 1 } }, gui_label_edit_cell_split::horizontal)));
   auto& notes = result.params.emplace_back(make_param(
-    make_topo_info_basic("{9E464846-650B-42DC-9E45-D8AFA2BADBDB}", "Notes", param_notes, 1),
+    make_topo_info("{9E464846-650B-42DC-9E45-D8AFA2BADBDB}", true, "Note Count", "Notes", "Notes", param_notes, 1),
     make_param_dsp_block(param_automate::automate), make_domain_step(1, 4, 1, 0),
     make_param_gui_single(section_notes, gui_edit_type::autofit_list, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   notes.info.description = "TODO";
   notes.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   auto& dist = result.params.emplace_back(make_param(
-    make_topo_info_basic("{4EACE8F8-6B15-4336-9904-0375EE935CBD}", "Dist", param_dist, 1),
+    make_topo_info("{4EACE8F8-6B15-4336-9904-0375EE935CBD}", true, "Note Distance", "Dist", "Dist", param_dist, 1),
     make_param_dsp_block(param_automate::automate), make_domain_step(1, 8, 1, 0),
     make_param_gui_single(section_notes, gui_edit_type::autofit_list, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
