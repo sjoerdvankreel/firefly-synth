@@ -233,7 +233,7 @@ arpeggiator_topo(plugin_topo const* topo, int section, gui_position const& pos)
     make_param_gui_single(section_sample, gui_edit_type::hslider, { 0, 1 },
       make_label_none())));
   rate_mod_rate_hz.gui.bindings.enabled.bind_params({ param_type, param_sync, param_rate_mod_on }, [](auto const& vs) { return vs[0] != type_off && vs[1] == 0 && vs[2] != 0; });
-  rate_mod_rate_hz.gui.bindings.visible.bind_params({ param_type, param_sync }, [](auto const& vs) { return vs[1] == 0; });
+  rate_mod_rate_hz.gui.bindings.visible.bind_params({ param_type, param_sync, param_rate_mod_on }, [](auto const& vs) { return vs[1] == 0; });
   rate_mod_rate_hz.info.description = "TODO";
   auto& rate_mod_rate_tempo = result.params.emplace_back(make_param(
     make_topo_info_basic("{075B311C-51B0-46FB-994A-7C222F7BB60A}", "Mod Rate", param_rate_mod_rate_tempo, 1),
@@ -242,7 +242,7 @@ arpeggiator_topo(plugin_topo const* topo, int section, gui_position const& pos)
       make_label_none())));
   rate_mod_rate_tempo.gui.submenu = make_timesig_submenu(rate_mod_rate_tempo.domain.timesigs);
   rate_mod_rate_tempo.gui.bindings.enabled.bind_params({ param_type, param_sync, param_rate_mod_on }, [](auto const& vs) { return vs[0] != type_off && vs[1] != 0 && vs[2] != 0; });
-  rate_mod_rate_tempo.gui.bindings.visible.bind_params({ param_type, param_sync }, [](auto const& vs) { return vs[1] != 0; });
+  rate_mod_rate_tempo.gui.bindings.visible.bind_params({ param_type, param_sync, param_rate_mod_on }, [](auto const& vs) { return vs[1] != 0; });
   rate_mod_rate_tempo.info.description = "TODO";
   auto& sync = result.params.emplace_back(make_param(
     make_topo_info_basic("{8DE4D902-946C-41AA-BA1B-E0B645F8C87D}", "Snc", param_sync, 1),

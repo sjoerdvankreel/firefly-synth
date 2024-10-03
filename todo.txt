@@ -69,7 +69,7 @@ X controls7: some kinda step editor ==> also instead can do hold & skip ? ==> sc
 V do some nice stuff with the global cv sources, they there for grabs already
 
 * maybe hard reset all chans for renoise ?
-* lfo not usable ==> give it its own internal lfo, reset in table start
+* lfo not usable ==> give it its own internal lfo, reset in table start ==> also sync it to the master stream pos
 * output the table pos as cv signal!
 * still not killing all the notes
 * still do something with note lengths/hold/stop/whatever ==> make the sequ
