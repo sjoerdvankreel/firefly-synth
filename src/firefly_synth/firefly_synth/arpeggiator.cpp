@@ -18,6 +18,8 @@ namespace firefly_synth {
 static float const mod_range_exp = 4.0f;
 static float const mod_range_linear = 8.0f;
 
+enum { output_base_table_pos, output_table_pos };
+
 enum { 
   section_table, section_notes, section_sample };
 
@@ -152,9 +154,12 @@ make_arpeggiator()
 module_topo
 arpeggiator_topo(plugin_topo const* topo, int section, gui_position const& pos)
 {
+  // TODO check dragging the handle?
   module_topo result(make_module(
     make_topo_info_basic("{8A09B4CD-9768-4504-B9FE-5447B047854B}", "ARP / SEQ", module_arpeggiator, 1),
-    make_module_dsp(module_stage::input, module_output::none, 0, {}),
+    make_module_dsp(module_stage::input, module_output::cv, 0, {
+      make_module_dsp_output(true, make_topo_info_basic("{94A509ED-AB5B-43CF-B4F1-422815D99186}", "Base Pos", output_base_table_pos, 1)),
+      make_module_dsp_output(true, make_topo_info_basic("{ED2AF50B-64F4-4E21-9E66-95079A1E101B}", "Pos", output_table_pos, 1))}),
     make_module_gui(section, pos, { { 1 }, { 24, 11, 28 } })));
   result.info.description = "Arpeggiator / Sequencer.";
 

@@ -81,7 +81,7 @@ V the osc mod controls are tiny ?
 * check automation works
 * check if shows up in the docs
 * write the manual
-* add arp table pos as a mod source ==> yes do it
+* add arp table pos as a mod source ==> yes do it + also make all graphs react pfft
 * reset is still no good
 
 wishlist:
