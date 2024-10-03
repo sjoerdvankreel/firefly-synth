@@ -15,8 +15,8 @@ using namespace plugin_base;
  
 namespace firefly_synth {
 
-static float const min_mod_amt = -8.0f;
-static float const max_mod_amt = 8.0f;
+static float const mod_range_exp = 4.0f;
+static float const mod_range_linear = 8.0f;
 
 enum { 
   section_table, section_notes, section_sample };
@@ -280,7 +280,7 @@ arpeggiator_topo(plugin_topo const* topo, int section, gui_position const& pos)
   mod_mode.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   auto& rate_mod_amt = result.params.emplace_back(make_param(
     make_topo_info_basic("{90A4DCE9-9EEA-4156-AC9F-DAD82ED33048}", "Amt", param_rate_mod_amt, 1),
-    make_param_dsp_block(param_automate::automate), make_domain_percentage(min_mod_amt, max_mod_amt, 0, 0, true),
+    make_param_dsp_block(param_automate::automate), make_domain_percentage(-1, 1, 0, 0, true),
     make_param_gui_single(section_sample, gui_edit_type::knob, { 1, 5, 1, 2 },
       make_label_none())));
   rate_mod_amt.info.description = "TODO";
@@ -559,8 +559,8 @@ arpeggiator_engine::process_notes(
   else
     mod_rate_hz = timesig_to_freq(block.host.bpm, get_timesig_param_value(block, module_arpeggiator, param_rate_mod_rate_tempo));
 
-  float rate_mod_amt = block.state.own_block_automation[param_rate_mod_amt][0].real();
-  assert(min_mod_amt <= rate_mod_amt && rate_mod_amt <= max_mod_amt);
+  float rate_mod_amt_base = block.state.own_block_automation[param_rate_mod_amt][0].real();
+  assert(-1 <= rate_mod_amt_base && rate_mod_amt_base <= 1);
 
   // keep looping through the table, 
   // taking the flip parameter into account
@@ -593,8 +593,13 @@ arpeggiator_engine::process_notes(
       if constexpr (ModMode != mod_mode_off)
       {
         float mod_val = current_mod_val(mod_type);
-        float actual_mod_val = mod_val * rate_mod_amt;
         check_unipolar(mod_val);
+
+        float actual_mod_val = mod_val * rate_mod_amt_base;
+        if constexpr (ModMode == mod_mode_linear)
+          actual_mod_val *= mod_range_linear;
+        else
+          actual_mod_val *= mod_range_exp;
 
         // if synced, make sure we are multiple of the tempo
         if (sync)
