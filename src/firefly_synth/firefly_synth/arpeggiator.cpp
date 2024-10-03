@@ -123,8 +123,13 @@ public arp_engine_base
   float _mod_phase = 0.0f; // internal lfo
   float _table_pos_cv_out = 0.0f;
   float _base_table_pos_cv_out = 0.0f;
+  float _note_rel_cv_out = 0.0f;
+  float _note_abs_cv_out = 0.0f;
   std::default_random_engine _random = {};
 
+  int _note_low_key = -1;
+  int _note_high_key = -1;
+  std::array<int, 128> _note_rel_mapping = {};
   std::array<arp_user_note, 128> _current_user_chord = {};
   std::vector<arp_table_note> _current_arp_note_table = {};
 
@@ -158,7 +163,9 @@ arpeggiator_topo(plugin_topo const* topo, int section, gui_position const& pos)
     make_topo_info_basic("{8A09B4CD-9768-4504-B9FE-5447B047854B}", "ARP / SEQ", module_arpeggiator, 1),
     make_module_dsp(module_stage::input, module_output::cv, 0, {
       make_module_dsp_output(true, make_topo_info_basic("{94A509ED-AB5B-43CF-B4F1-422815D99186}", "Base Pos", output_base_table_pos, 1)),
-      make_module_dsp_output(true, make_topo_info_basic("{ED2AF50B-64F4-4E21-9E66-95079A1E101B}", "Pos", output_table_pos, 1))}),
+      make_module_dsp_output(true, make_topo_info_basic("{ED2AF50B-64F4-4E21-9E66-95079A1E101B}", "Pos", output_table_pos, 1)),
+      make_module_dsp_output(true, make_topo_info_basic("{AAA54A01-75AF-475B-B02D-F85295462335}", "Rel Note", output_table_pos, 1)),
+      make_module_dsp_output(true, make_topo_info_basic("{C17077E6-FDA9-4DAE-9FAB-E6499A45F462}", "Abs Note", output_table_pos, 1)) }),
     make_module_gui(section, pos, { { 1 }, { 24, 11, 28 } })));
   result.info.description = "Arpeggiator / Sequencer.";
 
@@ -409,6 +416,8 @@ arpeggiator_engine::process_notes(
     {
       own_cv[output_table_pos][0][f] = 0.0f;
       own_cv[output_base_table_pos][0][f] = 0.0f;
+      own_cv[output_rel_note][0][f] = 0.0f;
+      own_cv[output_abs_note][0][f] = 0.0f;
     }
     return;
   }
@@ -442,6 +451,10 @@ arpeggiator_engine::process_notes(
     _note_remaining = 0;
     _table_pos_cv_out = 0.0f;
     _base_table_pos_cv_out = 0.0f;
+    _note_rel_cv_out = 0.0f;
+    _note_abs_cv_out = 0.0f;
+    _note_high_key = 0;
+    _note_low_key = 128;
     _current_arp_note_table.clear();
 
     // STEP 1: build up the base chord table
@@ -505,6 +518,14 @@ arpeggiator_engine::process_notes(
     // and sort the thing
     auto comp = [](auto const& l, auto const& r) { return l.midi_key < r.midi_key; };
     std::sort(_current_arp_note_table.begin(), _current_arp_note_table.end(), comp);
+
+    // need for cv outputs
+    for (int i = 0; i < _current_arp_note_table.size(); i++)
+    {
+      _note_rel_mapping[_current_arp_note_table[i].midi_key] = i;
+      _note_low_key = std::min(_note_low_key, _current_arp_note_table[i].midi_key);
+      _note_high_key = std::min(_note_low_key, _current_arp_note_table[i].midi_key);
+    }
 
     // STEP 3: take the up-down into account
     int note_set_count = _current_arp_note_table.size();
@@ -647,8 +668,16 @@ arpeggiator_engine::process_notes(
       flipped_pos = is_random(mode) ? _table_pos : flipped_table_pos();
 
       // update current values for cv state
+      _note_abs_cv_out = 0.0f;
+      _note_rel_cv_out = 0.0f;
       _table_pos_cv_out = flipped_pos / (float)(_current_arp_note_table.size() - 1);
       _base_table_pos_cv_out = (_table_pos % _current_arp_note_table.size()) / (float)(_current_arp_note_table.size() - 1);
+      int note_abs_range = _note_high_key - _note_low_key;
+      if (note_abs_range > 0)
+      {
+        _note_abs_cv_out = (_current_arp_note_table[flipped_pos].midi_key - _note_low_key) / (float)note_abs_range;
+        _note_rel_cv_out = _note_rel_mapping[_current_arp_note_table[flipped_pos].midi_key] / (float)(_current_arp_note_table.size() - 1);
+      }
 
       for (int i = 0; i < notes; i++)
       {
@@ -666,6 +695,8 @@ arpeggiator_engine::process_notes(
     --_note_remaining;
     own_cv[output_table_pos][0][f] = _table_pos_cv_out;
     own_cv[output_base_table_pos][0][f] = _base_table_pos_cv_out;
+    own_cv[output_abs_note][0][f] = _note_abs_cv_out;
+    own_cv[output_rel_note][0][f] = _note_rel_cv_out;
 
     if constexpr (ModMode != mod_mode_off)
     {
