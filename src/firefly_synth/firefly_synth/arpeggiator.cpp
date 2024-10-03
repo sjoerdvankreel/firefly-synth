@@ -18,10 +18,8 @@ namespace firefly_synth {
 static float const mod_range_exp = 4.0f;
 static float const mod_range_linear = 8.0f;
 
-enum { output_base_table_pos, output_table_pos };
-
-enum { 
-  section_table, section_notes, section_sample };
+enum { section_table, section_notes, section_sample };
+enum { output_base_table_pos, output_table_pos, output_rel_note, output_abs_note };
 
 enum {
   param_type, param_jump,
@@ -123,6 +121,8 @@ public arp_engine_base
   int _table_pos = -1;
   int _note_remaining = 0;
   float _mod_phase = 0.0f; // internal lfo
+  float _table_pos_cv_out = 0.0f;
+  float _base_table_pos_cv_out = 0.0f;
   std::default_random_engine _random = {};
 
   std::array<arp_user_note, 128> _current_user_chord = {};
@@ -154,7 +154,6 @@ make_arpeggiator()
 module_topo
 arpeggiator_topo(plugin_topo const* topo, int section, gui_position const& pos)
 {
-  // TODO check dragging the handle?
   module_topo result(make_module(
     make_topo_info_basic("{8A09B4CD-9768-4504-B9FE-5447B047854B}", "ARP / SEQ", module_arpeggiator, 1),
     make_module_dsp(module_stage::input, module_output::cv, 0, {
@@ -376,6 +375,7 @@ arpeggiator_engine::process_notes(
   // plugin_base clears on each round
   assert(out.size() == 0);
 
+  auto& own_cv = block.state.own_cv;
   auto const& block_auto = block.state.own_block_automation;
   int flip = block_auto[param_flip][0].step();
   int type = block_auto[param_type][0].step();
@@ -405,6 +405,11 @@ arpeggiator_engine::process_notes(
   if (type == type_off)
   {
     out.insert(out.end(), in.begin(), in.end());
+    for (int f = block.start_frame; f < block.end_frame; f++)
+    {
+      own_cv[output_table_pos][0][f] = 0.0f;
+      own_cv[output_base_table_pos][0][f] = 0.0f;
+    }
     return;
   }
   
@@ -435,6 +440,8 @@ arpeggiator_engine::process_notes(
     // reset to before start, will get picked up
     _table_pos = -1;
     _note_remaining = 0;
+    _table_pos_cv_out = 0.0f;
+    _base_table_pos_cv_out = 0.0f;
     _current_arp_note_table.clear();
 
     // STEP 1: build up the base chord table
@@ -639,6 +646,10 @@ arpeggiator_engine::process_notes(
 
       flipped_pos = is_random(mode) ? _table_pos : flipped_table_pos();
 
+      // update current values for cv state
+      _table_pos_cv_out = flipped_pos / (float)(_current_arp_note_table.size() - 1);
+      _base_table_pos_cv_out = (_table_pos % _current_arp_note_table.size()) / (float)(_current_arp_note_table.size() - 1);
+
       for (int i = 0; i < notes; i++)
       {
         note_event start_new = {};
@@ -653,6 +664,8 @@ arpeggiator_engine::process_notes(
     }
     
     --_note_remaining;
+    own_cv[output_table_pos][0][f] = _table_pos_cv_out;
+    own_cv[output_base_table_pos][0][f] = _base_table_pos_cv_out;
 
     if constexpr (ModMode != mod_mode_off)
     {
