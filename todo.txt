@@ -67,9 +67,10 @@ X controls4: the not-so-sequencer thingy
 V controls5: the speed (in time / bars / both) + allow some randomization and/or global-cv?
 X controls7: some kinda step editor ==> also instead can do hold & skip ? ==> scan & skip (e.g. scan 1, skip 0 plays as natural)
 V do some nice stuff with the global cv sources, they there for grabs already
+V lfo not usable ==> give it its own internal lfo, reset in table start ==> also sync it to the master stream pos
+V the osc mod controls are tiny ?
 
 * maybe hard reset all chans for renoise ?
-* lfo not usable ==> give it its own internal lfo, reset in table start ==> also sync it to the master stream pos
 * output the table pos as cv signal!
 * still not killing all the notes
 * still do something with note lengths/hold/stop/whatever ==> make the sequ
@@ -80,7 +81,6 @@ V do some nice stuff with the global cv sources, they there for grabs already
 * check automation works
 * check if shows up in the docs
 * write the manual
-* the osc mod controls are tiny ?
 * add arp table pos as a mod source ==> yes do it
 * reset is still no good
 
