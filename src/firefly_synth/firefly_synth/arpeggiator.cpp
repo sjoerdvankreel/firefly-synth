@@ -26,7 +26,7 @@ enum {
   param_mode, param_flip, param_seed,
   param_notes, param_dist,
   param_rate_hz, param_rate_tempo, param_rate_mod_rate_hz, param_rate_mod_rate_tempo, param_sync,
-  param_rate_mod, param_rate_mod_amt, param_rate_mod_on };
+  param_rate_mod_type, param_rate_mod_amt, param_rate_mod_on };
 
 enum { 
   mode_up, mode_down,
@@ -107,13 +107,21 @@ public arp_engine_base
 
   int _table_pos = -1;
   int _note_remaining = 0;
+  float _mod_phase = 0.0f; // internal lfo
   std::default_random_engine _random = {};
 
   std::array<arp_user_note, 128> _current_user_chord = {};
   std::vector<arp_table_note> _current_arp_note_table = {};
 
   int flipped_table_pos() const;
+  float current_mod_val(int mod_shape);
   void hard_reset(std::vector<note_event>& out);
+
+  template <bool IsModOn>
+  void process_notes(
+    plugin_block const& block,
+    std::vector<note_event> const& in,
+    std::vector<note_event>& out);
 
 public:
 
@@ -244,7 +252,7 @@ arpeggiator_topo(plugin_topo const* topo, int section, gui_position const& pos)
   sync.info.description = "TODO";
   sync.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   auto& rate_mod = result.params.emplace_back(make_param(
-    make_topo_info_basic("{3545206C-7A5F-41A3-B418-1F270DF61505}", "Mod", param_rate_mod, 1),
+    make_topo_info_basic("{3545206C-7A5F-41A3-B418-1F270DF61505}", "Mod", param_rate_mod_type, 1),
     make_param_dsp_block(param_automate::automate), make_domain_item(wave_shape_type_items(wave_target::arp, true), "Saw"),
     make_param_gui_single(section_sample, gui_edit_type::autofit_list, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
@@ -300,7 +308,45 @@ arpeggiator_engine::flipped_table_pos() const
   return result;
 }
 
-void 
+inline float
+arpeggiator_engine::current_mod_val(int mod_shape)
+{
+  switch (mod_shape)
+  {
+  case wave_shape_type_saw: return wave_shape_uni_saw(_mod_phase);
+  case wave_shape_type_tri: return wave_shape_uni_tri(_mod_phase);
+  case wave_shape_type_sin: return wave_shape_uni_sin(_mod_phase);
+  case wave_shape_type_cos: return wave_shape_uni_cos(_mod_phase);
+  case wave_shape_type_sqr_or_fold: return wave_shape_uni_sqr(_mod_phase);
+  case wave_shape_type_sin_sin: return wave_shape_uni_sin_sin(_mod_phase);
+  case wave_shape_type_sin_cos: return wave_shape_uni_sin_cos(_mod_phase);
+  case wave_shape_type_cos_sin: return wave_shape_uni_cos_sin(_mod_phase);
+  case wave_shape_type_cos_cos: return wave_shape_uni_cos_cos(_mod_phase);
+  case wave_shape_type_sin_sin_sin: return wave_shape_uni_sin_sin_sin(_mod_phase);
+  case wave_shape_type_sin_sin_cos: return wave_shape_uni_sin_sin_cos(_mod_phase);
+  case wave_shape_type_sin_cos_sin: return wave_shape_uni_sin_cos_sin(_mod_phase);
+  case wave_shape_type_sin_cos_cos: return wave_shape_uni_sin_cos_cos(_mod_phase);
+  case wave_shape_type_cos_sin_sin: return wave_shape_uni_cos_sin_sin(_mod_phase);
+  case wave_shape_type_cos_sin_cos: return wave_shape_uni_cos_sin_cos(_mod_phase);
+  case wave_shape_type_cos_cos_sin: return wave_shape_uni_cos_cos_sin(_mod_phase);
+  case wave_shape_type_cos_cos_cos: return wave_shape_uni_cos_cos_cos(_mod_phase);
+  default: assert(false); return 0.0f;
+  }
+}
+
+void
+arpeggiator_engine::process_notes(
+  plugin_block const& block,
+  std::vector<note_event> const& in,
+  std::vector<note_event>& out)
+{
+  if (block.state.own_block_automation[param_rate_mod_on][0].step() == 0)
+    process_notes<false>(block, in, out);
+  else
+    process_notes<true>(block, in, out);
+}
+
+template <bool IsModOn> void 
 arpeggiator_engine::process_notes(
   plugin_block const& block,
   std::vector<note_event> const& in,
@@ -318,7 +364,7 @@ arpeggiator_engine::process_notes(
   int jump = block_auto[param_jump][0].step();
   int sync = block_auto[param_sync][0].step();
   int notes = block_auto[param_notes][0].step();
-  int rate_mod = block_auto[param_rate_mod][0].step();
+  int mod_type = block_auto[param_rate_mod_type][0].step();
 
   // hard reset to make sure none of these are sticky
   if (type != _prev_type || mode != _prev_mode || flip != _prev_flip || notes != _prev_notes 
@@ -484,23 +530,21 @@ arpeggiator_engine::process_notes(
   if (_current_arp_note_table.size() == 0)
     return;
 
-  // rate modulator, if in use
-  float rate_mod_amt = 0.0f;
-  jarray<float, 1> const* rate_mod_source = nullptr;
-  if (rate_mod != 0)
-  {
-    // TODO
-    //auto const& map = _rate_mod_output_mappings[rate_mod];
-    //rate_mod_amt = block.state.own_block_automation[param_rate_mod_amt][0].real();
-    //rate_mod_source = &block.module_cv(map.module_index, map.module_slot)[map.output_index][map.output_slot];
-  }
-
   // how often to output new notes
   float rate_hz_base;
   if (sync == 0)
     rate_hz_base = block_auto[param_rate_hz][0].real();
   else
     rate_hz_base = timesig_to_freq(block.host.bpm, get_timesig_param_value(block, module_arpeggiator, param_rate_tempo));
+
+  float mod_rate_hz;
+  if (sync == 0)
+    mod_rate_hz = block_auto[param_rate_mod_rate_hz][0].real();
+  else
+    mod_rate_hz = timesig_to_freq(block.host.bpm, get_timesig_param_value(block, module_arpeggiator, param_rate_mod_rate_tempo));
+
+  float rate_mod_amt = block.state.own_block_automation[param_rate_mod_amt][0].real();
+  assert(min_mod_amt <= rate_mod_amt && rate_mod_amt <= max_mod_amt);
 
   // keep looping through the table, 
   // taking the flip parameter into account
@@ -527,11 +571,11 @@ arpeggiator_engine::process_notes(
 
       // apply modulation to arp rate
       float rate_hz = rate_hz_base;
-      if (rate_mod != 0)
+
+      if constexpr (IsModOn)
       {
-        float mod_val = (*rate_mod_source)[f];
-        check_unipolar(mod_val);
-        assert(min_mod_amt <= rate_mod_amt && rate_mod_amt <= max_mod_amt);
+        float mod_val = current_mod_val(mod_type);
+        check_unipolar(mod_val);        
         float actual_mod_val = mod_val * rate_mod_amt;
         rate_hz += actual_mod_val * rate_hz_base;
 
@@ -545,7 +589,7 @@ arpeggiator_engine::process_notes(
           int dir = q < irate_hz_base / 2 ? 0 : 1;
           rate_hz = (d + dir) * irate_hz_base;
         }
-      }      
+      }
 
       int rate_frames = block.sample_rate / rate_hz;
       _table_pos++;
@@ -572,6 +616,11 @@ arpeggiator_engine::process_notes(
     }
     
     --_note_remaining;
+
+    if constexpr (IsModOn)
+    {
+      increment_and_wrap_phase(_mod_phase, mod_rate_hz, block.sample_rate);
+    }
   }
 }
 
