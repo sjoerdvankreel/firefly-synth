@@ -26,7 +26,7 @@ enum {
   param_mode, param_flip, param_seed,
   param_notes, param_dist,
   param_rate_hz, param_rate_tempo, param_rate_mod_rate_hz, param_rate_mod_rate_tempo, param_sync,
-  param_rate_mod_type, param_rate_mod_amt, param_rate_mod_on };
+  param_rate_mod_type, param_rate_mod_mode, param_rate_mod_amt };
 
 enum { 
   mode_up, mode_down,
@@ -34,6 +34,9 @@ enum {
   mode_down_up1, mode_down_up2,
   mode_rand, mode_fixrand,
   mode_rand_free, mode_fixrand_free };
+
+enum {
+  mod_mode_off, mod_mode_linear, mod_mode_exp };
 
 enum { 
   type_off, type_straight, 
@@ -60,6 +63,16 @@ struct arp_table_note
   int midi_key;
   float velocity;
 };
+
+static std::vector<list_item>
+mod_mode_items()
+{
+  std::vector<list_item> result;
+  result.emplace_back("{3FDB85A8-1127-475E-AE04-194BE3154C1C}", "Off", "Off");
+  result.emplace_back("{E341B6D4-F0EA-4521-81CA-34F489224824}", "Linear", "Equal space between note lengths (e.g. 1, 2, 3, 4).");
+  result.emplace_back("{2856FBED-8720-4BE9-945C-1DD7092B8D6F}", "Exp", "Exponential space between note lengths (e.g 1, 2, 4, 8).");
+  return result;
+}
 
 static std::vector<list_item>
 type_items()
@@ -117,7 +130,7 @@ public arp_engine_base
   float current_mod_val(int mod_shape);
   void hard_reset(std::vector<note_event>& out);
 
-  template <bool IsModOn>
+  template <int ModMode>
   void process_notes(
     plugin_block const& block,
     std::vector<note_event> const& in,
@@ -232,8 +245,8 @@ arpeggiator_topo(plugin_topo const* topo, int section, gui_position const& pos)
     make_param_dsp_block(param_automate::automate), make_domain_log(0.25, 20, 4, 4, 2, "Hz"),
     make_param_gui_single(section_sample, gui_edit_type::hslider, { 0, 1 },
       make_label_none())));
-  rate_mod_rate_hz.gui.bindings.enabled.bind_params({ param_type, param_sync, param_rate_mod_on }, [](auto const& vs) { return vs[0] != type_off && vs[1] == 0 && vs[2] != 0; });
-  rate_mod_rate_hz.gui.bindings.visible.bind_params({ param_type, param_sync, param_rate_mod_on }, [](auto const& vs) { return vs[1] == 0; });
+  rate_mod_rate_hz.gui.bindings.enabled.bind_params({ param_type, param_sync, param_rate_mod_mode }, [](auto const& vs) { return vs[0] != type_off && vs[1] == 0 && vs[2] != 0; });
+  rate_mod_rate_hz.gui.bindings.visible.bind_params({ param_type, param_sync, param_rate_mod_mode }, [](auto const& vs) { return vs[1] == 0; });
   rate_mod_rate_hz.info.description = "TODO";
   auto& rate_mod_rate_tempo = result.params.emplace_back(make_param(
     make_topo_info_basic("{075B311C-51B0-46FB-994A-7C222F7BB60A}", "Mod Rate", param_rate_mod_rate_tempo, 1),
@@ -241,8 +254,8 @@ arpeggiator_topo(plugin_topo const* topo, int section, gui_position const& pos)
     make_param_gui_single(section_sample, gui_edit_type::autofit_list, { 0, 1 },
       make_label_none())));
   rate_mod_rate_tempo.gui.submenu = make_timesig_submenu(rate_mod_rate_tempo.domain.timesigs);
-  rate_mod_rate_tempo.gui.bindings.enabled.bind_params({ param_type, param_sync, param_rate_mod_on }, [](auto const& vs) { return vs[0] != type_off && vs[1] != 0 && vs[2] != 0; });
-  rate_mod_rate_tempo.gui.bindings.visible.bind_params({ param_type, param_sync, param_rate_mod_on }, [](auto const& vs) { return vs[1] != 0; });
+  rate_mod_rate_tempo.gui.bindings.enabled.bind_params({ param_type, param_sync, param_rate_mod_mode }, [](auto const& vs) { return vs[0] != type_off && vs[1] != 0 && vs[2] != 0; });
+  rate_mod_rate_tempo.gui.bindings.visible.bind_params({ param_type, param_sync, param_rate_mod_mode }, [](auto const& vs) { return vs[1] != 0; });
   rate_mod_rate_tempo.info.description = "TODO";
   auto& sync = result.params.emplace_back(make_param(
     make_topo_info_basic("{8DE4D902-946C-41AA-BA1B-E0B645F8C87D}", "Snc", param_sync, 1),
@@ -257,21 +270,21 @@ arpeggiator_topo(plugin_topo const* topo, int section, gui_position const& pos)
     make_param_gui_single(section_sample, gui_edit_type::autofit_list, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   rate_mod.info.description = "TODO";
-  rate_mod.gui.bindings.enabled.bind_params({ param_type, param_rate_mod_on }, [](auto const& vs) { return vs[0] != type_off && vs[1] != 0; });
+  rate_mod.gui.bindings.enabled.bind_params({ param_type, param_rate_mod_mode }, [](auto const& vs) { return vs[0] != type_off && vs[1] != 0; });
+  auto& mod_mode = result.params.emplace_back(make_param(
+    make_topo_info_basic("{48F3CE67-54B0-4F1C-927B-DED1BD65E6D6}", "Mode", param_rate_mod_mode, 1),
+    make_param_dsp_block(param_automate::automate), make_domain_item(mod_mode_items(), "Off"),
+    make_param_gui_single(section_sample, gui_edit_type::list, { 1, 1 },
+      make_label_none())));
+  mod_mode.info.description = "TODO";
+  mod_mode.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   auto& rate_mod_amt = result.params.emplace_back(make_param(
     make_topo_info_basic("{90A4DCE9-9EEA-4156-AC9F-DAD82ED33048}", "Amt", param_rate_mod_amt, 1),
     make_param_dsp_block(param_automate::automate), make_domain_percentage(min_mod_amt, max_mod_amt, 0, 0, true),
-    make_param_gui_single(section_sample, gui_edit_type::knob, { 1, 1 },
+    make_param_gui_single(section_sample, gui_edit_type::knob, { 1, 2 },
       make_label_none())));
   rate_mod_amt.info.description = "TODO";
-  rate_mod_amt.gui.bindings.enabled.bind_params({ param_type, param_rate_mod_on }, [](auto const& vs) { return vs[0] != type_off && vs[1] != 0; }); 
-  auto& mod_on = result.params.emplace_back(make_param(
-    make_topo_info_basic("{48F3CE67-54B0-4F1C-927B-DED1BD65E6D6}", "On", param_rate_mod_on, 1),
-    make_param_dsp_block(param_automate::automate), make_domain_toggle(false),
-    make_param_gui_single(section_sample, gui_edit_type::toggle, { 1, 2 },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  mod_on.info.description = "TODO";
-  mod_on.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
+  rate_mod_amt.gui.bindings.enabled.bind_params({ param_type, param_rate_mod_mode }, [](auto const& vs) { return vs[0] != type_off && vs[1] != 0; });
 
   return result;
 }         
@@ -340,13 +353,16 @@ arpeggiator_engine::process_notes(
   std::vector<note_event> const& in,
   std::vector<note_event>& out)
 {
-  if (block.state.own_block_automation[param_rate_mod_on][0].step() == 0)
-    process_notes<false>(block, in, out);
-  else
-    process_notes<true>(block, in, out);
+  switch (block.state.own_block_automation[param_rate_mod_mode][0].step())
+  {
+  case mod_mode_off: process_notes<mod_mode_off>(block, in, out); break;
+  case mod_mode_linear: process_notes<mod_mode_linear>(block, in, out); break;
+  case mod_mode_exp: process_notes<mod_mode_exp>(block, in, out); break;
+  default: assert(false); break;
+  }
 }
 
-template <bool IsModOn> void 
+template <int ModMode> void 
 arpeggiator_engine::process_notes(
   plugin_block const& block,
   std::vector<note_event> const& in,
@@ -574,27 +590,33 @@ arpeggiator_engine::process_notes(
       int rate_frames = block.sample_rate / rate_hz;
       int rate_frames_base = block.sample_rate / rate_hz;
 
-      if constexpr (IsModOn)
+      if constexpr (ModMode != mod_mode_off)
       {
         float mod_val = current_mod_val(mod_type);
-        check_unipolar(mod_val);        
         float actual_mod_val = mod_val * rate_mod_amt;
+        check_unipolar(mod_val);
 
         // if synced, make sure we are multiple of the tempo
-        if (sync) 
-          actual_mod_val = std::trunc(actual_mod_val);
+        if (sync)
+          actual_mod_val = std::round(actual_mod_val);
 
         // speed up - add to the frequency
         if (actual_mod_val >= 0.0f)
         {
-          rate_hz = rate_hz_base + actual_mod_val * rate_hz_base;
+          if constexpr(ModMode == mod_mode_linear)
+            rate_hz = rate_hz_base + actual_mod_val * rate_hz_base;
+          else
+            rate_hz = rate_hz_base + (std::pow(2, actual_mod_val + 1) - 1) * rate_hz_base;
           rate_frames = block.sample_rate / rate_hz;
         }
         else
         {
           // slow down - add to the frame count
-          rate_frames = rate_frames_base - actual_mod_val * rate_frames_base;
-        }        
+          if constexpr (ModMode == mod_mode_linear)
+            rate_frames = rate_frames_base - actual_mod_val * rate_frames_base;
+          else
+            rate_frames = rate_frames_base + (std::pow(2, 1 - actual_mod_val) - 1) * rate_frames_base;
+        }
       }
 
       _table_pos++;
@@ -622,7 +644,7 @@ arpeggiator_engine::process_notes(
     
     --_note_remaining;
 
-    if constexpr (IsModOn)
+    if constexpr (ModMode != mod_mode_off)
     {
       increment_and_wrap_phase(_mod_phase, mod_rate_hz, block.sample_rate);
     }
