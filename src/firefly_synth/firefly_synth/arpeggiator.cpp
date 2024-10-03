@@ -15,7 +15,7 @@ using namespace plugin_base;
  
 namespace firefly_synth {
 
-static float const min_mod_amt = 0.1f;
+static float const min_mod_amt = 0.0f;
 static float const max_mod_amt = 10.0f;
 
 enum { 
@@ -26,7 +26,7 @@ enum {
   param_mode, param_flip, param_seed,
   param_notes, param_dist,
   param_rate_hz, param_rate_tempo, param_sync,
-  param_rate_mod, param_rate_mod_amt };
+  param_rate_mod, param_rate_mod_rate_hz, param_rate_mod_rate_tempo, param_rate_mod_amt };
 
 enum { 
   mode_up, mode_down,
@@ -104,7 +104,6 @@ public arp_engine_base
   int _prev_sync = -1;
   int _prev_jump = -1;
   int _prev_notes = -1;
-  int _prev_rate_mod = -1;
 
   int _table_pos = -1;
   int _note_remaining = 0;
@@ -135,7 +134,7 @@ arpeggiator_topo(plugin_topo const* topo, int section, gui_position const& pos)
   module_topo result(make_module(
     make_topo_info_basic("{8A09B4CD-9768-4504-B9FE-5447B047854B}", "ARP / SEQ", module_arpeggiator, 1),
     make_module_dsp(module_stage::input, module_output::none, 0, {}),
-    make_module_gui(section, pos, { { 1 }, { 24, 11, 28 } })));
+    make_module_gui(section, pos, { { 1 }, { 24, 11, 31 } })));
   result.info.description = "Arpeggiator / Sequencer.";
 
   result.sections.emplace_back(make_param_section(section_table,
@@ -199,23 +198,22 @@ arpeggiator_topo(plugin_topo const* topo, int section, gui_position const& pos)
   dist.info.description = "TODO";
   dist.gui.bindings.enabled.bind_params({ param_type, param_notes }, [](auto const& vs) { return vs[0] != type_off && vs[1] > 1; });
 
-  result.sections.emplace_back(make_param_section(section_sample,
+  auto& sample_section = result.sections.emplace_back(make_param_section(section_sample,
     make_topo_tag_basic("{63A54D7E-C4CE-4DFF-8E00-A9B8FAEC643E}", "Sample"),
-    make_param_section_gui({ 0, 2 }, { { 1, 1 }, { 
-      gui_dimension::auto_size_all, 1, 
-      gui_dimension::auto_size_all, gui_dimension::auto_size_all } }, gui_label_edit_cell_split::horizontal)));
+    make_param_section_gui({ 0, 2 }, { { 1, 1 }, { gui_dimension::auto_size, 1, 1 } })));
+  sample_section.gui.autofit_row = 1;
   auto& rate_hz = result.params.emplace_back(make_param(
     make_topo_info_basic("{EE305C60-8D37-492D-A2BE-5BD9C80DC59D}", "Rate", param_rate_hz, 1),
     make_param_dsp_block(param_automate::automate), make_domain_log(0.25, 20, 4, 4, 2, "Hz"),
-    make_param_gui_single(section_sample, gui_edit_type::hslider, { 0, 0 },
+    make_param_gui_single(section_sample, gui_edit_type::hslider, { 0, 0, 1, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   rate_hz.gui.bindings.enabled.bind_params({ param_type, param_sync }, [](auto const& vs) { return vs[0] != type_off && vs[1] == 0; });
   rate_hz.gui.bindings.visible.bind_params({ param_type, param_sync }, [](auto const& vs) { return vs[1] == 0; });
   rate_hz.info.description = "TODO";
   auto& rate_tempo = result.params.emplace_back(make_param(
     make_topo_info_basic("{B1727889-9B55-4F93-8E0A-E2D4B791568B}", "Rate", param_rate_tempo, 1),
-    make_param_dsp_block(param_automate::automate), make_domain_timesig_default(false, { 16, 1 }, { 1, 4 }), // TODO tune this
-    make_param_gui_single(section_sample, gui_edit_type::autofit_list, { 0, 0 },
+    make_param_dsp_block(param_automate::automate), make_domain_timesig_default(false, { 16, 1 }, { 1, 4 }),
+    make_param_gui_single(section_sample, gui_edit_type::autofit_list, { 0, 0, 1, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   rate_tempo.gui.submenu = make_timesig_submenu(rate_tempo.domain.timesigs);
   rate_tempo.gui.bindings.enabled.bind_params({ param_type, param_sync }, [](auto const& vs) { return vs[0] != type_off && vs[1] != 0; });
@@ -224,7 +222,7 @@ arpeggiator_topo(plugin_topo const* topo, int section, gui_position const& pos)
   auto& sync = result.params.emplace_back(make_param(
     make_topo_info_basic("{8DE4D902-946C-41AA-BA1B-E0B645F8C87D}", "Sync", param_sync, 1),
     make_param_dsp_block(param_automate::automate), make_domain_toggle(true),
-    make_param_gui_single(section_sample, gui_edit_type::toggle, { 0, 2 },
+    make_param_gui_single(section_sample, gui_edit_type::toggle, { 0, 2, 1, 1 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   sync.info.description = "TODO";
   sync.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
@@ -235,13 +233,30 @@ arpeggiator_topo(plugin_topo const* topo, int section, gui_position const& pos)
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   rate_mod.info.description = "TODO";
   rate_mod.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
+  auto& rate_mod_rate_hz = result.params.emplace_back(make_param(
+    make_topo_info_basic("{BCE11AB3-3BB2-43CD-AD5E-C0E62B73F6E0}", "Mod Rate", param_rate_mod_rate_hz, 1),
+    make_param_dsp_block(param_automate::automate), make_domain_log(0.25, 20, 4, 4, 2, "Hz"),
+    make_param_gui_single(section_sample, gui_edit_type::hslider, { 1, 1 },
+      make_label_none())));
+  rate_mod_rate_hz.gui.bindings.enabled.bind_params({ param_type, param_sync }, [](auto const& vs) { return vs[0] != type_off && vs[1] == 0; });
+  rate_mod_rate_hz.gui.bindings.visible.bind_params({ param_type, param_sync }, [](auto const& vs) { return vs[1] == 0; });
+  rate_mod_rate_hz.info.description = "TODO";
+  auto& rate_mod_rate_tempo = result.params.emplace_back(make_param(
+    make_topo_info_basic("{075B311C-51B0-46FB-994A-7C222F7BB60A}", "Mod Rate", param_rate_mod_rate_tempo, 1),
+    make_param_dsp_block(param_automate::automate), make_domain_timesig_default(false, { 16, 1 }, { 1, 4 }),
+    make_param_gui_single(section_sample, gui_edit_type::autofit_list, { 1, 1 },
+      make_label_none())));
+  rate_mod_rate_tempo.gui.submenu = make_timesig_submenu(rate_mod_rate_tempo.domain.timesigs);
+  rate_mod_rate_tempo.gui.bindings.enabled.bind_params({ param_type, param_sync }, [](auto const& vs) { return vs[0] != type_off && vs[1] != 0; });
+  rate_mod_rate_tempo.gui.bindings.visible.bind_params({ param_type, param_sync }, [](auto const& vs) { return vs[1] != 0; });
+  rate_mod_rate_tempo.info.description = "TODO";
   auto& rate_mod_amt = result.params.emplace_back(make_param(
     make_topo_info_basic("{90A4DCE9-9EEA-4156-AC9F-DAD82ED33048}", "Amt", param_rate_mod_amt, 1),
-    make_param_dsp_block(param_automate::automate), make_domain_percentage(min_mod_amt, max_mod_amt, 1, 0, true),
+    make_param_dsp_block(param_automate::automate), make_domain_percentage(min_mod_amt, max_mod_amt, min_mod_amt, 0, true),
     make_param_gui_single(section_sample, gui_edit_type::knob, { 1, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   rate_mod_amt.info.description = "TODO";
-  rate_mod_amt.gui.bindings.enabled.bind_params({ param_type, param_rate_mod }, [](auto const& vs) { return vs[0] != type_off && vs[1] != 0; }); 
+  rate_mod_amt.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; }); 
 
   return result;
 }         
@@ -299,8 +314,8 @@ arpeggiator_engine::process_notes(
   int rate_mod = block_auto[param_rate_mod][0].step();
 
   // hard reset to make sure none of these are sticky
-  if (type != _prev_type || mode != _prev_mode || flip != _prev_flip || rate_mod != _prev_rate_mod ||
-    notes != _prev_notes || seed != _prev_seed || jump != _prev_jump || dist != _prev_dist || sync != _prev_sync)
+  if (type != _prev_type || mode != _prev_mode || flip != _prev_flip || notes != _prev_notes 
+    || seed != _prev_seed || jump != _prev_jump || dist != _prev_dist || sync != _prev_sync)
   {
     _prev_type = type;
     _prev_mode = mode;
@@ -310,7 +325,6 @@ arpeggiator_engine::process_notes(
     _prev_jump = jump;
     _prev_sync = sync;
     _prev_notes = notes;
-    _prev_rate_mod = rate_mod;
     hard_reset(out);
   }
 
