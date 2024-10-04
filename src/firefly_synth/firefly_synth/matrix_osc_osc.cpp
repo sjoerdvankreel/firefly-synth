@@ -63,8 +63,12 @@ public:
   osc_osc_matrix_engine(int max_frame_count);
   PB_PREVENT_ACCIDENTAL_COPY(osc_osc_matrix_engine);
 
-  void reset_audio(plugin_block const*) override {}
-  void process_audio(plugin_block& block) override;
+  void reset_audio(plugin_block const*,
+    std::vector<note_event> const* in_notes,
+    std::vector<note_event>* out_notes) override {}
+  void process_audio(plugin_block& block,
+    std::vector<note_event> const* in_notes,
+    std::vector<note_event>* out_notes) override;
 
   jarray<float, 3> const& modulate_am(
     plugin_block& block, int slot, 
@@ -296,7 +300,10 @@ jarray<float, 2> const&
 osc_osc_matrix_fm_modulator::modulate_fm<true>(plugin_block& block, int slot, cv_audio_matrix_mixdown const* cv_modulation);
 
 void
-osc_osc_matrix_engine::process_audio(plugin_block& block)
+osc_osc_matrix_engine::process_audio(
+  plugin_block& block,
+  std::vector<note_event> const* in_notes,
+  std::vector<note_event>* out_notes)
 {
   // need to capture stuff here because when we start 
   // modulating "own" does not refer to us but to the caller

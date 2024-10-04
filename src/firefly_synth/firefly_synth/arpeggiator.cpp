@@ -107,7 +107,7 @@ mode_items()
 }
 
 class arpeggiator_engine :
-public arp_engine_base
+public module_engine
 {
   int _prev_type = -1;
   int _prev_mode = -1;
@@ -138,21 +138,26 @@ public arp_engine_base
   void hard_reset(std::vector<note_event>& out);
 
   template <int ModMode>
-  void process_notes(
-    plugin_block const& block,
-    std::vector<note_event> const& in,
-    std::vector<note_event>& out);
+  void process_audio(
+    plugin_block& block,
+    std::vector<note_event> const* in_notes,
+    std::vector<note_event>* out_notes);
 
 public:
 
   arpeggiator_engine();
-  void process_notes(
-    plugin_block const& block,
-    std::vector<note_event> const& in,
-    std::vector<note_event>& out) override;
+
+  void process_audio(
+    plugin_block& block,
+    std::vector<note_event> const* in_notes,
+    std::vector<note_event>* out_notes) override;
+  void reset_audio(
+    plugin_block const* block,
+    std::vector<note_event> const* in_notes,
+    std::vector<note_event>* out_notes) override {};
 };
 
-std::unique_ptr<arp_engine_base>
+std::unique_ptr<module_engine>
 make_arpeggiator() 
 { return std::make_unique<arpeggiator_engine>(); }
 
@@ -360,28 +365,28 @@ arpeggiator_engine::current_mod_val(int mod_shape)
 }
 
 void
-arpeggiator_engine::process_notes(
-  plugin_block const& block,
-  std::vector<note_event> const& in,
-  std::vector<note_event>& out)
+arpeggiator_engine::process_audio(
+  plugin_block& block,
+  std::vector<note_event> const* in_notes,
+  std::vector<note_event>* out_notes)
 {
   switch (block.state.own_block_automation[param_rate_mod_mode][0].step())
   {
-  case mod_mode_off: process_notes<mod_mode_off>(block, in, out); break;
-  case mod_mode_linear: process_notes<mod_mode_linear>(block, in, out); break;
-  case mod_mode_exp: process_notes<mod_mode_exp>(block, in, out); break;
+  case mod_mode_off: process_audio<mod_mode_off>(block, in_notes, out_notes); break;
+  case mod_mode_linear: process_audio<mod_mode_linear>(block, in_notes, out_notes); break;
+  case mod_mode_exp: process_audio<mod_mode_exp>(block, in_notes, out_notes); break;
   default: assert(false); break;
   }
 }
 
 template <int ModMode> void 
-arpeggiator_engine::process_notes(
-  plugin_block const& block,
-  std::vector<note_event> const& in,
-  std::vector<note_event>& out)
+arpeggiator_engine::process_audio(
+  plugin_block& block,
+  std::vector<note_event> const* in_notes,
+  std::vector<note_event>* out_notes)
 {
   // plugin_base clears on each round
-  assert(out.size() == 0);
+  assert(out_notes->size() == 0);
 
   auto& own_cv = block.state.own_cv;
   auto const& block_auto = block.state.own_block_automation;
@@ -407,12 +412,12 @@ arpeggiator_engine::process_notes(
     _prev_jump = jump;
     _prev_sync = sync;
     _prev_notes = notes;
-    hard_reset(out);
+    hard_reset(*out_notes);
   }
 
   if (type == type_off)
   {
-    out.insert(out.end(), in.begin(), in.end());
+    out_notes->insert(out_notes->end(), in_notes->begin(), in_notes->end());
     for (int f = block.start_frame; f < block.end_frame; f++)
     {
       own_cv[output_abs_pos][0][f] = 0.0f;
@@ -425,18 +430,18 @@ arpeggiator_engine::process_notes(
   
   // this assumes notes are ordered by stream pos
   bool table_changed = false;
-  for (int i = 0; i < in.size(); i++)
+  for (int i = 0; i < in_notes->size(); i++)
   {
     table_changed = true;
-    if (in[i].type == note_event_type::on)
+    if ((*in_notes)[i].type == note_event_type::on)
     {
-      _current_user_chord[in[i].id.key].on = true;
-      _current_user_chord[in[i].id.key].velocity = in[i].velocity;
+      _current_user_chord[(*in_notes)[i].id.key].on = true;
+      _current_user_chord[(*in_notes)[i].id.key].velocity = (*in_notes)[i].velocity;
     }
     else
     {
-      _current_user_chord[in[i].id.key].on = false;
-      _current_user_chord[in[i].id.key].velocity = 0.0f;
+      _current_user_chord[(*in_notes)[i].id.key].on = false;
+      _current_user_chord[(*in_notes)[i].id.key].velocity = 0.0f;
     }
   }
 
@@ -445,7 +450,7 @@ arpeggiator_engine::process_notes(
     // STEP 0: off all notes
     // just active notes is not enough, 
     // user may have been playing with voice/osc note/oct in the meantime
-    hard_reset(out);
+    hard_reset(*out_notes);
 
     // reset to before start, will get picked up
     _table_pos = -1;
@@ -615,7 +620,7 @@ arpeggiator_engine::process_notes(
           end_old.id.id = 0;
           end_old.id.channel = 0; 
           end_old.id.key = _current_arp_note_table[(flipped_pos + i * dist) % _current_arp_note_table.size()].midi_key;
-          out.push_back(end_old);
+          out_notes->push_back(end_old);
         }
       }
 
@@ -689,7 +694,7 @@ arpeggiator_engine::process_notes(
         start_new.id.id = 0;
         start_new.id.channel = 0;
         start_new.id.key = _current_arp_note_table[(flipped_pos + i * dist) % _current_arp_note_table.size()].midi_key;
-        out.push_back(start_new);
+        out_notes->push_back(start_new);
       }
     }
     

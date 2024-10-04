@@ -62,8 +62,8 @@ graph_engine::process_default(
     engine = slot_map[module_slot].get();
   bool voice = module.dsp.stage == module_stage::voice;
   return process(module_index, module_slot, custom_outputs, context, [engine, voice, &custom_outputs, context](auto& block) {
-    engine->reset_graph(&block, custom_outputs, context);
-    engine->process_graph(block, custom_outputs, context);
+    engine->reset_graph(&block, nullptr, nullptr, custom_outputs, context);
+    engine->process_graph(block, nullptr, nullptr, custom_outputs, context);
   });
 }
 

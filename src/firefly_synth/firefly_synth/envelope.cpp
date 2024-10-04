@@ -90,10 +90,20 @@ public module_engine {
 public:
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(env_engine);
 
-  void reset_audio(plugin_block const* block) override;
-  void process_audio(plugin_block& block) override { process_internal(block, nullptr); }
-  void process_graph(plugin_block& block, std::vector<mod_out_custom_state> const& custom_outputs, void* context) override;
-  void reset_graph(plugin_block const* block, std::vector<mod_out_custom_state> const& custom_outputs, void* context) override;
+  void reset_audio(plugin_block const* block,
+    std::vector<note_event> const* in_notes,
+    std::vector<note_event>* out_notes) override;
+  void process_audio(plugin_block& block,
+    std::vector<note_event> const* in_notes,
+    std::vector<note_event>* out_notes) override { process_internal(block, nullptr); }
+
+  void process_graph(plugin_block& block,
+    std::vector<note_event> const* in_notes,
+    std::vector<note_event>* out_notes, 
+    std::vector<mod_out_custom_state> const& custom_outputs, void* context) override;
+  void reset_graph(plugin_block const* block,
+    std::vector<note_event> const* in_notes,
+    std::vector<note_event>* out_notes, std::vector<mod_out_custom_state> const& custom_outputs, void* context) override;
 
 private:
 
@@ -204,9 +214,9 @@ render_graph(
   engine->process_begin(&state, sample_rate, params.max_frame_count, voice_release_at);
   auto const* block = engine->process(module_env, mapping.module_slot, custom_outputs, nullptr, [mapping, &custom_outputs](plugin_block& block) {
     env_engine engine;
-    engine.reset_graph(&block, custom_outputs, nullptr);
+    engine.reset_graph(&block, nullptr, nullptr, custom_outputs, nullptr);
     cv_cv_matrix_mixdown modulation(make_static_cv_matrix_mixdown(block)[module_env][mapping.module_slot]);
-    engine.process_graph(block, custom_outputs, &modulation);
+    engine.process_graph(block, nullptr, nullptr, custom_outputs, &modulation);
   });
   engine->process_end();
 
@@ -539,7 +549,10 @@ calc_slope_exp_splt(double slope_pos, double splt_bnd, double exp)
 }
 
 void
-env_engine::reset_audio(plugin_block const* block)
+env_engine::reset_audio(
+  plugin_block const* block,
+  std::vector<note_event> const* in_notes,
+  std::vector<note_event>* out_notes)
 {
   _stage_pos = 0;
   _total_pos = 0;
@@ -555,11 +568,13 @@ env_engine::reset_audio(plugin_block const* block)
 
 void 
 env_engine::reset_graph(
-  plugin_block const* block, 
+  plugin_block const* block,
+  std::vector<note_event> const* in_notes,
+  std::vector<note_event>* out_notes,
   std::vector<mod_out_custom_state> const& custom_outputs, 
   void* context)
 {
-  reset_audio(block);
+  reset_audio(block, nullptr, nullptr);
 
   _ffwd_stopped_at_samples = -1;
   _ffwd_target_total_pos = 0.0f;
@@ -613,7 +628,9 @@ env_engine::reset_graph(
 
 void 
 env_engine::process_graph(
-  plugin_block& block, 
+  plugin_block& block,
+  std::vector<note_event> const* in_notes,
+  std::vector<note_event>* out_notes,
   std::vector<mod_out_custom_state> const& custom_outputs, 
   void* context)
 {

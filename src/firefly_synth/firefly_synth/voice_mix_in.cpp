@@ -12,8 +12,12 @@ namespace firefly_synth {
 class voice_mix_engine :
 public module_engine {
 public:
-  void process_audio(plugin_block& block) override;
-  void reset_audio(plugin_block const*) override {}
+  void process_audio(plugin_block& block,
+    std::vector<note_event> const* in_notes,
+    std::vector<note_event>* out_notes) override;
+  void reset_audio(plugin_block const*,
+    std::vector<note_event> const* in_notes,
+    std::vector<note_event>* out_notes) override {}
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(voice_mix_engine);
 };
 
@@ -32,7 +36,10 @@ voice_mix_topo(int section, bool is_fx)
 }
 
 void
-voice_mix_engine::process_audio(plugin_block& block)
+voice_mix_engine::process_audio(
+  plugin_block& block,
+  std::vector<note_event> const* in_notes,
+  std::vector<note_event>* out_notes)
 {
   for(int c = 0; c < 2; c++)
     block.out->voice_mixdown[c].copy_to(block.start_frame, block.end_frame, block.state.own_audio[0][0][c]);

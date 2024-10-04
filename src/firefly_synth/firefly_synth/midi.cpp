@@ -15,8 +15,12 @@ enum { section_main };
 class midi_engine :
 public module_engine {
 public:
-  void reset_audio(plugin_block const*) override {}
-  void process_audio(plugin_block& block) override;
+  void reset_audio(plugin_block const*,
+    std::vector<note_event> const* in_notes,
+    std::vector<note_event>* out_notes) override {}
+  void process_audio(plugin_block& block,
+    std::vector<note_event> const* in_notes,
+    std::vector<note_event>* out_notes) override;
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(midi_engine);
 };
 
@@ -38,7 +42,10 @@ midi_topo(int section)
 }
 
 void
-midi_engine::process_audio(plugin_block& block)
+midi_engine::process_audio(
+  plugin_block& block,
+  std::vector<note_event> const* in_notes,
+  std::vector<note_event>* out_notes)
 {
   auto& own_cv = block.state.own_cv;    
   auto const& midi = block.state.own_midi_automation;

@@ -105,8 +105,12 @@ public module_engine {
   void process_voice_mode_tuning_mode_unison(plugin_block& block);
 
 public:
-  void reset_audio(plugin_block const*) override;
-  void process_audio(plugin_block& block) override;
+  void reset_audio(plugin_block const*,
+    std::vector<note_event> const* in_notes,
+    std::vector<note_event>* out_notes) override;
+  void process_audio(plugin_block& block,
+    std::vector<note_event> const* in_notes,
+    std::vector<note_event>* out_notes) override;
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(voice_in_engine);
 };
 
@@ -354,7 +358,10 @@ voice_in_engine::calc_current_porta_midi_note()
 }
 
 void
-voice_in_engine::reset_audio(plugin_block const* block)
+voice_in_engine::reset_audio(
+  plugin_block const* block,
+  std::vector<note_event> const* in_notes,
+  std::vector<note_event>* out_notes)
 {
   _position = 0;
   _to_midi_note = block->voice->state.note_id_.key;
@@ -393,7 +400,10 @@ voice_in_engine::reset_audio(plugin_block const* block)
 }
 
 void
-voice_in_engine::process_audio(plugin_block& block)
+voice_in_engine::process_audio(
+  plugin_block& block,
+  std::vector<note_event> const* in_notes,
+  std::vector<note_event>* out_notes)
 {
   auto const& block_auto = block.state.own_block_automation;
   int voice_mode = block_auto[param_mode][0].step();

@@ -152,11 +152,21 @@ public:
   lfo_engine(bool global) : 
   _global(global), _smooth_noise(1, 1) {}
 
-  void reset_audio(plugin_block const*) override;
-  void reset_graph(plugin_block const* block, std::vector<mod_out_custom_state> const& custom_outputs, void* context) override;
+  void reset_audio(plugin_block const*,
+    std::vector<note_event> const* in_notes,
+    std::vector<note_event>* out_notes) override;
+  void reset_graph(plugin_block const* block,
+    std::vector<note_event> const* in_notes,
+    std::vector<note_event>* out_notes, 
+    std::vector<mod_out_custom_state> const& custom_outputs, 
+    void* context) override;
 
-  void process_audio(plugin_block& block) override { process_internal(block, nullptr); }
-  void process_graph(plugin_block& block, std::vector<mod_out_custom_state> const& custom_outputs, void* context) override 
+  void process_audio(plugin_block& block,
+    std::vector<note_event> const* in_notes,
+    std::vector<note_event>* out_notes) override { process_internal(block, nullptr); }
+  void process_graph(plugin_block& block,
+    std::vector<note_event> const* in_notes,
+    std::vector<note_event>* out_notes, std::vector<mod_out_custom_state> const& custom_outputs, void* context) override
   { process_internal(block, static_cast<cv_cv_matrix_mixdown const*>(context)); }
 };
 
@@ -230,8 +240,8 @@ render_graph(
   auto const* block = engine->process(mapping.module_index, mapping.module_slot, custom_outputs, nullptr, [&](plugin_block& block) {
     lfo_engine engine(global);
     cv_cv_matrix_mixdown modulation(make_static_cv_matrix_mixdown(block)[mapping.module_index][mapping.module_slot]);
-    engine.reset_graph(&block, custom_outputs, &modulation);
-    engine.process_graph(block, custom_outputs, &modulation);
+    engine.reset_graph(&block, nullptr, nullptr, custom_outputs, &modulation);
+    engine.process_graph(block, nullptr, nullptr, custom_outputs, &modulation);
   });
   engine->process_end();
   jarray<float, 1> series(block->state.own_cv[0][0]);
@@ -547,11 +557,13 @@ lfo_engine::update_block_params(plugin_block const* block)
 
 void 
 lfo_engine::reset_graph(
-  plugin_block const* block, 
+  plugin_block const* block,
+  std::vector<note_event> const* in_notes,
+  std::vector<note_event>* out_notes,
   std::vector<mod_out_custom_state> const& custom_outputs, 
   void* context)
 {
-  reset_audio(block);
+  reset_audio(block, nullptr, nullptr);
 
   int new_rand_seed = 0;
   float new_ref_phase = 0.0f;
@@ -624,7 +636,10 @@ lfo_engine::reset_graph(
 }
 
 void
-lfo_engine::reset_audio(plugin_block const* block) 
+lfo_engine::reset_audio(
+  plugin_block const* block,
+  std::vector<note_event> const* in_notes,
+  std::vector<note_event>* out_notes)
 { 
   _ref_phase = 0;
   _lfo_end_value = 0;

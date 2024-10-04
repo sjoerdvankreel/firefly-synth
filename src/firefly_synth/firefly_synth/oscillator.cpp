@@ -167,8 +167,12 @@ public:
   PB_PREVENT_ACCIDENTAL_COPY(osc_engine);
   osc_engine(int max_frame_count, float sample_rate);
 
-  void reset_audio(plugin_block const*) override;
-  void process_audio(plugin_block& block) override { process<false>(block, nullptr); }
+  void reset_audio(plugin_block const*,
+    std::vector<note_event> const* in_notes,
+    std::vector<note_event>* out_notes) override;
+  void process_audio(plugin_block& block,
+    std::vector<note_event> const* in_notes,
+    std::vector<note_event>* out_notes) override { process<false>(block, nullptr); }
   
   template <bool Graph> 
   void process(plugin_block& block, cv_audio_matrix_mixdown const* modulation);
@@ -277,7 +281,7 @@ render_osc_graphs(
   {
     block = engine->process(module_osc, i, custom_outputs, nullptr, [max_frame_count = params.max_frame_count, sample_rate](plugin_block& block) {
       osc_engine engine(max_frame_count, sample_rate);
-      engine.reset_audio(&block);
+      engine.reset_audio(&block, nullptr, nullptr);
       cv_audio_matrix_mixdown modulation(make_static_cv_matrix_mixdown(block));
       engine.process<true>(block, &modulation);
     });
@@ -715,7 +719,10 @@ _oversampler(max_frame_count)
 }
 
 void
-osc_engine::reset_audio(plugin_block const* block)
+osc_engine::reset_audio(
+  plugin_block const* block,
+  std::vector<note_event> const* in_notes,
+  std::vector<note_event>* out_notes)
 {
   // publish the oversampler ptrs
   // note: it is important to do this during reset() rather than process()

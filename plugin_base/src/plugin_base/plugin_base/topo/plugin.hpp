@@ -19,7 +19,6 @@ namespace plugin_base {
 class lnf;
 class plugin_gui;
 class plugin_state;
-class arp_engine_base;
 
 struct plugin_desc;
 struct plugin_topo_gui;
@@ -35,7 +34,7 @@ struct preset_item
   std::string group;
 };
 
-typedef std::function<std::unique_ptr<arp_engine_base>()>
+typedef std::function<std::unique_ptr<module_engine>()>
 arpeggiator_factory;
 
 // global unison support

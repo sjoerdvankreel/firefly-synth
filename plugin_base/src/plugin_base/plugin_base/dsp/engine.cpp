@@ -396,7 +396,7 @@ plugin_engine::activate_modules()
       {
         plugin_block block(make_plugin_block(-1, -1, m, mi, engine_tuning_mode_no_tuning, 0, 0));
         _input_engines[m][mi] = factory(*_state.desc().plugin, _sample_rate, _max_frame_count);
-        _input_engines[m][mi]->reset_audio(&block);
+        _input_engines[m][mi]->reset_audio(&block, nullptr, nullptr);
       }
     }
   
@@ -417,7 +417,7 @@ plugin_engine::activate_modules()
       {
         plugin_block block(make_plugin_block(-1, -1, m, mi, engine_tuning_mode_no_tuning, 0, 0));
         _output_engines[m][mi] = factory(*_state.desc().plugin, _sample_rate, _max_frame_count);
-        _output_engines[m][mi]->reset_audio(&block);
+        _output_engines[m][mi]->reset_audio(&block, nullptr, nullptr);
       }
     }
 }
@@ -547,7 +547,7 @@ plugin_engine::process_voice(int v, bool threaded)
 
         double start_time = seconds_since_epoch();
         _voice_module_process_duration_sec[v][m][mi] = start_time;
-        _voice_engines[v][m][mi]->process_audio(block);
+        _voice_engines[v][m][mi]->process_audio(block, nullptr, nullptr);
         _voice_module_process_duration_sec[v][m][mi] = seconds_since_epoch() - start_time;
 
         // plugin completed its envelope
@@ -631,7 +631,7 @@ plugin_engine::activate_voice(
           _voice_states[slot].sub_voice_index, _last_note_key, _last_note_channel));
         plugin_block block(make_plugin_block(slot, _voice_states[slot].note_id_.channel, m, mi, tuning_mode, state.start_frame, state.end_frame));
         block.voice = &voice_block;
-        _voice_engines[slot][m][mi]->reset_audio(&block);
+        _voice_engines[slot][m][mi]->reset_audio(&block, nullptr, nullptr);
       }
 }
 
@@ -982,7 +982,7 @@ plugin_engine::process()
         plugin_block block(make_plugin_block(-1, -1, m, mi, _current_block_tuning_mode, 0, frame_count));
         double start_time = seconds_since_epoch();
         _global_module_process_duration_sec[m][mi] = start_time;
-        _input_engines[m][mi]->process_audio(block);
+        _input_engines[m][mi]->process_audio(block, nullptr, nullptr);
         _global_module_process_duration_sec[m][mi] = seconds_since_epoch() - start_time;
       }
 
@@ -995,7 +995,7 @@ plugin_engine::process()
   if (_arpeggiator)
   {
     plugin_block block(make_plugin_block(-1, -1, _state.desc().plugin->engine.arpeggiator_module_index, 0, _current_block_tuning_mode, 0, frame_count));
-    _arpeggiator->process_notes(block, _host_block->events.notes, _arp_notes);
+    _arpeggiator->process_audio(block, &_host_block->events.notes, &_arp_notes);
   }
   else
     _arp_notes.insert(_arp_notes.end(), _host_block->events.notes.begin(), _host_block->events.notes.end());
@@ -1256,7 +1256,7 @@ plugin_engine::process()
         block.out = &out_block;
         double start_time = seconds_since_epoch();
         _global_module_process_duration_sec[m][mi] = start_time;
-        _output_engines[m][mi]->process_audio(block);
+        _output_engines[m][mi]->process_audio(block, nullptr, nullptr);
         _global_module_process_duration_sec[m][mi] = seconds_since_epoch() - start_time;
 
         // copy back output parameter values

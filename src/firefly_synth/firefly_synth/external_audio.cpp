@@ -16,8 +16,13 @@ enum { output_ext_audio, output_count };
 class external_audio_engine :
 public module_engine {
 public:
-  void process_audio(plugin_block& block) override;
-  void reset_audio(plugin_block const*) override {}
+  void process_audio(
+    plugin_block& block,
+    std::vector<note_event> const* in_notes,
+    std::vector<note_event>* out_notes) override;
+  void reset_audio(plugin_block const*,
+    std::vector<note_event> const* in_notes,
+    std::vector<note_event>* out_notes) override {}
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(external_audio_engine);
 };
 
@@ -36,7 +41,10 @@ external_audio_topo(int section, bool is_fx)
 }
 
 void
-external_audio_engine::process_audio(plugin_block& block)
+external_audio_engine::process_audio(
+  plugin_block& block,
+  std::vector<note_event> const* in_notes,
+  std::vector<note_event>* out_notes)
 {  
   float const* const* host_audio = block.host.audio_in;
   auto& own_audio = block.state.own_audio[output_ext_audio][0];

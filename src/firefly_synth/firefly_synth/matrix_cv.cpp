@@ -120,7 +120,10 @@ protected:
   void perform_mixdown(plugin_block& block, int module, int slot);
 
 public:
-  void reset_audio(plugin_block const*) override;
+  void reset_audio(
+    plugin_block const*,
+    std::vector<note_event> const* in_notes,
+    std::vector<note_event>* out_notes) override;
 };
 
 // mixes down into a single cv (entire module) on demand
@@ -136,7 +139,9 @@ public:
   cv_matrix_engine_base(true, global, topo, sources, targets), _mixer(this) {}
 
   PB_PREVENT_ACCIDENTAL_COPY(cv_cv_matrix_engine);
-  void process_audio(plugin_block& block) override;
+  void process_audio(plugin_block& block,
+    std::vector<note_event> const* in_notes,
+    std::vector<note_event>* out_notes) override;
   cv_cv_matrix_mixdown const& mix(plugin_block& block, int module, int slot);
 };
 
@@ -150,7 +155,9 @@ public:
     std::vector<param_topo_mapping> const& targets):
   cv_matrix_engine_base(false, global, topo, sources, targets) {}
 
-  void process_audio(plugin_block& block) override;
+  void process_audio(plugin_block& block,
+    std::vector<note_event> const* in_notes,
+    std::vector<note_event>* out_notes) override;
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(cv_audio_matrix_engine);
 };
 
@@ -594,7 +601,10 @@ _cv(cv), _global(global), _sources(sources), _targets(targets)
 }
 
 void 
-cv_cv_matrix_engine::process_audio(plugin_block& block)
+cv_cv_matrix_engine::process_audio(
+  plugin_block& block,
+  std::vector<note_event> const* in_notes,
+  std::vector<note_event>* out_notes)
 { *block.state.own_context = &_mixer; }
 
 cv_cv_matrix_mixdown const& 
@@ -609,14 +619,20 @@ cv_cv_matrix_engine::mix(plugin_block& block, int module, int slot)
 }
 
 void
-cv_audio_matrix_engine::process_audio(plugin_block& block)
+cv_audio_matrix_engine::process_audio(
+  plugin_block& block,
+  std::vector<note_event> const* in_notes,
+  std::vector<note_event>* out_notes)
 {
   perform_mixdown(block, -1, -1);
   *block.state.own_context = &_mixdown;
 }
 
 void 
-cv_matrix_engine_base::reset_audio(plugin_block const* block)
+cv_matrix_engine_base::reset_audio(
+  plugin_block const* block,
+  std::vector<note_event> const* in_notes,
+  std::vector<note_event>* out_notes)
 {
   // need to capture stuff here because when we start 
   // mixing "own" does not refer to us but to the caller

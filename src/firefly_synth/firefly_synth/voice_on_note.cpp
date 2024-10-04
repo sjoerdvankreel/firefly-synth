@@ -23,9 +23,17 @@ public module_engine {
   std::array<float, on_voice_random_count> _random_values;
   std::vector<module_output_mapping> const _global_outputs;
 public:
-  void process_audio(plugin_block& block) override;
-  void reset_audio(plugin_block const* block) override;
-  void reset_graph(plugin_block const* block, std::vector<mod_out_custom_state> const& custom_outputs, void* context) override;
+  void process_audio(plugin_block& block,
+    std::vector<note_event> const* in_notes,
+    std::vector<note_event>* out_notes) override;
+  void reset_audio(plugin_block const* block,
+    std::vector<note_event> const* in_notes,
+    std::vector<note_event>* out_notes) override;
+  void reset_graph(plugin_block const* block,
+    std::vector<note_event> const* in_notes,
+    std::vector<note_event>* out_notes, 
+    std::vector<mod_out_custom_state> const& custom_outputs, 
+    void* context) override;
   PB_PREVENT_ACCIDENTAL_COPY(voice_on_note_engine);
 
   // need a different seed for each voice!
@@ -59,12 +67,14 @@ voice_on_note_topo(plugin_topo const* topo, int section)
 
 void 
 voice_on_note_engine::reset_graph(
-  plugin_block const* block, 
+  plugin_block const* block,
+  std::vector<note_event> const* in_notes,
+  std::vector<note_event>* out_notes,
   std::vector<mod_out_custom_state> const& custom_outputs, 
   void* context)
 {
   // do reset_audio then overwrite with live values from process_audio
-  reset_audio(block);
+  reset_audio(block, nullptr, nullptr);
 
   // fix to current live values
   // backwards loop, outputs are sorted, latest-in-time are at the end
@@ -84,7 +94,10 @@ voice_on_note_engine::reset_graph(
 }
 
 void 
-voice_on_note_engine::reset_audio(plugin_block const* block)
+voice_on_note_engine::reset_audio(
+  plugin_block const* block,
+  std::vector<note_event> const* in_notes,
+  std::vector<note_event>* out_notes)
 {   
   for (int i = 0; i < on_voice_random_count; i++)
   {
@@ -101,7 +114,10 @@ voice_on_note_engine::reset_audio(plugin_block const* block)
 }
 
 void
-voice_on_note_engine::process_audio(plugin_block& block)
+voice_on_note_engine::process_audio(
+  plugin_block& block,
+  std::vector<note_event> const* in_notes,
+  std::vector<note_event>* out_notes)
 {
   for (int i = 0; i < on_voice_random_count; i++)
   {

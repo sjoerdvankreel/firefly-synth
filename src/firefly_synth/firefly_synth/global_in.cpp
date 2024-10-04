@@ -26,8 +26,12 @@ extern int const global_in_param_pb_range = param_pb_range;
 class global_in_engine :
 public module_engine {
 public:
-  void reset_audio(plugin_block const*) override {}
-  void process_audio(plugin_block& block) override;
+  void reset_audio(plugin_block const*,
+    std::vector<note_event> const* in_notes,
+    std::vector<note_event>* out_notes) override {}
+  void process_audio(plugin_block& block,
+    std::vector<note_event> const* in_notes,
+    std::vector<note_event>* out_notes) override;
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(global_in_engine);
 };
 
@@ -115,7 +119,10 @@ global_in_topo(int section, bool is_fx, gui_position const& pos)
 }
 
 void
-global_in_engine::process_audio(plugin_block& block)
+global_in_engine::process_audio(
+  plugin_block& block,
+  std::vector<note_event> const* in_notes,
+  std::vector<note_event>* out_notes)
 {
   auto& own_cv = block.state.own_cv;  
   auto const& accurate = block.state.own_accurate_automation;

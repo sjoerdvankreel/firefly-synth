@@ -322,8 +322,14 @@ public:
   PB_PREVENT_ACCIDENTAL_COPY(fx_engine);
   fx_engine(bool global, int sample_rate, int max_frame_count);
 
-  void reset_audio(plugin_block const*) override;
-  void process_audio(plugin_block& block) override { process<false>(block, nullptr, nullptr); }
+  void reset_audio(plugin_block const*,
+    std::vector<note_event> const* in_notes,
+    std::vector<note_event>* out_notes) override;
+
+  void process_audio(plugin_block& block,
+    std::vector<note_event> const* in_notes,
+    std::vector<note_event>* out_notes) override { process<false>(block, nullptr, nullptr); }
+
   template<bool Graph> 
   void process(plugin_block& block, cv_audio_matrix_mixdown const* modulation, jarray<float, 2> const* audio_in);
 };
@@ -435,7 +441,7 @@ render_graph(
     mapping.module_index, mapping.module_slot, custom_outputs, nullptr, [mapping, sample_rate, frame_count, &audio_in](plugin_block& block) {
     bool global = mapping.module_index == module_gfx;
     fx_engine engine(global, sample_rate, frame_count);
-    engine.reset_audio(&block);
+    engine.reset_audio(&block, nullptr, nullptr);
     cv_audio_matrix_mixdown modulation(make_static_cv_matrix_mixdown(block));
     engine.process<true>(block, &modulation, &audio_in);
   });
@@ -1246,7 +1252,10 @@ _dst_oversampler(max_frame_count)
 }
 
 void
-fx_engine::reset_audio(plugin_block const* block)
+fx_engine::reset_audio(
+  plugin_block const* block,
+  std::vector<note_event> const* in_notes,
+  std::vector<note_event>* out_notes)
 {
   _svf.clear();
   _dly_pos = 0;

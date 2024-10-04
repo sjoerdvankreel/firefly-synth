@@ -19,32 +19,39 @@ namespace plugin_base {
 
 class plugin_engine;
 
-// single module audio processors
+// single module audio/arp processors
 class module_engine { 
 public: 
   virtual ~module_engine() {}
-  virtual void process_audio(plugin_block& block) = 0;
-  virtual void reset_audio(plugin_block const* block) = 0;
+
+  // ok so this is really not the best design
+  // but it simplifies arpeggiator processing in graphs
+  // the single module designated as ARP should only process output notes
+  // and all the rest should output audio and cv stuff (and note ptrs will be null)
+  // ARP engine should NOT set module factory!
+  virtual void process_audio(
+    plugin_block& block,
+    std::vector<note_event> const* in_notes,
+    std::vector<note_event>* out_notes) = 0;
+  virtual void reset_audio(
+    plugin_block const* block,
+    std::vector<note_event> const* in_notes,
+    std::vector<note_event>* out_notes) = 0;
 
   // careful -- ui thread only
   // these are meant to do some optional pre/postprocessing and reroute to audio
   virtual void process_graph(
-    plugin_block& block, 
+    plugin_block& block,
+    std::vector<note_event> const* in_notes,
+    std::vector<note_event>* out_notes,
     std::vector<mod_out_custom_state> const& custom_outputs, 
-    void* context) { process_audio(block); }
+    void* context) { process_audio(block, in_notes, out_notes); }
   virtual void reset_graph(
-    plugin_block const* block, 
+    plugin_block const* block,
+    std::vector<note_event> const* in_notes,
+    std::vector<note_event>* out_notes,
     std::vector<mod_out_custom_state> const& custom_outputs, 
-    void* context) { reset_audio(block); }
-};
-
-// arpeggiator processor (optional)
-class arp_engine_base { 
-public: 
-  virtual ~arp_engine_base() {}
-  virtual void process_notes(plugin_block const& block,
-    std::vector<note_event> const& in,
-    std::vector<note_event>& out) = 0;
+    void* context) { reset_audio(block, in_notes, out_notes); }
 };
 
 // catering to clap
@@ -111,7 +118,7 @@ class plugin_engine final {
 
   // arpeggiator
   std::vector<note_event> _arp_notes = {};
-  std::unique_ptr<arp_engine_base> _arpeggiator = {};
+  std::unique_ptr<module_engine> _arpeggiator = {};
 
   // offset wrt _state
   jarray<float, 4> _current_modulation = {};

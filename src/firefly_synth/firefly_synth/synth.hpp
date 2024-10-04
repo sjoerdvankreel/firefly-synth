@@ -17,7 +17,7 @@ class osc_osc_matrix_am_modulator;
 class osc_osc_matrix_fm_modulator;
 
 // arp support
-std::unique_ptr<plugin_base::arp_engine_base>
+std::unique_ptr<plugin_base::module_engine>
 make_arpeggiator();
 
 // shared custom output/repaint tags
