@@ -19,7 +19,7 @@ static float const mod_range_exp = 4.0f;
 static float const mod_range_linear = 8.0f;
 
 enum { section_table, section_notes, section_sample };
-enum { output_base_table_pos, output_table_pos, output_rel_note, output_abs_note };
+enum { output_abs_pos, output_rel_pos, output_abs_note, output_rel_note };
 
 enum {
   param_type, param_jump,
@@ -121,15 +121,15 @@ public arp_engine_base
   int _table_pos = -1;
   int _note_remaining = 0;
   float _mod_phase = 0.0f; // internal lfo
-  float _table_pos_cv_out = 0.0f;
-  float _base_table_pos_cv_out = 0.0f;
-  float _note_rel_cv_out = 0.0f;
-  float _note_abs_cv_out = 0.0f;
+  float _cv_out_abs_pos = 0.0f;
+  float _cv_out_rel_pos = 0.0f;
+  float _cv_out_abs_note = 0.0f;
+  float _cv_out_rel_note = 0.0f;
   std::default_random_engine _random = {};
 
   int _note_low_key = -1;
   int _note_high_key = -1;
-  std::array<int, 128> _note_rel_mapping = {};
+  std::array<int, 128> _note_abs_mapping = {};
   std::array<arp_user_note, 128> _current_user_chord = {};
   std::vector<arp_table_note> _current_arp_note_table = {};
 
@@ -162,10 +162,10 @@ arpeggiator_topo(plugin_topo const* topo, int section, gui_position const& pos)
   module_topo result(make_module(
     make_topo_info("{8A09B4CD-9768-4504-B9FE-5447B047854B}", true, "Arpeggiator", "Arp", "Arp", module_arpeggiator, 1),
     make_module_dsp(module_stage::input, module_output::cv, 0, {
-      make_module_dsp_output(true, make_topo_info_basic("{94A509ED-AB5B-43CF-B4F1-422815D99186}", "Base Pos", output_base_table_pos, 1)),
-      make_module_dsp_output(true, make_topo_info_basic("{ED2AF50B-64F4-4E21-9E66-95079A1E101B}", "Pos", output_table_pos, 1)),
-      make_module_dsp_output(true, make_topo_info_basic("{AAA54A01-75AF-475B-B02D-F85295462335}", "Rel Note", output_rel_note, 1)),
-      make_module_dsp_output(true, make_topo_info_basic("{C17077E6-FDA9-4DAE-9FAB-E6499A45F462}", "Abs Note", output_abs_note, 1)) }),
+      make_module_dsp_output(true, make_topo_info_basic("{94A509ED-AB5B-43CF-B4F1-422815D99186}", "AbsPos", output_abs_pos, 1)),
+      make_module_dsp_output(true, make_topo_info_basic("{ED2AF50B-64F4-4E21-9E66-95079A1E101B}", "RelPos", output_rel_pos, 1)),
+      make_module_dsp_output(true, make_topo_info_basic("{AAA54A01-75AF-475B-B02D-F85295462335}", "AbsNote", output_abs_note, 1)),
+      make_module_dsp_output(true, make_topo_info_basic("{C17077E6-FDA9-4DAE-9FAB-E6499A45F462}", "RelNote", output_rel_note, 1)) }),
     make_module_gui(section, pos, { { 1 }, { 24, 11, 28 } })));
   result.gui.tabbed_name = "ARP";
   result.info.description = "Arpeggiator";
@@ -415,10 +415,10 @@ arpeggiator_engine::process_notes(
     out.insert(out.end(), in.begin(), in.end());
     for (int f = block.start_frame; f < block.end_frame; f++)
     {
+      own_cv[output_abs_pos][0][f] = 0.0f;
+      own_cv[output_rel_pos][0][f] = 0.0f;
       own_cv[output_rel_note][0][f] = 0.0f;
       own_cv[output_abs_note][0][f] = 0.0f;
-      own_cv[output_table_pos][0][f] = 0.0f;
-      own_cv[output_base_table_pos][0][f] = 0.0f;
     }
     return;
   }
@@ -449,13 +449,13 @@ arpeggiator_engine::process_notes(
 
     // reset to before start, will get picked up
     _table_pos = -1;
-    _note_remaining = 0;
-    _table_pos_cv_out = 0.0f;
-    _base_table_pos_cv_out = 0.0f;
-    _note_rel_cv_out = 0.0f;
-    _note_abs_cv_out = 0.0f;
     _note_high_key = 0;
     _note_low_key = 128;
+    _note_remaining = 0;
+    _cv_out_abs_pos = 0.0f;
+    _cv_out_rel_pos = 0.0f;
+    _cv_out_abs_note = 0.0f;
+    _cv_out_rel_note = 0.0f;
     _current_arp_note_table.clear();
 
     // STEP 1: build up the base chord table
@@ -523,7 +523,7 @@ arpeggiator_engine::process_notes(
     // need for cv outputs
     for (int i = 0; i < _current_arp_note_table.size(); i++)
     {
-      _note_rel_mapping[_current_arp_note_table[i].midi_key] = i;
+      _note_abs_mapping[_current_arp_note_table[i].midi_key] = i;
       _note_low_key = std::min(_note_low_key, _current_arp_note_table[i].midi_key);
       _note_high_key = std::max(_note_high_key, _current_arp_note_table[i].midi_key);
     }
@@ -669,15 +669,15 @@ arpeggiator_engine::process_notes(
       flipped_pos = is_random(mode) ? _table_pos : flipped_table_pos();
 
       // update current values for cv state
-      _note_abs_cv_out = 0.0f;
-      _note_rel_cv_out = 0.0f;
-      _table_pos_cv_out = flipped_pos / (float)(_current_arp_note_table.size() - 1);
-      _base_table_pos_cv_out = (_table_pos % _current_arp_note_table.size()) / (float)(_current_arp_note_table.size() - 1);
+      _cv_out_abs_note = 0.0f;
+      _cv_out_rel_note = 0.0f;
+      _cv_out_rel_pos = flipped_pos / (float)(_current_arp_note_table.size() - 1);
+      _cv_out_abs_pos = (_table_pos % _current_arp_note_table.size()) / (float)(_current_arp_note_table.size() - 1);
       int note_abs_range = _note_high_key - _note_low_key;
       if (note_abs_range > 0)
       {
-        _note_abs_cv_out = (_current_arp_note_table[flipped_pos].midi_key - _note_low_key) / (float)note_abs_range;
-        _note_rel_cv_out = _note_rel_mapping[_current_arp_note_table[flipped_pos].midi_key] / (float)(_current_arp_note_table.size() - 1);
+        _cv_out_rel_note = (_current_arp_note_table[flipped_pos].midi_key - _note_low_key) / (float)note_abs_range;
+        _cv_out_abs_note = _note_abs_mapping[_current_arp_note_table[flipped_pos].midi_key] / (float)(_current_arp_note_table.size() - 1);
       }
 
       for (int i = 0; i < notes; i++)
@@ -694,10 +694,10 @@ arpeggiator_engine::process_notes(
     }
     
     --_note_remaining;
-    own_cv[output_table_pos][0][f] = _table_pos_cv_out;
-    own_cv[output_base_table_pos][0][f] = _base_table_pos_cv_out;
-    own_cv[output_abs_note][0][f] = _note_abs_cv_out;
-    own_cv[output_rel_note][0][f] = _note_rel_cv_out;
+    own_cv[output_abs_pos][0][f] = _cv_out_abs_pos;
+    own_cv[output_rel_pos][0][f] = _cv_out_rel_pos;
+    own_cv[output_abs_note][0][f] = _cv_out_abs_note;
+    own_cv[output_rel_note][0][f] = _cv_out_rel_note;
 
     if constexpr (ModMode != mod_mode_off)
     {

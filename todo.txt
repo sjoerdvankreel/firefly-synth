@@ -29,7 +29,7 @@ autobuilds:
 modvis take 3:
 * make a new one for free-run and on-voice-rand
 
-arp / seq
+arp
 V do updown/downup 2 modes (repeat end note or not)
 V do +-/3 oct
 V do the flip-each-N control
@@ -71,19 +71,20 @@ V lfo not usable ==> give it its own internal lfo, reset in table start ==> also
 V the osc mod controls are tiny ?
 V output the table pos as cv signal!
 X do small graph under the VOICE OUT section
+V rename abs/rel
+X still do something with note lengths/hold/stop/whatever ==> make the sequ
+V remove any mention of seq
 
 * maybe hard reset all chans for renoise ?
 * still not killing all the notes
-* still do something with note lengths/hold/stop/whatever ==> make the sequ
 * compare perf with regular play notes
 * also maybe have some visualization! 
-* remove any mention of seq
 * check automation works
 * check if shows up in the docs
 * write the manual
 * add arp table pos as a mod source ==> yes do it + also make all graphs react pfft
 * reset is still no good
-* rename abs/rel
+
 
 wishlist:
 use fftw
