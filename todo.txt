@@ -69,12 +69,12 @@ X controls7: some kinda step editor ==> also instead can do hold & skip ? ==> sc
 V do some nice stuff with the global cv sources, they there for grabs already
 V lfo not usable ==> give it its own internal lfo, reset in table start ==> also sync it to the master stream pos
 V the osc mod controls are tiny ?
+V output the table pos as cv signal!
+X do small graph under the VOICE OUT section
 
 * maybe hard reset all chans for renoise ?
-* output the table pos as cv signal!
 * still not killing all the notes
 * still do something with note lengths/hold/stop/whatever ==> make the sequ
-* do small graph under the VOICE OUT section
 * compare perf with regular play notes
 * also maybe have some visualization! 
 * remove any mention of seq
