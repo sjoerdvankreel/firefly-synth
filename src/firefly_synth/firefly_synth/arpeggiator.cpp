@@ -156,14 +156,6 @@ std::unique_ptr<arp_engine_base>
 make_arpeggiator() 
 { return std::make_unique<arpeggiator_engine>(); }
 
-static graph_data
-render_graph(
-  plugin_state const& state, graph_engine* engine, int param,
-  param_topo_mapping const& mapping, std::vector<mod_out_custom_state> const& custom_outputs)
-{
-  return graph_data(0.33f, false, {});
-}
-
 module_topo
 arpeggiator_topo(plugin_topo const* topo, int section, gui_position const& pos)
 {
@@ -175,7 +167,6 @@ arpeggiator_topo(plugin_topo const* topo, int section, gui_position const& pos)
       make_module_dsp_output(true, make_topo_info_basic("{AAA54A01-75AF-475B-B02D-F85295462335}", "AbsNote", output_abs_note, 1)),
       make_module_dsp_output(true, make_topo_info_basic("{C17077E6-FDA9-4DAE-9FAB-E6499A45F462}", "RelNote", output_rel_note, 1)) }),
     make_module_gui(section, pos, { { 1 }, { 24, 11, 28 } })));
-  result.graph_renderer = render_graph;
   result.gui.tabbed_name = "ARP";
   result.info.description = "Arpeggiator";
 

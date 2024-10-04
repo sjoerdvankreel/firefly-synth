@@ -19,21 +19,12 @@ namespace plugin_base {
 
 class plugin_engine;
 
-// single module audio and/or arpeggiator processors
-// not so neat to put it in 1 class but simplifies graph handling
+// single module audio processors
 class module_engine { 
 public: 
   virtual ~module_engine() {}
-
-  // regular dsp call
-  // this will be called for all the modules not designated as arp
   virtual void process_audio(plugin_block& block) = 0;
   virtual void reset_audio(plugin_block const* block) = 0;
-
-  // regular arpeggiator call
-  // this will only be called for the one module designated as arp
-  virtual void process_notes(plugin_block& block) {}
-  virtual void reset_notes(plugin_block const* block) {}
 
   // careful -- ui thread only
   // these are meant to do some optional pre/postprocessing and reroute to audio
