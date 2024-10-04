@@ -164,8 +164,8 @@ arpeggiator_topo(plugin_topo const* topo, int section, gui_position const& pos)
     make_module_dsp(module_stage::input, module_output::cv, 0, {
       make_module_dsp_output(true, make_topo_info_basic("{94A509ED-AB5B-43CF-B4F1-422815D99186}", "Base Pos", output_base_table_pos, 1)),
       make_module_dsp_output(true, make_topo_info_basic("{ED2AF50B-64F4-4E21-9E66-95079A1E101B}", "Pos", output_table_pos, 1)),
-      make_module_dsp_output(true, make_topo_info_basic("{AAA54A01-75AF-475B-B02D-F85295462335}", "Rel Note", output_table_pos, 1)),
-      make_module_dsp_output(true, make_topo_info_basic("{C17077E6-FDA9-4DAE-9FAB-E6499A45F462}", "Abs Note", output_table_pos, 1)) }),
+      make_module_dsp_output(true, make_topo_info_basic("{AAA54A01-75AF-475B-B02D-F85295462335}", "Rel Note", output_rel_note, 1)),
+      make_module_dsp_output(true, make_topo_info_basic("{C17077E6-FDA9-4DAE-9FAB-E6499A45F462}", "Abs Note", output_abs_note, 1)) }),
     make_module_gui(section, pos, { { 1 }, { 24, 11, 28 } })));
   result.info.description = "Arpeggiator / Sequencer.";
 
@@ -414,10 +414,10 @@ arpeggiator_engine::process_notes(
     out.insert(out.end(), in.begin(), in.end());
     for (int f = block.start_frame; f < block.end_frame; f++)
     {
-      own_cv[output_table_pos][0][f] = 0.0f;
-      own_cv[output_base_table_pos][0][f] = 0.0f;
       own_cv[output_rel_note][0][f] = 0.0f;
       own_cv[output_abs_note][0][f] = 0.0f;
+      own_cv[output_table_pos][0][f] = 0.0f;
+      own_cv[output_base_table_pos][0][f] = 0.0f;
     }
     return;
   }
@@ -524,7 +524,7 @@ arpeggiator_engine::process_notes(
     {
       _note_rel_mapping[_current_arp_note_table[i].midi_key] = i;
       _note_low_key = std::min(_note_low_key, _current_arp_note_table[i].midi_key);
-      _note_high_key = std::min(_note_low_key, _current_arp_note_table[i].midi_key);
+      _note_high_key = std::max(_note_high_key, _current_arp_note_table[i].midi_key);
     }
 
     // STEP 3: take the up-down into account
