@@ -2,6 +2,7 @@
 #include <plugin_base/topo/plugin.hpp>
 #include <plugin_base/topo/support.hpp>
 #include <plugin_base/helpers/dsp.hpp>
+#include <plugin_base/dsp/graph_engine.hpp>
 
 #include <firefly_synth/waves.hpp>
 #include <firefly_synth/synth.hpp>
@@ -161,6 +162,61 @@ std::unique_ptr<module_engine>
 make_arpeggiator() 
 { return std::make_unique<arpeggiator_engine>(); }
 
+static graph_engine_params
+make_graph_engine_params()
+{
+  graph_engine_params result = {};
+  result.bpm = 120;
+  result.max_frame_count = 400;
+  return result;
+}
+
+static std::unique_ptr<graph_engine>
+make_graph_engine(plugin_desc const* desc)
+{
+  auto params = make_graph_engine_params();
+  return std::make_unique<graph_engine>(desc, params);
+}
+
+static graph_data
+render_graph(
+  plugin_state const& state, graph_engine* engine, int param,
+  param_topo_mapping const& mapping, std::vector<mod_out_custom_state> const& custom_outputs)
+{
+  int type = state.get_plain_at(mapping.module_index, mapping.module_slot, param_type, mapping.param_slot).step();
+  if (type == type_off) return graph_data(graph_data_type::off, {});
+
+  std::vector<note_event> in_notes;
+  std::vector<note_event> out_notes;
+
+  // default to c major for plotting
+  note_event note;
+  note.frame = 0;
+  note.id.id = 0;
+  note.id.channel = 0;
+  note.velocity = 1.0f;
+  note.type = note_event_type::on;
+
+  // TODO fix the table freq for plotting and ditch the lfo
+  note.id.key = 60;
+  in_notes.push_back(note);
+  note.id.key = 64;
+  in_notes.push_back(note);
+  note.id.key = 79; // TODO just checking
+  in_notes.push_back(note);
+
+  auto params = make_graph_engine_params();
+  engine->process_begin(&state, params.max_frame_count, params.max_frame_count, -1);
+  auto const* block = engine->process(mapping.module_index, mapping.module_slot, custom_outputs, nullptr, [&](plugin_block& block) {
+    arpeggiator_engine engine;
+    engine.reset_graph(&block, &in_notes, &out_notes, custom_outputs, nullptr);
+    engine.process_graph(block, &in_notes, &out_notes, custom_outputs, nullptr);
+    });
+  engine->process_end();
+  jarray<float, 1> series(block->state.own_cv[output_rel_note][0]);
+  return graph_data(series, false, 1.0f, false, {});
+}
+
 module_topo
 arpeggiator_topo(plugin_topo const* topo, int section, gui_position const& pos)
 {
@@ -174,6 +230,8 @@ arpeggiator_topo(plugin_topo const* topo, int section, gui_position const& pos)
     make_module_gui(section, pos, { { 1 }, { 24, 11, 28 } })));
   result.gui.tabbed_name = "ARP";
   result.info.description = "Arpeggiator";
+  result.graph_renderer = render_graph;
+  result.graph_engine_factory = make_graph_engine;
 
   result.sections.emplace_back(make_param_section(section_table,
     make_topo_tag_basic("{6779AFA8-E0FE-482F-989B-6DE07263AEED}", "Table"),
