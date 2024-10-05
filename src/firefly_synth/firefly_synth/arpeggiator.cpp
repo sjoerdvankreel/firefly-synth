@@ -18,6 +18,7 @@ namespace firefly_synth {
 
 static float const mod_range_exp = 4.0f;
 static float const mod_range_linear = 8.0f;
+static int const max_active_table_size = 256;
 
 enum { section_table, section_notes, section_sample };
 enum { output_abs_pos, output_rel_pos, output_abs_note, output_rel_note };
@@ -148,6 +149,15 @@ public:
 
   arpeggiator_engine();
 
+  int 
+  current_arp_note_table_size() const
+  { return _current_arp_note_table.size(); }
+
+  void
+  build_arp_note_table(
+    std::array<arp_user_note, 128> const& user_chord,
+    int type, int mode, int seed, bool jump);
+
   void process_audio(
     plugin_block& block,
     std::vector<note_event> const* in_notes,
@@ -167,7 +177,7 @@ make_graph_engine_params()
 {
   graph_engine_params result = {};
   result.bpm = 120;
-  result.max_frame_count = 400;
+  result.max_frame_count = max_active_table_size;
   return result;
 }
 
@@ -184,6 +194,9 @@ render_graph(
   param_topo_mapping const& mapping, std::vector<mod_out_custom_state> const& custom_outputs)
 {
   int type = state.get_plain_at(mapping.module_index, mapping.module_slot, param_type, mapping.param_slot).step();
+  int mode = state.get_plain_at(mapping.module_index, mapping.module_slot, param_mode, mapping.param_slot).step();
+  int seed = state.get_plain_at(mapping.module_index, mapping.module_slot, param_seed, mapping.param_slot).step();
+  bool jump = state.get_plain_at(mapping.module_index, mapping.module_slot, param_jump, mapping.param_slot).step() != 0;
   if (type == type_off) return graph_data(graph_data_type::off, {});
 
   std::vector<note_event> in_notes;
@@ -205,15 +218,24 @@ render_graph(
   note.id.key = 79; // TODO just checking
   in_notes.push_back(note);
 
-  auto params = make_graph_engine_params();
-  engine->process_begin(&state, params.max_frame_count, params.max_frame_count, -1);
+  std::array<arp_user_note, 128> user_chord = {};
+  for (int i = 0; i < in_notes.size(); i++)
+  {
+    user_chord[in_notes[i].id.key].on = true;
+    user_chord[in_notes[i].id.key].velocity = 1.0f;
+  }
+
+  arpeggiator_engine arp_engine;
+  arp_engine.build_arp_note_table(user_chord, type, mode, seed, jump);
+  int table_size = arp_engine.current_arp_note_table_size();
+  engine->process_begin(&state, table_size, table_size, -1);
   auto const* block = engine->process(mapping.module_index, mapping.module_slot, custom_outputs, nullptr, [&](plugin_block& block) {
-    arpeggiator_engine engine;
-    engine.reset_graph(&block, &in_notes, &out_notes, custom_outputs, nullptr);
-    engine.process_graph(block, &in_notes, &out_notes, custom_outputs, nullptr);
-    });
+    arp_engine.reset_graph(&block, &in_notes, &out_notes, custom_outputs, nullptr);
+    arp_engine.process_graph(block, &in_notes, &out_notes, custom_outputs, nullptr);
+  });
   engine->process_end();
-  jarray<float, 1> series(block->state.own_cv[output_rel_note][0]);
+  auto const& rel_out_notes = block->state.own_cv[output_rel_note][0];
+  jarray<float, 1> series(std::vector<float>(rel_out_notes.data().begin(), rel_out_notes.data().begin() + table_size));
   return graph_data(series, false, 1.0f, false, {});
 }
 
@@ -366,7 +388,10 @@ arpeggiator_topo(plugin_topo const* topo, int section, gui_position const& pos)
 
 arpeggiator_engine::
 arpeggiator_engine()
-{ _current_arp_note_table.reserve(128); /* guess */ }
+{
+  // should be enough to accomodate anything, hopefully
+  _current_arp_note_table.reserve(max_active_table_size);
+}
 
 void 
 arpeggiator_engine::hard_reset(std::vector<note_event>& out)
@@ -419,6 +444,133 @@ arpeggiator_engine::current_mod_val(int mod_shape)
   case wave_shape_type_cos_cos_sin: return wave_shape_uni_cos_cos_sin(_mod_phase);
   case wave_shape_type_cos_cos_cos: return wave_shape_uni_cos_cos_cos(_mod_phase);
   default: assert(false); return 0.0f;
+  }
+}
+
+void
+arpeggiator_engine::build_arp_note_table(
+  std::array<arp_user_note, 128> const& user_chord, 
+  int type, int mode, int seed, bool jump)
+{
+  _current_arp_note_table.clear();
+
+  // STEP 1: build up the base chord table
+  for (int i = 0; i < 128; i++)
+    if (user_chord[i].on)
+    {
+      arp_table_note atn;
+      atn.midi_key = i;
+      atn.velocity = user_chord[i].velocity;
+      _current_arp_note_table.push_back(atn);
+    }
+
+  if (_current_arp_note_table.size() == 0)
+    return;
+
+  // STEP 2: take the +/- oct into account
+  bool add_m3 = false;
+  bool add_m2 = false;
+  bool add_m1 = false;
+  bool add_p1 = false;
+  bool add_p2 = false;
+  bool add_p3 = false;
+  switch (type)
+  {
+  case type_straight: break;
+  case type_p1_oct: add_p1 = true; break;
+  case type_p2_oct: add_p1 = true; add_p2 = true; break;
+  case type_p3_oct: add_p1 = true; add_p2 = true; add_p3 = true; break;
+  case type_m1p1_oct: add_m1 = true; add_p1 = true; break;
+  case type_m2p2_oct: add_m1 = true; add_p1 = true; add_m2 = true; add_p2 = true; break;
+  case type_m3p3_oct: add_m1 = true; add_p1 = true; add_m2 = true; add_p2 = true; add_m3 = true; add_p3 = true; break;
+  default: assert(false); break;
+  }
+
+  int base_note_count = _current_arp_note_table.size();
+  if (add_m3)
+    for (int i = 0; i < base_note_count && _current_arp_note_table.size() < max_active_table_size; i++)
+      _current_arp_note_table.push_back({ _current_arp_note_table[i].midi_key - 36, _current_arp_note_table[i].velocity });
+  if (add_m2)
+    for (int i = 0; i < base_note_count && _current_arp_note_table.size() < max_active_table_size; i++)
+      _current_arp_note_table.push_back({ _current_arp_note_table[i].midi_key - 24, _current_arp_note_table[i].velocity });
+  if (add_m1)
+    for (int i = 0; i < base_note_count && _current_arp_note_table.size() < max_active_table_size; i++)
+      _current_arp_note_table.push_back({ _current_arp_note_table[i].midi_key - 12, _current_arp_note_table[i].velocity });
+  if (add_p1)
+    for (int i = 0; i < base_note_count && _current_arp_note_table.size() < max_active_table_size; i++)
+      _current_arp_note_table.push_back({ _current_arp_note_table[i].midi_key + 12, _current_arp_note_table[i].velocity });
+  if (add_p2)
+    for (int i = 0; i < base_note_count && _current_arp_note_table.size() < max_active_table_size; i++)
+      _current_arp_note_table.push_back({ _current_arp_note_table[i].midi_key + 24, _current_arp_note_table[i].velocity });
+  if (add_p3)
+    for (int i = 0; i < base_note_count && _current_arp_note_table.size() < max_active_table_size; i++)
+      _current_arp_note_table.push_back({ _current_arp_note_table[i].midi_key + 36, _current_arp_note_table[i].velocity });
+
+  // make sure all is in check
+  // we cannot go out of bounds in pitch
+  // pitch 2 freq translator allows it, but we won't be able to kill MIDI -3 or MIDI 134 etc
+  for (int i = 0; i < _current_arp_note_table.size(); i++)
+    _current_arp_note_table[i].midi_key = std::clamp(_current_arp_note_table[i].midi_key, 0, 127);
+
+  // and sort the thing
+  auto comp = [](auto const& l, auto const& r) { return l.midi_key < r.midi_key; };
+  std::sort(_current_arp_note_table.begin(), _current_arp_note_table.end(), comp);
+
+  // need for cv outputs
+  for (int i = 0; i < _current_arp_note_table.size(); i++)
+  {
+    _note_abs_mapping[_current_arp_note_table[i].midi_key] = i;
+    _note_low_key = std::min(_note_low_key, _current_arp_note_table[i].midi_key);
+    _note_high_key = std::max(_note_high_key, _current_arp_note_table[i].midi_key);
+  }
+
+  // TODO handle seeding for graph
+  // STEP 3: take the up-down into account
+  int note_set_count = _current_arp_note_table.size();
+  switch (mode)
+  {
+  case mode_rand:
+  case mode_fixrand:
+  case mode_rand_free:
+  case mode_fixrand_free:
+    if (mode == mode_fixrand || mode == mode_fixrand_free)
+      _random.seed(seed);
+    std::shuffle(_current_arp_note_table.begin(), _current_arp_note_table.end(), _random);
+    break;
+  case mode_up:
+    break; // already sorted
+  case mode_down:
+    std::reverse(_current_arp_note_table.begin(), _current_arp_note_table.end());
+    break;
+  case mode_up_down1: // excluding first/last (ceg->cege)
+    for (int i = note_set_count - 2; i >= 1 && _current_arp_note_table.size() < max_active_table_size; i--)
+      _current_arp_note_table.push_back({ _current_arp_note_table[i].midi_key, _current_arp_note_table[i].velocity });
+    break;
+  case mode_up_down2:
+    for (int i = note_set_count - 1; i >= 0 && _current_arp_note_table.size() < max_active_table_size; i--) // including first/last (ceg->ceggec)
+      _current_arp_note_table.push_back({ _current_arp_note_table[i].midi_key, _current_arp_note_table[i].velocity });
+    break;
+  case mode_down_up1:
+    std::reverse(_current_arp_note_table.begin(), _current_arp_note_table.end());
+    for (int i = note_set_count - 2; i >= 1 && _current_arp_note_table.size() < max_active_table_size; i--) // excluding first/last (ceg->gece)
+      _current_arp_note_table.push_back({ _current_arp_note_table[i].midi_key, _current_arp_note_table[i].velocity });
+    break;
+  case mode_down_up2:
+    std::reverse(_current_arp_note_table.begin(), _current_arp_note_table.end());
+    for (int i = note_set_count - 1; i >= 0 && _current_arp_note_table.size() < max_active_table_size; i--) // including first/last (ceg->gecceg)
+      _current_arp_note_table.push_back({ _current_arp_note_table[i].midi_key, _current_arp_note_table[i].velocity });
+    break;
+  default:
+    assert(false);
+    break;
+  }
+
+  // STEP 4 jump: cega -> cecgca
+  if (jump != 0)
+  {
+    note_set_count = _current_arp_note_table.size();
+    for (int i = 0; i < note_set_count - 2 && _current_arp_note_table.size() < max_active_table_size; i++)
+      _current_arp_note_table.insert(_current_arp_note_table.begin() + 2 + 2 * i, _current_arp_note_table[0]);
   }
 }
 
@@ -519,125 +671,7 @@ arpeggiator_engine::process_audio(
     _cv_out_rel_pos = 0.0f;
     _cv_out_abs_note = 0.0f;
     _cv_out_rel_note = 0.0f;
-    _current_arp_note_table.clear();
-
-    // STEP 1: build up the base chord table
-    for (int i = 0; i < 128; i++)
-      if(_current_user_chord[i].on)
-      {
-        arp_table_note atn;
-        atn.midi_key = i;
-        atn.velocity = _current_user_chord[i].velocity;
-        _current_arp_note_table.push_back(atn);
-      }
-
-    if (_current_arp_note_table.size() == 0)
-      return;
-
-    // STEP 2: take the +/- oct into account
-    bool add_m3 = false;
-    bool add_m2 = false;
-    bool add_m1 = false;
-    bool add_p1 = false;
-    bool add_p2 = false;
-    bool add_p3 = false;
-    switch (type)
-    {
-    case type_straight: break;
-    case type_p1_oct: add_p1 = true; break;
-    case type_p2_oct: add_p1 = true; add_p2 = true; break;
-    case type_p3_oct: add_p1 = true; add_p2 = true; add_p3 = true; break;
-    case type_m1p1_oct: add_m1 = true; add_p1 = true; break;
-    case type_m2p2_oct: add_m1 = true; add_p1 = true; add_m2 = true; add_p2 = true; break;
-    case type_m3p3_oct: add_m1 = true; add_p1 = true; add_m2 = true; add_p2 = true; add_m3 = true; add_p3 = true; break;
-    default: assert(false); break;
-    }
-
-    int base_note_count = _current_arp_note_table.size();
-    if(add_m3)
-      for (int i = 0; i < base_note_count; i++)
-        _current_arp_note_table.push_back({ _current_arp_note_table[i].midi_key - 36, _current_arp_note_table[i].velocity });
-    if (add_m2)
-      for (int i = 0; i < base_note_count; i++)
-        _current_arp_note_table.push_back({ _current_arp_note_table[i].midi_key - 24, _current_arp_note_table[i].velocity });
-    if (add_m1)
-      for (int i = 0; i < base_note_count; i++)
-        _current_arp_note_table.push_back({ _current_arp_note_table[i].midi_key - 12, _current_arp_note_table[i].velocity });
-    if (add_p1)
-      for (int i = 0; i < base_note_count; i++)
-        _current_arp_note_table.push_back({ _current_arp_note_table[i].midi_key + 12, _current_arp_note_table[i].velocity });
-    if (add_p2)
-      for (int i = 0; i < base_note_count; i++)
-        _current_arp_note_table.push_back({ _current_arp_note_table[i].midi_key + 24, _current_arp_note_table[i].velocity });
-    if (add_p3)
-      for (int i = 0; i < base_note_count; i++)
-        _current_arp_note_table.push_back({ _current_arp_note_table[i].midi_key + 36, _current_arp_note_table[i].velocity });
-
-    // make sure all is in check
-    // we cannot go out of bounds in pitch
-    // pitch 2 freq translator allows it, but we won't be able to kill MIDI -3 or MIDI 134 etc
-    for (int i = 0; i < _current_arp_note_table.size(); i++)
-      _current_arp_note_table[i].midi_key = std::clamp(_current_arp_note_table[i].midi_key, 0, 127);
-
-    // and sort the thing
-    auto comp = [](auto const& l, auto const& r) { return l.midi_key < r.midi_key; };
-    std::sort(_current_arp_note_table.begin(), _current_arp_note_table.end(), comp);
-
-    // need for cv outputs
-    for (int i = 0; i < _current_arp_note_table.size(); i++)
-    {
-      _note_abs_mapping[_current_arp_note_table[i].midi_key] = i;
-      _note_low_key = std::min(_note_low_key, _current_arp_note_table[i].midi_key);
-      _note_high_key = std::max(_note_high_key, _current_arp_note_table[i].midi_key);
-    }
-
-    // STEP 3: take the up-down into account
-    int note_set_count = _current_arp_note_table.size();
-    switch (mode)
-    {
-    case mode_rand:
-    case mode_fixrand:
-    case mode_rand_free:
-    case mode_fixrand_free:
-      if (mode == mode_fixrand || mode == mode_fixrand_free)
-        _random.seed(seed);
-      std::shuffle(_current_arp_note_table.begin(), _current_arp_note_table.end(), _random);
-      break;
-    case mode_up:
-      break; // already sorted
-    case mode_down:
-      std::reverse(_current_arp_note_table.begin(), _current_arp_note_table.end());
-      break;
-    case mode_up_down1: // excluding first/last (ceg->cege)
-      for (int i = note_set_count - 2; i >= 1; i--)
-        _current_arp_note_table.push_back({ _current_arp_note_table[i].midi_key, _current_arp_note_table[i].velocity });
-      break;
-    case mode_up_down2:
-      for (int i = note_set_count - 1; i >= 0; i--) // including first/last (ceg->ceggec)
-        _current_arp_note_table.push_back({ _current_arp_note_table[i].midi_key, _current_arp_note_table[i].velocity });
-      break;
-    case mode_down_up1:
-      std::reverse(_current_arp_note_table.begin(), _current_arp_note_table.end());
-      for (int i = note_set_count - 2; i >= 1; i--) // excluding first/last (ceg->gece)
-        _current_arp_note_table.push_back({ _current_arp_note_table[i].midi_key, _current_arp_note_table[i].velocity });
-      break;
-    case mode_down_up2:
-      std::reverse(_current_arp_note_table.begin(), _current_arp_note_table.end());
-      for (int i = note_set_count - 1; i >= 0; i--) // including first/last (ceg->gecceg)
-        _current_arp_note_table.push_back({ _current_arp_note_table[i].midi_key, _current_arp_note_table[i].velocity });
-      break;
-    default:
-      assert(false);
-      break;
-    }
-
-    // STEP 4 jump: cega -> cecgca
-    if (jump != 0)
-    {
-      note_set_count = _current_arp_note_table.size();
-      for (int i = 0; i < note_set_count - 2; i++)
-        _current_arp_note_table.insert(_current_arp_note_table.begin() + 2 + 2 * i, _current_arp_note_table[0]);
-    }
+    build_arp_note_table(_current_user_chord, type, mode, seed, jump);
   }
 
   if (_current_arp_note_table.size() == 0)
@@ -689,40 +723,45 @@ arpeggiator_engine::process_audio(
 
       if constexpr (ModMode != mod_mode_off)
       {
-        float mod_val = current_mod_val(mod_type);
-        check_unipolar(mod_val);
-
-        float actual_mod_val = mod_val * rate_mod_amt_base;
-        if constexpr (ModMode == mod_mode_linear)
-          actual_mod_val *= mod_range_linear;
-        else
-          actual_mod_val *= mod_range_exp;
-
-        // if synced, make sure we are multiple of the tempo
-        if (sync)
-          actual_mod_val = std::round(actual_mod_val);
-
-        // speed up - add to the frequency
-        if (actual_mod_val >= 0.0f)
+        // for graphing just go with equal length
+        // the mod indicator will show the speed
+        if (!block.graph)
         {
-          if constexpr(ModMode == mod_mode_linear)
-            rate_hz = rate_hz_base + actual_mod_val * rate_hz_base;
-          else
-            rate_hz = rate_hz_base + (std::pow(2, actual_mod_val) - 1) * rate_hz_base;
-          rate_frames = block.sample_rate / rate_hz;
-        }
-        else
-        {
-          // slow down - add to the frame count
+          float mod_val = current_mod_val(mod_type);
+          check_unipolar(mod_val);
+
+          float actual_mod_val = mod_val * rate_mod_amt_base;
           if constexpr (ModMode == mod_mode_linear)
-            rate_frames = rate_frames_base - actual_mod_val * rate_frames_base;
+            actual_mod_val *= mod_range_linear;
           else
-            rate_frames = rate_frames_base + (std::pow(2, -actual_mod_val) - 1) * rate_frames_base;
+            actual_mod_val *= mod_range_exp;
+
+          // if synced, make sure we are multiple of the tempo
+          if (sync)
+            actual_mod_val = std::round(actual_mod_val);
+
+          // speed up - add to the frequency
+          if (actual_mod_val >= 0.0f)
+          {
+            if constexpr (ModMode == mod_mode_linear)
+              rate_hz = rate_hz_base + actual_mod_val * rate_hz_base;
+            else
+              rate_hz = rate_hz_base + (std::pow(2, actual_mod_val) - 1) * rate_hz_base;
+            rate_frames = block.sample_rate / rate_hz;
+          }
+          else
+          {
+            // slow down - add to the frame count
+            if constexpr (ModMode == mod_mode_linear)
+              rate_frames = rate_frames_base - actual_mod_val * rate_frames_base;
+            else
+              rate_frames = rate_frames_base + (std::pow(2, -actual_mod_val) - 1) * rate_frames_base;
+          }
         }
       }
 
       _table_pos++;
-      _note_remaining = rate_frames;
+      _note_remaining = block.graph? 1: rate_frames;
 
       // TODO this better works WRT to note-off events ?
       if (mode == mode_rand_free || mode == mode_fixrand_free)
