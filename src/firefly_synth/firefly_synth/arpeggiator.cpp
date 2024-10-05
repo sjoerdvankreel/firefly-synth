@@ -123,6 +123,7 @@ public module_engine
 
   int _table_pos = -1;
   int _note_remaining = 0;
+  int _current_note_length = 0;
   float _mod_phase = 0.0f; // internal lfo
   float _cv_out_abs_pos = 0.0f;
   float _cv_out_rel_pos = 0.0f;
@@ -668,6 +669,7 @@ arpeggiator_engine::process_audio(
     _note_high_key = 0;
     _note_low_key = 128;
     _note_remaining = 0;
+    _current_note_length = 0;
     _cv_out_abs_pos = 0.0f;
     _cv_out_rel_pos = 0.0f;
     _cv_out_abs_note = 0.0f;
@@ -762,6 +764,7 @@ arpeggiator_engine::process_audio(
       }
 
       _table_pos++;
+      _current_note_length = rate_frames;
       _note_remaining = block.graph? 1: rate_frames;
 
       // TODO this better works WRT to note-off events ?
@@ -814,7 +817,7 @@ arpeggiator_engine::process_audio(
   block.push_modulation_output(modulation_output::make_mod_output_cv_state(
     -1,
     block.module_desc_.info.global,
-    _table_pos / (float)_current_arp_note_table.size()));
+    (_table_pos + (_current_note_length - _note_remaining) / (float)_current_note_length) / (float)_current_arp_note_table.size()));
 }
 
 }
