@@ -6,6 +6,7 @@ void
 graph_data::init(graph_data const& rhs)
 {
   _type = rhs.type();
+  _stepped = rhs.stepped();
   _bipolar = rhs.bipolar();
   _partitions = rhs.partitions();
   _stroke_thickness = rhs.stroke_thickness();

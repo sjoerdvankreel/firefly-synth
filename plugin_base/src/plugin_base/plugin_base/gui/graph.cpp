@@ -319,6 +319,24 @@ graph::paint_series(
   float h = getHeight();
   float count = series.size();
 
+  if (_data.stepped())
+  {
+    for (int i = 0; i < series.size(); i++)
+    {
+      g.setColour(_lnf->colors().graph_area);
+      float bar_h = series[i] * h;
+      float bar_y = (1.0f - series[i]) * h;
+      float bar_w = w / series.size();
+      float bar_x = i / (float)series.size() * w;
+      g.fillRect(bar_x, bar_y, bar_w, bar_h);
+      
+      g.setColour(_lnf->colors().graph_line);
+      g.fillRect(bar_x, bar_y - 1.0f, bar_w, 2.0f);
+
+    }
+    return;
+  }
+
   float y0 = (1 - std::clamp(series[0], 0.0f, 1.0f)) * h;
   pFill.startNewSubPath(0, bipolar? h * midpoint : h);
   pFill.lineTo(0, y0);

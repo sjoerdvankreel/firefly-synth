@@ -245,7 +245,7 @@ render_graph(
   });
   engine->process_end();
   jarray<float, 1> series(block->state.own_cv[0][0]);
-  return graph_data(series, false, 1.0f, false, { partition });
+  return graph_data(series, false, 1.0f, false, false, { partition });
 }
 
 bool

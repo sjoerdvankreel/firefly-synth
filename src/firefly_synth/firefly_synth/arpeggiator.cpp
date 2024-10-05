@@ -236,7 +236,7 @@ render_graph(
   engine->process_end();
   auto const& rel_out_notes = block->state.own_cv[output_rel_note][0];
   jarray<float, 1> series(std::vector<float>(rel_out_notes.data().begin(), rel_out_notes.data().begin() + table_size));
-  return graph_data(series, false, 1.0f, false, {});
+  return graph_data(series, false, 1.0f, false, true, {});
 }
 
 module_topo
