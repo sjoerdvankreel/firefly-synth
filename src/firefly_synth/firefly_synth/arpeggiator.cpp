@@ -20,6 +20,7 @@ static float const mod_range_exp = 4.0f;
 static float const mod_range_linear = 8.0f;
 static int const max_active_table_size = 256;
 
+enum { custom_tag_table_pos };
 enum { section_table, section_notes, section_sample };
 enum { output_abs_pos, output_rel_pos, output_abs_note, output_rel_note };
 
@@ -806,6 +807,14 @@ arpeggiator_engine::process_audio(
       increment_and_wrap_phase(_mod_phase, mod_rate_hz, block.sample_rate);
     }
   }
+
+  // only want the mod outputs for the actual audio engine
+  if (block.graph) return;
+
+  block.push_modulation_output(modulation_output::make_mod_output_cv_state(
+    -1,
+    block.module_desc_.info.global,
+    _table_pos / (float)_current_arp_note_table.size()));
 }
 
 }
