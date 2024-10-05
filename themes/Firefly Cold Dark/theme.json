@@ -147,7 +147,7 @@
       }
     },
     {
-      "custom_sections": ["Oscillator Graph", "Voice FX Graph", "Voice LFO Graph", "Envelope Graph", "Voice Matrix Graphs"],
+      "custom_sections": ["Arp Graph", "Oscillator Graph", "Voice FX Graph", "Voice LFO Graph", "Envelope Graph", "Voice Matrix Graphs"],
       "module_sections": ["Voice", "Voice Out", "Arpeggiator", "Osc", "Voice FX", "Voice LFO", "Env"],
       "colors": {
         "tab_button": "FF555555",

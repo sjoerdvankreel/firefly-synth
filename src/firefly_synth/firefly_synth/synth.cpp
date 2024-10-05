@@ -16,6 +16,7 @@ namespace firefly_synth {
 static int const synth_first_column_size = 42;
 static int const synth_second_column_size = 17;
   
+static std::string const arp_graph_name = "Arp Graph";
 static std::string const main_graph_name = "Main Graph";
 static std::string const vfx_graph_name = "Voice FX Graph";
 static std::string const env_graph_name = "Envelope Graph";
@@ -36,7 +37,8 @@ enum {
   custom_section_glfo_graph,
   custom_section_global_matrix_graphs,
   custom_section_fx_count,
-  custom_section_voice_matrix_graphs = custom_section_fx_count,
+  custom_section_arp_graph = custom_section_fx_count,
+  custom_section_voice_matrix_graphs,
   custom_section_osc_graph,
   custom_section_vfx_graph,
   custom_section_vlfo_graph,
@@ -425,7 +427,10 @@ synth_topo(format_basic_config const* config, bool is_fx, std::string const& ful
       -> Component& { return make_matrix_graphs_section(gui, lnf, store, true, module_section_global_matrices, global_matrix_graphs_name); });
   }
   else
-  {
+  { 
+    result->gui.custom_sections[custom_section_arp_graph] = make_custom_section_gui(
+      custom_section_arp_graph, arp_graph_name, { 6, 4, 1, 2 }, [](auto* gui, auto* lnf, auto store)
+      -> Component& { return make_module_graph_section(gui, lnf, store, module_arpeggiator, arp_graph_name, false, false, false, -1.0f, {}); });
     result->gui.custom_sections[custom_section_osc_graph] = make_custom_section_gui(
       custom_section_osc_graph, osc_graph_name, { 6, 3, 1, 1 }, [](auto* gui, auto* lnf, auto store)
       -> Component& { return make_module_graph_section(gui, lnf, store, module_osc, osc_graph_name, false, false, false, -1.0f, { module_osc_osc_matrix, module_voice_in }); });
@@ -441,7 +446,6 @@ synth_topo(format_basic_config const* config, bool is_fx, std::string const& ful
     result->gui.custom_sections[custom_section_global_matrix_graphs] = make_custom_section_gui(
       custom_section_global_matrix_graphs, global_matrix_graphs_name, { 4, 4, 1, 2 }, [](auto* gui, auto* lnf, auto store)
       -> Component& { return make_matrix_graphs_section(gui, lnf, store, false, module_section_global_matrices, global_matrix_graphs_name); });
-
     result->gui.custom_sections[custom_section_voice_matrix_graphs] = make_custom_section_gui(
       custom_section_voice_matrix_graphs, voice_matrix_graphs_name, { 9, 4, 1, 2 }, [](auto* gui, auto* lnf, auto store)
       -> Component& { return make_matrix_graphs_section(gui, lnf, store, false, module_section_voice_matrices, voice_matrix_graphs_name); });
@@ -491,7 +495,7 @@ synth_topo(format_basic_config const* config, bool is_fx, std::string const& ful
     result->gui.module_sections[module_section_global_matrices] = make_module_section_gui_tabbed(
       "{628D5FCB-0672-47A5-A23D-31257D4CCAF1}", module_section_global_matrices, { 2, 4, 2, 2 }, global_matrix_modules);
     result->gui.module_sections[module_section_voice_matrices] = make_module_section_gui_tabbed(
-      "{9BEB7D58-47AB-4E2D-891B-349607170508}", module_section_voice_matrices, { 6, 4, 3, 2 }, voice_matrix_modules);
+      "{9BEB7D58-47AB-4E2D-891B-349607170508}", module_section_voice_matrices, { 7, 4, 2, 2 }, voice_matrix_modules);
   }
 
   result->modules.resize(module_count);
