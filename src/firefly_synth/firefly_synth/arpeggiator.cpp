@@ -824,7 +824,7 @@ arpeggiator_engine::process_audio(
         if (_table_pos % _current_arp_note_table.size() == 0)
           std::shuffle(_current_arp_note_table.begin(), _current_arp_note_table.end(), _random);
 
-      flipped_pos = is_random(mode) ? _table_pos : flipped_table_pos();
+      flipped_pos = is_random(mode) ? _table_pos % _current_arp_note_table.size() : flipped_table_pos();
 
       // update current values for cv state
       _cv_out_abs_note = 0.0f;
