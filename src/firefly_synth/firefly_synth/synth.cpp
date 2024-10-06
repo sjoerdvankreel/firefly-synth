@@ -429,7 +429,7 @@ synth_topo(format_basic_config const* config, bool is_fx, std::string const& ful
   else
   { 
     result->gui.custom_sections[custom_section_arp_graph] = make_custom_section_gui(
-      custom_section_arp_graph, arp_graph_name, { 6, 4, 1, 2 }, [](auto* gui, auto* lnf, auto store)
+      custom_section_arp_graph, arp_graph_name, { 6, 4, 1, 1 }, [](auto* gui, auto* lnf, auto store)
       -> Component& { return make_module_graph_section(gui, lnf, store, module_arpeggiator, arp_graph_name, false, false, false, -1.0f, {}); });
     result->gui.custom_sections[custom_section_osc_graph] = make_custom_section_gui(
       custom_section_osc_graph, osc_graph_name, { 6, 3, 1, 1 }, [](auto* gui, auto* lnf, auto store)
@@ -447,7 +447,7 @@ synth_topo(format_basic_config const* config, bool is_fx, std::string const& ful
       custom_section_global_matrix_graphs, global_matrix_graphs_name, { 4, 4, 1, 2 }, [](auto* gui, auto* lnf, auto store)
       -> Component& { return make_matrix_graphs_section(gui, lnf, store, false, module_section_global_matrices, global_matrix_graphs_name); });
     result->gui.custom_sections[custom_section_voice_matrix_graphs] = make_custom_section_gui(
-      custom_section_voice_matrix_graphs, voice_matrix_graphs_name, { 9, 4, 1, 2 }, [](auto* gui, auto* lnf, auto store)
+      custom_section_voice_matrix_graphs, voice_matrix_graphs_name, { 6, 5, 1, 1 }, [](auto* gui, auto* lnf, auto store)
       -> Component& { return make_matrix_graphs_section(gui, lnf, store, false, module_section_voice_matrices, voice_matrix_graphs_name); });
   }
 
@@ -495,7 +495,7 @@ synth_topo(format_basic_config const* config, bool is_fx, std::string const& ful
     result->gui.module_sections[module_section_global_matrices] = make_module_section_gui_tabbed(
       "{628D5FCB-0672-47A5-A23D-31257D4CCAF1}", module_section_global_matrices, { 2, 4, 2, 2 }, global_matrix_modules);
     result->gui.module_sections[module_section_voice_matrices] = make_module_section_gui_tabbed(
-      "{9BEB7D58-47AB-4E2D-891B-349607170508}", module_section_voice_matrices, { 7, 4, 2, 2 }, voice_matrix_modules);
+      "{9BEB7D58-47AB-4E2D-891B-349607170508}", module_section_voice_matrices, { 7, 4, 3, 2 }, voice_matrix_modules);
   }
 
   result->modules.resize(module_count);
