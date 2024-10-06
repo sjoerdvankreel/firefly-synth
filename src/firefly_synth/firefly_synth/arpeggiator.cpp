@@ -23,6 +23,7 @@ static int const max_active_table_size = 256;
 enum { section_table, section_notes, section_sample };
 enum { output_abs_pos, output_rel_pos, output_abs_note, output_rel_note };
 enum { 
+  custom_tag_current_seed,
   custom_tag_user_chord_bits_0, custom_tag_user_chord_bits_1, 
   custom_tag_user_chord_bits_2, custom_tag_user_chord_bits_3 }; // 4 times for 128 midi notes
 
@@ -133,8 +134,11 @@ public module_engine
   float _cv_out_rel_note = 0.0f;
   std::default_random_engine _random = {};
 
+  // need to be able to reproduce rand state for graph
+  int _current_seed = 0;
   int _note_low_key = -1;
   int _note_high_key = -1;
+  int _graph_override_seed = -1;
   std::array<int, 128> _note_abs_mapping = {};
   std::array<std::uint32_t, 4> _user_chord_bits = {};
   std::array<arp_user_note, 128> _current_user_chord = {};
@@ -160,17 +164,24 @@ public:
 
   void
   build_arp_note_table(
-    std::array<arp_user_note, 128> const& user_chord,
-    int type, int mode, int seed, bool jump);
+    std::array<arp_user_note, 128> const& user_chord, int type, 
+    int mode, int current_seed, int seed_param, bool jump);
 
   void process_audio(
     plugin_block& block,
     std::vector<note_event> const* in_notes,
     std::vector<note_event>* out_notes) override;
+
   void reset_audio(
     plugin_block const* block,
     std::vector<note_event> const* in_notes,
-    std::vector<note_event>* out_notes) override {};
+    std::vector<note_event>* out_notes) override;
+
+  void reset_graph(plugin_block const* block,
+    std::vector<note_event> const* in_notes,
+    std::vector<note_event>* out_notes,
+    std::vector<mod_out_custom_state> const& custom_outputs,
+    void* context) override;
 };
 
 std::unique_ptr<module_engine>
@@ -200,7 +211,6 @@ render_graph(
 {
   int type = state.get_plain_at(mapping.module_index, mapping.module_slot, param_type, mapping.param_slot).step();
   int mode = state.get_plain_at(mapping.module_index, mapping.module_slot, param_mode, mapping.param_slot).step();
-  int seed = state.get_plain_at(mapping.module_index, mapping.module_slot, param_seed, mapping.param_slot).step();
   bool jump = state.get_plain_at(mapping.module_index, mapping.module_slot, param_jump, mapping.param_slot).step() != 0;
   if (type == type_off) return graph_data(graph_data_type::off, {});
 
@@ -228,6 +238,8 @@ render_graph(
       seen_user_chord_bits[3] = true;
       user_chord_bits[3] = custom_outputs[i].value_custom;
       break;
+    case custom_tag_current_seed:
+      break; // handled in reset_graph
     default:
       assert(false);
       break;
@@ -260,12 +272,11 @@ render_graph(
     note.velocity = 1.0f;
     note.type = note_event_type::on;
 
-    // TODO fix the table freq for plotting and ditch the lfo
     note.id.key = 60;
     in_notes.push_back(note);
     note.id.key = 64;
     in_notes.push_back(note);
-    note.id.key = 79; // TODO just checking
+    note.id.key = 67;
     in_notes.push_back(note);
   }
 
@@ -276,8 +287,10 @@ render_graph(
     user_chord[in_notes[i].id.key].velocity = 1.0f;
   }
 
+  // seed is not important here, just need to know the table size
+  // but see reset_graph
   arpeggiator_engine arp_engine;
-  arp_engine.build_arp_note_table(user_chord, type, mode, seed, jump);
+  arp_engine.build_arp_note_table(user_chord, type, mode, 1, 1, jump);
   int table_size = arp_engine.current_arp_note_table_size();
   engine->process_begin(&state, table_size, table_size, -1);
   auto const* block = engine->process(mapping.module_index, mapping.module_slot, custom_outputs, nullptr, [&](plugin_block& block) {
@@ -501,8 +514,9 @@ arpeggiator_engine::current_mod_val(int mod_shape)
 void
 arpeggiator_engine::build_arp_note_table(
   std::array<arp_user_note, 128> const& user_chord, 
-  int type, int mode, int seed, bool jump)
+  int type, int mode, int current_seed, int seed_param, bool jump)
 {
+  _current_seed = current_seed;
   _current_arp_note_table.clear();
 
   // STEP 1: build up the base chord table
@@ -584,8 +598,13 @@ arpeggiator_engine::build_arp_note_table(
   case mode_fixrand:
   case mode_rand_free:
   case mode_fixrand_free:
-    if (mode == mode_fixrand || mode == mode_fixrand_free)
-      _random.seed(seed);
+    if (_graph_override_seed != -1)
+      _current_seed = _graph_override_seed;
+    else if (mode == mode_rand || mode == mode_rand_free)
+      _current_seed = (_current_seed + 1) % 256;
+    else
+      _current_seed = seed_param;
+    _random.seed(_current_seed);
     std::shuffle(_current_arp_note_table.begin(), _current_arp_note_table.end(), _random);
     break;
   case mode_up:
@@ -623,6 +642,59 @@ arpeggiator_engine::build_arp_note_table(
     for (int i = 0; i < note_set_count - 2 && _current_arp_note_table.size() < max_active_table_size; i++)
       _current_arp_note_table.insert(_current_arp_note_table.begin() + 2 + 2 * i, _current_arp_note_table[0]);
   }
+}
+
+void 
+arpeggiator_engine::reset_audio(
+  plugin_block const* block,
+  std::vector<note_event> const* in_notes,
+  std::vector<note_event>* out_notes)
+{
+  // keep in check with members above
+
+  _prev_type = -1;
+  _prev_mode = -1;
+  _prev_flip = -1;
+  _prev_seed = -1;
+  _prev_dist = -1;
+  _prev_sync = -1;
+  _prev_jump = -1;
+  _prev_notes = -1;
+
+  _table_pos = -1;
+  _note_remaining = 0;
+  _current_note_length = 0;
+  _mod_phase = 0.0f;
+  _cv_out_abs_pos = 0.0f;
+  _cv_out_rel_pos = 0.0f;
+  _cv_out_abs_note = 0.0f;
+  _cv_out_rel_note = 0.0f;
+  _random = {};
+
+  _current_seed = 0;
+  _graph_override_seed = -1;
+  _note_low_key = -1;
+  _note_high_key = -1;
+  _note_abs_mapping = {};
+  _user_chord_bits = {};
+  _current_user_chord = {};
+  _current_arp_note_table = {};
+}
+
+void 
+arpeggiator_engine::reset_graph(plugin_block const* block,
+  std::vector<note_event> const* in_notes,
+  std::vector<note_event>* out_notes,
+  std::vector<mod_out_custom_state> const& custom_outputs,
+  void* context)
+{
+  reset_audio(block, in_notes, out_notes);
+  for (int i = 0; i < custom_outputs.size(); i++)
+    if (custom_outputs[i].tag_custom == custom_tag_current_seed)
+    {
+      _graph_override_seed = custom_outputs[i].value_custom;
+      break;
+    }
 }
 
 void
@@ -673,6 +745,7 @@ arpeggiator_engine::process_audio(
     _prev_jump = jump;
     _prev_sync = sync;
     _prev_notes = notes;
+    _current_seed = _graph_override_seed != -1? _graph_override_seed: seed;
     hard_reset(*out_notes);
   }
 
@@ -726,7 +799,7 @@ arpeggiator_engine::process_audio(
     _cv_out_rel_pos = 0.0f;
     _cv_out_abs_note = 0.0f;
     _cv_out_rel_note = 0.0f;
-    build_arp_note_table(_current_user_chord, type, mode, seed, jump);
+    build_arp_note_table(_current_user_chord, type, mode, _current_seed, seed, jump);
   }
 
   if (_current_arp_note_table.size() == 0)
@@ -819,10 +892,16 @@ arpeggiator_engine::process_audio(
       _current_note_length = rate_frames;
       _note_remaining = block.graph? 1: rate_frames;
 
-      // TODO this better works WRT to note-off events ?
       if (mode == mode_rand_free || mode == mode_fixrand_free)
         if (_table_pos % _current_arp_note_table.size() == 0)
+        {
+          if (_graph_override_seed != -1)
+            _current_seed = _graph_override_seed;
+          else
+            _current_seed = (_current_seed + 1) % 256;
+          _random.seed(_current_seed);
           std::shuffle(_current_arp_note_table.begin(), _current_arp_note_table.end(), _random);
+        }
 
       flipped_pos = is_random(mode) ? _table_pos % _current_arp_note_table.size() : flipped_table_pos();
 
@@ -891,6 +970,11 @@ arpeggiator_engine::process_audio(
     block.module_desc_.info.global,
     custom_tag_user_chord_bits_3,
     _user_chord_bits[3]));
+  block.push_modulation_output(modulation_output::make_mod_output_custom_state(
+    -1,
+    block.module_desc_.info.global,
+    custom_tag_current_seed,
+    _current_seed)); // need 1 before current pos to replicate the stream
 }
 
 }
