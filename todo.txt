@@ -106,7 +106,6 @@ ditch after-mod, claim micro support ?
 show effective modulation in the ui for clap param mod
 Feedback FM - but needs per-sample processing, not block
 turn on stuff when dragging (e.g. basic sin, dist skew etc)
-arpeggiator - hard - but easy -> play multiple octaves on-note. or maybe allow 3/s, 5/s, whatever selection
 
 wishlist sometime:
 mseg
