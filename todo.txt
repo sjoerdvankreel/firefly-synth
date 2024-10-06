@@ -76,9 +76,9 @@ X still do something with note lengths/hold/stop/whatever ==> make the sequ
 V remove any mention of seq
 V fix the rand crash
 V also maybe have some visualization! 
+V plot multiple notes
 
 * smaller graphs
-* plot multiple notes
 * do arp outs as on-note!
 * maybe hard reset all chans for renoise ?
 * still not killing all the notes
