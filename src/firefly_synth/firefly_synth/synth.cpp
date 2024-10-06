@@ -103,12 +103,13 @@ make_module_graph_section(
   int module, std::string const& name_in_theme, 
   bool render_on_module_mouse_enter, bool render_on_param_mouse_enter, 
   bool hover_selects_different_graph, float fixed_mod_indicator_pos,
-  std::vector<int> const& dependent_module_indices, float partition_scale = 0.15f)
+  graph_params::partition_scale_type scale_type, float partition_scale,
+  std::vector<int> const& dependent_module_indices)
 {
   graph_params params;
+  params.scale_type = scale_type;
   params.name_in_theme = name_in_theme;
   params.partition_scale = partition_scale;
-  params.scale_type = graph_params::scale_w;
   module_graph_params module_params = make_module_graph_params(
     module, render_on_module_mouse_enter, render_on_param_mouse_enter, 
     hover_selects_different_graph, fixed_mod_indicator_pos, dependent_module_indices);
@@ -416,10 +417,12 @@ synth_topo(format_basic_config const* config, bool is_fx, std::string const& ful
     -> Component& { return make_main_graph_section(gui, lnf, store); });
   result->gui.custom_sections[custom_section_gfx_graph] = make_custom_section_gui(
     custom_section_gfx_graph, gfx_graph_name, { 3, 3, 1, 1 }, [](auto* gui, auto* lnf, auto store)
-    -> Component& { return make_module_graph_section(gui, lnf, store, module_gfx, gfx_graph_name, false, false, false, -1.0f, {}); });
+    -> Component& { return make_module_graph_section(
+      gui, lnf, store, module_gfx, gfx_graph_name, false, false, false, -1.0f, graph_params::partition_scale_type::scale_w, 0.15f, {}); });
   result->gui.custom_sections[custom_section_glfo_graph] = make_custom_section_gui(
     custom_section_glfo_graph, glfo_graph_name, { 4, 3, 1, 1 }, [](auto* gui, auto* lnf, auto store)
-    -> Component& { return make_module_graph_section(gui, lnf, store, module_glfo, glfo_graph_name, false, false, false, -1.0f, {}); });
+    -> Component& { return make_module_graph_section(
+      gui, lnf, store, module_glfo, glfo_graph_name, false, false, false, -1.0f, graph_params::partition_scale_type::scale_w, 0.15f, {}); });
   if (is_fx)
   {
     result->gui.custom_sections[custom_section_global_matrix_graphs] = make_custom_section_gui(
@@ -430,19 +433,24 @@ synth_topo(format_basic_config const* config, bool is_fx, std::string const& ful
   { 
     result->gui.custom_sections[custom_section_arp_graph] = make_custom_section_gui(
       custom_section_arp_graph, arp_graph_name, { 6, 4, 1, 1 }, [](auto* gui, auto* lnf, auto store)
-      -> Component& { return make_module_graph_section(gui, lnf, store, module_arpeggiator, arp_graph_name, false, false, false, -1.0f, {}); });
+      -> Component& { return make_module_graph_section(
+        gui, lnf, store, module_arpeggiator, arp_graph_name, false, false, false, -1.0f, graph_params::partition_scale_type::scale_h, 0.33f, {}); });
     result->gui.custom_sections[custom_section_osc_graph] = make_custom_section_gui(
       custom_section_osc_graph, osc_graph_name, { 6, 3, 1, 1 }, [](auto* gui, auto* lnf, auto store)
-      -> Component& { return make_module_graph_section(gui, lnf, store, module_osc, osc_graph_name, false, false, false, -1.0f, { module_osc_osc_matrix, module_voice_in }); });
+      -> Component& { return make_module_graph_section(
+        gui, lnf, store, module_osc, osc_graph_name, false, false, false, -1.0f, graph_params::partition_scale_type::scale_w, 0.15f, { module_osc_osc_matrix, module_voice_in }); });
     result->gui.custom_sections[custom_section_vfx_graph] = make_custom_section_gui(
       custom_section_vfx_graph, vfx_graph_name, { 7, 3, 1, 1 }, [](auto* gui, auto* lnf, auto store)
-      -> Component& { return make_module_graph_section(gui, lnf, store, module_vfx, vfx_graph_name, false, false, false, -1.0f, {}); });
+      -> Component& { return make_module_graph_section(
+        gui, lnf, store, module_vfx, vfx_graph_name, false, false, false, -1.0f, graph_params::partition_scale_type::scale_w, 0.15f, {}); });
     result->gui.custom_sections[custom_section_vlfo_graph] = make_custom_section_gui(
       custom_section_vlfo_graph, vlfo_graph_name, { 8, 3, 1, 1 }, [](auto* gui, auto* lnf, auto store)
-      -> Component& { return make_module_graph_section(gui, lnf, store, module_vlfo, vlfo_graph_name, false, false, false, -1.0f, {}); });
+      -> Component& { return make_module_graph_section(
+        gui, lnf, store, module_vlfo, vlfo_graph_name, false, false, false, -1.0f, graph_params::partition_scale_type::scale_w, 0.15f, {}); });
     result->gui.custom_sections[custom_section_env_graph] = make_custom_section_gui(
       custom_section_env_graph, env_graph_name, { 9, 3, 1, 1 }, [](auto* gui, auto* lnf, auto store)
-      -> Component& { return make_module_graph_section(gui, lnf, store, module_env, env_graph_name, false, false, false, -1.0f, {}); });
+      -> Component& { return make_module_graph_section(
+        gui, lnf, store, module_env, env_graph_name, false, false, false, -1.0f, graph_params::partition_scale_type::scale_w, 0.15f, {}); });
     result->gui.custom_sections[custom_section_global_matrix_graphs] = make_custom_section_gui(
       custom_section_global_matrix_graphs, global_matrix_graphs_name, { 4, 4, 1, 2 }, [](auto* gui, auto* lnf, auto store)
       -> Component& { return make_matrix_graphs_section(gui, lnf, store, false, module_section_global_matrices, global_matrix_graphs_name); });
