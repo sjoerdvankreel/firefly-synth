@@ -469,7 +469,7 @@ arpeggiator_engine::hard_reset(std::vector<note_event>& out)
     off.frame = 0;
     off.id.id = 0;
     off.id.key = i;
-    off.id.channel = 0; // TODO need this?
+    off.id.channel = 0;
     off.velocity = 0.0f;
     off.type = note_event_type::off;
     out.push_back(off);
@@ -591,7 +591,6 @@ arpeggiator_engine::build_arp_note_table(
     _note_high_key = std::max(_note_high_key, _current_arp_note_table[i].midi_key);
   }
 
-  // TODO handle seeding for graph
   // STEP 3: take the up-down into account
   int note_set_count = _current_arp_note_table.size();
   switch (mode)
@@ -789,9 +788,18 @@ arpeggiator_engine::process_audio(
   if (table_changed)
   {
     // STEP 0: off all notes
-    // just active notes is not enough, 
-    // user may have been playing with voice/osc note/oct in the meantime
-    hard_reset(*out_notes);
+    for (int i = 0; i < 128; i++)
+      if(_current_user_chord[i].on)
+      {
+        note_event off;
+        off.frame = 0;
+        off.id.id = 0;
+        off.id.key = i;
+        off.id.channel = 0;
+        off.velocity = 0.0f;
+        off.type = note_event_type::off;
+        out_notes->push_back(off);
+      }
 
     // reset to before start, will get picked up
     _table_pos = -1;
