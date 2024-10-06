@@ -319,6 +319,7 @@ graph::paint_series(
   float h = getHeight();
   float count = series.size();
 
+#if 0 // TODO
   if (_data.stepped())
   {
     for (int i = 0; i < series.size(); i++)
@@ -336,6 +337,7 @@ graph::paint_series(
     }
     return;
   }
+#endif
 
   float y0 = (1 - std::clamp(series[0], 0.0f, 1.0f)) * h;
   pFill.startNewSubPath(0, bipolar? h * midpoint : h);
