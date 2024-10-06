@@ -20,9 +20,11 @@ static float const mod_range_exp = 4.0f;
 static float const mod_range_linear = 8.0f;
 static int const max_active_table_size = 256;
 
-enum { custom_tag_table_pos };
 enum { section_table, section_notes, section_sample };
 enum { output_abs_pos, output_rel_pos, output_abs_note, output_rel_note };
+enum { 
+  custom_tag_user_chord_bits_0, custom_tag_user_chord_bits_1, 
+  custom_tag_user_chord_bits_2, custom_tag_user_chord_bits_3 }; // 4 times for 128 midi notes
 
 enum {
   param_type, param_jump,
@@ -134,6 +136,7 @@ public module_engine
   int _note_low_key = -1;
   int _note_high_key = -1;
   std::array<int, 128> _note_abs_mapping = {};
+  std::array<std::uint32_t, 4> _user_chord_bits = {};
   std::array<arp_user_note, 128> _current_user_chord = {};
   std::vector<arp_table_note> _current_arp_note_table = {};
 
@@ -204,21 +207,67 @@ render_graph(
   std::vector<note_event> in_notes;
   std::vector<note_event> out_notes;
 
-  // default to c major for plotting
-  note_event note;
-  note.frame = 0;
-  note.id.id = 0;
-  note.id.channel = 0;
-  note.velocity = 1.0f;
-  note.type = note_event_type::on;
+  std::array<bool, 4> seen_user_chord_bits = {};
+  std::array<std::uint32_t, 4> user_chord_bits = {};
+  for (int i = 0; i < custom_outputs.size(); i++)
+    switch(custom_outputs[i].tag_custom)
+    {
+    case custom_tag_user_chord_bits_0:
+      seen_user_chord_bits[0] = true;
+      user_chord_bits[0] = custom_outputs[i].value_custom;
+      break;
+    case custom_tag_user_chord_bits_1:
+      seen_user_chord_bits[1] = true;
+      user_chord_bits[1] = custom_outputs[i].value_custom;
+      break;
+    case custom_tag_user_chord_bits_2:
+      seen_user_chord_bits[2] = true;
+      user_chord_bits[2] = custom_outputs[i].value_custom;
+      break;
+    case custom_tag_user_chord_bits_3:
+      seen_user_chord_bits[3] = true;
+      user_chord_bits[3] = custom_outputs[i].value_custom;
+      break;
+    default:
+      assert(false);
+      break;
+    }
+  
+  // go with actual / live chord
+  if (seen_user_chord_bits[0] && seen_user_chord_bits[1] && seen_user_chord_bits[2] && seen_user_chord_bits[3])
+  {
+    for(int i = 0; i < 4; i++)
+      for(int j = 0; j < 32; j++)
+        if ((user_chord_bits[i] & (1U << j)) != 0)
+        {
+          note_event note;
+          note.frame = 0;
+          note.id.id = 0;
+          note.id.key = i * 32 + j;
+          note.id.channel = 0;
+          note.velocity = 1.0f;
+          note.type = note_event_type::on;
+          in_notes.push_back(note);
+        }
+  }
+  else
+  {
+    // default to c major for plotting
+    note_event note;
+    note.frame = 0;
+    note.id.id = 0;
+    note.id.channel = 0;
+    note.velocity = 1.0f;
+    note.type = note_event_type::on;
 
-  // TODO fix the table freq for plotting and ditch the lfo
-  note.id.key = 60;
-  in_notes.push_back(note);
-  note.id.key = 64;
-  in_notes.push_back(note);
-  note.id.key = 79; // TODO just checking
-  in_notes.push_back(note);
+    // TODO fix the table freq for plotting and ditch the lfo
+    note.id.key = 60;
+    in_notes.push_back(note);
+    note.id.key = 64;
+    in_notes.push_back(note);
+    note.id.key = 79; // TODO just checking
+    in_notes.push_back(note);
+  }
 
   std::array<arp_user_note, 128> user_chord = {};
   for (int i = 0; i < in_notes.size(); i++)
@@ -645,15 +694,18 @@ arpeggiator_engine::process_audio(
   for (int i = 0; i < in_notes->size(); i++)
   {
     table_changed = true;
+    std::uint32_t midi_key = std::clamp((*in_notes)[i].id.key, 0, 127);
     if ((*in_notes)[i].type == note_event_type::on)
     {
-      _current_user_chord[(*in_notes)[i].id.key].on = true;
-      _current_user_chord[(*in_notes)[i].id.key].velocity = (*in_notes)[i].velocity;
+      _user_chord_bits[midi_key / 32] |= 1U << (midi_key % 32U);
+      _current_user_chord[midi_key].on = true;
+      _current_user_chord[midi_key].velocity = (*in_notes)[i].velocity;
     }
     else
     {
-      _current_user_chord[(*in_notes)[i].id.key].on = false;
-      _current_user_chord[(*in_notes)[i].id.key].velocity = 0.0f;
+      _user_chord_bits[midi_key / 32] &= ~(1U << (midi_key % 32U));
+      _current_user_chord[midi_key].on = false;
+      _current_user_chord[midi_key].velocity = 0.0f;
     }
   }
 
@@ -814,10 +866,31 @@ arpeggiator_engine::process_audio(
   // only want the mod outputs for the actual audio engine
   if (block.graph) return;
 
+  float precise_pos = (_table_pos % _current_arp_note_table.size()) + (_current_note_length - _note_remaining) / (float)_current_note_length;
   block.push_modulation_output(modulation_output::make_mod_output_cv_state(
     -1,
     block.module_desc_.info.global,
-    (_table_pos + (_current_note_length - _note_remaining) / (float)_current_note_length) / (float)_current_arp_note_table.size()));
+    precise_pos / _current_arp_note_table.size()));
+  block.push_modulation_output(modulation_output::make_mod_output_custom_state(
+    -1,
+    block.module_desc_.info.global,
+    custom_tag_user_chord_bits_0,
+    _user_chord_bits[0]));
+  block.push_modulation_output(modulation_output::make_mod_output_custom_state(
+    -1,
+    block.module_desc_.info.global,
+    custom_tag_user_chord_bits_1,
+    _user_chord_bits[1]));
+  block.push_modulation_output(modulation_output::make_mod_output_custom_state(
+    -1,
+    block.module_desc_.info.global,
+    custom_tag_user_chord_bits_2,
+    _user_chord_bits[2]));
+  block.push_modulation_output(modulation_output::make_mod_output_custom_state(
+    -1,
+    block.module_desc_.info.global,
+    custom_tag_user_chord_bits_3,
+    _user_chord_bits[3]));
 }
 
 }

@@ -75,6 +75,7 @@ V rename abs/rel
 X still do something with note lengths/hold/stop/whatever ==> make the sequ
 V remove any mention of seq
 
+* fix the rand crash
 * do arp outs as on-note!
 * maybe hard reset all chans for renoise ?
 * still not killing all the notes
