@@ -161,9 +161,12 @@ public:
 
   arpeggiator_engine();
 
-  int 
-  current_arp_note_table_size() const
-  { return _current_arp_note_table.size(); }
+  std::vector<arp_table_note> const&
+  current_arp_note_table() const
+  { return _current_arp_note_table; }
+
+  int note_low_key() const { return _note_low_key; }
+  int note_high_key() const { return _note_high_key; }
 
   void
   build_arp_note_table(
@@ -214,17 +217,22 @@ render_graph(
 {
   int type = state.get_plain_at(mapping.module_index, mapping.module_slot, param_type, mapping.param_slot).step();
   int mode = state.get_plain_at(mapping.module_index, mapping.module_slot, param_mode, mapping.param_slot).step();
+  int seed = state.get_plain_at(mapping.module_index, mapping.module_slot, param_seed, mapping.param_slot).step();
   bool jump = state.get_plain_at(mapping.module_index, mapping.module_slot, param_jump, mapping.param_slot).step() != 0;
   if (type == type_off) return graph_data(graph_data_type::off, {});
 
   std::vector<note_event> in_notes;
   std::vector<note_event> out_notes;
 
+  int current_seed = seed;
   std::array<bool, 4> seen_user_chord_bits = {};
   std::array<std::uint32_t, 4> user_chord_bits = {};
   for (int i = 0; i < custom_outputs.size(); i++)
     switch(custom_outputs[i].tag_custom)
     {
+    case custom_tag_current_seed:
+      current_seed = custom_outputs[i].value_custom;
+      break;
     case custom_tag_user_chord_bits_0:
       seen_user_chord_bits[0] = true;
       user_chord_bits[0] = custom_outputs[i].value_custom;
@@ -241,8 +249,6 @@ render_graph(
       seen_user_chord_bits[3] = true;
       user_chord_bits[3] = custom_outputs[i].value_custom;
       break;
-    case custom_tag_current_seed:
-      break; // handled in reset_graph
     default:
       assert(false);
       break;
@@ -293,18 +299,25 @@ render_graph(
   // seed is not important here, just need to know the table size
   // but see reset_graph
   arpeggiator_engine arp_engine;
-  arp_engine.build_arp_note_table(user_chord, type, mode, 1, 1, jump);
-  int table_size = arp_engine.current_arp_note_table_size();
-  engine->process_begin(&state, table_size, table_size, -1);
+  arp_engine.build_arp_note_table(user_chord, type, mode, current_seed, current_seed, jump);
+  auto const& arp_table = arp_engine.current_arp_note_table();
+  engine->process_begin(&state, arp_table.size(), arp_table.size(), -1);
   auto const* block = engine->process(mapping.module_index, mapping.module_slot, custom_outputs, nullptr, [&](plugin_block& block) {
     arp_engine.reset_graph(&block, &in_notes, &out_notes, custom_outputs, nullptr);
     arp_engine.process_graph(block, &in_notes, &out_notes, custom_outputs, nullptr);
   });
   engine->process_end();
-  auto const& rel_out_notes = block->state.own_cv[output_rel_note][0];
-  jarray<float, 1> series(std::vector<float>(rel_out_notes.data().begin(), rel_out_notes.data().begin() + table_size));
-  // TODO multibars
-  return graph_data(series, false, 1.0f, false, {});
+
+  std::vector<float> series;
+  auto const& rel_out_pos = block->state.own_cv[output_rel_pos][0];
+  int range = arp_engine.note_high_key() - arp_engine.note_low_key();
+  for (int i = 0; i < arp_table.size(); i++)
+  {
+    int table_index = (int)std::round(rel_out_pos[i] * (arp_table.size() - 1));
+    assert(0 <= table_index && table_index < arp_table.size());
+    series.push_back((arp_table[table_index].midi_key - arp_engine.note_low_key()) / (float)range);
+  }
+  return graph_data(jarray<float, 1>(series), false, 1.0f, false, {});
 }
 
 module_topo
