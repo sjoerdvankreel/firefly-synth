@@ -893,7 +893,7 @@ arpeggiator_engine::process_audio(
       _note_remaining = block.graph? 1: rate_frames;
 
       if (mode == mode_rand_free || mode == mode_fixrand_free)
-        if (_table_pos % _current_arp_note_table.size() == 0)
+        if (_table_pos != 0 && _table_pos % _current_arp_note_table.size() == 0)
         {
           if (_graph_override_seed != -1)
             _current_seed = _graph_override_seed;
