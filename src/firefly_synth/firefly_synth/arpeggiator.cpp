@@ -142,6 +142,7 @@ public module_engine
   int _note_low_key = -1;
   int _note_high_key = -1;
   int _graph_override_seed = -1;
+  std::array<bool, 128> _fire_this_round = {};
   std::array<int, 128> _note_abs_mapping = {};
   std::array<std::uint32_t, 4> _user_chord_bits = {};
   std::array<arp_user_note, 128> _current_user_chord = {};
@@ -703,6 +704,7 @@ arpeggiator_engine::reset_audio(
   _user_chord_bits = {};
   _current_user_chord = {};
   _current_arp_note_table = {};
+  _fire_this_round = {};
 }
 
 void 
@@ -952,16 +954,21 @@ arpeggiator_engine::process_audio(
         _cv_out_abs_note = _note_abs_mapping[_current_arp_note_table[flipped_pos].midi_key] / (float)(_current_arp_note_table.size() - 1);
       }
 
+      _fire_this_round = {};
       for (int i = 0; i < notes; i++)
       {
+        // don't do the same note twice (might occur with notes > 1)
+        int this_table_index = (flipped_pos + i * dist) % _current_arp_note_table.size();
+        if (_fire_this_round[_current_arp_note_table[this_table_index].midi_key]) continue;
         note_event start_new = {};
         start_new.frame = f;
         start_new.type = note_event_type::on;
-        start_new.velocity = _current_arp_note_table[(flipped_pos + i * dist) % _current_arp_note_table.size()].velocity;
+        start_new.velocity = _current_arp_note_table[this_table_index].velocity;
         start_new.id.id = 0;
         start_new.id.channel = 0;
-        start_new.id.key = _current_arp_note_table[(flipped_pos + i * dist) % _current_arp_note_table.size()].midi_key;
+        start_new.id.key = _current_arp_note_table[this_table_index].midi_key;
         out_notes->push_back(start_new);
+        _fire_this_round[_current_arp_note_table[this_table_index].midi_key] = true;
       }
     }
     

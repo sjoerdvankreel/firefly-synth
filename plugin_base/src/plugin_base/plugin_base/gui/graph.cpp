@@ -357,8 +357,13 @@ graph::paint_multi_bars(
         float bar_w = w / implied_count;
         float bar_x = i / (float)implied_count * w;
         g.fillRect(bar_x, bar_y, bar_w, bar_h);
+
         g.setColour(_lnf->colors().graph_line);
         g.fillRect(bar_x, bar_y - 1.0f, bar_w, 2.0f);
+
+        // for ARP
+        // lets us see where note begins in case same chord is repeated
+        g.fillEllipse(bar_x - 3, bar_y - 3, 6, 6);
     }
 }
 
