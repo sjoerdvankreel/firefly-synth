@@ -68,6 +68,9 @@ struct arp_table_note
 {
   int midi_key;
   float velocity;
+
+  bool operator < (arp_table_note const& rhs) 
+  { return midi_key < rhs.midi_key; }
 };
 
 static std::vector<list_item>
@@ -578,8 +581,7 @@ arpeggiator_engine::build_arp_note_table(
     _current_arp_note_table[i].midi_key = std::clamp(_current_arp_note_table[i].midi_key, 0, 127);
 
   // and sort the thing
-  auto comp = [](auto const& l, auto const& r) { return l.midi_key < r.midi_key; };
-  std::sort(_current_arp_note_table.begin(), _current_arp_note_table.end(), comp);
+  std::sort(_current_arp_note_table.begin(), _current_arp_note_table.end());
 
   // need for cv outputs
   for (int i = 0; i < _current_arp_note_table.size(); i++)
@@ -605,6 +607,8 @@ arpeggiator_engine::build_arp_note_table(
     else
       _current_seed = seed_param;
     _random.seed(_current_seed);
+    // need sort first since random order must be uniquely determined by the seed
+    std::sort(_current_arp_note_table.begin(), _current_arp_note_table.end());
     std::shuffle(_current_arp_note_table.begin(), _current_arp_note_table.end(), _random);
     break;
   case mode_up:
@@ -900,6 +904,8 @@ arpeggiator_engine::process_audio(
           else
             _current_seed = (_current_seed + 1) % 256;
           _random.seed(_current_seed);
+          // need sort first since random order must be uniquely determined by the seed
+          std::sort(_current_arp_note_table.begin(), _current_arp_note_table.end());
           std::shuffle(_current_arp_note_table.begin(), _current_arp_note_table.end(), _random);
         }
 
