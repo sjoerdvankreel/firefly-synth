@@ -319,26 +319,6 @@ graph::paint_series(
   float h = getHeight();
   float count = series.size();
 
-#if 0 // TODO
-  if (_data.stepped())
-  {
-    for (int i = 0; i < series.size(); i++)
-    {
-      g.setColour(_lnf->colors().graph_area);
-      float bar_h = series[i] * h;
-      float bar_y = (1.0f - series[i]) * h;
-      float bar_w = w / series.size();
-      float bar_x = i / (float)series.size() * w;
-      g.fillRect(bar_x, bar_y, bar_w, bar_h);
-      
-      g.setColour(_lnf->colors().graph_line);
-      g.fillRect(bar_x, bar_y - 1.0f, bar_w, 2.0f);
-
-    }
-    return;
-  }
-#endif
-
   float y0 = (1 - std::clamp(series[0], 0.0f, 1.0f)) * h;
   pFill.startNewSubPath(0, bipolar? h * midpoint : h);
   pFill.lineTo(0, y0);
@@ -357,6 +337,29 @@ graph::paint_series(
   if (!_data.stroke_with_area())
     g.setColour(_lnf->colors().graph_line);
   g.strokePath(pStroke, PathStrokeType(stroke_thickness));
+}
+
+void 
+graph::paint_multi_bars(
+  juce::Graphics& g, int implied_count,
+  std::vector<std::pair<int, float>> const& multi_bars)
+{
+  float w = getWidth();
+  float h = getHeight();
+
+  for(int i = 0; i < implied_count ; i++)
+    for (int j = 0; j < multi_bars.size(); j++)
+      if(multi_bars[j].first == i)
+      {
+        g.setColour(_lnf->colors().graph_area);
+        float bar_h = multi_bars[j].second * h;
+        float bar_y = (1.0f - multi_bars[j].second) * h;
+        float bar_w = w / implied_count;
+        float bar_x = i / (float)implied_count * w;
+        g.fillRect(bar_x, bar_y, bar_w, bar_h);
+        g.setColour(_lnf->colors().graph_line);
+        g.fillRect(bar_x, bar_y - 1.0f, bar_w, 2.0f);
+    }
 }
 
 void
@@ -460,27 +463,51 @@ graph::paint(Graphics& g)
     return;
   }  
 
-  assert(_data.type() == graph_data_type::series);
+  assert(_data.type() == graph_data_type::series || _data.type() == graph_data_type::multi_bars);
 
-  // paint the series
-  jarray<float, 1> series(_data.series());
-  if(_data.bipolar())
-    for(int i = 0; i < series.size(); i++)
-      series[i] = bipolar_to_unipolar(series[i]);
-  paint_series(g, series, _data.bipolar(), _data.stroke_thickness(), 0.5f);
+  // paint the series / bars
+  int count = -1;
+  if (_data.type() == graph_data_type::multi_bars)
+  {
+    int max_index = 0;
+    for (int i = 0; i < _data.multi_bars().size(); i++)
+      max_index = std::max(max_index, _data.multi_bars()[i].first);
+    count = max_index + 1;
+    paint_multi_bars(g, count, _data.multi_bars());
+  }
+  else
+  {
+    count = _data.series().size();
+    jarray<float, 1> series(_data.series());
+    if (_data.bipolar())
+      for (int i = 0; i < series.size(); i++)
+        series[i] = bipolar_to_unipolar(series[i]);
+    paint_series(g, series, _data.bipolar(), _data.stroke_thickness(), 0.5f);
+  }
 
   if (_gui->get_visuals_mode() != gui_visuals_mode_full) return;
 
   // paint the indicator bubbles
-  int count = _data.series().size();
   g.setColour(_lnf->colors().graph_modulation_bubble);
   for (int i = 0; i < _mod_indicators.size(); i++)
   {
     float output_pos = _mod_indicators[i];
     float x = output_pos * w;
     int point = std::clamp((int)(output_pos * count), 0, count - 1);
-    float y = (1 - std::clamp(_data.series()[point], 0.0f, 1.0f)) * h;
-    g.fillEllipse(x - 3, y - 3, 6, 6);
+    if (_data.type() == graph_data_type::series)
+    {
+      float y = (1 - std::clamp(_data.series()[point], 0.0f, 1.0f)) * h;
+      g.fillEllipse(x - 3, y - 3, 6, 6);
+    }
+    else
+    {
+      for (int j = 0; j < _data.multi_bars().size(); j++)
+        if(_data.multi_bars()[j].first == point)
+        {
+          float y = (1 - std::clamp(_data.multi_bars()[j].second, 0.0f, 1.0f)) * h;
+          g.fillEllipse(x - 3, y - 3, 6, 6);
+        }
+    }
   }
   if (fixed_graph_mod_indicator_pos() >= 0)
   {

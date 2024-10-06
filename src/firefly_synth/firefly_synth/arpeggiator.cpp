@@ -218,6 +218,8 @@ render_graph(
   int type = state.get_plain_at(mapping.module_index, mapping.module_slot, param_type, mapping.param_slot).step();
   int mode = state.get_plain_at(mapping.module_index, mapping.module_slot, param_mode, mapping.param_slot).step();
   int seed = state.get_plain_at(mapping.module_index, mapping.module_slot, param_seed, mapping.param_slot).step();
+  int dist = state.get_plain_at(mapping.module_index, mapping.module_slot, param_dist, mapping.param_slot).step();
+  int notes = state.get_plain_at(mapping.module_index, mapping.module_slot, param_notes, mapping.param_slot).step();
   bool jump = state.get_plain_at(mapping.module_index, mapping.module_slot, param_jump, mapping.param_slot).step() != 0;
   if (type == type_off) return graph_data(graph_data_type::off, {});
 
@@ -308,16 +310,21 @@ render_graph(
   });
   engine->process_end();
 
-  std::vector<float> series;
+  std::vector<std::pair<int, float>> multi_bars;
   auto const& rel_out_pos = block->state.own_cv[output_rel_pos][0];
   int range = arp_engine.note_high_key() - arp_engine.note_low_key();
   for (int i = 0; i < arp_table.size(); i++)
   {
     int table_index = (int)std::round(rel_out_pos[i] * (arp_table.size() - 1));
     assert(0 <= table_index && table_index < arp_table.size());
-    series.push_back((arp_table[table_index].midi_key - arp_engine.note_low_key()) / (float)range);
+    for (int j = 0; j < notes; j++)
+    {
+      int note_table_index = (table_index + j * dist) % arp_table.size();
+      float vertical_pos_normalized = (arp_table[note_table_index].midi_key - arp_engine.note_low_key()) / (float)range;
+      multi_bars.push_back({ i, vertical_pos_normalized });
+    }
   }
-  return graph_data(jarray<float, 1>(series), false, 1.0f, false, {});
+  return graph_data(multi_bars, {});
 }
 
 module_topo
