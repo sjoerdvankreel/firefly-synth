@@ -476,7 +476,7 @@ graph::paint(Graphics& g)
   {
     float output_pos = _mod_indicators[i];
     float x = output_pos * w;
-    int point = std::clamp((int)(output_pos * (count - 1)), 0, count - 1);
+    int point = std::clamp((int)(output_pos * count), 0, count - 1);
     float y = (1 - std::clamp(_data.series()[point], 0.0f, 1.0f)) * h;
     g.fillEllipse(x - 3, y - 3, 6, 6);
   }
