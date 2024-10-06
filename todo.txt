@@ -79,6 +79,7 @@ V also maybe have some visualization!
 V plot multiple notes
 V add ARP label to the graph
 
+* fix repaint stuff on global in param drag it always shows aux1
 * show what is off
 * make arp label not ugly
 * smaller graphs
