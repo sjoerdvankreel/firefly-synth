@@ -222,7 +222,7 @@ render_graph(
   int dist = state.get_plain_at(mapping.module_index, mapping.module_slot, param_dist, mapping.param_slot).step();
   int notes = state.get_plain_at(mapping.module_index, mapping.module_slot, param_notes, mapping.param_slot).step();
   bool jump = state.get_plain_at(mapping.module_index, mapping.module_slot, param_jump, mapping.param_slot).step() != 0;
-  if (type == type_off) return graph_data(graph_data_type::off, {});
+  if (type == type_off) return graph_data(graph_data_type::off, { state.desc().plugin->modules[mapping.module_index].info.tag.menu_display_name });
 
   std::vector<note_event> in_notes;
   std::vector<note_event> out_notes;
@@ -325,7 +325,7 @@ render_graph(
       multi_bars.push_back({ i, vertical_pos_normalized });
     }
   }
-  return graph_data(multi_bars, { "ARP" });
+  return graph_data(multi_bars, { state.desc().plugin->modules[mapping.module_index].info.tag.menu_display_name });
 }
 
 module_topo

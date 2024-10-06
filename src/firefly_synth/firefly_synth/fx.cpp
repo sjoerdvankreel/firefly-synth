@@ -377,7 +377,7 @@ render_graph(
   param_topo_mapping const& mapping, std::vector<mod_out_custom_state> const& custom_outputs)
 {
   int type = state.get_plain_at(mapping.module_index, mapping.module_slot, param_type, 0).step();
-  if(type == type_off) return graph_data(graph_data_type::off, {});
+  if(type == type_off) return graph_data(graph_data_type::off, { state.desc().plugin->modules[mapping.module_index].info.tag.menu_display_name });
 
   int frame_count = -1;
   int sample_rate = -1;

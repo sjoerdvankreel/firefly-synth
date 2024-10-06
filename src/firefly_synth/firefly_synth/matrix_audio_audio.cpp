@@ -112,7 +112,7 @@ render_graph(
     for (int r = 0; r < route_count; r++)
       if (state.get_plain_at(m.module_index, m.module_slot, param_on, r).step() != 0)
         return render_graph(state, engine, -1, { m.module_index, m.module_slot, m.param_index, r }, targets);
-    return graph_data(graph_data_type::off, {});
+    return graph_data(graph_data_type::off, { state.desc().plugin->modules[mapping.module_index].info.tag.menu_display_name });
   }
   
   int ti = state.get_plain_at(m.module_index, m.module_slot, param_target, m.param_slot).step();

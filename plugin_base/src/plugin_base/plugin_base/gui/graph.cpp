@@ -389,27 +389,33 @@ graph::paint(Graphics& g)
     g.fillRect(i / (float)(col_count) * w, 0.0f, 1.0f, h);
 
   // draw background partitions
-  for (int part = 0; part < _data.partitions().size(); part++)
-  {
-    Rectangle<float> area(part / (float)_data.partitions().size() * w, 0.0f, w / _data.partitions().size(), h);
-    if (part % 2 == 1)
+  if(_data.type() != graph_data_type::off && _data.type() != graph_data_type::na)
+    for (int part = 0; part < _data.partitions().size(); part++)
     {
-      g.setColour(_lnf->colors().graph_area.withAlpha(0.33f));
-      g.fillRect(area);
+      Rectangle<float> area(part / (float)_data.partitions().size() * w, 0.0f, w / _data.partitions().size(), h);
+      if (part % 2 == 1)
+      {
+        g.setColour(_lnf->colors().graph_area.withAlpha(0.33f));
+        g.fillRect(area);
+      }
+      g.setColour(_lnf->colors().graph_text);
+      if (_params.scale_type == graph_params::scale_h)
+        g.setFont(_lnf->font().withHeight(h * _params.partition_scale));
+      else
+        g.setFont(_lnf->font().withHeight(w * _params.partition_scale));
+      g.drawText(_data.partitions()[part], area, Justification::centred, false);
     }
-    g.setColour(_lnf->colors().graph_text);
+       
+  if (_data.type() == graph_data_type::off || _data.type() == graph_data_type::na)
+  {
+    g.setColour(_lnf->colors().graph_text); 
     if (_params.scale_type == graph_params::scale_h)
       g.setFont(_lnf->font().withHeight(h * _params.partition_scale));
     else
       g.setFont(_lnf->font().withHeight(w * _params.partition_scale));
-    g.drawText(_data.partitions()[part], area, Justification::centred, false);
-  }
-       
-  if (_data.type() == graph_data_type::off || _data.type() == graph_data_type::na)
-  {
-    g.setColour(_lnf->colors().graph_text);
-    auto text = _data.type() == graph_data_type::off ? "OFF" : "N/A";
-    g.setFont(dynamic_cast<plugin_base::lnf&>(getLookAndFeel()).font().boldened());
+    std::string text = _data.type() == graph_data_type::off ? "OFF" : "N/A";
+    assert(_data.partitions().size() < 2);
+    if (_data.partitions().size() == 1) text = _data.partitions()[0] + " " + text;
     g.drawText(text, getLocalBounds().toFloat(), Justification::centred, false);
     return;
   }

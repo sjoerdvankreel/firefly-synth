@@ -210,7 +210,7 @@ render_graph(
 {
   int type = state.get_plain_at(mapping.module_index, mapping.module_slot, param_type, mapping.param_slot).step();
   bool sync = state.get_plain_at(mapping.module_index, mapping.module_slot, param_sync, mapping.param_slot).step() != 0;
-  if(type == type_off) return graph_data(graph_data_type::off, {});
+  if(type == type_off) return graph_data(graph_data_type::off, { state.desc().plugin->modules[mapping.module_index].info.tag.menu_display_name });
   
   int sample_rate = -1;
   std::string partition;

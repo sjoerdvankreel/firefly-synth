@@ -365,7 +365,7 @@ render_graph(
     for(int r = 0; r < route_count; r++)
       if(state.get_plain_at(map.module_index, map.module_slot, param_type, r).step() != type_off)
         return render_graph(state, engine, -1, { map.module_index, map.module_slot, map.param_index, r }, custom_outputs, sources, targets);
-    return graph_data(graph_data_type::off, {});
+    return graph_data(graph_data_type::off, { state.desc().plugin->modules[mapping.module_index].info.tag.menu_display_name });
   }
 
   // scale to longest env or lfo

@@ -313,7 +313,7 @@ render_osc_graph(
   graph_engine_params params = {};
   int type = state.get_plain_at(module_osc, mapping.module_slot, param_type, 0).step();
   if(state.get_plain_at(mapping.module_index, mapping.module_slot, param_type, 0).step() == type_off) 
-    return graph_data(graph_data_type::off, {});
+    return graph_data(graph_data_type::off, { state.desc().plugin->modules[mapping.module_index].info.tag.menu_display_name });
   auto data = render_osc_graphs(state, engine, mapping.module_slot, false, custom_outputs)[mapping.module_slot];
   std::string partition = is_random(type)? "5 Cycles": "First Cycle";
   return graph_data(data.audio(), 1.0f, false, { partition });

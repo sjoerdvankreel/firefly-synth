@@ -194,7 +194,7 @@ render_graph(
   param_topo_mapping const& mapping, std::vector<mod_out_custom_state> const& custom_outputs)
 {
   if (state.get_plain_at(module_env, mapping.module_slot, param_on, 0).step() == 0) 
-    return graph_data(graph_data_type::off, {});
+    return graph_data(graph_data_type::off, { state.desc().plugin->modules[mapping.module_index].info.tag.menu_display_name });
 
   float dly, att, hld, dcy, rls, flt;
   env_plot_length_seconds(state, mapping.module_slot, dly, att, hld, dcy, rls, flt);
