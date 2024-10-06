@@ -825,6 +825,7 @@ arpeggiator_engine::process_audio(
       }
 
     // reset to before start, will get picked up
+    _mod_phase = 0.0f;
     _table_pos = -1;
     _note_high_key = 0;
     _note_low_key = 128;
