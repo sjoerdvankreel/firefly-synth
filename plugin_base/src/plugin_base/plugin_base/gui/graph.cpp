@@ -363,7 +363,7 @@ graph::paint_multi_bars(
 
         // for ARP
         // lets us see where note begins in case same chord is repeated
-        g.fillEllipse(bar_x - 3, bar_y - 3, 6, 6);
+        g.fillEllipse(bar_x - 2, bar_y - 2, 4, 4);
     }
 }
 

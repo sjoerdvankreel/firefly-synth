@@ -325,7 +325,7 @@ render_graph(
       multi_bars.push_back({ i, vertical_pos_normalized });
     }
   }
-  return graph_data(multi_bars, {});
+  return graph_data(multi_bars, { "ARP" });
 }
 
 module_topo
