@@ -142,6 +142,7 @@ public module_engine
   int _note_low_key = -1;
   int _note_high_key = -1;
   int _graph_override_seed = -1;
+  bool _is_render_for_cv_graph = false;
   std::array<bool, 128> _fire_this_round = {};
   std::array<int, 128> _note_abs_mapping = {};
   std::array<std::uint32_t, 4> _user_chord_bits = {};
@@ -728,6 +729,7 @@ arpeggiator_engine::reset_audio(
   _random = {};
 
   _current_seed = 0;
+  _is_render_for_cv_graph = false;
   _graph_override_seed = -1;
   _note_low_key = -1;
   _note_high_key = -1;
@@ -773,6 +775,15 @@ arpeggiator_engine::process_graph(
   }
   if (out_notes == nullptr)
     graph_out_notes_ptr = &graph_out_notes;
+
+  
+  for(int i = 0; i < custom_outputs.size(); i++)
+    if (custom_outputs[i].tag_custom == custom_out_shared_render_for_cv_graph)
+    {
+      _is_render_for_cv_graph = true;
+      break;
+    }
+
   process_audio(block, graph_in_notes_ptr, graph_out_notes_ptr);
 }
 
