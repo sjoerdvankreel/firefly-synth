@@ -84,6 +84,7 @@ V smaller graphs
 V give all graphs the same fontsize 
 V do arp outs as on-note!
 
+* relnote/relpos cv out is no good
 * review code, make detailed release notes
 * check if the EXP length is good
 * fix repaint stuff on global in param drag it always shows aux1
