@@ -164,8 +164,8 @@ audio_audio_matrix_topo(
 
   module_topo result(make_module(info,
     make_module_dsp(stage, module_output::audio, scratch_count, { 
-      make_module_dsp_output(false, make_topo_info_basic("{59AF084C-927D-4AFD-BA81-055687FF6A79}", "Silence", output_silence, 1)), 
-      make_module_dsp_output(false, make_topo_info_basic("{3EFFD54D-440A-4C91-AD4F-B1FA290208EB}", "Mixed", output_mixed, route_count)) }),
+      make_module_dsp_output(false, -1, make_topo_info_basic("{59AF084C-927D-4AFD-BA81-055687FF6A79}", "Silence", output_silence, 1)),
+      make_module_dsp_output(false, -1, make_topo_info_basic("{3EFFD54D-440A-4C91-AD4F-B1FA290208EB}", "Mixed", output_mixed, route_count)) }),
     make_module_gui(section, pos, { 1, 1 })));
 
   result.gui.tabbed_name = "Audio";

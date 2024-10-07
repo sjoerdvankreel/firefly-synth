@@ -137,6 +137,7 @@ struct module_topo_gui final {
 struct module_dsp_output final {
   topo_info info;
   bool is_modulation_source;
+  int underlying_module_index;
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(module_dsp_output);
 };
 

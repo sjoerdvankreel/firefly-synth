@@ -182,11 +182,12 @@ make_module(topo_info const& info, module_dsp const& dsp, module_topo_gui const&
 }
 
 module_dsp_output
-make_module_dsp_output(bool is_modulation_source, topo_info const& info)
+make_module_dsp_output(bool is_modulation_source, int underlying_module_index, topo_info const& info)
 {
   module_dsp_output result;
   result.info = topo_info(info);
   result.is_modulation_source = is_modulation_source;
+  result.underlying_module_index = underlying_module_index;
   return result;
 }
 

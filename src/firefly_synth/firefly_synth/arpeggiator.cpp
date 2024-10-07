@@ -334,10 +334,10 @@ arpeggiator_topo(plugin_topo const* topo, int section, gui_position const& pos)
   module_topo result(make_module(
     make_topo_info("{8A09B4CD-9768-4504-B9FE-5447B047854B}", true, "Arpeggiator", "Arp", "Arp", module_arpeggiator, 1),
     make_module_dsp(module_stage::input, module_output::cv, 0, {
-      make_module_dsp_output(true, make_topo_info_basic("{94A509ED-AB5B-43CF-B4F1-422815D99186}", "AbsPos", output_abs_pos, 1)),
-      make_module_dsp_output(true, make_topo_info_basic("{ED2AF50B-64F4-4E21-9E66-95079A1E101B}", "RelPos", output_rel_pos, 1)),
-      make_module_dsp_output(true, make_topo_info_basic("{AAA54A01-75AF-475B-B02D-F85295462335}", "AbsNote", output_abs_note, 1)),
-      make_module_dsp_output(true, make_topo_info_basic("{C17077E6-FDA9-4DAE-9FAB-E6499A45F462}", "RelNote", output_rel_note, 1)) }),
+      make_module_dsp_output(true, -1, make_topo_info_basic("{94A509ED-AB5B-43CF-B4F1-422815D99186}", "AbsPos", output_abs_pos, 1)),
+      make_module_dsp_output(true, -1, make_topo_info_basic("{ED2AF50B-64F4-4E21-9E66-95079A1E101B}", "RelPos", output_rel_pos, 1)),
+      make_module_dsp_output(true, -1, make_topo_info_basic("{AAA54A01-75AF-475B-B02D-F85295462335}", "AbsNote", output_abs_note, 1)),
+      make_module_dsp_output(true, -1, make_topo_info_basic("{C17077E6-FDA9-4DAE-9FAB-E6499A45F462}", "RelNote", output_rel_note, 1)) }),
     make_module_gui(section, pos, { { 1 }, { 24, 11, 28 } })));
   result.gui.tabbed_name = "ARP";
   result.info.description = "Arpeggiator";

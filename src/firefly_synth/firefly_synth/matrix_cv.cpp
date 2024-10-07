@@ -212,10 +212,10 @@ make_cv_routing_menu_handler(plugin_state* state)
   target_matrices[module_gcv_cv_matrix] = make_cv_target_matrix(make_cv_cv_matrix_targets(state->desc().plugin, true)).mappings;
   target_matrices[module_vcv_cv_matrix] = make_cv_target_matrix(make_cv_cv_matrix_targets(state->desc().plugin, false)).mappings;
   std::map<int, std::vector<module_output_mapping>> source_matrices;
-  source_matrices[module_gcv_cv_matrix] = make_cv_source_matrix(make_cv_matrix_sources(state->desc().plugin, true, false)).mappings;
-  source_matrices[module_vcv_cv_matrix] = make_cv_source_matrix(make_cv_matrix_sources(state->desc().plugin, false, false)).mappings;
-  source_matrices[module_gcv_audio_matrix] = make_cv_source_matrix(make_cv_matrix_sources(state->desc().plugin, true, false)).mappings;
-  source_matrices[module_vcv_audio_matrix] = make_cv_source_matrix(make_cv_matrix_sources(state->desc().plugin, false, false)).mappings;
+  source_matrices[module_gcv_cv_matrix] = make_cv_source_matrix(state->desc().plugin, make_cv_matrix_sources(state->desc().plugin, true, false)).mappings;
+  source_matrices[module_vcv_cv_matrix] = make_cv_source_matrix(state->desc().plugin, make_cv_matrix_sources(state->desc().plugin, false, false)).mappings;
+  source_matrices[module_gcv_audio_matrix] = make_cv_source_matrix(state->desc().plugin, make_cv_matrix_sources(state->desc().plugin, true, false)).mappings;
+  source_matrices[module_vcv_audio_matrix] = make_cv_source_matrix(state->desc().plugin, make_cv_matrix_sources(state->desc().plugin, false, false)).mappings;
   return std::make_unique<cv_routing_menu_handler>(state, param_type, type_off, param_source, param_target, source_matrices, target_matrices);
 }
 
@@ -415,14 +415,15 @@ render_graph(
 
 module_topo
 cv_matrix_topo(
-  int section, gui_position const& pos, bool cv, bool global, bool is_fx,
+  plugin_topo const* topo, int section, 
+  gui_position const& pos, bool cv, bool global, bool is_fx,
   std::vector<cv_source_entry> const& sources,
   std::vector<cv_source_entry> const& on_note_sources,
   std::vector<module_topo const*> const& targets)
 {
   topo_info info;
   int on_note_midi_start = -1;
-  auto source_matrix = make_cv_source_matrix(sources);
+  auto source_matrix = make_cv_source_matrix(topo, sources);
   auto target_matrix = make_cv_target_matrix(targets);
   auto const vcv_info = make_topo_info_basic("{C21FFFB0-DD6E-46B9-89E9-01D88CE3DE46}", "VCV-CV", module_vcv_cv_matrix, 1);
   auto const gcv_info = make_topo_info_basic("{330B00F5-2298-4418-A0DC-521B30A8D72D}", "GCV-CV", module_gcv_cv_matrix, 1);
@@ -441,7 +442,7 @@ cv_matrix_topo(
   if (!global)
   { 
     this_module = cv ? module_vcv_cv_matrix : module_vcv_audio_matrix;
-    auto on_note_matrix(make_cv_source_matrix(on_note_sources).mappings);
+    auto on_note_matrix(make_cv_source_matrix(topo, on_note_sources).mappings);
     for (int m = 0; m < on_note_matrix.size(); m++)
       if (on_note_matrix[m].module_index == module_midi) { on_note_midi_start = m; break; }
     assert(on_note_midi_start != -1);
@@ -450,7 +451,7 @@ cv_matrix_topo(
   int route_count = route_count_from_matrix_type(cv, global);
   module_topo result(make_module(info,
     make_module_dsp(stage, module_output::cv, scratch_count, {
-      make_module_dsp_output(false, make_topo_info_basic("{3AEE42C9-691E-484F-B913-55EB05CFBB02}", "Output", 0, route_count)) }),
+      make_module_dsp_output(false, -1, make_topo_info_basic("{3AEE42C9-691E-484F-B913-55EB05CFBB02}", "Output", 0, route_count)) }),
     make_module_gui(section, pos, { 1, 1 })));
   result.gui.render_automation_state = true; // don't want the graph source to be modulating the graph
   

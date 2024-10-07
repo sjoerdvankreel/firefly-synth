@@ -67,7 +67,7 @@ make_module_section_gui_tabbed(std::string const& id, int index, gui_position co
 midi_source
 make_midi_source(topo_tag const& tag, int id, float default_);
 module_dsp_output
-make_module_dsp_output(bool is_modulation_source, topo_info const& info);
+make_module_dsp_output(bool is_modulation_source, int underlying_module_index, topo_info const& info);
 module_topo
 make_module(topo_info const& info, module_dsp const& dsp, module_topo_gui const& gui);
 module_dsp

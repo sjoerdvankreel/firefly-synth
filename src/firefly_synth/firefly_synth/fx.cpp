@@ -661,7 +661,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
 
   module_topo result(make_module(info,
     make_module_dsp(stage, module_output::audio, scratch_count, {
-      make_module_dsp_output(false, make_topo_info_basic("{E7C21225-7ED5-45CC-9417-84A69BECA73C}", "Output", 0, 1)) }),
+      make_module_dsp_output(false, -1, make_topo_info_basic("{E7C21225-7ED5-45CC-9417-84A69BECA73C}", "Output", 0, 1)) }),
     make_module_gui(section, pos, { { 1, 1 }, { 32, 12, 35, 55, 8 } })));
   result.gui.tabbed_name = "FX";
   result.gui.is_drag_mod_source = true;

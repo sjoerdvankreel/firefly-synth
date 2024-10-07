@@ -132,7 +132,7 @@ osc_osc_matrix_topo(int section, gui_position const& pos, plugin_topo const* plu
   // scratch state for AM
   // for FM we use oversampled mono series
   for(int r = 0; r < route_count; r++)
-    outputs.push_back(make_module_dsp_output(false, make_topo_info_basic(
+    outputs.push_back(make_module_dsp_output(false, -1, make_topo_info_basic(
       "{1DABDF9D-E777-44FF-9720-3B09AAF07C6D}-" + std::to_string(r), "AM", r, max_osc_unison_voices + 1)));
 
   module_topo result(make_module(
