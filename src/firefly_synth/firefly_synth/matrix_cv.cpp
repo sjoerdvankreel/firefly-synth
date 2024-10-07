@@ -212,10 +212,10 @@ make_cv_routing_menu_handler(plugin_state* state)
   target_matrices[module_gcv_cv_matrix] = make_cv_target_matrix(make_cv_cv_matrix_targets(state->desc().plugin, true)).mappings;
   target_matrices[module_vcv_cv_matrix] = make_cv_target_matrix(make_cv_cv_matrix_targets(state->desc().plugin, false)).mappings;
   std::map<int, std::vector<module_output_mapping>> source_matrices;
-  source_matrices[module_gcv_cv_matrix] = make_cv_source_matrix(make_cv_matrix_sources(state->desc().plugin, true)).mappings;
-  source_matrices[module_vcv_cv_matrix] = make_cv_source_matrix(make_cv_matrix_sources(state->desc().plugin, false)).mappings;
-  source_matrices[module_gcv_audio_matrix] = make_cv_source_matrix(make_cv_matrix_sources(state->desc().plugin, true)).mappings;
-  source_matrices[module_vcv_audio_matrix] = make_cv_source_matrix(make_cv_matrix_sources(state->desc().plugin, false)).mappings;
+  source_matrices[module_gcv_cv_matrix] = make_cv_source_matrix(make_cv_matrix_sources(state->desc().plugin, true, false)).mappings;
+  source_matrices[module_vcv_cv_matrix] = make_cv_source_matrix(make_cv_matrix_sources(state->desc().plugin, false, false)).mappings;
+  source_matrices[module_gcv_audio_matrix] = make_cv_source_matrix(make_cv_matrix_sources(state->desc().plugin, true, false)).mappings;
+  source_matrices[module_vcv_audio_matrix] = make_cv_source_matrix(make_cv_matrix_sources(state->desc().plugin, false, false)).mappings;
   return std::make_unique<cv_routing_menu_handler>(state, param_type, type_off, param_source, param_target, source_matrices, target_matrices);
 }
 

@@ -192,7 +192,7 @@ make_static_cv_matrix_mixdown(plugin_base::plugin_block& block);
 
 // routing matrices sources/targets
 std::vector<plugin_base::cv_source_entry>
-make_cv_matrix_sources(plugin_base::plugin_topo const* topo, bool global);
+make_cv_matrix_sources(plugin_base::plugin_topo const* topo, bool global, bool on_note);
 std::vector<plugin_base::module_topo const*>
 make_cv_cv_matrix_targets(plugin_base::plugin_topo const* topo, bool global);
 std::vector<plugin_base::module_topo const*>

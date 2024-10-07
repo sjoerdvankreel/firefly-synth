@@ -47,21 +47,21 @@ voice_on_note_topo(plugin_topo const* topo, int section)
   // see also cv_audio_matrix.select_midi_active
   std::vector<module_dsp_output> outputs;
   std::string const on_note_id("{68360340-68B2-4B88-95BD-B1929F240BAA}");
-  auto global_sources(make_cv_source_matrix(make_cv_matrix_sources(topo, true)));
+  auto on_note_source(make_cv_source_matrix(make_cv_matrix_sources(topo, false, true)));
   outputs.push_back(make_module_dsp_output(true,
     make_topo_info("{8E4692CE-0A00-4739-BBD2-1E671D24F1B8}", true, "On Note Rnd", "Rnd", "Rnd", 0, on_voice_random_count)));
-  for(int i = 0; i < global_sources.items.size(); i++)
+  for(int i = 0; i < on_note_source.items.size(); i++)
     outputs.push_back(make_module_dsp_output(true, make_topo_info(
-      global_sources.items[i].id, true,
-      global_sources.items[i].name, 
-      global_sources.items[i].name,
-      global_sources.items[i].name, i + on_voice_random_output_index + 1, 1)));
+      on_note_source.items[i].id, true,
+      on_note_source.items[i].name,
+      on_note_source.items[i].name,
+      on_note_source.items[i].name, i + on_voice_random_output_index + 1, 1))); // TODO better menu
 
   module_topo result(make_module(
     make_topo_info("{EF1A4E73-BCAD-4D38-A54E-44B83EF46CB5}", true, "On Note", "On Note", "On Nt", module_voice_on_note, 1),
     make_module_dsp(module_stage::voice, module_output::cv, 0, outputs), make_module_gui_none(section)));
   result.info.description = "Provides a couple of random-on-voice values plus on-note versions of all global modulation sources for the per-voice CV mod matrix.";
-  result.engine_factory = [gm = global_sources.mappings](auto const&, int, int) { return std::make_unique<voice_on_note_engine>(gm); };
+  result.engine_factory = [gm = on_note_source.mappings](auto const&, int, int) { return std::make_unique<voice_on_note_engine>(gm); };
   return result;
 }
 
