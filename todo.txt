@@ -81,7 +81,9 @@ V add ARP label to the graph
 V show what is off
 V make arp label not ugly
 V smaller graphs
+V give all graphs the same fontsize 
 
+* check if the EXP length is good
 * fix repaint stuff on global in param drag it always shows aux1
 * do arp outs as on-note!
 * maybe hard reset all chans for renoise ?
@@ -92,6 +94,7 @@ V smaller graphs
 * write the manual
 * add arp table pos as a mod source ==> yes do it + also make all graphs react pfft
 * reset is still no good
+* do more kbd tracking
 
 wishlist:
 use fftw

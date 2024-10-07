@@ -13,6 +13,9 @@ using namespace plugin_base;
 
 namespace firefly_synth {
 
+static float const all_graphs_scale = 0.25f;
+static graph_params::partition_scale_type const all_graphs_scale_type = graph_params::partition_scale_type::scale_h;
+
 static int const synth_first_column_size = 42;
 static int const synth_second_column_size = 17;
   
@@ -103,13 +106,12 @@ make_module_graph_section(
   int module, std::string const& name_in_theme, 
   bool render_on_module_mouse_enter, bool render_on_param_mouse_enter, 
   bool hover_selects_different_graph, float fixed_mod_indicator_pos,
-  graph_params::partition_scale_type scale_type, float partition_scale,
   std::vector<int> const& dependent_module_indices)
 {
   graph_params params;
-  params.scale_type = scale_type;
   params.name_in_theme = name_in_theme;
-  params.partition_scale = partition_scale;
+  params.scale_type = all_graphs_scale_type;
+  params.partition_scale = all_graphs_scale;
   module_graph_params module_params = make_module_graph_params(
     module, render_on_module_mouse_enter, render_on_param_mouse_enter, 
     hover_selects_different_graph, fixed_mod_indicator_pos, dependent_module_indices);
@@ -138,15 +140,14 @@ make_main_graph_section(plugin_gui* gui, lnf* lnf, component_store store)
 static Component&
 make_matrix_graphs_section(
   plugin_gui* gui, lnf* lnf, component_store store, 
-  bool is_fx, int module_section, float partition_scale,
-  std::string const& name_in_theme)
+  bool is_fx, int module_section, std::string const& name_in_theme)
 {
   return store_component<tabbed_module_section_container>(store, gui, module_section,
-    [gui, is_fx, lnf, module_section, partition_scale, name_in_theme](int module_index) -> std::unique_ptr<juce::Component> {
+    [gui, is_fx, lnf, module_section, name_in_theme](int module_index) -> std::unique_ptr<juce::Component> {
       graph_params params;
       params.name_in_theme = name_in_theme;
-      params.partition_scale = partition_scale;
-      params.scale_type = graph_params::scale_h;
+      params.partition_scale = all_graphs_scale;
+      params.scale_type = all_graphs_scale_type;
       switch (module_index)
       {
       case module_vaudio_audio_matrix: return std::make_unique<module_graph>(gui, lnf, params, make_module_graph_params(module_index, false, true, true, -1.0f, { }));
@@ -419,45 +420,45 @@ synth_topo(format_basic_config const* config, bool is_fx, std::string const& ful
   result->gui.custom_sections[custom_section_gfx_graph] = make_custom_section_gui(
     custom_section_gfx_graph, gfx_graph_name, { 3, 3, 1, 1 }, [](auto* gui, auto* lnf, auto store)
     -> Component& { return make_module_graph_section(
-      gui, lnf, store, module_gfx, gfx_graph_name, false, false, false, -1.0f, graph_params::partition_scale_type::scale_w, 0.15f, {}); });
+      gui, lnf, store, module_gfx, gfx_graph_name, false, false, false, -1.0f, {}); });
   result->gui.custom_sections[custom_section_glfo_graph] = make_custom_section_gui(
     custom_section_glfo_graph, glfo_graph_name, { 4, 3, 1, 1 }, [](auto* gui, auto* lnf, auto store)
     -> Component& { return make_module_graph_section(
-      gui, lnf, store, module_glfo, glfo_graph_name, false, false, false, -1.0f, graph_params::partition_scale_type::scale_w, 0.15f, {}); });
+      gui, lnf, store, module_glfo, glfo_graph_name, false, false, false, -1.0f, {}); });
   if (is_fx)
   {
     result->gui.custom_sections[custom_section_global_matrix_graphs] = make_custom_section_gui(
       custom_section_global_matrix_graphs, global_matrix_graphs_name, { 4, 4, 1, 2 }, [](auto* gui, auto* lnf, auto store)
-      -> Component& { return make_matrix_graphs_section(gui, lnf, store, true, module_section_global_matrices, 0.33f, global_matrix_graphs_name); });
+      -> Component& { return make_matrix_graphs_section(gui, lnf, store, true, module_section_global_matrices, global_matrix_graphs_name); });
   }
   else
   { 
     result->gui.custom_sections[custom_section_arp_graph] = make_custom_section_gui(
       custom_section_arp_graph, arp_graph_name, { 6, 4, 1, 1 }, [](auto* gui, auto* lnf, auto store)
       -> Component& { return make_module_graph_section(
-        gui, lnf, store, module_arpeggiator, arp_graph_name, false, false, false, -1.0f, graph_params::partition_scale_type::scale_h, 0.33f, {}); });
+        gui, lnf, store, module_arpeggiator, arp_graph_name, false, false, false, -1.0f, {}); });
     result->gui.custom_sections[custom_section_osc_graph] = make_custom_section_gui(
       custom_section_osc_graph, osc_graph_name, { 6, 3, 1, 1 }, [](auto* gui, auto* lnf, auto store)
       -> Component& { return make_module_graph_section(
-        gui, lnf, store, module_osc, osc_graph_name, false, false, false, -1.0f, graph_params::partition_scale_type::scale_w, 0.15f, { module_osc_osc_matrix, module_voice_in }); });
+        gui, lnf, store, module_osc, osc_graph_name, false, false, false, -1.0f, { module_osc_osc_matrix, module_voice_in }); });
     result->gui.custom_sections[custom_section_vfx_graph] = make_custom_section_gui(
       custom_section_vfx_graph, vfx_graph_name, { 7, 3, 1, 1 }, [](auto* gui, auto* lnf, auto store)
       -> Component& { return make_module_graph_section(
-        gui, lnf, store, module_vfx, vfx_graph_name, false, false, false, -1.0f, graph_params::partition_scale_type::scale_w, 0.15f, {}); });
+        gui, lnf, store, module_vfx, vfx_graph_name, false, false, false, -1.0f, {}); });
     result->gui.custom_sections[custom_section_vlfo_graph] = make_custom_section_gui(
       custom_section_vlfo_graph, vlfo_graph_name, { 8, 3, 1, 1 }, [](auto* gui, auto* lnf, auto store)
       -> Component& { return make_module_graph_section(
-        gui, lnf, store, module_vlfo, vlfo_graph_name, false, false, false, -1.0f, graph_params::partition_scale_type::scale_w, 0.15f, {}); });
+        gui, lnf, store, module_vlfo, vlfo_graph_name, false, false, false, -1.0f, {}); });
     result->gui.custom_sections[custom_section_env_graph] = make_custom_section_gui(
       custom_section_env_graph, env_graph_name, { 9, 3, 1, 1 }, [](auto* gui, auto* lnf, auto store)
       -> Component& { return make_module_graph_section(
-        gui, lnf, store, module_env, env_graph_name, false, false, false, -1.0f, graph_params::partition_scale_type::scale_w, 0.15f, {}); });
+        gui, lnf, store, module_env, env_graph_name, false, false, false, -1.0f, {}); });
     result->gui.custom_sections[custom_section_global_matrix_graphs] = make_custom_section_gui(
       custom_section_global_matrix_graphs, global_matrix_graphs_name, { 4, 4, 1, 2 }, [](auto* gui, auto* lnf, auto store)
-      -> Component& { return make_matrix_graphs_section(gui, lnf, store, false, module_section_global_matrices, 0.33f, global_matrix_graphs_name); });
+      -> Component& { return make_matrix_graphs_section(gui, lnf, store, false, module_section_global_matrices, global_matrix_graphs_name); });
     result->gui.custom_sections[custom_section_voice_matrix_graphs] = make_custom_section_gui(
       custom_section_voice_matrix_graphs, voice_matrix_graphs_name, { 6, 5, 1, 1 }, [](auto* gui, auto* lnf, auto store)
-      -> Component& { return make_matrix_graphs_section(gui, lnf, store, false, module_section_voice_matrices, 0.2f, voice_matrix_graphs_name); });
+      -> Component& { return make_matrix_graphs_section(gui, lnf, store, false, module_section_voice_matrices, voice_matrix_graphs_name); });
   }
 
   result->gui.module_sections.resize(is_fx? module_section_fx_count: module_section_synth_count);
