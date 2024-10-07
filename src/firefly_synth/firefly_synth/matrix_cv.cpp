@@ -388,7 +388,7 @@ render_graph(
   engine->process_begin(&state, sample_rate, params.max_frame_count, voice_release_at);
   std::vector<int> relevant_modules({ module_gcv_cv_matrix, module_global_in, module_glfo });
   if(map.module_index == module_vcv_audio_matrix || map.module_index == module_vcv_cv_matrix)
-    relevant_modules.insert(relevant_modules.end(), { module_vcv_cv_matrix, module_voice_note, module_voice_on_note, module_arpeggiator, module_vlfo, module_env });
+    relevant_modules.insert(relevant_modules.end(), { module_vcv_cv_matrix, module_voice_note, module_voice_on_note, module_vlfo, module_env });
   for(int m = 0; m < relevant_modules.size(); m++)
     for(int mi = 0; mi < state.desc().plugin->modules[relevant_modules[m]].info.slot_count; mi++)
       engine->process_default(relevant_modules[m], mi, custom_cv_outputs, nullptr);
@@ -464,7 +464,7 @@ cv_matrix_topo(
 
   // need these for continuous repaint
   result.dependent_custom_outputs_module_topo_indices = { module_glfo };
-  if (!global) result.dependent_custom_outputs_module_topo_indices = { module_glfo, module_arpeggiator, module_env, module_vlfo, module_voice_note, module_voice_on_note };
+  if (!global) result.dependent_custom_outputs_module_topo_indices = { module_glfo, module_env, module_vlfo, module_voice_note, module_voice_on_note };
   result.gui.menu_handler_factory = [](plugin_state* state) {
     return std::make_unique<tidy_matrix_menu_handler>(
       state, 1, param_type, type_off, std::vector<std::vector<int>>({{ param_target, param_source }})); 

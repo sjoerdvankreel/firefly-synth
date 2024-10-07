@@ -155,12 +155,12 @@ make_matrix_graphs_section(
       case module_osc_osc_matrix: return std::make_unique<module_graph>(gui, lnf, params, make_module_graph_params(module_index, true, false, true, -1.0f,
         { module_osc, module_voice_in }));
       case module_vcv_audio_matrix: return std::make_unique<module_graph>(gui, lnf, params, make_module_graph_params(module_index, false, true, true, 0.0f,
-        { module_global_in, module_glfo, module_vlfo, module_arpeggiator, module_env, module_voice_in, module_voice_out,
+        { module_global_in, module_glfo, module_vlfo, module_env, module_voice_in, module_voice_out,
         module_osc, module_osc_osc_matrix, module_vfx, module_vaudio_audio_matrix }));
       case module_gcv_audio_matrix: return std::make_unique<module_graph>(gui, lnf, params, make_module_graph_params(module_index, false, true, true, 0.0f,
         { module_global_in, module_glfo, module_gfx, module_gaudio_audio_matrix, module_global_out }));
       case module_vcv_cv_matrix: return std::make_unique<module_graph>(gui, lnf, params, make_module_graph_params(module_index, false, true, true, 0.0f,
-        { module_global_in, module_glfo, module_gcv_audio_matrix, module_vlfo, module_arpeggiator, module_env, module_vcv_audio_matrix }));
+        { module_global_in, module_glfo, module_gcv_audio_matrix, module_vlfo, module_env, module_vcv_audio_matrix }));
       case module_gcv_cv_matrix: return std::make_unique<module_graph>(gui, lnf, params, make_module_graph_params(module_index, false, true, true, 0.0f,
         { module_global_in, module_glfo, module_gcv_audio_matrix }));
       default: assert(false); return std::make_unique<Component>();
