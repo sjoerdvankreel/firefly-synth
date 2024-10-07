@@ -502,7 +502,7 @@ int
 arpeggiator_engine::flipped_table_pos() const
 {
   int n = _table_pos % (_prev_flip * 2);
-  if (n < _prev_flip) return _table_pos % _current_arp_note_table.size();
+  if (n < _prev_flip) return _table_pos;
   n -= _prev_flip;
   int base_pos = _table_pos - (_table_pos % _prev_flip);
   int result = (base_pos + _prev_flip - n - 1) % _current_arp_note_table.size();
@@ -924,7 +924,7 @@ arpeggiator_engine::process_audio(
         }
       }
 
-      _table_pos++;
+      _table_pos = (_table_pos + 1) % _current_arp_note_table.size();
       _current_note_length = rate_frames;
       _note_remaining = block.graph? 1: rate_frames;
 
@@ -941,13 +941,13 @@ arpeggiator_engine::process_audio(
           std::shuffle(_current_arp_note_table.begin(), _current_arp_note_table.end(), _random);
         }
 
-      flipped_pos = is_random(mode) ? _table_pos % _current_arp_note_table.size() : flipped_table_pos();
+      flipped_pos = is_random(mode) ? _table_pos: flipped_table_pos();
 
       // update current values for cv state
       _cv_out_abs_note = 0.0f;
       _cv_out_rel_note = 0.0f;
       _cv_out_rel_pos = flipped_pos / (float)(_current_arp_note_table.size() - 1);
-      _cv_out_abs_pos = (_table_pos % _current_arp_note_table.size()) / (float)(_current_arp_note_table.size() - 1);
+      _cv_out_abs_pos = _table_pos / (float)(_current_arp_note_table.size() - 1);
       int note_abs_range = _note_high_key - _note_low_key;
       if (note_abs_range > 0)
       {
@@ -988,7 +988,7 @@ arpeggiator_engine::process_audio(
   // only want the mod outputs for the actual audio engine
   if (block.graph) return;
 
-  float precise_pos = (_table_pos % _current_arp_note_table.size()) + (_current_note_length - _note_remaining) / (float)_current_note_length;
+  float precise_pos = _table_pos + (_current_note_length - _note_remaining) / (float)_current_note_length;
   block.push_modulation_output(modulation_output::make_mod_output_cv_state(
     -1,
     block.module_desc_.info.global,

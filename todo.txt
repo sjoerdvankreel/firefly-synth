@@ -83,8 +83,9 @@ V make arp label not ugly
 V smaller graphs
 V give all graphs the same fontsize 
 V do arp outs as on-note!
+V relnote/relpos cv out is no good
 
-* relnote/relpos cv out is no good
+* another option ==> do "ignore" (float NaN?) for cv graph also for midi and clap mod
 * review code, make detailed release notes
 * check if the EXP length is good
 * fix repaint stuff on global in param drag it always shows aux1
