@@ -239,32 +239,39 @@ render_graph(
   int current_seed = seed;
   std::array<bool, 4> seen_user_chord_bits = {};
   std::array<std::uint32_t, 4> user_chord_bits = {};
+  int module_global = state.desc().module_topo_to_index.at(module_arpeggiator) + 0;
   for (int i = 0; i < custom_outputs.size(); i++)
-    switch(custom_outputs[i].tag_custom)
-    {
-    case custom_tag_current_seed:
-      current_seed = custom_outputs[i].value_custom;
-      break;
-    case custom_tag_user_chord_bits_0:
-      seen_user_chord_bits[0] = true;
-      user_chord_bits[0] = custom_outputs[i].value_custom;
-      break;
-    case custom_tag_user_chord_bits_1:
-      seen_user_chord_bits[1] = true;
-      user_chord_bits[1] = custom_outputs[i].value_custom;
-      break;
-    case custom_tag_user_chord_bits_2:
-      seen_user_chord_bits[2] = true;
-      user_chord_bits[2] = custom_outputs[i].value_custom;
-      break;
-    case custom_tag_user_chord_bits_3:
-      seen_user_chord_bits[3] = true;
-      user_chord_bits[3] = custom_outputs[i].value_custom;
-      break;
-    default:
-      assert(false);
-      break;
-    }
+    if(custom_outputs[i].module_global == module_global)
+      switch(custom_outputs[i].tag_custom)
+      {
+      case custom_tag_output_abs_note:
+      case custom_tag_output_rel_note:
+      case custom_tag_output_abs_pos:
+      case custom_tag_output_rel_pos:
+        break;
+      case custom_tag_current_seed:
+        current_seed = custom_outputs[i].value_custom;
+        break;
+      case custom_tag_user_chord_bits_0:
+        seen_user_chord_bits[0] = true;
+        user_chord_bits[0] = custom_outputs[i].value_custom;
+        break;
+      case custom_tag_user_chord_bits_1:
+        seen_user_chord_bits[1] = true;
+        user_chord_bits[1] = custom_outputs[i].value_custom;
+        break;
+      case custom_tag_user_chord_bits_2:
+        seen_user_chord_bits[2] = true;
+        user_chord_bits[2] = custom_outputs[i].value_custom;
+        break;
+      case custom_tag_user_chord_bits_3:
+        seen_user_chord_bits[3] = true;
+        user_chord_bits[3] = custom_outputs[i].value_custom;
+        break;
+      default:
+        assert(false);
+        break;
+      }
   
   // go with actual / live chord
   if (seen_user_chord_bits[0] && seen_user_chord_bits[1] && seen_user_chord_bits[2] && seen_user_chord_bits[3])
@@ -1063,16 +1070,16 @@ arpeggiator_engine::process_audio(
   // TODO can this work for midi?
   block.push_modulation_output(modulation_output::make_mod_output_custom_state(
     -1, block.module_desc_.info.global,
-    custom_tag_output_abs_pos, _cv_out_abs_pos * std::numeric_limits<int>::max()));
+    custom_tag_output_abs_pos, check_unipolar(_cv_out_abs_pos) * std::numeric_limits<int>::max()));
   block.push_modulation_output(modulation_output::make_mod_output_custom_state(
     -1, block.module_desc_.info.global,
-    custom_tag_output_rel_pos, _cv_out_rel_pos * std::numeric_limits<int>::max()));
+    custom_tag_output_rel_pos, check_unipolar(_cv_out_rel_pos) * std::numeric_limits<int>::max()));
   block.push_modulation_output(modulation_output::make_mod_output_custom_state(
     -1, block.module_desc_.info.global,
-    custom_tag_output_abs_note, _cv_out_abs_note * std::numeric_limits<int>::max()));
+    custom_tag_output_abs_note, check_unipolar(_cv_out_abs_note) * std::numeric_limits<int>::max()));
   block.push_modulation_output(modulation_output::make_mod_output_custom_state(
     -1, block.module_desc_.info.global,
-    custom_tag_output_rel_note, _cv_out_rel_note * std::numeric_limits<int>::max()));
+    custom_tag_output_rel_note, check_unipolar(_cv_out_rel_note) * std::numeric_limits<int>::max()));
 }
 
 }
