@@ -178,12 +178,17 @@ public:
     plugin_block& block,
     std::vector<note_event> const* in_notes,
     std::vector<note_event>* out_notes) override;
+  void process_graph(
+    plugin_block& block,
+    std::vector<note_event> const* in_notes,
+    std::vector<note_event>* out_notes,
+    std::vector<mod_out_custom_state> const& custom_outputs,
+    void* context) override;
 
   void reset_audio(
     plugin_block const* block,
     std::vector<note_event> const* in_notes,
     std::vector<note_event>* out_notes) override;
-
   void reset_graph(plugin_block const* block,
     std::vector<note_event> const* in_notes,
     std::vector<note_event>* out_notes,
@@ -211,57 +216,45 @@ make_graph_engine(plugin_desc const* desc)
   return std::make_unique<graph_engine>(desc, params);
 }
 
-static graph_data
-render_graph(
-  plugin_state const& state, graph_engine* engine, int param,
-  param_topo_mapping const& mapping, std::vector<mod_out_custom_state> const& custom_outputs)
+static std::vector<note_event>
+get_graph_input_notes(plugin_desc const* desc, std::vector<mod_out_custom_state> const& custom_outputs)
 {
-  int type = state.get_plain_at(mapping.module_index, mapping.module_slot, param_type, mapping.param_slot).step();
-  int mode = state.get_plain_at(mapping.module_index, mapping.module_slot, param_mode, mapping.param_slot).step();
-  int seed = state.get_plain_at(mapping.module_index, mapping.module_slot, param_seed, mapping.param_slot).step();
-  int dist = state.get_plain_at(mapping.module_index, mapping.module_slot, param_dist, mapping.param_slot).step();
-  int notes = state.get_plain_at(mapping.module_index, mapping.module_slot, param_notes, mapping.param_slot).step();
-  bool jump = state.get_plain_at(mapping.module_index, mapping.module_slot, param_jump, mapping.param_slot).step() != 0;
-  if (type == type_off) return graph_data(graph_data_type::off, { state.desc().plugin->modules[mapping.module_index].info.tag.menu_display_name });
-
-  std::vector<note_event> in_notes;
-  std::vector<note_event> out_notes;
-
-  int current_seed = seed;
+  std::vector<note_event> result;
   std::array<bool, 4> seen_user_chord_bits = {};
   std::array<std::uint32_t, 4> user_chord_bits = {};
+  int module_global = desc->module_topo_to_index.at(module_arpeggiator) + 0;
   for (int i = 0; i < custom_outputs.size(); i++)
-    switch(custom_outputs[i].tag_custom)
-    {
-    case custom_tag_current_seed:
-      current_seed = custom_outputs[i].value_custom;
-      break;
-    case custom_tag_user_chord_bits_0:
-      seen_user_chord_bits[0] = true;
-      user_chord_bits[0] = custom_outputs[i].value_custom;
-      break;
-    case custom_tag_user_chord_bits_1:
-      seen_user_chord_bits[1] = true;
-      user_chord_bits[1] = custom_outputs[i].value_custom;
-      break;
-    case custom_tag_user_chord_bits_2:
-      seen_user_chord_bits[2] = true;
-      user_chord_bits[2] = custom_outputs[i].value_custom;
-      break;
-    case custom_tag_user_chord_bits_3:
-      seen_user_chord_bits[3] = true;
-      user_chord_bits[3] = custom_outputs[i].value_custom;
-      break;
-    default:
-      assert(false);
-      break;
-    }
-  
+    if(custom_outputs[i].module_global == module_global)
+      switch (custom_outputs[i].tag_custom)
+      {
+      case custom_tag_current_seed:
+        break;
+      case custom_tag_user_chord_bits_0:
+        seen_user_chord_bits[0] = true;
+        user_chord_bits[0] = custom_outputs[i].value_custom;
+        break;
+      case custom_tag_user_chord_bits_1:
+        seen_user_chord_bits[1] = true;
+        user_chord_bits[1] = custom_outputs[i].value_custom;
+        break;
+      case custom_tag_user_chord_bits_2:
+        seen_user_chord_bits[2] = true;
+        user_chord_bits[2] = custom_outputs[i].value_custom;
+        break;
+      case custom_tag_user_chord_bits_3:
+        seen_user_chord_bits[3] = true;
+        user_chord_bits[3] = custom_outputs[i].value_custom;
+        break;
+      default:
+        assert(false);
+        break;
+      }
+
   // go with actual / live chord
   if (seen_user_chord_bits[0] && seen_user_chord_bits[1] && seen_user_chord_bits[2] && seen_user_chord_bits[3])
   {
-    for(int i = 0; i < 4; i++)
-      for(int j = 0; j < 32; j++)
+    for (int i = 0; i < 4; i++)
+      for (int j = 0; j < 32; j++)
         if ((user_chord_bits[i] & (1U << j)) != 0)
         {
           note_event note;
@@ -271,7 +264,7 @@ render_graph(
           note.id.channel = 0;
           note.velocity = 1.0f;
           note.type = note_event_type::on;
-          in_notes.push_back(note);
+          result.push_back(note);
         }
   }
   else
@@ -285,12 +278,50 @@ render_graph(
     note.type = note_event_type::on;
 
     note.id.key = 60;
-    in_notes.push_back(note);
+    result.push_back(note);
     note.id.key = 64;
-    in_notes.push_back(note);
+    result.push_back(note);
     note.id.key = 67;
-    in_notes.push_back(note);
+    result.push_back(note);
   }
+
+  return result;
+}
+
+static graph_data
+render_graph(
+  plugin_state const& state, graph_engine* engine, int param,
+  param_topo_mapping const& mapping, std::vector<mod_out_custom_state> const& custom_outputs)
+{
+  int type = state.get_plain_at(mapping.module_index, mapping.module_slot, param_type, mapping.param_slot).step();
+  int mode = state.get_plain_at(mapping.module_index, mapping.module_slot, param_mode, mapping.param_slot).step();
+  int seed = state.get_plain_at(mapping.module_index, mapping.module_slot, param_seed, mapping.param_slot).step();
+  int dist = state.get_plain_at(mapping.module_index, mapping.module_slot, param_dist, mapping.param_slot).step();
+  int notes = state.get_plain_at(mapping.module_index, mapping.module_slot, param_notes, mapping.param_slot).step();
+  bool jump = state.get_plain_at(mapping.module_index, mapping.module_slot, param_jump, mapping.param_slot).step() != 0;
+  if (type == type_off) return graph_data(graph_data_type::off, { state.desc().plugin->modules[mapping.module_index].info.tag.menu_display_name });
+
+  int current_seed = seed;
+  int module_global = state.desc().module_topo_to_index.at(module_arpeggiator) + 0;
+  for (int i = 0; i < custom_outputs.size(); i++)
+    if(custom_outputs[i].module_global == module_global)
+      switch(custom_outputs[i].tag_custom)
+      {
+      case custom_tag_current_seed:
+        current_seed = custom_outputs[i].value_custom;
+        break;
+      case custom_tag_user_chord_bits_0:
+      case custom_tag_user_chord_bits_1:
+      case custom_tag_user_chord_bits_2:
+      case custom_tag_user_chord_bits_3:
+        break;
+      default:
+        assert(false);
+        break;
+    }
+
+  std::vector<note_event> out_notes;
+  std::vector<note_event> in_notes = get_graph_input_notes(&state.desc(), custom_outputs);
 
   std::array<arp_user_note, 128> user_chord = {};
   for (int i = 0; i < in_notes.size(); i++)
@@ -721,6 +752,28 @@ arpeggiator_engine::reset_graph(plugin_block const* block,
       _graph_override_seed = custom_outputs[i].value_custom;
       break;
     }
+}
+
+void 
+arpeggiator_engine::process_graph(
+  plugin_block& block,
+  std::vector<note_event> const* in_notes,
+  std::vector<note_event>* out_notes,
+  std::vector<mod_out_custom_state> const& custom_outputs,
+  void* context)
+{
+  std::vector<note_event> graph_in_notes;
+  std::vector<note_event> graph_out_notes;
+  std::vector<note_event>* graph_out_notes_ptr = out_notes;
+  std::vector<note_event> const* graph_in_notes_ptr = in_notes;
+  if (in_notes == nullptr)
+  {
+    graph_in_notes = get_graph_input_notes(&block.plugin_desc_, custom_outputs);
+    graph_in_notes_ptr = &graph_in_notes;
+  }
+  if (out_notes == nullptr)
+    graph_out_notes_ptr = &graph_out_notes;
+  process_audio(block, graph_in_notes_ptr, graph_out_notes_ptr);
 }
 
 void

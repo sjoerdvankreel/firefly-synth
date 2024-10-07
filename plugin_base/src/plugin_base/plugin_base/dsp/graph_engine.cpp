@@ -55,7 +55,11 @@ graph_engine::process_default(
   auto const& module = _desc->plugin->modules[module_index];
   if (slot_map.find(module_slot) == slot_map.end())
   {
-    auto module_engine = module.engine_factory(*_desc->plugin, _sample_rate, _host_block->frame_count);
+    std::unique_ptr<module_engine> module_engine = {};
+    if (_desc->plugin->engine.arpeggiator_module_index == module_index)
+      module_engine = _desc->plugin->engine.arpeggiator_factory_();
+    else
+      module_engine = module.engine_factory(*_desc->plugin, _sample_rate, _host_block->frame_count);
     engine = module_engine.get();
     slot_map[module_slot] = std::move(module_engine);
   } else
