@@ -282,7 +282,7 @@ render_graph(
         {
           note_event note;
           note.frame = 0;
-          note.id.id = 0;
+          note.id.id = -1;
           note.id.key = i * 32 + j;
           note.id.channel = 0;
           note.velocity = 1.0f;
@@ -295,7 +295,7 @@ render_graph(
     // default to c major for plotting
     note_event note;
     note.frame = 0;
-    note.id.id = 0;
+    note.id.id = -1;
     note.id.channel = 0;
     note.velocity = 1.0f;
     note.type = note_event_type::on;
@@ -505,7 +505,7 @@ arpeggiator_engine::hard_reset(std::vector<note_event>& out)
   {
     note_event off;
     off.frame = 0;
-    off.id.id = 0;
+    off.id.id = -1;
     off.id.key = i;
     off.id.channel = 0;
     off.velocity = 0.0f;
@@ -874,7 +874,7 @@ arpeggiator_engine::process_audio(
       {
         note_event off;
         off.frame = 0;
-        off.id.id = 0;
+        off.id.id = -1;
         off.id.key = i;
         off.id.channel = 0;
         off.velocity = 0.0f;
@@ -931,7 +931,7 @@ arpeggiator_engine::process_audio(
           end_old.frame = f;
           end_old.velocity = 0.0f;
           end_old.type = note_event_type::off;
-          end_old.id.id = 0;
+          end_old.id.id = -1;
           end_old.id.channel = 0; 
           end_old.id.key = _current_arp_note_table[(flipped_pos + i * dist) % _current_arp_note_table.size()].midi_key;
           out_notes->push_back(end_old);
@@ -1023,7 +1023,7 @@ arpeggiator_engine::process_audio(
         start_new.frame = f;
         start_new.type = note_event_type::on;
         start_new.velocity = _current_arp_note_table[this_table_index].velocity;
-        start_new.id.id = 0;
+        start_new.id.id = -1;
         start_new.id.channel = 0;
         start_new.id.key = _current_arp_note_table[this_table_index].midi_key;
         out_notes->push_back(start_new);
