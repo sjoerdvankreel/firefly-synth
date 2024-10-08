@@ -85,10 +85,10 @@ V give all graphs the same fontsize
 V do arp outs as on-note!
 V cvout still no good
 X another option ==> do "ignore" (float NaN?) for cv graph also for midi and clap mod ==> yes! do notexist/poison buffer
+V check if the EXP length is good
 
 * fix the gaux123456 graphs
 * review code, make detailed release notes
-* check if the EXP length is good
 * fix repaint stuff on global in param drag it always shows aux1
 * maybe hard reset all chans for renoise ?
 * still not killing all the notes
