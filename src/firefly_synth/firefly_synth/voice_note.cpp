@@ -72,12 +72,12 @@ voice_note_engine::reset_graph(
         if (!seen_velo && custom_outputs[i].tag_custom == custom_tag_velo)
         {
           seen_velo = true;
-          _graph_velo = *reinterpret_cast<float const*>(&custom_outputs[i].value_custom);
+          _graph_velo = custom_outputs[i].value_custom_float();
         }
         if (!seen_pitch && custom_outputs[i].tag_custom == custom_tag_pitch)
         {
           seen_pitch = true;
-          _graph_pitch = *reinterpret_cast<float const*>(&custom_outputs[i].value_custom);
+          _graph_pitch = custom_outputs[i].value_custom_float();
         }
         if (seen_velo && seen_pitch)
           break;
@@ -113,16 +113,16 @@ voice_note_engine::process_audio(
 
   if (block.graph) return;
 
-  block.push_modulation_output(modulation_output::make_mod_output_custom_state(
+  block.push_modulation_output(modulation_output::make_mod_output_custom_state_float(
     block.voice->state.slot,
     block.module_desc_.info.global,
     custom_tag_pitch,
-    *reinterpret_cast<int*>(&pitch)));
-  block.push_modulation_output(modulation_output::make_mod_output_custom_state(
+    pitch));
+  block.push_modulation_output(modulation_output::make_mod_output_custom_state_float(
     block.voice->state.slot,
     block.module_desc_.info.global,
     custom_tag_velo,
-    *reinterpret_cast<int*>(&velo)));
+    velo));
 }
 
 }

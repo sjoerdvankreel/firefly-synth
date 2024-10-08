@@ -83,7 +83,7 @@ voice_on_note_engine::reset_graph(
       if (custom_outputs[i].module_global == block->module_desc_.info.global)
       {
         int tag = custom_outputs[i].tag_custom;
-        float val = custom_outputs[i].value_custom / (float)std::numeric_limits<int>::max();
+        float val = custom_outputs[i].value_custom_float();
         if (0 <= tag && tag < on_voice_random_count)
           _random_values[tag] = val;
         else // dealing with on-note-global-lfo-N
@@ -124,22 +124,22 @@ voice_on_note_engine::process_audio(
     block.state.own_cv[on_voice_random_output_index][i].fill(block.start_frame, block.end_frame, _random_values[i]);
 
     if (!block.graph)
-      block.push_modulation_output(modulation_output::make_mod_output_custom_state(
+      block.push_modulation_output(modulation_output::make_mod_output_custom_state_float(
         block.voice->state.slot,
         block.module_desc_.info.global,
         i,
-        (int)(_random_values[i] * std::numeric_limits<int>::max())));
+        _random_values[i]));
   }
   for (int i = 0; i < _global_outputs.size(); i++)
   {
     block.state.own_cv[i + on_voice_random_output_index + 1][0].fill(block.start_frame, block.end_frame, _on_note_values[i]);
 
     if (!block.graph && _global_outputs[i].module_index == module_glfo)
-      block.push_modulation_output(modulation_output::make_mod_output_custom_state(
+      block.push_modulation_output(modulation_output::make_mod_output_custom_state_float(
         block.voice->state.slot,
         block.module_desc_.info.global,
         on_voice_random_count + _global_outputs[i].module_slot,
-        (int)(_on_note_values[i] * std::numeric_limits<int>::max())));
+        _on_note_values[i]));
   }
 }
 

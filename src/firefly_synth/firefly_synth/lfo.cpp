@@ -584,17 +584,17 @@ lfo_engine::reset_graph(
         if (!seen_rand_seed && custom_outputs[i].tag_custom == custom_tag_rand_seed)
         {
           seen_rand_seed = true;
-          new_rand_seed = custom_outputs[i].value_custom;
+          new_rand_seed = custom_outputs[i].value_custom_int();
         }
         if (!seen_ref_phase && custom_outputs[i].tag_custom == custom_tag_ref_phase)
         {
           seen_ref_phase = true;
-          new_ref_phase = custom_outputs[i].value_custom / (float)std::numeric_limits<int>::max();
+          new_ref_phase = custom_outputs[i].value_custom_float();
         }
         if (!seen_end_value && custom_outputs[i].tag_custom == custom_tag_end_value)
         {
           seen_end_value = true;
-          new_end_value = custom_outputs[i].value_custom / (float)std::numeric_limits<int>::max();
+          new_end_value = custom_outputs[i].value_custom_float();
         }
       }
       if (!seen_render_for_cv_graph && custom_outputs[i].tag_custom == custom_out_shared_render_for_cv_graph)
@@ -695,12 +695,12 @@ lfo_engine::process_internal(plugin_block& block, cv_cv_matrix_mixdown const* mo
       _global ? -1 : block.voice->state.slot,
       block.module_desc_.info.global,
       _ref_phase));
-    block.push_modulation_output(modulation_output::make_mod_output_custom_state(
+    block.push_modulation_output(modulation_output::make_mod_output_custom_state_float(
       _global ? -1 : block.voice->state.slot,
       block.module_desc_.info.global,
       custom_tag_ref_phase,
-      (int)(_ref_phase * std::numeric_limits<int>::max())));
-    block.push_modulation_output(modulation_output::make_mod_output_custom_state(
+      _ref_phase));
+    block.push_modulation_output(modulation_output::make_mod_output_custom_state_int(
       _global ? -1 : block.voice->state.slot,
       block.module_desc_.info.global,
       custom_tag_rand_seed,
@@ -716,11 +716,11 @@ lfo_engine::process_internal(plugin_block& block, cv_cv_matrix_mixdown const* mo
     block.state.own_cv[0][0].fill(block.start_frame, block.end_frame, _filter_end_value);
 
     if (!block.graph)
-      block.push_modulation_output(modulation_output::make_mod_output_custom_state(
+      block.push_modulation_output(modulation_output::make_mod_output_custom_state_float(
         _global ? -1 : block.voice->state.slot,
         block.module_desc_.info.global,
         custom_tag_end_value,
-        (int)(_filter_end_value * std::numeric_limits<int>::max())));
+        _filter_end_value));
 
     return; 
   }

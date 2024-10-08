@@ -58,10 +58,10 @@ struct mod_out_param_state
   std::uint8_t module_global;
   std::uint8_t padding;
   std::uint16_t param_global;
-  std::uint16_t value_normalized;
+  std::uint16_t value_normalized_raw;
 
   float normalized_real() const
-  { return std::clamp((float)value_normalized / std::numeric_limits<std::uint16_t>::max(), 0.0f, 1.0f); }
+  { return std::clamp((float)value_normalized_raw / std::numeric_limits<std::uint16_t>::max(), 0.0f, 1.0f); }
 };
 
 struct mod_out_custom_state
@@ -70,7 +70,12 @@ struct mod_out_custom_state
   std::int8_t voice_index; // -1 for global
   std::uint8_t module_global;
   std::uint8_t tag_custom;
-  std::int32_t value_custom;
+  std::uint32_t value_custom_raw;
+
+  int value_custom_int() const
+  { return *reinterpret_cast<int const*>(&value_custom_raw); }
+  float value_custom_float() const
+  { return *reinterpret_cast<float const*>(&value_custom_raw); }
 };
 
 union mod_out_state 
@@ -95,9 +100,11 @@ union modulation_output
   static modulation_output
   make_mod_output_cv_state(std::int8_t voice_index, std::uint8_t module_global, float position_normalized);
   static modulation_output
-  make_mod_output_custom_state(std::int8_t voice_index, std::uint8_t module_global, std::uint8_t tag_custom, std::int32_t value_custom);
-  static modulation_output
   make_mod_output_param_state(std::int8_t voice_index, std::uint8_t module_global, std::uint16_t param_global, float value_normalized);
+  static modulation_output
+  make_mod_output_custom_state_int(std::int8_t voice_index, std::uint8_t module_global, std::uint8_t tag_custom, int value_custom);
+  static modulation_output
+  make_mod_output_custom_state_float(std::int8_t voice_index, std::uint8_t module_global, std::uint8_t tag_custom, float value_custom);
 };
 
 // with timestamp for voice, needed for sorting

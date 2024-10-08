@@ -250,23 +250,23 @@ render_graph(
       case custom_tag_output_rel_pos:
         break;
       case custom_tag_current_seed:
-        current_seed = custom_outputs[i].value_custom;
+        current_seed = custom_outputs[i].value_custom_int();
         break;
       case custom_tag_user_chord_bits_0:
         seen_user_chord_bits[0] = true;
-        user_chord_bits[0] = custom_outputs[i].value_custom;
+        user_chord_bits[0] = custom_outputs[i].value_custom_int();
         break;
       case custom_tag_user_chord_bits_1:
         seen_user_chord_bits[1] = true;
-        user_chord_bits[1] = custom_outputs[i].value_custom;
+        user_chord_bits[1] = custom_outputs[i].value_custom_int();
         break;
       case custom_tag_user_chord_bits_2:
         seen_user_chord_bits[2] = true;
-        user_chord_bits[2] = custom_outputs[i].value_custom;
+        user_chord_bits[2] = custom_outputs[i].value_custom_int();
         break;
       case custom_tag_user_chord_bits_3:
         seen_user_chord_bits[3] = true;
-        user_chord_bits[3] = custom_outputs[i].value_custom;
+        user_chord_bits[3] = custom_outputs[i].value_custom_int();
         break;
       default:
         assert(false);
@@ -734,7 +734,7 @@ arpeggiator_engine::reset_graph(plugin_block const* block,
   for (int i = 0; i < custom_outputs.size(); i++)
     if (custom_outputs[i].tag_custom == custom_tag_current_seed)
     {
-      _graph_override_seed = custom_outputs[i].value_custom;
+      _graph_override_seed = custom_outputs[i].value_custom_int();
       break;
     }
 }
@@ -758,22 +758,22 @@ arpeggiator_engine::process_graph(
           std::fill(
             block.state.own_cv[output_abs_pos][0].begin(), 
             block.state.own_cv[output_abs_pos][0].end(), 
-            custom_outputs[j].value_custom / (float)std::numeric_limits<int>::max());
+            custom_outputs[j].value_custom_float());
         if (custom_outputs[j].module_global == module_global && custom_outputs[j].tag_custom == custom_tag_output_rel_pos)
           std::fill(
             block.state.own_cv[output_rel_pos][0].begin(),
             block.state.own_cv[output_rel_pos][0].end(),
-            custom_outputs[j].value_custom / (float)std::numeric_limits<int>::max());
+            custom_outputs[j].value_custom_float());
         if (custom_outputs[j].module_global == module_global && custom_outputs[j].tag_custom == custom_tag_output_abs_note)
           std::fill(
             block.state.own_cv[output_abs_note][0].begin(),
             block.state.own_cv[output_abs_note][0].end(),
-            custom_outputs[j].value_custom / (float)std::numeric_limits<int>::max());
+            custom_outputs[j].value_custom_float());
         if (custom_outputs[j].module_global == module_global && custom_outputs[j].tag_custom == custom_tag_output_rel_note)
           std::fill(
             block.state.own_cv[output_rel_note][0].begin(),
             block.state.own_cv[output_rel_note][0].end(),
-            custom_outputs[j].value_custom / (float)std::numeric_limits<int>::max());
+            custom_outputs[j].value_custom_float());
       }
       return;
     }
@@ -1050,36 +1050,36 @@ arpeggiator_engine::process_audio(
   block.push_modulation_output(modulation_output::make_mod_output_cv_state(
     -1, block.module_desc_.info.global,
     precise_pos / _current_arp_note_table.size()));
-  block.push_modulation_output(modulation_output::make_mod_output_custom_state(
+  block.push_modulation_output(modulation_output::make_mod_output_custom_state_int(
     -1, block.module_desc_.info.global,
     custom_tag_current_seed, _current_seed));
 
-  block.push_modulation_output(modulation_output::make_mod_output_custom_state(
+  block.push_modulation_output(modulation_output::make_mod_output_custom_state_int(
     -1, block.module_desc_.info.global,
     custom_tag_user_chord_bits_0, _user_chord_bits[0]));
-  block.push_modulation_output(modulation_output::make_mod_output_custom_state(
+  block.push_modulation_output(modulation_output::make_mod_output_custom_state_int(
     -1, block.module_desc_.info.global,
     custom_tag_user_chord_bits_1, _user_chord_bits[1]));
-  block.push_modulation_output(modulation_output::make_mod_output_custom_state(
+  block.push_modulation_output(modulation_output::make_mod_output_custom_state_int(
     -1, block.module_desc_.info.global,
     custom_tag_user_chord_bits_2, _user_chord_bits[2]));
-  block.push_modulation_output(modulation_output::make_mod_output_custom_state(
+  block.push_modulation_output(modulation_output::make_mod_output_custom_state_int(
     -1, block.module_desc_.info.global,
     custom_tag_user_chord_bits_3, _user_chord_bits[3]));
 
   // TODO can this work for midi?
-  block.push_modulation_output(modulation_output::make_mod_output_custom_state(
+  block.push_modulation_output(modulation_output::make_mod_output_custom_state_float(
     -1, block.module_desc_.info.global,
-    custom_tag_output_abs_pos, check_unipolar(_cv_out_abs_pos) * std::numeric_limits<int>::max()));
-  block.push_modulation_output(modulation_output::make_mod_output_custom_state(
+    custom_tag_output_abs_pos, check_unipolar(_cv_out_abs_pos)));
+  block.push_modulation_output(modulation_output::make_mod_output_custom_state_float(
     -1, block.module_desc_.info.global,
-    custom_tag_output_rel_pos, check_unipolar(_cv_out_rel_pos) * std::numeric_limits<int>::max()));
-  block.push_modulation_output(modulation_output::make_mod_output_custom_state(
+    custom_tag_output_rel_pos, check_unipolar(_cv_out_rel_pos)));
+  block.push_modulation_output(modulation_output::make_mod_output_custom_state_float(
     -1, block.module_desc_.info.global,
-    custom_tag_output_abs_note, check_unipolar(_cv_out_abs_note) * std::numeric_limits<int>::max()));
-  block.push_modulation_output(modulation_output::make_mod_output_custom_state(
+    custom_tag_output_abs_note, check_unipolar(_cv_out_abs_note)));
+  block.push_modulation_output(modulation_output::make_mod_output_custom_state_float(
     -1, block.module_desc_.info.global,
-    custom_tag_output_rel_note, check_unipolar(_cv_out_rel_note) * std::numeric_limits<int>::max()));
+    custom_tag_output_rel_note, check_unipolar(_cv_out_rel_note)));
 }
 
 }

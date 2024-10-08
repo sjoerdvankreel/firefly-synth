@@ -598,13 +598,13 @@ env_engine::reset_graph(
         {
           // microseconds, see below
           new_ffwd_run_for_graph = true;
-          new_ffwd_target_total_pos = custom_outputs[i].value_custom / 1000000.0f;
+          new_ffwd_target_total_pos = custom_outputs[i].value_custom_int() / 1000000.0f;
           break;
         }
         if (!seen_multitrig && custom_outputs[i].tag_custom == custom_tag_multitrig_level)
         {
           seen_multitrig = true;
-          float trig_level = custom_outputs[i].value_custom / (float)std::numeric_limits<int>::max();
+          float trig_level = custom_outputs[i].value_custom_float();
           _current_level = trig_level;
           _multitrig_level = trig_level;
         }
@@ -678,10 +678,10 @@ env_engine::process_internal(plugin_block& block, cv_cv_matrix_mixdown const* mo
     block.state.own_cv[0][0].fill(block.start_frame, block.end_frame, 0.0f);
     // CAUTION: microseconds
     if(_stage == env_stage::end && !block.graph)
-      block.push_modulation_output(modulation_output::make_mod_output_custom_state(
+      block.push_modulation_output(modulation_output::make_mod_output_custom_state_int(
         block.voice->state.slot,
         block.module_desc_.info.global,
-        0,
+        custom_tag_total_pos,
         (int)(_total_pos * 1000000)));
     return;
   }
@@ -698,17 +698,17 @@ env_engine::process_internal(plugin_block& block, cv_cv_matrix_mixdown const* mo
   // since sample rates are different for audio and GUI, need a value in time not frames
   // reset_graph+render_graph then need to derive the env state by just truncating the entire thing to that position
   // CAUTION: microseconds. cannot go with maxint because total_pos is not in [0, 1] (env can be > 1 second)
-  block.push_modulation_output(modulation_output::make_mod_output_custom_state(
+  block.push_modulation_output(modulation_output::make_mod_output_custom_state_int(
     block.voice->state.slot,
     block.module_desc_.info.global,
     custom_tag_total_pos,
     (int)(_total_pos * 1000000)));
   if(block_auto[param_trigger][0].step() == trigger_multi)
-    block.push_modulation_output(modulation_output::make_mod_output_custom_state(
+    block.push_modulation_output(modulation_output::make_mod_output_custom_state_float(
       block.voice->state.slot,
       block.module_desc_.info.global,
       custom_tag_multitrig_level,
-      (int)(_multitrig_level * std::numeric_limits<int>::max())));
+      _multitrig_level));
 
   // drop the mod indicators when we ended
   if (_stage == env_stage::end) return;

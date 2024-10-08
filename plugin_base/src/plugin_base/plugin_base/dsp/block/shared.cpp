@@ -27,15 +27,28 @@ modulation_output::make_mod_output_cv_state(std::int8_t voice_index, std::uint8_
 }
 
 modulation_output
-modulation_output::make_mod_output_custom_state(std::int8_t voice_index, std::uint8_t module_global, std::uint8_t tag_custom, std::int32_t value_custom)
+modulation_output::make_mod_output_custom_state_int(std::int8_t voice_index, std::uint8_t module_global, std::uint8_t tag_custom, std::int32_t value_custom)
 {
   assert(voice_index >= -1);
   modulation_output result;
   result.state.custom.tag_custom = tag_custom;
   result.state.custom.voice_index = voice_index;
-  result.state.custom.value_custom = value_custom;
   result.state.custom.module_global = module_global;
   result.state.custom.event_type = out_event_custom_state;
+  result.state.custom.value_custom_raw = *reinterpret_cast<std::uint32_t*>(&value_custom);
+  return result;
+}
+
+modulation_output
+modulation_output::make_mod_output_custom_state_float(std::int8_t voice_index, std::uint8_t module_global, std::uint8_t tag_custom, float value_custom)
+{
+  assert(voice_index >= -1);
+  modulation_output result;
+  result.state.custom.tag_custom = tag_custom;
+  result.state.custom.voice_index = voice_index;
+  result.state.custom.module_global = module_global;
+  result.state.custom.event_type = out_event_custom_state;
+  result.state.custom.value_custom_raw = *reinterpret_cast<std::uint32_t*>(&value_custom);
   return result;
 }
   
@@ -49,7 +62,10 @@ modulation_output::make_mod_output_param_state(std::int8_t voice_index, std::uin
   result.state.param.param_global = param_global;
   result.state.param.module_global = module_global;
   result.state.param.event_type = out_event_param_state;
-  result.state.param.value_normalized = (std::uint16_t)(std::clamp(value_normalized, 0.0f, 1.0f) * std::numeric_limits<std::uint16_t>::max());
+
+  // need clamp in larger datatype as 1.0f * maxuint16 can go > maxuint16 in float
+  int ivalue_normalized = (int)(std::clamp(value_normalized, 0.0f, 1.0f) * std::numeric_limits<std::uint16_t>::max());
+  result.state.param.value_normalized_raw = (std::uint16_t)(std::clamp(ivalue_normalized, 0, (int)std::numeric_limits<std::uint16_t>::max()));
   return result;
 }
 

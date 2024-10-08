@@ -382,7 +382,7 @@ render_graph(
 
   // make dependent renderers know they are plotting for us
   std::vector<mod_out_custom_state> custom_cv_outputs(custom_outputs);
-  custom_cv_outputs.push_back(modulation_output::make_mod_output_custom_state(
+  custom_cv_outputs.push_back(modulation_output::make_mod_output_custom_state_int(
     -1, -1, custom_out_shared_render_for_cv_graph, -1).state.custom);
 
   engine->process_begin(&state, sample_rate, params.max_frame_count, voice_release_at);
