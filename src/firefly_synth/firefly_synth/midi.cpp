@@ -12,7 +12,9 @@ using namespace plugin_base;
 namespace firefly_synth {
 
 enum { section_main };
-enum { custom_out_tag_cp, custom_out_tag_pb, custom_out_tag_cc };
+
+// this better match midi_source_id
+enum { custom_out_tag_cc = midi_source_cc, custom_out_tag_cp = midi_source_cp, custom_out_tag_pb = midi_source_pb };
 
 class midi_engine :
 public module_engine {
@@ -73,8 +75,8 @@ midi_engine::reset_graph(plugin_block const* block,
         _graph_pb = custom_outputs[i].value_custom_float();
         break;
       default:
-        assert(0 <= custom_outputs[i].tag_custom - 2 && custom_outputs[i].tag_custom - 2 < 128);
-        _graph_cc[custom_outputs[i].tag_custom - 2] = custom_outputs[i].value_custom_float();
+        assert(0 <= custom_outputs[i].tag_custom && custom_outputs[i].tag_custom  < 128);
+        _graph_cc[custom_outputs[i].tag_custom] = custom_outputs[i].value_custom_float();
         break;
       }
 }
