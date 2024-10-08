@@ -90,6 +90,7 @@ X maybe hard reset all chans for renoise ?
 V still not killing all the notes
 V reset is still no good
 
+* show arp label as chord ceg-whatever
 * fix the gaux123456 graphs
 * review code, make detailed release notes
 * fix repaint stuff on global in param drag it always shows aux1
