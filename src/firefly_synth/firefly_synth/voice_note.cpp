@@ -60,6 +60,9 @@ voice_note_engine::reset_graph(
 {
   reset_audio(block, nullptr, nullptr);
 
+  _graph_velo = 0.0f;
+  _graph_pitch = 0.0f;
+
   // fix to current live values
   // backwards loop, outputs are sorted, latest-in-time are at the end
   bool seen_velo = false;
