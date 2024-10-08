@@ -90,7 +90,8 @@ X maybe hard reset all chans for renoise ?
 V still not killing all the notes
 V reset is still no good
 
-* on-note-midi is borked
+* on-note-midi is borked ==> better do all the midi stuff in same order
+* do i need midi active select for onnote?
 * fix the midi graph
 * single-note arp not always goes off
 * show arp label as chord ceg-whatever
