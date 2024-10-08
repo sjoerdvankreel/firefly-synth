@@ -83,9 +83,8 @@ V make arp label not ugly
 V smaller graphs
 V give all graphs the same fontsize 
 V do arp outs as on-note!
-V relnote/relpos cv out is no good
 
-* another option ==> do "ignore" (float NaN?) for cv graph also for midi and clap mod
+* cvout still no good
 * review code, make detailed release notes
 * check if the EXP length is good
 * fix repaint stuff on global in param drag it always shows aux1
@@ -95,9 +94,10 @@ V relnote/relpos cv out is no good
 * check automation works
 * check if shows up in the docs
 * write the manual
-* add arp table pos as a mod source ==> yes do it + also make all graphs react pfft
-* reset is still no good
 * do more kbd tracking
+* add arp table pos as a mod source ==> yes do it + also make all graphs react pfft
+* another option ==> do "ignore" (float NaN?) for cv graph also for midi and clap mod ==> yes! do notexist/poison buffer
+* reset is still no good
 
 wishlist:
 use fftw
