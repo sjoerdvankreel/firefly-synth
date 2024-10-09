@@ -141,12 +141,15 @@ For monophonic mode, on-note really means on-voice-start. If you want note-by-no
 
 ## Arpeggiator
 
-Builds up a note table from the current chord, then loops through that table outputting 1 or more notes on each round.<br/><br/>
-To explain, see below for what happens when playing c-major (let's say C4E4G4).
+Builds up a note table from the current chord, then loops through that table outputting 1 or more notes on each round.
+To explain, see below for what happens when playing c-major (let's say C4-E4-G4).
 
-### Constructing the ARP table
+### Constructing the ARP table from type, mode, flip &amp; jump parameters
 
-
+* Type: selects the octave count. C4-E4-G4 with +1 octave then becomes C4-E4-G4-C5-E5-G5.
+* Mode: rearranges the table after octave selection. F.e. "down" just reverses it, for up-down it becomes C4-E4-G4-C5-E5-G5-E5-C5-G4-E4.
+* Jump: rearranges the table after mode selection. When on, table becomes first-next-first-next etc. In this example, C4-E4-C4-G4-C4-C5-C4-E5-C4-G5-C4-E5-C4-C5-C4-G4-C4-E4.
+* Flip: rearranges the table after jumping by inverting note selection every N positions. In this example with flip set to 2: C4-E4-G4-C4-C4-C5-E5-C4-C4-G5-E5-C4-C4-C5-G4-C4-C4-E4.
 
 ## Feature overview
 
