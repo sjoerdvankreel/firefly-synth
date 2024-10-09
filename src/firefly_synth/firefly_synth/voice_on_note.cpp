@@ -46,7 +46,6 @@ voice_on_note_topo(plugin_topo const* topo, int section)
 {
   // see also cv_audio_matrix.select_midi_active
   std::vector<module_dsp_output> outputs;
-  std::string const on_note_id("{68360340-68B2-4B88-95BD-B1929F240BAA}");
   auto on_note_source(make_cv_source_matrix(topo, make_cv_matrix_sources(topo, false, true)));
   outputs.push_back(make_module_dsp_output(true, -1,
     make_topo_info("{8E4692CE-0A00-4739-BBD2-1E671D24F1B8}", true, "On Note Rnd", "Rnd", "Rnd", 0, on_voice_random_count)));

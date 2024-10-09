@@ -256,7 +256,7 @@ select_midi_active(
           active[module_midi][0][midi_source_pb] = 1;
         else if (mapping.output_index == on_note_midi_start + midi_output_cp)
           active[module_midi][0][midi_source_cp] = 1;
-        else if (mapping.output_index >= on_note_midi_start + midi_output_cc)
+        else if (mapping.output_index >= on_note_midi_start + midi_output_cc && mapping.output_index < on_note_midi_start + midi_output_cc + 128)
           active[module_midi][0][midi_source_cc + mapping.output_index - on_note_midi_start - midi_output_cc] = 1;
       }
     }
@@ -446,6 +446,8 @@ cv_matrix_topo(
     for (int m = 0; m < on_note_matrix.size(); m++)
       if (on_note_matrix[m].module_index == module_midi) { on_note_midi_start = m; break; }
     assert(on_note_midi_start != -1);
+    // these go first
+    on_note_midi_start += on_voice_random_output_index + 1;
   }
 
   int route_count = route_count_from_matrix_type(cv, global);
