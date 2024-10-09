@@ -349,7 +349,7 @@ arpeggiator_topo(plugin_topo const* topo, int section, gui_position const& pos)
       make_module_dsp_output(true, -1, make_topo_info_basic("{C17077E6-FDA9-4DAE-9FAB-E6499A45F462}", "RelNote", output_rel_note, 1)) }),
     make_module_gui(section, pos, { { 1 }, { 24, 11, 28 } })));
   result.gui.tabbed_name = "ARP";
-  result.info.description = "Arpeggiator";
+  result.info.description = "Arpeggiator with internal rate modulation and a couple of creative controls.";
   result.graph_renderer = render_graph;
   result.graph_engine_factory = make_graph_engine;
 
@@ -363,27 +363,27 @@ arpeggiator_topo(plugin_topo const* topo, int section, gui_position const& pos)
     make_param_dsp_block(param_automate::automate), make_domain_item(type_items(), "Off"),
     make_param_gui_single(section_table, gui_edit_type::autofit_list, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  type.info.description = "TODO";
+  type.info.description = "Selects arpeggiator octave count.";
   auto& jump = result.params.emplace_back(make_param(
     make_topo_info("{41D984D0-2ECA-463C-B32E-0548562658AE}", true, "Table Jumping", "Jmp", "Jmp", param_jump, 1),
     make_param_dsp_block(param_automate::automate), make_domain_toggle(false),
     make_param_gui_single(section_table, gui_edit_type::toggle, { 0, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  jump.info.description = "TODO";
+  jump.info.description = "Arp table jumping (repeat first note every odd position). F.e. cefga with jumping becomes cecfcgca.";
   jump.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   auto& mode = result.params.emplace_back(make_param(
     make_topo_info_basic("{BCE75C3A-85B8-4946-A06B-68F8F5F36785}", "Mode", param_mode, 1),
     make_param_dsp_block(param_automate::automate), make_domain_item(mode_items(), "Up"),
     make_param_gui_single(section_table, gui_edit_type::autofit_list, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  mode.info.description = "TODO";
+  mode.info.description = "Selects arpeggiator mode (e.g. up, down, updown, random etc).";
   mode.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   auto& flip = result.params.emplace_back(make_param(
     make_topo_info("{35217232-FFFF-4286-8C87-3E08D9817B8D}", true, "Table Flip Count", "Flip", "Flip", param_flip, 1),
     make_param_dsp_block(param_automate::automate), make_domain_step(1, 9, 1, 0),
     make_param_gui_single(section_table, gui_edit_type::autofit_list, { 1, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  flip.info.description = "TODO";
+  flip.info.description = "Flips the arp table every N notes. F.e. cegcegceg with flip count 2 becomes cecgegecg.";
   flip.gui.bindings.visible.bind_params({ param_type, param_mode }, [](auto const& vs) { return !is_random(vs[1]); });
   flip.gui.bindings.enabled.bind_params({ param_type, param_mode }, [](auto const& vs) { return vs[0] != type_off && !is_random(vs[1]); });
   auto& seed = result.params.emplace_back(make_param(
@@ -391,7 +391,7 @@ arpeggiator_topo(plugin_topo const* topo, int section, gui_position const& pos)
     make_param_dsp_block(param_automate::automate), make_domain_step(1, 255, 1, 0),
     make_param_gui_single(section_table, gui_edit_type::knob, { 1, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  seed.info.description = "TODO";
+  seed.info.description = "Seed for random modes.";
   seed.gui.bindings.visible.bind_params({ param_type, param_mode }, [](auto const& vs) { return is_random(vs[1]); });
   seed.gui.bindings.enabled.bind_params({ param_type, param_mode }, [](auto const& vs) { return vs[0] != type_off && is_random(vs[1]); });
 
@@ -404,14 +404,14 @@ arpeggiator_topo(plugin_topo const* topo, int section, gui_position const& pos)
     make_param_dsp_block(param_automate::automate), make_domain_step(1, 4, 1, 0),
     make_param_gui_single(section_notes, gui_edit_type::autofit_list, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  notes.info.description = "TODO";
+  notes.info.description = "Select this many notes from the table. F.e. when the table is cefg, with note count 2 and note distance 1 the repeating chords become ce-ef-fg-gc.";
   notes.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   auto& dist = result.params.emplace_back(make_param(
     make_topo_info("{4EACE8F8-6B15-4336-9904-0375EE935CBD}", true, "Note Distance", "Dist", "Dist", param_dist, 1),
     make_param_dsp_block(param_automate::automate), make_domain_step(1, 8, 1, 0),
     make_param_gui_single(section_notes, gui_edit_type::autofit_list, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  dist.info.description = "TODO";
+  dist.info.description = "Distance between notes from the table. F.e. when the table is cefg, with note count 2 and note distance 2 the repeating chords become cf-eg-fc-ge.";
   dist.gui.bindings.enabled.bind_params({ param_type, param_notes }, [](auto const& vs) { return vs[0] != type_off && vs[1] > 1; });
 
   auto& sample_section = result.sections.emplace_back(make_param_section(section_sample,
@@ -419,66 +419,66 @@ arpeggiator_topo(plugin_topo const* topo, int section, gui_position const& pos)
     make_param_section_gui({ 0, 2 }, { { 1, 1 }, { gui_dimension::auto_size, 1, 1, 1, 1, 1, 1 } })));
   sample_section.gui.autofit_row = 1;
   auto& rate_hz = result.params.emplace_back(make_param(
-    make_topo_info_basic("{EE305C60-8D37-492D-A2BE-5BD9C80DC59D}", "Rate", param_rate_hz, 1),
+    make_topo_info_basic("{EE305C60-8D37-492D-A2BE-5BD9C80DC59D}", "Rate Hz", param_rate_hz, 1),
     make_param_dsp_block(param_automate::automate), make_domain_log(0.25, 20, 4, 4, 2, "Hz"),
     make_param_gui_single(section_sample, gui_edit_type::hslider, { 0, 0, 1, 1 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   rate_hz.gui.bindings.enabled.bind_params({ param_type, param_sync }, [](auto const& vs) { return vs[0] != type_off && vs[1] == 0; });
   rate_hz.gui.bindings.visible.bind_params({ param_type, param_sync }, [](auto const& vs) { return vs[1] == 0; });
-  rate_hz.info.description = "TODO";
+  rate_hz.info.description = "Arp rate in Hz.";
   auto& rate_tempo = result.params.emplace_back(make_param(
-    make_topo_info_basic("{B1727889-9B55-4F93-8E0A-E2D4B791568B}", "Rate", param_rate_tempo, 1),
+    make_topo_info_basic("{B1727889-9B55-4F93-8E0A-E2D4B791568B}", "Rate Tempo", param_rate_tempo, 1),
     make_param_dsp_block(param_automate::automate), make_domain_timesig_default(false, { 16, 1 }, { 1, 4 }),
     make_param_gui_single(section_sample, gui_edit_type::autofit_list, { 0, 0, 1, 1 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   rate_tempo.gui.submenu = make_timesig_submenu(rate_tempo.domain.timesigs);
   rate_tempo.gui.bindings.enabled.bind_params({ param_type, param_sync }, [](auto const& vs) { return vs[0] != type_off && vs[1] != 0; });
   rate_tempo.gui.bindings.visible.bind_params({ param_type, param_sync }, [](auto const& vs) { return vs[1] != 0; });
-  rate_tempo.info.description = "TODO";  
+  rate_tempo.info.description = "Arp rate in bars.";  
   auto& rate_mod_rate_hz = result.params.emplace_back(make_param(
-    make_topo_info_basic("{BCE11AB3-3BB2-43CD-AD5E-C0E62B73F6E0}", "Mod Rate", param_rate_mod_rate_hz, 1),
+    make_topo_info_basic("{BCE11AB3-3BB2-43CD-AD5E-C0E62B73F6E0}", "Mod Rate Hz", param_rate_mod_rate_hz, 1),
     make_param_dsp_block(param_automate::automate), make_domain_log(0.25, 20, 4, 4, 2, "Hz"),
     make_param_gui_single(section_sample, gui_edit_type::hslider, { 0, 1, 1, 3 },
       make_label_none())));
   rate_mod_rate_hz.gui.bindings.enabled.bind_params({ param_type, param_sync, param_rate_mod_mode }, [](auto const& vs) { return vs[0] != type_off && vs[1] == 0 && vs[2] != 0; });
   rate_mod_rate_hz.gui.bindings.visible.bind_params({ param_type, param_sync, param_rate_mod_mode }, [](auto const& vs) { return vs[1] == 0; });
-  rate_mod_rate_hz.info.description = "TODO";
+  rate_mod_rate_hz.info.description = "Rate modulation in hz.";
   auto& rate_mod_rate_tempo = result.params.emplace_back(make_param(
-    make_topo_info_basic("{075B311C-51B0-46FB-994A-7C222F7BB60A}", "Mod Rate", param_rate_mod_rate_tempo, 1),
+    make_topo_info_basic("{075B311C-51B0-46FB-994A-7C222F7BB60A}", "Mod Rate Tempo", param_rate_mod_rate_tempo, 1),
     make_param_dsp_block(param_automate::automate), make_domain_timesig_default(false, { 16, 1 }, { 1, 4 }),
     make_param_gui_single(section_sample, gui_edit_type::autofit_list, { 0, 1, 1, 3 },
       make_label_none())));
   rate_mod_rate_tempo.gui.submenu = make_timesig_submenu(rate_mod_rate_tempo.domain.timesigs);
   rate_mod_rate_tempo.gui.bindings.enabled.bind_params({ param_type, param_sync, param_rate_mod_mode }, [](auto const& vs) { return vs[0] != type_off && vs[1] != 0 && vs[2] != 0; });
   rate_mod_rate_tempo.gui.bindings.visible.bind_params({ param_type, param_sync, param_rate_mod_mode }, [](auto const& vs) { return vs[1] != 0; });
-  rate_mod_rate_tempo.info.description = "TODO";
+  rate_mod_rate_tempo.info.description = "Rate modulation in bars. Note: when sync is on, the final arp tempo will be snapped to the base tempo. See mod mode.";
   auto& sync = result.params.emplace_back(make_param(
     make_topo_info_basic("{8DE4D902-946C-41AA-BA1B-E0B645F8C87D}", "Snc", param_sync, 1),
     make_param_dsp_block(param_automate::automate), make_domain_toggle(true),
     make_param_gui_single(section_sample, gui_edit_type::toggle, { 0, 4, 1, 3 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  sync.info.description = "TODO";
+  sync.info.description = "Select arp rate and mod rate in time or bars.";
   sync.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   auto& rate_mod = result.params.emplace_back(make_param(
     make_topo_info_basic("{3545206C-7A5F-41A3-B418-1F270DF61505}", "Mod", param_rate_mod_type, 1),
     make_param_dsp_block(param_automate::automate), make_domain_item(wave_shape_type_items(wave_target::arp, true), "Saw"),
     make_param_gui_single(section_sample, gui_edit_type::autofit_list, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  rate_mod.info.description = "TODO";
+  rate_mod.info.description = "Selects the shape of the rate modulator (internal LFO).";
   rate_mod.gui.bindings.enabled.bind_params({ param_type, param_rate_mod_mode }, [](auto const& vs) { return vs[0] != type_off && vs[1] != 0; });
   auto& mod_mode = result.params.emplace_back(make_param(
     make_topo_info_basic("{48F3CE67-54B0-4F1C-927B-DED1BD65E6D6}", "Mode", param_rate_mod_mode, 1),
     make_param_dsp_block(param_automate::automate), make_domain_item(mod_mode_items(), "Off"),
     make_param_gui_single(section_sample, gui_edit_type::list, { 1, 1, 1, 4 },
       make_label_none())));
-  mod_mode.info.description = "TODO";
+  mod_mode.info.description = "Selects the mode of the rate modulator. With sync on, the final rate will be snapped to logical multiples of the bar size (e.g. exponential 1/4 with speedup becomes 1/4, 1/8, 1/16, with slowdown becomes 1/4, 1/2, 1/1 etc. Linear with sync, 1/4 becomes 1/4, 2/4, 3/4 etc).";
   mod_mode.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   auto& rate_mod_amt = result.params.emplace_back(make_param(
     make_topo_info_basic("{90A4DCE9-9EEA-4156-AC9F-DAD82ED33048}", "Amt", param_rate_mod_amt, 1),
     make_param_dsp_block(param_automate::automate), make_domain_percentage(-1, 1, 0, 0, true),
     make_param_gui_single(section_sample, gui_edit_type::knob, { 1, 5, 1, 2 },
       make_label_none())));
-  rate_mod_amt.info.description = "TODO";
+  rate_mod_amt.info.description = "Selects the amount of speed-up/slow down.";
   rate_mod_amt.gui.bindings.enabled.bind_params({ param_type, param_rate_mod_mode }, [](auto const& vs) { return vs[0] != type_off && vs[1] != 0; });
 
   return result;

@@ -77,7 +77,7 @@
 <td>Yes</td>
 <td>Before voice</td>
 <td>1</td>
-<td class='description'>Arpeggiator</td>
+<td class='description'>Arpeggiator with internal rate modulation and a couple of creative controls.</td>
 </tr>
 <tr>
 <td><a href='#9'>9</a></td>
@@ -968,7 +968,7 @@
 <td>N/A</td>
 </tr>
 <tr>
-<td colspan='11' class='description'>TODO</td>
+<td colspan='11' class='description'>Selects arpeggiator octave count.</td>
 </tr>
 <tr>
 <td rowspan='2'>Table Jumping</td>
@@ -985,7 +985,7 @@
 <td>N/A</td>
 </tr>
 <tr>
-<td colspan='11' class='description'>TODO</td>
+<td colspan='11' class='description'>Arp table jumping (repeat first note every odd position). F.e. cefga with jumping becomes cecfcgca.</td>
 </tr>
 <tr>
 <td rowspan='2'>Mode</td>
@@ -1002,7 +1002,7 @@
 <td>N/A</td>
 </tr>
 <tr>
-<td colspan='11' class='description'>TODO</td>
+<td colspan='11' class='description'>Selects arpeggiator mode (e.g. up, down, updown, random etc).</td>
 </tr>
 <tr>
 <td rowspan='2'>Table Flip Count</td>
@@ -1019,7 +1019,7 @@
 <td>N/A</td>
 </tr>
 <tr>
-<td colspan='11' class='description'>TODO</td>
+<td colspan='11' class='description'>Flips the arp table every N notes. F.e. cegcegceg with flip count 2 becomes cecgegecg.</td>
 </tr>
 <tr>
 <td rowspan='2'>Seed</td>
@@ -1036,7 +1036,7 @@
 <td>N/A</td>
 </tr>
 <tr>
-<td colspan='11' class='description'>TODO</td>
+<td colspan='11' class='description'>Seed for random modes.</td>
 </tr>
 <tr>
 <td rowspan='2'>Note Count</td>
@@ -1053,7 +1053,7 @@
 <td>N/A</td>
 </tr>
 <tr>
-<td colspan='11' class='description'>TODO</td>
+<td colspan='11' class='description'>Select this many notes from the table. F.e. when the table is cefg, with note count 2 and note distance 1 the repeating chords become ce-ef-fg-gc.</td>
 </tr>
 <tr>
 <td rowspan='2'>Note Distance</td>
@@ -1070,10 +1070,10 @@
 <td>N/A</td>
 </tr>
 <tr>
-<td colspan='11' class='description'>TODO</td>
+<td colspan='11' class='description'>Distance between notes from the table. F.e. when the table is cefg, with note count 2 and note distance 2 the repeating chords become cf-eg-fc-ge.</td>
 </tr>
 <tr>
-<td rowspan='2'>Rate</td>
+<td rowspan='2'>Rate Hz</td>
 <td>Sample</td>
 <td>Yes</td>
 <td>Patch</td>
@@ -1087,10 +1087,10 @@
 <td>4.00 Hz</td>
 </tr>
 <tr>
-<td colspan='11' class='description'>TODO</td>
+<td colspan='11' class='description'>Arp rate in Hz.</td>
 </tr>
 <tr>
-<td rowspan='2'>Rate</td>
+<td rowspan='2'>Rate Tempo</td>
 <td>Sample</td>
 <td>Yes</td>
 <td>Patch</td>
@@ -1104,10 +1104,10 @@
 <td>N/A</td>
 </tr>
 <tr>
-<td colspan='11' class='description'>TODO</td>
+<td colspan='11' class='description'>Arp rate in bars.</td>
 </tr>
 <tr>
-<td rowspan='2'>Mod Rate</td>
+<td rowspan='2'>Mod Rate Hz</td>
 <td>Sample</td>
 <td>Yes</td>
 <td>Patch</td>
@@ -1121,10 +1121,10 @@
 <td>4.00 Hz</td>
 </tr>
 <tr>
-<td colspan='11' class='description'>TODO</td>
+<td colspan='11' class='description'>Rate modulation in hz.</td>
 </tr>
 <tr>
-<td rowspan='2'>Mod Rate</td>
+<td rowspan='2'>Mod Rate Tempo</td>
 <td>Sample</td>
 <td>Yes</td>
 <td>Patch</td>
@@ -1138,7 +1138,7 @@
 <td>N/A</td>
 </tr>
 <tr>
-<td colspan='11' class='description'>TODO</td>
+<td colspan='11' class='description'>Rate modulation in bars. Note: when sync is on, the final arp tempo will be snapped to the base tempo. See mod mode.</td>
 </tr>
 <tr>
 <td rowspan='2'>Snc</td>
@@ -1155,7 +1155,7 @@
 <td>N/A</td>
 </tr>
 <tr>
-<td colspan='11' class='description'>TODO</td>
+<td colspan='11' class='description'>Select arp rate and mod rate in time or bars.</td>
 </tr>
 <tr>
 <td rowspan='2'>Mod</td>
@@ -1172,7 +1172,7 @@
 <td>N/A</td>
 </tr>
 <tr>
-<td colspan='11' class='description'>TODO</td>
+<td colspan='11' class='description'>Selects the shape of the rate modulator (internal LFO).</td>
 </tr>
 <tr>
 <td rowspan='2'>Mode</td>
@@ -1189,7 +1189,7 @@
 <td>N/A</td>
 </tr>
 <tr>
-<td colspan='11' class='description'>TODO</td>
+<td colspan='11' class='description'>Selects the mode of the rate modulator. With sync on, the final rate will be snapped to logical multiples of the bar size (e.g. exponential 1/4 with speedup becomes 1/4, 1/8, 1/16, with slowdown becomes 1/4, 1/2, 1/1 etc. Linear with sync, 1/4 becomes 1/4, 2/4, 3/4 etc).</td>
 </tr>
 <tr>
 <td rowspan='2'>Amt</td>
@@ -1206,7 +1206,7 @@
 <td>N/A</td>
 </tr>
 <tr>
-<td colspan='11' class='description'>TODO</td>
+<td colspan='11' class='description'>Selects the amount of speed-up/slow down.</td>
 </tr>
 </table>
 <a name='9'/>
