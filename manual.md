@@ -162,7 +162,7 @@ If you set the note count exactly equal to the table size with distance equal to
 (f.e. input chord = ceg, type = plain, mode = up) the arpeggiator will just be repeating the input chord.
 Combined with the rate modulator this may be used as a very crude sort-of pattern generator.
 
-### Controlling the output rate by rate &amp; mod rate parameters
+### Controlling the output rate by rate &amp; mod-rate parameters
 
 * Sync: controls output rate type (in hz or bars)
 * Rate: selects output rate
