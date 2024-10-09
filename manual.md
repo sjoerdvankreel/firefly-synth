@@ -151,10 +151,22 @@ To explain, see below for what happens when playing c-major (let's say C4-E4-G4)
 * Jump: rearranges the table after mode selection. When on, table becomes first-next-first-next etc. In this example, C4-E4-C4-G4-C4-C5-C4-E5-C4-G5-C4-E5-C4-C5-C4-G4-C4-E4.
 * Flip: rearranges the table after jumping by inverting note selection every N positions. In this example with flip set to 2: C4-E4-G4-C4-C4-C5-E5-C4-C4-G5-E5-C4-C4-C5-G4-C4-C4-E4.
 
+There are 4 random modes with allow to either reset or free-run on table construction (happens on note-on/off) and table repeat.
+
+### Sampling the active table by notes &amp; dist parameters
+
+* Notes: select this many notes to output from the table. If table is C4-E4-G4-C5-E5-G5 (with distance set to 1), consecutive outputs are C4+E4, E4+G4, G4+C5, C5+E5, E5+G5, G5+C4, repeat.
+* Distance: distance between multiple notes in the table. If table is C4-E4-G4-C5-E5-G5 (with distance set to 2), consecutive outputs are C4+G4, E4+C4, G4+E5, C5+G5, E5+C4, G5+E4, repeat.
+
+If you set the note count exactly equal to the table size with distance equal to 1 
+(f.e. input chord = ceg, type = plain, mode = up) the arpeggiator will just be repeating the input chord.
+Combined with the rate modulator this may be used as a very crude sort-of pattern generator.
+
 ## Feature overview
 
 See the parameter reference document for details.
 
+- Arpeggiator.
 - Microtuning support.
 - Envelope 1 hardwired to voice gain.
 - Per-voice and global audio routing matrices.
