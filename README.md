@@ -109,10 +109,10 @@ Demo tunes:
 
 Other:
 - FX Demo: [fx_demo_reaper_clap.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/fx_demo_reaper_clap.mp3)
-- DSF distortion: [saw_to_dsf_distortion_demo.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/saw_to_dsf_distortion_demo.mp3)
-- Noise generator demo: [stereo_noise_reaper_clap.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/stereo_noise_reaper_clap.mp3)
 - Arpeggiator demo 1: [arp_demo_1_renoise_vst3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/arp_demo_1_renoise_vst3.mp3)
 - Arpeggiator demo 2: [arp_demo_2_reaper_clap](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/arp_demo_2_reaper_clap.mp3)
+- DSF distortion: [saw_to_dsf_distortion_demo.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/saw_to_dsf_distortion_demo.mp3)
+- Noise generator demo: [stereo_noise_reaper_clap.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/stereo_noise_reaper_clap.mp3)
 - Distortion modulation demo: [distortion_modulation.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/distortion_modulation.mp3)
 - I Love Distortion + Global Unison: [i_love_distortion_global_unison.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/i_love_distortion_global_unison.mp3)
 - Visual modulation demo [visual_modulation_demo_no_automation_reaper_clap.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/visual_modulation_demo_no_automation_reaper_clap.mp3)
