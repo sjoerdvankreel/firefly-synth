@@ -139,6 +139,10 @@ Please note that Tuning Mode is saved with the plugin instance as a whole, and i
 as "play C5 against an oscillator set to C3". After-mod also takes all pitch modulators (cents, unison detuning, raw pitch etc) into account.
 For monophonic mode, on-note really means on-voice-start. If you want note-by-note retuning for monophonic, continuous is the way to go.
 
+## Arpeggiator
+
+Builds up a note table from the current chord, then loops through that table outputting 1 or more notes on each round.
+
 ## Feature overview
 
 See the parameter reference document for details.
