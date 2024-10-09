@@ -994,15 +994,21 @@ arpeggiator_engine::process_audio(
       flipped_pos = is_random(mode) ? _table_pos: flipped_table_pos();
 
       // update current values for cv state
+      _cv_out_rel_pos = 0.0f;
+      _cv_out_abs_pos = 0.0f;
       _cv_out_abs_note = 0.0f;
+      if (_current_arp_note_table.size() > 1)
+      {
+        _cv_out_abs_pos = _table_pos / (float)(_current_arp_note_table.size() - 1);
+        _cv_out_rel_pos = flipped_pos / (float)(_current_arp_note_table.size() - 1);
+        _cv_out_abs_note = _note_abs_mapping[_current_arp_note_table[flipped_pos].midi_key] / (float)(_current_arp_note_table.size() - 1);
+      }
+
       _cv_out_rel_note = 0.0f;
-      _cv_out_rel_pos = flipped_pos / (float)(_current_arp_note_table.size() - 1);
-      _cv_out_abs_pos = _table_pos / (float)(_current_arp_note_table.size() - 1);
       int note_abs_range = _note_high_key - _note_low_key;
       if (note_abs_range > 0)
       {
         _cv_out_rel_note = (_current_arp_note_table[flipped_pos].midi_key - _note_low_key) / (float)note_abs_range;
-        _cv_out_abs_note = _note_abs_mapping[_current_arp_note_table[flipped_pos].midi_key] / (float)(_current_arp_note_table.size() - 1);
       }
 
       _fire_this_round = {};
