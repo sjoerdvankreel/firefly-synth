@@ -95,13 +95,12 @@ V fix the midi graph
 X do more kbd tracking
 V add arp table pos as a mod source ==> yes do it + also make all graphs react pfft
 V single-note arp not always goes off
+V check if arp works with microtuning
+X drop microtune-after
 
-* check if arp works with microtuning
-* drop microtune-after
 * show arp label as chord ceg-whatever + N/A when off
 * fix the gaux123456 graphs
 * review code, make detailed release notes
-* fix repaint stuff on global in param drag it always shows aux1
 * compare perf with regular play notes
 * check automation works
 * check if shows up in the docs
