@@ -156,7 +156,7 @@ There are 4 random modes with allow to either reset or free-run on table constru
 ### Sampling the active table by notes &amp; dist parameters
 
 * Notes: select this many notes to output from the table. If table is C4-E4-G4-C5-E5-G5 (with distance set to 1), consecutive outputs are C4+E4, E4+G4, G4+C5, C5+E5, E5+G5, G5+C4, repeat.
-* Distance: distance between multiple notes in the table. If table is C4-E4-G4-C5-E5-G5 (with distance set to 2), consecutive outputs are C4+G4, E4+C4, G4+E5, C5+G5, E5+C4, G5+E4, repeat.
+* Distance: distance between multiple notes in the table. If table is C4-E4-G4-C5-E5-G5 (with distance set to 2), consecutive outputs are C4+G4, E4+C5, G4+E5, C5+G5, E5+C4, G5+E4, repeat.
 
 If you set the note count exactly equal to the table size with distance equal to 1 
 (f.e. input chord = ceg, type = plain, mode = up) the arpeggiator will just be repeating the input chord.
