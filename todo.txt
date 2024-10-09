@@ -104,8 +104,7 @@ V check automation works
 V check if shows up in the docs
 V write the manual
 V check fx mode
-
-* review code, make detailed release notes
+V review code, make detailed release notes
 
 wishlist:
 use fftw
