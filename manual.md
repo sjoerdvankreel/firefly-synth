@@ -151,7 +151,7 @@ To explain, see below for what happens when playing c-major (let's say C4-E4-G4)
 * Jump: rearranges the table after mode selection. When on, table becomes first-next-first-next etc. In this example, C4-E4-C4-G4-C4-C5-C4-E5-C4-G5-C4-E5-C4-C5-C4-G4-C4-E4.
 * Flip: rearranges the table after jumping by inverting note selection every N positions. In this example with flip set to 2: C4-E4-G4-C4-C4-C5-E5-C4-C4-G5-E5-C4-C4-C5-G4-C4-C4-E4.
 
-There are 4 random modes with allow to either reset or free-run on table construction (happens on note-on/off) and table repeat.
+There are 4 random modes which allow to either reset or free-run on table construction (happens on note-on/off) and table repeat.
 
 ### Sampling the active table by notes &amp; dist parameters
 
@@ -161,6 +161,21 @@ There are 4 random modes with allow to either reset or free-run on table constru
 If you set the note count exactly equal to the table size with distance equal to 1 
 (f.e. input chord = ceg, type = plain, mode = up) the arpeggiator will just be repeating the input chord.
 Combined with the rate modulator this may be used as a very crude sort-of pattern generator.
+
+### Controlling the output rate by rate &amp; mod rate parameters
+
+* Sync: controls output rate type (in hz or bars)
+* Rate: selects output rate
+
+When the internal LFO modulator is off, that's all there's to it. Otherwise:
+
+* Mod mode: selects off/linear/exponential modulation.
+* Mod: selects the internal LFO shape which is used to modulate the output rate.
+* Amount: selects how much to change the output rate relative to the base rate.
+
+When synced, (output rate + modulator offset) is snapped to the base rate.
+F.e. 1/4 with linear slowdown gets you 1/4, 2/4, 3/4, exponential slowdown gets 1/4, 1/2, 1/1.
+1/4 with linear speedup gets you (1/4)/1, (1/4)/2, (1/4)/3, exponential speedup gets 1/4, 1/8, 1/16.
 
 ## Feature overview
 
