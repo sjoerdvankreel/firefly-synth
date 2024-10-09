@@ -141,7 +141,12 @@ For monophonic mode, on-note really means on-voice-start. If you want note-by-no
 
 ## Arpeggiator
 
-Builds up a note table from the current chord, then loops through that table outputting 1 or more notes on each round.
+Builds up a note table from the current chord, then loops through that table outputting 1 or more notes on each round.<br/><br/>
+To explain, see below for what happens when playing c-major (let's say C4E4G4).
+
+### Constructing the ARP table
+
+
 
 ## Feature overview
 
