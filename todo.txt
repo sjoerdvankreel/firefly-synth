@@ -97,11 +97,11 @@ V add arp table pos as a mod source ==> yes do it + also make all graphs react p
 V single-note arp not always goes off
 V check if arp works with microtuning
 X drop microtune-after
+V show arp label as chord ceg-whatever + N/A when off
+V compare perf with regular play notes
 
-* show arp label as chord ceg-whatever + N/A when off
 * fix the gaux123456 graphs
 * review code, make detailed release notes
-* compare perf with regular play notes
 * check automation works
 * check if shows up in the docs
 * write the manual

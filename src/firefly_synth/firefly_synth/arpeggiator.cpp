@@ -292,20 +292,7 @@ render_graph(
   }
   else
   {
-    // default to c major for plotting
-    note_event note;
-    note.frame = 0;
-    note.id.id = -1;
-    note.id.channel = 0;
-    note.velocity = 1.0f;
-    note.type = note_event_type::on;
-
-    note.id.key = 60;
-    in_notes.push_back(note);
-    note.id.key = 64;
-    in_notes.push_back(note);
-    note.id.key = 67;
-    in_notes.push_back(note);
+    return graph_data(graph_data_type::na, { state.desc().plugin->modules[mapping.module_index].info.tag.menu_display_name });
   }
 
   std::array<arp_user_note, 128> user_chord = {};
@@ -341,7 +328,13 @@ render_graph(
       multi_bars.push_back({ i, vertical_pos_normalized });
     }
   }
-  return graph_data(multi_bars, { state.desc().plugin->modules[mapping.module_index].info.tag.menu_display_name });
+
+  // Show at most 8 notes of user chord as partition
+  std::string partition = {};
+  std::vector<list_item> midi_note_list = make_midi_note_list();
+  for (int i = 0; i < in_notes.size() && i < 8; i++)
+    partition += midi_note_list[in_notes[i].id.key].name;
+  return graph_data(multi_bars, { partition });
 }
 
 module_topo
