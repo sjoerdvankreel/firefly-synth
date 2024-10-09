@@ -102,10 +102,10 @@ V compare perf with regular play notes
 V fix the gaux123456 graphs
 V check automation works
 V check if shows up in the docs
+V write the manual
+V check fx mode
 
-* check fx mode
 * review code, make detailed release notes
-* write the manual
 
 wishlist:
 use fftw
