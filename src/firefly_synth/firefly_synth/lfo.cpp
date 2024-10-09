@@ -152,11 +152,21 @@ public:
   lfo_engine(bool global) : 
   _global(global), _smooth_noise(1, 1) {}
 
-  void reset_audio(plugin_block const*) override;
-  void reset_graph(plugin_block const* block, std::vector<mod_out_custom_state> const& custom_outputs, void* context) override;
+  void reset_audio(plugin_block const*,
+    std::vector<note_event> const* in_notes,
+    std::vector<note_event>* out_notes) override;
+  void reset_graph(plugin_block const* block,
+    std::vector<note_event> const* in_notes,
+    std::vector<note_event>* out_notes, 
+    std::vector<mod_out_custom_state> const& custom_outputs, 
+    void* context) override;
 
-  void process_audio(plugin_block& block) override { process_internal(block, nullptr); }
-  void process_graph(plugin_block& block, std::vector<mod_out_custom_state> const& custom_outputs, void* context) override 
+  void process_audio(plugin_block& block,
+    std::vector<note_event> const* in_notes,
+    std::vector<note_event>* out_notes) override { process_internal(block, nullptr); }
+  void process_graph(plugin_block& block,
+    std::vector<note_event> const* in_notes,
+    std::vector<note_event>* out_notes, std::vector<mod_out_custom_state> const& custom_outputs, void* context) override
   { process_internal(block, static_cast<cv_cv_matrix_mixdown const*>(context)); }
 };
 
@@ -200,7 +210,7 @@ render_graph(
 {
   int type = state.get_plain_at(mapping.module_index, mapping.module_slot, param_type, mapping.param_slot).step();
   bool sync = state.get_plain_at(mapping.module_index, mapping.module_slot, param_sync, mapping.param_slot).step() != 0;
-  if(type == type_off) return graph_data(graph_data_type::off, {});
+  if(type == type_off) return graph_data(graph_data_type::off, { state.desc().plugin->modules[mapping.module_index].info.tag.menu_display_name });
   
   int sample_rate = -1;
   std::string partition;
@@ -230,8 +240,8 @@ render_graph(
   auto const* block = engine->process(mapping.module_index, mapping.module_slot, custom_outputs, nullptr, [&](plugin_block& block) {
     lfo_engine engine(global);
     cv_cv_matrix_mixdown modulation(make_static_cv_matrix_mixdown(block)[mapping.module_index][mapping.module_slot]);
-    engine.reset_graph(&block, custom_outputs, &modulation);
-    engine.process_graph(block, custom_outputs, &modulation);
+    engine.reset_graph(&block, nullptr, nullptr, custom_outputs, &modulation);
+    engine.process_graph(block, nullptr, nullptr, custom_outputs, &modulation);
   });
   engine->process_end();
   jarray<float, 1> series(block->state.own_cv[0][0]);
@@ -253,7 +263,7 @@ lfo_state_converter::handle_invalid_param_value(
     {
       // format is {guid}-{guid}-{guid}
       if (old_value.size() != 3 * 38 + 2) return false;
-      auto shape_items = wave_shape_type_items(false, _global);
+      auto shape_items = wave_shape_type_items(wave_target::lfo, _global);
       std::string old_shape_guid = old_value.substr(0, 38);
       
       // was smooth or fold
@@ -299,7 +309,7 @@ lfo_state_converter::handle_invalid_param_value(
     {
       // format is {guid}-{guid}-{guid}
       if (old_value.size() != 3 * 38 + 2) return false;
-      auto shape_items = wave_shape_type_items(false, _global);
+      auto shape_items = wave_shape_type_items(wave_target::lfo, _global);
       std::string old_shape_guid = old_value.substr(0, 38);
       for (int i = 0; i < shape_items.size(); i++)
         if (old_shape_guid == shape_items[i].id)
@@ -379,7 +389,7 @@ lfo_topo(int section, gui_position const& pos, bool global, bool is_fx)
   if(!global) column_sizes = { 32, 13, 34, 55, 8 };
   module_topo result(make_module(info,
     make_module_dsp(stage, module_output::cv, 1, {
-      make_module_dsp_output(true, make_topo_info_basic("{197CB1D4-8A48-4093-A5E7-2781C731BBFC}", "Output", 0, 1)) }),
+      make_module_dsp_output(true, -1, make_topo_info_basic("{197CB1D4-8A48-4093-A5E7-2781C731BBFC}", "Output", 0, 1)) }),
     make_module_gui(section, pos, { { 1, 1 }, column_sizes })));
   result.gui.tabbed_name = "LFO";
   result.gui.is_drag_mod_source = true;
@@ -473,7 +483,7 @@ lfo_topo(int section, gui_position const& pos, bool global, bool is_fx)
   if(!global) shape_section.gui.merge_with_section = section_phase;
   auto& shape = result.params.emplace_back(make_param(
     make_topo_info_basic("{7D48C09B-AC99-4B88-B880-4633BC8DFB37}", "Shape", param_shape, 1),
-    make_param_dsp_automate_if_voice(!global), make_domain_item(wave_shape_type_items(false, global), "Sin"),
+    make_param_dsp_automate_if_voice(!global), make_domain_item(wave_shape_type_items(wave_target::lfo, global), "Sin"),
     make_param_gui_single(section_shape, gui_edit_type::autofit_list, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   shape.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
@@ -547,11 +557,13 @@ lfo_engine::update_block_params(plugin_block const* block)
 
 void 
 lfo_engine::reset_graph(
-  plugin_block const* block, 
+  plugin_block const* block,
+  std::vector<note_event> const* in_notes,
+  std::vector<note_event>* out_notes,
   std::vector<mod_out_custom_state> const& custom_outputs, 
   void* context)
 {
-  reset_audio(block);
+  reset_audio(block, nullptr, nullptr);
 
   int new_rand_seed = 0;
   float new_ref_phase = 0.0f;
@@ -572,17 +584,17 @@ lfo_engine::reset_graph(
         if (!seen_rand_seed && custom_outputs[i].tag_custom == custom_tag_rand_seed)
         {
           seen_rand_seed = true;
-          new_rand_seed = custom_outputs[i].value_custom;
+          new_rand_seed = custom_outputs[i].value_custom_int();
         }
         if (!seen_ref_phase && custom_outputs[i].tag_custom == custom_tag_ref_phase)
         {
           seen_ref_phase = true;
-          new_ref_phase = custom_outputs[i].value_custom / (float)std::numeric_limits<int>::max();
+          new_ref_phase = custom_outputs[i].value_custom_float();
         }
         if (!seen_end_value && custom_outputs[i].tag_custom == custom_tag_end_value)
         {
           seen_end_value = true;
-          new_end_value = custom_outputs[i].value_custom / (float)std::numeric_limits<int>::max();
+          new_end_value = custom_outputs[i].value_custom_float();
         }
       }
       if (!seen_render_for_cv_graph && custom_outputs[i].tag_custom == custom_out_shared_render_for_cv_graph)
@@ -624,7 +636,10 @@ lfo_engine::reset_graph(
 }
 
 void
-lfo_engine::reset_audio(plugin_block const* block) 
+lfo_engine::reset_audio(
+  plugin_block const* block,
+  std::vector<note_event> const* in_notes,
+  std::vector<note_event>* out_notes)
 { 
   _ref_phase = 0;
   _lfo_end_value = 0;
@@ -680,12 +695,12 @@ lfo_engine::process_internal(plugin_block& block, cv_cv_matrix_mixdown const* mo
       _global ? -1 : block.voice->state.slot,
       block.module_desc_.info.global,
       _ref_phase));
-    block.push_modulation_output(modulation_output::make_mod_output_custom_state(
+    block.push_modulation_output(modulation_output::make_mod_output_custom_state_float(
       _global ? -1 : block.voice->state.slot,
       block.module_desc_.info.global,
       custom_tag_ref_phase,
-      (int)(_ref_phase * std::numeric_limits<int>::max())));
-    block.push_modulation_output(modulation_output::make_mod_output_custom_state(
+      _ref_phase));
+    block.push_modulation_output(modulation_output::make_mod_output_custom_state_int(
       _global ? -1 : block.voice->state.slot,
       block.module_desc_.info.global,
       custom_tag_rand_seed,
@@ -701,11 +716,11 @@ lfo_engine::process_internal(plugin_block& block, cv_cv_matrix_mixdown const* mo
     block.state.own_cv[0][0].fill(block.start_frame, block.end_frame, _filter_end_value);
 
     if (!block.graph)
-      block.push_modulation_output(modulation_output::make_mod_output_custom_state(
+      block.push_modulation_output(modulation_output::make_mod_output_custom_state_float(
         _global ? -1 : block.voice->state.slot,
         block.module_desc_.info.global,
         custom_tag_end_value,
-        (int)(_filter_end_value * std::numeric_limits<int>::max())));
+        _filter_end_value));
 
     return; 
   }

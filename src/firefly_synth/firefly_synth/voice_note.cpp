@@ -22,9 +22,17 @@ public module_engine {
   float _graph_pitch = 0.0f;
 
 public:
-  void process_audio(plugin_block& block) override;
-  void reset_audio(plugin_block const*) override {}
-  void reset_graph(plugin_block const* block, std::vector<mod_out_custom_state> const& custom_outputs, void* context) override;
+  void process_audio(plugin_block& block,
+    std::vector<note_event> const* in_notes,
+    std::vector<note_event>* out_notes) override;
+  void reset_audio(plugin_block const*,
+    std::vector<note_event> const* in_notes,
+    std::vector<note_event>* out_notes) override {}
+  void reset_graph(plugin_block const* block,
+    std::vector<note_event> const* in_notes,
+    std::vector<note_event>* out_notes,
+    std::vector<mod_out_custom_state> const& custom_outputs, 
+    void* context) override;
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(voice_note_engine);
 };
 
@@ -34,8 +42,8 @@ voice_note_topo(int section)
   module_topo result(make_module(
     make_topo_info_basic("{4380584E-6CC5-4DA5-A533-17A9A1777476}", "Note", module_voice_note, 1),
     make_module_dsp(module_stage::voice, module_output::cv, 0, {
-      make_module_dsp_output(true, make_topo_info_basic("{376846A2-33FC-4DB0-BCB9-7A43A8488A7F}", "Key", output_key_pitch, 1)),
-      make_module_dsp_output(true, make_topo_info("{2D59B6B8-3B08-430C-9A8A-E882C8E14597}", true, "Velocity", "Velo", "Velo", output_velo, 1)) }),
+      make_module_dsp_output(true, -1, make_topo_info_basic("{376846A2-33FC-4DB0-BCB9-7A43A8488A7F}", "Key", output_key_pitch, 1)),
+      make_module_dsp_output(true, -1, make_topo_info("{2D59B6B8-3B08-430C-9A8A-E882C8E14597}", true, "Velocity", "Velo", "Velo", output_velo, 1)) }),
     make_module_gui_none(section)));
   result.info.description = "Provides MIDI note and velocity as modulation sources.";
   result.engine_factory = [](auto const&, int, int) { return std::make_unique<voice_note_engine>(); };
@@ -44,11 +52,16 @@ voice_note_topo(int section)
 
 void 
 voice_note_engine::reset_graph(
-  plugin_block const* block, 
+  plugin_block const* block,
+  std::vector<note_event> const* in_notes,
+  std::vector<note_event>* out_notes,
   std::vector<mod_out_custom_state> const& custom_outputs, 
   void* context)
 {
-  reset_audio(block);
+  reset_audio(block, nullptr, nullptr);
+
+  _graph_velo = 0.0f;
+  _graph_pitch = 0.0f;
 
   // fix to current live values
   // backwards loop, outputs are sorted, latest-in-time are at the end
@@ -62,12 +75,12 @@ voice_note_engine::reset_graph(
         if (!seen_velo && custom_outputs[i].tag_custom == custom_tag_velo)
         {
           seen_velo = true;
-          _graph_velo = *reinterpret_cast<float const*>(&custom_outputs[i].value_custom);
+          _graph_velo = custom_outputs[i].value_custom_float();
         }
         if (!seen_pitch && custom_outputs[i].tag_custom == custom_tag_pitch)
         {
           seen_pitch = true;
-          _graph_pitch = *reinterpret_cast<float const*>(&custom_outputs[i].value_custom);
+          _graph_pitch = custom_outputs[i].value_custom_float();
         }
         if (seen_velo && seen_pitch)
           break;
@@ -76,7 +89,10 @@ voice_note_engine::reset_graph(
 }
 
 void
-voice_note_engine::process_audio(plugin_block& block)
+voice_note_engine::process_audio(
+  plugin_block& block,
+  std::vector<note_event> const* in_notes,
+  std::vector<note_event>* out_notes)
 {  
   float velo;
   float pitch;
@@ -100,16 +116,16 @@ voice_note_engine::process_audio(plugin_block& block)
 
   if (block.graph) return;
 
-  block.push_modulation_output(modulation_output::make_mod_output_custom_state(
+  block.push_modulation_output(modulation_output::make_mod_output_custom_state_float(
     block.voice->state.slot,
     block.module_desc_.info.global,
     custom_tag_pitch,
-    *reinterpret_cast<int*>(&pitch)));
-  block.push_modulation_output(modulation_output::make_mod_output_custom_state(
+    pitch));
+  block.push_modulation_output(modulation_output::make_mod_output_custom_state_float(
     block.voice->state.slot,
     block.module_desc_.info.global,
     custom_tag_velo,
-    *reinterpret_cast<int*>(&velo)));
+    velo));
 }
 
 }

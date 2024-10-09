@@ -23,11 +23,11 @@ wave_make_name_skew(int skew)
 }
 
 static std::string
-wave_make_name_shape(int shape, bool for_shaper)
+wave_make_name_shape(int shape, wave_target target)
 {
   switch (shape)
   {
-  case wave_shape_type_saw: return for_shaper? "Off": "Saw";
+  case wave_shape_type_saw: return target == wave_target::shaper? "Off": "Saw";
   case wave_shape_type_tri: return "Tri";
   case wave_shape_type_sin: return "Sin";
   case wave_shape_type_cos: return "Cos";
@@ -43,7 +43,7 @@ wave_make_name_shape(int shape, bool for_shaper)
   case wave_shape_type_cos_sin_cos: return "CsSnCs";
   case wave_shape_type_cos_cos_sin: return "CsCsSn";
   case wave_shape_type_cos_cos_cos: return "CsCsCs";
-  case wave_shape_type_sqr_or_fold: return for_shaper? "Fldbk": "Sqr";
+  case wave_shape_type_sqr_or_fold: return target == wave_target::shaper ? "Fldbk": "Sqr";
   case wave_shape_type_smooth_1: return "Smooth 1";
   case wave_shape_type_smooth_free_1: return "Free Smooth 1";
   case wave_shape_type_static_1: return "Static 1";
@@ -70,38 +70,38 @@ wave_skew_type_tags()
 }
 
 static std::vector<topo_tag>
-wave_shape_type_tags(bool for_shaper, bool global)
+wave_shape_type_tags(wave_target target, bool global)
 {
   std::vector<topo_tag> result;
-  result.push_back(make_topo_tag_basic("{CA30E83B-2A11-4833-8A45-81F666A3A4F5}", wave_make_name_shape(wave_shape_type_saw, for_shaper)));
-  result.push_back(make_topo_tag_basic("{41D6859E-3A16-432A-8851-D4E5D3F39662}", wave_make_name_shape(wave_shape_type_tri, for_shaper)));
-  result.push_back(make_topo_tag_basic("{4A873C32-8B89-47ED-8C93-44FE0B6A7DCC}", wave_make_name_shape(wave_shape_type_sin, for_shaper)));
-  result.push_back(make_topo_tag_basic("{102A7369-1994-41B1-9E2E-EC96AB60162E}", wave_make_name_shape(wave_shape_type_cos, for_shaper)));
-  result.push_back(make_topo_tag_basic("{B6B07567-00C8-4076-B60F-D2AC10CE935A}", wave_make_name_shape(wave_shape_type_sin_sin, for_shaper)));
-  result.push_back(make_topo_tag_basic("{B1305EE8-57EF-4BC6-8F3A-7A8BBD2359F2}", wave_make_name_shape(wave_shape_type_sin_cos, for_shaper)));
-  result.push_back(make_topo_tag_basic("{FA227C0D-C604-45B3-B5DF-0E6C46FD9C2F}", wave_make_name_shape(wave_shape_type_cos_sin, for_shaper)));
-  result.push_back(make_topo_tag_basic("{37D39A3C-2058-4DC6-A9AE-DFBB423EB0D2}", wave_make_name_shape(wave_shape_type_cos_cos, for_shaper)));
-  result.push_back(make_topo_tag_basic("{CE36CD8E-5D1F-40F0-85E3-5DAD99AFC53E}", wave_make_name_shape(wave_shape_type_sin_sin_sin, for_shaper)));
-  result.push_back(make_topo_tag_basic("{D921DA52-4D30-4AB7-95F3-CAA65C4F83AA}", wave_make_name_shape(wave_shape_type_sin_sin_cos, for_shaper)));
-  result.push_back(make_topo_tag_basic("{C8D7BA33-6458-4972-8C31-D9BDAE0A3A54}", wave_make_name_shape(wave_shape_type_sin_cos_sin, for_shaper)));
-  result.push_back(make_topo_tag_basic("{F67FB33F-CEDF-4F43-AD23-356775EECED2}", wave_make_name_shape(wave_shape_type_sin_cos_cos, for_shaper)));
-  result.push_back(make_topo_tag_basic("{84E3B508-2AAA-4EBA-AD8C-B5AD1A055342}", wave_make_name_shape(wave_shape_type_cos_sin_sin, for_shaper)));
-  result.push_back(make_topo_tag_basic("{B191D364-1951-449A-ABC7-09AEE9DB9FC4}", wave_make_name_shape(wave_shape_type_cos_sin_cos, for_shaper)));
-  result.push_back(make_topo_tag_basic("{094482D1-5BAC-4F70-80F3-CA3924DDFBE6}", wave_make_name_shape(wave_shape_type_cos_cos_sin, for_shaper)));
-  result.push_back(make_topo_tag_basic("{6A56691C-0F9C-4CE1-B835-85CF4D3B1F9B}", wave_make_name_shape(wave_shape_type_cos_cos_cos, for_shaper)));
-  result.push_back(make_topo_tag_basic("{E16E6DC4-ACB3-4313-A094-A6EA9F8ACA85}", wave_make_name_shape(wave_shape_type_sqr_or_fold, for_shaper)));
+  result.push_back(make_topo_tag_basic("{CA30E83B-2A11-4833-8A45-81F666A3A4F5}", wave_make_name_shape(wave_shape_type_saw, target)));
+  result.push_back(make_topo_tag_basic("{41D6859E-3A16-432A-8851-D4E5D3F39662}", wave_make_name_shape(wave_shape_type_tri, target)));
+  result.push_back(make_topo_tag_basic("{4A873C32-8B89-47ED-8C93-44FE0B6A7DCC}", wave_make_name_shape(wave_shape_type_sin, target)));
+  result.push_back(make_topo_tag_basic("{102A7369-1994-41B1-9E2E-EC96AB60162E}", wave_make_name_shape(wave_shape_type_cos, target)));
+  result.push_back(make_topo_tag_basic("{B6B07567-00C8-4076-B60F-D2AC10CE935A}", wave_make_name_shape(wave_shape_type_sin_sin, target)));
+  result.push_back(make_topo_tag_basic("{B1305EE8-57EF-4BC6-8F3A-7A8BBD2359F2}", wave_make_name_shape(wave_shape_type_sin_cos, target)));
+  result.push_back(make_topo_tag_basic("{FA227C0D-C604-45B3-B5DF-0E6C46FD9C2F}", wave_make_name_shape(wave_shape_type_cos_sin, target)));
+  result.push_back(make_topo_tag_basic("{37D39A3C-2058-4DC6-A9AE-DFBB423EB0D2}", wave_make_name_shape(wave_shape_type_cos_cos, target)));
+  result.push_back(make_topo_tag_basic("{CE36CD8E-5D1F-40F0-85E3-5DAD99AFC53E}", wave_make_name_shape(wave_shape_type_sin_sin_sin, target)));
+  result.push_back(make_topo_tag_basic("{D921DA52-4D30-4AB7-95F3-CAA65C4F83AA}", wave_make_name_shape(wave_shape_type_sin_sin_cos, target)));
+  result.push_back(make_topo_tag_basic("{C8D7BA33-6458-4972-8C31-D9BDAE0A3A54}", wave_make_name_shape(wave_shape_type_sin_cos_sin, target)));
+  result.push_back(make_topo_tag_basic("{F67FB33F-CEDF-4F43-AD23-356775EECED2}", wave_make_name_shape(wave_shape_type_sin_cos_cos, target)));
+  result.push_back(make_topo_tag_basic("{84E3B508-2AAA-4EBA-AD8C-B5AD1A055342}", wave_make_name_shape(wave_shape_type_cos_sin_sin, target)));
+  result.push_back(make_topo_tag_basic("{B191D364-1951-449A-ABC7-09AEE9DB9FC4}", wave_make_name_shape(wave_shape_type_cos_sin_cos, target)));
+  result.push_back(make_topo_tag_basic("{094482D1-5BAC-4F70-80F3-CA3924DDFBE6}", wave_make_name_shape(wave_shape_type_cos_cos_sin, target)));
+  result.push_back(make_topo_tag_basic("{6A56691C-0F9C-4CE1-B835-85CF4D3B1F9B}", wave_make_name_shape(wave_shape_type_cos_cos_cos, target)));
+  result.push_back(make_topo_tag_basic("{E16E6DC4-ACB3-4313-A094-A6EA9F8ACA85}", wave_make_name_shape(wave_shape_type_sqr_or_fold, target)));
 
-  if (for_shaper) return result;
-  result.push_back(make_topo_tag_basic("{7176FE9E-D2A8-44FE-B312-93D712173D29}", wave_make_name_shape(wave_shape_type_smooth_1, false)));
-  result.push_back(make_topo_tag_basic("{FA26FEFB-CACD-4D00-A986-246F09959F5E}", wave_make_name_shape(wave_shape_type_static_1, false)));
-  result.push_back(make_topo_tag_basic("{54A731B7-1E4E-4F5C-9507-2A7FA3F79B20}", wave_make_name_shape(wave_shape_type_smooth_free_1, false)));
-  result.push_back(make_topo_tag_basic("{FA86B2EE-12F7-40FB-BEB9-070E62C7C691}", wave_make_name_shape(wave_shape_type_static_free_1, false)));
+  if (target != wave_target::lfo) return result;
+  result.push_back(make_topo_tag_basic("{7176FE9E-D2A8-44FE-B312-93D712173D29}", wave_make_name_shape(wave_shape_type_smooth_1, target)));
+  result.push_back(make_topo_tag_basic("{FA26FEFB-CACD-4D00-A986-246F09959F5E}", wave_make_name_shape(wave_shape_type_static_1, target)));
+  result.push_back(make_topo_tag_basic("{54A731B7-1E4E-4F5C-9507-2A7FA3F79B20}", wave_make_name_shape(wave_shape_type_smooth_free_1, target)));
+  result.push_back(make_topo_tag_basic("{FA86B2EE-12F7-40FB-BEB9-070E62C7C691}", wave_make_name_shape(wave_shape_type_static_free_1, target)));
 
   if (global) return result;
-  result.push_back(make_topo_tag_basic("{4CB433AA-C15E-4560-999D-4C2D5DAF14B3}", wave_make_name_shape(wave_shape_type_smooth_2, false)));
-  result.push_back(make_topo_tag_basic("{E3735241-E420-4E25-9B82-D6CD2D9E8C2C}", wave_make_name_shape(wave_shape_type_static_2, false)));
-  result.push_back(make_topo_tag_basic("{23356ED1-CC60-475C-B927-541FBC0012C6}", wave_make_name_shape(wave_shape_type_smooth_free_2, false)));
-  result.push_back(make_topo_tag_basic("{B4A2ABBF-2433-4B12-96B2-221B3F56FDAE}", wave_make_name_shape(wave_shape_type_static_free_2, false)));
+  result.push_back(make_topo_tag_basic("{4CB433AA-C15E-4560-999D-4C2D5DAF14B3}", wave_make_name_shape(wave_shape_type_smooth_2, target)));
+  result.push_back(make_topo_tag_basic("{E3735241-E420-4E25-9B82-D6CD2D9E8C2C}", wave_make_name_shape(wave_shape_type_static_2, target)));
+  result.push_back(make_topo_tag_basic("{23356ED1-CC60-475C-B927-541FBC0012C6}", wave_make_name_shape(wave_shape_type_smooth_free_2, target)));
+  result.push_back(make_topo_tag_basic("{B4A2ABBF-2433-4B12-96B2-221B3F56FDAE}", wave_make_name_shape(wave_shape_type_static_free_2, target)));
   return result;
 }
 
@@ -116,10 +116,10 @@ wave_skew_type_items()
 }
 
 std::vector<list_item>
-wave_shape_type_items(bool for_shaper, bool global)
+wave_shape_type_items(wave_target target, bool global)
 {
   std::vector<list_item> result;
-  auto tags = wave_shape_type_tags(for_shaper, global);
+  auto tags = wave_shape_type_tags(target, global);
   for (int i = 0; i < tags.size(); i++)
     result.push_back({ tags[i].id, tags[i].menu_display_name });
   return result;

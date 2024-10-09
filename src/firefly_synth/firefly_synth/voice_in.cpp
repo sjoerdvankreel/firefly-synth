@@ -105,8 +105,12 @@ public module_engine {
   void process_voice_mode_tuning_mode_unison(plugin_block& block);
 
 public:
-  void reset_audio(plugin_block const*) override;
-  void process_audio(plugin_block& block) override;
+  void reset_audio(plugin_block const*,
+    std::vector<note_event> const* in_notes,
+    std::vector<note_event>* out_notes) override;
+  void process_audio(plugin_block& block,
+    std::vector<note_event> const* in_notes,
+    std::vector<note_event>* out_notes) override;
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(voice_in_engine);
 };
 
@@ -177,12 +181,12 @@ voice_in_topo(int section, gui_position const& pos)
   module_topo result(make_module(
     make_topo_info_basic("{524138DF-1303-4961-915A-3CAABA69D53A}", "Voice", module_voice_in, 1),
     make_module_dsp(module_stage::voice, module_output::cv, scratch_count, {
-      make_module_dsp_output(false, make_topo_info_basic("{58E73C3A-CACD-48CC-A2B6-25861EC7C828}", "Pitch", 0, 1)) }),
+      make_module_dsp_output(false, -1, make_topo_info_basic("{58E73C3A-CACD-48CC-A2B6-25861EC7C828}", "Pitch", 0, 1)) }),
       make_module_gui(section, pos, { { 1, 1 }, { 32, 8, 39, 13, 50 } })));
   result.info.description = "Oscillator common module. Controls portamento, oversampling and base pitch for all oscillators. Also contains global unison support.";
 
   result.graph_renderer = render_graph;
-  result.force_rerender_on_param_hover = true;
+  result.gui.force_rerender_graph_on_param_hover = true;
   result.gui.menu_handler_factory = make_cv_routing_menu_handler;
   result.engine_factory = [](auto const&, int, int) { return std::make_unique<voice_in_engine>(); };
   result.state_converter_factory = [](auto desc) { return std::make_unique<voice_in_state_converter>(desc); };
@@ -354,7 +358,10 @@ voice_in_engine::calc_current_porta_midi_note()
 }
 
 void
-voice_in_engine::reset_audio(plugin_block const* block)
+voice_in_engine::reset_audio(
+  plugin_block const* block,
+  std::vector<note_event> const* in_notes,
+  std::vector<note_event>* out_notes)
 {
   _position = 0;
   _to_midi_note = block->voice->state.note_id_.key;
@@ -393,7 +400,10 @@ voice_in_engine::reset_audio(plugin_block const* block)
 }
 
 void
-voice_in_engine::process_audio(plugin_block& block)
+voice_in_engine::process_audio(
+  plugin_block& block,
+  std::vector<note_event> const* in_notes,
+  std::vector<note_event>* out_notes)
 {
   auto const& block_auto = block.state.own_block_automation;
   int voice_mode = block_auto[param_mode][0].step();

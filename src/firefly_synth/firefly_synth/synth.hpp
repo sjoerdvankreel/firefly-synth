@@ -16,6 +16,10 @@ class osc_osc_matrix_engine;
 class osc_osc_matrix_am_modulator;
 class osc_osc_matrix_fm_modulator;
 
+// arp support
+std::unique_ptr<plugin_base::module_engine>
+make_arpeggiator();
+
 // shared custom output/repaint tags
 enum { custom_out_shared_render_for_cv_graph = 128 };
 
@@ -83,7 +87,7 @@ std::unique_ptr<plugin_base::plugin_topo> synth_topo(
 // For example env can modulate vlfo so env goes first.
 enum {
   module_master_settings, module_external_audio, module_midi, module_gcv_cv_matrix, module_global_in,
-  module_glfo, module_gcv_audio_matrix, module_vcv_cv_matrix, module_voice_note, module_voice_on_note, 
+  module_glfo, module_gcv_audio_matrix, module_arpeggiator, module_vcv_cv_matrix, module_voice_note, module_voice_on_note, 
   module_env, module_vlfo, module_vcv_audio_matrix, module_voice_in, module_vaudio_audio_matrix, 
   module_osc_osc_matrix, module_osc, module_vfx, module_voice_out, module_voice_mix, 
   module_gaudio_audio_matrix, module_gfx, module_global_out, module_monitor, module_count };
@@ -188,7 +192,7 @@ make_static_cv_matrix_mixdown(plugin_base::plugin_block& block);
 
 // routing matrices sources/targets
 std::vector<plugin_base::cv_source_entry>
-make_cv_matrix_sources(plugin_base::plugin_topo const* topo, bool global);
+make_cv_matrix_sources(plugin_base::plugin_topo const* topo, bool global, bool on_note);
 std::vector<plugin_base::module_topo const*>
 make_cv_cv_matrix_targets(plugin_base::plugin_topo const* topo, bool global);
 std::vector<plugin_base::module_topo const*>
@@ -218,6 +222,7 @@ plugin_base::module_topo external_audio_topo(int section, bool is_fx);
 plugin_base::module_topo voice_on_note_topo(plugin_base::plugin_topo const* topo, int section);
 plugin_base::module_topo env_topo(int section, plugin_base::gui_position const& pos);
 plugin_base::module_topo osc_topo(int section, plugin_base::gui_position const& pos);
+plugin_base::module_topo arpeggiator_topo(plugin_base::plugin_topo const* topo, int section, plugin_base::gui_position const& pos);
 plugin_base::module_topo voice_in_topo(int section, plugin_base::gui_position const& pos);
 plugin_base::module_topo global_in_topo(int section, bool is_fx, plugin_base::gui_position const& pos);
 plugin_base::module_topo fx_topo(int section, plugin_base::gui_position const& pos, bool global, bool is_fx);
@@ -228,7 +233,7 @@ plugin_base::module_topo osc_osc_matrix_topo(int section, plugin_base::gui_posit
 plugin_base::module_topo master_settings_topo(int section, plugin_base::gui_position const& pos, bool is_fx, plugin_base::plugin_topo const* plugin);
 plugin_base::module_topo audio_audio_matrix_topo(int section, plugin_base::gui_position const& pos, bool global, bool is_fx,
   std::vector<plugin_base::module_topo const*> const& sources, std::vector<plugin_base::module_topo const*> const& targets);
-plugin_base::module_topo cv_matrix_topo(int section, plugin_base::gui_position const& pos, bool cv, bool global, bool is_fx,
+plugin_base::module_topo cv_matrix_topo(plugin_base::plugin_topo const* topo, int section, plugin_base::gui_position const& pos, bool cv, bool global, bool is_fx,
   std::vector<plugin_base::cv_source_entry> const& sources, std::vector<plugin_base::cv_source_entry> const& on_note_sources, std::vector<plugin_base::module_topo const*> const& targets);
 
 }

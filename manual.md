@@ -139,10 +139,58 @@ Please note that Tuning Mode is saved with the plugin instance as a whole, and i
 as "play C5 against an oscillator set to C3". After-mod also takes all pitch modulators (cents, unison detuning, raw pitch etc) into account.
 For monophonic mode, on-note really means on-voice-start. If you want note-by-note retuning for monophonic, continuous is the way to go.
 
+## Arpeggiator
+
+Builds up a note table from the current chord, then loops through that table outputting 1 or more notes on each round.
+To explain, see below for what happens when playing c-major (let's say C4-E4-G4).
+
+### Constructing the ARP table from type, mode, flip &amp; jump parameters
+
+* Type: selects the octave count. C4-E4-G4 with +1 octave then becomes C4-E4-G4-C5-E5-G5.
+* Mode: rearranges the table after octave selection. F.e. "down" just reverses it, for up-down it becomes C4-E4-G4-C5-E5-G5-E5-C5-G4-E4.
+* Jump: rearranges the table after mode selection. When on, table becomes first-next-first-next etc. In this example, C4-E4-C4-G4-C4-C5-C4-E5-C4-G5-C4-E5-C4-C5-C4-G4-C4-E4.
+* Flip: rearranges the table after jumping by inverting note selection every N positions. In this example with flip set to 2: C4-E4-G4-C4-C4-C5-E5-C4-C4-G5-E5-C4-C4-C5-G4-C4-C4-E4.
+
+There are 4 random modes which allow to either reset or free-run on table construction (happens on note-on/off) and table repeat.
+
+### Sampling the active table by notes &amp; dist parameters
+
+* Notes: select this many notes to output from the table. If table is C4-E4-G4-C5-E5-G5 (with distance set to 1), consecutive outputs are C4+E4, E4+G4, G4+C5, C5+E5, E5+G5, G5+C4, repeat.
+* Distance: distance between multiple notes in the table. If table is C4-E4-G4-C5-E5-G5 (with distance set to 2), consecutive outputs are C4+G4, E4+C5, G4+E5, C5+G5, E5+C4, G5+E4, repeat.
+
+If you set the note count exactly equal to the table size with distance equal to 1 
+(f.e. input chord = ceg, type = plain, mode = up) the arpeggiator will just be repeating the input chord.
+Combined with the rate modulator this may be used as a very crude sort-of pattern generator.
+
+### Controlling the output rate by rate &amp; mod-rate parameters
+
+* Sync: controls output rate type (in hz or bars)
+* Rate: selects output rate
+
+When the internal LFO modulator is off, that's all there's to it. Otherwise:
+
+* Mod mode: selects off/linear/exponential modulation.
+* Mod: selects the internal LFO shape which is used to modulate the output rate.
+* Amount: selects how much to change the output rate relative to the base rate.
+
+When synced, (output rate + modulator offset) is snapped to the base rate.
+F.e. 1/4 with linear slowdown gets you 1/4, 2/4, 3/4, exponential slowdown gets 1/4, 1/2, 1/1.
+1/4 with linear speedup gets you (1/4)/1, (1/4)/2, (1/4)/3, exponential speedup gets 1/4, 1/8, 1/16.
+
+### Modulation sources produced by the ARP
+
+These are probably best used as on-note versions, but regular versions are available, too.
+
+* Note absolute: with a table of C4-B4-C5 this gets you 0.0, 0.5, 1.0.
+* Note relative: with a table of C4-B4-C5 this gets you (0/12), (11/12), (12/12).
+* Table absolute position: with a table size of 5 this gets you 0.0, 0.25, 0.5, 0.75, 1.0.
+* Table relative position: takes flipping into account. F.e. with flip set to 2, gets you 0.0, 0.25, 0.75, 0.5, 1.0.
+
 ## Feature overview
 
 See the parameter reference document for details.
 
+- Arpeggiator.
 - Microtuning support.
 - Envelope 1 hardwired to voice gain.
 - Per-voice and global audio routing matrices.

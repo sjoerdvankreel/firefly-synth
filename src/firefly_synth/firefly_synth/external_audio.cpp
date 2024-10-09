@@ -16,8 +16,13 @@ enum { output_ext_audio, output_count };
 class external_audio_engine :
 public module_engine {
 public:
-  void process_audio(plugin_block& block) override;
-  void reset_audio(plugin_block const*) override {}
+  void process_audio(
+    plugin_block& block,
+    std::vector<note_event> const* in_notes,
+    std::vector<note_event>* out_notes) override;
+  void reset_audio(plugin_block const*,
+    std::vector<note_event> const* in_notes,
+    std::vector<note_event>* out_notes) override {}
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(external_audio_engine);
 };
 
@@ -27,7 +32,7 @@ external_audio_topo(int section, bool is_fx)
   module_topo result(make_module(
     make_topo_info("{B5D634E6-4D8A-4C49-9926-1CE21C9B465F}", true, "External Audio", "External Audio", "Ext", module_external_audio, 1),
     make_module_dsp(module_stage::input, module_output::audio, 0, {
-      make_module_dsp_output(false, make_topo_info("{EA060413-A2E3-4AD2-98D0-F6FE5F7B987E}", true, "External Audio", "External Audio", "Ext", output_ext_audio, 1)) }),
+      make_module_dsp_output(false, -1, make_topo_info("{EA060413-A2E3-4AD2-98D0-F6FE5F7B987E}", true, "External Audio", "External Audio", "Ext", output_ext_audio, 1)) }),
     make_module_gui_none(section)));
   result.info.description = "In FX mode, provides external audio input to the global audio matrix.";
   result.engine_factory = nullptr;
@@ -36,7 +41,10 @@ external_audio_topo(int section, bool is_fx)
 }
 
 void
-external_audio_engine::process_audio(plugin_block& block)
+external_audio_engine::process_audio(
+  plugin_block& block,
+  std::vector<note_event> const* in_notes,
+  std::vector<note_event>* out_notes)
 {  
   float const* const* host_audio = block.host.audio_in;
   auto& own_audio = block.state.own_audio[output_ext_audio][0];

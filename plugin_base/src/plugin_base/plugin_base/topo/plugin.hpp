@@ -4,6 +4,7 @@
 #include <plugin_base/topo/module.hpp>
 #include <plugin_base/shared/jarray.hpp>
 #include <plugin_base/shared/utility.hpp>
+#include <plugin_base/dsp/block/host.hpp>
 
 #include <juce_gui_basics/juce_gui_basics.h>
 
@@ -32,6 +33,9 @@ struct preset_item
   std::string path;
   std::string group;
 };
+
+typedef std::function<std::unique_ptr<module_engine>()>
+arpeggiator_factory;
 
 // global unison support
 typedef int (*sub_voice_counter_t)(bool graph, plugin_state const& state);
@@ -157,6 +161,10 @@ struct engine_params
   // voice management is done by plugin_base so we need some cooperation
   engine_param voice_mode = {};
   sub_voice_counter_t sub_voice_counter = {};
+
+  // arpeggiator allows plug to rewrite the note stream
+  int arpeggiator_module_index = -1; // nonnegative to activate
+  arpeggiator_factory arpeggiator_factory_ = {};
 };
 
 // plugin definition

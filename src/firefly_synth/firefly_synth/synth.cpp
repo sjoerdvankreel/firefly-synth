@@ -13,9 +13,13 @@ using namespace plugin_base;
 
 namespace firefly_synth {
 
+static float const all_graphs_scale = 0.25f;
+static graph_params::partition_scale_type const all_graphs_scale_type = graph_params::partition_scale_type::scale_h;
+
 static int const synth_first_column_size = 42;
 static int const synth_second_column_size = 17;
   
+static std::string const arp_graph_name = "Arp Graph";
 static std::string const main_graph_name = "Main Graph";
 static std::string const vfx_graph_name = "Voice FX Graph";
 static std::string const env_graph_name = "Envelope Graph";
@@ -36,7 +40,8 @@ enum {
   custom_section_glfo_graph,
   custom_section_global_matrix_graphs,
   custom_section_fx_count,
-  custom_section_voice_matrix_graphs = custom_section_fx_count,
+  custom_section_arp_graph = custom_section_fx_count,
+  custom_section_voice_matrix_graphs,
   custom_section_osc_graph,
   custom_section_vfx_graph,
   custom_section_vlfo_graph,
@@ -53,7 +58,8 @@ enum {
   module_section_monitor, 
   module_section_global_matrices,
   module_section_fx_count,
-  module_section_voice_matrices = module_section_fx_count,
+  module_section_arp = module_section_fx_count,
+  module_section_voice_matrices,
   module_section_voice_in,
   module_section_voice_out,
   module_section_osc, 
@@ -100,12 +106,12 @@ make_module_graph_section(
   int module, std::string const& name_in_theme, 
   bool render_on_module_mouse_enter, bool render_on_param_mouse_enter, 
   bool hover_selects_different_graph, float fixed_mod_indicator_pos,
-  std::vector<int> const& dependent_module_indices, float partition_scale = 0.15f)
+  std::vector<int> const& dependent_module_indices)
 {
   graph_params params;
   params.name_in_theme = name_in_theme;
-  params.partition_scale = partition_scale;
-  params.scale_type = graph_params::scale_w;
+  params.scale_type = all_graphs_scale_type;
+  params.partition_scale = all_graphs_scale;
   module_graph_params module_params = make_module_graph_params(
     module, render_on_module_mouse_enter, render_on_param_mouse_enter, 
     hover_selects_different_graph, fixed_mod_indicator_pos, dependent_module_indices);
@@ -140,8 +146,8 @@ make_matrix_graphs_section(
     [gui, is_fx, lnf, module_section, name_in_theme](int module_index) -> std::unique_ptr<juce::Component> {
       graph_params params;
       params.name_in_theme = name_in_theme;
-      params.scale_type = graph_params::scale_h;
-      params.partition_scale = 0.33f;
+      params.partition_scale = all_graphs_scale;
+      params.scale_type = all_graphs_scale_type;
       switch (module_index)
       {
       case module_vaudio_audio_matrix: return std::make_unique<module_graph>(gui, lnf, params, make_module_graph_params(module_index, false, true, true, -1.0f, { }));
@@ -149,14 +155,14 @@ make_matrix_graphs_section(
       case module_osc_osc_matrix: return std::make_unique<module_graph>(gui, lnf, params, make_module_graph_params(module_index, true, false, true, -1.0f,
         { module_osc, module_voice_in }));
       case module_vcv_audio_matrix: return std::make_unique<module_graph>(gui, lnf, params, make_module_graph_params(module_index, false, true, true, 0.0f,
-        { module_global_in, module_glfo, module_vlfo, module_env, module_voice_in, module_voice_out,
+        { module_midi, module_global_in, module_glfo, module_vlfo, module_arpeggiator, module_env, module_voice_in, module_voice_out,
         module_osc, module_osc_osc_matrix, module_vfx, module_vaudio_audio_matrix }));
       case module_gcv_audio_matrix: return std::make_unique<module_graph>(gui, lnf, params, make_module_graph_params(module_index, false, true, true, 0.0f,
-        { module_global_in, module_glfo, module_gfx, module_gaudio_audio_matrix, module_global_out }));
+        { module_midi, module_global_in, module_glfo, module_gfx, module_gaudio_audio_matrix, module_global_out }));
       case module_vcv_cv_matrix: return std::make_unique<module_graph>(gui, lnf, params, make_module_graph_params(module_index, false, true, true, 0.0f,
-        { module_global_in, module_glfo, module_gcv_audio_matrix, module_vlfo, module_env, module_vcv_audio_matrix }));
+        { module_midi, module_global_in, module_glfo, module_gcv_audio_matrix, module_vlfo, module_arpeggiator, module_env, module_vcv_audio_matrix }));
       case module_gcv_cv_matrix: return std::make_unique<module_graph>(gui, lnf, params, make_module_graph_params(module_index, false, true, true, 0.0f,
-        { module_global_in, module_glfo, module_gcv_audio_matrix }));
+        { module_midi, module_global_in, module_glfo, module_gcv_audio_matrix }));
       default: assert(false); return std::make_unique<Component>();
       }
     });
@@ -320,24 +326,31 @@ make_cv_audio_matrix_targets(plugin_topo const* topo, bool global)
 }
 
 std::vector<cv_source_entry>
-make_cv_matrix_sources(plugin_topo const* topo, bool global)
+make_cv_matrix_sources(plugin_topo const* topo, bool global, bool on_note)
 {
+  assert(!on_note || !global);
   if(global)
     return { 
       { "", &topo->modules[module_global_in]},
       { "", &topo->modules[module_glfo] },
       { "", &topo->modules[module_midi] } };
-  else
-    return { 
-      { "Global", nullptr }, 
+  if (on_note)
+    return {
       { "", &topo->modules[module_global_in]},
       { "", &topo->modules[module_glfo] },
       { "", &topo->modules[module_midi] },
-      { "Voice", nullptr }, 
-      { "", &topo->modules[module_env] },
-      { "", &topo->modules[module_vlfo] },
-      { "", &topo->modules[module_voice_note] },
-      { "", &topo->modules[module_voice_on_note] }};
+      { "", &topo->modules[module_arpeggiator] } };
+  return { 
+    { "Global", nullptr }, 
+    { "", &topo->modules[module_global_in]},
+    { "", &topo->modules[module_glfo] },
+    { "", &topo->modules[module_midi] },
+    { "", &topo->modules[module_arpeggiator] },
+    { "Voice", nullptr },
+    { "", &topo->modules[module_env] },
+    { "", &topo->modules[module_vlfo] },
+    { "", &topo->modules[module_voice_note] },
+    { "", &topo->modules[module_voice_on_note] } };
 }
 
 std::unique_ptr<plugin_topo>
@@ -353,6 +366,8 @@ synth_topo(format_basic_config const* config, bool is_fx, std::string const& ful
   result->version.major = FF_SYNTH_VERSION_MAJOR;
   result->version.minor = FF_SYNTH_VERSION_MINOR;
   result->version.patch = FF_SYNTH_VERSION_PATCH;
+  result->engine.arpeggiator_factory_ = make_arpeggiator;
+  result->engine.arpeggiator_module_index = module_arpeggiator;
   result->engine.voice_mode.module_index = module_voice_in;
   result->engine.voice_mode.param_index = voice_in_param_mode;
   result->engine.visuals.module_index = module_master_settings;
@@ -410,10 +425,12 @@ synth_topo(format_basic_config const* config, bool is_fx, std::string const& ful
     -> Component& { return make_main_graph_section(gui, lnf, store); });
   result->gui.custom_sections[custom_section_gfx_graph] = make_custom_section_gui(
     custom_section_gfx_graph, gfx_graph_name, { 3, 3, 1, 1 }, [](auto* gui, auto* lnf, auto store)
-    -> Component& { return make_module_graph_section(gui, lnf, store, module_gfx, gfx_graph_name, false, false, false, -1.0f, {}); });
+    -> Component& { return make_module_graph_section(
+      gui, lnf, store, module_gfx, gfx_graph_name, false, false, false, -1.0f, {}); });
   result->gui.custom_sections[custom_section_glfo_graph] = make_custom_section_gui(
     custom_section_glfo_graph, glfo_graph_name, { 4, 3, 1, 1 }, [](auto* gui, auto* lnf, auto store)
-    -> Component& { return make_module_graph_section(gui, lnf, store, module_glfo, glfo_graph_name, false, false, false, -1.0f, {}); });
+    -> Component& { return make_module_graph_section(
+      gui, lnf, store, module_glfo, glfo_graph_name, false, false, false, -1.0f, {}); });
   if (is_fx)
   {
     result->gui.custom_sections[custom_section_global_matrix_graphs] = make_custom_section_gui(
@@ -421,25 +438,32 @@ synth_topo(format_basic_config const* config, bool is_fx, std::string const& ful
       -> Component& { return make_matrix_graphs_section(gui, lnf, store, true, module_section_global_matrices, global_matrix_graphs_name); });
   }
   else
-  {
+  { 
+    result->gui.custom_sections[custom_section_arp_graph] = make_custom_section_gui(
+      custom_section_arp_graph, arp_graph_name, { 6, 4, 1, 1 }, [](auto* gui, auto* lnf, auto store)
+      -> Component& { return make_module_graph_section(
+        gui, lnf, store, module_arpeggiator, arp_graph_name, false, false, false, -1.0f, {}); });
     result->gui.custom_sections[custom_section_osc_graph] = make_custom_section_gui(
       custom_section_osc_graph, osc_graph_name, { 6, 3, 1, 1 }, [](auto* gui, auto* lnf, auto store)
-      -> Component& { return make_module_graph_section(gui, lnf, store, module_osc, osc_graph_name, false, false, false, -1.0f, { module_osc_osc_matrix, module_voice_in }); });
+      -> Component& { return make_module_graph_section(
+        gui, lnf, store, module_osc, osc_graph_name, false, false, false, -1.0f, { module_osc_osc_matrix, module_voice_in }); });
     result->gui.custom_sections[custom_section_vfx_graph] = make_custom_section_gui(
       custom_section_vfx_graph, vfx_graph_name, { 7, 3, 1, 1 }, [](auto* gui, auto* lnf, auto store)
-      -> Component& { return make_module_graph_section(gui, lnf, store, module_vfx, vfx_graph_name, false, false, false, -1.0f, {}); });
+      -> Component& { return make_module_graph_section(
+        gui, lnf, store, module_vfx, vfx_graph_name, false, false, false, -1.0f, {}); });
     result->gui.custom_sections[custom_section_vlfo_graph] = make_custom_section_gui(
       custom_section_vlfo_graph, vlfo_graph_name, { 8, 3, 1, 1 }, [](auto* gui, auto* lnf, auto store)
-      -> Component& { return make_module_graph_section(gui, lnf, store, module_vlfo, vlfo_graph_name, false, false, false, -1.0f, {}); });
+      -> Component& { return make_module_graph_section(
+        gui, lnf, store, module_vlfo, vlfo_graph_name, false, false, false, -1.0f, {}); });
     result->gui.custom_sections[custom_section_env_graph] = make_custom_section_gui(
       custom_section_env_graph, env_graph_name, { 9, 3, 1, 1 }, [](auto* gui, auto* lnf, auto store)
-      -> Component& { return make_module_graph_section(gui, lnf, store, module_env, env_graph_name, false, false, false, -1.0f, {}); });
+      -> Component& { return make_module_graph_section(
+        gui, lnf, store, module_env, env_graph_name, false, false, false, -1.0f, {}); });
     result->gui.custom_sections[custom_section_global_matrix_graphs] = make_custom_section_gui(
       custom_section_global_matrix_graphs, global_matrix_graphs_name, { 4, 4, 1, 2 }, [](auto* gui, auto* lnf, auto store)
       -> Component& { return make_matrix_graphs_section(gui, lnf, store, false, module_section_global_matrices, global_matrix_graphs_name); });
-
     result->gui.custom_sections[custom_section_voice_matrix_graphs] = make_custom_section_gui(
-      custom_section_voice_matrix_graphs, voice_matrix_graphs_name, { 9, 4, 1, 2 }, [](auto* gui, auto* lnf, auto store)
+      custom_section_voice_matrix_graphs, voice_matrix_graphs_name, { 6, 5, 1, 1 }, [](auto* gui, auto* lnf, auto store)
       -> Component& { return make_matrix_graphs_section(gui, lnf, store, false, module_section_voice_matrices, voice_matrix_graphs_name); });
   }
 
@@ -479,13 +503,15 @@ synth_topo(format_basic_config const* config, bool is_fx, std::string const& ful
       "{FB435C64-8349-4F0F-84FC-FFC82002D69F}", module_section_voice_in, { 5, 0, 1, 3 }, { { 1 }, { 1 } });
     result->gui.module_sections[module_section_voice_out] = make_module_section_gui(
       "{2B764ECA-B745-4087-BB73-1B5952BC6B96}", module_section_voice_out, { 5, 3, 1, 1 }, { { 1 }, { 1 } });
+    result->gui.module_sections[module_section_arp] = make_module_section_gui(
+      "{BB3255E5-86BF-4685-803F-E990A14EFF2E}", module_section_arp, { 5, 4, 1, 2 }, { { 1 }, { 1 } });
 
     std::vector<int> global_matrix_modules = { module_gaudio_audio_matrix, module_gcv_audio_matrix, module_gcv_cv_matrix };
     std::vector<int> voice_matrix_modules = { module_osc_osc_matrix, module_vaudio_audio_matrix, module_vcv_audio_matrix, module_vcv_cv_matrix };
     result->gui.module_sections[module_section_global_matrices] = make_module_section_gui_tabbed(
       "{628D5FCB-0672-47A5-A23D-31257D4CCAF1}", module_section_global_matrices, { 2, 4, 2, 2 }, global_matrix_modules);
     result->gui.module_sections[module_section_voice_matrices] = make_module_section_gui_tabbed(
-      "{9BEB7D58-47AB-4E2D-891B-349607170508}", module_section_voice_matrices, { 5, 4, 4, 2 }, voice_matrix_modules);
+      "{9BEB7D58-47AB-4E2D-891B-349607170508}", module_section_voice_matrices, { 7, 4, 3, 2 }, voice_matrix_modules);
   }
 
   result->modules.resize(module_count);
@@ -501,27 +527,28 @@ synth_topo(format_basic_config const* config, bool is_fx, std::string const& ful
   result->modules[module_osc] = osc_topo(is_fx ? module_section_hidden : module_section_osc, { 0, 0 });
   result->modules[module_global_in] = global_in_topo(module_section_global_in, is_fx, { 0, 0 });
   result->modules[module_master_settings] = master_settings_topo(module_section_master_settings, { 0, 0 }, is_fx, result.get());
-  result->modules[module_voice_on_note] = voice_on_note_topo(result.get(), module_section_hidden); // must be after all global cv  
-  result->modules[module_voice_in] = voice_in_topo(is_fx ? module_section_hidden : module_section_voice_in, { 0, 0 }); // must be after all cv
+  result->modules[module_arpeggiator] = arpeggiator_topo(result.get(), is_fx ? module_section_hidden : module_section_arp, { 0, 0 }); // voice stuff must be after global cv
+  result->modules[module_voice_on_note] = voice_on_note_topo(result.get(), module_section_hidden);
+  result->modules[module_voice_in] = voice_in_topo(is_fx ? module_section_hidden : module_section_voice_in, { 0, 0 });
   result->modules[module_voice_out] = audio_out_topo(is_fx ? module_section_hidden : module_section_voice_out, { 0, 0 }, false);
   result->modules[module_global_out] = audio_out_topo(module_section_global_out, { 0, 0 }, true);
   result->modules[module_monitor] = monitor_topo(module_section_monitor, { 0, 0 }, result->audio_polyphony, is_fx);
   result->modules[module_osc_osc_matrix] = osc_osc_matrix_topo(is_fx ? module_section_hidden : module_section_voice_matrices, { 0, 0 }, result.get());
   result->modules[module_gaudio_audio_matrix] = audio_audio_matrix_topo(module_section_global_matrices, { 0, 0 }, true, is_fx,
     make_audio_audio_matrix_sources(result.get(), true), make_audio_audio_matrix_targets(result.get(), true));
-  result->modules[module_gcv_audio_matrix] = cv_matrix_topo(module_section_global_matrices, { 0, 0 }, false, true, is_fx,
-    make_cv_matrix_sources(result.get(), true), {}, make_cv_audio_matrix_targets(result.get(), true));
-  result->modules[module_gcv_cv_matrix] = cv_matrix_topo(module_section_global_matrices, { 0, 0 }, true, true, is_fx,
-    make_cv_matrix_sources(result.get(), true), {}, make_cv_cv_matrix_targets(result.get(), true));
+  result->modules[module_gcv_audio_matrix] = cv_matrix_topo(result.get(), module_section_global_matrices, { 0, 0 }, false, true, is_fx,
+    make_cv_matrix_sources(result.get(), true, false), {}, make_cv_audio_matrix_targets(result.get(), true));
+  result->modules[module_gcv_cv_matrix] = cv_matrix_topo(result.get(), module_section_global_matrices, { 0, 0 }, true, true, is_fx,
+    make_cv_matrix_sources(result.get(), true, false), {}, make_cv_cv_matrix_targets(result.get(), true));
   result->modules[module_vaudio_audio_matrix] = audio_audio_matrix_topo(is_fx ? module_section_hidden : module_section_voice_matrices, { 0, 0 }, false, is_fx,
     make_audio_audio_matrix_sources(result.get(), false), make_audio_audio_matrix_targets(result.get(), false));
-  result->modules[module_vcv_audio_matrix] = cv_matrix_topo(is_fx ? module_section_hidden : module_section_voice_matrices, { 0, 0 }, false, false, is_fx,
-    make_cv_matrix_sources(result.get(), false),
-    make_cv_matrix_sources(result.get(), true),
+  result->modules[module_vcv_audio_matrix] = cv_matrix_topo(result.get(), is_fx ? module_section_hidden : module_section_voice_matrices, { 0, 0 }, false, false, is_fx,
+    make_cv_matrix_sources(result.get(), false, false),
+    make_cv_matrix_sources(result.get(), false, true),
     make_cv_audio_matrix_targets(result.get(), false));
-  result->modules[module_vcv_cv_matrix] = cv_matrix_topo(is_fx ? module_section_hidden : module_section_voice_matrices, { 0, 0 }, true, false, is_fx,
-    make_cv_matrix_sources(result.get(), false),
-    make_cv_matrix_sources(result.get(), true),
+  result->modules[module_vcv_cv_matrix] = cv_matrix_topo(result.get(), is_fx ? module_section_hidden : module_section_voice_matrices, { 0, 0 }, true, false, is_fx,
+    make_cv_matrix_sources(result.get(), false, false),
+    make_cv_matrix_sources(result.get(), false, true),
     make_cv_cv_matrix_targets(result.get(), false));
   return result;
 } 

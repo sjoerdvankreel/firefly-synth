@@ -128,7 +128,9 @@ struct module_topo_gui final {
   bool enable_tab_menu = true;
   module_tab_menu_handler_factory menu_handler_factory;
 
+  bool force_rerender_graph_on_param_hover = false;
   bool render_automation_state = false; // or modulation state / for graphs
+  bool rerender_graph_on_modulation = true; // might not be so good if the plot is a single param
 
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(module_topo_gui);
 };
@@ -137,6 +139,7 @@ struct module_topo_gui final {
 struct module_dsp_output final {
   topo_info info;
   bool is_modulation_source;
+  int underlying_module_index;
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(module_dsp_output);
 };
 
@@ -176,7 +179,6 @@ struct module_topo final {
 
   state_initializer minimal_initializer;
   state_initializer default_initializer;
-  bool force_rerender_on_param_hover = false;
 
   module_graph_renderer graph_renderer;
   module_engine_factory engine_factory;

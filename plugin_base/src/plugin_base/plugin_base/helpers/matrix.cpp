@@ -173,7 +173,7 @@ make_audio_matrix(std::vector<module_topo const*> const& modules, int start_slot
 }
 
 routing_matrix<module_output_mapping>
-make_cv_source_matrix(std::vector<cv_source_entry> const& entries)
+make_cv_source_matrix(plugin_topo const* topo, std::vector<cv_source_entry> const& entries)
 {
   int index = 0;
   routing_matrix<module_output_mapping> result;
@@ -217,14 +217,28 @@ make_cv_source_matrix(std::vector<cv_source_entry> const& entries)
     }
     else
     {
+      int prev_underlying_module_index = -1;
       auto output_submenu = result.submenu->add_submenu(module_tag.display_name);
+      auto current_submenu = output_submenu;
       for (int o = 0; o < module->dsp.outputs.size(); o++)
       {
         auto const& output = module->dsp.outputs[o];
         if (!output.is_modulation_source) continue;
+
+        if (output.underlying_module_index == -1)
+        {
+          prev_underlying_module_index = -1;
+          current_submenu = output_submenu;
+        }
+        else if(output.underlying_module_index != prev_underlying_module_index)
+        {
+          prev_underlying_module_index = output.underlying_module_index;
+          current_submenu = output_submenu->add_submenu(topo->modules[output.underlying_module_index].info.tag.menu_display_name);
+        }
+
         for (int oi = 0; oi < output.info.slot_count; oi++)
         {
-          output_submenu->indices.push_back(index++);
+          current_submenu->indices.push_back(index++);
           result.mappings.push_back({ module->info.index, 0, o, oi });
           result.items.push_back({
             make_id(module_tag.id, 0, output.info.tag.id, oi),

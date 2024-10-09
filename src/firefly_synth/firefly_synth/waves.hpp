@@ -10,13 +10,16 @@
 namespace firefly_synth
 {
 
+// stuff is shared
+enum class wave_target { lfo, arp, shaper };
+
 // non-antialised waveforms for lfos and shapers
 using plugin_base::unipolar_to_bipolar;
 using plugin_base::bipolar_to_unipolar;
 inline float const pi32 = plugin_base::pi32;
 
 std::vector<plugin_base::list_item> wave_skew_type_items();
-std::vector<plugin_base::list_item> wave_shape_type_items(bool for_shaper, bool global);
+std::vector<plugin_base::list_item> wave_shape_type_items(wave_target target, bool global);
 
 enum { wave_skew_type_off, wave_skew_type_lin, wave_skew_type_scu, wave_skew_type_scb, wave_skew_type_xpu, wave_skew_type_xpb };
 enum { 

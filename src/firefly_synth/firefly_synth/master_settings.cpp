@@ -51,7 +51,8 @@ master_settings_topo(int section, gui_position const& pos, bool is_fx, plugin_ba
   result.info.description = "Automation, MIDI and BPM smoothing control and microtuning mode.";
   result.graph_renderer = render_graph;
   result.gui.show_tab_header = false;
-  result.force_rerender_on_param_hover = true;
+  result.gui.rerender_graph_on_modulation = false;
+  result.gui.force_rerender_graph_on_param_hover = true;
 
   result.sections.emplace_back(make_param_section(section_tuning,
     make_topo_tag_basic("{650CEC37-B01B-4EE6-A010-34C2AE1C66B0}", "Tuning"), 

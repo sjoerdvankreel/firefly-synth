@@ -69,6 +69,9 @@ _voice_processor_context(voice_processor_context)
   _voice_modulation_outputs.resize(_polyphony);
   for(int i = 0; i < _polyphony; i++)
     _voice_modulation_outputs[i].resize(desc->module_count);
+
+  // just a best guess, hope it wont allocate
+  _arp_notes.resize(1024);
 }
 
 engine_tuning_mode 
@@ -184,7 +187,7 @@ plugin_engine::make_plugin_block(
     current_tuning,
     tuning_mode,
     start_frame, end_frame, slot,
-    _sample_rate, state, nullptr, nullptr, 
+    _sample_rate, _stream_time, state, nullptr, nullptr, 
     _host_block->shared, _state.desc(), 
     _state.desc().modules[module_global],
     modulation_outputs
@@ -296,6 +299,10 @@ plugin_engine::deactivate()
   for (int m = _state.desc().module_output_start; m < _state.desc().plugin->modules.size(); m++)
     for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
       _output_engines[m][mi].reset();
+
+
+  // arp
+  _arpeggiator.reset();
 }
 
 void
@@ -332,6 +339,13 @@ plugin_engine::activate(int max_frame_count)
   // set automation values to current state, events may overwrite
   automation_state_dirty();
   init_automation_from_state();
+
+  // arp
+  if (_state.desc().plugin->engine.arpeggiator_module_index != -1)
+  {
+    assert(_state.desc().plugin->engine.arpeggiator_factory_);
+    _arpeggiator = _state.desc().plugin->engine.arpeggiator_factory_();
+  }
 }
 
 void
@@ -382,7 +396,7 @@ plugin_engine::activate_modules()
       {
         plugin_block block(make_plugin_block(-1, -1, m, mi, engine_tuning_mode_no_tuning, 0, 0));
         _input_engines[m][mi] = factory(*_state.desc().plugin, _sample_rate, _max_frame_count);
-        _input_engines[m][mi]->reset_audio(&block);
+        _input_engines[m][mi]->reset_audio(&block, nullptr, nullptr);
       }
     }
   
@@ -403,7 +417,7 @@ plugin_engine::activate_modules()
       {
         plugin_block block(make_plugin_block(-1, -1, m, mi, engine_tuning_mode_no_tuning, 0, 0));
         _output_engines[m][mi] = factory(*_state.desc().plugin, _sample_rate, _max_frame_count);
-        _output_engines[m][mi]->reset_audio(&block);
+        _output_engines[m][mi]->reset_audio(&block, nullptr, nullptr);
       }
     }
 }
@@ -533,7 +547,7 @@ plugin_engine::process_voice(int v, bool threaded)
 
         double start_time = seconds_since_epoch();
         _voice_module_process_duration_sec[v][m][mi] = start_time;
-        _voice_engines[v][m][mi]->process_audio(block);
+        _voice_engines[v][m][mi]->process_audio(block, nullptr, nullptr);
         _voice_module_process_duration_sec[v][m][mi] = seconds_since_epoch() - start_time;
 
         // plugin completed its envelope
@@ -617,7 +631,7 @@ plugin_engine::activate_voice(
           _voice_states[slot].sub_voice_index, _last_note_key, _last_note_channel));
         plugin_block block(make_plugin_block(slot, _voice_states[slot].note_id_.channel, m, mi, tuning_mode, state.start_frame, state.end_frame));
         block.voice = &voice_block;
-        _voice_engines[slot][m][mi]->reset_audio(&block);
+        _voice_engines[slot][m][mi]->reset_audio(&block, nullptr, nullptr);
       }
 }
 
@@ -968,13 +982,23 @@ plugin_engine::process()
         plugin_block block(make_plugin_block(-1, -1, m, mi, _current_block_tuning_mode, 0, frame_count));
         double start_time = seconds_since_epoch();
         _global_module_process_duration_sec[m][mi] = start_time;
-        _input_engines[m][mi]->process_audio(block);
+        _input_engines[m][mi]->process_audio(block, nullptr, nullptr);
         _global_module_process_duration_sec[m][mi] = seconds_since_epoch() - start_time;
       }
 
   /********************************************************/
   /* STEP 5: Voice management in case of polyphonic synth */
   /********************************************************/
+
+  // arpeggiator: plug is free to completely rewrite the note stream
+  _arp_notes.clear();
+  if (_arpeggiator)
+  {
+    plugin_block block(make_plugin_block(-1, -1, _state.desc().plugin->engine.arpeggiator_module_index, 0, _current_block_tuning_mode, 0, frame_count));
+    _arpeggiator->process_audio(block, &_host_block->events.notes, &_arp_notes);
+  }
+  else
+    _arp_notes.insert(_arp_notes.end(), _host_block->events.notes.begin(), _host_block->events.notes.end());
 
   if(_state.desc().plugin->type == plugin_type::synth)
   {
@@ -1010,9 +1034,9 @@ plugin_engine::process()
       if (topo.engine.sub_voice_counter) sub_voice_count = topo.engine.sub_voice_counter(_graph, _state);
 
       // poly mode: steal voices for incoming notes by age
-      for (int e = 0; e < _host_block->events.notes.size(); e++)
+      for (int e = 0; e < _arp_notes.size(); e++)
       {
-        auto const& event = _host_block->events.notes[e];
+        auto const& event = _arp_notes[e];
         if (event.type != note_event_type::on) continue;
 
         // mts-esp support
@@ -1042,14 +1066,14 @@ plugin_engine::process()
       // set up note-off stream, plugin will have to do something with it
       // so first check if there's a "real" note-off in there (not caused by an note-on at the same sample pos)
       int first_note_off_index = -1;
-      for (int e = 0; e < _host_block->events.notes.size(); e++)
-        if (_host_block->events.notes[e].type == note_event_type::off)
+      for (int e = 0; e < _arp_notes.size(); e++)
+        if (_arp_notes[e].type == note_event_type::off)
         {
           // if a note off is caused by another note on at the same sample position, ignore it
-          auto const& event = _host_block->events.notes[e];
+          auto const& event = _arp_notes[e];
           bool note_on_found_this_pos = false;
-          for (int e2 = 0; e2 < _host_block->events.notes.size(); e2++)
-            if (_host_block->events.notes[e2].type == note_event_type::on && _host_block->events.notes[e2].frame == event.frame)
+          for (int e2 = 0; e2 < _arp_notes.size(); e2++)
+            if (_arp_notes[e2].type == note_event_type::on && _arp_notes[e2].frame == event.frame)
             {
               note_on_found_this_pos = true;
               break;
@@ -1065,9 +1089,9 @@ plugin_engine::process()
       // if there's no true note-off in this block, check for note-on
       int first_note_on_index = -1;
       if(first_note_off_index == -1)
-        for (int e = 0; e < _host_block->events.notes.size(); e++)
+        for (int e = 0; e < _arp_notes.size(); e++)
         {
-          auto const& event = _host_block->events.notes[e];
+          auto const& event = _arp_notes[e];
           if (event.type == note_event_type::on)
           {
             // mts-esp support
@@ -1084,7 +1108,7 @@ plugin_engine::process()
       // and if it's there, proceed
       if(first_note_on_index != -1)
       {
-        auto& first_event = _host_block->events.notes[first_note_on_index];
+        auto& first_event = _arp_notes[first_note_on_index];
 
         int slot = -1;
         for(int v = 0; v < _voice_states.size(); v++)
@@ -1130,10 +1154,10 @@ plugin_engine::process()
         }
 
         // set up note-on stream, plugin will have to do something with it
-        for(int e = 0; e < _host_block->events.notes.size(); e++)
-          if(_host_block->events.notes[e].type == note_event_type::on)
+        for(int e = 0; e < _arp_notes.size(); e++)
+          if(_arp_notes[e].type == note_event_type::on)
           {
-            auto const& event = _host_block->events.notes[e]; 
+            auto const& event = _arp_notes[e];
             _last_note_key = event.id.key;
             _last_note_channel = event.id.channel;
             std::fill(_mono_note_stream.begin() + event.frame, _mono_note_stream.end(), mono_note_state { event.id.key, mono_note_stream_event::none });
@@ -1148,9 +1172,9 @@ plugin_engine::process()
     // clap on bitwig hands us note-on events with note id and note-off events without them
     // so i choose to allow note-off with note-id to only kill the same note-id
     // but allow note-off without note-id to kill any matching pck regardless of note-id
-    for (int e = 0; e < _host_block->events.notes.size(); e++)
+    for (int e = 0; e < _arp_notes.size(); e++)
     {
-      auto const& event = _host_block->events.notes[e];
+      auto const& event = _arp_notes[e];
       if (event.type == note_event_type::on) continue;
       for (int v = 0; v < _voice_states.size(); v++)
       {
@@ -1232,7 +1256,7 @@ plugin_engine::process()
         block.out = &out_block;
         double start_time = seconds_since_epoch();
         _global_module_process_duration_sec[m][mi] = start_time;
-        _output_engines[m][mi]->process_audio(block);
+        _output_engines[m][mi]->process_audio(block, nullptr, nullptr);
         _global_module_process_duration_sec[m][mi] = seconds_since_epoch() - start_time;
 
         // copy back output parameter values

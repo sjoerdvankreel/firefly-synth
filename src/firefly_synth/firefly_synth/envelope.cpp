@@ -90,10 +90,20 @@ public module_engine {
 public:
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(env_engine);
 
-  void reset_audio(plugin_block const* block) override;
-  void process_audio(plugin_block& block) override { process_internal(block, nullptr); }
-  void process_graph(plugin_block& block, std::vector<mod_out_custom_state> const& custom_outputs, void* context) override;
-  void reset_graph(plugin_block const* block, std::vector<mod_out_custom_state> const& custom_outputs, void* context) override;
+  void reset_audio(plugin_block const* block,
+    std::vector<note_event> const* in_notes,
+    std::vector<note_event>* out_notes) override;
+  void process_audio(plugin_block& block,
+    std::vector<note_event> const* in_notes,
+    std::vector<note_event>* out_notes) override { process_internal(block, nullptr); }
+
+  void process_graph(plugin_block& block,
+    std::vector<note_event> const* in_notes,
+    std::vector<note_event>* out_notes, 
+    std::vector<mod_out_custom_state> const& custom_outputs, void* context) override;
+  void reset_graph(plugin_block const* block,
+    std::vector<note_event> const* in_notes,
+    std::vector<note_event>* out_notes, std::vector<mod_out_custom_state> const& custom_outputs, void* context) override;
 
 private:
 
@@ -184,7 +194,7 @@ render_graph(
   param_topo_mapping const& mapping, std::vector<mod_out_custom_state> const& custom_outputs)
 {
   if (state.get_plain_at(module_env, mapping.module_slot, param_on, 0).step() == 0) 
-    return graph_data(graph_data_type::off, {});
+    return graph_data(graph_data_type::off, { state.desc().plugin->modules[mapping.module_index].info.tag.menu_display_name });
 
   float dly, att, hld, dcy, rls, flt;
   env_plot_length_seconds(state, mapping.module_slot, dly, att, hld, dcy, rls, flt);
@@ -204,9 +214,9 @@ render_graph(
   engine->process_begin(&state, sample_rate, params.max_frame_count, voice_release_at);
   auto const* block = engine->process(module_env, mapping.module_slot, custom_outputs, nullptr, [mapping, &custom_outputs](plugin_block& block) {
     env_engine engine;
-    engine.reset_graph(&block, custom_outputs, nullptr);
+    engine.reset_graph(&block, nullptr, nullptr, custom_outputs, nullptr);
     cv_cv_matrix_mixdown modulation(make_static_cv_matrix_mixdown(block)[module_env][mapping.module_slot]);
-    engine.process_graph(block, custom_outputs, &modulation);
+    engine.process_graph(block, nullptr, nullptr, custom_outputs, &modulation);
   });
   engine->process_end();
 
@@ -306,7 +316,7 @@ env_topo(int section, gui_position const& pos)
   module_topo result(make_module(
     make_topo_info_basic("{DE952BFA-88AC-4F05-B60A-2CEAF9EE8BF9}", "Env", module_env, 10),
     make_module_dsp(module_stage::voice, module_output::cv, 0, { 
-      make_module_dsp_output(true, make_topo_info_basic("{2CDB809A-17BF-4936-99A0-B90E1035CBE6}", "Output", 0, 1)) }),
+      make_module_dsp_output(true, -1, make_topo_info_basic("{2CDB809A-17BF-4936-99A0-B90E1035CBE6}", "Output", 0, 1)) }),
     make_module_gui(section, pos, { { 1, 1 }, { 6, 26, 13, 34, 63 } })));
   result.gui.autofit_column = 1;
   result.gui.tabbed_name = "ENV";
@@ -539,7 +549,10 @@ calc_slope_exp_splt(double slope_pos, double splt_bnd, double exp)
 }
 
 void
-env_engine::reset_audio(plugin_block const* block)
+env_engine::reset_audio(
+  plugin_block const* block,
+  std::vector<note_event> const* in_notes,
+  std::vector<note_event>* out_notes)
 {
   _stage_pos = 0;
   _total_pos = 0;
@@ -555,11 +568,13 @@ env_engine::reset_audio(plugin_block const* block)
 
 void 
 env_engine::reset_graph(
-  plugin_block const* block, 
+  plugin_block const* block,
+  std::vector<note_event> const* in_notes,
+  std::vector<note_event>* out_notes,
   std::vector<mod_out_custom_state> const& custom_outputs, 
   void* context)
 {
-  reset_audio(block);
+  reset_audio(block, nullptr, nullptr);
 
   _ffwd_stopped_at_samples = -1;
   _ffwd_target_total_pos = 0.0f;
@@ -583,13 +598,13 @@ env_engine::reset_graph(
         {
           // microseconds, see below
           new_ffwd_run_for_graph = true;
-          new_ffwd_target_total_pos = custom_outputs[i].value_custom / 1000000.0f;
+          new_ffwd_target_total_pos = custom_outputs[i].value_custom_int() / 1000000.0f;
           break;
         }
         if (!seen_multitrig && custom_outputs[i].tag_custom == custom_tag_multitrig_level)
         {
           seen_multitrig = true;
-          float trig_level = custom_outputs[i].value_custom / (float)std::numeric_limits<int>::max();
+          float trig_level = custom_outputs[i].value_custom_float();
           _current_level = trig_level;
           _multitrig_level = trig_level;
         }
@@ -613,7 +628,9 @@ env_engine::reset_graph(
 
 void 
 env_engine::process_graph(
-  plugin_block& block, 
+  plugin_block& block,
+  std::vector<note_event> const* in_notes,
+  std::vector<note_event>* out_notes,
   std::vector<mod_out_custom_state> const& custom_outputs, 
   void* context)
 {
@@ -661,10 +678,10 @@ env_engine::process_internal(plugin_block& block, cv_cv_matrix_mixdown const* mo
     block.state.own_cv[0][0].fill(block.start_frame, block.end_frame, 0.0f);
     // CAUTION: microseconds
     if(_stage == env_stage::end && !block.graph)
-      block.push_modulation_output(modulation_output::make_mod_output_custom_state(
+      block.push_modulation_output(modulation_output::make_mod_output_custom_state_int(
         block.voice->state.slot,
         block.module_desc_.info.global,
-        0,
+        custom_tag_total_pos,
         (int)(_total_pos * 1000000)));
     return;
   }
@@ -681,17 +698,17 @@ env_engine::process_internal(plugin_block& block, cv_cv_matrix_mixdown const* mo
   // since sample rates are different for audio and GUI, need a value in time not frames
   // reset_graph+render_graph then need to derive the env state by just truncating the entire thing to that position
   // CAUTION: microseconds. cannot go with maxint because total_pos is not in [0, 1] (env can be > 1 second)
-  block.push_modulation_output(modulation_output::make_mod_output_custom_state(
+  block.push_modulation_output(modulation_output::make_mod_output_custom_state_int(
     block.voice->state.slot,
     block.module_desc_.info.global,
     custom_tag_total_pos,
     (int)(_total_pos * 1000000)));
   if(block_auto[param_trigger][0].step() == trigger_multi)
-    block.push_modulation_output(modulation_output::make_mod_output_custom_state(
+    block.push_modulation_output(modulation_output::make_mod_output_custom_state_float(
       block.voice->state.slot,
       block.module_desc_.info.global,
       custom_tag_multitrig_level,
-      (int)(_multitrig_level * std::numeric_limits<int>::max())));
+      _multitrig_level));
 
   // drop the mod indicators when we ended
   if (_stage == env_stage::end) return;

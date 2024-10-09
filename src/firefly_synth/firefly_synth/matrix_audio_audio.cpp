@@ -38,8 +38,12 @@ public:
     std::vector<module_topo_mapping> const& targets): 
     _global(global), _mixer(this), _sources(sources), _targets(targets) {}
 
-  void reset_audio(plugin_block const*) override {}
-  void process_audio(plugin_block& block) override;
+  void reset_audio(plugin_block const*,
+    std::vector<note_event> const* in_notes,
+    std::vector<note_event>* out_notes) override {}
+  void process_audio(plugin_block& block,
+    std::vector<note_event> const* in_notes,
+    std::vector<note_event>* out_notes) override;
   jarray<float, 2> const& mix(plugin_block& block, int module, int slot);
 };
 
@@ -108,7 +112,7 @@ render_graph(
     for (int r = 0; r < route_count; r++)
       if (state.get_plain_at(m.module_index, m.module_slot, param_on, r).step() != 0)
         return render_graph(state, engine, -1, { m.module_index, m.module_slot, m.param_index, r }, targets);
-    return graph_data(graph_data_type::off, {});
+    return graph_data(graph_data_type::off, { state.desc().plugin->modules[mapping.module_index].info.tag.menu_display_name });
   }
   
   int ti = state.get_plain_at(m.module_index, m.module_slot, param_target, m.param_slot).step();
@@ -160,8 +164,8 @@ audio_audio_matrix_topo(
 
   module_topo result(make_module(info,
     make_module_dsp(stage, module_output::audio, scratch_count, { 
-      make_module_dsp_output(false, make_topo_info_basic("{59AF084C-927D-4AFD-BA81-055687FF6A79}", "Silence", output_silence, 1)), 
-      make_module_dsp_output(false, make_topo_info_basic("{3EFFD54D-440A-4C91-AD4F-B1FA290208EB}", "Mixed", output_mixed, route_count)) }),
+      make_module_dsp_output(false, -1, make_topo_info_basic("{59AF084C-927D-4AFD-BA81-055687FF6A79}", "Silence", output_silence, 1)),
+      make_module_dsp_output(false, -1, make_topo_info_basic("{3EFFD54D-440A-4C91-AD4F-B1FA290208EB}", "Mixed", output_mixed, route_count)) }),
     make_module_gui(section, pos, { 1, 1 })));
 
   result.gui.tabbed_name = "Audio";
@@ -253,7 +257,10 @@ audio_audio_matrix_mixer::mix(plugin_block& block, int module, int slot)
 { return _engine->mix(block, module, slot); }
 
 void 
-audio_audio_matrix_engine::process_audio(plugin_block& block)
+audio_audio_matrix_engine::process_audio(
+  plugin_block& block,
+  std::vector<note_event> const* in_notes,
+  std::vector<note_event>* out_notes)
 { 
   // need to capture own audio here because when we start 
   // mixing "own" does not refer to us but to the caller

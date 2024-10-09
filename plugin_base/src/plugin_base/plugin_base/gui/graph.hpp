@@ -44,6 +44,10 @@ private:
     juce::Graphics& g, jarray<float, 1> const& series, 
     bool bipolar, float stroke_thickness, float midpoint);
 
+  void paint_multi_bars(
+    juce::Graphics& g, int implied_count,
+    std::vector<std::pair<int, float>> const& multi_bars);
+
 protected:
 
   graph_data _data;

@@ -26,9 +26,6 @@ autobuilds:
 * ask paul
 * integrate https://github.com/surge-synthesizer/monique-monosynth/blob/main/.github/workflows/build-pr.yml
 
-modvis take 3:
-* make a new one for free-run and on-voice-rand
-
 wishlist:
 use fftw
 make a patch cleanup button
@@ -42,7 +39,6 @@ ditch after-mod, claim micro support ?
 show effective modulation in the ui for clap param mod
 Feedback FM - but needs per-sample processing, not block
 turn on stuff when dragging (e.g. basic sin, dist skew etc)
-arpeggiator - hard - but easy -> play multiple octaves on-note. or maybe allow 3/s, 5/s, whatever selection
 
 wishlist sometime:
 mseg

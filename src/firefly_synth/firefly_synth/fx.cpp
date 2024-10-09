@@ -322,8 +322,14 @@ public:
   PB_PREVENT_ACCIDENTAL_COPY(fx_engine);
   fx_engine(bool global, int sample_rate, int max_frame_count);
 
-  void reset_audio(plugin_block const*) override;
-  void process_audio(plugin_block& block) override { process<false>(block, nullptr, nullptr); }
+  void reset_audio(plugin_block const*,
+    std::vector<note_event> const* in_notes,
+    std::vector<note_event>* out_notes) override;
+
+  void process_audio(plugin_block& block,
+    std::vector<note_event> const* in_notes,
+    std::vector<note_event>* out_notes) override { process<false>(block, nullptr, nullptr); }
+
   template<bool Graph> 
   void process(plugin_block& block, cv_audio_matrix_mixdown const* modulation, jarray<float, 2> const* audio_in);
 };
@@ -371,7 +377,7 @@ render_graph(
   param_topo_mapping const& mapping, std::vector<mod_out_custom_state> const& custom_outputs)
 {
   int type = state.get_plain_at(mapping.module_index, mapping.module_slot, param_type, 0).step();
-  if(type == type_off) return graph_data(graph_data_type::off, {});
+  if(type == type_off) return graph_data(graph_data_type::off, { state.desc().plugin->modules[mapping.module_index].info.tag.menu_display_name });
 
   int frame_count = -1;
   int sample_rate = -1;
@@ -435,7 +441,7 @@ render_graph(
     mapping.module_index, mapping.module_slot, custom_outputs, nullptr, [mapping, sample_rate, frame_count, &audio_in](plugin_block& block) {
     bool global = mapping.module_index == module_gfx;
     fx_engine engine(global, sample_rate, frame_count);
-    engine.reset_audio(&block);
+    engine.reset_audio(&block, nullptr, nullptr);
     cv_audio_matrix_mixdown modulation(make_static_cv_matrix_mixdown(block));
     engine.process<true>(block, &modulation, &audio_in);
   });
@@ -552,7 +558,7 @@ fx_state_converter::handle_invalid_param_value(
     {
       // format is {guid}-{guid}-{guid}
       if(old_value.size() != 3 * 38 + 2) return false;
-      auto shaper_items = wave_shape_type_items(true, _global);
+      auto shaper_items = wave_shape_type_items(wave_target::shaper, _global);
       std::string old_shaper_guid = old_value.substr(0, 38);
       for(int i = 0; i < shaper_items.size(); i++)
         if (old_shaper_guid == shaper_items[i].id)
@@ -655,7 +661,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
 
   module_topo result(make_module(info,
     make_module_dsp(stage, module_output::audio, scratch_count, {
-      make_module_dsp_output(false, make_topo_info_basic("{E7C21225-7ED5-45CC-9417-84A69BECA73C}", "Output", 0, 1)) }),
+      make_module_dsp_output(false, -1, make_topo_info_basic("{E7C21225-7ED5-45CC-9417-84A69BECA73C}", "Output", 0, 1)) }),
     make_module_gui(section, pos, { { 1, 1 }, { 32, 12, 35, 55, 8 } })));
   result.gui.tabbed_name = "FX";
   result.gui.is_drag_mod_source = true;
@@ -900,7 +906,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
   dist_clip_expo.info.description = "Exponential clipper amount.";
   auto& dist_shaper = result.params.emplace_back(make_param(
     make_topo_info("{BFB5A04F-5372-4259-8198-6761BA52ADEB}", true, "Dist Shape", "Shp", "Dist Shape", param_dist_shaper, 1),
-    make_param_dsp_automate_if_voice(!global), make_domain_item(wave_shape_type_items(true, global), ""),
+    make_param_dsp_automate_if_voice(!global), make_domain_item(wave_shape_type_items(wave_target::shaper, global), ""),
     make_param_gui_single(section_dist_right, gui_edit_type::autofit_list, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   dist_shaper.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
@@ -1246,7 +1252,10 @@ _dst_oversampler(max_frame_count)
 }
 
 void
-fx_engine::reset_audio(plugin_block const* block)
+fx_engine::reset_audio(
+  plugin_block const* block,
+  std::vector<note_event> const* in_notes,
+  std::vector<note_event>* out_notes)
 {
   _svf.clear();
   _dly_pos = 0;

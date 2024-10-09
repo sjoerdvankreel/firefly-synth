@@ -167,8 +167,12 @@ public:
   PB_PREVENT_ACCIDENTAL_COPY(osc_engine);
   osc_engine(int max_frame_count, float sample_rate);
 
-  void reset_audio(plugin_block const*) override;
-  void process_audio(plugin_block& block) override { process<false>(block, nullptr); }
+  void reset_audio(plugin_block const*,
+    std::vector<note_event> const* in_notes,
+    std::vector<note_event>* out_notes) override;
+  void process_audio(plugin_block& block,
+    std::vector<note_event> const* in_notes,
+    std::vector<note_event>* out_notes) override { process<false>(block, nullptr); }
   
   template <bool Graph> 
   void process(plugin_block& block, cv_audio_matrix_mixdown const* modulation);
@@ -277,7 +281,7 @@ render_osc_graphs(
   {
     block = engine->process(module_osc, i, custom_outputs, nullptr, [max_frame_count = params.max_frame_count, sample_rate](plugin_block& block) {
       osc_engine engine(max_frame_count, sample_rate);
-      engine.reset_audio(&block);
+      engine.reset_audio(&block, nullptr, nullptr);
       cv_audio_matrix_mixdown modulation(make_static_cv_matrix_mixdown(block));
       engine.process<true>(block, &modulation);
     });
@@ -309,7 +313,7 @@ render_osc_graph(
   graph_engine_params params = {};
   int type = state.get_plain_at(module_osc, mapping.module_slot, param_type, 0).step();
   if(state.get_plain_at(mapping.module_index, mapping.module_slot, param_type, 0).step() == type_off) 
-    return graph_data(graph_data_type::off, {});
+    return graph_data(graph_data_type::off, { state.desc().plugin->modules[mapping.module_index].info.tag.menu_display_name });
   auto data = render_osc_graphs(state, engine, mapping.module_slot, false, custom_outputs)[mapping.module_slot];
   std::string partition = is_random(type)? "5 Cycles": "First Cycle";
   return graph_data(data.audio(), 1.0f, false, { partition });
@@ -321,7 +325,7 @@ osc_topo(int section, gui_position const& pos)
   module_topo result(make_module(
     make_topo_info_basic("{45C2CCFE-48D9-4231-A327-319DAE5C9366}", "Osc", module_osc, 5),
     make_module_dsp(module_stage::voice, module_output::audio, scratch_count, {
-      make_module_dsp_output(false, make_topo_info_basic("{FA702356-D73E-4438-8127-0FDD01526B7E}", "Output", 0, 1 + max_osc_unison_voices)) }),
+      make_module_dsp_output(false, -1, make_topo_info_basic("{FA702356-D73E-4438-8127-0FDD01526B7E}", "Output", 0, 1 + max_osc_unison_voices)) }),
     make_module_gui(section, pos, { { 1, 1 }, { 32, 8, 13, 26, 55, 8 } })));
   result.info.description = "Oscillator module with sine/saw/triangle/square/DSF/Karplus-Strong/noise generators, hardsync and unison support.";
   result.gui.tabbed_name = "OSC";
@@ -715,7 +719,10 @@ _oversampler(max_frame_count)
 }
 
 void
-osc_engine::reset_audio(plugin_block const* block)
+osc_engine::reset_audio(
+  plugin_block const* block,
+  std::vector<note_event> const* in_notes,
+  std::vector<note_event>* out_notes)
 {
   // publish the oversampler ptrs
   // note: it is important to do this during reset() rather than process()

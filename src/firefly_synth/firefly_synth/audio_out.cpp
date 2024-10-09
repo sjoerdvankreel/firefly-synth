@@ -16,8 +16,12 @@ enum { scratch_bal, scratch_count };
 class global_audio_out_engine :
 public module_engine {            
 public:
-  void reset_audio(plugin_block const*) override {}
-  void process_audio(plugin_block& block) override;
+  void reset_audio(plugin_block const*,
+    std::vector<note_event> const* in_notes,
+    std::vector<note_event>* out_notes) override {}
+  void process_audio(plugin_block& block,
+    std::vector<note_event> const* in_notes,
+    std::vector<note_event>* out_notes) override;
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(global_audio_out_engine);
 };
 
@@ -27,8 +31,12 @@ public module_engine {
   template <bool GlobalUnison>
   void process_unison(plugin_block& block);
 public:
-  void reset_audio(plugin_block const*) override {}
-  void process_audio(plugin_block& block) override;
+  void reset_audio(plugin_block const*,
+    std::vector<note_event> const* in_notes,
+    std::vector<note_event>* out_notes) override {}
+  void process_audio(plugin_block& block,
+    std::vector<note_event> const* in_notes,
+    std::vector<note_event>* out_notes) override;
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(voice_audio_out_engine);
 };
 
@@ -42,7 +50,8 @@ render_graph(
   float gain = state.get_plain_at(mapping.module_index, mapping.module_slot, param_gain, 0).real();
   float l = stereo_balance<0>(bal) * gain;
   float r = stereo_balance<1>(bal) * gain;
-  return graph_data({ { l, r } }, { partition });
+  std::vector<std::pair<float, float>> stereo = { { l, r } };
+  return graph_data(stereo, { partition });
 }
 
 module_topo
@@ -107,7 +116,10 @@ audio_out_topo(int section, gui_position const& pos, bool global)
 } 
 
 void
-global_audio_out_engine::process_audio(plugin_block& block)
+global_audio_out_engine::process_audio(
+  plugin_block& block,
+  std::vector<note_event> const* in_notes,
+  std::vector<note_event>* out_notes)
 {
   auto& mixer = get_audio_audio_matrix_mixer(block, true);
   auto const& audio_in = mixer.mix(block, module_global_out, 0);
@@ -126,7 +138,10 @@ global_audio_out_engine::process_audio(plugin_block& block)
 
 
 void
-voice_audio_out_engine::process_audio(plugin_block& block)
+voice_audio_out_engine::process_audio(
+  plugin_block& block,
+  std::vector<note_event> const* in_notes,
+  std::vector<note_event>* out_notes)
 {
   if(block.voice->state.sub_voice_count > 1)
     process_unison<true>(block);

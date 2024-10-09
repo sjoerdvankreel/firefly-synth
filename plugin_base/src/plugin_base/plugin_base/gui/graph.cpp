@@ -97,6 +97,9 @@ module_graph::modulation_outputs_changed(std::vector<modulation_output> const& o
   int this_module_global = desc.module_topo_to_index.at(this_module_index) + this_module_slot;
   int this_param_first = desc.modules[this_module_global].params[0].info.global;
 
+  if (!desc.modules[this_module_global].module->gui.rerender_graph_on_modulation)
+    return;
+
   bool rerender_indicators = false;
   bool any_mod_indicator_found = false;
   for (int i = 0; i < outputs.size(); i++)
@@ -227,7 +230,7 @@ module_graph::module_mouse_enter(int module)
   auto const& desc = _gui->automation_state()->desc().modules[module];
   if (_module_params.module_index != -1 && _module_params.module_index != desc.module->info.index) return;
   if(desc.params.size() == 0) return;
-  if(_module_params.render_on_module_mouse_enter && !desc.module->force_rerender_on_param_hover)
+  if(_module_params.render_on_module_mouse_enter && !desc.module->gui.force_rerender_graph_on_param_hover)
     request_rerender(desc.params[0].info.global, false);
 }
 
@@ -339,6 +342,34 @@ graph::paint_series(
   g.strokePath(pStroke, PathStrokeType(stroke_thickness));
 }
 
+void 
+graph::paint_multi_bars(
+  juce::Graphics& g, int implied_count,
+  std::vector<std::pair<int, float>> const& multi_bars)
+{
+  float w = getWidth();
+  float h = getHeight();
+
+  for(int i = 0; i < implied_count ; i++)
+    for (int j = 0; j < multi_bars.size(); j++)
+      if(multi_bars[j].first == i)
+      {
+        g.setColour(_lnf->colors().graph_area);
+        float bar_h = multi_bars[j].second * h;
+        float bar_y = (1.0f - multi_bars[j].second) * h;
+        float bar_w = w / implied_count;
+        float bar_x = i / (float)implied_count * w;
+        g.fillRect(bar_x, bar_y, bar_w, bar_h);
+
+        g.setColour(_lnf->colors().graph_line);
+        g.fillRect(bar_x, bar_y - 1.0f, bar_w, 2.0f);
+
+        // for ARP
+        // lets us see where note begins in case same chord is repeated
+        g.fillEllipse(bar_x - 2, bar_y - 2, 4, 4);
+    }
+}
+
 void
 graph::paint(Graphics& g)
 {
@@ -361,27 +392,33 @@ graph::paint(Graphics& g)
     g.fillRect(i / (float)(col_count) * w, 0.0f, 1.0f, h);
 
   // draw background partitions
-  for (int part = 0; part < _data.partitions().size(); part++)
-  {
-    Rectangle<float> area(part / (float)_data.partitions().size() * w, 0.0f, w / _data.partitions().size(), h);
-    if (part % 2 == 1)
+  if(_data.type() != graph_data_type::off && _data.type() != graph_data_type::na)
+    for (int part = 0; part < _data.partitions().size(); part++)
     {
-      g.setColour(_lnf->colors().graph_area.withAlpha(0.33f));
-      g.fillRect(area);
+      Rectangle<float> area(part / (float)_data.partitions().size() * w, 0.0f, w / _data.partitions().size(), h);
+      if (part % 2 == 1)
+      {
+        g.setColour(_lnf->colors().graph_area.withAlpha(0.33f));
+        g.fillRect(area);
+      }
+      g.setColour(_lnf->colors().graph_text);
+      if (_params.scale_type == graph_params::scale_h)
+        g.setFont(_lnf->font().withHeight(h * _params.partition_scale));
+      else
+        g.setFont(_lnf->font().withHeight(w * _params.partition_scale));
+      g.drawText(_data.partitions()[part], area, Justification::centred, false);
     }
-    g.setColour(_lnf->colors().graph_text);
+       
+  if (_data.type() == graph_data_type::off || _data.type() == graph_data_type::na)
+  {
+    g.setColour(_lnf->colors().graph_text); 
     if (_params.scale_type == graph_params::scale_h)
       g.setFont(_lnf->font().withHeight(h * _params.partition_scale));
     else
       g.setFont(_lnf->font().withHeight(w * _params.partition_scale));
-    g.drawText(_data.partitions()[part], area, Justification::centred, false);
-  }
-       
-  if (_data.type() == graph_data_type::off || _data.type() == graph_data_type::na)
-  {
-    g.setColour(_lnf->colors().graph_text);
-    auto text = _data.type() == graph_data_type::off ? "OFF" : "N/A";
-    g.setFont(dynamic_cast<plugin_base::lnf&>(getLookAndFeel()).font().boldened());
+    std::string text = _data.type() == graph_data_type::off ? "OFF" : "N/A";
+    assert(_data.partitions().size() < 2);
+    if (_data.partitions().size() == 1) text = _data.partitions()[0] + " " + text;
     g.drawText(text, getLocalBounds().toFloat(), Justification::centred, false);
     return;
   }
@@ -440,27 +477,51 @@ graph::paint(Graphics& g)
     return;
   }  
 
-  assert(_data.type() == graph_data_type::series);
+  assert(_data.type() == graph_data_type::series || _data.type() == graph_data_type::multi_bars);
 
-  // paint the series
-  jarray<float, 1> series(_data.series());
-  if(_data.bipolar())
-    for(int i = 0; i < series.size(); i++)
-      series[i] = bipolar_to_unipolar(series[i]);
-  paint_series(g, series, _data.bipolar(), _data.stroke_thickness(), 0.5f);
+  // paint the series / bars
+  int count = -1;
+  if (_data.type() == graph_data_type::multi_bars)
+  {
+    int max_index = 0;
+    for (int i = 0; i < _data.multi_bars().size(); i++)
+      max_index = std::max(max_index, _data.multi_bars()[i].first);
+    count = max_index + 1;
+    paint_multi_bars(g, count, _data.multi_bars());
+  }
+  else
+  {
+    count = _data.series().size();
+    jarray<float, 1> series(_data.series());
+    if (_data.bipolar())
+      for (int i = 0; i < series.size(); i++)
+        series[i] = bipolar_to_unipolar(series[i]);
+    paint_series(g, series, _data.bipolar(), _data.stroke_thickness(), 0.5f);
+  }
 
   if (_gui->get_visuals_mode() != gui_visuals_mode_full) return;
 
   // paint the indicator bubbles
-  int count = _data.series().size();
   g.setColour(_lnf->colors().graph_modulation_bubble);
   for (int i = 0; i < _mod_indicators.size(); i++)
   {
     float output_pos = _mod_indicators[i];
     float x = output_pos * w;
-    int point = std::clamp((int)(output_pos * (count - 1)), 0, count - 1);
-    float y = (1 - std::clamp(_data.series()[point], 0.0f, 1.0f)) * h;
-    g.fillEllipse(x - 3, y - 3, 6, 6);
+    int point = std::clamp((int)(output_pos * count), 0, count - 1);
+    if (_data.type() == graph_data_type::series)
+    {
+      float y = (1 - std::clamp(_data.series()[point], 0.0f, 1.0f)) * h;
+      g.fillEllipse(x - 3, y - 3, 6, 6);
+    }
+    else
+    {
+      for (int j = 0; j < _data.multi_bars().size(); j++)
+        if(_data.multi_bars()[j].first == point)
+        {
+          float y = (1 - std::clamp(_data.multi_bars()[j].second, 0.0f, 1.0f)) * h;
+          g.fillEllipse(x - 3, y - 3, 6, 6);
+        }
+    }
   }
   if (fixed_graph_mod_indicator_pos() >= 0)
   {
