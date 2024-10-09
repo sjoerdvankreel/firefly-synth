@@ -186,7 +186,7 @@ voice_in_topo(int section, gui_position const& pos)
   result.info.description = "Oscillator common module. Controls portamento, oversampling and base pitch for all oscillators. Also contains global unison support.";
 
   result.graph_renderer = render_graph;
-  result.force_rerender_on_param_hover = true;
+  result.gui.force_rerender_graph_on_param_hover = true;
   result.gui.menu_handler_factory = make_cv_routing_menu_handler;
   result.engine_factory = [](auto const&, int, int) { return std::make_unique<voice_in_engine>(); };
   result.state_converter_factory = [](auto desc) { return std::make_unique<voice_in_state_converter>(desc); };

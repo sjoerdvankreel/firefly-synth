@@ -99,8 +99,8 @@ V check if arp works with microtuning
 X drop microtune-after
 V show arp label as chord ceg-whatever + N/A when off
 V compare perf with regular play notes
+V fix the gaux123456 graphs
 
-* fix the gaux123456 graphs
 * review code, make detailed release notes
 * check automation works
 * check if shows up in the docs

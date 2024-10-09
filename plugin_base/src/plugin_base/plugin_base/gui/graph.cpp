@@ -97,6 +97,9 @@ module_graph::modulation_outputs_changed(std::vector<modulation_output> const& o
   int this_module_global = desc.module_topo_to_index.at(this_module_index) + this_module_slot;
   int this_param_first = desc.modules[this_module_global].params[0].info.global;
 
+  if (!desc.modules[this_module_global].module->gui.rerender_graph_on_modulation)
+    return;
+
   bool rerender_indicators = false;
   bool any_mod_indicator_found = false;
   for (int i = 0; i < outputs.size(); i++)
@@ -227,7 +230,7 @@ module_graph::module_mouse_enter(int module)
   auto const& desc = _gui->automation_state()->desc().modules[module];
   if (_module_params.module_index != -1 && _module_params.module_index != desc.module->info.index) return;
   if(desc.params.size() == 0) return;
-  if(_module_params.render_on_module_mouse_enter && !desc.module->force_rerender_on_param_hover)
+  if(_module_params.render_on_module_mouse_enter && !desc.module->gui.force_rerender_graph_on_param_hover)
     request_rerender(desc.params[0].info.global, false);
 }
 

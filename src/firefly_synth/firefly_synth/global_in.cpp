@@ -64,7 +64,8 @@ global_in_topo(int section, bool is_fx, gui_position const& pos)
   result.info.description = "Global CV module with MIDI-linked modwheel and pitchbend, and some additional freely-assignable parameters.";
 
   result.graph_renderer = render_graph;
-  result.force_rerender_on_param_hover = true;
+  result.gui.force_rerender_graph_on_param_hover = true;
+  result.gui.rerender_graph_on_modulation = false;
   result.gui.menu_handler_factory = make_cv_routing_menu_handler;
   result.engine_factory = [](auto const&, int, int) { return std::make_unique<global_in_engine>(); };
 
