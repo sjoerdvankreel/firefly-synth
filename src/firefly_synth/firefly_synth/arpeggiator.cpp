@@ -419,7 +419,7 @@ arpeggiator_topo(plugin_topo const* topo, int section, gui_position const& pos)
     make_param_section_gui({ 0, 2 }, { { 1, 1 }, { gui_dimension::auto_size, 1, 1, 1, 1, 1, 1 } })));
   sample_section.gui.autofit_row = 1;
   auto& rate_hz = result.params.emplace_back(make_param(
-    make_topo_info_basic("{EE305C60-8D37-492D-A2BE-5BD9C80DC59D}", "Rate Hz", param_rate_hz, 1),
+    make_topo_info("{EE305C60-8D37-492D-A2BE-5BD9C80DC59D}", true, "Rate Hz", "Rate", "Rate", param_rate_hz, 1),
     make_param_dsp_block(param_automate::automate), make_domain_log(0.25, 20, 4, 4, 2, "Hz"),
     make_param_gui_single(section_sample, gui_edit_type::hslider, { 0, 0, 1, 1 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
@@ -427,7 +427,7 @@ arpeggiator_topo(plugin_topo const* topo, int section, gui_position const& pos)
   rate_hz.gui.bindings.visible.bind_params({ param_type, param_sync }, [](auto const& vs) { return vs[1] == 0; });
   rate_hz.info.description = "Arp rate in Hz.";
   auto& rate_tempo = result.params.emplace_back(make_param(
-    make_topo_info_basic("{B1727889-9B55-4F93-8E0A-E2D4B791568B}", "Rate Tempo", param_rate_tempo, 1),
+    make_topo_info("{B1727889-9B55-4F93-8E0A-E2D4B791568B}", true, "Rate Tempo", "Rate", "Rate", param_rate_tempo, 1),
     make_param_dsp_block(param_automate::automate), make_domain_timesig_default(false, { 16, 1 }, { 1, 4 }),
     make_param_gui_single(section_sample, gui_edit_type::autofit_list, { 0, 0, 1, 1 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
@@ -436,7 +436,7 @@ arpeggiator_topo(plugin_topo const* topo, int section, gui_position const& pos)
   rate_tempo.gui.bindings.visible.bind_params({ param_type, param_sync }, [](auto const& vs) { return vs[1] != 0; });
   rate_tempo.info.description = "Arp rate in bars.";  
   auto& rate_mod_rate_hz = result.params.emplace_back(make_param(
-    make_topo_info_basic("{BCE11AB3-3BB2-43CD-AD5E-C0E62B73F6E0}", "Mod Rate Hz", param_rate_mod_rate_hz, 1),
+    make_topo_info("{BCE11AB3-3BB2-43CD-AD5E-C0E62B73F6E0}", true, "Mod Rate Hz", "Mod Rate", "Mod Rate", param_rate_mod_rate_hz, 1),
     make_param_dsp_block(param_automate::automate), make_domain_log(0.25, 20, 4, 4, 2, "Hz"),
     make_param_gui_single(section_sample, gui_edit_type::hslider, { 0, 1, 1, 3 },
       make_label_none())));
@@ -444,7 +444,7 @@ arpeggiator_topo(plugin_topo const* topo, int section, gui_position const& pos)
   rate_mod_rate_hz.gui.bindings.visible.bind_params({ param_type, param_sync, param_rate_mod_mode }, [](auto const& vs) { return vs[1] == 0; });
   rate_mod_rate_hz.info.description = "Rate modulation in hz.";
   auto& rate_mod_rate_tempo = result.params.emplace_back(make_param(
-    make_topo_info_basic("{075B311C-51B0-46FB-994A-7C222F7BB60A}", "Mod Rate Tempo", param_rate_mod_rate_tempo, 1),
+    make_topo_info("{075B311C-51B0-46FB-994A-7C222F7BB60A}", true, "Mod Rate Tempo", "Mod Rate", "Mod Rate", param_rate_mod_rate_tempo, 1),
     make_param_dsp_block(param_automate::automate), make_domain_timesig_default(false, { 16, 1 }, { 1, 4 }),
     make_param_gui_single(section_sample, gui_edit_type::autofit_list, { 0, 1, 1, 3 },
       make_label_none())));
