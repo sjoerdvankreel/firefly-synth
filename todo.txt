@@ -89,12 +89,14 @@ V check if the EXP length is good
 X maybe hard reset all chans for renoise ?
 V still not killing all the notes
 V reset is still no good
+X on-note-midi is borked ==> better do all the midi stuff in same order
+V do i need midi active select for onnote?
+V fix the midi graph
+X do more kbd tracking
+V add arp table pos as a mod source ==> yes do it + also make all graphs react pfft
 
-* on-note-midi is borked ==> better do all the midi stuff in same order
-* do i need midi active select for onnote?
-* fix the midi graph
 * single-note arp not always goes off
-* show arp label as chord ceg-whatever
+* show arp label as chord ceg-whatever + N/A when off
 * fix the gaux123456 graphs
 * review code, make detailed release notes
 * fix repaint stuff on global in param drag it always shows aux1
@@ -102,8 +104,6 @@ V reset is still no good
 * check automation works
 * check if shows up in the docs
 * write the manual
-* do more kbd tracking
-* add arp table pos as a mod source ==> yes do it + also make all graphs react pfft
 
 wishlist:
 use fftw
