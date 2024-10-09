@@ -73,7 +73,7 @@ struct arp_table_note
   int midi_key;
   float velocity;
 
-  bool operator < (arp_table_note const& rhs) 
+  bool operator < (arp_table_note const& rhs) const
   { return midi_key < rhs.midi_key; }
 };
 
