@@ -177,6 +177,15 @@ When synced, (output rate + modulator offset) is snapped to the base rate.
 F.e. 1/4 with linear slowdown gets you 1/4, 2/4, 3/4, exponential slowdown gets 1/4, 1/2, 1/1.
 1/4 with linear speedup gets you (1/4)/1, (1/4)/2, (1/4)/3, exponential speedup gets 1/4, 1/8, 1/16.
 
+### Modulation sources produced by the ARP
+
+These are probably best used as on-note versions, but regular versions are available, too.
+
+* Note absolute: with a table of C4-B4-C5 this gets you 0.0, 0.5, 1.0.
+* Note relative: with a table of C4-B4-C5 this gets you (0/12), (11/12), (12/12).
+* Table absolute position: with a table size of 5 this gets you 0.0, 0.25, 0.5, 0.75, 1.0.
+* Table relative position: takes flipping into account. F.e. with flip set to 2, gets you 0.0, 0.25, 0.75, 0.5, 1.0.
+
 ## Feature overview
 
 See the parameter reference document for details.

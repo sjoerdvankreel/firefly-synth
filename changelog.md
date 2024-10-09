@@ -1,6 +1,10 @@
 ### ?, ? - V1.9.5.
 
-- Added arpeggiator.
+- Added arpeggiator (see manual).
+- UI: CV matrix now reacts to MIDI input.
+- UI: CV matrix on-note menu is now split out into submenus for GLFO/MIDI/Note etc.
+- Bugfix: on-note-MIDI selection was off by 1 (e.g. on-note CC4 got you CC3).
+- Bugfix: global-in and master parameters would not rerender the main graph when modulation is active.
 
 ### September 25, 2024 - V1.9.4.
 
