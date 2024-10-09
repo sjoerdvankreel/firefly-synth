@@ -494,7 +494,6 @@ arpeggiator_topo(plugin_topo const* topo, int section, gui_position const& pos)
 arpeggiator_engine::
 arpeggiator_engine()
 {
-  // should be enough to accomodate anything, hopefully
   _current_arp_note_table.reserve(max_active_table_size);
 }
 
@@ -846,11 +845,25 @@ arpeggiator_engine::process_audio(
     return;
   }
   
+  // STEP 0: off all current notes
+  bool table_changed = in_notes->size() != 0;
+  if (table_changed)
+    for (int i = 0; i < 128; i++)
+      if (_fire_this_round[i])
+      {
+        note_event off;
+        off.frame = 0;
+        off.id.id = -1;
+        off.id.key = i;
+        off.id.channel = 0;
+        off.velocity = 0.0f;
+        off.type = note_event_type::off;
+        out_notes->push_back(off);
+      }
+
   // this assumes notes are ordered by stream pos
-  bool table_changed = false;
   for (int i = 0; i < in_notes->size(); i++)
   {
-    table_changed = true;
     std::uint32_t midi_key = std::clamp((*in_notes)[i].id.key, 0, 127);
     if ((*in_notes)[i].type == note_event_type::on)
     {
@@ -868,20 +881,6 @@ arpeggiator_engine::process_audio(
 
   if (table_changed)
   {
-    // STEP 0: off all notes
-    for (int i = 0; i < 128; i++)
-      if(_current_user_chord[i].on)
-      {
-        note_event off;
-        off.frame = 0;
-        off.id.id = -1;
-        off.id.key = i;
-        off.id.channel = 0;
-        off.velocity = 0.0f;
-        off.type = note_event_type::off;
-        out_notes->push_back(off);
-      }
-
     // reset to before start, will get picked up
     _mod_phase = 0.0f;
     _table_pos = -1;
@@ -1067,7 +1066,6 @@ arpeggiator_engine::process_audio(
     -1, block.module_desc_.info.global,
     custom_tag_user_chord_bits_3, _user_chord_bits[3]));
 
-  // TODO can this work for midi?
   block.push_modulation_output(modulation_output::make_mod_output_custom_state_float(
     -1, block.module_desc_.info.global,
     custom_tag_output_abs_pos, check_unipolar(_cv_out_abs_pos)));

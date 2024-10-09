@@ -54,7 +54,7 @@ voice_on_note_topo(plugin_topo const* topo, int section)
       on_note_source.items[i].id, true,
       on_note_source.items[i].name,
       on_note_source.items[i].name,
-      on_note_source.items[i].name, i + on_voice_random_output_index + 1, 1))); // TODO better menu
+      on_note_source.items[i].name, i + on_voice_random_output_index + 1, 1)));
 
   module_topo result(make_module(
     make_topo_info("{EF1A4E73-BCAD-4D38-A54E-44B83EF46CB5}", true, "On Note", "On Note", "On Nt", module_voice_on_note, 1),
