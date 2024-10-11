@@ -28,7 +28,10 @@ autobuilds:
 
 wishlist:
 use fftw
-do global unison subvoice index as a mod source!
+do more keyboard tracking just do it
+do global unison subvoice index as a mod source
+do arp table pos odd/even as a mod source
+should figure out a way to do user supplied formulas?
 make a patch cleanup button
 update the manuals routing overview image with new colors
 filter microtuning
