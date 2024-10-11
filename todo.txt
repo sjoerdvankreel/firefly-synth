@@ -28,6 +28,7 @@ autobuilds:
 
 wishlist:
 use fftw
+do global unison subvoice index as a mod source!
 make a patch cleanup button
 update the manuals routing overview image with new colors
 filter microtuning
