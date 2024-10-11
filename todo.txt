@@ -28,6 +28,7 @@ autobuilds:
 
 wishlist:
 use fftw
+fix the bug demos
 do more keyboard tracking just do it -- also trackmode mul/add
 do global unison subvoice index as a mod source
 do arp table pos odd/even as a mod source
