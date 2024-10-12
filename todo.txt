@@ -27,6 +27,7 @@ autobuilds:
 * integrate https://github.com/surge-synthesizer/monique-monosynth/blob/main/.github/workflows/build-pr.yml
 
 small stuff:
+do the description on tooltip
 fix the bug demos
 make a patch cleanup button
 do arp and glfo in project time samples (can do now bc all is phased!)
