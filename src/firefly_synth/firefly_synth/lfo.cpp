@@ -25,11 +25,14 @@ enum { custom_tag_ref_phase, custom_tag_rand_seed, custom_tag_end_value };
 enum class lfo_stage { cycle, filter, end };
 enum { scratch_rate, scratch_count };
 enum { type_off, type_repeat, type_one_shot, type_one_phase };
-enum { section_left, section_sync, section_skew, section_shape, section_phase };
+enum { section_left, section_sync, section_skew, section_shape, section_phase_or_host };
 enum {
   param_type, param_rate, param_tempo, param_sync,
   param_skew_x, param_skew_x_amt, param_skew_y, param_skew_y_amt,
-  param_shape, param_steps, param_seed, param_voice_rnd_source, param_filter, param_phase };
+  param_shape, param_steps, param_seed, param_voice_rnd_source, param_filter, 
+  param_phase, // phase offset for voice lfo
+  param_host = param_phase // sync to host project time for global lfo
+};
 
 static bool
 is_noise_voice_rand(int shape)
@@ -480,7 +483,7 @@ lfo_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_topo_tag_basic("{A5B5DC53-2E73-4C0B-9DD1-721A335EA076}", "Right"),
     make_param_section_gui({ 0, 3, 2, 1 }, gui_dimension({ 1, 1 }, {
     gui_dimension::auto_size_all, gui_dimension::auto_size, gui_dimension::auto_size_all, 1 }), gui_label_edit_cell_split::horizontal)));
-  if(!global) shape_section.gui.merge_with_section = section_phase;
+  shape_section.gui.merge_with_section = section_phase_or_host;
   auto& shape = result.params.emplace_back(make_param(
     make_topo_info_basic("{7D48C09B-AC99-4B88-B880-4633BC8DFB37}", "Shape", param_shape, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(wave_shape_type_items(wave_target::lfo, global), "Sin"),
@@ -522,19 +525,30 @@ lfo_topo(int section, gui_position const& pos, bool global, bool is_fx)
   smooth.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   smooth.info.description = "Applies a lowpass filter to smooth out rough edges.";
 
-  if(global) return result;
-
-  auto& phase_section = result.sections.emplace_back(make_param_section(section_phase,
+  auto& phase_or_host_section = result.sections.emplace_back(make_param_section(section_phase_or_host,
     make_topo_tag_basic("{8EB0A04C-5D69-4B0E-89BD-884BC2EFDFBE}", "Phase"),
     make_param_section_gui({ 0, 4, 2, 1 }, gui_dimension({ 1, 1 }, { 1 }), gui_label_edit_cell_split::vertical)));
-  if (!global) phase_section.gui.merge_with_section = section_shape;
-  auto& phase = result.params.emplace_back(make_param(
-    make_topo_info_basic("{B23E9732-ECE3-4D5D-8EC1-FF299C6926BB}", "Phs", param_phase, 1),
-    make_param_dsp_automate_if_voice(!global), make_domain_percentage_identity(0, 0, true),
-    make_param_gui_single(section_phase, gui_edit_type::knob, { 0, 0 },
-    make_label(gui_label_contents::name, gui_label_align::top, gui_label_justify::center))));
-  phase.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
-  phase.info.description = "In per-voice module, allows for phase adjustment of periodic generators.";
+  phase_or_host_section.gui.merge_with_section = section_shape;
+  if (!global)
+  {
+    auto& phase = result.params.emplace_back(make_param(
+      make_topo_info_basic("{B23E9732-ECE3-4D5D-8EC1-FF299C6926BB}", "Phs", param_phase, 1),
+      make_param_dsp(param_direction::input, param_rate::voice, param_automate::automate), make_domain_percentage_identity(0, 0, true),
+      make_param_gui_single(section_phase_or_host, gui_edit_type::knob, { 0, 0 },
+        make_label(gui_label_contents::name, gui_label_align::top, gui_label_justify::center))));
+    phase.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
+    phase.info.description = "In per-voice module, allows for phase adjustment of periodic generators.";
+  }
+  else
+  {
+    auto& host = result.params.emplace_back(make_param(
+      make_topo_info_basic("{B97DF7D3-3259-4343-9577-858C6A5B786B}", "Host", param_host, 1),
+      make_param_dsp(param_direction::input, param_rate::block, param_automate::automate), make_domain_toggle(true),
+      make_param_gui_single(section_phase_or_host, gui_edit_type::toggle, { 0, 0 },
+        make_label(gui_label_contents::name, gui_label_align::top, gui_label_justify::center))));
+    host.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
+    host.info.description = "In global module, snaps lfo phase to project/song time.";
+  }
 
   return result;
 }

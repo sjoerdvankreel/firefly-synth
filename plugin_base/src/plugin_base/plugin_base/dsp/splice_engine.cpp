@@ -154,6 +154,7 @@ plugin_splice_engine::process()
     inner_block.frame_count = this_block_frames;
     inner_block.mts_client = _host_block.mts_client;
     inner_block.shared.bpm = _host_block.shared.bpm;
+    inner_block.shared.project_time = _host_block.shared.project_time + this_block_start;
 
     float* this_audio_out[2];
     this_audio_out[0] = _host_block.audio_out[0] + this_block_start;

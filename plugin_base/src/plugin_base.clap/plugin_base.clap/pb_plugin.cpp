@@ -656,6 +656,7 @@ pb_plugin::process(clap_process const* process) noexcept
   block.mts_client = _mts_client;
   block.frame_count = process->frames_count;
   block.audio_out = process->audio_outputs[0].data32;
+  block.shared.project_time = 0; // TODO figure this out.
   block.shared.bpm = process->transport? process->transport->tempo: 0;
   block.shared.audio_in = process->audio_inputs? process->audio_inputs[0].data32: nullptr;
 
