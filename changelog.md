@@ -2,6 +2,7 @@
 
 - Fixed a couple of outdated parameter descriptions.
 - Show parameter descriptions (from reference document) in tooltips.
+- Optionally allow global LFO's to sync to DAW project time (does NOT work with rate modulation, i.e. causes full phase reset).
 
 ### October 9, 2024 - V1.9.5.
 
