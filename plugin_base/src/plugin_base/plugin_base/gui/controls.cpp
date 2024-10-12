@@ -201,7 +201,7 @@ param_value_label::own_param_changed(plain_value plain)
 { 
   std::string text = _gui->automation_state()->plain_to_text_at_index(false, _param->info.global, plain);
   setText(text, dontSendNotification); 
-  setTooltip(_param->info.name + ": " + text);
+  setTooltip(_param->tooltip(_gui->automation_state()->get_plain_at_index(_param->info.global)));
 }
 
 MouseCursor 
@@ -504,7 +504,7 @@ param_toggle_button::own_param_changed(plain_value plain)
 {
   _checked = plain.step() != 0;
   setToggleState(plain.step() != 0, dontSendNotification);
-  setTooltip(_param->info.name + ": " + _param->param->domain.plain_to_text(false, plain));
+  setTooltip(_param->tooltip(plain));
 }
 
 void 
@@ -521,7 +521,7 @@ param_toggle_button(plugin_gui* gui, module_desc const* module, param_desc const
 param_component(gui, module, param), autofit_togglebutton(lnf, param->param->gui.tabular)
 {
   auto value = param->param->domain.default_plain(module->info.slot, param->info.slot);
-  setTooltip(_param->info.name + ": " + _param->param->domain.plain_to_text(false, value));
+  setTooltip(_param->tooltip(value));
   _checked = value.step() != 0;
   addListener(this);
   init();
@@ -678,11 +678,7 @@ param_combobox::own_param_changed(plain_value plain)
 {
   std::string value;
   setSelectedId(plain.step() + 1 - _param->param->domain.min, dontSendNotification);
-  if(_param->param->domain.type == domain_type::item)
-    value = _param->param->domain.plain_to_item_tooltip(plain);
-  else
-    value = _param->param->domain.plain_to_text(false, plain);
-  setTooltip(_param->info.name + ": " + value);
+  setTooltip(_param->tooltip(plain));
 }
 
 void 
