@@ -30,6 +30,7 @@ small stuff:
 V do the description on tooltip
 V fix the descriptions they are out of date
 X do the conversion for snapping ==> missing = off
+X global unit lfo phase offset not plot good
 
 update the routing graph for arp
 do global snap docs
@@ -41,7 +42,6 @@ arp new note = reset table pos yes/no?
 do more keyboard tracking just do it -- also trackmode mul/add
 do global unison subvoice index as a mod source
 turn on stuff when dragging (e.g. basic sin, dist skew etc)
-global unit lfo phase offset not plot good
 
 wishlist:
 use fftw
