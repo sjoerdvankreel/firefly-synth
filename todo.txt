@@ -33,7 +33,6 @@ do arp and glfo in project time samples (can do now bc all is phased!)
 arp new note = reset table pos yes/no?
 do more keyboard tracking just do it -- also trackmode mul/add
 do global unison subvoice index as a mod source
-do arp table pos odd/even as a mod source
 should figure out a way to do user supplied formulas?
 make a patch cleanup button
 update the manuals routing overview image with new colors
