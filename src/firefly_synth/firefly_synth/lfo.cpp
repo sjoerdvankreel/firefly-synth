@@ -412,7 +412,7 @@ lfo_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_param_dsp_automate_if_voice(!global), make_domain_item(type_items(), ""),
     make_param_gui_single(section_left, gui_edit_type::list, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  type.info.description = std::string("Selects time or tempo-synced and repeating or one-shot type. ") +
+  type.info.description = std::string("Selects repeating or one-shot type. ") +
     "For regular one-shot type, the LFO stays at it's end value after exactly 1 cycle. " + 
     "For phase one-shot type, the end value takes the phase offset parameter into account.";
   auto& rate = result.params.emplace_back(make_param(
@@ -490,9 +490,7 @@ lfo_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_param_gui_single(section_shape, gui_edit_type::autofit_list, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   shape.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
-  shape.info.description = std::string("Selects waveform plus horizontal and vertical skewing modes. ") +
-    "Waveforms are various periodic functions plus smooth noise, static noise and free-running static noise. " +
-    "Skewing modes are off (cpu efficient, so use it if you dont need the extra control), linear, scale unipolar/bipolar and exponential unipolar/bipolar.";
+  shape.info.description = std::string("Selects waveform: various periodic functions plus smooth noise, static noise and free-running static noise.");
   auto& steps = result.params.emplace_back(make_param(
     make_topo_info_basic("{445CF696-0364-4638-9BD5-3E1C9A957B6A}", "Steps", param_steps, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_step(1, 99, 1, 0),
