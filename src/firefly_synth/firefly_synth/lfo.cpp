@@ -388,8 +388,7 @@ lfo_topo(int section, gui_position const& pos, bool global, bool is_fx)
     "static noise, smoothing control, phase andjustment, stair-stepping " +
     "and horizontal and vertical skewing controls with various types.";
 
-  std::vector<int> column_sizes = { 32, 13, 34, 63 };
-  if(!global) column_sizes = { 32, 13, 34, 55, 8 };
+  std::vector<int> column_sizes = { 32, 13, 34, 55, 8 };
   module_topo result(make_module(info,
     make_module_dsp(stage, module_output::cv, 1, {
       make_module_dsp_output(true, -1, make_topo_info_basic("{197CB1D4-8A48-4093-A5E7-2781C731BBFC}", "Output", 0, 1)) }),
