@@ -34,6 +34,7 @@ X global unit lfo phase offset not plot good
 
 update the routing graph for arp
 do global snap docs?
+do snap for clap and arp
 fix the bug demos
 make a patch cleanup button
 do arp and glfo in project time samples (can do now bc all is phased!)
