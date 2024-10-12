@@ -29,6 +29,7 @@ autobuilds:
 wishlist:
 use fftw
 fix the bug demos
+do arp and glfo in project time samples (can do now bc all is phased!)
 arp new note = reset table pos yes/no?
 do more keyboard tracking just do it -- also trackmode mul/add
 do global unison subvoice index as a mod source
