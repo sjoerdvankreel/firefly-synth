@@ -539,7 +539,8 @@ param_slider::
 param_slider(plugin_gui* gui, module_desc const* module, param_desc const* param) :
 param_component(gui, module, param), Slider()
 {
-  setPopupDisplayEnabled(true, true, nullptr);  
+  setPopupDisplayEnabled(true, true, nullptr);
+
   switch (param->param->gui.edit_type)
   {
   case gui_edit_type::knob: setSliderStyle(Slider::RotaryVerticalDrag); break;
@@ -552,6 +553,9 @@ param_component(gui, module, param), Slider()
   // parameter modulation outputs
   if (param->param->dsp.can_modulate(param->info.slot))
     gui->add_modulation_output_listener(this);
+
+  auto value = param->param->domain.default_plain(module->info.slot, param->info.slot);
+  setTooltip(_param->tooltip(value));
 
   setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
   if(param->param->domain.unit.size())
@@ -588,6 +592,13 @@ param_slider::modulation_outputs_reset()
   _min_modulation_output = -1.0f;
   _max_modulation_output = -1.0f;
   repaint();
+}
+
+void 
+param_slider::own_param_changed(plain_value plain)
+{
+  setTooltip(_param->tooltip(plain));
+  setValue(_param->param->domain.plain_to_raw(plain), juce::dontSendNotification);
 }
 
 void 

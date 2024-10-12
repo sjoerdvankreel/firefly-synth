@@ -239,8 +239,7 @@ public modulation_output_listener
   std::vector<modulation_output> _this_mod_outputs = {};
 
 protected:
-  void own_param_changed(plain_value plain) override final
-  { setValue(_param->param->domain.plain_to_raw(plain), juce::dontSendNotification); }
+  void own_param_changed(plain_value plain) override final;
 
 public: 
   ~param_slider();
@@ -260,7 +259,7 @@ public:
   void valueChanged() override;
   void stoppedDragging() override { _gui->param_end_changes(_param->info.global); }
   void startedDragging() override { _gui->param_begin_changes(_param->info.global); }
-
+  
   juce::String getTextFromValue(double value) override 
   { return juce::String(_param->info.name + ": ") + juce::Slider::getTextFromValue(value * (_param->param->domain.display == domain_display::percentage ? 100 : 1)); }
 };
