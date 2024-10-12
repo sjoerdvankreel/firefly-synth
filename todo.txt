@@ -29,9 +29,10 @@ autobuilds:
 small stuff:
 V do the description on tooltip
 V fix the descriptions they are out of date
+X do the conversion for snapping ==> missing = off
 
 update the routing graph for arp
-do the conversion for snapping ==> missing = off
+do global snap docs
 fix the bug demos
 make a patch cleanup button
 do arp and glfo in project time samples (can do now bc all is phased!)

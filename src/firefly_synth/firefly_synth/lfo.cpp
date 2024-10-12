@@ -542,11 +542,11 @@ lfo_topo(int section, gui_position const& pos, bool global, bool is_fx)
   {
     auto& host = result.params.emplace_back(make_param(
       make_topo_info("{B97DF7D3-3259-4343-9577-858C6A5B786B}", true, "Snap To Project", "Snp", "Snp", param_snap, 1),
-      make_param_dsp(param_direction::input, param_rate::block, param_automate::automate), make_domain_toggle(true),
+      make_param_dsp(param_direction::input, param_rate::block, param_automate::automate), make_domain_toggle(false),
       make_param_gui_single(section_phase_or_host, gui_edit_type::toggle, { 0, 0 },
         make_label(gui_label_contents::name, gui_label_align::top, gui_label_justify::center))));
     host.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
-    host.info.description = "In global module, snaps lfo phase to project/song time.";
+    host.info.description = "In global module, snaps lfo phase to project/song time. Note this defeats rate modulation!";
   }
 
   return result;
