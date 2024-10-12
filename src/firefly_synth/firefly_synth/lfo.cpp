@@ -975,12 +975,19 @@ void lfo_engine::process_loop(plugin_block& block, cv_cv_matrix_mixdown const* m
   // reset phase to project time for glfo
   if constexpr (Snap)
   {
-    // Rate can go zero by modulation.
-    float rate0 = std::max(rate_curve[block.start_frame], 1.0f);
-    std::int64_t samples0 = (std::int64_t)(block.sample_rate / rate0);
-    std::int64_t phase_frames = block.host.project_time % samples0;
-    _ref_phase = phase_frames / (float)samples0;
-    _phase = _ref_phase;
+    // graph block always starts at 0
+    if (!block.graph)
+    {
+      // Rate can go zero by modulation.
+      float rate0 = rate_curve[block.start_frame];
+      if (rate0 > 0.0f)
+      {
+        std::int64_t samples0 = (std::int64_t)(block.sample_rate / rate0);
+        std::int64_t phase_frames = block.host.project_time % samples0;
+        _ref_phase = phase_frames / (float)samples0;
+        _phase = _ref_phase;
+      }
+    }
   }
 
   for (int f = block.start_frame; f < block.end_frame; f++)
