@@ -27,6 +27,7 @@ autobuilds:
 * integrate https://github.com/surge-synthesizer/monique-monosynth/blob/main/.github/workflows/build-pr.yml
 
 small stuff:
+do the conversion for snapping ==> missing = off
 do the description on tooltip
 fix the descriptions they are out of date
 fix the bug demos

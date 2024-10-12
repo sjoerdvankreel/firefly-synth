@@ -31,7 +31,7 @@ enum {
   param_skew_x, param_skew_x_amt, param_skew_y, param_skew_y_amt,
   param_shape, param_steps, param_seed, param_voice_rnd_source, param_filter, 
   param_phase, // phase offset for voice lfo
-  param_host = param_phase // sync to host project time for global lfo
+  param_snap = param_phase // snap to host project time for global lfo
 };
 
 static bool
@@ -385,7 +385,7 @@ lfo_topo(int section, gui_position const& pos, bool global, bool is_fx)
   module_stage stage = global ? module_stage::input : module_stage::voice;
   auto info = topo_info(global ? global_info : voice_info);
   info.description = std::string("Optional tempo-synced LFO with repeating and one-shot types, various periodic waveforms, smooth noise, ") +  
-    "static noise and free-running static noise, smoothing control, phase andjustment, stair-stepping " +
+    "static noise, smoothing control, phase andjustment, stair-stepping " +
     "and horizontal and vertical skewing controls with various types.";
 
   std::vector<int> column_sizes = { 32, 13, 34, 63 };
@@ -490,7 +490,7 @@ lfo_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_param_gui_single(section_shape, gui_edit_type::autofit_list, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   shape.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
-  shape.info.description = std::string("Selects waveform: various periodic functions plus smooth noise, static noise and free-running static noise.");
+  shape.info.description = std::string("Selects waveform: various periodic functions plus smooth and static noise.");
   auto& steps = result.params.emplace_back(make_param(
     make_topo_info_basic("{445CF696-0364-4638-9BD5-3E1C9A957B6A}", "Steps", param_steps, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_step(1, 99, 1, 0),
@@ -530,7 +530,7 @@ lfo_topo(int section, gui_position const& pos, bool global, bool is_fx)
   if (!global)
   {
     auto& phase = result.params.emplace_back(make_param(
-      make_topo_info_basic("{B23E9732-ECE3-4D5D-8EC1-FF299C6926BB}", "Phs", param_phase, 1),
+      make_topo_info("{B23E9732-ECE3-4D5D-8EC1-FF299C6926BB}", true, "Phase Offset", "Phs", "Phs", param_phase, 1),
       make_param_dsp(param_direction::input, param_rate::voice, param_automate::automate), make_domain_percentage_identity(0, 0, true),
       make_param_gui_single(section_phase_or_host, gui_edit_type::knob, { 0, 0 },
         make_label(gui_label_contents::name, gui_label_align::top, gui_label_justify::center))));
@@ -540,7 +540,7 @@ lfo_topo(int section, gui_position const& pos, bool global, bool is_fx)
   else
   {
     auto& host = result.params.emplace_back(make_param(
-      make_topo_info_basic("{B97DF7D3-3259-4343-9577-858C6A5B786B}", "Host", param_host, 1),
+      make_topo_info("{B97DF7D3-3259-4343-9577-858C6A5B786B}", true, "Snap To Project", "Snp", "Snp", param_snap, 1),
       make_param_dsp(param_direction::input, param_rate::block, param_automate::automate), make_domain_toggle(true),
       make_param_gui_single(section_phase_or_host, gui_edit_type::toggle, { 0, 0 },
         make_label(gui_label_contents::name, gui_label_align::top, gui_label_justify::center))));
