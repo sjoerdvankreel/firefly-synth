@@ -31,13 +31,14 @@ V do the description on tooltip
 V fix the descriptions they are out of date
 X do the conversion for snapping ==> missing = off
 X global unit lfo phase offset not plot good
+V do glfo in project time samples (can do now bc all is phased!)
+V do snap for clap
 
 update the routing graph for arp
 do global snap docs?
-do snap for clap and arp
 fix the bug demos
 make a patch cleanup button
-do arp and glfo in project time samples (can do now bc all is phased!)
+
 ditch after-mod, claim micro support ?
 arp new note = reset table pos yes/no?
 do more keyboard tracking just do it -- also trackmode mul/add
