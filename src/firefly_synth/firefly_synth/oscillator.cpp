@@ -25,6 +25,7 @@ enum { section_type, section_sync_on, section_sync_uni, section_basic, section_b
 enum { 
   scratch_pb, scratch_cent, scratch_pitch, scratch_sync_semi, 
   scratch_basic_sin_mix, scratch_basic_saw_mix, scratch_basic_tri_mix, scratch_basic_sqr_mix, 
+  scratch_combi_freq, scratch_combi_mix,
   scratch_rand_freq, scratch_rand_rate, scratch_count }; // todo overlap scratch space
 
 enum {
@@ -577,7 +578,7 @@ osc_topo(int section, gui_position const& pos)
   combi_skew_y_1.info.description = "Wave 1 skew Y amount.";
   auto& combi_freq = result.params.emplace_back(make_param(
     make_topo_info("{428C5833-3BBE-40AF-9A9C-5EACA40F4CA4}", true, "Combi Freq", "Freq", "Combi Freq", param_combi_freq, 1),
-    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.0f, 2, true), // TODO how much
+    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(0.0f, 32.0f, 1.0f, 2, true),
     make_param_gui_single(section_combi, gui_edit_type::knob, { 0, 6, 1, 1 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   combi_freq.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_combi; });
@@ -605,7 +606,7 @@ osc_topo(int section, gui_position const& pos)
   combi_skew_y_2.info.description = "Wave 2 skew Y amount.";
   auto& combi_mix = result.params.emplace_back(make_param(
     make_topo_info("{3590AA81-DDF3-4785-8944-D18B9869C609}", true, "Combi Mix", "Mix", "Combi Mix", param_combi_mix, 1),
-    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.0f, 2, true), // TODO how much
+    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5f, 2, true),
     make_param_gui_single(section_combi, gui_edit_type::knob, { 1, 6, 1, 1 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   combi_mix.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_combi; });
@@ -795,30 +796,33 @@ generate_sqr(float phase, float increment, float pwm)
 }
 
 static inline float
-generate_combi(int wave1, int wave2, float phase, float increment)
+generate_combi(int wave1, int wave2, float phase1, float increment, float freq, float mix)
 {
   float r1 = 0.0f;
   float r2 = 0.0f;
+  float phase2 = phase1 * (1.0 + freq);
+  phase2 -= std::floor(phase2);
 
   switch (wave1)
   {
-  case combi_wave_sin: r1 = generate_sin(phase); break;
-  case combi_wave_saw: r1 = generate_saw(phase, increment); break;
-  case combi_wave_tri: r1 = generate_triangle(phase, increment); break;
-  case combi_wave_sqr: r1 = generate_sqr(phase, increment, 1.0f); break;
+  case combi_wave_sin: r1 = generate_sin(phase1); break;
+  case combi_wave_saw: r1 = generate_saw(phase1, increment); break;
+  case combi_wave_tri: r1 = generate_triangle(phase1, increment); break;
+  case combi_wave_sqr: r1 = generate_sqr(phase1, increment, 1.0f); break;
   default: assert(false); break;
   }
 
   switch (wave2)
   {
-  case combi_wave_sin: r2 = generate_sin(phase); break;
-  case combi_wave_saw: r2 = generate_saw(phase, increment); break;
-  case combi_wave_tri: r2 = generate_triangle(phase, increment); break;
-  case combi_wave_sqr: r2 = generate_sqr(phase, increment, 1.0f); break;
+  case combi_wave_sin: r2 = generate_sin(phase2); break;
+  case combi_wave_saw: r2 = generate_saw(phase2, increment * freq); break;
+  case combi_wave_tri: r2 = generate_triangle(phase2, increment * freq); break;
+  case combi_wave_sqr: r2 = generate_sqr(phase2, increment * freq, 1.0f); break;
   default: assert(false); break;
   }
 
-  return (r1 + r2) * 0.5f;
+  // TODO deal with non-integer by lerp
+  return (1.0f - mix) * r1 + mix * r2;
 }
 
 osc_engine::
@@ -1267,6 +1271,11 @@ osc_engine::process_tuning_mode_unison(plugin_block& block, cv_audio_matrix_mixd
   if constexpr (BasicTri) block.normalized_to_raw_block<domain_type::linear>(module_osc, param_basic_tri_mix, basic_tri_mix_curve_norm, basic_tri_mix_curve);
   if constexpr (BasicSqr) block.normalized_to_raw_block<domain_type::linear>(module_osc, param_basic_sqr_mix, basic_sqr_mix_curve_norm, basic_sqr_mix_curve);
 
+  auto const& combi_mix_curve = *(*modulation)[module_osc][block.module_slot][param_combi_mix][0];
+  auto& combi_freq_curve = block.state.own_scratch[scratch_combi_freq];
+  auto const& combi_freq_curve_norm = *(*modulation)[module_osc][block.module_slot][param_combi_freq][0];
+  if constexpr (Combi) block.normalized_to_raw_block<domain_type::linear>(module_osc, param_combi_freq, combi_freq_curve_norm, combi_freq_curve);
+
   auto& rand_rate_curve = block.state.own_scratch[scratch_rand_rate];
   auto& rand_freq_curve = block.state.own_scratch[scratch_rand_freq];
   auto const& rand_rate_curve_norm = *(*modulation)[module_osc][block.module_slot][param_rand_rate][0];
@@ -1380,8 +1389,8 @@ osc_engine::process_tuning_mode_unison(plugin_block& block, cv_audio_matrix_mixd
       if constexpr (BasicSaw) synced_sample += generate_saw(_sync_phases[v], inc_sync) * basic_saw_mix_curve[mod_index];
       if constexpr (BasicTri) synced_sample += generate_triangle(_sync_phases[v], inc_sync) * basic_tri_mix_curve[mod_index];
       if constexpr (BasicSqr) synced_sample += generate_sqr(_sync_phases[v], inc_sync, basic_pw_curve[mod_index]) * basic_sqr_mix_curve[mod_index];
-      if constexpr (Combi) synced_sample = generate_combi(combi_wave_1, combi_wave_2, _sync_phases[v], inc_sync);
       if constexpr (DSF) synced_sample = generate_dsf<int>(_sync_phases[v], oversampled_rate, freq_sync, dsf_parts, dsf_dist, dsf_dcy_curve[mod_index]);
+      if constexpr (Combi) synced_sample = generate_combi(combi_wave_1, combi_wave_2, _sync_phases[v], inc_sync, combi_freq_curve[mod_index], combi_mix_curve[mod_index]);
 
       // generate the unsynced sample and crossover
       float unsynced_sample = 0;
@@ -1401,8 +1410,8 @@ osc_engine::process_tuning_mode_unison(plugin_block& block, cv_audio_matrix_mixd
           if constexpr (BasicSaw) unsynced_sample += generate_saw(_unsync_phases[v], inc_sync) * basic_saw_mix_curve[mod_index];
           if constexpr (BasicTri) unsynced_sample += generate_triangle(_unsync_phases[v], inc_sync) * basic_tri_mix_curve[mod_index];
           if constexpr (BasicSqr) unsynced_sample += generate_sqr(_unsync_phases[v], inc_sync, basic_pw_curve[mod_index]) * basic_sqr_mix_curve[mod_index];
-          if constexpr (Combi) unsynced_sample = generate_combi(combi_wave_1, combi_wave_2, _unsync_phases[v], inc_sync);
           if constexpr (DSF) unsynced_sample = generate_dsf<int>(_unsync_phases[v], oversampled_rate, freq_sync, dsf_parts, dsf_dist, dsf_dcy_curve[mod_index]);
+          if constexpr (Combi) unsynced_sample = generate_combi(combi_wave_1, combi_wave_2, _unsync_phases[v], inc_sync, combi_freq_curve[mod_index], combi_mix_curve[mod_index]);
 
           increment_and_wrap_phase(_unsync_phases[v], inc_sync);
           float unsynced_weight = _unsync_samples[v]-- / (sync_over_samples + 1.0f);
