@@ -32,7 +32,7 @@ enum {
   param_uni_voices, param_uni_sprd, param_uni_dtn, param_uni_phase,
   param_basic1_sin_on, param_basic1_sin_mix, param_basic1_saw_on, param_basic1_saw_mix,
   param_basic1_tri_on, param_basic1_tri_mix, param_basic1_sqr_on, param_basic1_sqr_mix, param_basic1_sqr_pw,
-  param_basic2_wave1, param_basic2_wave2, param_basic2_freq, param_basic2_amp, param_basic2_skew_x, param_basic2_skew_y,
+  param_basic2_wave1, param_basic2_wave2, param_basic2_freq, param_basic2_mix,
   param_dsf_parts, param_dsf_dist, param_dsf_dcy,
   param_rand_svf, param_rand_rate, param_rand_freq, param_rand_res, param_rand_seed, // shared k+s/noise
   param_kps_fdbk, param_kps_mid, param_kps_stretch,
@@ -464,56 +464,56 @@ osc_topo(int section, gui_position const& pos)
   basic1.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_basic1; });
   basic1.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_off || vs[0] == type_basic1; });
   auto& basic1_sin_on = result.params.emplace_back(make_param(
-    make_topo_info("{BD753E3C-B84E-4185-95D1-66EA3B27C76B}", true, "Basic Sin On", "Sin", "Basic Sin", param_basic1_sin_on, 1),
+    make_topo_info("{BD753E3C-B84E-4185-95D1-66EA3B27C76B}", true, "Basic 1 Sin On", "Sin", "Basic Sin", param_basic1_sin_on, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_toggle(true),
     make_param_gui_single(section_basic1, gui_edit_type::toggle, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   basic1_sin_on.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_basic1; });
   basic1_sin_on.info.description = "Toggle sine generator on/off.";
   auto& basic1_sin_mix = result.params.emplace_back(make_param(
-    make_topo_info("{60FAAC91-7F69-4804-AC8B-2C7E6F3E4238}", true, "Basic Sin Mix", "Sin", "Basic Sin Mix", param_basic1_sin_mix, 1),
+    make_topo_info("{60FAAC91-7F69-4804-AC8B-2C7E6F3E4238}", true, "Basic 1 Sin Mix", "Sin", "Basic Sin Mix", param_basic1_sin_mix, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 1, 0, true),
     make_param_gui_single(section_basic1, gui_edit_type::hslider, { 0, 2 }, make_label_none())));
   basic1_sin_mix.gui.bindings.enabled.bind_params({ param_type, param_basic1_sin_on }, [](auto const& vs) { return vs[0] == type_basic1 && vs[1] != 0; });
   basic1_sin_mix.info.description = "Sine generator mix amount.";
   basic1_sin_on.gui.alternate_drag_param_id = basic1_sin_mix.info.tag.id;
   auto& basic1_saw_on = result.params.emplace_back(make_param(
-    make_topo_info("{A31C1E92-E7FF-410F-8466-7AC235A95BDB}", true, "Basic Saw On", "Saw", "Basic Saw", param_basic1_saw_on, 1),
+    make_topo_info("{A31C1E92-E7FF-410F-8466-7AC235A95BDB}", true, "Basic 1 Saw On", "Saw", "Basic Saw", param_basic1_saw_on, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_toggle(false),
     make_param_gui_single(section_basic1, gui_edit_type::toggle, { 0, 3 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   basic1_saw_on.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_basic1; });
   basic1_saw_on.info.description = "Toggle saw generator on/off.";
   auto& basic1_saw_mix = result.params.emplace_back(make_param(
-    make_topo_info("{A459839C-F78E-4871-8494-6D524F00D0CE}", true, "Basic Saw Mix", "Saw", "Basic Saw Mix", param_basic1_saw_mix, 1),
+    make_topo_info("{A459839C-F78E-4871-8494-6D524F00D0CE}", true, "Basic 1 Saw Mix", "Saw", "Basic Saw Mix", param_basic1_saw_mix, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 1, 0, true),
     make_param_gui_single(section_basic1, gui_edit_type::hslider, { 0, 5 }, make_label_none())));
   basic1_saw_mix.gui.bindings.enabled.bind_params({ param_type, param_basic1_saw_on }, [](auto const& vs) { return vs[0] == type_basic1 && vs[1] != 0; });
   basic1_saw_mix.info.description = "Saw generator mix amount.";
   basic1_saw_on.gui.alternate_drag_param_id = basic1_saw_mix.info.tag.id;
   auto& basic1_tri_on = result.params.emplace_back(make_param(
-    make_topo_info("{F2B92036-ED14-4D88-AFE3-B83C1AAE5E76}", true, "Basic Tri On", "Tri", "Basic Tri", param_basic1_tri_on, 1),
+    make_topo_info("{F2B92036-ED14-4D88-AFE3-B83C1AAE5E76}", true, "Basic 1 Tri On", "Tri", "Basic Tri", param_basic1_tri_on, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_toggle(false),
     make_param_gui_single(section_basic1, gui_edit_type::toggle, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   basic1_tri_on.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_basic1; });
   basic1_tri_on.info.description = "Toggle triangle generator on/off.";
   auto& basic1_tri_mix = result.params.emplace_back(make_param(
-    make_topo_info("{88F88506-5916-4668-BD8B-5C35D01D1147}", true, "Basic Tri Mix", "Tri", "Basic Tri Mix", param_basic1_tri_mix, 1),
+    make_topo_info("{88F88506-5916-4668-BD8B-5C35D01D1147}", true, "Basic 1 Tri Mix", "Tri", "Basic Tri Mix", param_basic1_tri_mix, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 1, 0, true),
     make_param_gui_single(section_basic1, gui_edit_type::hslider, { 1, 2 }, make_label_none())));
   basic1_tri_mix.gui.bindings.enabled.bind_params({ param_type, param_basic1_tri_on }, [](auto const& vs) { return vs[0] == type_basic1 && vs[1] != 0; });
   basic1_tri_mix.info.description = "Triangle generator mix amount.";
   basic1_tri_on.gui.alternate_drag_param_id = basic1_tri_mix.info.tag.id;
   auto& basic1_sqr_on = result.params.emplace_back(make_param(
-    make_topo_info("{C3AF1917-64FD-481B-9C21-3FE6F8D039C4}", true, "Basic Sqr On", "Sqr", "Basic Sqr", param_basic1_sqr_on, 1),
+    make_topo_info("{C3AF1917-64FD-481B-9C21-3FE6F8D039C4}", true, "Basic 1 Sqr On", "Sqr", "Basic Sqr", param_basic1_sqr_on, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_toggle(false),
     make_param_gui_single(section_basic1, gui_edit_type::toggle, { 1, 3 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   basic1_sqr_on.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_basic1; });
   basic1_sqr_on.info.description = "Toggle square generator on/off.";
   auto& basic1_sqr_mix = result.params.emplace_back(make_param(
-    make_topo_info("{B133B0E6-23DC-4B44-AA3B-6D04649271A4}", true, "Basic Sqr Mix", "Sqr", "Basic Sqr Mix", param_basic1_sqr_mix, 1),
+    make_topo_info("{B133B0E6-23DC-4B44-AA3B-6D04649271A4}", true, "Basic 1 Sqr Mix", "Sqr", "Basic Sqr Mix", param_basic1_sqr_mix, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 1, 0, true),
     make_param_gui_single(section_basic1, gui_edit_type::hslider, { 1, 5 }, make_label_none())));
   basic1_sqr_mix.gui.bindings.enabled.bind_params({ param_type, param_basic1_sqr_on }, [](auto const& vs) { return vs[0] == type_basic1 && vs[1] != 0; });
@@ -521,18 +521,52 @@ osc_topo(int section, gui_position const& pos)
   basic1_sqr_on.gui.alternate_drag_param_id = basic1_sqr_mix.info.tag.id;
 
   auto& basic1_pw = result.sections.emplace_back(make_param_section(section_basic1_pw,
-    make_topo_tag_basic("{93984655-A05F-424D-B3E5-A0C94AF8D0B3}", "Basic PW"),
+    make_topo_tag_basic("{93984655-A05F-424D-B3E5-A0C94AF8D0B3}", "Basic 1 PW"),
     make_param_section_gui({ 0, 5, 2, 1 }, gui_dimension({ 1, 1 }, { 1 }), gui_label_edit_cell_split::vertical)));
   basic1_pw.gui.merge_with_section = section_basic1;
   basic1_pw.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_basic1; });
   basic1_pw.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_off || vs[0] == type_basic1; });
   auto& basic1_sqr_pw = result.params.emplace_back(make_param(
-    make_topo_info("{57A231B9-CCC7-4881-885E-3244AE61107C}", true, "Basic Sqr PW", "PW", "Basic PW", param_basic1_sqr_pw, 1),
+    make_topo_info("{57A231B9-CCC7-4881-885E-3244AE61107C}", true, "Basic 1 Sqr PW", "PW", "Basic PW", param_basic1_sqr_pw, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(1, 0, true),
     make_param_gui_single(section_basic1_pw, gui_edit_type::knob, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::top, gui_label_justify::center))));
   basic1_sqr_pw.gui.bindings.enabled.bind_params({ param_type, param_basic1_sqr_on }, [](auto const& vs) { return vs[0] == type_basic1 && vs[1] != 0; });
   basic1_sqr_pw.info.description = "Square generator pulse width.";
+
+  auto& basic2 = result.sections.emplace_back(make_param_section(section_basic2,
+    make_topo_tag_basic("{7BB6F0D9-4A04-4932-B7CD-C3AF5C13C067}", "Basic 2"),
+    make_param_section_gui({ 0, 4, 2, 2 }, gui_dimension({ 1, 1 }, { 1, 1 })))); // todo autosize
+  basic2.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_basic2; });
+  basic2.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_basic2; });
+  auto& basic2_wave_1 = result.params.emplace_back(make_param(
+    make_topo_info("{D6B0CF43-5136-4D92-8EEA-2AE5EDD30C0E}", true, "Basic 2 Wave 1", "Wave 1", "Wave 1", param_basic2_wave1, 1),
+    make_param_dsp_voice(param_automate::automate), make_domain_item(basic2_wave_items(), "Sin"),
+    make_param_gui_single(section_basic2, gui_edit_type::autofit_list, { 0, 0, 1, 1 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
+  basic2_wave_1.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_basic2; });
+  basic2_wave_1.info.description = "Selects the base waveform.";
+  auto& basic2_wave_2 = result.params.emplace_back(make_param(
+    make_topo_info("{A8BAE205-AA10-4C48-8C40-5C5B4B1118FE}", true, "Basic 2 Wave 2", "Wave 2", "Wave 2", param_basic2_wave2, 1),
+    make_param_dsp_voice(param_automate::automate), make_domain_item(basic2_wave_items(), "Sin"),
+    make_param_gui_single(section_basic2, gui_edit_type::autofit_list, { 1, 0, 1, 1 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
+  basic2_wave_2.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_basic2; });
+  basic2_wave_2.info.description = "Selects the overlay waveform.";
+  auto& basic2_freq = result.params.emplace_back(make_param(
+    make_topo_info("{428C5833-3BBE-40AF-9A9C-5EACA40F4CA4}", true, "Basic 2 Freq", "Freq", "Basic 2 Freq", param_basic2_freq, 1),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.0f, 2, true), // TODO how much
+    make_param_gui_single(section_basic2, gui_edit_type::hslider, { 0, 1, 1, 1 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
+  basic2_freq.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_basic2; });
+  basic2_freq.info.description = "Selects the overlay frequency.";
+  auto& basic2_mix = result.params.emplace_back(make_param(
+    make_topo_info("{3590AA81-DDF3-4785-8944-D18B9869C609}", true, "Basic 2 Mix", "Mix", "Basic 2 Mix", param_basic2_mix, 1),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.0f, 2, true), // TODO how much
+    make_param_gui_single(section_basic2, gui_edit_type::hslider, { 1, 1, 1, 1 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
+  basic2_mix.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_basic2; });
+  basic2_mix.info.description = "Controls the overlay mix amount.";
 
   auto& dsf = result.sections.emplace_back(make_param_section(section_dsf,
     make_topo_tag_basic("{F6B06CEA-AF28-4AE2-943E-6225510109A3}", "DSF"),
