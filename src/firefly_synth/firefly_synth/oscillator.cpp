@@ -32,7 +32,8 @@ enum {
   param_uni_voices, param_uni_sprd, param_uni_dtn, param_uni_phase,
   param_basic_sin_on, param_basic_sin_mix, param_basic_saw_on, param_basic_saw_mix,
   param_basic_tri_on, param_basic_tri_mix, param_basic_sqr_on, param_basic_sqr_mix, param_basic_sqr_pw,
-  param_combi_wave1, param_combi_wave2, param_combi_freq, param_combi_mix,
+  param_combi_wave1, param_combi_skew_x_1, param_combi_skew_y_1, param_combi_freq,
+  param_combi_wave2, param_combi_skew_x_2, param_combi_skew_y_2, param_combi_mix,
   param_dsf_parts, param_dsf_dist, param_dsf_dcy,
   param_rand_svf, param_rand_rate, param_rand_freq, param_rand_res, param_rand_seed, // shared k+s/noise
   param_kps_fdbk, param_kps_mid, param_kps_stretch,
@@ -536,7 +537,7 @@ osc_topo(int section, gui_position const& pos)
 
   auto& combi = result.sections.emplace_back(make_param_section(section_combi,
     make_topo_tag_basic("{7BB6F0D9-4A04-4932-B7CD-C3AF5C13C067}", "Combi"),
-    make_param_section_gui({ 0, 4, 2, 2 }, gui_dimension({ 1, 1 }, { 1, 1 })))); // todo autosize
+    make_param_section_gui({ 0, 4, 2, 2 }, gui_dimension({ 1, 1 }, { 1, 1, 1, 1 })))); // todo autosize
   combi.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_combi; });
   combi.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_combi; });
   auto& combi_wave_1 = result.params.emplace_back(make_param(
@@ -546,6 +547,27 @@ osc_topo(int section, gui_position const& pos)
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   combi_wave_1.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_combi; });
   combi_wave_1.info.description = "Selects the base waveform.";
+  auto& combi_skew_x_1 = result.params.emplace_back(make_param(
+    make_topo_info("{961FA897-E195-48D0-A43B-B2DDAF796F2B}", true, "Combi Skew X 1", "Skew X", "Skew X 1", param_combi_skew_x_1, 1),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.0, 2, true),
+    make_param_gui_single(section_combi, gui_edit_type::knob, { 0, 1, 1, 1 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
+  combi_skew_x_1.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_combi; });
+  combi_skew_x_1.info.description = "Wave 1 skew X amount.";
+  auto& combi_skew_y_1 = result.params.emplace_back(make_param(
+    make_topo_info("{CF5A5AA9-7AC0-43D4-862F-17FA98A09655}", true, "Combi Skew Y 1", "Skew Y", "Skew Y 1", param_combi_skew_y_1, 1),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.0, 2, true),
+    make_param_gui_single(section_combi, gui_edit_type::knob, { 0, 2, 1, 1 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
+  combi_skew_y_1.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_combi; });
+  combi_skew_y_1.info.description = "Wave 1 skew Y amount.";
+  auto& combi_freq = result.params.emplace_back(make_param(
+    make_topo_info("{428C5833-3BBE-40AF-9A9C-5EACA40F4CA4}", true, "Combi Freq", "Freq", "Combi Freq", param_combi_freq, 1),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.0f, 2, true), // TODO how much
+    make_param_gui_single(section_combi, gui_edit_type::knob, { 0, 3, 1, 1 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
+  combi_freq.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_combi; });
+  combi_freq.info.description = "Controls wave 2 frequency.";
   auto& combi_wave_2 = result.params.emplace_back(make_param(
     make_topo_info("{A8BAE205-AA10-4C48-8C40-5C5B4B1118FE}", true, "Combi Wave 2", "Wave 2", "Wave 2", param_combi_wave2, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_item(combi_wave_items(), "Sin"),
@@ -553,17 +575,24 @@ osc_topo(int section, gui_position const& pos)
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   combi_wave_2.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_combi; });
   combi_wave_2.info.description = "Selects the overlay waveform.";
-  auto& combi_freq = result.params.emplace_back(make_param(
-    make_topo_info("{428C5833-3BBE-40AF-9A9C-5EACA40F4CA4}", true, "Combi Freq", "Freq", "Combi Freq", param_combi_freq, 1),
-    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.0f, 2, true), // TODO how much
-    make_param_gui_single(section_combi, gui_edit_type::hslider, { 0, 1, 1, 1 },
+  auto& combi_skew_x_2 = result.params.emplace_back(make_param(
+    make_topo_info("{420B67B9-5062-4004-B2E9-8F0DC3B7CACE}", true, "Combi Skew X 2", "Skew X", "Skew X 2", param_combi_skew_x_2, 1),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.0, 2, true),
+    make_param_gui_single(section_combi, gui_edit_type::knob, { 1, 1, 1, 1 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  combi_freq.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_combi; });
-  combi_freq.info.description = "Selects the overlay frequency.";
+  combi_skew_x_2.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_combi; });
+  combi_skew_x_2.info.description = "Wave 2 skew X amount.";
+  auto& combi_skew_y_2 = result.params.emplace_back(make_param(
+    make_topo_info("{AC7EA48C-533E-45E7-B12F-044887495F3C}", true, "Combi Skew Y 2", "Skew Y", "Skew Y 2", param_combi_skew_y_2, 1),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.0, 2, true),
+    make_param_gui_single(section_combi, gui_edit_type::knob, { 1, 2, 1, 1 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
+  combi_skew_y_2.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_combi; });
+  combi_skew_y_2.info.description = "Wave 2 skew Y amount.";
   auto& combi_mix = result.params.emplace_back(make_param(
     make_topo_info("{3590AA81-DDF3-4785-8944-D18B9869C609}", true, "Combi Mix", "Mix", "Combi Mix", param_combi_mix, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.0f, 2, true), // TODO how much
-    make_param_gui_single(section_combi, gui_edit_type::hslider, { 1, 1, 1, 1 },
+    make_param_gui_single(section_combi, gui_edit_type::knob, { 1, 3, 1, 1 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   combi_mix.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_combi; });
   combi_mix.info.description = "Controls the overlay mix amount.";
