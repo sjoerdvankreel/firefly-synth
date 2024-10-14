@@ -805,7 +805,7 @@ generate_combi(int wave1, int wave2, float phase, float increment)
   case combi_wave_sin: r1 = generate_sin(phase); break;
   case combi_wave_saw: r1 = generate_saw(phase, increment); break;
   case combi_wave_tri: r1 = generate_triangle(phase, increment); break;
-  case combi_wave_sqr: r1 = generate_sqr(phase, increment, 0.0f); break;
+  case combi_wave_sqr: r1 = generate_sqr(phase, increment, 1.0f); break;
   default: assert(false); break;
   }
 
@@ -814,7 +814,7 @@ generate_combi(int wave1, int wave2, float phase, float increment)
   case combi_wave_sin: r2 = generate_sin(phase); break;
   case combi_wave_saw: r2 = generate_saw(phase, increment); break;
   case combi_wave_tri: r2 = generate_triangle(phase, increment); break;
-  case combi_wave_sqr: r2 = generate_sqr(phase, increment, 0.0f); break;
+  case combi_wave_sqr: r2 = generate_sqr(phase, increment, 1.0f); break;
   default: assert(false); break;
   }
 
