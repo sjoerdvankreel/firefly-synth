@@ -878,7 +878,9 @@ generate_combi(int wave_a, int wave_b, float sr, float phase_lo, float inc_lo, f
   float b_hi = (1.0f - dist_lerp) * b_hi_1 + dist_lerp * b_hi_2;
   (void)b_hi;
 
-  return (1.0f - phase_lo) * a_lo + phase_lo * a_hi;
+  float a_up = (1.0f - phase_lo) * a_lo + phase_lo * a_hi;
+  float a_down = phase_lo * a_lo + (1.0f - phase_lo) * a_hi;
+  return (1.0f - mix) * a_up + mix * a_down;
 }
 
 osc_engine::
