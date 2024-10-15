@@ -811,10 +811,16 @@ generate_combi(int wave1, int wave2, float phase1, float increment, float freq, 
   // todo skewx/skewy = affect wave2 volume relative to phase
   // freq/mix as-intended
 
+  // PM test
+  // ALSO fix to nyquist + lerp to bandlimited somehow?
+  float pm_amt = sky1 * 4;
 
   // todo limit to nyquist
-  float phase2 = phase1 * (1.0 + freq);
+  //float phase2 = (phase1 + (pm_amt * phase1)) * (1.0 + freq);
+  float phase2 = phase1 + (phase1 * pm_amt * (1 + freq));
   phase2 -= std::floor(phase2);
+
+  // TODO incr 2 
 
   switch (wave1)
   {
