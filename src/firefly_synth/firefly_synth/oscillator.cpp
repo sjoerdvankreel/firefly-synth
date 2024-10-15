@@ -578,7 +578,7 @@ osc_topo(int section, gui_position const& pos)
   combi_skew_y_1.info.description = "Wave 1 skew Y amount.";
   auto& combi_freq = result.params.emplace_back(make_param(
     make_topo_info("{428C5833-3BBE-40AF-9A9C-5EACA40F4CA4}", true, "Combi Freq", "Freq", "Combi Freq", param_combi_freq, 1),
-    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(0.0f, 32.0f, 1.0f, 2, true),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_linear(0.0f, 32.0f, 1.0f, 2, ""),
     make_param_gui_single(section_combi, gui_edit_type::knob, { 0, 6, 1, 1 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   combi_freq.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_combi; });
@@ -796,10 +796,19 @@ generate_sqr(float phase, float increment, float pwm)
 }
 
 static inline float
-generate_combi(int wave1, int wave2, float phase1, float increment, float freq, float mix)
+generate_combi(int wave1, int wave2, float phase1, float increment, float freq, float mix, float skx1, float sky1, float skx2, float sxy2)
 {
   float r1 = 0.0f;
   float r2 = 0.0f;
+
+  // todo dont do this it causes pitch drift (shouldv seen that coming)
+  phase1 = std::pow(phase1, 1.0f + skx1 * 9.0f);
+
+  // todo skewx/skewy = affect wave2 volume relative to phase
+  // freq/mix as-intended
+
+
+  // todo limit to nyquist
   float phase2 = phase1 * (1.0 + freq);
   phase2 -= std::floor(phase2);
 
@@ -821,8 +830,11 @@ generate_combi(int wave1, int wave2, float phase1, float increment, float freq, 
   default: assert(false); break;
   }
 
+  // tryout: skew x1 as % of phase 1
+  float final_mix = 1 - phase1;
+
   // TODO deal with non-integer by lerp
-  return (1.0f - mix) * r1 + mix * r2;
+  return (1.0f - final_mix) * r1 + final_mix * r2;
 }
 
 osc_engine::
@@ -1272,6 +1284,10 @@ osc_engine::process_tuning_mode_unison(plugin_block& block, cv_audio_matrix_mixd
   if constexpr (BasicSqr) block.normalized_to_raw_block<domain_type::linear>(module_osc, param_basic_sqr_mix, basic_sqr_mix_curve_norm, basic_sqr_mix_curve);
 
   auto const& combi_mix_curve = *(*modulation)[module_osc][block.module_slot][param_combi_mix][0];
+  auto const& combi_skx1_curve = *(*modulation)[module_osc][block.module_slot][param_combi_skew_x_1][0];
+  auto const& combi_sky1_curve = *(*modulation)[module_osc][block.module_slot][param_combi_skew_y_1][0];
+  auto const& combi_skx2_curve = *(*modulation)[module_osc][block.module_slot][param_combi_skew_x_2][0];
+  auto const& combi_sky2_curve = *(*modulation)[module_osc][block.module_slot][param_combi_skew_y_2][0];
   auto& combi_freq_curve = block.state.own_scratch[scratch_combi_freq];
   auto const& combi_freq_curve_norm = *(*modulation)[module_osc][block.module_slot][param_combi_freq][0];
   if constexpr (Combi) block.normalized_to_raw_block<domain_type::linear>(module_osc, param_combi_freq, combi_freq_curve_norm, combi_freq_curve);
@@ -1390,7 +1406,9 @@ osc_engine::process_tuning_mode_unison(plugin_block& block, cv_audio_matrix_mixd
       if constexpr (BasicTri) synced_sample += generate_triangle(_sync_phases[v], inc_sync) * basic_tri_mix_curve[mod_index];
       if constexpr (BasicSqr) synced_sample += generate_sqr(_sync_phases[v], inc_sync, basic_pw_curve[mod_index]) * basic_sqr_mix_curve[mod_index];
       if constexpr (DSF) synced_sample = generate_dsf<int>(_sync_phases[v], oversampled_rate, freq_sync, dsf_parts, dsf_dist, dsf_dcy_curve[mod_index]);
-      if constexpr (Combi) synced_sample = generate_combi(combi_wave_1, combi_wave_2, _sync_phases[v], inc_sync, combi_freq_curve[mod_index], combi_mix_curve[mod_index]);
+      if constexpr (Combi) synced_sample = generate_combi(
+        combi_wave_1, combi_wave_2, _sync_phases[v], inc_sync, combi_freq_curve[mod_index], combi_mix_curve[mod_index], 
+        combi_skx1_curve[mod_index], combi_sky1_curve[mod_index], combi_skx2_curve[mod_index], combi_sky2_curve[mod_index]);
 
       // generate the unsynced sample and crossover
       float unsynced_sample = 0;
@@ -1411,7 +1429,10 @@ osc_engine::process_tuning_mode_unison(plugin_block& block, cv_audio_matrix_mixd
           if constexpr (BasicTri) unsynced_sample += generate_triangle(_unsync_phases[v], inc_sync) * basic_tri_mix_curve[mod_index];
           if constexpr (BasicSqr) unsynced_sample += generate_sqr(_unsync_phases[v], inc_sync, basic_pw_curve[mod_index]) * basic_sqr_mix_curve[mod_index];
           if constexpr (DSF) unsynced_sample = generate_dsf<int>(_unsync_phases[v], oversampled_rate, freq_sync, dsf_parts, dsf_dist, dsf_dcy_curve[mod_index]);
-          if constexpr (Combi) unsynced_sample = generate_combi(combi_wave_1, combi_wave_2, _unsync_phases[v], inc_sync, combi_freq_curve[mod_index], combi_mix_curve[mod_index]);
+          if constexpr (Combi) unsynced_sample = generate_combi(
+            combi_wave_1, combi_wave_2, _unsync_phases[v], inc_sync, combi_freq_curve[mod_index], combi_mix_curve[mod_index],
+            combi_skx1_curve[mod_index], combi_sky1_curve[mod_index], combi_skx2_curve[mod_index], combi_sky2_curve[mod_index]);
+
 
           increment_and_wrap_phase(_unsync_phases[v], inc_sync);
           float unsynced_weight = _unsync_samples[v]-- / (sync_over_samples + 1.0f);
