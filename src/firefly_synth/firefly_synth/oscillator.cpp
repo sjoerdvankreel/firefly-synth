@@ -798,11 +798,13 @@ generate_sqr(float phase, float increment, float pwm)
 static inline float
 generate_combi(int wave1, int wave2, float phase1, float increment, float freq, float mix, float skx1, float sky1, float skx2, float sxy2)
 {
-  float r1 = 0.0f;
-  float r2 = 0.0f;
+  float lo_1 = 0.0f;
+  float lo_2 = 0.0f;
+  float hi_1 = 0.0f;
+  float hi_2 = 0.0f;
 
   // todo dont do this it causes pitch drift (shouldv seen that coming)
-  phase1 = std::pow(phase1, 1.0f + skx1 * 9.0f);
+ // phase1 = std::pow(phase1, 1.0f + skx1 * 9.0f);
 
   // rename osci to hi/low
   // morph hi/low / lo-hi
@@ -816,27 +818,57 @@ generate_combi(int wave1, int wave2, float phase1, float increment, float freq, 
 
   switch (wave1)
   {
-  case combi_wave_sin: r1 = generate_sin(phase1); break;
-  case combi_wave_saw: r1 = generate_saw(phase1, increment); break;
-  case combi_wave_tri: r1 = generate_triangle(phase1, increment); break;
-  case combi_wave_sqr: r1 = generate_sqr(phase1, increment, 1.0f); break;
+  case combi_wave_sin: 
+    lo_1 = generate_sin(phase1); 
+    hi_1 = generate_sin(phase2);
+    break;
+  case combi_wave_saw: 
+    lo_1 = generate_saw(phase1, increment); 
+    hi_1 = generate_saw(phase2, increment);
+    break;
+  case combi_wave_tri: 
+    lo_1 = generate_triangle(phase1, increment); 
+    hi_1 = generate_triangle(phase2, increment);
+    break;
+  case combi_wave_sqr: 
+    lo_1 = generate_sqr(phase1, increment, 1.0f); 
+    hi_1 = generate_sqr(phase2, increment, 1.0f);
+    break;
   default: assert(false); break;
   }
 
   switch (wave2)
   {
-  case combi_wave_sin: r2 = generate_sin(phase2); break;
-  case combi_wave_saw: r2 = generate_saw(phase2, increment * freq); break;
-  case combi_wave_tri: r2 = generate_triangle(phase2, increment * freq); break;
-  case combi_wave_sqr: r2 = generate_sqr(phase2, increment * freq, 1.0f); break;
+  case combi_wave_sin:
+    lo_2 = generate_sin(phase1);
+    hi_2 = generate_sin(phase2);
+    break;
+  case combi_wave_saw:
+    lo_2 = generate_saw(phase1, increment);
+    hi_2 = generate_saw(phase2, increment);
+    break;
+  case combi_wave_tri:
+    lo_2 = generate_triangle(phase1, increment);
+    hi_2 = generate_triangle(phase2, increment);
+    break;
+  case combi_wave_sqr:
+    lo_2 = generate_sqr(phase1, increment, 1.0f);
+    hi_2 = generate_sqr(phase2, increment, 1.0f);
+    break;
   default: assert(false); break;
   }
 
-  // tryout: skew x1 as % of phase 1
-  float final_mix = 1 - phase1;
+  // todo tryout: skew x1 as % of phase 1
+  //float final_mix = 0.5f;
 
   // TODO deal with non-integer by lerp
-  return (1.0f - final_mix) * r1 + final_mix * r2;
+  //return (1.0f - final_mix) * r1 + final_mix * r2;
+
+  float morhp_lo = phase1 * skx1;
+  float low = (1.0f - morhp_lo) * lo_1 + morhp_lo * lo_2;
+  float morhp_hi = phase1 * skx2;
+  float hi = (1.0f - morhp_hi) * hi_1 + morhp_hi * hi_2;
+  return (low + hi) * 0.5f;
 }
 
 osc_engine::
