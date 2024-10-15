@@ -804,6 +804,8 @@ generate_combi(int wave1, int wave2, float phase1, float increment, float freq, 
   // todo dont do this it causes pitch drift (shouldv seen that coming)
   phase1 = std::pow(phase1, 1.0f + skx1 * 9.0f);
 
+  // rename osci to hi/low
+  // morph hi/low / lo-hi
   // todo skewx/skewy = affect wave2 volume relative to phase
   // freq/mix as-intended
 
