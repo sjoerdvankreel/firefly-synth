@@ -807,6 +807,8 @@ generate_combi(int wave_a, int wave_b, float sr, float phase_lo, float inc_lo, f
   float b_hi_1 = 0.0f;
   float b_hi_2 = 0.0f;
 
+  // dist needs to be integer multiples to go full cycle on the hi generator
+  // so need to lerp them and also take nyquist into account
   float max_dist = std::floor(sr * 0.5f / freq_lo);
   float dist_1 = std::min(max_dist, std::floor(dist));
   float dist_2 = std::min(max_dist, std::floor(dist) + 1.0f);
