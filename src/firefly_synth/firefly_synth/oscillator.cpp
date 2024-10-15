@@ -16,6 +16,8 @@ using namespace plugin_base;
 
 namespace firefly_synth {
 
+// todo rename the combi params eg freq->dist
+
 static float const max_phase_mod = 0.1f;
 
 enum { combi_wave_sin, combi_wave_saw, combi_wave_tri, combi_wave_sqr };
@@ -578,7 +580,7 @@ osc_topo(int section, gui_position const& pos)
   combi_skew_y_1.info.description = "Wave 1 skew Y amount.";
   auto& combi_freq = result.params.emplace_back(make_param(
     make_topo_info("{428C5833-3BBE-40AF-9A9C-5EACA40F4CA4}", true, "Combi Freq", "Freq", "Combi Freq", param_combi_freq, 1),
-    make_param_dsp_accurate(param_automate::modulate), make_domain_linear(0.0f, 32.0f, 1.0f, 2, ""),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_linear(1.0f, 32.0f, 2.0f, 2, ""),
     make_param_gui_single(section_combi, gui_edit_type::knob, { 0, 6, 1, 1 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   combi_freq.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_combi; });
@@ -796,85 +798,85 @@ generate_sqr(float phase, float increment, float pwm)
 }
 
 static inline float
-generate_combi(int wave1, int wave2, float phase1, float increment, float freq, float mix, float skx1, float sky1, float skx2, float sxy2)
+generate_combi(int wave_a, int wave_b, float sr, float phase_lo, float inc_lo, float freq_lo, float dist, float mix, float skx1, float sky1, float skx2, float sxy2)
 {
-  float lo_1 = 0.0f;
-  float lo_2 = 0.0f;
-  float hi_1 = 0.0f;
-  float hi_2 = 0.0f;
+  float a_lo = 0.0f;
+  float b_lo = 0.0f;
+  float a_hi_1 = 0.0f;
+  float a_hi_2 = 0.0f;
+  float b_hi_1 = 0.0f;
+  float b_hi_2 = 0.0f;
 
-  // todo dont do this it causes pitch drift (shouldv seen that coming)
- // phase1 = std::pow(phase1, 1.0f + skx1 * 9.0f);
+  float max_dist = std::floor(sr * 0.5f / freq_lo);
+  float dist_1 = std::min(max_dist, std::floor(dist));
+  float dist_2 = std::min(max_dist, std::floor(dist) + 1.0f);
+  float dist_lerp = dist - std::floor(dist);
+  float inc_hi_1 = inc_lo * dist_1;
+  float inc_hi_2 = inc_lo * dist_2;
+  float phase_hi_1 = phase_lo * dist_1;
+  float phase_hi_2 = phase_lo * dist_2;
+  phase_hi_1 -= std::floor(phase_hi_1);
+  phase_hi_2 -= std::floor(phase_hi_2);
 
-  // rename osci to hi/low
-  // morph hi/low / lo-hi
-  // todo skewx/skewy = affect wave2 volume relative to phase
-  // freq/mix as-intended
-
-  // PM test
-  // ALSO fix to nyquist + lerp to bandlimited somehow?
-  float pm_amt = sky1 * 4;
-
-  // todo limit to nyquist
-  //float phase2 = (phase1 + (pm_amt * phase1)) * (1.0 + freq);
-  float phase2 = phase1 + (phase1 * pm_amt * (1 + freq));
-  phase2 -= std::floor(phase2);
-
-  // TODO incr 2 
-
-  switch (wave1)
+  switch (wave_a)
   {
   case combi_wave_sin: 
-    lo_1 = generate_sin(phase1); 
-    hi_1 = generate_sin(phase2);
+    a_lo = generate_sin(phase_lo);
+    a_hi_1 = generate_sin(phase_hi_1);
+    a_hi_2 = generate_sin(phase_hi_2);
     break;
   case combi_wave_saw: 
-    lo_1 = generate_saw(phase1, increment); 
-    hi_1 = generate_saw(phase2, increment);
+    a_lo = generate_saw(phase_lo, inc_lo);
+    a_hi_1 = generate_saw(phase_hi_1, inc_hi_1);
+    a_hi_2 = generate_saw(phase_hi_2, inc_hi_2);
     break;
   case combi_wave_tri: 
-    lo_1 = generate_triangle(phase1, increment); 
-    hi_1 = generate_triangle(phase2, increment);
+    a_lo = generate_triangle(phase_lo, inc_lo);
+    a_hi_1 = generate_triangle(phase_hi_1, inc_hi_1);
+    a_hi_2 = generate_triangle(phase_hi_2, inc_hi_2);
     break;
   case combi_wave_sqr: 
-    lo_1 = generate_sqr(phase1, increment, 1.0f); 
-    hi_1 = generate_sqr(phase2, increment, 1.0f);
+    a_lo = generate_sqr(phase_lo, inc_lo, 1.0f);
+    a_hi_1 = generate_sqr(phase_hi_1, inc_hi_1, 1.0f);
+    a_hi_2 = generate_sqr(phase_hi_2, inc_hi_2, 1.0f);
     break;
-  default: assert(false); break;
+  default: 
+    assert(false); 
+    break;
   }
 
-  switch (wave2)
+  switch (wave_b)
   {
   case combi_wave_sin:
-    lo_2 = generate_sin(phase1);
-    hi_2 = generate_sin(phase2);
+    b_lo = generate_sin(phase_lo);
+    b_hi_1 = generate_sin(phase_hi_1);
+    b_hi_2 = generate_sin(phase_hi_2);
     break;
   case combi_wave_saw:
-    lo_2 = generate_saw(phase1, increment);
-    hi_2 = generate_saw(phase2, increment);
+    b_lo = generate_saw(phase_lo, inc_lo);
+    b_hi_1 = generate_saw(phase_hi_1, inc_hi_1);
+    b_hi_2 = generate_saw(phase_hi_2, inc_hi_2);
     break;
   case combi_wave_tri:
-    lo_2 = generate_triangle(phase1, increment);
-    hi_2 = generate_triangle(phase2, increment);
+    b_lo = generate_triangle(phase_lo, inc_lo);
+    b_hi_1 = generate_triangle(phase_hi_1, inc_hi_1);
+    b_hi_2 = generate_triangle(phase_hi_2, inc_hi_2);
     break;
   case combi_wave_sqr:
-    lo_2 = generate_sqr(phase1, increment, 1.0f);
-    hi_2 = generate_sqr(phase2, increment, 1.0f);
+    b_lo = generate_sqr(phase_lo, inc_lo, 1.0f);
+    b_hi_1 = generate_sqr(phase_hi_1, inc_hi_1, 1.0f);
+    b_hi_2 = generate_sqr(phase_hi_2, inc_hi_2, 1.0f);
     break;
-  default: assert(false); break;
+  default:
+    assert(false);
+    break;
   }
 
-  // todo tryout: skew x1 as % of phase 1
-  //float final_mix = 0.5f;
+  float a_hi = (1.0f - dist_lerp) * a_hi_1 + dist_lerp * a_hi_2;
+  float b_hi = (1.0f - dist_lerp) * b_hi_1 + dist_lerp * b_hi_2;
+  (void)b_hi;
 
-  // TODO deal with non-integer by lerp
-  //return (1.0f - final_mix) * r1 + final_mix * r2;
-
-  float morhp_lo = phase1 * skx1;
-  float low = (1.0f - morhp_lo) * lo_1 + morhp_lo * lo_2;
-  float morhp_hi = phase1 * skx2;
-  float hi = (1.0f - morhp_hi) * hi_1 + morhp_hi * hi_2;
-  return (low + hi) * 0.5f;
+  return (1.0f - phase_lo) * a_lo + phase_lo * a_hi;
 }
 
 osc_engine::
@@ -1447,8 +1449,10 @@ osc_engine::process_tuning_mode_unison(plugin_block& block, cv_audio_matrix_mixd
       if constexpr (BasicSqr) synced_sample += generate_sqr(_sync_phases[v], inc_sync, basic_pw_curve[mod_index]) * basic_sqr_mix_curve[mod_index];
       if constexpr (DSF) synced_sample = generate_dsf<int>(_sync_phases[v], oversampled_rate, freq_sync, dsf_parts, dsf_dist, dsf_dcy_curve[mod_index]);
       if constexpr (Combi) synced_sample = generate_combi(
-        combi_wave_1, combi_wave_2, _sync_phases[v], inc_sync, combi_freq_curve[mod_index], combi_mix_curve[mod_index], 
-        combi_skx1_curve[mod_index], combi_sky1_curve[mod_index], combi_skx2_curve[mod_index], combi_sky2_curve[mod_index]);
+        combi_wave_1, combi_wave_2, oversampled_rate, _sync_phases[v], inc_sync, freq_sync, 
+        combi_freq_curve[mod_index], combi_mix_curve[mod_index],
+        combi_skx1_curve[mod_index], combi_sky1_curve[mod_index], 
+        combi_skx2_curve[mod_index], combi_sky2_curve[mod_index]);
 
       // generate the unsynced sample and crossover
       float unsynced_sample = 0;
@@ -1470,7 +1474,7 @@ osc_engine::process_tuning_mode_unison(plugin_block& block, cv_audio_matrix_mixd
           if constexpr (BasicSqr) unsynced_sample += generate_sqr(_unsync_phases[v], inc_sync, basic_pw_curve[mod_index]) * basic_sqr_mix_curve[mod_index];
           if constexpr (DSF) unsynced_sample = generate_dsf<int>(_unsync_phases[v], oversampled_rate, freq_sync, dsf_parts, dsf_dist, dsf_dcy_curve[mod_index]);
           if constexpr (Combi) unsynced_sample = generate_combi(
-            combi_wave_1, combi_wave_2, _unsync_phases[v], inc_sync, combi_freq_curve[mod_index], combi_mix_curve[mod_index],
+            combi_wave_1, combi_wave_2, oversampled_rate, _unsync_phases[v], inc_sync, freq_sync, combi_freq_curve[mod_index], combi_mix_curve[mod_index],
             combi_skx1_curve[mod_index], combi_sky1_curve[mod_index], combi_skx2_curve[mod_index], combi_sky2_curve[mod_index]);
 
 
