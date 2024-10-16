@@ -813,17 +813,6 @@ generate_combi(int wave_a, int wave_b, float sr, float phase_lo, float inc_lo, f
   float dist_1 = std::min(max_dist, std::floor(dist));
   float dist_2 = std::min(max_dist, std::floor(dist) + 1.0f);
   float dist_lerp = dist - std::floor(dist);
-
-  // ok so this gets a continuous distance but now stuff aliases
-  // so lerp freq gives me f.e. 50% 400hz and 50% 800hz
-  // and theres nowhere a 600hz signal to be found so no good either
-  // this looks like same problem as hardsync - how to bandlimit 
-  // a pitched up signal by non-integer multiples of the base freq
-  // maybe employ the same subsample cross-over thingy ?
-  
-  //dist_lerp = 0;
-  //dist_1 = dist_2 = dist;
-
   float inc_hi_1 = inc_lo * dist_1;
   float inc_hi_2 = inc_lo * dist_2;
   float phase_hi_1 = phase_lo * dist_1;
