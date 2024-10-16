@@ -37,7 +37,7 @@ enum {
   param_basic_sin_on, param_basic_sin_mix, param_basic_saw_on, param_basic_saw_mix,
   param_basic_tri_on, param_basic_tri_mix, param_basic_sqr_on, param_basic_sqr_mix, param_basic_sqr_pw,
   param_combi_wave1, param_combi_skew_x_1, param_combi_skew_y_1, param_combi_freq,
-  param_combi_wave2, param_combi_skew_x_2, param_combi_skew_y_2, param_combi_mix,
+  param_combi_wave2, param_combi_skew_x_2, param_combi_skew_y_2, param_combi_dcy,
   param_dsf_parts, param_dsf_dist, param_dsf_dcy,
   param_rand_svf, param_rand_rate, param_rand_freq, param_rand_res, param_rand_seed, // shared k+s/noise
   param_kps_fdbk, param_kps_mid, param_kps_stretch,
@@ -607,8 +607,8 @@ osc_topo(int section, gui_position const& pos)
   combi_skew_y_2.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_combi; });
   combi_skew_y_2.info.description = "Wave 2 skew Y amount.";
   auto& combi_mix = result.params.emplace_back(make_param(
-    make_topo_info("{3590AA81-DDF3-4785-8944-D18B9869C609}", true, "Combi Mix", "Mix", "Combi Mix", param_combi_mix, 1),
-    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5f, 2, true),
+    make_topo_info("{3590AA81-DDF3-4785-8944-D18B9869C609}", true, "Combi Decay", "Dcy", "Combi Dcy", param_combi_dcy, 1),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.0f, 2, true),
     make_param_gui_single(section_combi, gui_edit_type::knob, { 1, 6, 1, 1 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   combi_mix.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_combi; });
@@ -798,60 +798,38 @@ generate_sqr(float phase, float increment, float pwm)
 }
 
 static inline float
-generate_combi(int wave_a, int wave_b, float sr, float phase_lo, float inc_lo, float freq_lo, float dist, float mix, float skx1, float sky1, float skx2, float sxy2)
+generate_combi(int wave_a, int wave_b, float sr, float phase_lo, float inc_lo, float freq_lo, float dist, float dcy, float skx1, float sky1, float skx2, float sxy2)
 {
   float a_lo = 0.0f;
   float b_lo = 0.0f;
-  float a_hi_1 = 0.0f;
-  float a_hi_2 = 0.0f;
-  float b_hi_1 = 0.0f;
-  float b_hi_2 = 0.0f;
+  float a_hi = 0.0f;
+  float b_hi = 0.0f;
 
-  // dist needs to be integer multiples to go full cycle on the hi generator
-  // so need to lerp them and also take nyquist into account
-  float max_dist = std::floor(sr * 0.5f / freq_lo);
-  float dist_1 = std::min(max_dist, std::floor(dist));
-  float dist_2 = std::min(max_dist, std::floor(dist) + 1.0f);
-  float dist_lerp = dist - std::floor(dist);
+  // clamp to nyquist
+  float max_dist = sr * 0.5f / freq_lo;
+  dist = std::min(dist, max_dist);
 
-  // ok so this gets a continuous distance but now stuff aliases
-  // so lerp freq gives me f.e. 50% 400hz and 50% 800hz
-  // and theres nowhere a 600hz signal to be found so no good either
-  // this looks like same problem as hardsync - how to bandlimit 
-  // a pitched up signal by non-integer multiples of the base freq
-  // maybe employ the same subsample cross-over thingy ?
-  
-  //dist_lerp = 0;
-  //dist_1 = dist_2 = dist;
-
-  float inc_hi_1 = inc_lo * dist_1;
-  float inc_hi_2 = inc_lo * dist_2;
-  float phase_hi_1 = phase_lo * dist_1;
-  float phase_hi_2 = phase_lo * dist_2;
-  phase_hi_1 -= std::floor(phase_hi_1);
-  phase_hi_2 -= std::floor(phase_hi_2);
+  float inc_hi = inc_lo * dist;
+  float phase_hi = phase_lo * dist;
+  phase_hi -= std::floor(phase_hi);
 
   switch (wave_a)
   {
   case combi_wave_sin: 
     a_lo = generate_sin(phase_lo);
-    a_hi_1 = generate_sin(phase_hi_1);
-    a_hi_2 = generate_sin(phase_hi_2);
+    a_hi = generate_sin(phase_hi);
     break;
   case combi_wave_saw: 
     a_lo = generate_saw(phase_lo, inc_lo);
-    a_hi_1 = generate_saw(phase_hi_1, inc_hi_1);
-    a_hi_2 = generate_saw(phase_hi_2, inc_hi_2);
+    a_hi = generate_saw(phase_hi, inc_hi);
     break;
   case combi_wave_tri: 
     a_lo = generate_triangle(phase_lo, inc_lo);
-    a_hi_1 = generate_triangle(phase_hi_1, inc_hi_1);
-    a_hi_2 = generate_triangle(phase_hi_2, inc_hi_2);
+    a_hi = generate_triangle(phase_hi, inc_hi);
     break;
   case combi_wave_sqr: 
     a_lo = generate_sqr(phase_lo, inc_lo, 1.0f);
-    a_hi_1 = generate_sqr(phase_hi_1, inc_hi_1, 1.0f);
-    a_hi_2 = generate_sqr(phase_hi_2, inc_hi_2, 1.0f);
+    a_hi = generate_sqr(phase_hi, inc_hi, 1.0f);
     break;
   default: 
     assert(false); 
@@ -862,36 +840,40 @@ generate_combi(int wave_a, int wave_b, float sr, float phase_lo, float inc_lo, f
   {
   case combi_wave_sin:
     b_lo = generate_sin(phase_lo);
-    b_hi_1 = generate_sin(phase_hi_1);
-    b_hi_2 = generate_sin(phase_hi_2);
+    b_hi = generate_sin(phase_hi);
     break;
   case combi_wave_saw:
     b_lo = generate_saw(phase_lo, inc_lo);
-    b_hi_1 = generate_saw(phase_hi_1, inc_hi_1);
-    b_hi_2 = generate_saw(phase_hi_2, inc_hi_2);
+    b_hi = generate_saw(phase_hi, inc_hi);
     break;
   case combi_wave_tri:
     b_lo = generate_triangle(phase_lo, inc_lo);
-    b_hi_1 = generate_triangle(phase_hi_1, inc_hi_1);
-    b_hi_2 = generate_triangle(phase_hi_2, inc_hi_2);
+    b_hi = generate_triangle(phase_hi, inc_hi);
     break;
   case combi_wave_sqr:
     b_lo = generate_sqr(phase_lo, inc_lo, 1.0f);
-    b_hi_1 = generate_sqr(phase_hi_1, inc_hi_1, 1.0f);
-    b_hi_2 = generate_sqr(phase_hi_2, inc_hi_2, 1.0f);
+    b_hi = generate_sqr(phase_hi, inc_hi, 1.0f);
     break;
   default:
     assert(false);
     break;
   }
 
-  float a_hi = (1.0f - dist_lerp) * a_hi_1 + dist_lerp * a_hi_2;
-  float b_hi = (1.0f - dist_lerp) * b_hi_1 + dist_lerp * b_hi_2;
+  // hi can go non-integer-multiple of the base frequency
+  // so ends as an incomplete cycle. therefore we make
+  // sure it's amplitude approaches zero as the low phase
+  // proceeds from 0 to 1. The mix amount is controlled by decay curve.
+
+  // other options are:
+  // 1 do nothing - produces aliasing
+  // 2 snap to integer multiples of the base freq and lerp - produces audible "stepping" eg 200 hz, 400 hz, 600 hz etc (not continuous)
+  // 3 do subsample interpolation like hardsync - heavy on the bookkeeping
+
   (void)b_hi;
 
-  float a_up = (1.0f - phase_lo) * a_lo + phase_lo * a_hi;
-  float a_down = phase_lo * a_lo + (1.0f - phase_lo) * a_hi;
-  return (1.0f - mix) * a_up + mix * a_down;
+  float const dcy_range = 0.99f;
+  float mix_hi = (1.0f - std::pow(phase_lo, (1.0f - dcy_range) + dcy_range * dcy));
+  return (1.0f - mix_hi) * a_lo + mix_hi * a_hi;
 }
 
 osc_engine::
@@ -1340,7 +1322,7 @@ osc_engine::process_tuning_mode_unison(plugin_block& block, cv_audio_matrix_mixd
   if constexpr (BasicTri) block.normalized_to_raw_block<domain_type::linear>(module_osc, param_basic_tri_mix, basic_tri_mix_curve_norm, basic_tri_mix_curve);
   if constexpr (BasicSqr) block.normalized_to_raw_block<domain_type::linear>(module_osc, param_basic_sqr_mix, basic_sqr_mix_curve_norm, basic_sqr_mix_curve);
 
-  auto const& combi_mix_curve = *(*modulation)[module_osc][block.module_slot][param_combi_mix][0];
+  auto const& combi_dcy_curve = *(*modulation)[module_osc][block.module_slot][param_combi_dcy][0];
   auto const& combi_skx1_curve = *(*modulation)[module_osc][block.module_slot][param_combi_skew_x_1][0];
   auto const& combi_sky1_curve = *(*modulation)[module_osc][block.module_slot][param_combi_skew_y_1][0];
   auto const& combi_skx2_curve = *(*modulation)[module_osc][block.module_slot][param_combi_skew_x_2][0];
@@ -1465,7 +1447,7 @@ osc_engine::process_tuning_mode_unison(plugin_block& block, cv_audio_matrix_mixd
       if constexpr (DSF) synced_sample = generate_dsf<int>(_sync_phases[v], oversampled_rate, freq_sync, dsf_parts, dsf_dist, dsf_dcy_curve[mod_index]);
       if constexpr (Combi) synced_sample = generate_combi(
         combi_wave_1, combi_wave_2, oversampled_rate, _sync_phases[v], inc_sync, freq_sync, 
-        combi_freq_curve[mod_index], combi_mix_curve[mod_index],
+        combi_freq_curve[mod_index], combi_dcy_curve[mod_index],
         combi_skx1_curve[mod_index], combi_sky1_curve[mod_index], 
         combi_skx2_curve[mod_index], combi_sky2_curve[mod_index]);
 
@@ -1489,7 +1471,7 @@ osc_engine::process_tuning_mode_unison(plugin_block& block, cv_audio_matrix_mixd
           if constexpr (BasicSqr) unsynced_sample += generate_sqr(_unsync_phases[v], inc_sync, basic_pw_curve[mod_index]) * basic_sqr_mix_curve[mod_index];
           if constexpr (DSF) unsynced_sample = generate_dsf<int>(_unsync_phases[v], oversampled_rate, freq_sync, dsf_parts, dsf_dist, dsf_dcy_curve[mod_index]);
           if constexpr (Combi) unsynced_sample = generate_combi(
-            combi_wave_1, combi_wave_2, oversampled_rate, _unsync_phases[v], inc_sync, freq_sync, combi_freq_curve[mod_index], combi_mix_curve[mod_index],
+            combi_wave_1, combi_wave_2, oversampled_rate, _unsync_phases[v], inc_sync, freq_sync, combi_freq_curve[mod_index], combi_dcy_curve[mod_index],
             combi_skx1_curve[mod_index], combi_sky1_curve[mod_index], combi_skx2_curve[mod_index], combi_sky2_curve[mod_index]);
 
 
