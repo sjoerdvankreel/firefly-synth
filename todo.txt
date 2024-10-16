@@ -47,7 +47,6 @@ turn on stuff when dragging (e.g. basic sin, dist skew etc)
 
 wishlist:
 use fftw
-take Nyquist into account for hardsync?
 should figure out a way to do user supplied formulas?
 update the manuals routing overview image with new colors
 filter micro tuning
