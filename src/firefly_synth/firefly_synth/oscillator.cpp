@@ -432,7 +432,7 @@ osc_topo(int section, gui_position const& pos)
     make_param_gui_single(section_sync_uni, gui_edit_type::knob, { 1, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   uni_dtn.gui.bindings.enabled.bind_params({ param_type, param_uni_voices }, [](auto const& vs) { return can_do_pitch(vs[0]) && vs[1] > 1; });
-  uni_dtn.info.description = "Detune unison voices. Only applicable to Basic and DSF generators.";
+  uni_dtn.info.description = "Detune unison voices. Only applicable to Basic, DSF and KPS generators.";
   auto& uni_phase = result.params.emplace_back(make_param(
     make_topo_info("{8F1098B6-64F9-407E-A8A3-8C3637D59A26}", true, "Unison Phase", "Phs", "Uni Phase", param_uni_phase, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),

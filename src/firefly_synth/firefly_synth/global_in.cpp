@@ -9,6 +9,7 @@
 
 #include <firefly_synth/synth.hpp>
 #include <cmath>
+#include <algorithm>
 
 using namespace plugin_base;
 
@@ -52,7 +53,7 @@ module_topo
 global_in_topo(int section, bool is_fx, gui_position const& pos)
 {
   std::vector<int> row_distribution = { 1 };
-  std::vector<int> column_distribution = { 37, 27, 26, 44, 24, 22, 28, 76 };
+  std::vector<int> column_distribution = { 37, 27, 26, 44, 24, 22, 32, 80 };
   module_topo result(make_module(
     make_topo_info_basic("{E22B3B9D-2337-4DE5-AA34-EB3351948D6A}", "Global", module_global_in, 1),
     make_module_dsp(module_stage::input, module_output::cv, 0, {
@@ -69,13 +70,13 @@ global_in_topo(int section, bool is_fx, gui_position const& pos)
   result.gui.menu_handler_factory = make_cv_routing_menu_handler;
   result.engine_factory = [](auto const&, int, int) { return std::make_unique<global_in_engine>(); };
 
-  auto section_aux_gui = make_param_section_gui({ 0, 0, 1, 5 }, gui_dimension({ 1 }, {
-      gui_dimension::auto_size_all, 1,
-      gui_dimension::auto_size_all, 1,
-      gui_dimension::auto_size_all, 1,
-      gui_dimension::auto_size_all, 1,
-      gui_dimension::auto_size_all, 1,
-      gui_dimension::auto_size_all, 1 }),
+  auto section_aux_gui = make_param_section_gui({ 0, 0, 1, 7 }, gui_dimension({ 1 }, {
+      1, gui_dimension::auto_size_all,
+      1, gui_dimension::auto_size_all,
+      1, gui_dimension::auto_size_all,
+      1, gui_dimension::auto_size_all,
+      1, gui_dimension::auto_size_all,
+      1, gui_dimension::auto_size_all}),
       gui_label_edit_cell_split::horizontal);
   result.sections.emplace_back(make_param_section(section_aux,
     make_topo_tag_basic("{BB12B605-4EEF-4FEA-9F2C-FACEEA39644A}", "Aux"), section_aux_gui));
@@ -85,32 +86,36 @@ global_in_topo(int section, bool is_fx, gui_position const& pos)
     make_param_gui(section_aux, gui_edit_type::knob, param_layout::parent_grid, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   aux.info.description = "Auxilliary controls to be used through automation and the CV matrices.";
+  aux.gui.editable_label = true;
   aux.gui.alternate_drag_output_id = result.dsp.outputs[output_aux].info.tag.id;
   aux.gui.display_formatter = [](auto const& desc) { 
-    return desc.info.slot == 0 ? desc.info.name : std::to_string(desc.info.slot + 1); };
+    std::string result = desc.param->info.tag.display_name + " " + std::to_string(desc.info.slot + 1);
+    std::transform(result.begin(), result.end(), result.begin(), ::toupper);
+    return result;
+  };
 
   auto linked_gui = make_param_section_gui(
-    { 0, 5, 1, 3 }, gui_dimension({ 1 }, { 
+    { 0, 7, 1, 1 }, gui_dimension({ 1 }, { 
       gui_dimension::auto_size_all, gui_dimension::auto_size_all, gui_dimension::auto_size_all, 
       gui_dimension::auto_size_all, gui_dimension::auto_size_all, 1 }), gui_label_edit_cell_split::horizontal);
   result.sections.emplace_back(make_param_section(section_linked,
     make_topo_tag_basic("{56FD2FEB-3084-4E28-B56C-06D31406EB42}", "Linked"), linked_gui));
   auto& mod_wheel = result.params.emplace_back(make_param(
-    make_topo_info("{7696305C-28F3-4C54-A6CA-7C9DB5635153}", true, "Mod Wheel", "Mod Wheel", "Mod", param_mod, 1),
+    make_topo_info("{7696305C-28F3-4C54-A6CA-7C9DB5635153}", true, "Mod Wheel", "Mod", "Mod", param_mod, 1),
     make_param_dsp_midi({ module_midi, 0, 1 }), make_domain_percentage_identity(0, 0, true),
     make_param_gui_single(section_linked, gui_edit_type::knob, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   mod_wheel.info.description = "Linked to MIDI mod wheel, updates on incoming MIDI events.";
   mod_wheel.gui.alternate_drag_output_id = result.dsp.outputs[output_mod].info.tag.id;
   auto& pitch_bend = result.params.emplace_back(make_param(
-    make_topo_info("{D1B334A6-FA2F-4AE4-97A0-A28DD0C1B48D}", true, "Pitch Bend", "Pitch Bend", "PB", param_pb, 1),
+    make_topo_info("{D1B334A6-FA2F-4AE4-97A0-A28DD0C1B48D}", true, "Pitch Bend", "PB", "PB", param_pb, 1),
     make_param_dsp_midi({ module_midi, 0, midi_source_pb }), make_domain_percentage(-1, 1, 0, 0, true),
     make_param_gui_single(section_linked, gui_edit_type::knob, { 0, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   pitch_bend.info.description = "Linked to MIDI pitch bend, updates on incoming MIDI events.";
   pitch_bend.gui.alternate_drag_output_id = result.dsp.outputs[output_pb].info.tag.id;
   auto& pb_range = result.params.emplace_back(make_param(
-    make_topo_info("{79B7592A-4911-4B04-8F71-5DD4B2733F4F}", true, "Pitch Bend Range", "Range", "PB Range", param_pb_range, 1),
+    make_topo_info("{79B7592A-4911-4B04-8F71-5DD4B2733F4F}", true, "Pitch Bend Range", "Rng", "PB Range", param_pb_range, 1),
     make_param_dsp_block(param_automate::automate), make_domain_step(1, 24, 12, 0),
     make_param_gui_single(section_linked, gui_edit_type::list, { 0, 4 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
