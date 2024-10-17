@@ -16,19 +16,15 @@ using namespace plugin_base;
 
 namespace firefly_synth {
 
-// todo rename the combi params eg freq->dist
-
 static float const max_phase_mod = 0.1f;
 
-enum { combi_wave_sin, combi_wave_saw, combi_wave_tri, combi_wave_sqr };
+enum { type_off, type_basic, type_dsf, type_kps1, type_kps2, type_static };
 enum { rand_svf_lpf, rand_svf_hpf, rand_svf_bpf, rand_svf_bsf, rand_svf_peq };
-enum { type_off, type_basic, type_combi, type_dsf, type_kps1, type_kps2, type_static };
-enum { section_type, section_sync_on, section_sync_uni, section_basic, section_basic_pw, section_combi, section_dsf, section_rand };
+enum { section_type, section_sync_on, section_sync_uni, section_basic, section_basic_pw, section_dsf, section_rand };
 enum { 
   scratch_pb, scratch_cent, scratch_pitch, scratch_sync_semi, 
   scratch_basic_sin_mix, scratch_basic_saw_mix, scratch_basic_tri_mix, scratch_basic_sqr_mix, 
-  scratch_combi_freq, scratch_combi_mix,
-  scratch_rand_freq, scratch_rand_rate, scratch_count }; // todo overlap scratch space
+  scratch_rand_freq, scratch_rand_rate, scratch_count };
 
 enum {
   param_type, param_gain, param_note, param_cent, 
@@ -36,8 +32,6 @@ enum {
   param_uni_voices, param_uni_sprd, param_uni_dtn, param_uni_phase,
   param_basic_sin_on, param_basic_sin_mix, param_basic_saw_on, param_basic_saw_mix,
   param_basic_tri_on, param_basic_tri_mix, param_basic_sqr_on, param_basic_sqr_mix, param_basic_sqr_pw,
-  param_combi_wave1, param_combi_skew_x_1, param_combi_skew_y_1, param_combi_freq,
-  param_combi_wave2, param_combi_skew_x_2, param_combi_skew_y_2, param_combi_mix,
   param_dsf_parts, param_dsf_dist, param_dsf_dcy,
   param_rand_svf, param_rand_rate, param_rand_freq, param_rand_res, param_rand_seed, // shared k+s/noise
   param_kps_fdbk, param_kps_mid, param_kps_stretch,
@@ -52,9 +46,9 @@ static bool constexpr is_kps(int type)
 static bool constexpr is_random(int type)
 { return type == type_static || is_kps(type); }
 static bool can_do_phase(int type)
-{ return type == type_basic || type == type_combi || type == type_dsf; }
+{ return type == type_basic || type == type_dsf; }
 static bool can_do_pitch(int type)
-{ return type == type_basic || type == type_combi || type == type_dsf || is_kps(type); }
+{ return type == type_basic || type == type_dsf || is_kps(type); }
 
 // bit different for osci and lfo
 // lfo is bucket based but for this one we'd need up to SR/2 buckets
@@ -109,23 +103,11 @@ get_oversmp_info(plugin_block const& block, int& stages, int& factor)
 }
 
 static std::vector<list_item>
-combi_wave_items()
-{
-  std::vector<list_item> result;
-  result.emplace_back("{B52E7D25-CADD-4075-BDC8-AB5298F53784}", "Sin");
-  result.emplace_back("{B3E1E560-EBDB-4E3D-827E-DE5A83B6EA6C}", "Saw");
-  result.emplace_back("{994FFDF7-98B4-46EA-B33A-48027E8611B1}", "Tri");
-  result.emplace_back("{09474479-189A-4D0E-95D9-C0DD08753C44}", "Sqr");
-  return result;
-}
-
-static std::vector<list_item>
 type_items()
 {
   std::vector<list_item> result;
   result.emplace_back("{9C9FFCAD-09A5-49E6-A083-482C8A3CF20B}", "Off", "Off");
   result.emplace_back("{9185A6F4-F9EF-4A33-8462-1B02A25FDF29}", "Basic", "Basic Analog");
-  result.emplace_back("{0E9AD9BB-9C57-4333-84DC-A888E755C2AD}", "Combi", "Combi Analog");
   result.emplace_back("{5DDB5617-85CC-4BE7-8295-63184BA56191}", "DSF", "Discrete Summation Formulae");
   result.emplace_back("{E6814747-6CEE-47DA-9878-890D0A5DC5C7}", "K+S1", "Karplus-Strong");
   result.emplace_back("{43DC7825-E437-4792-88D5-6E76241493A1}", "K+S2", "Karplus-Strong With Midpoint Adjustment");
@@ -204,28 +186,19 @@ private:
 
   template <bool Graph> void process_dsf(plugin_block& block, cv_audio_matrix_mixdown const* modulation);
   template <bool Graph> void process_basic(plugin_block& block, cv_audio_matrix_mixdown const* modulation);
-  template <bool Graph> void process_static(plugin_block& block, cv_audio_matrix_mixdown const* modulation);  
-
-  template <bool Graph> void 
-  process_combi(plugin_block& block, cv_audio_matrix_mixdown const* modulation);
-  template <bool Graph, bool Sync> void 
-  process_combi_wave1(plugin_block& block, cv_audio_matrix_mixdown const* modulation);
-  template <bool Graph, int CombiWave1, bool Sync> 
-  void process_combi_wave1_wave2(plugin_block& block, cv_audio_matrix_mixdown const* modulation);
-
-  template <bool Graph, bool BasicSin> void
+  template <bool Graph> void process_static(plugin_block& block, cv_audio_matrix_mixdown const* modulation);
+  
+  template <bool Graph, bool Sin> void
   process_basic_sin(plugin_block& block, cv_audio_matrix_mixdown const* modulation);
-  template <bool Graph, bool BasicSin, bool BasicSaw>
+  template <bool Graph, bool Sin, bool Saw>
   void process_basic_sin_saw(plugin_block& block, cv_audio_matrix_mixdown const* modulation);
-  template <bool Graph, bool BasicSin, bool BasicSaw, bool BasicTri>
+  template <bool Graph, bool Sin, bool Saw, bool Tri>
   void process_basic_sin_saw_tri(plugin_block& block, cv_audio_matrix_mixdown const* modulation);
-  template <bool Graph, bool BasicSin, bool BasicSaw, bool BasicTri, bool BasicSqr>
+  template <bool Graph, bool Sin, bool Saw, bool Tri, bool Sqr>
   void process_basic_sin_saw_tri_sqr(plugin_block& block, cv_audio_matrix_mixdown const* modulation);
-  template <bool Graph, bool BasicSin, bool BasicSaw, bool BasicTri, bool BasicSqr, 
-    bool Combi, int CombiWave1, int CombiWave2, bool DSF, bool Sync, bool KPS, bool KPSAutoFdbk, bool Static, int StaticSVFType>
+  template <bool Graph, bool Sin, bool Saw, bool Tri, bool Sqr, bool DSF, bool Sync, bool KPS, bool KPSAutoFdbk, bool Static, int StaticSVFType>
   void process_tuning_mode(plugin_block& block, cv_audio_matrix_mixdown const* modulation);
-  template <bool Graph, bool BasicSin, bool BasicSaw, bool BasicTri, bool BasicSqr, 
-    bool Combi, int CombiWave1, int CombiWave2, bool DSF, bool Sync, bool KPS, bool KPSAutoFdbk, bool Static, int StaticSVFType, engine_tuning_mode TuningMode>
+  template <bool Graph, bool Sin, bool Saw, bool Tri, bool Sqr, bool DSF, bool Sync, bool KPS, bool KPSAutoFdbk, bool Static, int StaticSVFType, engine_tuning_mode TuningMode>
   void process_tuning_mode_unison(plugin_block& block, cv_audio_matrix_mixdown const* modulation);
 };
 
@@ -377,7 +350,6 @@ osc_topo(int section, gui_position const& pos)
   type.gui.submenu = std::make_shared<gui_submenu>();
   type.gui.submenu->indices.push_back(type_off);
   type.gui.submenu->indices.push_back(type_basic);
-  type.gui.submenu->indices.push_back(type_combi);
   type.gui.submenu->indices.push_back(type_dsf);
   type.gui.submenu->indices.push_back(type_static);
   type.gui.submenu->add_submenu("Karplus-Strong", { type_kps1, type_kps2 });
@@ -460,7 +432,7 @@ osc_topo(int section, gui_position const& pos)
     make_param_gui_single(section_sync_uni, gui_edit_type::knob, { 1, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   uni_dtn.gui.bindings.enabled.bind_params({ param_type, param_uni_voices }, [](auto const& vs) { return can_do_pitch(vs[0]) && vs[1] > 1; });
-  uni_dtn.info.description = "Detune unison voices. Only applicable to Basic, DSF and KPS generators.";
+  uni_dtn.info.description = "Detune unison voices. Only applicable to Basic and DSF generators.";
   auto& uni_phase = result.params.emplace_back(make_param(
     make_topo_info("{8F1098B6-64F9-407E-A8A3-8C3637D59A26}", true, "Unison Phase", "Phs", "Uni Phase", param_uni_phase, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
@@ -548,72 +520,6 @@ osc_topo(int section, gui_position const& pos)
   basic_sqr_pw.gui.bindings.enabled.bind_params({ param_type, param_basic_sqr_on }, [](auto const& vs) { return vs[0] == type_basic && vs[1] != 0; });
   basic_sqr_pw.info.description = "Square generator pulse width.";
 
-  auto& combi = result.sections.emplace_back(make_param_section(section_combi,
-    make_topo_tag_basic("{7BB6F0D9-4A04-4932-B7CD-C3AF5C13C067}", "Combi"),
-    make_param_section_gui({ 0, 4, 2, 2 }, gui_dimension({ 1, 1 }, { 
-      gui_dimension::auto_size_all, gui_dimension::auto_size_all,
-      gui_dimension::auto_size_all, 1, 
-      gui_dimension::auto_size_all, 1,
-      gui_dimension::auto_size_all, 1 }), gui_label_edit_cell_split::horizontal)));
-  combi.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_combi; });
-  combi.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_combi; });
-  auto& combi_wave_1 = result.params.emplace_back(make_param(
-    make_topo_info("{D6B0CF43-5136-4D92-8EEA-2AE5EDD30C0E}", true, "Combi Wave 1", "Wave 1", "Combi Wave 1", param_combi_wave1, 1),
-    make_param_dsp_voice(param_automate::automate), make_domain_item(combi_wave_items(), "Sin"),
-    make_param_gui_single(section_combi, gui_edit_type::autofit_list, { 0, 0, 1, 1 },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  combi_wave_1.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_combi; });
-  combi_wave_1.info.description = "Selects the base waveform.";
-  auto& combi_skew_x_1 = result.params.emplace_back(make_param(
-    make_topo_info("{961FA897-E195-48D0-A43B-B2DDAF796F2B}", true, "Combi Skew X 1", "Skw X", "Combi Skew X 1", param_combi_skew_x_1, 1),
-    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.0, 2, true),
-    make_param_gui_single(section_combi, gui_edit_type::knob, { 0, 2, 1, 1 },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  combi_skew_x_1.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_combi; });
-  combi_skew_x_1.info.description = "Wave 1 skew X amount.";
-  auto& combi_skew_y_1 = result.params.emplace_back(make_param(
-    make_topo_info("{CF5A5AA9-7AC0-43D4-862F-17FA98A09655}", true, "Combi Skew Y 1", "Skw Y", "Combi Skew Y 1", param_combi_skew_y_1, 1),
-    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.0, 2, true),
-    make_param_gui_single(section_combi, gui_edit_type::knob, { 0, 4, 1, 1 },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  combi_skew_y_1.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_combi; });
-  combi_skew_y_1.info.description = "Wave 1 skew Y amount.";
-  auto& combi_freq = result.params.emplace_back(make_param(
-    make_topo_info("{428C5833-3BBE-40AF-9A9C-5EACA40F4CA4}", true, "Combi Freq", "Freq", "Combi Freq", param_combi_freq, 1),
-    make_param_dsp_accurate(param_automate::modulate), make_domain_linear(1.0f, 32.0f, 2.0f, 2, ""),
-    make_param_gui_single(section_combi, gui_edit_type::knob, { 0, 6, 1, 1 },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  combi_freq.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_combi; });
-  combi_freq.info.description = "Controls wave 2 frequency.";
-  auto& combi_wave_2 = result.params.emplace_back(make_param(
-    make_topo_info("{A8BAE205-AA10-4C48-8C40-5C5B4B1118FE}", true, "Combi Wave 2", "Wave 2", "Combi Wave 2", param_combi_wave2, 1),
-    make_param_dsp_voice(param_automate::automate), make_domain_item(combi_wave_items(), "Sin"),
-    make_param_gui_single(section_combi, gui_edit_type::autofit_list, { 1, 0, 1, 1 },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  combi_wave_2.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_combi; });
-  combi_wave_2.info.description = "Selects the overlay waveform.";
-  auto& combi_skew_x_2 = result.params.emplace_back(make_param(
-    make_topo_info("{420B67B9-5062-4004-B2E9-8F0DC3B7CACE}", true, "Combi Skew X 2", "Skw X", "Combi Skew X 2", param_combi_skew_x_2, 1),
-    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.0, 2, true),
-    make_param_gui_single(section_combi, gui_edit_type::knob, { 1, 2, 1, 1 },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  combi_skew_x_2.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_combi; });
-  combi_skew_x_2.info.description = "Wave 2 skew X amount.";
-  auto& combi_skew_y_2 = result.params.emplace_back(make_param(
-    make_topo_info("{AC7EA48C-533E-45E7-B12F-044887495F3C}", true, "Combi Skew Y 2", "Skw Y", "Combi Skew Y 2", param_combi_skew_y_2, 1),
-    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.0, 2, true),
-    make_param_gui_single(section_combi, gui_edit_type::knob, { 1, 4, 1, 1 },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  combi_skew_y_2.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_combi; });
-  combi_skew_y_2.info.description = "Wave 2 skew Y amount.";
-  auto& combi_mix = result.params.emplace_back(make_param(
-    make_topo_info("{3590AA81-DDF3-4785-8944-D18B9869C609}", true, "Combi Mix", "Mix", "Combi Mix", param_combi_mix, 1),
-    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5f, 2, true),
-    make_param_gui_single(section_combi, gui_edit_type::knob, { 1, 6, 1, 1 },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  combi_mix.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_combi; });
-  combi_mix.info.description = "Controls the overlay mix amount.";
-
   auto& dsf = result.sections.emplace_back(make_param_section(section_dsf,
     make_topo_tag_basic("{F6B06CEA-AF28-4AE2-943E-6225510109A3}", "DSF"),
     make_param_section_gui({ 0, 4, 2, 2 }, gui_dimension({ 1, 1 }, { 1, 1 }))));
@@ -661,21 +567,24 @@ osc_topo(int section, gui_position const& pos)
     make_param_gui_single(section_rand, gui_edit_type::hslider, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   random_step.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_random(vs[0]); });
-  random_step.info.description = std::string("On-voice-init step count for static noise and initial-excite stage of Karplus-Strong.");
+  random_step.info.description = std::string("On-voice-init step count for static noise and initial-excite stage of Karplus-Strong. ") +
+    "Modulation takes place only at voice start.";
   auto& random_freq = result.params.emplace_back(make_param(
     make_topo_info("{289B4EA4-4A0E-4D33-98BA-7DF475B342E9}", true, "Random Filter Freq", "Freq", "Random Freq", param_rand_freq, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_log(20, 20000, 20000, 1000, 0, "Hz"),
     make_param_gui_single(section_rand, gui_edit_type::knob, { 0, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   random_freq.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_random(vs[0]); });
-  random_freq.info.description = std::string("Continuous filter frequency for static noise or voice-initial-excite filter frequency for Karplus-Strong.");
+  random_freq.info.description = std::string("Continuous filter frequency for static noise or initial-excite filter frequency for Karplus-Strong. ") + 
+    "Modulation takes place only at voice start.";
   auto& random_res = result.params.emplace_back(make_param(
     make_topo_info("{3E68ACDC-9800-4A4B-9BB6-984C5A7F624B}", true, "Random Filter Reso", "Reso", "Random Reso", param_rand_res, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0, 0, true),
     make_param_gui_single(section_rand, gui_edit_type::knob, { 1, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   random_res.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_random(vs[0]); });
-  random_res.info.description = std::string("Continuous filter resonance for static noise or voice-initial-excite filter resonance for Karplus-Strong.");
+  random_res.info.description = std::string("Continuous filter resonance for static noise or initial-excite filter resonance for Karplus-Strong. ") + 
+    "Modulation takes place only at voice start.";
   auto& random_seed = result.params.emplace_back(make_param(
     make_topo_info("{81873698-DEA9-4541-8E99-FEA21EAA2FEF}", true, "Rnd Seed", "Seed", "Rnd Seed", param_rand_seed, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_step(1, 255, 1, 0),
@@ -729,12 +638,6 @@ osc_topo(int section, gui_position const& pos)
   return result;
 }
 
-static inline float
-generate_sin(float phase)
-{
-  return std::sin(2.0f * pi32 * phase);
-}
-
 // https://www.kvraudio.com/forum/viewtopic.php?t=375517
 static inline float
 generate_blep(float phase, float inc)
@@ -753,7 +656,7 @@ generate_saw(float phase, float inc)
 }
 
 // https://dsp.stackexchange.com/questions/54790/polyblamp-anti-aliasing-in-c
-static inline float
+static float
 generate_blamp(float phase, float increment)
 {
   float y = 0.0f;
@@ -771,7 +674,7 @@ generate_blamp(float phase, float increment)
   return y * increment / 15;
 }
 
-static inline float
+static float
 generate_triangle(float phase, float increment)
 {
   float const triangle_scale = 0.9f;
@@ -787,7 +690,7 @@ generate_triangle(float phase, float increment)
   return result * triangle_scale;
 }
 
-static inline float
+static float
 generate_sqr(float phase, float increment, float pwm)
 {
   float const min_pw = 0.05f;
@@ -795,92 +698,6 @@ generate_sqr(float phase, float increment, float pwm)
   float saw1 = generate_saw(phase, increment);
   float saw2 = generate_saw(phase + pw - std::floor(phase + pw), increment);
   return (saw1 - saw2) * 0.5f;
-}
-
-static inline float
-generate_combi(int wave_a, int wave_b, float sr, float phase_lo, float inc_lo, float freq_lo, float dist, float mix, float skx1, float sky1, float skx2, float sxy2)
-{
-  float a_lo = 0.0f;
-  float b_lo = 0.0f;
-  float a_hi_1 = 0.0f;
-  float a_hi_2 = 0.0f;
-  float b_hi_1 = 0.0f;
-  float b_hi_2 = 0.0f;
-
-  // dist needs to be integer multiples to go full cycle on the hi generator
-  // so need to lerp them and also take nyquist into account
-  float max_dist = std::floor(sr * 0.5f / freq_lo);
-  float dist_1 = std::min(max_dist, std::floor(dist));
-  float dist_2 = std::min(max_dist, std::floor(dist) + 1.0f);
-  float dist_lerp = dist - std::floor(dist);
-  float inc_hi_1 = inc_lo * dist_1;
-  float inc_hi_2 = inc_lo * dist_2;
-  float phase_hi_1 = phase_lo * dist_1;
-  float phase_hi_2 = phase_lo * dist_2;
-  phase_hi_1 -= std::floor(phase_hi_1);
-  phase_hi_2 -= std::floor(phase_hi_2);
-
-  switch (wave_a)
-  {
-  case combi_wave_sin: 
-    a_lo = generate_sin(phase_lo);
-    a_hi_1 = generate_sin(phase_hi_1);
-    a_hi_2 = generate_sin(phase_hi_2);
-    break;
-  case combi_wave_saw: 
-    a_lo = generate_saw(phase_lo, inc_lo);
-    a_hi_1 = generate_saw(phase_hi_1, inc_hi_1);
-    a_hi_2 = generate_saw(phase_hi_2, inc_hi_2);
-    break;
-  case combi_wave_tri: 
-    a_lo = generate_triangle(phase_lo, inc_lo);
-    a_hi_1 = generate_triangle(phase_hi_1, inc_hi_1);
-    a_hi_2 = generate_triangle(phase_hi_2, inc_hi_2);
-    break;
-  case combi_wave_sqr: 
-    a_lo = generate_sqr(phase_lo, inc_lo, 1.0f);
-    a_hi_1 = generate_sqr(phase_hi_1, inc_hi_1, 1.0f);
-    a_hi_2 = generate_sqr(phase_hi_2, inc_hi_2, 1.0f);
-    break;
-  default: 
-    assert(false); 
-    break;
-  }
-
-  switch (wave_b)
-  {
-  case combi_wave_sin:
-    b_lo = generate_sin(phase_lo);
-    b_hi_1 = generate_sin(phase_hi_1);
-    b_hi_2 = generate_sin(phase_hi_2);
-    break;
-  case combi_wave_saw:
-    b_lo = generate_saw(phase_lo, inc_lo);
-    b_hi_1 = generate_saw(phase_hi_1, inc_hi_1);
-    b_hi_2 = generate_saw(phase_hi_2, inc_hi_2);
-    break;
-  case combi_wave_tri:
-    b_lo = generate_triangle(phase_lo, inc_lo);
-    b_hi_1 = generate_triangle(phase_hi_1, inc_hi_1);
-    b_hi_2 = generate_triangle(phase_hi_2, inc_hi_2);
-    break;
-  case combi_wave_sqr:
-    b_lo = generate_sqr(phase_lo, inc_lo, 1.0f);
-    b_hi_1 = generate_sqr(phase_hi_1, inc_hi_1, 1.0f);
-    b_hi_2 = generate_sqr(phase_hi_2, inc_hi_2, 1.0f);
-    break;
-  default:
-    assert(false);
-    break;
-  }
-
-  float a_hi = (1.0f - dist_lerp) * a_hi_1 + dist_lerp * a_hi_2;
-  float b_hi = (1.0f - dist_lerp) * b_hi_1 + dist_lerp * b_hi_2;
-  (void)b_hi;
-
-  float a_up = (1.0f - phase_lo) * a_lo + phase_lo * a_hi;
-  float a_down = phase_lo * a_lo + (1.0f - phase_lo) * a_hi;
-  return (1.0f - mix) * a_up + mix * a_down;
 }
 
 osc_engine::
@@ -1079,7 +896,7 @@ osc_engine::process(plugin_block& block, cv_audio_matrix_mixdown const* modulati
   if (type == type_off)
   {
     // still need to process to clear out the buffer in case we are mod source
-    process_tuning_mode<Graph, false, false, false, false, false, -1, -1, false, false, false, false, false, -1>(block, modulation);
+    process_tuning_mode<Graph, false, false, false, false, false, false, false, false, false, -1>(block, modulation);
     return;
   }
 
@@ -1087,10 +904,9 @@ osc_engine::process(plugin_block& block, cv_audio_matrix_mixdown const* modulati
   {
   case type_dsf: process_dsf<Graph>(block, modulation); break;
   case type_basic: process_basic<Graph>(block, modulation); break;
-  case type_combi: process_combi<Graph>(block, modulation); break;
   case type_static: process_static<Graph>(block, modulation); break;
-  case type_kps1: process_tuning_mode<Graph, false, false, false, false, false, -1, -1, false, false, true, false, false, -1>(block, modulation); break;
-  case type_kps2: process_tuning_mode<Graph, false, false, false, false, false, -1, -1, false, false, true, true, false, -1>(block, modulation); break;
+  case type_kps1: process_tuning_mode<Graph, false, false, false, false, false, false, true, false, false, -1>(block, modulation); break;
+  case type_kps2: process_tuning_mode<Graph, false, false, false, false, false, false, true, true, false, -1>(block, modulation); break;
   default: assert(false); break;
   }
 }
@@ -1099,44 +915,9 @@ template <bool Graph> void
 osc_engine::process_dsf(plugin_block& block, cv_audio_matrix_mixdown const* modulation)
 {
   if(block.state.own_block_automation[param_hard_sync][0].step())
-    process_tuning_mode<Graph, false, false, false, false, false, -1, -1, true, true, false, false, false, -1>(block, modulation);
+    process_tuning_mode<Graph, false, false, false, false, true, true, false, false, false, -1>(block, modulation);
   else
-    process_tuning_mode<Graph, false, false, false, false, false, -1, -1, true, false, false, false, false, -1>(block, modulation);
-}
-
-template <bool Graph> void
-osc_engine::process_combi(plugin_block& block, cv_audio_matrix_mixdown const* modulation)
-{
-  if (block.state.own_block_automation[param_hard_sync][0].step())
-    process_combi_wave1<Graph, true>(block, modulation);
-  else
-    process_combi_wave1<Graph, false>(block, modulation);
-}
-
-template <bool Graph, bool Sync> void
-osc_engine::process_combi_wave1(plugin_block& block, cv_audio_matrix_mixdown const* modulation)
-{
-  switch (block.state.own_block_automation[param_combi_wave1][0].step())
-  {
-  case combi_wave_sin: process_combi_wave1_wave2<Graph, combi_wave_sin, Sync>(block, modulation); break;
-  case combi_wave_saw: process_combi_wave1_wave2<Graph, combi_wave_saw, Sync>(block, modulation); break;
-  case combi_wave_tri: process_combi_wave1_wave2<Graph, combi_wave_tri, Sync>(block, modulation); break;
-  case combi_wave_sqr: process_combi_wave1_wave2<Graph, combi_wave_sqr, Sync>(block, modulation); break;
-  default: assert(false); break;
-  }
-}
-
-template <bool Graph, int CombiWave1, bool Sync> void
-osc_engine::process_combi_wave1_wave2(plugin_block& block, cv_audio_matrix_mixdown const* modulation)
-{
-  switch (block.state.own_block_automation[param_combi_wave2][0].step())
-  {
-  case combi_wave_sin: process_tuning_mode<Graph, false, false, false, false, true, CombiWave1, combi_wave_sin, false, Sync, false, false, false, -1>(block, modulation); break;
-  case combi_wave_saw: process_tuning_mode<Graph, false, false, false, false, true, CombiWave1, combi_wave_saw, false, Sync, false, false, false, -1>(block, modulation); break;
-  case combi_wave_tri: process_tuning_mode<Graph, false, false, false, false, true, CombiWave1, combi_wave_tri, false, Sync, false, false, false, -1>(block, modulation); break;
-  case combi_wave_sqr: process_tuning_mode<Graph, false, false, false, false, true, CombiWave1, combi_wave_sqr, false, Sync, false, false, false, -1>(block, modulation); break;
-  default: assert(false); break;
-  }
+    process_tuning_mode<Graph, false, false, false, false, true, false, false, false, false, -1>(block, modulation);
 }
 
 template <bool Graph> void
@@ -1146,11 +927,11 @@ osc_engine::process_static(plugin_block& block, cv_audio_matrix_mixdown const* m
   int svf_mode = block_auto[param_rand_svf][0].step();
   switch (svf_mode)
   {
-  case rand_svf_lpf: process_tuning_mode<Graph, false, false, false, false, false, -1, -1, false, false, false, false, true, rand_svf_lpf>(block, modulation); break;
-  case rand_svf_hpf: process_tuning_mode<Graph, false, false, false, false, false, -1, -1, false, false, false, false, true, rand_svf_hpf>(block, modulation); break;
-  case rand_svf_bpf: process_tuning_mode<Graph, false, false, false, false, false, -1, -1, false, false, false, false, true, rand_svf_bpf>(block, modulation); break;
-  case rand_svf_bsf: process_tuning_mode<Graph, false, false, false, false, false, -1, -1, false, false, false, false, true, rand_svf_bsf>(block, modulation); break;
-  case rand_svf_peq: process_tuning_mode<Graph, false, false, false, false, false, -1, -1, false, false, false, false, true, rand_svf_peq>(block, modulation); break;
+  case rand_svf_lpf: process_tuning_mode<Graph, false, false, false, false, false, false, false, false, true, rand_svf_lpf>(block, modulation); break;
+  case rand_svf_hpf: process_tuning_mode<Graph, false, false, false, false, false, false, false, false, true, rand_svf_hpf>(block, modulation); break;
+  case rand_svf_bpf: process_tuning_mode<Graph, false, false, false, false, false, false, false, false, true, rand_svf_bpf>(block, modulation); break;
+  case rand_svf_bsf: process_tuning_mode<Graph, false, false, false, false, false, false, false, false, true, rand_svf_bsf>(block, modulation); break;
+  case rand_svf_peq: process_tuning_mode<Graph, false, false, false, false, false, false, false, false, true, rand_svf_peq>(block, modulation); break;
   default: assert(false); break;
   }
 }
@@ -1164,66 +945,62 @@ osc_engine::process_basic(plugin_block& block, cv_audio_matrix_mixdown const* mo
   else process_basic_sin<Graph, false>(block, modulation);
 }
 
-template <bool Graph, bool BasicSin> void
+template <bool Graph, bool Sin> void
 osc_engine::process_basic_sin(plugin_block& block, cv_audio_matrix_mixdown const* modulation)
 {
   auto const& block_auto = block.state.own_block_automation;
   bool saw = block_auto[param_basic_saw_on][0].step();
-  if (saw) process_basic_sin_saw<Graph, BasicSin, true>(block, modulation);
-  else process_basic_sin_saw<Graph, BasicSin, false>(block, modulation);
+  if (saw) process_basic_sin_saw<Graph, Sin, true>(block, modulation);
+  else process_basic_sin_saw<Graph, Sin, false>(block, modulation);
 }
 
-template <bool Graph, bool BasicSin, bool BasicSaw> void
+template <bool Graph, bool Sin, bool Saw> void
 osc_engine::process_basic_sin_saw(plugin_block& block, cv_audio_matrix_mixdown const* modulation)
 {
   auto const& block_auto = block.state.own_block_automation;
   bool tri = block_auto[param_basic_tri_on][0].step();
-  if (tri) process_basic_sin_saw_tri<Graph, BasicSin, BasicSaw, true>(block, modulation);
-  else process_basic_sin_saw_tri<Graph, BasicSin, BasicSaw, false>(block, modulation);
+  if (tri) process_basic_sin_saw_tri<Graph, Sin, Saw, true>(block, modulation);
+  else process_basic_sin_saw_tri<Graph, Sin, Saw, false>(block, modulation);
 }
 
-template <bool Graph, bool BasicSin, bool BasicSaw, bool BasicTri> void
+template <bool Graph, bool Sin, bool Saw, bool Tri> void
 osc_engine::process_basic_sin_saw_tri(plugin_block& block, cv_audio_matrix_mixdown const* modulation)
 {
   auto const& block_auto = block.state.own_block_automation;
   bool sqr = block_auto[param_basic_sqr_on][0].step();
-  if (sqr) process_basic_sin_saw_tri_sqr<Graph, BasicSin, BasicSaw, BasicTri, true>(block, modulation);
-  else process_basic_sin_saw_tri_sqr<Graph, BasicSin, BasicSaw, BasicTri, false>(block, modulation);
+  if (sqr) process_basic_sin_saw_tri_sqr<Graph, Sin, Saw, Tri, true>(block, modulation);
+  else process_basic_sin_saw_tri_sqr<Graph, Sin, Saw, Tri, false>(block, modulation);
 }
 
-template <bool Graph, bool BasicSin, bool BasicSaw, bool BasicTri, bool BasicSqr> void
+template <bool Graph, bool Sin, bool Saw, bool Tri, bool Sqr> void
 osc_engine::process_basic_sin_saw_tri_sqr(plugin_block& block, cv_audio_matrix_mixdown const* modulation)
 {
   auto const& block_auto = block.state.own_block_automation;
   bool sync = block_auto[param_hard_sync][0].step() != 0;
-  if (sync) process_tuning_mode<Graph, BasicSin, BasicSaw, BasicTri, BasicSqr, false, -1, -1, false, true, false, false, false, -1>(block, modulation);
-  else process_tuning_mode<Graph, BasicSin, BasicSaw, BasicTri, BasicSqr, false, -1, -1, false, false, false, false, false, -1>(block, modulation);
+  if (sync) process_tuning_mode<Graph, Sin, Saw, Tri, Sqr, false, true, false, false, false, -1>(block, modulation);
+  else process_tuning_mode<Graph, Sin, Saw, Tri, Sqr, false, false, false, false, false, -1>(block, modulation);
 }
 
-template <
-  bool Graph, 
-  bool BasicSin, bool BasicSaw, bool BasicTri, bool BasicSqr, 
-  bool Combi, int CombiWave1, int CombiWave2, 
-  bool DSF, bool Sync, bool KPS, bool KPSAutoFdbk, bool Static, int StaticSVFType>
+template <bool Graph, bool Sin, bool Saw, bool Tri, bool Sqr, bool DSF, bool Sync, bool KPS, bool KPSAutoFdbk, bool Static, int StaticSVFType>
 void
 osc_engine::process_tuning_mode(plugin_block& block, cv_audio_matrix_mixdown const* modulation)
 {
   switch (block.current_tuning_mode)
   {
   case engine_tuning_mode_no_tuning:
-    process_tuning_mode_unison<Graph, BasicSin, BasicSaw, BasicTri, BasicSqr, Combi, CombiWave1, CombiWave2, DSF, Sync, KPS, KPSAutoFdbk, Static, StaticSVFType, engine_tuning_mode_no_tuning>(block, modulation);
+    process_tuning_mode_unison<Graph, Sin, Saw, Tri, Sqr, DSF, Sync, KPS, KPSAutoFdbk, Static, StaticSVFType, engine_tuning_mode_no_tuning>(block, modulation);
     break;
   case engine_tuning_mode_on_note_before_mod:
-    process_tuning_mode_unison<Graph, BasicSin, BasicSaw, BasicTri, BasicSqr, Combi, CombiWave1, CombiWave2, DSF, Sync, KPS, KPSAutoFdbk, Static, StaticSVFType, engine_tuning_mode_on_note_before_mod>(block, modulation);
+    process_tuning_mode_unison<Graph, Sin, Saw, Tri, Sqr, DSF, Sync, KPS, KPSAutoFdbk, Static, StaticSVFType, engine_tuning_mode_on_note_before_mod>(block, modulation);
     break;
   case engine_tuning_mode_on_note_after_mod:
-    process_tuning_mode_unison<Graph, BasicSin, BasicSaw, BasicTri, BasicSqr, Combi, CombiWave1, CombiWave2, DSF, Sync, KPS, KPSAutoFdbk, Static, StaticSVFType, engine_tuning_mode_on_note_after_mod>(block, modulation);
+    process_tuning_mode_unison<Graph, Sin, Saw, Tri, Sqr, DSF, Sync, KPS, KPSAutoFdbk, Static, StaticSVFType, engine_tuning_mode_on_note_after_mod>(block, modulation);
     break;
   case engine_tuning_mode_continuous_before_mod:
-    process_tuning_mode_unison<Graph, BasicSin, BasicSaw, BasicTri, BasicSqr, Combi, CombiWave1, CombiWave2, DSF, Sync, KPS, KPSAutoFdbk, Static, StaticSVFType, engine_tuning_mode_continuous_before_mod>(block, modulation);
+    process_tuning_mode_unison<Graph, Sin, Saw, Tri, Sqr, DSF, Sync, KPS, KPSAutoFdbk, Static, StaticSVFType, engine_tuning_mode_continuous_before_mod>(block, modulation);
     break;
   case engine_tuning_mode_continuous_after_mod:
-    process_tuning_mode_unison<Graph, BasicSin, BasicSaw, BasicTri, BasicSqr, Combi, CombiWave1, CombiWave2, DSF, Sync, KPS, KPSAutoFdbk, Static, StaticSVFType, engine_tuning_mode_continuous_after_mod>(block, modulation);
+    process_tuning_mode_unison<Graph, Sin, Saw, Tri, Sqr, DSF, Sync, KPS, KPSAutoFdbk, Static, StaticSVFType, engine_tuning_mode_continuous_after_mod>(block, modulation);
     break;
   default:
     assert(false);
@@ -1231,28 +1008,21 @@ osc_engine::process_tuning_mode(plugin_block& block, cv_audio_matrix_mixdown con
   }
 }
 
-template <
-  bool Graph, 
-  bool BasicSin, bool BasicSaw, bool BasicTri, bool BasicSqr, 
-  bool Combi, int CombiWave1, int CombiWave2,
-  bool DSF, bool Sync, bool KPS, bool KPSAutoFdbk, bool Static, int StaticSVFType, engine_tuning_mode TuningMode>
+template <bool Graph, bool Sin, bool Saw, bool Tri, bool Sqr, bool DSF, bool Sync, bool KPS, bool KPSAutoFdbk, bool Static, int StaticSVFType, engine_tuning_mode TuningMode>
 void
 osc_engine::process_tuning_mode_unison(plugin_block& block, cv_audio_matrix_mixdown const* modulation)
 {
   int generator_count = 0;
-  if constexpr (BasicSin) generator_count++;
-  if constexpr (BasicSaw) generator_count++;
-  if constexpr (BasicTri) generator_count++;
-  if constexpr (BasicSqr) generator_count++;
-  if constexpr (Combi) generator_count++;
+  if constexpr (Sin) generator_count++;
+  if constexpr (Saw) generator_count++;
+  if constexpr (Tri) generator_count++;
+  if constexpr (Sqr) generator_count++;
   if constexpr (DSF) generator_count++;
   if constexpr (KPS) generator_count++;
   if constexpr (Static) generator_count++;
 
   static_assert(!KPSAutoFdbk || KPS);
   static_assert(StaticSVFType == -1 || Static);
-  static_assert(Combi || (CombiWave1 == -1 && CombiWave2 == -1));
-  static_assert(!Combi || (CombiWave1 != -1 && CombiWave2 != -1));
 
   // need to clear all active outputs because we 
   // don't know if we are a modulation source
@@ -1280,8 +1050,6 @@ osc_engine::process_tuning_mode_unison(plugin_block& block, cv_audio_matrix_mixd
   int dsf_parts = (int)std::round(block_auto[param_dsf_parts][0].real());
   int global_pb_range = block.state.all_block_automation[module_global_in][0][global_in_param_pb_range][0].step();
   
-  int combi_wave_1 = block_auto[param_combi_wave1][0].step();
-  int combi_wave_2 = block_auto[param_combi_wave2][0].step();
   int rand_seed = block_auto[param_rand_seed][0].step();
   int kps_mid_note = block_auto[param_kps_mid][0].step();
   float kps_mid_freq = block.pitch_to_freq_with_tuning<TuningMode>(kps_mid_note);
@@ -1297,9 +1065,9 @@ osc_engine::process_tuning_mode_unison(plugin_block& block, cv_audio_matrix_mixd
   auto const& kps_stretch_curve = *(*modulation)[module_osc][block.module_slot][param_kps_stretch][0];
   auto const& stc_res_curve = *(*modulation)[module_osc][block.module_slot][param_rand_res][0];
 
+  auto const& pw_curve = *(*modulation)[module_osc][block.module_slot][param_basic_sqr_pw][0];
   auto const& uni_dtn_curve = *(*modulation)[module_osc][block.module_slot][param_uni_dtn][0];
   auto const& uni_sprd_curve = *(*modulation)[module_osc][block.module_slot][param_uni_sprd][0];
-  auto const& basic_pw_curve = *(*modulation)[module_osc][block.module_slot][param_basic_sqr_pw][0];
   auto const& voice_pitch_offset_curve = block.voice->all_cv[module_voice_in][0][voice_in_output_pitch_offset][0];
 
   auto& pb_curve = block.state.own_scratch[scratch_pb];
@@ -1316,27 +1084,18 @@ osc_engine::process_tuning_mode_unison(plugin_block& block, cv_audio_matrix_mixd
   block.normalized_to_raw_block<domain_type::linear>(module_osc, param_pitch, pitch_curve_norm, pitch_curve);
   if constexpr(Sync) block.normalized_to_raw_block<domain_type::linear>(module_osc, param_hard_sync_semis, sync_semis_curve_norm, sync_semis_curve);
 
-  auto& basic_sin_mix_curve = block.state.own_scratch[scratch_basic_sin_mix];
-  auto& basic_saw_mix_curve = block.state.own_scratch[scratch_basic_saw_mix];
-  auto& basic_tri_mix_curve = block.state.own_scratch[scratch_basic_tri_mix];
-  auto& basic_sqr_mix_curve = block.state.own_scratch[scratch_basic_sqr_mix];
-  auto const& basic_sin_mix_curve_norm = *(*modulation)[module_osc][block.module_slot][param_basic_sin_mix][0];
-  auto const& basic_saw_mix_curve_norm = *(*modulation)[module_osc][block.module_slot][param_basic_saw_mix][0];
-  auto const& basic_tri_mix_curve_norm = *(*modulation)[module_osc][block.module_slot][param_basic_tri_mix][0];
-  auto const& basic_sqr_mix_curve_norm = *(*modulation)[module_osc][block.module_slot][param_basic_sqr_mix][0];
-  if constexpr (BasicSin) block.normalized_to_raw_block<domain_type::linear>(module_osc, param_basic_sin_mix, basic_sin_mix_curve_norm, basic_sin_mix_curve);
-  if constexpr (BasicSaw) block.normalized_to_raw_block<domain_type::linear>(module_osc, param_basic_saw_mix, basic_saw_mix_curve_norm, basic_saw_mix_curve);
-  if constexpr (BasicTri) block.normalized_to_raw_block<domain_type::linear>(module_osc, param_basic_tri_mix, basic_tri_mix_curve_norm, basic_tri_mix_curve);
-  if constexpr (BasicSqr) block.normalized_to_raw_block<domain_type::linear>(module_osc, param_basic_sqr_mix, basic_sqr_mix_curve_norm, basic_sqr_mix_curve);
-
-  auto const& combi_mix_curve = *(*modulation)[module_osc][block.module_slot][param_combi_mix][0];
-  auto const& combi_skx1_curve = *(*modulation)[module_osc][block.module_slot][param_combi_skew_x_1][0];
-  auto const& combi_sky1_curve = *(*modulation)[module_osc][block.module_slot][param_combi_skew_y_1][0];
-  auto const& combi_skx2_curve = *(*modulation)[module_osc][block.module_slot][param_combi_skew_x_2][0];
-  auto const& combi_sky2_curve = *(*modulation)[module_osc][block.module_slot][param_combi_skew_y_2][0];
-  auto& combi_freq_curve = block.state.own_scratch[scratch_combi_freq];
-  auto const& combi_freq_curve_norm = *(*modulation)[module_osc][block.module_slot][param_combi_freq][0];
-  if constexpr (Combi) block.normalized_to_raw_block<domain_type::linear>(module_osc, param_combi_freq, combi_freq_curve_norm, combi_freq_curve);
+  auto& sin_mix_curve = block.state.own_scratch[scratch_basic_sin_mix];
+  auto& saw_mix_curve = block.state.own_scratch[scratch_basic_saw_mix];
+  auto& tri_mix_curve = block.state.own_scratch[scratch_basic_tri_mix];
+  auto& sqr_mix_curve = block.state.own_scratch[scratch_basic_sqr_mix];  
+  auto const& sin_mix_curve_norm = *(*modulation)[module_osc][block.module_slot][param_basic_sin_mix][0];
+  auto const& saw_mix_curve_norm = *(*modulation)[module_osc][block.module_slot][param_basic_saw_mix][0];
+  auto const& tri_mix_curve_norm = *(*modulation)[module_osc][block.module_slot][param_basic_tri_mix][0];
+  auto const& sqr_mix_curve_norm = *(*modulation)[module_osc][block.module_slot][param_basic_sqr_mix][0];  
+  if constexpr (Sin) block.normalized_to_raw_block<domain_type::linear>(module_osc, param_basic_sin_mix, sin_mix_curve_norm, sin_mix_curve);
+  if constexpr (Saw) block.normalized_to_raw_block<domain_type::linear>(module_osc, param_basic_saw_mix, saw_mix_curve_norm, saw_mix_curve);
+  if constexpr (Tri) block.normalized_to_raw_block<domain_type::linear>(module_osc, param_basic_tri_mix, tri_mix_curve_norm, tri_mix_curve);
+  if constexpr (Sqr) block.normalized_to_raw_block<domain_type::linear>(module_osc, param_basic_sqr_mix, sqr_mix_curve_norm, sqr_mix_curve);
 
   auto& rand_rate_curve = block.state.own_scratch[scratch_rand_rate];
   auto& rand_freq_curve = block.state.own_scratch[scratch_rand_freq];
@@ -1447,16 +1206,11 @@ osc_engine::process_tuning_mode_unison(plugin_block& block, cv_audio_matrix_mixd
         assert(0 <= _sync_phases[v] && _sync_phases[v] < 1);
       }
 
-      if constexpr (BasicSin) synced_sample += generate_sin(_sync_phases[v]) * basic_sin_mix_curve[mod_index];
-      if constexpr (BasicSaw) synced_sample += generate_saw(_sync_phases[v], inc_sync) * basic_saw_mix_curve[mod_index];
-      if constexpr (BasicTri) synced_sample += generate_triangle(_sync_phases[v], inc_sync) * basic_tri_mix_curve[mod_index];
-      if constexpr (BasicSqr) synced_sample += generate_sqr(_sync_phases[v], inc_sync, basic_pw_curve[mod_index]) * basic_sqr_mix_curve[mod_index];
+      if constexpr (Saw) synced_sample += generate_saw(_sync_phases[v], inc_sync) * saw_mix_curve[mod_index];
+      if constexpr (Sin) synced_sample += std::sin(2.0f * pi32 * _sync_phases[v]) * sin_mix_curve[mod_index];
+      if constexpr (Tri) synced_sample += generate_triangle(_sync_phases[v], inc_sync) * tri_mix_curve[mod_index];
+      if constexpr (Sqr) synced_sample += generate_sqr(_sync_phases[v], inc_sync, pw_curve[mod_index]) * sqr_mix_curve[mod_index];
       if constexpr (DSF) synced_sample = generate_dsf<int>(_sync_phases[v], oversampled_rate, freq_sync, dsf_parts, dsf_dist, dsf_dcy_curve[mod_index]);
-      if constexpr (Combi) synced_sample = generate_combi(
-        combi_wave_1, combi_wave_2, oversampled_rate, _sync_phases[v], inc_sync, freq_sync, 
-        combi_freq_curve[mod_index], combi_mix_curve[mod_index],
-        combi_skx1_curve[mod_index], combi_sky1_curve[mod_index], 
-        combi_skx2_curve[mod_index], combi_sky2_curve[mod_index]);
 
       // generate the unsynced sample and crossover
       float unsynced_sample = 0;
@@ -1472,15 +1226,11 @@ osc_engine::process_tuning_mode_unison(plugin_block& block, cv_audio_matrix_mixd
           if (_unsync_phases[v] == 1) _unsync_phases[v] = 0; // this could be more efficient?
           assert(0 <= _unsync_phases[v] && _unsync_phases[v] < 1);
 
-          if constexpr (BasicSin) unsynced_sample += generate_sin(_unsync_phases[v]) * basic_sin_mix_curve[mod_index];
-          if constexpr (BasicSaw) unsynced_sample += generate_saw(_unsync_phases[v], inc_sync) * basic_saw_mix_curve[mod_index];
-          if constexpr (BasicTri) unsynced_sample += generate_triangle(_unsync_phases[v], inc_sync) * basic_tri_mix_curve[mod_index];
-          if constexpr (BasicSqr) unsynced_sample += generate_sqr(_unsync_phases[v], inc_sync, basic_pw_curve[mod_index]) * basic_sqr_mix_curve[mod_index];
+          if constexpr (Saw) unsynced_sample += generate_saw(_unsync_phases[v], inc_sync) * saw_mix_curve[mod_index];
+          if constexpr (Sin) unsynced_sample += std::sin(2.0f * pi32 * _unsync_phases[v]) * sin_mix_curve[mod_index];
+          if constexpr (Tri) unsynced_sample += generate_triangle(_unsync_phases[v], inc_sync) * tri_mix_curve[mod_index];
+          if constexpr (Sqr) unsynced_sample += generate_sqr(_unsync_phases[v], inc_sync, pw_curve[mod_index]) * sqr_mix_curve[mod_index];
           if constexpr (DSF) unsynced_sample = generate_dsf<int>(_unsync_phases[v], oversampled_rate, freq_sync, dsf_parts, dsf_dist, dsf_dcy_curve[mod_index]);
-          if constexpr (Combi) unsynced_sample = generate_combi(
-            combi_wave_1, combi_wave_2, oversampled_rate, _unsync_phases[v], inc_sync, freq_sync, combi_freq_curve[mod_index], combi_mix_curve[mod_index],
-            combi_skx1_curve[mod_index], combi_sky1_curve[mod_index], combi_skx2_curve[mod_index], combi_sky2_curve[mod_index]);
-
 
           increment_and_wrap_phase(_unsync_phases[v], inc_sync);
           float unsynced_weight = _unsync_samples[v]-- / (sync_over_samples + 1.0f);
