@@ -33,15 +33,14 @@ X do the conversion for snapping ==> missing = off
 X global unit lfo phase offset not plot good
 V do glfo in project time samples (can do now bc all is phased!)
 V do snap for clap
-X arp new note = reset table pos yes/no?
 
 update the routing graph for arp
 do global snap docs?
 fix the bug demos
 make a patch cleanup button
 
-do labels for the auxes
 ditch after-mod, claim micro support ?
+arp new note = reset table pos yes/no?
 do more keyboard tracking just do it -- also trackmode mul/add
 do global unison subvoice index as a mod source
 turn on stuff when dragging (e.g. basic sin, dist skew etc)
