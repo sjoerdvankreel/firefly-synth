@@ -1,4 +1,4 @@
-?, ? - V1.9.6.
+### October 23, 2024 - V1.9.6.
 
 - Fixed a couple of outdated parameter descriptions.
 - Show parameter descriptions (from reference document) in tooltips.
