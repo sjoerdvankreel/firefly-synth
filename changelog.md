@@ -1,6 +1,9 @@
 ?, ? - V1.9.6.
 
+- Fixed a couple of outdated parameter descriptions.
+- Show parameter descriptions (from reference document) in tooltips.
 - Bugfix: CV-to-envelope modulation did not take the voice start sample position within the block into account.
+- Optionally allow global LFO's to sync to DAW project time (does NOT work with rate modulation, i.e. causes full phase reset).
 
 ### October 9, 2024 - V1.9.5.
 

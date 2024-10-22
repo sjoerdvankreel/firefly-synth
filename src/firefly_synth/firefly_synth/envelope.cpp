@@ -363,7 +363,7 @@ env_topo(int section, gui_position const& pos)
     make_param_gui_single(section_type, gui_edit_type::list, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   mode.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
-  mode.info.description = std::string("Selects envelope slode mode.<br/>") +
+  mode.info.description = std::string("Selects envelope slope mode.<br/>") +
     "Linear - linear slope, most cpu efficient.<br/>" +
     "Exponential unipolar - regular exponential slope.<br/>" +
     "Exponential bipolar - vertically splits section in 2 exponential parts.<br/>" +

@@ -16,6 +16,7 @@ struct note_id final {
 
 // shared host/plug
 struct shared_block final {
+  std::int64_t project_time; // in frames
   float bpm;
   float const* const* audio_in;
 };

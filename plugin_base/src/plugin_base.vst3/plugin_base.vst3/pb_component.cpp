@@ -113,6 +113,7 @@ pb_component::process(ProcessData& data)
   block.mts_client = _mts_client;
   block.frame_count = data.numSamples;
   block.shared.bpm = data.processContext ? data.processContext->tempo : 0;
+  block.shared.project_time = data.processContext ? data.processContext->projectTimeSamples: 0;
 
   if(data.outputs && data.outputs[0].channelBuffers32)
     block.audio_out = data.outputs[0].channelBuffers32;

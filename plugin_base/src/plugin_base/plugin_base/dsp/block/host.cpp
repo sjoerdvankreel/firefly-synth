@@ -18,6 +18,7 @@ host_block::prepare()
 
   frame_count = 0;
   shared.bpm = 0;
+  shared.project_time = 0;
   shared.audio_in = nullptr;
 }
   

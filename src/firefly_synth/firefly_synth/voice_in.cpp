@@ -217,7 +217,8 @@ voice_in_topo(int section, gui_position const& pos)
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   oversmp.info.description = std::string("Oversampling for those rare cases where it makes a positive difference. ") +
     "Only affects FM and hardsync, but not AM. " +
-    "Oversampling is per unison voice, so setting both this and unison to 8 results in an oscillator being 64 times as expensive to calculate.";
+    "Oversampling is per osc unison voice, so setting both this and osc unison to 4 results in an oscillator being 16 times as expensive to calculate. "  + 
+    "Then multiply that by global unison.";
 
   auto& porta_sync_section = result.sections.emplace_back(make_param_section(section_porta_sync,
     make_topo_tag_basic("{11E4DE4C-A824-424E-BC5E-014240518C0F}", "Sync"),
