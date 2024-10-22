@@ -1,10 +1,10 @@
 <html>
 <head>
-<title>Firefly Synth 1.9.5</title>
+<title>Firefly Synth 1.9.6</title>
 <style>th, td { padding: 3px; }a, a:visited { color: #666666; }.description { background:#EEEEEE; }h1 { font-size: 19px; color: black; }h2 { font-size: 17px; color: black; }h3 { font-size: 15px; color: black; }body { font-family: Verdana; color: black; }html { position: relative; max-width: 1024px; margin: auto; }tr td { width: auto; white-space: nowrap; } tr th { width: auto; white-space: nowrap; }table, th, td { font-size: 13px; border: 1px solid gray; border-collapse: collapse; text-align: left; }tr td:last-child { width: 100%; white-space: wrap; } tr th:last-child { width: 100%; white-space: wrap; }</style>
 </head>
 <body>
-<h1>Firefly Synth 1.9.5</h1>
+<h1>Firefly Synth 1.9.6</h1>
 <h2>Module Overview</h2>
 <table>
 <tr>
@@ -61,7 +61,7 @@
 <td>Yes</td>
 <td>Before voice</td>
 <td>10</td>
-<td class='description'>Optional tempo-synced LFO with repeating and one-shot types, various periodic waveforms, smooth noise, static noise and free-running static noise, smoothing control, phase andjustment, stair-stepping and horizontal and vertical skewing controls with various types.</td>
+<td class='description'>Optional tempo-synced LFO with repeating and one-shot types, various periodic waveforms, smooth noise, static noise, smoothing control, phase andjustment, stair-stepping and horizontal and vertical skewing controls with various types.</td>
 </tr>
 <tr>
 <td><a href='#7'>7</a></td>
@@ -117,7 +117,7 @@
 <td>Yes</td>
 <td>Voice</td>
 <td>10</td>
-<td class='description'>Optional tempo-synced LFO with repeating and one-shot types, various periodic waveforms, smooth noise, static noise and free-running static noise, smoothing control, phase andjustment, stair-stepping and horizontal and vertical skewing controls with various types.</td>
+<td class='description'>Optional tempo-synced LFO with repeating and one-shot types, various periodic waveforms, smooth noise, static noise, smoothing control, phase andjustment, stair-stepping and horizontal and vertical skewing controls with various types.</td>
 </tr>
 <tr>
 <td><a href='#14'>14</a></td>
@@ -592,7 +592,7 @@
 <td>N/A</td>
 </tr>
 <tr>
-<td colspan='11' class='description'>Selects time or tempo-synced and repeating or one-shot type. For regular one-shot type, the LFO stays at it's end value after exactly 1 cycle. For phase one-shot type, the end value takes the phase offset parameter into account.</td>
+<td colspan='11' class='description'>Selects repeating or one-shot type. For regular one-shot type, the LFO stays at it's end value after exactly 1 cycle. For phase one-shot type, the end value takes the phase offset parameter into account.</td>
 </tr>
 <tr>
 <td rowspan='2'>Rate</td>
@@ -728,7 +728,7 @@
 <td>N/A</td>
 </tr>
 <tr>
-<td colspan='11' class='description'>Selects waveform plus horizontal and vertical skewing modes. Waveforms are various periodic functions plus smooth noise, static noise and free-running static noise. Skewing modes are off (cpu efficient, so use it if you dont need the extra control), linear, scale unipolar/bipolar and exponential unipolar/bipolar.</td>
+<td colspan='11' class='description'>Selects waveform: various periodic functions plus smooth and static noise.</td>
 </tr>
 <tr>
 <td rowspan='2'>Steps</td>
@@ -797,6 +797,23 @@
 </tr>
 <tr>
 <td colspan='11' class='description'>Applies a lowpass filter to smooth out rough edges.</td>
+</tr>
+<tr>
+<td rowspan='2'>Snap To Project</td>
+<td>Phase</td>
+<td>Yes</td>
+<td>Patch</td>
+<td>1</td>
+<td>Input</td>
+<td>Block</td>
+<td>Automate</td>
+<td>Off</td>
+<td>On</td>
+<td>Off</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>In global module, snaps lfo phase to project/song time. Note this defeats rate modulation!</td>
 </tr>
 </table>
 <a name='7'/>
@@ -1412,7 +1429,7 @@
 <td>N/A</td>
 </tr>
 <tr>
-<td colspan='11' class='description'>Selects envelope slode mode.<br/>Linear - linear slope, most cpu efficient.<br/>Exponential unipolar - regular exponential slope.<br/>Exponential bipolar - vertically splits section in 2 exponential parts.<br/>Exponential split - horizontally and vertically splits section in 2 exponential parts to generate smooth curves.</td>
+<td colspan='11' class='description'>Selects envelope slope mode.<br/>Linear - linear slope, most cpu efficient.<br/>Exponential unipolar - regular exponential slope.<br/>Exponential bipolar - vertically splits section in 2 exponential parts.<br/>Exponential split - horizontally and vertically splits section in 2 exponential parts to generate smooth curves.</td>
 </tr>
 <tr>
 <td rowspan='2'>Tempo Sync</td>
@@ -1736,7 +1753,7 @@
 <td>N/A</td>
 </tr>
 <tr>
-<td colspan='11' class='description'>Selects time or tempo-synced and repeating or one-shot type. For regular one-shot type, the LFO stays at it's end value after exactly 1 cycle. For phase one-shot type, the end value takes the phase offset parameter into account.</td>
+<td colspan='11' class='description'>Selects repeating or one-shot type. For regular one-shot type, the LFO stays at it's end value after exactly 1 cycle. For phase one-shot type, the end value takes the phase offset parameter into account.</td>
 </tr>
 <tr>
 <td rowspan='2'>Rate</td>
@@ -1872,7 +1889,7 @@
 <td>N/A</td>
 </tr>
 <tr>
-<td colspan='11' class='description'>Selects waveform plus horizontal and vertical skewing modes. Waveforms are various periodic functions plus smooth noise, static noise and free-running static noise. Skewing modes are off (cpu efficient, so use it if you dont need the extra control), linear, scale unipolar/bipolar and exponential unipolar/bipolar.</td>
+<td colspan='11' class='description'>Selects waveform: various periodic functions plus smooth and static noise.</td>
 </tr>
 <tr>
 <td rowspan='2'>Steps</td>
@@ -1943,7 +1960,7 @@
 <td colspan='11' class='description'>Applies a lowpass filter to smooth out rough edges.</td>
 </tr>
 <tr>
-<td rowspan='2'>Phs</td>
+<td rowspan='2'>Phase Offset</td>
 <td>Phase</td>
 <td>Yes</td>
 <td>Patch</td>
@@ -2146,7 +2163,7 @@
 <td>N/A</td>
 </tr>
 <tr>
-<td colspan='11' class='description'>Oversampling for those rare cases where it makes a positive difference. Only affects FM and hardsync, but not AM. Oversampling is per unison voice, so setting both this and unison to 8 results in an oscillator being 64 times as expensive to calculate.</td>
+<td colspan='11' class='description'>Oversampling for those rare cases where it makes a positive difference. Only affects FM and hardsync, but not AM. Oversampling is per osc unison voice, so setting both this and osc unison to 4 results in an oscillator being 16 times as expensive to calculate. Then multiply that by global unison.</td>
 </tr>
 <tr>
 <td rowspan='2'>Porta Tempo Sync</td>
@@ -2880,7 +2897,7 @@
 <td>N/A</td>
 </tr>
 <tr>
-<td colspan='11' class='description'>Detune unison voices. Only applicable to Basic and DSF generators.</td>
+<td colspan='11' class='description'>Detune unison voices. Only applicable to Basic, KPS and DSF generators.</td>
 </tr>
 <tr>
 <td rowspan='2'>Unison Phase</td>
@@ -3629,7 +3646,7 @@
 <td>1.00</td>
 </tr>
 <tr>
-<td colspan='11' class='description'>Gain amount to drive the shaper and X/Y parameters. Use an Osc with gain envelope to have the effect of the distortion gradually fall-off.</td>
+<td colspan='11' class='description'>Gain amount to drive the shaper and X/Y parameters. For per-voice, use an Osc with gain envelope to have the effect of the distortion gradually fall-off.</td>
 </tr>
 <tr>
 <td rowspan='2'>Dist Mix</td>
@@ -4380,7 +4397,7 @@
 <td>1.00</td>
 </tr>
 <tr>
-<td colspan='11' class='description'>Gain amount to drive the shaper and X/Y parameters. Use an Osc with gain envelope to have the effect of the distortion gradually fall-off.</td>
+<td colspan='11' class='description'>Gain amount to drive the shaper and X/Y parameters. For per-voice, use an Osc with gain envelope to have the effect of the distortion gradually fall-off.</td>
 </tr>
 <tr>
 <td rowspan='2'>Dist Mix</td>

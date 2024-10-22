@@ -201,6 +201,7 @@ public:
   void activate(int max_frame_count);
   void init_from_state(plugin_state const* state);
 
+  int get_sample_rate() const { return _sample_rate; }
   void set_sample_rate(int sample_rate) { _sample_rate = sample_rate; }
   void mark_param_as_automated(int m, int mi, int p, int pi) { _param_was_automated[m][mi][p][pi] = 1; }
 };

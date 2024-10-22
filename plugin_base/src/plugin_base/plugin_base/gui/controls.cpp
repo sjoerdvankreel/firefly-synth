@@ -201,7 +201,7 @@ param_value_label::own_param_changed(plain_value plain)
 { 
   std::string text = _gui->automation_state()->plain_to_text_at_index(false, _param->info.global, plain);
   setText(text, dontSendNotification); 
-  setTooltip(_param->info.name + ": " + text);
+  setTooltip(_param->tooltip(_gui->automation_state()->get_plain_at_index(_param->info.global)));
 }
 
 MouseCursor 
@@ -504,7 +504,7 @@ param_toggle_button::own_param_changed(plain_value plain)
 {
   _checked = plain.step() != 0;
   setToggleState(plain.step() != 0, dontSendNotification);
-  setTooltip(_param->info.name + ": " + _param->param->domain.plain_to_text(false, plain));
+  setTooltip(_param->tooltip(plain));
 }
 
 void 
@@ -521,7 +521,7 @@ param_toggle_button(plugin_gui* gui, module_desc const* module, param_desc const
 param_component(gui, module, param), autofit_togglebutton(lnf, param->param->gui.tabular)
 {
   auto value = param->param->domain.default_plain(module->info.slot, param->info.slot);
-  setTooltip(_param->info.name + ": " + _param->param->domain.plain_to_text(false, value));
+  setTooltip(_param->tooltip(value));
   _checked = value.step() != 0;
   addListener(this);
   init();
@@ -539,7 +539,8 @@ param_slider::
 param_slider(plugin_gui* gui, module_desc const* module, param_desc const* param) :
 param_component(gui, module, param), Slider()
 {
-  setPopupDisplayEnabled(true, true, nullptr);  
+  setPopupDisplayEnabled(true, true, nullptr);
+
   switch (param->param->gui.edit_type)
   {
   case gui_edit_type::knob: setSliderStyle(Slider::RotaryVerticalDrag); break;
@@ -552,6 +553,9 @@ param_component(gui, module, param), Slider()
   // parameter modulation outputs
   if (param->param->dsp.can_modulate(param->info.slot))
     gui->add_modulation_output_listener(this);
+
+  auto value = param->param->domain.default_plain(module->info.slot, param->info.slot);
+  setTooltip(_param->tooltip(value));
 
   setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
   if(param->param->domain.unit.size())
@@ -588,6 +592,13 @@ param_slider::modulation_outputs_reset()
   _min_modulation_output = -1.0f;
   _max_modulation_output = -1.0f;
   repaint();
+}
+
+void 
+param_slider::own_param_changed(plain_value plain)
+{
+  setTooltip(_param->tooltip(plain));
+  setValue(_param->param->domain.plain_to_raw(plain), juce::dontSendNotification);
 }
 
 void 
@@ -678,11 +689,7 @@ param_combobox::own_param_changed(plain_value plain)
 {
   std::string value;
   setSelectedId(plain.step() + 1 - _param->param->domain.min, dontSendNotification);
-  if(_param->param->domain.type == domain_type::item)
-    value = _param->param->domain.plain_to_item_tooltip(plain);
-  else
-    value = _param->param->domain.plain_to_text(false, plain);
-  setTooltip(_param->info.name + ": " + value);
+  setTooltip(_param->tooltip(plain));
 }
 
 void 

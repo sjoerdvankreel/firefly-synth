@@ -34,6 +34,8 @@ public:
   void release_block() {}
   void activate_modules() { _engine.activate_modules(); }
   void automation_state_dirty() { _engine.automation_state_dirty(); }
+
+  int get_sample_rate() const { return _engine.get_sample_rate(); }
   void set_sample_rate(int sample_rate) { _engine.set_sample_rate(sample_rate); }
   void process_voice(int v, bool threaded) { _engine.process_voice(v, threaded); }
   void mark_param_as_automated(int m, int mi, int p, int pi) { _engine.mark_param_as_automated(m, mi, p, pi); }

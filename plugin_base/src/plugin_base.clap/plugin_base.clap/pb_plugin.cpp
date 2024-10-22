@@ -656,8 +656,15 @@ pb_plugin::process(clap_process const* process) noexcept
   block.mts_client = _mts_client;
   block.frame_count = process->frames_count;
   block.audio_out = process->audio_outputs[0].data32;
-  block.shared.bpm = process->transport? process->transport->tempo: 0;
   block.shared.audio_in = process->audio_inputs? process->audio_inputs[0].data32: nullptr;
+
+  block.shared.bpm = 0;
+  block.shared.project_time = 0;
+  if (process->transport != nullptr)
+  {
+    block.shared.bpm = process->transport->tempo;
+    block.shared.project_time = (std::int64_t)std::round((double)process->transport->song_pos_seconds / (double)CLAP_SECTIME_FACTOR * _splice_engine.get_sample_rate());
+  }
 
   process_gui_to_audio_events(process->out_events);
 

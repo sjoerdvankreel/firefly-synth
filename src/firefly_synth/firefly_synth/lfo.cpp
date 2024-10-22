@@ -25,11 +25,14 @@ enum { custom_tag_ref_phase, custom_tag_rand_seed, custom_tag_end_value };
 enum class lfo_stage { cycle, filter, end };
 enum { scratch_rate, scratch_count };
 enum { type_off, type_repeat, type_one_shot, type_one_phase };
-enum { section_left, section_sync, section_skew, section_shape, section_phase };
+enum { section_left, section_sync, section_skew, section_shape, section_phase_or_host };
 enum {
   param_type, param_rate, param_tempo, param_sync,
   param_skew_x, param_skew_x_amt, param_skew_y, param_skew_y_amt,
-  param_shape, param_steps, param_seed, param_voice_rnd_source, param_filter, param_phase };
+  param_shape, param_steps, param_seed, param_voice_rnd_source, param_filter, 
+  param_phase, // phase offset for voice lfo
+  param_snap = param_phase // snap to host project time for global lfo
+};
 
 static bool
 is_noise_voice_rand(int shape)
@@ -134,15 +137,17 @@ public module_engine {
   void process_uni_type(plugin_block& block, cv_cv_matrix_mixdown const* modulation);
   template <bool GlobalUnison, int Type, bool Sync>
   void process_uni_type_sync(plugin_block& block, cv_cv_matrix_mixdown const* modulation);
-  template <bool GlobalUnison, int Type, bool Sync, class Shape>
-  void process_uni_type_sync_shape(plugin_block& block, cv_cv_matrix_mixdown const* modulation, Shape shape);
-  template <bool GlobalUnison, int Type, bool Sync, class Shape, class SkewX>
-  void process_uni_type_sync_shape_x(plugin_block& block, cv_cv_matrix_mixdown const* modulation, Shape shape, SkewX skew_x);
-  template <bool GlobalUnison, int Type, bool Sync, class Shape, class SkewX, class SkewY>
-  void process_uni_type_sync_shape_xy(plugin_block& block, cv_cv_matrix_mixdown const* modulation, Shape shape, SkewX skew_x, SkewY skew_y);
-  template <bool GlobalUnison, int Type, bool Sync, class Shape, class SkewX, class SkewY, class Quantize>
-  void process_uni_type_sync_shape_xy_quantize(plugin_block& block, cv_cv_matrix_mixdown const* modulation, Shape shape, SkewX skew_x, SkewY skew_y, Quantize quantize);
-  template <bool GlobalUnison, int Type, bool Sync, class Calc, class Quantize>
+  template <bool GlobalUnison, int Type, bool Sync, bool Snap>
+  void process_uni_type_sync_snap(plugin_block& block, cv_cv_matrix_mixdown const* modulation);
+  template <bool GlobalUnison, int Type, bool Sync, bool Snap, class Shape>
+  void process_uni_type_sync_snap_shape(plugin_block& block, cv_cv_matrix_mixdown const* modulation, Shape shape);
+  template <bool GlobalUnison, int Type, bool Sync, bool Snap, class Shape, class SkewX>
+  void process_uni_type_sync_snap_shape_x(plugin_block& block, cv_cv_matrix_mixdown const* modulation, Shape shape, SkewX skew_x);
+  template <bool GlobalUnison, int Type, bool Sync, bool Snap, class Shape, class SkewX, class SkewY>
+  void process_uni_type_sync_snap_shape_xy(plugin_block& block, cv_cv_matrix_mixdown const* modulation, Shape shape, SkewX skew_x, SkewY skew_y);
+  template <bool GlobalUnison, int Type, bool Sync, bool Snap, class Shape, class SkewX, class SkewY, class Quantize>
+  void process_uni_type_sync_snap_shape_xy_quantize(plugin_block& block, cv_cv_matrix_mixdown const* modulation, Shape shape, SkewX skew_x, SkewY skew_y, Quantize quantize);
+  template <bool GlobalUnison, int Type, bool Sync, bool Snap, class Calc, class Quantize>
   void process_loop(plugin_block& block, cv_cv_matrix_mixdown const* modulation, Calc calc, Quantize quantize);
 
   void process_internal(plugin_block& block, cv_cv_matrix_mixdown const* modulation);
@@ -382,11 +387,10 @@ lfo_topo(int section, gui_position const& pos, bool global, bool is_fx)
   module_stage stage = global ? module_stage::input : module_stage::voice;
   auto info = topo_info(global ? global_info : voice_info);
   info.description = std::string("Optional tempo-synced LFO with repeating and one-shot types, various periodic waveforms, smooth noise, ") +  
-    "static noise and free-running static noise, smoothing control, phase andjustment, stair-stepping " +
+    "static noise, smoothing control, phase andjustment, stair-stepping " +
     "and horizontal and vertical skewing controls with various types.";
 
-  std::vector<int> column_sizes = { 32, 13, 34, 63 };
-  if(!global) column_sizes = { 32, 13, 34, 55, 8 };
+  std::vector<int> column_sizes = { 32, 13, 34, 55, 8 };
   module_topo result(make_module(info,
     make_module_dsp(stage, module_output::cv, 1, {
       make_module_dsp_output(true, -1, make_topo_info_basic("{197CB1D4-8A48-4093-A5E7-2781C731BBFC}", "Output", 0, 1)) }),
@@ -409,7 +413,7 @@ lfo_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_param_dsp_automate_if_voice(!global), make_domain_item(type_items(), ""),
     make_param_gui_single(section_left, gui_edit_type::list, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  type.info.description = std::string("Selects time or tempo-synced and repeating or one-shot type. ") +
+  type.info.description = std::string("Selects repeating or one-shot type. ") +
     "For regular one-shot type, the LFO stays at it's end value after exactly 1 cycle. " + 
     "For phase one-shot type, the end value takes the phase offset parameter into account.";
   auto& rate = result.params.emplace_back(make_param(
@@ -480,16 +484,14 @@ lfo_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_topo_tag_basic("{A5B5DC53-2E73-4C0B-9DD1-721A335EA076}", "Right"),
     make_param_section_gui({ 0, 3, 2, 1 }, gui_dimension({ 1, 1 }, {
     gui_dimension::auto_size_all, gui_dimension::auto_size, gui_dimension::auto_size_all, 1 }), gui_label_edit_cell_split::horizontal)));
-  if(!global) shape_section.gui.merge_with_section = section_phase;
+  shape_section.gui.merge_with_section = section_phase_or_host;
   auto& shape = result.params.emplace_back(make_param(
     make_topo_info_basic("{7D48C09B-AC99-4B88-B880-4633BC8DFB37}", "Shape", param_shape, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(wave_shape_type_items(wave_target::lfo, global), "Sin"),
     make_param_gui_single(section_shape, gui_edit_type::autofit_list, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   shape.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
-  shape.info.description = std::string("Selects waveform plus horizontal and vertical skewing modes. ") +
-    "Waveforms are various periodic functions plus smooth noise, static noise and free-running static noise. " +
-    "Skewing modes are off (cpu efficient, so use it if you dont need the extra control), linear, scale unipolar/bipolar and exponential unipolar/bipolar.";
+  shape.info.description = std::string("Selects waveform: various periodic functions plus smooth and static noise.");
   auto& steps = result.params.emplace_back(make_param(
     make_topo_info_basic("{445CF696-0364-4638-9BD5-3E1C9A957B6A}", "Steps", param_steps, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_step(1, 99, 1, 0),
@@ -522,19 +524,30 @@ lfo_topo(int section, gui_position const& pos, bool global, bool is_fx)
   smooth.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   smooth.info.description = "Applies a lowpass filter to smooth out rough edges.";
 
-  if(global) return result;
-
-  auto& phase_section = result.sections.emplace_back(make_param_section(section_phase,
+  auto& phase_or_host_section = result.sections.emplace_back(make_param_section(section_phase_or_host,
     make_topo_tag_basic("{8EB0A04C-5D69-4B0E-89BD-884BC2EFDFBE}", "Phase"),
     make_param_section_gui({ 0, 4, 2, 1 }, gui_dimension({ 1, 1 }, { 1 }), gui_label_edit_cell_split::vertical)));
-  if (!global) phase_section.gui.merge_with_section = section_shape;
-  auto& phase = result.params.emplace_back(make_param(
-    make_topo_info_basic("{B23E9732-ECE3-4D5D-8EC1-FF299C6926BB}", "Phs", param_phase, 1),
-    make_param_dsp_automate_if_voice(!global), make_domain_percentage_identity(0, 0, true),
-    make_param_gui_single(section_phase, gui_edit_type::knob, { 0, 0 },
-    make_label(gui_label_contents::name, gui_label_align::top, gui_label_justify::center))));
-  phase.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
-  phase.info.description = "In per-voice module, allows for phase adjustment of periodic generators.";
+  phase_or_host_section.gui.merge_with_section = section_shape;
+  if (!global)
+  {
+    auto& phase = result.params.emplace_back(make_param(
+      make_topo_info("{B23E9732-ECE3-4D5D-8EC1-FF299C6926BB}", true, "Phase Offset", "Phs", "Phs", param_phase, 1),
+      make_param_dsp(param_direction::input, param_rate::voice, param_automate::automate), make_domain_percentage_identity(0, 0, true),
+      make_param_gui_single(section_phase_or_host, gui_edit_type::knob, { 0, 0 },
+        make_label(gui_label_contents::name, gui_label_align::top, gui_label_justify::center))));
+    phase.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
+    phase.info.description = "In per-voice module, allows for phase adjustment of periodic generators.";
+  }
+  else
+  {
+    auto& host = result.params.emplace_back(make_param(
+      make_topo_info("{B97DF7D3-3259-4343-9577-858C6A5B786B}", true, "Snap To Project", "Snp", "Snp", param_snap, 1),
+      make_param_dsp(param_direction::input, param_rate::block, param_automate::automate), make_domain_toggle(false),
+      make_param_gui_single(section_phase_or_host, gui_edit_type::toggle, { 0, 0 },
+        make_label(gui_label_contents::name, gui_label_align::top, gui_label_justify::center))));
+    host.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
+    host.info.description = "In global module, snaps lfo phase to project/song time. Note this defeats rate modulation!";
+  }
 
   return result;
 }
@@ -800,89 +813,97 @@ lfo_engine::process_uni_type(plugin_block& block, cv_cv_matrix_mixdown const* mo
 template <bool GlobalUnison, int Type, bool Sync> void
 lfo_engine::process_uni_type_sync(plugin_block& block, cv_cv_matrix_mixdown const* modulation)
 {
+  bool snap = block.state.own_block_automation[param_snap][0].step() != 0;
+  if (_global && snap) process_uni_type_sync_snap<GlobalUnison, Type, Sync, true>(block, modulation);
+  else process_uni_type_sync_snap<GlobalUnison, Type, Sync, false>(block, modulation);
+}
+
+template <bool GlobalUnison, int Type, bool Sync, bool Snap> void
+lfo_engine::process_uni_type_sync_snap(plugin_block& block, cv_cv_matrix_mixdown const* modulation)
+{
   int seed = _global ? _prev_global_seed : _per_voice_seed;
   switch (block.state.own_block_automation[param_shape][0].step())
   {
-  case wave_shape_type_saw: process_uni_type_sync_shape<GlobalUnison, Type, Sync>(block, modulation, wave_shape_uni_saw); break;
-  case wave_shape_type_tri: process_uni_type_sync_shape<GlobalUnison, Type, Sync>(block, modulation, wave_shape_uni_tri); break;
-  case wave_shape_type_sin: process_uni_type_sync_shape<GlobalUnison, Type, Sync>(block, modulation, wave_shape_uni_sin); break;
-  case wave_shape_type_cos: process_uni_type_sync_shape<GlobalUnison, Type, Sync>(block, modulation, wave_shape_uni_cos); break;
-  case wave_shape_type_sqr_or_fold: process_uni_type_sync_shape<GlobalUnison, Type, Sync>(block, modulation, wave_shape_uni_sqr); break;
-  case wave_shape_type_sin_sin: process_uni_type_sync_shape<GlobalUnison, Type, Sync>(block, modulation, wave_shape_uni_sin_sin); break;
-  case wave_shape_type_sin_cos: process_uni_type_sync_shape<GlobalUnison, Type, Sync>(block, modulation, wave_shape_uni_sin_cos); break;
-  case wave_shape_type_cos_sin: process_uni_type_sync_shape<GlobalUnison, Type, Sync>(block, modulation, wave_shape_uni_cos_sin); break;
-  case wave_shape_type_cos_cos: process_uni_type_sync_shape<GlobalUnison, Type, Sync>(block, modulation, wave_shape_uni_cos_cos); break;
-  case wave_shape_type_sin_sin_sin: process_uni_type_sync_shape<GlobalUnison, Type, Sync>(block, modulation, wave_shape_uni_sin_sin_sin); break;
-  case wave_shape_type_sin_sin_cos: process_uni_type_sync_shape<GlobalUnison, Type, Sync>(block, modulation, wave_shape_uni_sin_sin_cos); break;
-  case wave_shape_type_sin_cos_sin: process_uni_type_sync_shape<GlobalUnison, Type, Sync>(block, modulation, wave_shape_uni_sin_cos_sin); break;
-  case wave_shape_type_sin_cos_cos: process_uni_type_sync_shape<GlobalUnison, Type, Sync>(block, modulation, wave_shape_uni_sin_cos_cos); break;
-  case wave_shape_type_cos_sin_sin: process_uni_type_sync_shape<GlobalUnison, Type, Sync>(block, modulation, wave_shape_uni_cos_sin_sin); break;
-  case wave_shape_type_cos_sin_cos: process_uni_type_sync_shape<GlobalUnison, Type, Sync>(block, modulation, wave_shape_uni_cos_sin_cos); break;
-  case wave_shape_type_cos_cos_sin: process_uni_type_sync_shape<GlobalUnison, Type, Sync>(block, modulation, wave_shape_uni_cos_cos_sin); break;
-  case wave_shape_type_cos_cos_cos: process_uni_type_sync_shape<GlobalUnison, Type, Sync>(block, modulation, wave_shape_uni_cos_cos_cos); break;
-  case wave_shape_type_smooth_1: 
+  case wave_shape_type_saw: process_uni_type_sync_snap_shape<GlobalUnison, Type, Sync, Snap>(block, modulation, wave_shape_uni_saw); break;
+  case wave_shape_type_tri: process_uni_type_sync_snap_shape<GlobalUnison, Type, Sync, Snap>(block, modulation, wave_shape_uni_tri); break;
+  case wave_shape_type_sin: process_uni_type_sync_snap_shape<GlobalUnison, Type, Sync, Snap>(block, modulation, wave_shape_uni_sin); break;
+  case wave_shape_type_cos: process_uni_type_sync_snap_shape<GlobalUnison, Type, Sync, Snap>(block, modulation, wave_shape_uni_cos); break;
+  case wave_shape_type_sqr_or_fold: process_uni_type_sync_snap_shape<GlobalUnison, Type, Sync, Snap>(block, modulation, wave_shape_uni_sqr); break;
+  case wave_shape_type_sin_sin: process_uni_type_sync_snap_shape<GlobalUnison, Type, Sync, Snap>(block, modulation, wave_shape_uni_sin_sin); break;
+  case wave_shape_type_sin_cos: process_uni_type_sync_snap_shape<GlobalUnison, Type, Sync, Snap>(block, modulation, wave_shape_uni_sin_cos); break;
+  case wave_shape_type_cos_sin: process_uni_type_sync_snap_shape<GlobalUnison, Type, Sync, Snap>(block, modulation, wave_shape_uni_cos_sin); break;
+  case wave_shape_type_cos_cos: process_uni_type_sync_snap_shape<GlobalUnison, Type, Sync, Snap>(block, modulation, wave_shape_uni_cos_cos); break;
+  case wave_shape_type_sin_sin_sin: process_uni_type_sync_snap_shape<GlobalUnison, Type, Sync, Snap>(block, modulation, wave_shape_uni_sin_sin_sin); break;
+  case wave_shape_type_sin_sin_cos: process_uni_type_sync_snap_shape<GlobalUnison, Type, Sync, Snap>(block, modulation, wave_shape_uni_sin_sin_cos); break;
+  case wave_shape_type_sin_cos_sin: process_uni_type_sync_snap_shape<GlobalUnison, Type, Sync, Snap>(block, modulation, wave_shape_uni_sin_cos_sin); break;
+  case wave_shape_type_sin_cos_cos: process_uni_type_sync_snap_shape<GlobalUnison, Type, Sync, Snap>(block, modulation, wave_shape_uni_sin_cos_cos); break;
+  case wave_shape_type_cos_sin_sin: process_uni_type_sync_snap_shape<GlobalUnison, Type, Sync, Snap>(block, modulation, wave_shape_uni_cos_sin_sin); break;
+  case wave_shape_type_cos_sin_cos: process_uni_type_sync_snap_shape<GlobalUnison, Type, Sync, Snap>(block, modulation, wave_shape_uni_cos_sin_cos); break;
+  case wave_shape_type_cos_cos_sin: process_uni_type_sync_snap_shape<GlobalUnison, Type, Sync, Snap>(block, modulation, wave_shape_uni_cos_cos_sin); break;
+  case wave_shape_type_cos_cos_cos: process_uni_type_sync_snap_shape<GlobalUnison, Type, Sync, Snap>(block, modulation, wave_shape_uni_cos_cos_cos); break;
+  case wave_shape_type_smooth_1:
   case wave_shape_type_smooth_2:
   case wave_shape_type_smooth_free_1:
   case wave_shape_type_smooth_free_2:
-    process_uni_type_sync_shape<GlobalUnison, Type, Sync>(block, modulation, [this](float in) {
+    process_uni_type_sync_snap_shape<GlobalUnison, Type, Sync, Snap>(block, modulation, [this](float in) {
       return wave_shape_uni_custom(in, [this](float in) {
-        return _smooth_noise.at(in); }); }); 
+        return _smooth_noise.at(in); }); });
     break;
   case wave_shape_type_static_1:
   case wave_shape_type_static_2:
   case wave_shape_type_static_free_1:
   case wave_shape_type_static_free_2:
-    process_uni_type_sync_shape<GlobalUnison, Type, Sync>(block, modulation, [this, seed](float in) {
+    process_uni_type_sync_snap_shape<GlobalUnison, Type, Sync, Snap>(block, modulation, [this, seed](float in) {
       return wave_shape_uni_custom(in, [this](float in) {
-        return _static_noise.at(in); }); }); 
+        return _static_noise.at(in); }); });
     break;
   default: assert(false); break;
   }
 }
 
-template <bool GlobalUnison, int Type, bool Sync, class Shape> void
-lfo_engine::process_uni_type_sync_shape(plugin_block& block, cv_cv_matrix_mixdown const* modulation, Shape shape)
+template <bool GlobalUnison, int Type, bool Sync, bool Snap, class Shape> void
+lfo_engine::process_uni_type_sync_snap_shape(plugin_block& block, cv_cv_matrix_mixdown const* modulation, Shape shape)
 {
   switch (block.state.own_block_automation[param_skew_x][0].step())
   {
-  case wave_skew_type_off: process_uni_type_sync_shape_x<GlobalUnison, Type, Sync>(block, modulation, shape, wave_skew_uni_off); break;
-  case wave_skew_type_lin: process_uni_type_sync_shape_x<GlobalUnison, Type, Sync>(block, modulation, shape, wave_skew_uni_lin); break;
-  case wave_skew_type_scu: process_uni_type_sync_shape_x<GlobalUnison, Type, Sync>(block, modulation, shape, wave_skew_uni_scu); break;
-  case wave_skew_type_scb: process_uni_type_sync_shape_x<GlobalUnison, Type, Sync>(block, modulation, shape, wave_skew_uni_scb); break;
-  case wave_skew_type_xpu: process_uni_type_sync_shape_x<GlobalUnison, Type, Sync>(block, modulation, shape, wave_skew_uni_xpu); break;
-  case wave_skew_type_xpb: process_uni_type_sync_shape_x<GlobalUnison, Type, Sync>(block, modulation, shape, wave_skew_uni_xpb); break;
+  case wave_skew_type_off: process_uni_type_sync_snap_shape_x<GlobalUnison, Type, Sync, Snap>(block, modulation, shape, wave_skew_uni_off); break;
+  case wave_skew_type_lin: process_uni_type_sync_snap_shape_x<GlobalUnison, Type, Sync, Snap>(block, modulation, shape, wave_skew_uni_lin); break;
+  case wave_skew_type_scu: process_uni_type_sync_snap_shape_x<GlobalUnison, Type, Sync, Snap>(block, modulation, shape, wave_skew_uni_scu); break;
+  case wave_skew_type_scb: process_uni_type_sync_snap_shape_x<GlobalUnison, Type, Sync, Snap>(block, modulation, shape, wave_skew_uni_scb); break;
+  case wave_skew_type_xpu: process_uni_type_sync_snap_shape_x<GlobalUnison, Type, Sync, Snap>(block, modulation, shape, wave_skew_uni_xpu); break;
+  case wave_skew_type_xpb: process_uni_type_sync_snap_shape_x<GlobalUnison, Type, Sync, Snap>(block, modulation, shape, wave_skew_uni_xpb); break;
   default: assert(false); break;
   }
 }
 
-template <bool GlobalUnison, int Type, bool Sync, class Shape, class SkewX> void
-lfo_engine::process_uni_type_sync_shape_x(plugin_block& block, cv_cv_matrix_mixdown const* modulation, Shape shape, SkewX skew_x)
+template <bool GlobalUnison, int Type, bool Sync, bool Snap, class Shape, class SkewX> void
+lfo_engine::process_uni_type_sync_snap_shape_x(plugin_block& block, cv_cv_matrix_mixdown const* modulation, Shape shape, SkewX skew_x)
 {
   switch (block.state.own_block_automation[param_skew_y][0].step())
   {
-  case wave_skew_type_off: process_uni_type_sync_shape_xy<GlobalUnison, Type, Sync>(block, modulation, shape, skew_x, wave_skew_uni_off); break;
-  case wave_skew_type_lin: process_uni_type_sync_shape_xy<GlobalUnison, Type, Sync>(block, modulation, shape, skew_x, wave_skew_uni_lin); break;
-  case wave_skew_type_scu: process_uni_type_sync_shape_xy<GlobalUnison, Type, Sync>(block, modulation, shape, skew_x, wave_skew_uni_scu); break;
-  case wave_skew_type_scb: process_uni_type_sync_shape_xy<GlobalUnison, Type, Sync>(block, modulation, shape, skew_x, wave_skew_uni_scb); break;
-  case wave_skew_type_xpu: process_uni_type_sync_shape_xy<GlobalUnison, Type, Sync>(block, modulation, shape, skew_x, wave_skew_uni_xpu); break;
-  case wave_skew_type_xpb: process_uni_type_sync_shape_xy<GlobalUnison, Type, Sync>(block, modulation, shape, skew_x, wave_skew_uni_xpb); break;
+  case wave_skew_type_off: process_uni_type_sync_snap_shape_xy<GlobalUnison, Type, Sync, Snap>(block, modulation, shape, skew_x, wave_skew_uni_off); break;
+  case wave_skew_type_lin: process_uni_type_sync_snap_shape_xy<GlobalUnison, Type, Sync, Snap>(block, modulation, shape, skew_x, wave_skew_uni_lin); break;
+  case wave_skew_type_scu: process_uni_type_sync_snap_shape_xy<GlobalUnison, Type, Sync, Snap>(block, modulation, shape, skew_x, wave_skew_uni_scu); break;
+  case wave_skew_type_scb: process_uni_type_sync_snap_shape_xy<GlobalUnison, Type, Sync, Snap>(block, modulation, shape, skew_x, wave_skew_uni_scb); break;
+  case wave_skew_type_xpu: process_uni_type_sync_snap_shape_xy<GlobalUnison, Type, Sync, Snap>(block, modulation, shape, skew_x, wave_skew_uni_xpu); break;
+  case wave_skew_type_xpb: process_uni_type_sync_snap_shape_xy<GlobalUnison, Type, Sync, Snap>(block, modulation, shape, skew_x, wave_skew_uni_xpb); break;
   default: assert(false); break;
   }
 }
 
-template <bool GlobalUnison, int Type, bool Sync, class Shape, class SkewX, class SkewY> void
-lfo_engine::process_uni_type_sync_shape_xy(plugin_block& block, cv_cv_matrix_mixdown const* modulation, Shape shape, SkewX skew_x, SkewY skew_y)
+template <bool GlobalUnison, int Type, bool Sync, bool Snap, class Shape, class SkewX, class SkewY> void
+lfo_engine::process_uni_type_sync_snap_shape_xy(plugin_block& block, cv_cv_matrix_mixdown const* modulation, Shape shape, SkewX skew_x, SkewY skew_y)
 {
   auto const& block_auto = block.state.own_block_automation;
   int shaper = block_auto[param_shape][0].step();
   int step = block_auto[param_steps][0].step();
   bool quantize = !is_noise(shaper) && step != 1;
-  if(quantize) process_uni_type_sync_shape_xy_quantize<GlobalUnison, Type, Sync>(block, modulation, shape, skew_x, skew_y, lfo_quantize);
-  else process_uni_type_sync_shape_xy_quantize<GlobalUnison, Type, Sync>(block, modulation, shape, skew_x, skew_y, [](float in, int st) { return in; });
+  if(quantize) process_uni_type_sync_snap_shape_xy_quantize<GlobalUnison, Type, Sync, Snap>(block, modulation, shape, skew_x, skew_y, lfo_quantize);
+  else process_uni_type_sync_snap_shape_xy_quantize<GlobalUnison, Type, Sync, Snap>(block, modulation, shape, skew_x, skew_y, [](float in, int st) { return in; });
 }
 
-template <bool GlobalUnison, int Type, bool Sync, class Shape, class SkewX, class SkewY, class Quantize> void
-lfo_engine::process_uni_type_sync_shape_xy_quantize(plugin_block& block, cv_cv_matrix_mixdown const* modulation, Shape shape, SkewX skew_x, SkewY skew_y, Quantize quantize)
+template <bool GlobalUnison, int Type, bool Sync, bool Snap, class Shape, class SkewX, class SkewY, class Quantize> void
+lfo_engine::process_uni_type_sync_snap_shape_xy_quantize(plugin_block& block, cv_cv_matrix_mixdown const* modulation, Shape shape, SkewX skew_x, SkewY skew_y, Quantize quantize)
 {
   auto const& block_auto = block.state.own_block_automation;
   int sx = block_auto[param_skew_x][0].step();
@@ -894,21 +915,21 @@ lfo_engine::process_uni_type_sync_shape_xy_quantize(plugin_block& block, cv_cv_m
   {
     auto processor = [skew_x, skew_y, shape](float in, float x, float y) { 
       return wave_calc_uni(in, x, y, shape, skew_x, skew_y); };
-    process_loop<GlobalUnison, Type, Sync>(block, modulation, processor, quantize);
+    process_loop<GlobalUnison, Type, Sync, Snap>(block, modulation, processor, quantize);
   }
   else if (!x_is_exp && y_is_exp)
   {
     auto processor = [skew_x, skew_y, shape](float in, float x, float y) { 
       float py = std::log(0.001 + (y * 0.999)) / log_half;
       return wave_calc_uni(in, x, py, shape, skew_x, skew_y); };
-    process_loop<GlobalUnison, Type, Sync>(block, modulation, processor, quantize);
+    process_loop<GlobalUnison, Type, Sync, Snap>(block, modulation, processor, quantize);
   }
   else if (x_is_exp && !y_is_exp)
   {
     auto processor = [skew_x, skew_y, shape](float in, float x, float y) {
       float px = std::log(0.001 + (x * 0.999)) / log_half;
       return wave_calc_uni(in, px, y, shape, skew_x, skew_y); };
-    process_loop<GlobalUnison, Type, Sync>(block, modulation, processor, quantize);
+    process_loop<GlobalUnison, Type, Sync, Snap>(block, modulation, processor, quantize);
   }
   else
   {
@@ -916,11 +937,11 @@ lfo_engine::process_uni_type_sync_shape_xy_quantize(plugin_block& block, cv_cv_m
       float px = std::log(0.001 + (x * 0.999)) / log_half;
       float py = std::log(0.001 + (y * 0.999)) / log_half;
       return wave_calc_uni(in, px, py, shape, skew_x, skew_y); };
-    process_loop<GlobalUnison, Type, Sync>(block, modulation, processor, quantize);
+    process_loop<GlobalUnison, Type, Sync, Snap>(block, modulation, processor, quantize);
   }
 }
 
-template <bool GlobalUnison, int Type, bool Sync, class Calc, class Quantize>
+template <bool GlobalUnison, int Type, bool Sync, bool Snap, class Calc, class Quantize>
 void lfo_engine::process_loop(plugin_block& block, cv_cv_matrix_mixdown const* modulation, Calc calc, Quantize quantize)
 {
   int this_module = _global ? module_glfo : module_vlfo;
@@ -949,6 +970,24 @@ void lfo_engine::process_loop(plugin_block& block, cv_cv_matrix_mixdown const* m
     auto const& glob_uni_lfo_dtn_curve = block.state.all_accurate_automation[module_voice_in][0][voice_in_param_uni_lfo_dtn][0];
     for(int f = block.start_frame; f < block.end_frame; f++)
       rate_curve[f] *= 1 + (voice_pos * glob_uni_lfo_dtn_curve[f]);
+  }
+
+  // reset phase to project time for glfo
+  if constexpr (Snap)
+  {
+    // graph block always starts at 0
+    if (!block.graph)
+    {
+      // Rate can go zero by modulation.
+      float rate0 = rate_curve[block.start_frame];
+      if (rate0 > 0.0f)
+      {
+        std::int64_t samples0 = (std::int64_t)(block.sample_rate / rate0);
+        std::int64_t phase_frames = block.host.project_time % samples0;
+        _ref_phase = phase_frames / (float)samples0;
+        _phase = _ref_phase;
+      }
+    }
   }
 
   for (int f = block.start_frame; f < block.end_frame; f++)

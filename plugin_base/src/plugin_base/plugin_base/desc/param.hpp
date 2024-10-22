@@ -19,7 +19,10 @@ struct param_desc final {
   param_topo const* param = {};
 
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(param_desc);
+
+  std::string tooltip(plain_value plain) const;
   void validate(module_desc const& module, int index) const;
+
   param_desc(
     module_topo const& module_, int module_slot,
     param_topo const& param_, int topo, int slot, int local_, int global);

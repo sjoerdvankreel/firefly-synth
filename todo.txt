@@ -14,10 +14,11 @@ on release:
 8 update the history
 9 check if need update github social preview
 10 mail to self
-11 dont forget to tag
-12 make a github release
-13 update kvr 
-14 update the website (vimexx)
+11 merge back
+12 dont forget to tag
+13 make a github release
+14 update kvr 
+15 update the website (vimexx)
 
 microtuning:
 * check up on andreyas comments
@@ -26,25 +27,26 @@ autobuilds:
 * ask paul
 * integrate https://github.com/surge-synthesizer/monique-monosynth/blob/main/.github/workflows/build-pr.yml
 
-wishlist:
-use fftw
-fix the bug demos
-do arp and glfo in project time samples (can do now bc all is phased!)
+make a patch cleanup button
+update the routing graph for arp
+
+ditch after-mod, claim micro support ?
 arp new note = reset table pos yes/no?
 do more keyboard tracking just do it -- also trackmode mul/add
 do global unison subvoice index as a mod source
+turn on stuff when dragging (e.g. basic sin, dist skew etc)
+
+wishlist:
+use fftw
 should figure out a way to do user supplied formulas?
-make a patch cleanup button
 update the manuals routing overview image with new colors
-filter microtuning
+filter micro tuning
 DSF falloff to the left
 clap polyphonic modulation
 full-blown renoise support
 fix global unison for mono mode
-ditch after-mod, claim micro support ?
 show effective modulation in the ui for clap param mod
 Feedback FM - but needs per-sample processing, not block
-turn on stuff when dragging (e.g. basic sin, dist skew etc)
 
 wishlist sometime:
 mseg
@@ -58,4 +60,3 @@ visual routing indicators
 automated regression tests
 better studiorack integration
 do async clear delay lines etc on patch select
-global unit lfo phase offset not plot good
