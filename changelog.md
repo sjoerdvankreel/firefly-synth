@@ -1,3 +1,7 @@
+?, ? - V1.9.6.
+
+- Bugfix: CV-to-envelope modulation did not take the voice start sample position within the block into account.
+
 ### October 9, 2024 - V1.9.5.
 
 - Added arpeggiator (see manual).
