@@ -17,13 +17,13 @@
           "name": "studiorack.jpg"
         },
         "linux": {
-          "name": "firefly_synth_1.9.5_linux_vst3_instrument.zip"
+          "name": "firefly_synth_1.9.6_linux_vst3_instrument.zip"
         },
         "mac": {
-          "name": "firefly_synth_1.9.5_mac_vst3_instrument.zip"
+          "name": "firefly_synth_1.9.6_mac_vst3_instrument.zip"
         },
         "win": {
-          "name": "firefly_synth_1.9.5_windows_vst3_instrument.zip"
+          "name": "firefly_synth_1.9.6_windows_vst3_instrument.zip"
         }
       }
     }
