@@ -94,9 +94,6 @@ struct param_topo_gui final {
   // allow to drop on this combobox?
   bool enable_dropdown_drop_target = false;
 
-  // allows user to attach a custom tag to param ui
-  bool editable_label = false;
-
   // if dragging this label, mod source is "self" or below
   std::string alternate_drag_param_id = {};
   std::string alternate_drag_output_id = {};

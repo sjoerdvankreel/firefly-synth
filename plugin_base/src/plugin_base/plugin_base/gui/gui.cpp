@@ -1162,18 +1162,15 @@ plugin_gui::make_param_label(module_desc const& module, param_desc const& param,
   }
 
   assert(alternate_drag_param == nullptr || alternate_drag_output == nullptr);
-  assert(!param.param->gui.editable_label || contents == gui_label_contents::name);
 
   Component* result = {};
   Label* label_result = {};
-
   switch (contents)
   {
   case gui_label_contents::name:
     label_result = &make_component<param_name_label>(this, &module, &param,
       alternate_drag_param, alternate_drag_output, _module_lnfs[module.module->info.index].get());
     label_result->setJustificationType(justification_type(param.param->gui.label));
-    if (param.param->gui.editable_label) label_result->setEditable(true);
     result = label_result;
     break;
   case gui_label_contents::value:
