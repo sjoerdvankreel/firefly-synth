@@ -36,6 +36,12 @@ do more keyboard tracking just do it -- also trackmode mul/add
 do global unison subvoice index as a mod source
 turn on stuff when dragging (e.g. basic sin, dist skew etc)
 
+mseg:
+- for lfo
+- for env + sustain point
+- update the mode description in the gui
+
+
 wishlist:
 use fftw
 should figure out a way to do user supplied formulas?

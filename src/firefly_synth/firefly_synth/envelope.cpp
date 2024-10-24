@@ -32,9 +32,11 @@ enum {
   param_delay_time, param_delay_tempo, param_hold_time, param_hold_tempo,
   param_attack_time, param_attack_tempo, param_attack_slope, 
   param_decay_time, param_decay_tempo, param_decay_slope, 
-  param_release_time, param_release_tempo, param_release_slope };
+  param_release_time, param_release_tempo, param_release_slope,
+  param_mseg_start_y, param_mseg_end_y };
 
-static constexpr bool is_exp_slope(int mode) { return mode != mode_linear; }
+static constexpr bool is_exp_slope(int mode) { 
+  return mode == mode_exp_uni || mode == mode_exp_bi || mode == mode_exp_split; }
 
 static std::vector<list_item>
 trigger_items()
@@ -530,14 +532,26 @@ env_topo(int section, gui_position const& pos)
   release_slope.gui.bindings.enabled.bind_params({ param_on, param_mode }, [](auto const& vs) { return vs[0] != 0 && is_exp_slope(vs[1]); });
   release_slope.info.description = "Controls release slope for exponential types. Modulation takes place only at voice start.";
 
+  // todo disable the other controls for dahdsr
+  // todo what can be automated/modulated
   auto& mseg_section = result.sections.emplace_back(make_param_section(section_mseg,
     make_topo_tag_basic("{62ECE061-2CF7-42BD-A7FE-9069306DB83F}", "MSEG"),
     make_param_section_gui({ 0, 4, 2, 1 }, { 1, 1 })));
   mseg_section.gui.bindings.visible.bind_params({ param_mode }, [](auto const& vs) { return vs[0] == mode_mseg; });
-  // todo disable the other controls
   mseg_section.gui.custom_gui_factory = [](plugin_gui* gui, lnf* lnf, int module_slot, component_store store) {
-    return &store_component<mseg_editor>(store);
-  };
+    return &store_component<mseg_editor>(store, gui, module_env, module_slot, param_mseg_start_y, param_mseg_end_y); };
+  auto& start_y = result.params.emplace_back(make_param(
+    make_topo_info("{BB1A9691-DA7D-460D-BDF3-7D99F272CD05}", true, "MSEG Start Y", "Start Y", "Start Y", param_mseg_start_y, 1),
+    make_param_dsp_voice(param_automate::none), make_domain_linear(0.0, 1.0, 1.0, 2, ""),
+    make_param_gui_none()));
+  start_y.gui.bindings.enabled.bind_params({ param_on, param_mode }, [](auto const& vs) { return vs[0] != 0 && vs[1] == mode_mseg; });
+  start_y.info.description = "TODO";
+  auto& end_y = result.params.emplace_back(make_param(
+    make_topo_info("{D4114CFC-B2E6-4927-9011-E49BF68995C4}", true, "MSEG End Y", "End Y", "End Y", param_mseg_end_y, 1),
+    make_param_dsp_voice(param_automate::none), make_domain_linear(0.0, 1.0, 0.0, 2, ""),
+    make_param_gui_none()));
+  end_y.gui.bindings.enabled.bind_params({ param_on, param_mode }, [](auto const& vs) { return vs[0] != 0 && vs[1] == mode_mseg; });
+  end_y.info.description = "TODO";
   return result;
 }
 
