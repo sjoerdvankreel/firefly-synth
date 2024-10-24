@@ -91,12 +91,14 @@ param_topo::validate(plugin_topo const& plugin, module_topo const& module, int i
   assert(!domain.is_real() || domain.max > domain.min);
   assert(domain.is_real() || dsp.rate != param_rate::accurate);
   assert(0 <= gui.section && gui.section < module.sections.size());
-  assert((info.slot_count == 1) == (gui.layout == param_layout::single));
   assert(dsp.direction == param_direction::input || !gui.bindings.enabled.is_bound());
   assert(dsp.direction == param_direction::input || !gui.bindings.global_enabled.is_bound());
   assert(gui.edit_type != gui_edit_type::toggle || domain.type == domain_type::toggle);
   assert(dsp.direction != param_direction::output || module.dsp.stage == module_stage::output);
   assert(gui.alternate_drag_output_id.size() == 0 || gui.alternate_drag_param_id.size() == 0);
+
+  if (module.sections[this->gui.section].gui.custom_gui_factory == nullptr)
+    assert((info.slot_count == 1) == (gui.layout == param_layout::single));
 
   if (info.is_per_instance)
   {

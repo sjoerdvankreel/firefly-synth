@@ -619,19 +619,19 @@ osc_topo(int section, gui_position const& pos)
   auto& pitch = result.params.emplace_back(make_param(
     make_topo_info_basic("{6E9030AF-EC7A-4473-B194-5DA200E7F90C}", "Pitch", param_pitch, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_linear(-128, 128, 0, 0, ""),
-    make_param_gui_none()));
+    make_param_gui_none(section_type)));
   pitch.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return can_do_pitch(vs[0]); });
   pitch.info.description = "Absolute pitch modulation target, also reacts to Voice-in pitch modulation.";
   auto& pb = result.params.emplace_back(make_param(
     make_topo_info("{D310300A-A143-4866-8356-F82329A76BAE}", true, "Pitch Bend", "Pitch Bend", "Pitch Bend", param_pb, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 0, 0, true),
-    make_param_gui_none()));
+    make_param_gui_none(section_type)));
   pb.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return can_do_pitch(vs[0]); });
   pb.info.description = "Pitch-bend modulation target. Also reacts to Voice-in PB modulation and global pitchbend range.";
   auto& pm = result.params.emplace_back(make_param(
     make_topo_info("{EDBD2257-6582-4438-8EEA-7464B06FB37F}", true, "Phase", "Phase", "Phase", param_phase, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0, 1, true),
-    make_param_gui_none()));
+    make_param_gui_none(section_type)));
   pm.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return can_do_phase(vs[0]); });
   pm.info.description = "Phase modulation target.";
 

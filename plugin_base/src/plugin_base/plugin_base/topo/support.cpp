@@ -377,10 +377,11 @@ make_param_dsp(param_direction direction, param_rate rate, param_automate automa
 }
 
 param_topo_gui
-make_param_gui_none()
+make_param_gui_none(int section)
 {
   param_topo_gui result = {};
   result.visible = false;
+  result.section = section;
   return result;
 }
 

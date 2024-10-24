@@ -22,9 +22,14 @@ public juce::Component
   int const _module_slot;
   int const _start_y_param;
   int const _end_y_param;
+  int const _on_param;
+  int const _x_param;
+  int const _y_param;
 public:
   void paint(juce::Graphics& g) override;
-  mseg_editor(plugin_gui* gui, int module_index, int module_slot, int start_y_param, int end_y_param);
+  mseg_editor(
+    plugin_gui* gui, int module_index, int module_slot, 
+    int start_y_param, int end_y_param, int on_param, int x_param, int y_param);
 };
 
 }

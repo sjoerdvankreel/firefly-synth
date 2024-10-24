@@ -129,7 +129,7 @@ param_domain
 make_domain_log(double min, double max, double default_, double midpoint, int precision, std::string const& unit);
 
 param_topo_gui
-make_param_gui_none();
+make_param_gui_none(int section);
 param_topo_gui
 make_param_gui(int section, gui_edit_type edit_type, param_layout layout, gui_position position, gui_label label);
 param_topo
