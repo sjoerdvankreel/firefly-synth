@@ -5,6 +5,7 @@
 #include <plugin_base/dsp/utility.hpp>
 #include <plugin_base/shared/io_plugin.hpp>
 #include <plugin_base/dsp/graph_engine.hpp>
+#include <plugin_base/gui/mseg_editor.hpp>
 
 #include <firefly_synth/synth.hpp>
 #include <firefly_synth/waves.hpp>
@@ -535,9 +536,7 @@ env_topo(int section, gui_position const& pos)
   mseg_section.gui.bindings.visible.bind_params({ param_mode }, [](auto const& vs) { return vs[0] == mode_mseg; });
   // todo disable the other controls
   mseg_section.gui.custom_gui_factory = [](plugin_gui* gui, lnf* lnf, int module_slot, component_store store) {
-    auto& result = store_component<juce::Label>(store);
-    result.setText("NARF", juce::dontSendNotification);
-    return &result;
+    return &store_component<mseg_editor>(store);
   };
   return result;
 }
