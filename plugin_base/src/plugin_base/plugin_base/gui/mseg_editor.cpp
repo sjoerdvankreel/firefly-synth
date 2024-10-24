@@ -44,7 +44,7 @@ mseg_editor::paint(Graphics& g)
   g.setColour(Colours::blue);
 
   // start to point 0
-  g.drawLine(0, h - start_y * h, w * points[0].first, h * points[0].second);
+  g.drawLine(0, h - start_y * h, w * points[0].first, h - h * points[0].second);
 }
 
 }

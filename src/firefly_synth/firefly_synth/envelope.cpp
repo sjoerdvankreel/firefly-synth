@@ -579,7 +579,7 @@ env_topo(int section, gui_position const& pos)
     make_param_gui_none(section_mseg)));
   mseg_y.gui.bindings.enabled.bind_params({ param_on, param_mode }, [](auto const& vs) { return vs[0] != 0 && vs[1] == mode_mseg; });
   mseg_y.info.description = "TODO";
-  mseg_x.domain.default_selector_ = [](int, int s) {
+  mseg_y.domain.default_selector_ = [](int, int s) {
     if (s == 0) return "1.0";
     if (s == 1) return "0.5";
     return "0.0";
