@@ -10,6 +10,9 @@
 
 namespace plugin_base {
 
+class lnf;
+class plugin_gui;
+
 struct module_topo;
 struct plugin_topo;
 struct gui_dimension;
@@ -26,12 +29,15 @@ enum class gui_edit_type {
   none, toggle, list, autofit_list, knob, hslider, vslider, output_label_left, 
   output_label_center, output_toggle, output_module_name, output_meter };
 
+
 typedef std::function<bool(int module_slot)>
 gui_slot_binding_selector;
 typedef std::function<bool(std::vector<int> const& vs)>
 gui_param_binding_selector;
 typedef std::function<bool(int)>
 gui_global_param_binding_selector;
+typedef std::function<juce::Component& (std::unique_ptr<juce::Component>&&)>
+component_store;
 
 // for custom module/param context menus
 struct custom_menu_entry { int action; std::string title; };

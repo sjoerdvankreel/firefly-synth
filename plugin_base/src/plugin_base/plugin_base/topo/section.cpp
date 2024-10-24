@@ -41,6 +41,19 @@ param_section::validate(plugin_topo const& plugin, module_topo const& module, in
       assert(false);
   }
 
+  if (gui.custom_gui_factory != nullptr)
+  {
+    assert(!is_one_grid_param);
+    assert(gui.wrap_in_container);
+    assert(gui.autofit_row == 0);
+    assert(gui.autofit_column == 0);
+    assert(gui.scroll_mode == gui_scroll_mode::none);
+    assert(gui.cell_split == gui_label_edit_cell_split::no_split);
+    assert(gui.dimension.row_sizes.size() == 1 && gui.dimension.row_sizes[0] == 1);
+    assert(gui.dimension.column_sizes.size() == 1 && gui.dimension.column_sizes[0] == 1);
+    return;
+  }
+
   // validation is handled elsewhere
   if(is_one_grid_param) return;
 

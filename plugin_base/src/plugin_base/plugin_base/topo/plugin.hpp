@@ -40,8 +40,6 @@ arpeggiator_factory;
 // global unison support
 typedef int (*sub_voice_counter_t)(bool graph, plugin_state const& state);
 
-typedef std::function<juce::Component&(std::unique_ptr<juce::Component>&&)>
-component_store;
 typedef std::function<gui_dimension(plugin_topo_gui_theme_settings const& settings)>
 plugin_dimension_factory;
 typedef std::function<juce::Component&(plugin_gui* gui, lnf* lnf, component_store store)>

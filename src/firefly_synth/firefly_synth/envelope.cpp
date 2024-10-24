@@ -24,8 +24,8 @@ enum class env_stage { delay, attack, hold, decay, sustain, release, filter, end
 
 enum { type_sustain, type_follow, type_release };
 enum { trigger_legato, trigger_retrig, trigger_multi };
-enum { mode_linear, mode_exp_uni, mode_exp_bi, mode_exp_split };
-enum { section_on, section_type, section_sync, section_trigger, section_dahdr };
+enum { mode_linear, mode_exp_uni, mode_exp_bi, mode_exp_split, mode_mseg };
+enum { section_on, section_type, section_sync, section_trigger, section_dahdr, section_mseg };
 enum {
   param_on, param_type, param_mode, param_sync, param_filter, param_trigger, param_sustain,
   param_delay_time, param_delay_tempo, param_hold_time, param_hold_tempo,
@@ -63,6 +63,7 @@ mode_items()
   result.emplace_back("{924FB84C-7509-446F-82E7-B9E39DE399A5}", "Exp Uni", "Exponential Unipolar");
   result.emplace_back("{35EDA297-B042-41C0-9A1C-9502DBDAF633}", "Exp Bi", "Exponential Bipolar");
   result.emplace_back("{666FEFDF-3BC5-4FDA-8490-A8980741D6E7}", "Exp Split", "Exponential Split");
+  result.emplace_back("{CD3E67A3-80CC-4419-9E1F-E7A5FF9ABE1E}", "MSEG", "Multi-Segment Envelope Generator");
   return result;
 }
 
@@ -412,11 +413,12 @@ env_topo(int section, gui_position const& pos)
   sustain.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
   sustain.info.description = "Sustain level. Modulation takes place only at voice start.";
 
-  result.sections.emplace_back(make_param_section(section_dahdr,
+  auto& dahdr_section = result.sections.emplace_back(make_param_section(section_dahdr,
     make_topo_tag_basic("{96BDC7C2-7DF4-4CC5-88F9-2256975D70AC}", "DAHDR"),
     make_param_section_gui({ 0, 4, 2, 1 }, { { 1, 1 }, { 
       gui_dimension::auto_size_all, 1, gui_dimension::auto_size_all, 1, 
       gui_dimension::auto_size_all, 1, gui_dimension::auto_size_all, 1 } }, gui_label_edit_cell_split::horizontal)));
+  dahdr_section.gui.bindings.visible.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_mseg; });
   auto& delay_time = result.params.emplace_back(make_param(
     make_topo_info("{E9EF839C-235D-4248-A4E1-FAD62089CC78}", true, "Dly Time", "Dly", "Dly Time", param_delay_time, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_log(0, 10, 0, 1, 3, "Sec"),
@@ -527,6 +529,16 @@ env_topo(int section, gui_position const& pos)
   release_slope.gui.bindings.enabled.bind_params({ param_on, param_mode }, [](auto const& vs) { return vs[0] != 0 && is_exp_slope(vs[1]); });
   release_slope.info.description = "Controls release slope for exponential types. Modulation takes place only at voice start.";
 
+  auto& mseg_section = result.sections.emplace_back(make_param_section(section_mseg,
+    make_topo_tag_basic("{62ECE061-2CF7-42BD-A7FE-9069306DB83F}", "MSEG"),
+    make_param_section_gui({ 0, 4, 2, 1 }, { 1, 1 })));
+  mseg_section.gui.bindings.visible.bind_params({ param_mode }, [](auto const& vs) { return vs[0] == mode_mseg; });
+  // todo disable the other controls
+  mseg_section.gui.custom_gui_factory = [](plugin_gui* gui, lnf* lnf, int module_slot, component_store store) {
+    auto& result = store_component<juce::Label>(store);
+    result.setText("NARF", juce::dontSendNotification);
+    return &result;
+  };
   return result;
 }
 
@@ -763,6 +775,7 @@ void env_engine::process_mono_type_sync_trigger(plugin_block& block, cv_cv_matri
   case mode_exp_bi: process_mono_type_sync_trigger_mode<Monophonic, Type, Sync, Trigger, mode_exp_bi>(block, modulation, calc_slope_exp_bi); break;
   case mode_exp_uni: process_mono_type_sync_trigger_mode<Monophonic, Type, Sync, Trigger, mode_exp_uni>(block, modulation, calc_slope_exp_uni); break;
   case mode_exp_split: process_mono_type_sync_trigger_mode<Monophonic, Type, Sync, Trigger, mode_exp_split>(block, modulation, calc_slope_exp_splt); break;
+  case mode_mseg: break; // TODO
   default: assert(false); break;
   }
 }

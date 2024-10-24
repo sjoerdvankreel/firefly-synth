@@ -1042,6 +1042,16 @@ plugin_gui::make_multi_param(module_desc const& module, param_section const& sec
 Component&
 plugin_gui::make_param_section(module_desc const& module, param_section const& section, bool first_horizontal)
 {
+  // easy case - plug builds its own param gui
+  if (section.gui.custom_gui_factory != nullptr)
+  {
+    auto store = [this](std::unique_ptr<Component>&& owned) -> Component& {
+      auto result = owned.get();
+      _components.emplace_back(std::move(owned));
+      return *result; };
+    return *section.gui.custom_gui_factory(this, module_lnf(module.module->info.index), module.info.slot, store);
+  }
+
   auto const& params = module.params;
   bool is_parent_grid_param = false;
   grid_component& grid = make_component<grid_component>(section.gui.dimension, 
