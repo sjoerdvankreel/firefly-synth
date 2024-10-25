@@ -20,7 +20,7 @@ _on_param(on_param), _x_param(x_param), _y_param(y_param)
 void
 mseg_editor::paint(Graphics& g)
 {
-  float const point_size = 10.0f;
+  float const point_size = 8.0f;
   float const padding = point_size * 0.5f;
 
   float const x = padding;
@@ -47,17 +47,28 @@ mseg_editor::paint(Graphics& g)
 
   g.setColour(_lnf->colors().mseg_background);
   g.fillRect(getLocalBounds());
-  g.setColour(_lnf->colors().mseg_line);
 
   // start to point 0
+  g.setColour(_lnf->colors().mseg_line);
   g.drawLine(x, y + h - start_y * h, x + w * points[0].first, y + h - h * points[0].second);
+  g.setColour(_lnf->colors().mseg_point);
+  g.drawEllipse(x - point_size / 2, y + h - start_y * h - point_size / 2, point_size, point_size, 1);
+  g.drawEllipse(x + w * points[0].first - point_size / 2, y + h - h * points[0].second - point_size / 2, point_size, point_size, 1);
 
   // mid sections
   for (int i = 1; i < points.size(); i++)
+  {
+    g.setColour(_lnf->colors().mseg_line);
     g.drawLine(x + w * points[i - 1].first, y + h - h * points[i - 1].second, x + w * points[i].first, y + h - h * points[i].second);
+    g.setColour(_lnf->colors().mseg_point);
+    g.drawEllipse(x + w * points[i].first - point_size / 2, y + h - h * points[i].second - point_size / 2, point_size, point_size, 1);
+  }
 
   // last to end point
+  g.setColour(_lnf->colors().mseg_line);
   g.drawLine(x + w * points[points.size() - 1].first, y + h - h * points[points.size() - 1].second, x + w - 1, y + h - end_y * h);
+  g.setColour(_lnf->colors().mseg_point);
+  g.drawEllipse(x + w - 1 - point_size / 2, y + h - end_y * h - point_size / 2, point_size, point_size, 1);
 }
 
 }
