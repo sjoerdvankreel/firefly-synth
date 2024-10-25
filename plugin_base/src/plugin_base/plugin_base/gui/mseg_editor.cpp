@@ -69,8 +69,26 @@ mseg_editor::paint(Graphics& g)
   // mid sections
   for (int i = 1; i < points.size(); i++)
   {
+    Path p;
+    float x1_norm = points[i - 1].first;
+    float x2_norm = points[i].first;
+    float y1_norm = points[i - 1].second;
+    float y2_norm = points[i].second;
+
+    float const points_per_seg = 32;
+    p.startNewSubPath(x1_norm, y1_norm);
+    for (int j = 1; j < points_per_seg; j++)
+    {
+      float pos = j / (points_per_seg - 1.0f);
+      float x_this_pos_norm = x1_norm + pos * (x2_norm - x1_norm);
+      float y_this_pos_norm = y1_norm + pos * (y2_norm - y1_norm); // todo get the curvature in here
+      float x_this_pos = x + w * x_this_pos_norm;
+      float y_this_pos = y + h - h * y_this_pos_norm;
+      p.lineTo(x_this_pos, y_this_pos);
+    }    
+
     g.setColour(_lnf->colors().mseg_line);
-    g.drawLine(x + w * points[i - 1].first, y + h - h * points[i - 1].second, x + w * points[i].first, y + h - h * points[i].second);
+    g.fillPath(p);
     g.setColour(_lnf->colors().mseg_point);
     g.drawEllipse(x + w * points[i].first - point_size / 2, y + h - h * points[i].second - point_size / 2, point_size, point_size, 1);
   }
