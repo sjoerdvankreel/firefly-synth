@@ -1429,7 +1429,7 @@
 <td>N/A</td>
 </tr>
 <tr>
-<td colspan='11' class='description'>Selects envelope slope mode.<br/>Linear - linear slope, most cpu efficient.<br/>Exponential unipolar - regular exponential slope.<br/>Exponential bipolar - vertically splits section in 2 exponential parts.<br/>Exponential split - horizontally and vertically splits section in 2 exponential parts to generate smooth curves.</td>
+<td colspan='11' class='description'>Selects envelope mode.<br/>Linear - linear slope DAHDSR, most cpu efficient.<br/>Exponential unipolar - regular exponential slope DAHDSR.<br/>Exponential bipolar - DAHDSR, vertically splits section in 2 exponential parts.<br/>Exponential split - DAHDSR, horizontally and vertically splits section in 2 exponential parts to generate smooth curves.<br/>MSEG - custom drawn envelope generator.</td>
 </tr>
 <tr>
 <td rowspan='2'>Tempo Sync</td>
@@ -1498,6 +1498,23 @@
 </tr>
 <tr>
 <td colspan='11' class='description'>Sustain level. Modulation takes place only at voice start.</td>
+</tr>
+<tr>
+<td rowspan='2'>MSEG Mode</td>
+<td>Trigger</td>
+<td>Yes</td>
+<td>Patch</td>
+<td>1</td>
+<td>Input</td>
+<td>Voice</td>
+<td>None</td>
+<td>Linear</td>
+<td>Exp Split</td>
+<td>Linear</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Selects MSEG slope mode.<br/>Linear - linear slope, most cpu efficient.<br/>Exponential unipolar - regular exponential slope.<br/>Exponential bipolar - vertically splits section in 2 exponential parts.<br/>Exponential split - horizontally and vertically splits section in 2 exponential parts to generate smooth curves.</td>
 </tr>
 <tr>
 <td rowspan='2'>Dly Time</td>

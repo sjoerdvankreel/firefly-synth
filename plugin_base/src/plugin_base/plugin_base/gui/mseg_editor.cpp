@@ -4,13 +4,25 @@ using namespace juce;
 
 namespace plugin_base {
 
+std::vector<list_item> 
+mseg_mode_items()
+{
+  std::vector<list_item> result;
+  result.emplace_back("{B3310A09-6A49-4EB6-848C-1F61A1028126}", "Linear", "Linear");
+  result.emplace_back("{924FB84C-7509-446F-82E7-B9E39DE399A5}", "Exp Uni", "Exponential Unipolar");
+  result.emplace_back("{35EDA297-B042-41C0-9A1C-9502DBDAF633}", "Exp Bi", "Exponential Bipolar");
+  result.emplace_back("{666FEFDF-3BC5-4FDA-8490-A8980741D6E7}", "Exp Split", "Exponential Split");
+  return result;
+}
+
 mseg_editor::
 mseg_editor(
   plugin_gui* gui, lnf* lnf, int module_index, int module_slot, 
-  int start_y_param, int end_y_param, int on_param, int x_param, int y_param):
+  int start_y_param, int end_y_param, int mode_param,
+  int on_param, int x_param, int y_param):
 _gui(gui), _lnf(lnf),
 _module_index(module_index), _module_slot(module_slot), 
-_start_y_param(start_y_param), _end_y_param(end_y_param),
+_start_y_param(start_y_param), _end_y_param(end_y_param), _mode_param(mode_param),
 _on_param(on_param), _x_param(x_param), _y_param(y_param)
 {
   // todo loads of validation

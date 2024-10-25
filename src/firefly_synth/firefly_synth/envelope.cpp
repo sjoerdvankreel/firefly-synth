@@ -26,10 +26,11 @@ enum class env_stage { delay, attack, hold, decay, sustain, release, filter, end
 
 enum { type_sustain, type_follow, type_release };
 enum { trigger_legato, trigger_retrig, trigger_multi };
-enum { mode_linear, mode_exp_uni, mode_exp_bi, mode_exp_split, mode_mseg };
+enum { mode_linear = mseg_mode_linear, mode_exp_uni, mode_exp_bi, mode_exp_split, mode_mseg };
 enum { section_on, section_type, section_sync, section_trigger, section_dahdr, section_mseg };
 enum {
-  param_on, param_type, param_mode, param_sync, param_filter, param_trigger, param_sustain,
+  param_on, param_type, param_mode, param_sync, param_filter, param_trigger, 
+  param_sustain, param_mseg_mode,
   param_delay_time, param_delay_tempo, param_hold_time, param_hold_tempo,
   param_attack_time, param_attack_tempo, param_attack_slope, 
   param_decay_time, param_decay_tempo, param_decay_slope, 
@@ -62,11 +63,7 @@ type_items()
 static std::vector<list_item>
 mode_items()
 {
-  std::vector<list_item> result;
-  result.emplace_back("{B3310A09-6A49-4EB6-848C-1F61A1028126}", "Linear", "Linear");
-  result.emplace_back("{924FB84C-7509-446F-82E7-B9E39DE399A5}", "Exp Uni", "Exponential Unipolar");
-  result.emplace_back("{35EDA297-B042-41C0-9A1C-9502DBDAF633}", "Exp Bi", "Exponential Bipolar");
-  result.emplace_back("{666FEFDF-3BC5-4FDA-8490-A8980741D6E7}", "Exp Split", "Exponential Split");
+  std::vector<list_item> result = mseg_mode_items();
   result.emplace_back("{CD3E67A3-80CC-4419-9E1F-E7A5FF9ABE1E}", "MSEG", "Multi-Segment Envelope Generator");
   return result;
 }
@@ -368,11 +365,12 @@ env_topo(int section, gui_position const& pos)
     make_param_gui_single(section_type, gui_edit_type::list, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   mode.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
-  mode.info.description = std::string("Selects envelope slope mode.<br/>") +
-    "Linear - linear slope, most cpu efficient.<br/>" +
-    "Exponential unipolar - regular exponential slope.<br/>" +
-    "Exponential bipolar - vertically splits section in 2 exponential parts.<br/>" +
-    "Exponential split - horizontally and vertically splits section in 2 exponential parts to generate smooth curves.";
+  mode.info.description = std::string("Selects envelope mode.<br/>") +
+    "Linear - linear slope DAHDSR, most cpu efficient.<br/>" +
+    "Exponential unipolar - regular exponential slope DAHDSR.<br/>" +
+    "Exponential bipolar - DAHDSR, vertically splits section in 2 exponential parts.<br/>" +
+    "Exponential split - DAHDSR, horizontally and vertically splits section in 2 exponential parts to generate smooth curves.<br/>" +
+    "MSEG - custom drawn envelope generator.";
 
   auto& sync_section = result.sections.emplace_back(make_param_section(section_sync,
     make_topo_tag_basic("{B9A937AF-6807-438F-8F79-506C47F621BD}", "Sync"),
@@ -414,8 +412,22 @@ env_topo(int section, gui_position const& pos)
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
     make_param_gui_single(section_trigger, gui_edit_type::hslider, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  sustain.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
+  sustain.gui.bindings.enabled.bind_params({ param_on, param_mode }, [](auto const& vs) { return vs[0] != 0 && vs[1] != mode_mseg; });
+  sustain.gui.bindings.visible.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_mseg; });
   sustain.info.description = "Sustain level. Modulation takes place only at voice start.";
+  auto& mseg_mode = result.params.emplace_back(make_param(
+    make_topo_info("{ACF9A33E-A6E7-4807-9853-FCE4E56B2355}", true, "MSEG Mode", "MSEG", "MSEG", param_mseg_mode, 1),
+    make_param_dsp_voice(param_automate::none), make_domain_item(mseg_mode_items(), ""),
+    make_param_gui_single(section_trigger, gui_edit_type::list, { 1, 0 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
+  mseg_mode.gui.bindings.enabled.bind_params({ param_on, param_mode }, [](auto const& vs) { return vs[0] != 0 && vs[1] == mode_mseg; });
+  mseg_mode.gui.bindings.visible.bind_params({ param_mode }, [](auto const& vs) { return vs[0] == mode_mseg; });
+  mseg_mode.info.description = std::string("Selects MSEG slope mode.<br/>") +
+    "Linear - linear slope, most cpu efficient.<br/>" +
+    "Exponential unipolar - regular exponential slope.<br/>" +
+    "Exponential bipolar - vertically splits section in 2 exponential parts.<br/>" +
+    "Exponential split - horizontally and vertically splits section in 2 exponential parts to generate smooth curves.";
+
 
   auto& dahdr_section = result.sections.emplace_back(make_param_section(section_dahdr,
     make_topo_tag_basic("{96BDC7C2-7DF4-4CC5-88F9-2256975D70AC}", "DAHDR"),
@@ -540,7 +552,9 @@ env_topo(int section, gui_position const& pos)
     make_param_section_gui({ 0, 4, 2, 1 }, { 1, 1 })));
   mseg_section.gui.bindings.visible.bind_params({ param_mode }, [](auto const& vs) { return vs[0] == mode_mseg; });
   mseg_section.gui.custom_gui_factory = [](plugin_gui* gui, lnf* lnf, int module_slot, component_store store) {
-    return &store_component<mseg_editor>(store, gui, lnf, module_env, module_slot, param_mseg_start_y, param_mseg_end_y, param_mseg_on, param_mseg_x, param_mseg_y); };
+    return &store_component<mseg_editor>(
+      store, gui, lnf, module_env, module_slot, 
+      param_mseg_start_y, param_mseg_end_y, param_mseg_mode, param_mseg_on, param_mseg_x, param_mseg_y); };
   auto& mseg_start_y = result.params.emplace_back(make_param(
     make_topo_info("{BB1A9691-DA7D-460D-BDF3-7D99F272CD05}", true, "MSEG Start Y", "Start Y", "Start Y", param_mseg_start_y, 1),
     make_param_dsp_voice(param_automate::none), make_domain_linear(0.0, 1.0, 0.0, 2, ""),
