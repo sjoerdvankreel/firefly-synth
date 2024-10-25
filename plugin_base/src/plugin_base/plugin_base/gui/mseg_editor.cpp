@@ -39,7 +39,7 @@ mseg_editor::paint(Graphics& g)
   // dsp also needs to sort!
   std::sort(points.begin(), points.end(), [](auto const& l, auto const& r) { return l.first < r.first; });
 
-  g.setColour(Colours::red);
+  g.setColour(Colours::red); 
   g.fillRect(getLocalBounds());
   g.setColour(Colours::blue);
 
