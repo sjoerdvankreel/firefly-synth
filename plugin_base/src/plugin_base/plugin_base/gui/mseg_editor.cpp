@@ -19,14 +19,24 @@ mseg_editor::
 mseg_editor(
   plugin_gui* gui, lnf* lnf, int module_index, int module_slot, 
   int start_y_param, int end_y_param, int mode_param,
-  int on_param, int x_param, int y_param):
+  int on_param, int x_param, int y_param, int slope_param):
 _gui(gui), _lnf(lnf),
 _module_index(module_index), _module_slot(module_slot), 
 _start_y_param(start_y_param), _end_y_param(end_y_param), _mode_param(mode_param),
-_on_param(on_param), _x_param(x_param), _y_param(y_param)
+_on_param(on_param), _x_param(x_param), _y_param(y_param), _slope_param(slope_param)
 {
-  // todo loads of validation
-  // need at least 1 point !? maybe ==> yes
+  assert(gui != nullptr);
+  assert(lnf != nullptr);
+  auto const& topo = *gui->automation_state()->desc().plugin;
+  auto const& param_list = topo.modules[module_index].params;
+
+  auto is_linear_unit = [](param_topo const& pt) { 
+    return pt.domain.type == domain_type::linear && pt.domain.min == 0 && pt.domain.max == 0; };
+  assert(is_linear_unit(param_list[start_y_param]));
+  assert(is_linear_unit(param_list[end_y_param]));
+  assert(is_linear_unit(param_list[x_param]));
+  assert(is_linear_unit(param_list[y_param]));
+  assert(is_linear_unit(param_list[slope_param]));
 }
 
 void

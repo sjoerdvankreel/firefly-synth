@@ -17,7 +17,7 @@ using namespace plugin_base;
 
 namespace firefly_synth {
 
-static int const mseg_max_point_count = 16;
+static int const mseg_max_seg_count = 16;
 static float const log_half = std::log(0.5f); 
 static float const max_filter_time_ms = 500;
 
@@ -35,7 +35,7 @@ enum {
   param_attack_time, param_attack_tempo, param_attack_slope, 
   param_decay_time, param_decay_tempo, param_decay_slope, 
   param_release_time, param_release_tempo, param_release_slope,
-  param_mseg_start_y, param_mseg_end_y, param_mseg_on, param_mseg_x, param_mseg_y };
+  param_mseg_start_y, param_mseg_end_y, param_mseg_on, param_mseg_x, param_mseg_y, param_mseg_slope };
 
 static constexpr bool is_exp_slope(int mode) { 
   return mode == mode_exp_uni || mode == mode_exp_bi || mode == mode_exp_split; }
@@ -554,7 +554,7 @@ env_topo(int section, gui_position const& pos)
   mseg_section.gui.custom_gui_factory = [](plugin_gui* gui, lnf* lnf, int module_slot, component_store store) {
     return &store_component<mseg_editor>(
       store, gui, lnf, module_env, module_slot, 
-      param_mseg_start_y, param_mseg_end_y, param_mseg_mode, param_mseg_on, param_mseg_x, param_mseg_y); };
+      param_mseg_start_y, param_mseg_end_y, param_mseg_mode, param_mseg_on, param_mseg_x, param_mseg_y, param_mseg_slope); };
   auto& mseg_start_y = result.params.emplace_back(make_param(
     make_topo_info("{BB1A9691-DA7D-460D-BDF3-7D99F272CD05}", true, "MSEG Start Y", "Start Y", "Start Y", param_mseg_start_y, 1),
     make_param_dsp_voice(param_automate::none), make_domain_linear(0.0, 1.0, 0.0, 2, ""),
@@ -568,7 +568,7 @@ env_topo(int section, gui_position const& pos)
   mseg_end_y.gui.bindings.enabled.bind_params({ param_on, param_mode }, [](auto const& vs) { return vs[0] != 0 && vs[1] == mode_mseg; });
   mseg_end_y.info.description = "TODO";
   auto& mseg_on = result.params.emplace_back(make_param(
-    make_topo_info("{4E43B99B-D8A2-43A8-99FF-9A8E204CD99B}", true, "MSEG On", "On", "On", param_mseg_on, mseg_max_point_count),
+    make_topo_info("{4E43B99B-D8A2-43A8-99FF-9A8E204CD99B}", true, "MSEG On", "On", "On", param_mseg_on, mseg_max_seg_count - 1),
     make_param_dsp_voice(param_automate::none), make_domain_toggle(false),
     make_param_gui_none(section_mseg)));
   mseg_on.gui.bindings.enabled.bind_params({ param_on, param_mode }, [](auto const& vs) { return vs[0] != 0 && vs[1] == mode_mseg; });
@@ -577,7 +577,7 @@ env_topo(int section, gui_position const& pos)
     return s <= 1 ? "On" : "Off";
   };
   auto& mseg_x = result.params.emplace_back(make_param(
-    make_topo_info("{CFF71CB5-C93F-44BE-AC42-1814D96B291A}", true, "MSEG X", "X", "X", param_mseg_x, mseg_max_point_count),
+    make_topo_info("{CFF71CB5-C93F-44BE-AC42-1814D96B291A}", true, "MSEG X", "X", "X", param_mseg_x, mseg_max_seg_count - 1),
     make_param_dsp_voice(param_automate::none), make_domain_linear(0.0, 1.0, 0.0, 2, ""),
     make_param_gui_none(section_mseg)));
   mseg_x.gui.bindings.enabled.bind_params({ param_on, param_mode }, [](auto const& vs) { return vs[0] != 0 && vs[1] == mode_mseg; });
@@ -588,7 +588,7 @@ env_topo(int section, gui_position const& pos)
     return "0.0";
   };
   auto& mseg_y = result.params.emplace_back(make_param(
-    make_topo_info("{60F4F483-F5C9-486D-8D6B-E4098B08FDC4}", true, "MSEG Y", "Y", "Y", param_mseg_y, mseg_max_point_count),
+    make_topo_info("{60F4F483-F5C9-486D-8D6B-E4098B08FDC4}", true, "MSEG Y", "Y", "Y", param_mseg_y, mseg_max_seg_count - 1),
     make_param_dsp_voice(param_automate::none), make_domain_linear(0.0, 1.0, 0.0, 2, ""),
     make_param_gui_none(section_mseg)));
   mseg_y.gui.bindings.enabled.bind_params({ param_on, param_mode }, [](auto const& vs) { return vs[0] != 0 && vs[1] == mode_mseg; });
@@ -596,6 +596,18 @@ env_topo(int section, gui_position const& pos)
   mseg_y.domain.default_selector_ = [](int, int s) {
     if (s == 0) return "1.0";
     if (s == 1) return "0.5";
+    return "0.0";
+  };
+  auto& mseg_slope = result.params.emplace_back(make_param(
+    make_topo_info("{E2373194-3C31-4AC9-A5CC-857F90AC0D16}", true, "MSEG Slope", "Slope", "Slope", param_mseg_slope, mseg_max_seg_count),
+    make_param_dsp_voice(param_automate::none), make_domain_linear(0.0, 1.0, 0.0, 2, ""),
+    make_param_gui_none(section_mseg)));
+  mseg_slope.gui.bindings.enabled.bind_params({ param_on, param_mode }, [](auto const& vs) { return vs[0] != 0 && vs[1] == mode_mseg; });
+  mseg_slope.info.description = "TODO";
+  mseg_slope.domain.default_selector_ = [](int, int s) {
+    if (s == 0) return "0.3";
+    if (s == 1) return "0.7";
+    if (s == 2) return "0.25";
     return "0.0";
   };
   return result;

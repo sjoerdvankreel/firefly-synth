@@ -33,12 +33,14 @@ public juce::Component
   int const _on_param;
   int const _x_param;
   int const _y_param;
+  int const _slope_param;
+
 public:
   void paint(juce::Graphics& g) override;
   mseg_editor(
     plugin_gui* gui, lnf* lnf, int module_index, int module_slot, 
     int start_y_param, int end_y_param, int mode_param,
-    int on_param, int x_param, int y_param);
+    int on_param, int x_param, int y_param, int slope_param);
 };
 
 }
