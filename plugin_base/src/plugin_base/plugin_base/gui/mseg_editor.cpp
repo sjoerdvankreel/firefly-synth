@@ -20,8 +20,14 @@ _on_param(on_param), _x_param(x_param), _y_param(y_param)
 void
 mseg_editor::paint(Graphics& g)
 {
-  float w = getLocalBounds().getWidth();
-  float h = getLocalBounds().getHeight();
+  float const point_size = 10.0f;
+  float const padding = point_size * 0.5f;
+
+  float const x = padding;
+  float const y = padding;
+  float const w = getLocalBounds().getWidth() - padding * 2.0f;
+  float const h = getLocalBounds().getHeight() - padding * 2.0f;
+
   auto const state = _gui->automation_state();
   float end_y = state->get_plain_at(_module_index, _module_slot, _end_y_param, 0).real();
   float start_y = state->get_plain_at(_module_index, _module_slot, _start_y_param, 0).real();
@@ -44,14 +50,14 @@ mseg_editor::paint(Graphics& g)
   g.setColour(_lnf->colors().mseg_line);
 
   // start to point 0
-  g.drawLine(0, h - start_y * h, w * points[0].first, h - h * points[0].second);
+  g.drawLine(x, y + h - start_y * h, x + w * points[0].first, y + h - h * points[0].second);
 
   // mid sections
   for (int i = 1; i < points.size(); i++)
-    g.drawLine(w * points[i - 1].first, h - h * points[i - 1].second, w * points[i].first, h - h * points[i].second);
+    g.drawLine(x + w * points[i - 1].first, y + h - h * points[i - 1].second, x + w * points[i].first, y + h - h * points[i].second);
 
   // last to end point
-  g.drawLine(w * points[points.size() - 1].first, h - h * points[points.size() - 1].second, w - 1, h - end_y * h);
+  g.drawLine(x + w * points[points.size() - 1].first, y + h - h * points[points.size() - 1].second, x + w - 1, y + h - end_y * h);
 }
 
 }
