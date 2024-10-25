@@ -6,9 +6,9 @@ namespace plugin_base {
 
 mseg_editor::
 mseg_editor(
-  plugin_gui* gui, int module_index, int module_slot, 
+  plugin_gui* gui, lnf* lnf, int module_index, int module_slot, 
   int start_y_param, int end_y_param, int on_param, int x_param, int y_param):
-_gui(gui), 
+_gui(gui), _lnf(lnf),
 _module_index(module_index), _module_slot(module_slot), 
 _start_y_param(start_y_param), _end_y_param(end_y_param),
 _on_param(on_param), _x_param(x_param), _y_param(y_param)
@@ -39,9 +39,9 @@ mseg_editor::paint(Graphics& g)
   // dsp also needs to sort!
   std::sort(points.begin(), points.end(), [](auto const& l, auto const& r) { return l.first < r.first; });
 
-  g.setColour(Colours::red); 
+  g.setColour(_lnf->colors().mseg_background);
   g.fillRect(getLocalBounds());
-  g.setColour(Colours::blue);
+  g.setColour(_lnf->colors().mseg_line);
 
   // start to point 0
   g.drawLine(0, h - start_y * h, w * points[0].first, h - h * points[0].second);

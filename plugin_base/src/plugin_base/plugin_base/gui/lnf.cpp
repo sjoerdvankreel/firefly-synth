@@ -87,6 +87,8 @@ override_colors(gui_colors const& base, var const& json)
   result.mseg_background = override_color_if_present(json, "mseg_background", result.mseg_background);
   result.mseg_area = override_color_if_present(json, "mseg_area", result.mseg_area);
   result.mseg_line = override_color_if_present(json, "mseg_line", result.mseg_line);
+  result.mseg_point = override_color_if_present(json, "mseg_point", result.mseg_point);
+  result.mseg_text = override_color_if_present(json, "mseg_text", result.mseg_text);
   result.bubble_outline = override_color_if_present(json, "bubble_outline", result.bubble_outline);
   result.param_background = override_color_if_present(json, "param_background", result.param_background);
   result.param_highlight = override_color_if_present(json, "param_highlight", result.param_highlight);

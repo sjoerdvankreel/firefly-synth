@@ -201,6 +201,8 @@ struct gui_colors final {
   juce::Colour mseg_background = juce::Colour(0xFF00FF00);
   juce::Colour mseg_area = juce::Colour(0xFF00FF00);
   juce::Colour mseg_line = juce::Colour(0xFF00FF00);
+  juce::Colour mseg_point = juce::Colour(0xFF00FF00);
+  juce::Colour mseg_text = juce::Colour(0xFF00FF00);
   juce::Colour bubble_outline = juce::Colour(0xFF00FF00);
   juce::Colour param_background = juce::Colour(0xFF00FF00);
   juce::Colour param_highlight = juce::Colour(0xFF00FF00);

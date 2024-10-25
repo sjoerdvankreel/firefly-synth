@@ -540,7 +540,7 @@ env_topo(int section, gui_position const& pos)
     make_param_section_gui({ 0, 4, 2, 1 }, { 1, 1 })));
   mseg_section.gui.bindings.visible.bind_params({ param_mode }, [](auto const& vs) { return vs[0] == mode_mseg; });
   mseg_section.gui.custom_gui_factory = [](plugin_gui* gui, lnf* lnf, int module_slot, component_store store) {
-    return &store_component<mseg_editor>(store, gui, module_env, module_slot, param_mseg_start_y, param_mseg_end_y, param_mseg_on, param_mseg_x, param_mseg_y); };
+    return &store_component<mseg_editor>(store, gui, lnf, module_env, module_slot, param_mseg_start_y, param_mseg_end_y, param_mseg_on, param_mseg_x, param_mseg_y); };
   auto& mseg_start_y = result.params.emplace_back(make_param(
     make_topo_info("{BB1A9691-DA7D-460D-BDF3-7D99F272CD05}", true, "MSEG Start Y", "Start Y", "Start Y", param_mseg_start_y, 1),
     make_param_dsp_voice(param_automate::none), make_domain_linear(0.0, 1.0, 0.0, 2, ""),

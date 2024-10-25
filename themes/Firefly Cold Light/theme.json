@@ -36,6 +36,8 @@
     "graph_modulation_bubble": "C0FFFFFF",
     "mseg_grid": "40FFFFFF",
     "mseg_background": "FF000000",
+    "mseg_point": "C0FFFFFF",
+    "mseg_text": "C0FFFFFF",
     "bubble_outline": "FF999999",
     "param_background": "FF333333",
     "param_highlight": "FFFFFFFF",

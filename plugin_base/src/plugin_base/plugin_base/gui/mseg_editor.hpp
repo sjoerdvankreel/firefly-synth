@@ -18,6 +18,8 @@ class mseg_editor:
 public juce::Component
 {
   plugin_gui* const _gui;
+  lnf* const _lnf;
+
   int const _module_index;
   int const _module_slot;
   int const _start_y_param;
@@ -28,7 +30,7 @@ public juce::Component
 public:
   void paint(juce::Graphics& g) override;
   mseg_editor(
-    plugin_gui* gui, int module_index, int module_slot, 
+    plugin_gui* gui, lnf* lnf, int module_index, int module_slot, 
     int start_y_param, int end_y_param, int on_param, int x_param, int y_param);
 };
 
