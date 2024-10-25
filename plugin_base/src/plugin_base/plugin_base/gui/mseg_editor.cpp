@@ -21,7 +21,7 @@ void
 mseg_editor::paint(Graphics& g)
 {
   float const point_size = 8.0f;
-  float const padding = point_size * 0.5f;
+  float const padding = point_size * 0.5f + 2;
 
   float const x = padding;
   float const y = padding;
