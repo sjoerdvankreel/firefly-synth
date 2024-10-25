@@ -76,12 +76,13 @@ mseg_editor::paint(Graphics& g)
     float y2_norm = points[i].second;
 
     int const pixel_count = (int)std::ceil((x2_norm - x1_norm) * w) * 2;
+    auto sloped_y = [](float pos, float y1, float y2) { return pos * (y2 - y1); };
     p.startNewSubPath(x + w * x1_norm, y + h - h * y1_norm);
     for (int j = 1; j < pixel_count; j++)
     {
       float pos = j / (pixel_count - 1.0f);
       float x_this_pos_norm = x1_norm + pos * (x2_norm - x1_norm);
-      float y_this_pos_norm = y1_norm + pos * (y2_norm - y1_norm); // todo get the curvature in here
+      float y_this_pos_norm = y1_norm + sloped_y(pos, y1_norm, y2_norm); // todo get the curvature in here
       float x_this_pos = x + w * x_this_pos_norm;
       float y_this_pos = y + h - h * y_this_pos_norm;
       p.lineTo(x_this_pos, y_this_pos);
