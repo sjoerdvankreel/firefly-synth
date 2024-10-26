@@ -29,6 +29,12 @@ public juce::Component
   int const _y_param;
   int const _slope_param;
 
+  void make_slope_path(
+    float x, float y, float w, float h,
+    std::pair<float, float> const& from, 
+    std::pair<float, float> const& to, 
+    int slope_index, juce::Path& path) const;
+
 public:
   void paint(juce::Graphics& g) override;
   mseg_editor(
