@@ -29,7 +29,8 @@ enum { trigger_legato, trigger_retrig, trigger_multi };
 enum { mode_linear, mode_exp_uni, mode_exp_bi, mode_exp_split, mode_mseg };
 enum { section_on, section_type, section_sync, section_trigger, section_dahdr, section_mseg };
 enum {
-  param_on, param_type, param_mode, param_sync, param_filter, param_trigger, param_sustain, 
+  param_on, param_type, param_mode, param_sync, param_filter, param_trigger, 
+  param_sustain, param_mseg_length_time, param_mseg_length_sync,
   param_delay_time, param_delay_tempo, param_hold_time, param_hold_tempo,
   param_attack_time, param_attack_tempo, param_attack_slope, 
   param_decay_time, param_decay_tempo, param_decay_slope, 

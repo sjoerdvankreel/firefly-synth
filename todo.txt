@@ -33,6 +33,8 @@ deal with the dsp
 deal with retrigger etc
 select env length time/bars
 do the actual editing
+snap to grid ?
+disable regular env stuff when mseg
 
 make a patch cleanup button
 update the routing graph for arp
