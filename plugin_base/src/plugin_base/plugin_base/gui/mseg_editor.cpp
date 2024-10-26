@@ -120,6 +120,10 @@ mseg_editor::paint(Graphics& g)
   g.setColour(_lnf->colors().mseg_background);
   g.fillRect(getLocalBounds());
 
+  // filler
+  g.setColour(_lnf->colors().mseg_area);
+  g.fillRect(x, y + h, w, padding);
+
   // grid
   g.setColour(_lnf->colors().mseg_grid);
   g.drawRect(getLocalBounds(), 1.0f);
@@ -193,11 +197,6 @@ mseg_editor::paint(Graphics& g)
   slope_marker_y = y + h - h * sloped_y_pos(0.5f, points.size(), points[points.size() - 1].second, end_y) - point_size / 2;
   g.setColour(_lnf->colors().mseg_point);
   g.drawEllipse(slope_marker_x, slope_marker_y, point_size, point_size, 1.0f);
-
-  // grid
-  g.setColour(_lnf->colors().mseg_grid);
-  g.drawLine(x, y + h, x + w, y + h);
-
 }
 
 }
