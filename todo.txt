@@ -36,6 +36,8 @@ do the actual editing
 snap to grid ?
 disable regular env stuff when mseg
 what can be modulated ?
+do sustain marker
+mseg as lfo
 
 make a patch cleanup button
 update the routing graph for arp

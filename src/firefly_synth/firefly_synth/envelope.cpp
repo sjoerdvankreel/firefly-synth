@@ -420,7 +420,7 @@ env_topo(int section, gui_position const& pos)
   sustain.gui.bindings.visible.bind_params({ param_on, param_mode, param_sync }, [](auto const& vs) { return vs[1] != mode_mseg; });
   sustain.info.description = "Sustain level. Modulation takes place only at voice start.";
   auto& mseg_time = result.params.emplace_back(make_param(
-    make_topo_info("{2A704A76-D1A9-4A99-850B-7CB55865B716}", true, "MSEG Length", "Length", "Length", param_mseg_length_time, 1),
+    make_topo_info("{2A704A76-D1A9-4A99-850B-7CB55865B716}", true, "MSEG Length", "MSEG Length", "MSEG Length", param_mseg_length_time, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_log(0, 30, 5, 5, 2, "Sec"),
     make_param_gui_single(section_trigger, gui_edit_type::hslider, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
@@ -448,7 +448,7 @@ env_topo(int section, gui_position const& pos)
     make_param_dsp_accurate(param_automate::modulate), make_domain_log(0, 10, 0, 1, 3, "Sec"),
     make_param_gui_single(section_dahdr, gui_edit_type::knob, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  delay_time.gui.bindings.enabled.bind_params({ param_on, param_sync }, [](auto const& vs) { return vs[0] != 0 && vs[1] == 0; });
+  delay_time.gui.bindings.enabled.bind_params({ param_on, param_sync, param_mode }, [](auto const& vs) { return vs[0] != 0 && vs[1] == 0 && vs[2] != mode_mseg; });
   delay_time.gui.bindings.visible.bind_params({ param_sync }, [](auto const& vs) { return vs[0] == 0; });
   delay_time.info.description = "Delay section length in seconds. Modulation takes place only at voice start.";
   auto& delay_tempo = result.params.emplace_back(make_param(
@@ -457,7 +457,7 @@ env_topo(int section, gui_position const& pos)
     make_param_gui_single(section_dahdr, gui_edit_type::list, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   delay_tempo.gui.submenu = make_timesig_submenu(delay_tempo.domain.timesigs);
-  delay_tempo.gui.bindings.enabled.bind_params({ param_on, param_sync }, [](auto const& vs) { return vs[0] != 0 && vs[1] != 0; });
+  delay_tempo.gui.bindings.enabled.bind_params({ param_on, param_sync, param_mode }, [](auto const& vs) { return vs[0] != 0 && vs[1] != 0 && vs[2] != mode_mseg; });
   delay_tempo.gui.bindings.visible.bind_params({ param_on, param_sync }, [](auto const& vs) { return vs[0] != 0 && vs[1] != 0; });
   delay_tempo.info.description = "Delay section length in bars.";
   auto& hold_time = result.params.emplace_back(make_param(
@@ -465,7 +465,7 @@ env_topo(int section, gui_position const& pos)
     make_param_dsp_accurate(param_automate::modulate), make_domain_log(0, 10, 0, 1, 3, "Sec"),
     make_param_gui_single(section_dahdr, gui_edit_type::knob, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  hold_time.gui.bindings.enabled.bind_params({ param_on, param_sync }, [](auto const& vs) { return vs[0] != 0 && vs[1] == 0; });
+  hold_time.gui.bindings.enabled.bind_params({ param_on, param_sync, param_mode }, [](auto const& vs) { return vs[0] != 0 && vs[1] == 0 && vs[2] != mode_mseg; });
   hold_time.gui.bindings.visible.bind_params({ param_sync }, [](auto const& vs) { return vs[0] == 0; });
   hold_time.info.description = "Hold section length in seconds. Modulation takes place only at voice start.";
   auto& hold_tempo = result.params.emplace_back(make_param(
@@ -474,7 +474,7 @@ env_topo(int section, gui_position const& pos)
     make_param_gui_single(section_dahdr, gui_edit_type::list, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   hold_tempo.gui.submenu = make_timesig_submenu(hold_tempo.domain.timesigs);
-  hold_tempo.gui.bindings.enabled.bind_params({ param_on, param_sync }, [](auto const& vs) { return vs[0] != 0 && vs[1] != 0; });
+  hold_tempo.gui.bindings.enabled.bind_params({ param_on, param_sync, param_mode }, [](auto const& vs) { return vs[0] != 0 && vs[1] != 0 && vs[2] != mode_mseg; });
   hold_tempo.gui.bindings.visible.bind_params({ param_on, param_sync }, [](auto const& vs) { return vs[0] != 0 && vs[1] != 0; });
   hold_tempo.info.description = "Hold section length in bars.";
 
@@ -483,7 +483,7 @@ env_topo(int section, gui_position const& pos)
     make_param_dsp_accurate(param_automate::modulate), make_domain_log(0, 10, 0.03, 1, 3, "Sec"),
     make_param_gui_single(section_dahdr, gui_edit_type::knob, { 0, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  attack_time.gui.bindings.enabled.bind_params({ param_on, param_sync }, [](auto const& vs) { return vs[0] != 0 && vs[1] == 0; });
+  attack_time.gui.bindings.enabled.bind_params({ param_on, param_sync, param_mode }, [](auto const& vs) { return vs[0] != 0 && vs[1] == 0 && vs[2] != mode_mseg; });
   attack_time.gui.bindings.visible.bind_params({ param_sync }, [](auto const& vs) { return vs[0] == 0; });
   attack_time.info.description = "Attack section length in seconds. Modulation takes place only at voice start.";
   auto& attack_tempo = result.params.emplace_back(make_param(
@@ -492,7 +492,7 @@ env_topo(int section, gui_position const& pos)
     make_param_gui_single(section_dahdr, gui_edit_type::list, { 0, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   attack_tempo.gui.submenu = make_timesig_submenu(attack_tempo.domain.timesigs);
-  attack_tempo.gui.bindings.enabled.bind_params({ param_on, param_sync }, [](auto const& vs) { return vs[0] != 0 && vs[1] != 0; });
+  attack_tempo.gui.bindings.enabled.bind_params({ param_on, param_sync, param_mode }, [](auto const& vs) { return vs[0] != 0 && vs[1] != 0 && vs[2] != mode_mseg; });
   attack_tempo.gui.bindings.visible.bind_params({ param_on, param_sync }, [](auto const& vs) { return vs[0] != 0 && vs[1] != 0; });
   attack_tempo.info.description = "Attack section length in bars.";
   auto& attack_slope = result.params.emplace_back(make_param(
@@ -508,7 +508,7 @@ env_topo(int section, gui_position const& pos)
     make_param_dsp_accurate(param_automate::modulate), make_domain_log(0, 10, 0.1, 1, 3, "Sec"),
     make_param_gui_single(section_dahdr, gui_edit_type::knob, { 0, 4 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  decay_time.gui.bindings.enabled.bind_params({ param_on, param_sync }, [](auto const& vs) { return vs[0] != 0 && vs[1] == 0; });
+  decay_time.gui.bindings.enabled.bind_params({ param_on, param_sync, param_mode }, [](auto const& vs) { return vs[0] != 0 && vs[1] == 0 && vs[2] != mode_mseg; });
   decay_time.gui.bindings.visible.bind_params({ param_sync }, [](auto const& vs) { return vs[0] == 0; });
   decay_time.info.description = "Decay section length in seconds. Modulation takes place only at voice start.";
   auto& decay_tempo = result.params.emplace_back(make_param(
@@ -517,7 +517,7 @@ env_topo(int section, gui_position const& pos)
     make_param_gui_single(section_dahdr, gui_edit_type::list, { 0, 4 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   decay_tempo.gui.submenu = make_timesig_submenu(decay_tempo.domain.timesigs);
-  decay_tempo.gui.bindings.enabled.bind_params({ param_on, param_sync }, [](auto const& vs) { return vs[0] != 0 && vs[1] != 0; });
+  decay_tempo.gui.bindings.enabled.bind_params({ param_on, param_sync, param_mode }, [](auto const& vs) { return vs[0] != 0 && vs[1] != 0 && vs[2] != mode_mseg; });
   decay_tempo.gui.bindings.visible.bind_params({ param_on, param_sync }, [](auto const& vs) { return vs[0] != 0 && vs[1] != 0; });
   decay_tempo.info.description = "Decay section length in bars.";
   auto& decay_slope = result.params.emplace_back(make_param(
@@ -533,7 +533,7 @@ env_topo(int section, gui_position const& pos)
     make_param_dsp_accurate(param_automate::modulate), make_domain_log(0, 10, 0.2, 1, 3, "Sec"),
     make_param_gui_single(section_dahdr, gui_edit_type::knob, { 0, 6 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  release_time.gui.bindings.enabled.bind_params({ param_on, param_sync }, [](auto const& vs) { return vs[0] != 0 && vs[1] == 0; });
+  release_time.gui.bindings.enabled.bind_params({ param_on, param_sync, param_mode }, [](auto const& vs) { return vs[0] != 0 && vs[1] == 0 && vs[2] != mode_mseg; });
   release_time.gui.bindings.visible.bind_params({ param_sync }, [](auto const& vs) { return vs[0] == 0; });
   release_time.info.description = "Release section length in seconds. Modulation takes place only at voice start.";
   auto& release_tempo = result.params.emplace_back(make_param(
@@ -542,7 +542,7 @@ env_topo(int section, gui_position const& pos)
     make_param_gui_single(section_dahdr, gui_edit_type::list, { 0, 6 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   release_tempo.gui.submenu = make_timesig_submenu(release_tempo.domain.timesigs);
-  release_tempo.gui.bindings.enabled.bind_params({ param_on, param_sync }, [](auto const& vs) { return vs[0] != 0 && vs[1] != 0; });
+  release_tempo.gui.bindings.enabled.bind_params({ param_on, param_sync, param_mode }, [](auto const& vs) { return vs[0] != 0 && vs[1] != 0 && vs[2] != mode_mseg; });
   release_tempo.gui.bindings.visible.bind_params({ param_on, param_sync }, [](auto const& vs) { return vs[0] != 0 && vs[1] != 0; });
   release_tempo.info.description = "Release section length in bars.";
   auto& release_slope = result.params.emplace_back(make_param(
