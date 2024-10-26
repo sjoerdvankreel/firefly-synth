@@ -563,7 +563,7 @@ env_topo(int section, gui_position const& pos)
   mseg_on.gui.bindings.enabled.bind_params({ param_on, param_mode }, [](auto const& vs) { return vs[0] != 0 && vs[1] == mode_mseg; });
   mseg_on.info.description = "TODO";
   mseg_on.domain.default_selector_ = [](int, int s) {
-    return s <= 1 ? "On" : "Off";
+    return s <= 2 ? "On" : "Off"; // todo remove 1
   };
   auto& mseg_x = result.params.emplace_back(make_param(
     make_topo_info("{CFF71CB5-C93F-44BE-AC42-1814D96B291A}", true, "MSEG X", "X", "X", param_mseg_x, mseg_max_seg_count - 1),
@@ -573,7 +573,8 @@ env_topo(int section, gui_position const& pos)
   mseg_x.info.description = "TODO";
   mseg_x.domain.default_selector_ = [](int, int s) {
     if (s == 0) return "0.25";
-    if (s == 1) return "0.5";
+    if (s == 1) return "0.5"; // todo remove
+    if (s == 2) return "0.75";
     return "0.0";
   };
   auto& mseg_y = result.params.emplace_back(make_param(
@@ -585,6 +586,7 @@ env_topo(int section, gui_position const& pos)
   mseg_y.domain.default_selector_ = [](int, int s) {
     if (s == 0) return "1.0";
     if (s == 1) return "0.5";
+    if (s == 2) return "0.5"; // todo remove
     return "0.0";
   };
   auto& mseg_slope = result.params.emplace_back(make_param(
@@ -594,9 +596,10 @@ env_topo(int section, gui_position const& pos)
   mseg_slope.gui.bindings.enabled.bind_params({ param_on, param_mode }, [](auto const& vs) { return vs[0] != 0 && vs[1] == mode_mseg; });
   mseg_slope.info.description = "TODO";
   mseg_slope.domain.default_selector_ = [](int, int s) {
-    if (s == 0) return "0.0";
+    if (s == 0) return "0.1";
     if (s == 1) return "0.5";
-    if (s == 2) return "1.0";
+    if (s == 2) return "0.5"; // todo remove this one
+    if (s == 3) return "0.9";
     return "0.0";
   };
   return result;
