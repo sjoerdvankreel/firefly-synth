@@ -107,6 +107,9 @@ mseg_editor::paint(Graphics& g)
   g.setColour(_lnf->colors().mseg_background);
   g.fillRect(getLocalBounds());
 
+  g.setColour(_lnf->colors().mseg_grid);
+  g.drawRect(getLocalBounds(), 1.0f);
+
   // start to point 0
   g.setColour(_lnf->colors().mseg_line);
   make_slope_path(x, y, w, h, { 0.0f, start_y }, points[0], 0, sloped_path);
