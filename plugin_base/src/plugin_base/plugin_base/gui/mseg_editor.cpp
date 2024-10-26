@@ -43,7 +43,7 @@ mseg_editor::sloped_y_pos(
   float slope = state->get_plain_at(_module_index, _module_slot, _slope_param, index).real();
   if (slope < 0.5f) slope = 0.01f + 0.99f * slope * 2.0f;
   else slope = 1.0f + 99.0f * (slope - 0.5f) * 2.0f;
-  return std::pow(pos, slope) * (y2 - y1); 
+  return y1 + std::pow(pos, slope) * (y2 - y1); 
 }
 
 void 
@@ -65,7 +65,7 @@ mseg_editor::make_slope_path(
   {
     float pos = j / (pixel_count - 1.0f);
     float x_this_pos_norm = x1_norm + pos * (x2_norm - x1_norm);
-    float y_this_pos_norm = y1_norm + sloped_y_pos(pos, slope_index, y1_norm, y2_norm);
+    float y_this_pos_norm = sloped_y_pos(pos, slope_index, y1_norm, y2_norm);
     float x_this_pos = x + w * x_this_pos_norm;
     float y_this_pos = y + h - h * y_this_pos_norm;
     path.lineTo(x_this_pos, y_this_pos);
