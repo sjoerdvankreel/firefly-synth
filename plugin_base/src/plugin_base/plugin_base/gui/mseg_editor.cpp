@@ -50,8 +50,8 @@ mseg_editor::make_slope_path(
   auto const state = _gui->automation_state();
   auto sloped_y = [this, &state](float pos, int index, float y1, float y2) {
     float slope = state->get_plain_at(_module_index, _module_slot, _slope_param, index).real();
-    if (slope < 0.5f) slope = 0.1f + 0.9f * slope * 2.0f;
-    else slope = 1.0f + 9.0f * (slope - 0.5f) * 2.0f;
+    if (slope < 0.5f) slope = 0.01f + 0.99f * slope * 2.0f;
+    else slope = 1.0f + 99.0f * (slope - 0.5f) * 2.0f;
     return std::pow(pos, slope) * (y2 - y1); 
   };
 
