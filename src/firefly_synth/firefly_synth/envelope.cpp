@@ -420,7 +420,7 @@ env_topo(int section, gui_position const& pos)
   sustain.gui.bindings.visible.bind_params({ param_on, param_mode, param_sync }, [](auto const& vs) { return vs[1] != mode_mseg; });
   sustain.info.description = "Sustain level. Modulation takes place only at voice start.";
   auto& mseg_time = result.params.emplace_back(make_param(
-    make_topo_info("{2A704A76-D1A9-4A99-850B-7CB55865B716}", true, "MSEG Length", "MSEG Length", "MSEG Length", param_mseg_length_time, 1),
+    make_topo_info("{2A704A76-D1A9-4A99-850B-7CB55865B716}", true, "MSEG Length", "Length", "MSEG Length", param_mseg_length_time, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_log(0, 30, 5, 5, 2, "Sec"),
     make_param_gui_single(section_trigger, gui_edit_type::hslider, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
@@ -428,8 +428,8 @@ env_topo(int section, gui_position const& pos)
   mseg_time.gui.bindings.visible.bind_params({ param_on, param_mode, param_sync }, [](auto const& vs) { return vs[1] == mode_mseg && vs[2] == 0; });
   mseg_time.info.description = "TODO";
   auto& mseg_sync = result.params.emplace_back(make_param(
-    make_topo_info("{CA478736-06B5-411F-9CCA-BE3D25C1E447}", true, "MSEG Tempo", "Tempo", "Tempo", param_mseg_length_sync, 1),
-    make_param_dsp_voice(param_automate::automate), make_domain_timesig_default(true, { 4, 1 }, { 0, 1 }),
+    make_topo_info("{CA478736-06B5-411F-9CCA-BE3D25C1E447}", true, "MSEG Tempo", "Tempo", "MSEG Tempo", param_mseg_length_sync, 1),
+    make_param_dsp_voice(param_automate::automate), make_domain_timesig_default(false, { 4, 1 }, { 0, 1 }),
     make_param_gui_single(section_trigger, gui_edit_type::list, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   mseg_sync.gui.submenu = make_timesig_submenu(mseg_sync.domain.timesigs);
