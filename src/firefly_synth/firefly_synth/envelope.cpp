@@ -416,8 +416,26 @@ env_topo(int section, gui_position const& pos)
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
     make_param_gui_single(section_trigger, gui_edit_type::hslider, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  sustain.gui.bindings.enabled.bind_params({ param_on, param_mode }, [](auto const& vs) { return vs[0] != 0 && vs[1] != mode_mseg; });
+  sustain.gui.bindings.enabled.bind_params({ param_on, param_mode, param_sync }, [](auto const& vs) { return vs[0] != 0 && vs[1] != mode_mseg; });
+  sustain.gui.bindings.visible.bind_params({ param_on, param_mode, param_sync }, [](auto const& vs) { return vs[1] != mode_mseg; });
   sustain.info.description = "Sustain level. Modulation takes place only at voice start.";
+  auto& mseg_time = result.params.emplace_back(make_param(
+    make_topo_info("{2A704A76-D1A9-4A99-850B-7CB55865B716}", true, "MSEG Length", "Length", "Length", param_mseg_length_time, 1),
+    make_param_dsp_voice(param_automate::automate), make_domain_log(0, 30, 5, 5, 2, "Sec"),
+    make_param_gui_single(section_trigger, gui_edit_type::hslider, { 1, 0 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
+  mseg_time.gui.bindings.enabled.bind_params({ param_on, param_mode, param_sync }, [](auto const& vs) { return vs[0] != 0 && vs[1] == mode_mseg && vs[2] == 0; });
+  mseg_time.gui.bindings.visible.bind_params({ param_on, param_mode, param_sync }, [](auto const& vs) { return vs[1] == mode_mseg && vs[2] == 0; });
+  mseg_time.info.description = "TODO";
+  auto& mseg_sync = result.params.emplace_back(make_param(
+    make_topo_info("{CA478736-06B5-411F-9CCA-BE3D25C1E447}", true, "MSEG Tempo", "Tempo", "Tempo", param_mseg_length_sync, 1),
+    make_param_dsp_voice(param_automate::automate), make_domain_timesig_default(true, { 4, 1 }, { 0, 1 }),
+    make_param_gui_single(section_trigger, gui_edit_type::list, { 1, 0 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
+  mseg_sync.gui.submenu = make_timesig_submenu(mseg_sync.domain.timesigs);
+  mseg_sync.gui.bindings.enabled.bind_params({ param_on, param_mode, param_sync }, [](auto const& vs) { return vs[0] != 0 && vs[1] == mode_mseg && vs[2] != 0; });
+  mseg_sync.gui.bindings.visible.bind_params({ param_on, param_mode, param_sync }, [](auto const& vs) { return vs[1] == mode_mseg && vs[2] != 0; });
+  mseg_sync.info.description = "TODO";
 
   auto& dahdr_section = result.sections.emplace_back(make_param_section(section_dahdr,
     make_topo_tag_basic("{96BDC7C2-7DF4-4CC5-88F9-2256975D70AC}", "DAHDR"),
@@ -547,13 +565,13 @@ env_topo(int section, gui_position const& pos)
       param_mseg_start_y, param_mseg_end_y, param_mseg_on, param_mseg_x, param_mseg_y, param_mseg_slope); };
   auto& mseg_start_y = result.params.emplace_back(make_param(
     make_topo_info("{BB1A9691-DA7D-460D-BDF3-7D99F272CD05}", true, "MSEG Start Y", "Start Y", "Start Y", param_mseg_start_y, 1),
-    make_param_dsp_voice(param_automate::none), make_domain_linear(0.0, 1.0, 0.0, 2, ""),
+    make_param_dsp_voice(param_automate::automate), make_domain_linear(0.0, 1.0, 0.0, 2, ""),
     make_param_gui_none(section_mseg)));
   mseg_start_y.gui.bindings.enabled.bind_params({ param_on, param_mode }, [](auto const& vs) { return vs[0] != 0 && vs[1] == mode_mseg; });
   mseg_start_y.info.description = "TODO";
   auto& mseg_end_y = result.params.emplace_back(make_param(
     make_topo_info("{D4114CFC-B2E6-4927-9011-E49BF68995C4}", true, "MSEG End Y", "End Y", "End Y", param_mseg_end_y, 1),
-    make_param_dsp_voice(param_automate::none), make_domain_linear(0.0, 1.0, 0.0, 2, ""),
+    make_param_dsp_voice(param_automate::automate), make_domain_linear(0.0, 1.0, 0.0, 2, ""),
     make_param_gui_none(section_mseg)));
   mseg_end_y.gui.bindings.enabled.bind_params({ param_on, param_mode }, [](auto const& vs) { return vs[0] != 0 && vs[1] == mode_mseg; });
   mseg_end_y.info.description = "TODO";
@@ -568,7 +586,7 @@ env_topo(int section, gui_position const& pos)
   };
   auto& mseg_x = result.params.emplace_back(make_param(
     make_topo_info("{CFF71CB5-C93F-44BE-AC42-1814D96B291A}", true, "MSEG X", "X", "X", param_mseg_x, mseg_max_seg_count - 1),
-    make_param_dsp_voice(param_automate::none), make_domain_linear(0.0, 1.0, 0.0, 2, ""),
+    make_param_dsp_voice(param_automate::automate), make_domain_linear(0.0, 1.0, 0.0, 2, ""),
     make_param_gui_none(section_mseg)));
   mseg_x.gui.bindings.enabled.bind_params({ param_on, param_mode }, [](auto const& vs) { return vs[0] != 0 && vs[1] == mode_mseg; });
   mseg_x.info.description = "TODO";
@@ -580,7 +598,7 @@ env_topo(int section, gui_position const& pos)
   };
   auto& mseg_y = result.params.emplace_back(make_param(
     make_topo_info("{60F4F483-F5C9-486D-8D6B-E4098B08FDC4}", true, "MSEG Y", "Y", "Y", param_mseg_y, mseg_max_seg_count - 1),
-    make_param_dsp_voice(param_automate::none), make_domain_linear(0.0, 1.0, 0.0, 2, ""),
+    make_param_dsp_voice(param_automate::automate), make_domain_linear(0.0, 1.0, 0.0, 2, ""),
     make_param_gui_none(section_mseg)));
   mseg_y.gui.bindings.enabled.bind_params({ param_on, param_mode }, [](auto const& vs) { return vs[0] != 0 && vs[1] == mode_mseg; });
   mseg_y.info.description = "TODO";
@@ -592,7 +610,7 @@ env_topo(int section, gui_position const& pos)
   };
   auto& mseg_slope = result.params.emplace_back(make_param(
     make_topo_info("{E2373194-3C31-4AC9-A5CC-857F90AC0D16}", true, "MSEG Slope", "Slope", "Slope", param_mseg_slope, mseg_max_seg_count),
-    make_param_dsp_voice(param_automate::none), make_domain_linear(0.0, 1.0, 0.0, 2, ""),
+    make_param_dsp_voice(param_automate::automate), make_domain_linear(0.0, 1.0, 0.0, 2, ""),
     make_param_gui_none(section_mseg)));
   mseg_slope.gui.bindings.enabled.bind_params({ param_on, param_mode }, [](auto const& vs) { return vs[0] != 0 && vs[1] == mode_mseg; });
   mseg_slope.info.description = "TODO";
