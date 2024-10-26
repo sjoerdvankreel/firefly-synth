@@ -421,7 +421,7 @@ env_topo(int section, gui_position const& pos)
   sustain.info.description = "Sustain level. Modulation takes place only at voice start.";
   auto& mseg_time = result.params.emplace_back(make_param(
     make_topo_info("{2A704A76-D1A9-4A99-850B-7CB55865B716}", true, "MSEG Length", "Length", "Length", param_mseg_length_time, 1),
-    make_param_dsp_voice(param_automate::automate), make_domain_log(0, 30, 5, 5, 2, "Sec"),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_log(0, 30, 5, 5, 2, "Sec"),
     make_param_gui_single(section_trigger, gui_edit_type::hslider, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   mseg_time.gui.bindings.enabled.bind_params({ param_on, param_mode, param_sync }, [](auto const& vs) { return vs[0] != 0 && vs[1] == mode_mseg && vs[2] == 0; });
