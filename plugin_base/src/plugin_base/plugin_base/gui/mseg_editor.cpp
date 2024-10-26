@@ -20,18 +20,25 @@ _on_param(on_param), _x_param(x_param), _y_param(y_param), _slope_param(slope_pa
   (void)param_list;
 
   auto is_linear_unit = [](param_topo const& pt) { 
-    return pt.domain.type == domain_type::linear && pt.domain.min == 0 && pt.domain.max == 0; };
+    return pt.domain.type == domain_type::linear && pt.domain.min == 0 && pt.domain.max == 1; };
   assert(is_linear_unit(param_list[start_y_param]));
   assert(is_linear_unit(param_list[end_y_param]));
   assert(is_linear_unit(param_list[x_param]));
   assert(is_linear_unit(param_list[y_param]));
   assert(is_linear_unit(param_list[slope_param]));
+  assert(param_list[start_y_param].info.slot_count == 1);
+  assert(param_list[end_y_param].info.slot_count == 1);
+  assert(param_list[x_param].info.slot_count >= 1);
+  assert(param_list[y_param].info.slot_count == param_list[x_param].info.slot_count);
+  assert(param_list[on_param].info.slot_count == param_list[x_param].info.slot_count);
+  assert(param_list[slope_param].info.slot_count == param_list[x_param].info.slot_count + 1);
 }
 
 void
 mseg_editor::paint(Graphics& g)
 {
   float const point_size = 8.0f;
+  float const line_thickness = 2.0f;
   float const padding = point_size * 0.5f + 2;
 
   float const x = padding;
@@ -75,8 +82,13 @@ mseg_editor::paint(Graphics& g)
     float y1_norm = points[i - 1].second;
     float y2_norm = points[i].second;
 
-    int const pixel_count = (int)std::ceil((x2_norm - x1_norm) * w) * 2;
-    auto sloped_y = [](float pos, float y1, float y2) { return pos * (y2 - y1); };
+    int const pixel_count = (int)std::ceil((x2_norm - x1_norm) * w);
+    auto sloped_y = [this, i, &state](float pos, float y1, float y2) {
+      float slope = state->get_plain_at(_module_index, _module_slot, _slope_param, i - 1).real();
+      if (slope < 0.5f) slope = 0.1f + 0.9f * slope * 2.0f;
+      else slope = 1.0f + 9.0f * (slope - 0.5f) * 2.0f;
+      return std::pow(pos, slope) * (y2 - y1);
+    };
     p.startNewSubPath(x + w * x1_norm, y + h - h * y1_norm);
     for (int j = 1; j < pixel_count; j++)
     {
@@ -89,7 +101,7 @@ mseg_editor::paint(Graphics& g)
     }    
 
     g.setColour(_lnf->colors().mseg_line);
-    g.fillPath(p); 
+    g.strokePath(p, PathStrokeType(line_thickness)); 
     g.setColour(_lnf->colors().mseg_point);
     g.drawEllipse(x + w * points[i].first - point_size / 2, y + h - h * points[i].second - point_size / 2, point_size, point_size, 1);
   }

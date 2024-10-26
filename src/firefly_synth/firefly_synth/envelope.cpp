@@ -594,9 +594,9 @@ env_topo(int section, gui_position const& pos)
   mseg_slope.gui.bindings.enabled.bind_params({ param_on, param_mode }, [](auto const& vs) { return vs[0] != 0 && vs[1] == mode_mseg; });
   mseg_slope.info.description = "TODO";
   mseg_slope.domain.default_selector_ = [](int, int s) {
-    if (s == 0) return "0.3";
-    if (s == 1) return "0.7";
-    if (s == 2) return "0.25";
+    if (s == 0) return "0.0";
+    if (s == 1) return "0.5";
+    if (s == 2) return "1.0";
     return "0.0";
   };
   return result;
@@ -736,6 +736,9 @@ env_engine::init_slope_exp_splt(double slope, double split_pos, double& exp, dou
 void
 env_engine::process_internal(plugin_block& block, cv_cv_matrix_mixdown const* modulation)
 {
+  // TEMP TODO REMOVEME
+  if (block.state.own_block_automation[param_mode][0].step() == mode_mseg) return;
+  
   // allow custom data for graphs
   if (modulation == nullptr)
   {
