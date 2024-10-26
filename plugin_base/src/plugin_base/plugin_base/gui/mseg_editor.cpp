@@ -161,6 +161,12 @@ mseg_editor::paint(Graphics& g)
   g.fillEllipse(x + w - 1 - point_size / 2, y + h - end_y * h - point_size / 2, point_size, point_size);
   g.setColour(_lnf->colors().mseg_point);
   g.drawEllipse(x + w - 1 - point_size / 2, y + h - end_y * h - point_size / 2, point_size, point_size, 1);
+
+  // slope marker
+  slope_marker_x = x + (points[points.size() - 1].first + 1.0f) * 0.5f * w - point_size / 2;
+  slope_marker_y = y + h - h * sloped_y_pos(0.5f, points.size(), points[points.size() - 1].second, end_y) - point_size / 2;
+  g.setColour(_lnf->colors().mseg_point);
+  g.drawEllipse(slope_marker_x, slope_marker_y, point_size, point_size, 1.0f);
 }
 
 }
