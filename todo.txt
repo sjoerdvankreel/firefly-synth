@@ -27,6 +27,13 @@ autobuilds:
 * ask paul
 * integrate https://github.com/surge-synthesizer/monique-monosynth/blob/main/.github/workflows/build-pr.yml
 
+mseg:
+draw the grid
+deal with the dsp
+deal with retrigger etc
+select env length time/bars
+do the actual editing
+
 make a patch cleanup button
 update the routing graph for arp
 
