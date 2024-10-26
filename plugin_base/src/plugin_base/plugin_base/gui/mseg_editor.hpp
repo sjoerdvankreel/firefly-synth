@@ -37,7 +37,7 @@ public juce::Component
     float x, float y, float w, float h,
     std::pair<float, float> const& from, 
     std::pair<float, float> const& to, 
-    int slope_index, juce::Path& path) const;
+    int slope_index, bool closed, juce::Path& path) const;
 
 public:
   void paint(juce::Graphics& g) override;

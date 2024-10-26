@@ -51,7 +51,7 @@ mseg_editor::make_slope_path(
   float x, float y, float w, float h, 
   std::pair<float, float> const& from, 
   std::pair<float, float> const& to, 
-  int slope_index, Path& path) const
+  int slope_index, bool closed, Path& path) const
 {
   path = {};
   float x1_norm = from.first;
@@ -60,7 +60,13 @@ mseg_editor::make_slope_path(
   float y2_norm = to.second;
 
   int const pixel_count = (int)std::ceil((x2_norm - x1_norm) * w);
-  path.startNewSubPath(x + w * x1_norm, y + h - h * y1_norm);
+  if (closed)
+  {
+    path.startNewSubPath(x + w * x1_norm, y + h);
+    path.lineTo(x + w * x1_norm, y + h - h * y1_norm);
+  }
+  else
+    path.startNewSubPath(x + w * x1_norm, y + h - h * y1_norm);
   for (int j = 1; j < pixel_count; j++)
   {
     float pos = j / (pixel_count - 1.0f);
@@ -69,6 +75,12 @@ mseg_editor::make_slope_path(
     float x_this_pos = x + w * x_this_pos_norm;
     float y_this_pos = y + h - h * y_this_pos_norm;
     path.lineTo(x_this_pos, y_this_pos);
+
+    if (closed && j == pixel_count - 1)
+    {
+      path.lineTo(x_this_pos, y + h);
+      path.closeSubPath();
+    }
   }
 }
 
@@ -112,8 +124,11 @@ mseg_editor::paint(Graphics& g)
 
   // start to point 0
   g.setColour(_lnf->colors().mseg_line);
-  make_slope_path(x, y, w, h, { 0.0f, start_y }, points[0], 0, sloped_path);
+  make_slope_path(x, y, w, h, { 0.0f, start_y }, points[0], 0, false, sloped_path);
   g.strokePath(sloped_path, PathStrokeType(line_thickness));
+  g.setColour(_lnf->colors().mseg_area);
+  make_slope_path(x, y, w, h, { 0.0f, start_y }, points[0], 0, true, sloped_path);
+  g.fillPath(sloped_path);
 
   // point marker
   g.setColour(_lnf->colors().mseg_point.withAlpha(0.5f));
@@ -137,9 +152,12 @@ mseg_editor::paint(Graphics& g)
   for (int i = 1; i < points.size(); i++)
   {
     // point n - 1 to n
-    make_slope_path(x, y, w, h, points[i - 1], points[i], i, sloped_path);
     g.setColour(_lnf->colors().mseg_line);
+    make_slope_path(x, y, w, h, points[i - 1], points[i], i, false, sloped_path);
     g.strokePath(sloped_path, PathStrokeType(line_thickness));
+    g.setColour(_lnf->colors().mseg_area);
+    make_slope_path(x, y, w, h, points[i - 1], points[i], i, true, sloped_path);
+    g.fillPath(sloped_path);
 
     // point marker
     g.setColour(_lnf->colors().mseg_point.withAlpha(0.5f));
@@ -156,8 +174,11 @@ mseg_editor::paint(Graphics& g)
 
   // last to end point
   g.setColour(_lnf->colors().mseg_line);
-  make_slope_path(x, y, w, h, points[points.size() - 1], { 1.0f, end_y }, points.size(), sloped_path);
+  make_slope_path(x, y, w, h, points[points.size() - 1], { 1.0f, end_y }, points.size(), false, sloped_path);
   g.strokePath(sloped_path, PathStrokeType(line_thickness));
+  g.setColour(_lnf->colors().mseg_area);
+  make_slope_path(x, y, w, h, points[points.size() - 1], { 1.0f, end_y }, points.size(), true, sloped_path);
+  g.fillPath(sloped_path);
 
   // point marker
   g.setColour(_lnf->colors().mseg_point.withAlpha(0.5f));
