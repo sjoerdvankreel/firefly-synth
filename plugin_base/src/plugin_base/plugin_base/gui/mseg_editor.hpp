@@ -29,6 +29,10 @@ public juce::Component
   int const _y_param;
   int const _slope_param;
 
+  float sloped_y_pos(
+    float pos, int index, 
+    float y1, float y2) const;
+
   void make_slope_path(
     float x, float y, float w, float h,
     std::pair<float, float> const& from, 
