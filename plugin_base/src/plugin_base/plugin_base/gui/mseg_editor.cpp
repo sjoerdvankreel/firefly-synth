@@ -175,6 +175,22 @@ mseg_editor::mouseMove(MouseEvent const& event)
       _hovered_start_y = false;
       setMouseCursor(MouseCursor::DraggingHandCursor);
     }
+
+    if (i > 0)
+    {
+      float this_slope_x1 = x + (_sorted_points[i - 1].first + _sorted_points[i].first) * 0.5f * w - point_size / 2;
+      float this_slope_y1 = y + h - h * sloped_y_pos(0.5f, i, _sorted_points[i - 1].second, _sorted_points[i].second) - point_size / 2;
+      float this_slope_x2 = this_slope_x1 + point_size;
+      float this_slope_y2 = this_slope_y1 + point_size;
+      if (this_slope_x1 <= event.x && event.x <= this_slope_x2 && this_slope_y1 <= event.y && event.y <= this_slope_y2)
+      {
+        _hovered_point = -1;
+        _hovered_slope = i;
+        _hovered_end_y = false;
+        _hovered_start_y = false;
+        setMouseCursor(MouseCursor::DraggingHandCursor);
+      }
+    }
   }
 
   float end_y_x1 = x + w - 1 - point_size / 2;
@@ -272,7 +288,7 @@ mseg_editor::paint(Graphics& g)
     // slope marker
     slope_marker_x = x + (_sorted_points[i - 1].first + _sorted_points[i].first) * 0.5f * w - point_size / 2;
     slope_marker_y = y + h - h * sloped_y_pos(0.5f, i, _sorted_points[i - 1].second, _sorted_points[i].second) - point_size / 2;
-    g.setColour(_lnf->colors().mseg_point);
+    g.setColour(_hovered_slope == i ? _lnf->colors().mseg_line : _lnf->colors().mseg_point);
     g.drawEllipse(slope_marker_x, slope_marker_y, point_size, point_size, 1.0f);
   }
 
