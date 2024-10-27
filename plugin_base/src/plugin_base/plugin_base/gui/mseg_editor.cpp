@@ -141,8 +141,27 @@ mseg_editor::mouseMove(MouseEvent const& event)
   float start_y_y2 = start_y_y1 + point_size;
   if (start_y_x1 <= event.x && event.x <= start_y_x2 && start_y_y1 <= event.y && event.y <= start_y_y2)
   {
+    _hovered_point = -1;
+    _hovered_slope = -1;
+    _hovered_end_y = false;
     _hovered_start_y = true;
     setMouseCursor(MouseCursor::DraggingHandCursor);
+  }
+
+  for (int i = 0; i < _sorted_points.size(); i++)
+  {
+    float this_point_x1 = x + w * _sorted_points[i].first - point_size / 2;
+    float this_point_y1 = y + h - h * _sorted_points[i].second - point_size / 2;
+    float this_point_x2 = this_point_x1 + point_size;
+    float this_point_y2 = this_point_y1 + point_size;
+    if (this_point_x1 <= event.x && event.x <= this_point_x2 && this_point_y1 <= event.y && event.y <= this_point_y2)
+    {
+      _hovered_point = i;
+      _hovered_slope = -1;
+      _hovered_end_y = false;
+      _hovered_start_y = false;
+      setMouseCursor(MouseCursor::DraggingHandCursor);
+    }
   }
 
   float end_y_x1 = x + w - 1 - point_size / 2;
@@ -151,7 +170,10 @@ mseg_editor::mouseMove(MouseEvent const& event)
   float end_y_y2 = end_y_y1 + point_size;
   if (end_y_x1 <= event.x && event.x <= end_y_x2 && end_y_y1 <= event.y && event.y <= end_y_y2)
   {
+    _hovered_point = -1;
+    _hovered_slope = -1;
     _hovered_end_y = true;
+    _hovered_start_y = false;
     setMouseCursor(MouseCursor::DraggingHandCursor);
   }
 
@@ -229,9 +251,9 @@ mseg_editor::paint(Graphics& g)
     g.fillPath(sloped_path);
 
     // point marker
-    g.setColour(_lnf->colors().mseg_point.withAlpha(0.5f));
+    g.setColour(_hovered_point == i ? _lnf->colors().mseg_line.withAlpha(0.5f) : _lnf->colors().mseg_point.withAlpha(0.5f));
     g.fillEllipse(x + w * _sorted_points[i].first - point_size / 2, y + h - h * _sorted_points[i].second - point_size / 2, point_size, point_size);
-    g.setColour(_lnf->colors().mseg_point);
+    g.setColour(_hovered_point == i ? _lnf->colors().mseg_line : _lnf->colors().mseg_point.withAlpha(0.5f));
     g.drawEllipse(x + w * _sorted_points[i].first - point_size / 2, y + h - h * _sorted_points[i].second - point_size / 2, point_size, point_size, 1);
 
     // slope marker
