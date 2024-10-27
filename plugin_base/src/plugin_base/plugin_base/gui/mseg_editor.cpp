@@ -4,6 +4,7 @@ using namespace juce;
 
 namespace plugin_base {
 
+static char const* mseg_magic = "MSEG_MAGIC";
 static float const point_size = 8.0f;
 static float const line_thickness = 2.0f;
 static float const padding = point_size * 0.5f + 2;
@@ -146,7 +147,34 @@ mseg_editor::mouseDrag(MouseEvent const& event)
     g.fillEllipse(0.0f, 0.0f, point_size, point_size);
   }
   Point<int> offset(image.getWidth() / 2 + point_size, image.getHeight() / 2 + point_size);
-  startDragging(String(""), this, ScaledImage(image), false, &offset);
+  startDragging(String(mseg_magic), this, ScaledImage(image), false, &offset);
+}
+
+bool
+mseg_editor::isInterestedInDragSource(juce::DragAndDropTarget::SourceDetails const& details)
+{
+  return details.description == String(mseg_magic);
+}
+
+void 
+mseg_editor::itemDropped(juce::DragAndDropTarget::SourceDetails const& details)
+{
+
+}
+
+void 
+mseg_editor::itemDragMove(juce::DragAndDropTarget::SourceDetails const& details)
+{
+  //float const x = padding;
+  float const y = padding;
+  //float const w = getLocalBounds().getWidth() - padding * 2.0f;
+  float const h = getLocalBounds().getHeight() - padding * 2.0f;
+
+  if (!_dragging_start_y) return;
+  auto const state = _gui->automation_state();
+  float start_y_amt = 1.0f - std::clamp((details.localPosition.y - y) / h, 0.0f, 1.0f);
+  state->set_raw_at(_module_index, _module_slot, _start_y_param, 0, start_y_amt);
+  repaint();
 }
 
 void

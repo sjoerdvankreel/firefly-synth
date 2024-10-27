@@ -16,7 +16,8 @@ namespace plugin_base {
 // optional 1 sustain point in case of envelope
 class mseg_editor:
 public juce::Component,
-public juce::DragAndDropContainer
+public juce::DragAndDropContainer,
+public juce::DragAndDropTarget
 {
   plugin_gui* const _gui;
   lnf* const _lnf;
@@ -61,6 +62,10 @@ public:
   void mouseDown(juce::MouseEvent const& event) override;
   void mouseDrag(juce::MouseEvent const& event) override;
   void mouseMove(juce::MouseEvent const& event) override;
+
+  void itemDropped(juce::DragAndDropTarget::SourceDetails const& details) override;
+  void itemDragMove(juce::DragAndDropTarget::SourceDetails const& details) override;
+  bool isInterestedInDragSource(juce::DragAndDropTarget::SourceDetails const& details) override;
 
   mseg_editor(
     plugin_gui* gui, lnf* lnf, int module_index, int module_slot, 
