@@ -15,7 +15,8 @@ namespace plugin_base {
 // counted slope parameters with count = N + 1
 // optional 1 sustain point in case of envelope
 class mseg_editor:
-public juce::Component
+public juce::Component,
+public juce::DragAndDropContainer
 {
   plugin_gui* const _gui;
   lnf* const _lnf;

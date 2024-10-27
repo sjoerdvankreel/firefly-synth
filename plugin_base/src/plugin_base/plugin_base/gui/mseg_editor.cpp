@@ -130,6 +130,7 @@ mseg_editor::mouseDown(MouseEvent const& event)
 void
 mseg_editor::mouseDrag(MouseEvent const& event)
 {
+  startDragging(String("FOO"), this, ScaledImage{});
 }
 
 void
