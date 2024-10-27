@@ -1007,7 +1007,6 @@ void env_engine::process_mono_type_sync_trigger_mode(plugin_block& block, cv_cv_
       {
         float from_x, to_x;
         if (i == 0) { from_x = 0.0; to_x = _mseg_segments[i].to_x; }
-        else if (i == _mseg_segments.size() - 1) { from_x = _mseg_segments[i].to_x; to_x = 1.0; }
         else { from_x = _mseg_segments[i - 1].to_x; to_x = _mseg_segments[i].to_x; }
         _mseg_y[i + 1] = _mseg_segments[i].to_y;
         _mseg_time[i] = (to_x - from_x) * mseg_time;
