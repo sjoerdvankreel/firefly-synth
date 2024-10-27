@@ -41,9 +41,12 @@ mseg_editor::sloped_y_pos(
 {
   auto const state = _gui->automation_state();
   float slope = state->get_plain_at(_module_index, _module_slot, _slope_param, index).real();
-  if (slope < 0.5f) slope = 0.01f + 0.99f * slope * 2.0f;
-  else slope = 1.0f + 99.0f * (slope - 0.5f) * 2.0f;
-  return y1 + std::pow(pos, slope) * (y2 - y1); 
+  double const slope_min = exp_slope_min;
+  double const slope_max = (1.0 - exp_slope_min);
+  double const slope_range = slope_max - slope_min;
+  double const slope_bounded = exp_slope_min + slope_range * slope;
+  double const exp = std::log(slope_bounded) / std::log(0.5);
+  return y1 + std::pow(pos, exp) * (y2 - y1); 
 }
 
 void 

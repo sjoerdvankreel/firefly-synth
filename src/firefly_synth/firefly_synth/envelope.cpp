@@ -163,8 +163,8 @@ private:
   bool _is_ffwd_run_for_graph = false;
   float _ffwd_target_total_pos = 0.0f;
 
-  static inline double const slope_min = 0.0001;
-  static inline double const slope_max = 0.9999;
+  static inline double const slope_min = exp_slope_min;
+  static inline double const slope_max = (1.0 - exp_slope_min);
   static inline double const slope_range = slope_max - slope_min;
 
   void init_slope_exp(double slope, double& exp);
