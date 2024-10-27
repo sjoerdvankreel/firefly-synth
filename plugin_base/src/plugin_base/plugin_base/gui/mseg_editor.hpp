@@ -63,6 +63,7 @@ public:
   void mouseDrag(juce::MouseEvent const& event) override;
   void mouseMove(juce::MouseEvent const& event) override;
 
+  void itemDragExit(const SourceDetails& details) override;
   void itemDropped(juce::DragAndDropTarget::SourceDetails const& details) override;
   void itemDragMove(juce::DragAndDropTarget::SourceDetails const& details) override;
   bool isInterestedInDragSource(juce::DragAndDropTarget::SourceDetails const& details) override;

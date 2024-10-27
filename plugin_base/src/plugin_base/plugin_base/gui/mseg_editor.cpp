@@ -151,15 +151,32 @@ mseg_editor::mouseDrag(MouseEvent const& event)
 }
 
 bool
-mseg_editor::isInterestedInDragSource(juce::DragAndDropTarget::SourceDetails const& details)
+mseg_editor::isInterestedInDragSource(DragAndDropTarget::SourceDetails const& details)
 {
   return details.description == String(mseg_magic);
 }
 
-void 
-mseg_editor::itemDropped(juce::DragAndDropTarget::SourceDetails const& details)
+void
+mseg_editor::itemDragExit(DragAndDropTarget::SourceDetails const& details)
 {
+  itemDropped(details);
+}
 
+void
+mseg_editor::itemDropped(DragAndDropTarget::SourceDetails const& details)
+{
+  _hovered_point = -1;
+  _hovered_slope = -1;
+  _hovered_end_y = false;
+  _hovered_start_y = false;
+
+  _dragging_point = -1;
+  _dragging_slope = -1;
+  _dragging_end_y = false;
+  _dragging_start_y = false;
+
+  setMouseCursor(MouseCursor::ParentCursor);
+  repaint();
 }
 
 void 
@@ -169,12 +186,20 @@ mseg_editor::itemDragMove(juce::DragAndDropTarget::SourceDetails const& details)
   float const y = padding;
   //float const w = getLocalBounds().getWidth() - padding * 2.0f;
   float const h = getLocalBounds().getHeight() - padding * 2.0f;
-
-  if (!_dragging_start_y) return;
   auto const state = _gui->automation_state();
-  float start_y_amt = 1.0f - std::clamp((details.localPosition.y - y) / h, 0.0f, 1.0f);
-  state->set_raw_at(_module_index, _module_slot, _start_y_param, 0, start_y_amt);
-  repaint();
+
+  if (_dragging_start_y)
+  {
+    float start_y_amt = 1.0f - std::clamp((details.localPosition.y - y) / h, 0.0f, 1.0f);
+    state->set_raw_at(_module_index, _module_slot, _start_y_param, 0, start_y_amt);
+    repaint();
+  }
+  else if (_dragging_end_y)
+  {
+    float end_y_amt = 1.0f - std::clamp((details.localPosition.y - y) / h, 0.0f, 1.0f);
+    state->set_raw_at(_module_index, _module_slot, _end_y_param, 0, end_y_amt);
+    repaint();
+  }
 }
 
 void
