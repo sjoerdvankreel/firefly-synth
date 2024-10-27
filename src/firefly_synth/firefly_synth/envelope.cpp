@@ -1154,7 +1154,7 @@ void env_engine::process_mono_type_sync_trigger_mode(plugin_block& block, cv_cv_
       else
       {
         // TODO handle trigger modes
-        out = calc_slope(slope_pos, 0.0f, _mseg_exp[_mseg_stage]);
+        out = _mseg_y[_mseg_stage] + (_mseg_y[_mseg_stage + 1] - _mseg_y[_mseg_stage]) * calc_slope(slope_pos, 0.0f, _mseg_exp[_mseg_stage]);
         _current_level = out;
         _multitrig_level = out;
       }
