@@ -461,7 +461,7 @@ env_topo(int section, gui_position const& pos)
   mseg_time.info.description = "TODO";
   auto& mseg_sync = result.params.emplace_back(make_param(
     make_topo_info("{CA478736-06B5-411F-9CCA-BE3D25C1E447}", true, "MSEG Tempo", "Tempo", "MSEG Tempo", param_mseg_length_sync, 1),
-    make_param_dsp_voice(param_automate::automate), make_domain_timesig_default(false, { 4, 1 }, { 0, 1 }),
+    make_param_dsp_voice(param_automate::automate), make_domain_timesig_default(false, { 4, 1 }, { 1, 1 }),
     make_param_gui_single(section_trigger, gui_edit_type::list, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   mseg_sync.gui.submenu = make_timesig_submenu(mseg_sync.domain.timesigs);
@@ -983,22 +983,22 @@ void env_engine::process_mono_type_sync_trigger_mode(plugin_block& block, cv_cv_
       std::fill(&_mseg_y[0], &_mseg_y[0] + mseg_max_seg_count + 1, 0.0);
       std::fill(&_mseg_exp[0], &_mseg_exp[0] + mseg_max_seg_count, 0.0);
       std::fill(&_mseg_time[0], &_mseg_time[0] + mseg_max_seg_count, 0.0);
-      _mseg_y[0] = block.normalized_to_raw_fast<domain_type::linear>(module_env, param_mseg_start_y, (*(*modulation)[param_mseg_start_y][0])[block.start_frame]);
+      _mseg_y[0] = block.normalized_to_raw_fast<domain_type::identity>(module_env, param_mseg_start_y, (*(*modulation)[param_mseg_start_y][0])[block.start_frame]);
 
       _mseg_segments.clear();
       for (int i = 0; i < mseg_max_seg_count - 1; i++)
         if(block_auto[param_mseg_on][i].step() != 0)
         {
           mseg_segment seg;
-          seg.to_x = block.normalized_to_raw_fast<domain_type::linear>(module_env, param_mseg_x, (*(*modulation)[param_mseg_x][i])[block.start_frame]);
-          seg.to_y = block.normalized_to_raw_fast<domain_type::linear>(module_env, param_mseg_y, (*(*modulation)[param_mseg_y][i])[block.start_frame]);
-          seg.slope = block.normalized_to_raw_fast<domain_type::linear>(module_env, param_mseg_slope, (*(*modulation)[param_mseg_slope][i])[block.start_frame]);
+          seg.to_x = block.normalized_to_raw_fast<domain_type::identity>(module_env, param_mseg_x, (*(*modulation)[param_mseg_x][i])[block.start_frame]);
+          seg.to_y = block.normalized_to_raw_fast<domain_type::identity>(module_env, param_mseg_y, (*(*modulation)[param_mseg_y][i])[block.start_frame]);
+          seg.slope = block.normalized_to_raw_fast<domain_type::identity>(module_env, param_mseg_slope, (*(*modulation)[param_mseg_slope][i])[block.start_frame]);
           _mseg_segments.push_back(seg);
         }
       mseg_segment last_seg;
       last_seg.to_x = 1.0f;
-      last_seg.to_y = block.normalized_to_raw_fast<domain_type::linear>(module_env, param_mseg_end_y, (*(*modulation)[param_mseg_end_y][0])[block.start_frame]);
-      last_seg.slope = block.normalized_to_raw_fast<domain_type::linear>(module_env, param_mseg_slope, (*(*modulation)[param_mseg_slope][_mseg_segments.size()])[block.start_frame]);
+      last_seg.to_y = block.normalized_to_raw_fast<domain_type::identity>(module_env, param_mseg_end_y, (*(*modulation)[param_mseg_end_y][0])[block.start_frame]);
+      last_seg.slope = block.normalized_to_raw_fast<domain_type::identity>(module_env, param_mseg_slope, (*(*modulation)[param_mseg_slope][_mseg_segments.size()])[block.start_frame]);
       _mseg_segments.push_back(last_seg);
 
       std::sort(_mseg_segments.begin(), _mseg_segments.end(), [](auto const& l, auto const& r) { return l.to_x < r.to_x; });

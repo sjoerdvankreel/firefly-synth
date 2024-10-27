@@ -20,7 +20,7 @@ _on_param(on_param), _x_param(x_param), _y_param(y_param), _slope_param(slope_pa
   (void)param_list;
 
   auto is_linear_unit = [](param_topo const& pt) { 
-    return pt.domain.type == domain_type::linear && pt.domain.min == 0 && pt.domain.max == 1; };
+    return pt.domain.type == domain_type::identity && pt.domain.min == 0 && pt.domain.max == 1; };
   assert(is_linear_unit(param_list[start_y_param]));
   assert(is_linear_unit(param_list[end_y_param]));
   assert(is_linear_unit(param_list[x_param]));
