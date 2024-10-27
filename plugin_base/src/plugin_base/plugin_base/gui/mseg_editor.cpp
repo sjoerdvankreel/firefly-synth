@@ -109,7 +109,30 @@ mseg_editor::make_slope_path(
   }
 }
 
-void 
+void
+mseg_editor::mouseUp(MouseEvent const& event)
+{
+  _dragging_point = -1;
+  _dragging_slope = -1;
+  _dragging_end_y = false;
+  _dragging_start_y = false;
+}
+
+void
+mseg_editor::mouseDown(MouseEvent const& event)
+{
+  _dragging_point = _hovered_point;
+  _dragging_slope = _hovered_slope;
+  _dragging_end_y = _hovered_end_y;
+  _dragging_start_y = _hovered_start_y;
+}
+
+void
+mseg_editor::mouseDrag(MouseEvent const& event)
+{
+}
+
+void
 mseg_editor::mouseMove(MouseEvent const& event)
 {
   float const x = padding;

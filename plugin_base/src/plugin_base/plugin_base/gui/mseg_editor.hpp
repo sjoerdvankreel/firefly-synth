@@ -33,6 +33,12 @@ public juce::Component
   int _hovered_slope = -1;
   bool _hovered_end_y = false;
   bool _hovered_start_y = false;
+
+  int _dragging_point = -1;
+  int _dragging_slope = -1;
+  bool _dragging_end_y = false;
+  bool _dragging_start_y = false;
+
   std::vector<std::pair<float, float>> _sorted_points = {};
 
   void calc_sorted_points();
@@ -49,6 +55,10 @@ public juce::Component
 
 public:
   void paint(juce::Graphics& g) override;
+
+  void mouseUp(juce::MouseEvent const& event) override;
+  void mouseDown(juce::MouseEvent const& event) override;
+  void mouseDrag(juce::MouseEvent const& event) override;
   void mouseMove(juce::MouseEvent const& event) override;
 
   mseg_editor(
