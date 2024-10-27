@@ -637,7 +637,7 @@ env_topo(int section, gui_position const& pos)
   mseg_y.domain.default_selector_ = [](int, int s) {
     if (s == 0) return "100";
     if (s == 1) return "50";
-    if (s == 2) return "50"; // todo remove
+    if (s == 2) return "100"; // todo remove
     return "0.0";
   };
   auto& mseg_slope = result.params.emplace_back(make_param(
@@ -649,8 +649,8 @@ env_topo(int section, gui_position const& pos)
   mseg_slope.domain.default_selector_ = [](int, int s) {
     if (s == 0) return "10";
     if (s == 1) return "50";
-    if (s == 2) return "50"; // todo remove this one
-    if (s == 3) return "90";
+    if (s == 2) return "90"; // todo remove this one
+    if (s == 3) return "30";
     return "0.0";
   };
   return result;
