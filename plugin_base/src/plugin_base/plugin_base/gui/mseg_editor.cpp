@@ -157,12 +157,6 @@ mseg_editor::isInterestedInDragSource(DragAndDropTarget::SourceDetails const& de
 }
 
 void
-mseg_editor::itemDragExit(DragAndDropTarget::SourceDetails const& details)
-{
-  itemDropped(details);
-}
-
-void
 mseg_editor::itemDropped(DragAndDropTarget::SourceDetails const& details)
 {
   _hovered_point = -1;
@@ -193,12 +187,20 @@ mseg_editor::itemDragMove(juce::DragAndDropTarget::SourceDetails const& details)
     float start_y_amt = 1.0f - std::clamp((details.localPosition.y - y) / h, 0.0f, 1.0f);
     state->set_raw_at(_module_index, _module_slot, _start_y_param, 0, start_y_amt);
     repaint();
+    return;
   }
-  else if (_dragging_end_y)
+
+  if (_dragging_end_y)
   {
     float end_y_amt = 1.0f - std::clamp((details.localPosition.y - y) / h, 0.0f, 1.0f);
     state->set_raw_at(_module_index, _module_slot, _end_y_param, 0, end_y_amt);
     repaint();
+    return;
+  }
+
+  if (_dragging_point != -1)
+  {
+
   }
 }
 
