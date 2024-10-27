@@ -38,6 +38,7 @@ disable regular env stuff when mseg
 what can be modulated ?
 do sustain marker
 mseg as lfo
+see if we can paint the vcv matrices more often based on static stuff
 
 make a patch cleanup button
 update the routing graph for arp
