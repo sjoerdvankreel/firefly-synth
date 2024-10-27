@@ -182,25 +182,27 @@ mseg_editor::itemDragMove(juce::DragAndDropTarget::SourceDetails const& details)
   float const h = getLocalBounds().getHeight() - padding * 2.0f;
   auto const state = _gui->automation_state();
 
+  float drag_y_amt = 1.0f - std::clamp((details.localPosition.y - y) / h, 0.0f, 1.0f);;
+
   if (_dragging_start_y)
   {
-    float start_y_amt = 1.0f - std::clamp((details.localPosition.y - y) / h, 0.0f, 1.0f);
-    state->set_raw_at(_module_index, _module_slot, _start_y_param, 0, start_y_amt);
+    state->set_raw_at(_module_index, _module_slot, _start_y_param, 0, drag_y_amt);
     repaint();
     return;
   }
 
   if (_dragging_end_y)
   {
-    float end_y_amt = 1.0f - std::clamp((details.localPosition.y - y) / h, 0.0f, 1.0f);
-    state->set_raw_at(_module_index, _module_slot, _end_y_param, 0, end_y_amt);
+    state->set_raw_at(_module_index, _module_slot, _end_y_param, 0, drag_y_amt);
     repaint();
     return;
   }
 
   if (_dragging_point != -1)
   {
-
+    state->set_raw_at(_module_index, _module_slot, _y_param, _dragging_point, drag_y_amt);
+    repaint();
+    return;
   }
 }
 
