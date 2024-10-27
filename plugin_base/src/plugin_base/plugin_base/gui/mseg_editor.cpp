@@ -130,6 +130,7 @@ mseg_editor::mouseDown(MouseEvent const& event)
 void
 mseg_editor::mouseDrag(MouseEvent const& event)
 {
+  if (isDragAndDropActive()) return;
   Image image(Image::PixelFormat::ARGB, point_size, point_size, true);
   Graphics g(image);
   if (_dragging_slope != -1)
