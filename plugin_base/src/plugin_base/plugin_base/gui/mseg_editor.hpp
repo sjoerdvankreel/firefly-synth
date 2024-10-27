@@ -33,6 +33,9 @@ public juce::Component
   int _hovered_slope = -1;
   bool _hovered_end_y = false;
   bool _hovered_start_y = false;
+  std::vector<std::pair<float, float>> _sorted_points = {};
+
+  void calc_sorted_points();
 
   float sloped_y_pos(
     float pos, int index, 

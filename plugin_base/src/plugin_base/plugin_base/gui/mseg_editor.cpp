@@ -53,6 +53,24 @@ mseg_editor::sloped_y_pos(
   return y1 + std::pow(pos, exp) * (y2 - y1); 
 }
 
+void
+mseg_editor::calc_sorted_points()
+{
+  _sorted_points.clear();
+  auto const state = _gui->automation_state();
+  int max_point_count = state->desc().plugin->modules[_module_index].params[_on_param].info.slot_count;
+  for (int i = 0; i < max_point_count; i++)
+    if (state->get_plain_at(_module_index, _module_slot, _on_param, i).step() != 0)
+    {
+      float x_norm = state->get_plain_at(_module_index, _module_slot, _x_param, i).real();
+      float y_norm = state->get_plain_at(_module_index, _module_slot, _y_param, i).real();
+      _sorted_points.push_back({ x_norm, y_norm });
+    }
+
+  // dsp also must sort !
+  std::sort(_sorted_points.begin(), _sorted_points.end(), [](auto const& l, auto const& r) { return l.first < r.first; });
+}
+
 void 
 mseg_editor::make_slope_path(
   float x, float y, float w, float h, 
@@ -96,17 +114,12 @@ mseg_editor::mouseMove(MouseEvent const& event)
 {
   float const x = padding;
   float const y = padding;
-  // float const w = getLocalBounds().getWidth() - padding * 2.0f;
+  float const w = getLocalBounds().getWidth() - padding * 2.0f;
   float const h = getLocalBounds().getHeight() - padding * 2.0f;
 
   auto const state = _gui->automation_state();
-  // float end_y = state->get_plain_at(_module_index, _module_slot, _end_y_param, 0).real();
+  float end_y = state->get_plain_at(_module_index, _module_slot, _end_y_param, 0).real();
   float start_y = state->get_plain_at(_module_index, _module_slot, _start_y_param, 0).real();
-
-  float start_y_x1 = x - point_size / 2;
-  float start_y_y1 = y + h - start_y * h - point_size / 2;
-  float start_y_x2 = start_y_x1 + point_size;
-  float start_y_y2 = start_y_y1 + point_size;
 
   int prev_hovered_point = _hovered_point;
   int prev_hovered_slope = _hovered_slope;
@@ -118,11 +131,27 @@ mseg_editor::mouseMove(MouseEvent const& event)
   _hovered_end_y = false;
   _hovered_start_y = false;
   setMouseCursor(MouseCursor::ParentCursor);
+  calc_sorted_points();
 
   // todo this is bound to cause overlapping on near points ...
+
+  float start_y_x1 = x - point_size / 2;
+  float start_y_y1 = y + h - start_y * h - point_size / 2;
+  float start_y_x2 = start_y_x1 + point_size;
+  float start_y_y2 = start_y_y1 + point_size;
   if (start_y_x1 <= event.x && event.x <= start_y_x2 && start_y_y1 <= event.y && event.y <= start_y_y2)
   {
     _hovered_start_y = true;
+    setMouseCursor(MouseCursor::DraggingHandCursor);
+  }
+
+  float end_y_x1 = x + w - 1 - point_size / 2;
+  float end_y_y1 = y + h - end_y * h - point_size / 2;
+  float end_y_x2 = end_y_x1 + point_size;
+  float end_y_y2 = end_y_y1 + point_size;
+  if (end_y_x1 <= event.x && event.x <= end_y_x2 && end_y_y1 <= event.y && event.y <= end_y_y2)
+  {
+    _hovered_end_y = true;
     setMouseCursor(MouseCursor::DraggingHandCursor);
   }
 
@@ -148,18 +177,7 @@ mseg_editor::paint(Graphics& g)
   float end_y = state->get_plain_at(_module_index, _module_slot, _end_y_param, 0).real();
   float start_y = state->get_plain_at(_module_index, _module_slot, _start_y_param, 0).real();
 
-  std::vector<std::pair<float, float>> points = {};
-  int max_point_count = state->desc().plugin->modules[_module_index].params[_on_param].info.slot_count;
-  for(int i = 0; i < max_point_count; i++)
-    if (state->get_plain_at(_module_index, _module_slot, _on_param, i).step() != 0)
-    {
-      float x_norm = state->get_plain_at(_module_index, _module_slot, _x_param, i).real();
-      float y_norm = state->get_plain_at(_module_index, _module_slot, _y_param, i).real();
-      points.push_back({ x_norm, y_norm });
-    }
-
-  // dsp also needs to sort!
-  std::sort(points.begin(), points.end(), [](auto const& l, auto const& r) { return l.first < r.first; });
+  calc_sorted_points();
 
   // bg
   g.setColour(_lnf->colors().mseg_background);
@@ -175,10 +193,10 @@ mseg_editor::paint(Graphics& g)
 
   // start to point 0
   g.setColour(_lnf->colors().mseg_line);
-  make_slope_path(x, y, w, h, { 0.0f, start_y }, points[0], 0, false, sloped_path);
+  make_slope_path(x, y, w, h, { 0.0f, start_y }, _sorted_points[0], 0, false, sloped_path);
   g.strokePath(sloped_path, PathStrokeType(line_thickness));
   g.setColour(_lnf->colors().mseg_area);
-  make_slope_path(x, y, w, h, { 0.0f, start_y }, points[0], 0, true, sloped_path);
+  make_slope_path(x, y, w, h, { 0.0f, start_y }, _sorted_points[0], 0, true, sloped_path);
   g.fillPath(sloped_path);
 
   // point marker
@@ -189,57 +207,57 @@ mseg_editor::paint(Graphics& g)
 
   // point marker
   g.setColour(_lnf->colors().mseg_point.withAlpha(0.5f));
-  g.fillEllipse(x + w * points[0].first - point_size / 2, y + h - h * points[0].second - point_size / 2, point_size, point_size);
+  g.fillEllipse(x + w * _sorted_points[0].first - point_size / 2, y + h - h * _sorted_points[0].second - point_size / 2, point_size, point_size);
   g.setColour(_lnf->colors().mseg_point);
-  g.drawEllipse(x + w * points[0].first - point_size / 2, y + h - h * points[0].second - point_size / 2, point_size, point_size, 1);
+  g.drawEllipse(x + w * _sorted_points[0].first - point_size / 2, y + h - h * _sorted_points[0].second - point_size / 2, point_size, point_size, 1);
 
   // slope marker
-  slope_marker_x = x + (0.0f + points[0].first) * 0.5f * w - point_size / 2;
-  slope_marker_y = y + h - h * sloped_y_pos(0.5f, 0, start_y, points[0].second) - point_size / 2;
+  slope_marker_x = x + (0.0f + _sorted_points[0].first) * 0.5f * w - point_size / 2;
+  slope_marker_y = y + h - h * sloped_y_pos(0.5f, 0, start_y, _sorted_points[0].second) - point_size / 2;
   g.setColour(_lnf->colors().mseg_point);
   g.drawEllipse(slope_marker_x, slope_marker_y, point_size, point_size, 1.0f);
 
   // mid sections
-  for (int i = 1; i < points.size(); i++)
+  for (int i = 1; i < _sorted_points.size(); i++)
   {
     // point n - 1 to n
     g.setColour(_lnf->colors().mseg_line);
-    make_slope_path(x, y, w, h, points[i - 1], points[i], i, false, sloped_path);
+    make_slope_path(x, y, w, h, _sorted_points[i - 1], _sorted_points[i], i, false, sloped_path);
     g.strokePath(sloped_path, PathStrokeType(line_thickness));
     g.setColour(_lnf->colors().mseg_area);
-    make_slope_path(x, y, w, h, points[i - 1], points[i], i, true, sloped_path);
+    make_slope_path(x, y, w, h, _sorted_points[i - 1], _sorted_points[i], i, true, sloped_path);
     g.fillPath(sloped_path);
 
     // point marker
     g.setColour(_lnf->colors().mseg_point.withAlpha(0.5f));
-    g.fillEllipse(x + w * points[i].first - point_size / 2, y + h - h * points[i].second - point_size / 2, point_size, point_size);
+    g.fillEllipse(x + w * _sorted_points[i].first - point_size / 2, y + h - h * _sorted_points[i].second - point_size / 2, point_size, point_size);
     g.setColour(_lnf->colors().mseg_point);
-    g.drawEllipse(x + w * points[i].first - point_size / 2, y + h - h * points[i].second - point_size / 2, point_size, point_size, 1);
+    g.drawEllipse(x + w * _sorted_points[i].first - point_size / 2, y + h - h * _sorted_points[i].second - point_size / 2, point_size, point_size, 1);
 
     // slope marker
-    slope_marker_x = x + (points[i - 1].first + points[i].first) * 0.5f * w - point_size / 2;
-    slope_marker_y = y + h - h * sloped_y_pos(0.5f, i, points[i - 1].second, points[i].second) - point_size / 2;
+    slope_marker_x = x + (_sorted_points[i - 1].first + _sorted_points[i].first) * 0.5f * w - point_size / 2;
+    slope_marker_y = y + h - h * sloped_y_pos(0.5f, i, _sorted_points[i - 1].second, _sorted_points[i].second) - point_size / 2;
     g.setColour(_lnf->colors().mseg_point);
     g.drawEllipse(slope_marker_x, slope_marker_y, point_size, point_size, 1.0f);
   }
 
   // last to end point
   g.setColour(_lnf->colors().mseg_line);
-  make_slope_path(x, y, w, h, points[points.size() - 1], { 1.0f, end_y }, points.size(), false, sloped_path);
+  make_slope_path(x, y, w, h, _sorted_points[_sorted_points.size() - 1], { 1.0f, end_y }, _sorted_points.size(), false, sloped_path);
   g.strokePath(sloped_path, PathStrokeType(line_thickness));
   g.setColour(_lnf->colors().mseg_area);
-  make_slope_path(x, y, w, h, points[points.size() - 1], { 1.0f, end_y }, points.size(), true, sloped_path);
+  make_slope_path(x, y, w, h, _sorted_points[_sorted_points.size() - 1], { 1.0f, end_y }, _sorted_points.size(), true, sloped_path);
   g.fillPath(sloped_path);
 
   // point marker
-  g.setColour(_lnf->colors().mseg_point.withAlpha(0.5f));
+  g.setColour(_hovered_end_y ? _lnf->colors().mseg_line.withAlpha(0.5f) : _lnf->colors().mseg_point.withAlpha(0.5f));
   g.fillEllipse(x + w - 1 - point_size / 2, y + h - end_y * h - point_size / 2, point_size, point_size);
-  g.setColour(_lnf->colors().mseg_point);
+  g.setColour(_hovered_end_y ? _lnf->colors().mseg_line: _lnf->colors().mseg_point);
   g.drawEllipse(x + w - 1 - point_size / 2, y + h - end_y * h - point_size / 2, point_size, point_size, 1);
 
   // slope marker
-  slope_marker_x = x + (points[points.size() - 1].first + 1.0f) * 0.5f * w - point_size / 2;
-  slope_marker_y = y + h - h * sloped_y_pos(0.5f, points.size(), points[points.size() - 1].second, end_y) - point_size / 2;
+  slope_marker_x = x + (_sorted_points[_sorted_points.size() - 1].first + 1.0f) * 0.5f * w - point_size / 2;
+  slope_marker_y = y + h - h * sloped_y_pos(0.5f, _sorted_points.size(), _sorted_points[_sorted_points.size() - 1].second, end_y) - point_size / 2;
   g.setColour(_lnf->colors().mseg_point);
   g.drawEllipse(slope_marker_x, slope_marker_y, point_size, point_size, 1.0f);
 }
