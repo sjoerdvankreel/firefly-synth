@@ -148,6 +148,19 @@ mseg_editor::mouseMove(MouseEvent const& event)
     setMouseCursor(MouseCursor::DraggingHandCursor);
   }
 
+  float start_slope_x1 = x + (0.0f + _sorted_points[0].first) * 0.5f * w - point_size / 2;
+  float start_slope_y1 = y + h - h * sloped_y_pos(0.5f, 0, start_y, _sorted_points[0].second) - point_size / 2;
+  float start_slope_x2 = start_slope_x1 + point_size;
+  float start_slope_y2 = start_slope_y1 + point_size;
+  if (start_slope_x1 <= event.x && event.x <= start_slope_x2 && start_slope_y1 <= event.y && event.y <= start_slope_y2)
+  {
+    _hovered_point = -1;
+    _hovered_slope = 0;
+    _hovered_end_y = false;
+    _hovered_start_y = false;
+    setMouseCursor(MouseCursor::DraggingHandCursor);
+  }
+
   for (int i = 0; i < _sorted_points.size(); i++)
   {
     float this_point_x1 = x + w * _sorted_points[i].first - point_size / 2;
@@ -228,15 +241,15 @@ mseg_editor::paint(Graphics& g)
   g.drawEllipse(x - point_size / 2, y + h - start_y * h - point_size / 2, point_size, point_size, 1);
 
   // point marker
-  g.setColour(_lnf->colors().mseg_point.withAlpha(0.5f));
+  g.setColour(_hovered_point == 0 ? _lnf->colors().mseg_line.withAlpha(0.5f) : _lnf->colors().mseg_point.withAlpha(0.5f));
   g.fillEllipse(x + w * _sorted_points[0].first - point_size / 2, y + h - h * _sorted_points[0].second - point_size / 2, point_size, point_size);
-  g.setColour(_lnf->colors().mseg_point);
+  g.setColour(_hovered_point == 0 ? _lnf->colors().mseg_line : _lnf->colors().mseg_point);
   g.drawEllipse(x + w * _sorted_points[0].first - point_size / 2, y + h - h * _sorted_points[0].second - point_size / 2, point_size, point_size, 1);
 
   // slope marker
   slope_marker_x = x + (0.0f + _sorted_points[0].first) * 0.5f * w - point_size / 2;
   slope_marker_y = y + h - h * sloped_y_pos(0.5f, 0, start_y, _sorted_points[0].second) - point_size / 2;
-  g.setColour(_lnf->colors().mseg_point);
+  g.setColour(_hovered_slope == 0 ? _lnf->colors().mseg_line : _lnf->colors().mseg_point);
   g.drawEllipse(slope_marker_x, slope_marker_y, point_size, point_size, 1.0f);
 
   // mid sections
