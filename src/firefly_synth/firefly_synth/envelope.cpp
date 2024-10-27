@@ -887,11 +887,11 @@ void env_engine::process_mono_type_sync_trigger(plugin_block& block, cv_cv_matri
 {
   switch (block.state.own_block_automation[param_mode][0].step())
   {
+  case mode_mseg: process_mono_type_sync_trigger_mode<Monophonic, Type, Sync, Trigger, mode_mseg>(block, modulation, calc_slope_exp_uni); break;
   case mode_linear: process_mono_type_sync_trigger_mode<Monophonic, Type, Sync, Trigger, mode_linear>(block, modulation, calc_slope_lin); break;
   case mode_exp_bi: process_mono_type_sync_trigger_mode<Monophonic, Type, Sync, Trigger, mode_exp_bi>(block, modulation, calc_slope_exp_bi); break;
   case mode_exp_uni: process_mono_type_sync_trigger_mode<Monophonic, Type, Sync, Trigger, mode_exp_uni>(block, modulation, calc_slope_exp_uni); break;
   case mode_exp_split: process_mono_type_sync_trigger_mode<Monophonic, Type, Sync, Trigger, mode_exp_split>(block, modulation, calc_slope_exp_splt); break;
-  case mode_mseg: process_mono_type_sync_trigger_mode<Monophonic, Type, Sync, Trigger, mode_exp_uni>(block, modulation, calc_slope_exp_uni); break;
   default: assert(false); break;
   }
 }
