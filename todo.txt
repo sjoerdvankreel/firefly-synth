@@ -45,6 +45,7 @@ why does it keep on dirtying the graph state?
 better defaults
 do sustain/release on env + all the mono-mode stuff
 make the mseg editor react to automation (but NOT modulation!_)
+thoroughly test the case when we add/rem points! 
 
 make a patch cleanup button
 update the routing graph for arp
