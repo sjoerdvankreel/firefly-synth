@@ -42,6 +42,7 @@ see if we can paint the vcv matrices more often based on static stuff
 same for vlfo/venv ==> stick to last note or something ?
 vlfo smooth not paint good (prolly looking for note rand?)
 why does it keep on dirtying the graph state?
+better defaults
 
 make a patch cleanup button
 update the routing graph for arp
