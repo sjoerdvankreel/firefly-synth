@@ -113,28 +113,31 @@ public:
 
 private:
 
-  double _stn = 0;
-  double _hld = 0;
-  double _dcy = 0;
-  double _dly = 0;
-  double _att = 0;
-  double _rls = 0;
+  // dahdsr
+  double _dahdsr_stn = 0;
+  double _dahdsr_hld = 0;
+  double _dahdsr_dcy = 0;
+  double _dahdsr_dly = 0;
+  double _dahdsr_att = 0;
+  double _dahdsr_rls = 0;
   
-  env_stage _stage = {};
-  cv_filter _filter = {};
+  // dahdsr
+  double _dahdsr_slp_att_exp = 0;
+  double _dahdsr_slp_dcy_exp = 0;
+  double _dahdsr_slp_rls_exp = 0;
+  double _dahdsr_slp_att_splt_bnd = 0;
+  double _dahdsr_slp_dcy_splt_bnd = 0;
+  double _dahdsr_slp_rls_splt_bnd = 0;
 
+  // dahdsr
+  env_stage _dahdsr_stage = {};
+
+  // shared
+  cv_filter _filter = {};
   double _stage_pos = 0;
   double _total_pos = 0;
   double _current_level = 0;
   double _multitrig_level = 0;
-
-  double _slp_att_exp = 0;
-  double _slp_dcy_exp = 0;
-  double _slp_rls_exp = 0;
-  double _slp_att_splt_bnd = 0;
-  double _slp_dcy_splt_bnd = 0;
-  double _slp_rls_splt_bnd = 0;
-
   bool _voice_initialized = false;
 
   // graphing
@@ -652,8 +655,8 @@ env_engine::reset_audio(
   _total_pos = 0;
   _current_level = 0;
   _multitrig_level = 0;
-  _stage = env_stage::delay;
   _voice_initialized = false;
+  _dahdsr_stage = env_stage::delay;
 
   auto const& block_auto = block->state.own_block_automation;
   float filter = block_auto[param_filter][0].real();
@@ -770,11 +773,11 @@ env_engine::process_internal(plugin_block& block, cv_cv_matrix_mixdown const* mo
 
   auto const& block_auto = block.state.own_block_automation;
   bool on = block_auto[param_on][0].step() != 0;
-  if (_stage == env_stage::end || (!on && block.module_slot != 0))
+  if (_dahdsr_stage == env_stage::end || (!on && block.module_slot != 0))
   {
     block.state.own_cv[0][0].fill(block.start_frame, block.end_frame, 0.0f);
     // CAUTION: microseconds
-    if(_stage == env_stage::end && !block.graph)
+    if(_dahdsr_stage == env_stage::end && !block.graph)
       block.push_modulation_output(modulation_output::make_mod_output_custom_state_int(
         block.voice->state.slot,
         block.module_desc_.info.global,
@@ -808,9 +811,9 @@ env_engine::process_internal(plugin_block& block, cv_cv_matrix_mixdown const* mo
       _multitrig_level));
 
   // drop the mod indicators when we ended
-  if (_stage == env_stage::end) return;
+  if (_dahdsr_stage == env_stage::end) return;
   float flt = block.state.own_block_automation[param_filter][0].real() / 1000.0f;
-  float normalized_pos = std::clamp(_total_pos / (_dly + _att + _hld + _dcy + _rls + flt), 0.0, 1.0);
+  float normalized_pos = std::clamp(_total_pos / (_dahdsr_dly + _dahdsr_att + _dahdsr_hld + _dahdsr_dcy + _dahdsr_rls + flt), 0.0, 1.0);
   block.push_modulation_output(modulation_output::make_mod_output_cv_state(
     block.voice->state.slot,
     block.module_desc_.info.global,
@@ -878,21 +881,21 @@ void env_engine::process_mono_type_sync_trigger_mode(plugin_block& block, cv_cv_
 
     // These are not really continuous (we only pick them up at voice start)
     // but we fake it this way so they can participate in modulation.
-    _stn = (*(*modulation)[param_sustain][0])[block.start_frame];
-    _hld = block.normalized_to_raw_fast<domain_type::log>(module_env, param_hold_time, (*(*modulation)[param_hold_time][0])[block.start_frame]);
-    _dcy = block.normalized_to_raw_fast<domain_type::log>(module_env, param_decay_time, (*(*modulation)[param_decay_time][0])[block.start_frame]);
-    _dly = block.normalized_to_raw_fast<domain_type::log>(module_env, param_delay_time, (*(*modulation)[param_delay_time][0])[block.start_frame]);
-    _att = block.normalized_to_raw_fast<domain_type::log>(module_env, param_attack_time, (*(*modulation)[param_attack_time][0])[block.start_frame]);
-    _rls = block.normalized_to_raw_fast<domain_type::log>(module_env, param_release_time, (*(*modulation)[param_release_time][0])[block.start_frame]);
+    _dahdsr_stn = (*(*modulation)[param_sustain][0])[block.start_frame];
+    _dahdsr_hld = block.normalized_to_raw_fast<domain_type::log>(module_env, param_hold_time, (*(*modulation)[param_hold_time][0])[block.start_frame]);
+    _dahdsr_dcy = block.normalized_to_raw_fast<domain_type::log>(module_env, param_decay_time, (*(*modulation)[param_decay_time][0])[block.start_frame]);
+    _dahdsr_dly = block.normalized_to_raw_fast<domain_type::log>(module_env, param_delay_time, (*(*modulation)[param_delay_time][0])[block.start_frame]);
+    _dahdsr_att = block.normalized_to_raw_fast<domain_type::log>(module_env, param_attack_time, (*(*modulation)[param_attack_time][0])[block.start_frame]);
+    _dahdsr_rls = block.normalized_to_raw_fast<domain_type::log>(module_env, param_release_time, (*(*modulation)[param_release_time][0])[block.start_frame]);
 
     if constexpr (Sync)
     {
       auto const& params = block.plugin_desc_.plugin->modules[module_env].params;
-      _hld = timesig_to_time(block.host.bpm, params[param_hold_tempo].domain.timesigs[block_auto[param_hold_tempo][0].step()]);
-      _dcy = timesig_to_time(block.host.bpm, params[param_decay_tempo].domain.timesigs[block_auto[param_decay_tempo][0].step()]);
-      _dly = timesig_to_time(block.host.bpm, params[param_delay_tempo].domain.timesigs[block_auto[param_delay_tempo][0].step()]);
-      _att = timesig_to_time(block.host.bpm, params[param_attack_tempo].domain.timesigs[block_auto[param_attack_tempo][0].step()]);
-      _rls = timesig_to_time(block.host.bpm, params[param_release_tempo].domain.timesigs[block_auto[param_release_tempo][0].step()]);
+      _dahdsr_hld = timesig_to_time(block.host.bpm, params[param_hold_tempo].domain.timesigs[block_auto[param_hold_tempo][0].step()]);
+      _dahdsr_dcy = timesig_to_time(block.host.bpm, params[param_decay_tempo].domain.timesigs[block_auto[param_decay_tempo][0].step()]);
+      _dahdsr_dly = timesig_to_time(block.host.bpm, params[param_delay_tempo].domain.timesigs[block_auto[param_delay_tempo][0].step()]);
+      _dahdsr_att = timesig_to_time(block.host.bpm, params[param_attack_tempo].domain.timesigs[block_auto[param_attack_tempo][0].step()]);
+      _dahdsr_rls = timesig_to_time(block.host.bpm, params[param_release_tempo].domain.timesigs[block_auto[param_release_tempo][0].step()]);
     }
 
     // global unison - be sure not to scale envelope length to 0%
@@ -902,11 +905,11 @@ void env_engine::process_mono_type_sync_trigger_mode(plugin_block& block, cv_cv_
       float glob_uni_env_dtn = block.state.all_block_automation[module_voice_in][0][voice_in_param_uni_env_dtn][0].real();
       float voice_pos = unipolar_to_bipolar((float)block.voice->state.sub_voice_index / (block.voice->state.sub_voice_count - 1.0f));
       float scale_length = 1 + (voice_pos * glob_uni_env_dtn * max_scale);
-      _hld *= scale_length;
-      _dcy *= scale_length;
-      _dly *= scale_length;
-      _att *= scale_length;
-      _rls *= scale_length;
+      _dahdsr_hld *= scale_length;
+      _dahdsr_dcy *= scale_length;
+      _dahdsr_dly *= scale_length;
+      _dahdsr_att *= scale_length;
+      _dahdsr_rls *= scale_length;
     }
 
     if constexpr (is_dahdsr_exp_slope(Mode))
@@ -919,15 +922,15 @@ void env_engine::process_mono_type_sync_trigger_mode(plugin_block& block, cv_cv_
 
       if constexpr(Mode == mode_exp_uni || Mode == mode_exp_bi)
       {
-        init_slope_exp(ds, _slp_dcy_exp);
-        init_slope_exp(rs, _slp_rls_exp);
-        init_slope_exp(as, _slp_att_exp);
+        init_slope_exp(ds, _dahdsr_slp_dcy_exp);
+        init_slope_exp(rs, _dahdsr_slp_rls_exp);
+        init_slope_exp(as, _dahdsr_slp_att_exp);
       }
       else if constexpr (Mode == mode_exp_split)
       {
-        init_slope_exp_splt(ds, ds, _slp_dcy_exp, _slp_dcy_splt_bnd);
-        init_slope_exp_splt(rs, rs, _slp_rls_exp, _slp_rls_splt_bnd);
-        init_slope_exp_splt(as, 1 - as, _slp_att_exp, _slp_att_splt_bnd);
+        init_slope_exp_splt(ds, ds, _dahdsr_slp_dcy_exp, _dahdsr_slp_dcy_splt_bnd);
+        init_slope_exp_splt(rs, rs, _dahdsr_slp_rls_exp, _dahdsr_slp_rls_splt_bnd);
+        init_slope_exp_splt(as, 1 - as, _dahdsr_slp_att_exp, _dahdsr_slp_att_splt_bnd);
       }
       else 
         assert(false);
@@ -936,7 +939,7 @@ void env_engine::process_mono_type_sync_trigger_mode(plugin_block& block, cv_cv_
 
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
-    if (_stage == env_stage::end)
+    if (_dahdsr_stage == env_stage::end)
     {
       _current_level = 0;
       _multitrig_level = 0;
@@ -945,7 +948,7 @@ void env_engine::process_mono_type_sync_trigger_mode(plugin_block& block, cv_cv_
     }
 
     // need some time for the filter to fade out otherwise we'll pop on fast releases
-    if (_stage == env_stage::filter)
+    if (_dahdsr_stage == env_stage::filter)
     {
       _current_level = 0;
       _multitrig_level = 0;
@@ -960,7 +963,7 @@ void env_engine::process_mono_type_sync_trigger_mode(plugin_block& block, cv_cv_
       block.state.own_cv[0][0][f] = level;
       if (level < 1e-5)
       {
-        _stage = env_stage::end;
+        _dahdsr_stage = env_stage::end;
         block.voice->finished |= block.module_slot == 0;
       }
       continue;
@@ -977,11 +980,11 @@ void env_engine::process_mono_type_sync_trigger_mode(plugin_block& block, cv_cv_
       {
         if(block.state.mono_note_stream[f].event_type == mono_note_stream_event::on)
         {
-          if(_stage < env_stage::release)
+          if(_dahdsr_stage < env_stage::release)
           {
             _stage_pos = 0;
             _total_pos = 0;
-            _stage = env_stage::delay;
+            _dahdsr_stage = env_stage::delay;
             if constexpr (Trigger == trigger_retrig)
             {
               _current_level = 0;
@@ -998,28 +1001,28 @@ void env_engine::process_mono_type_sync_trigger_mode(plugin_block& block, cv_cv_
     }
 
     if (block.voice->state.release_frame == f && 
-      (Type == type_sustain || (Type == type_release && _stage != env_stage::release)))
+      (Type == type_sustain || (Type == type_release && _dahdsr_stage != env_stage::release)))
     {
       _stage_pos = 0;
-      _stage = env_stage::release;
+      _dahdsr_stage = env_stage::release;
     }
 
-    if (_stage == env_stage::sustain && Type == type_sustain)
+    if (_dahdsr_stage == env_stage::sustain && Type == type_sustain)
     {
-      _current_level = _stn;
-      _multitrig_level = _stn;
-      block.state.own_cv[0][0][f] = _filter.next(_stn);
+      _current_level = _dahdsr_stn;
+      _multitrig_level = _dahdsr_stn;
+      block.state.own_cv[0][0][f] = _filter.next(_dahdsr_stn);
       continue;
     }
 
     double stage_seconds = 0;
-    switch (_stage)
+    switch (_dahdsr_stage)
     {
-    case env_stage::hold: stage_seconds = _hld; break;
-    case env_stage::decay: stage_seconds = _dcy; break;
-    case env_stage::delay: stage_seconds = _dly; break;
-    case env_stage::attack: stage_seconds = _att; break;
-    case env_stage::release: stage_seconds = _rls; break;
+    case env_stage::hold: stage_seconds = _dahdsr_hld; break;
+    case env_stage::decay: stage_seconds = _dahdsr_dcy; break;
+    case env_stage::delay: stage_seconds = _dahdsr_dly; break;
+    case env_stage::attack: stage_seconds = _dahdsr_att; break;
+    case env_stage::release: stage_seconds = _dahdsr_rls; break;
     default: assert(false); break;
     }
 
@@ -1027,7 +1030,7 @@ void env_engine::process_mono_type_sync_trigger_mode(plugin_block& block, cv_cv_
     _stage_pos = std::min(_stage_pos, stage_seconds);
     double slope_pos = _stage_pos / stage_seconds;
     if (stage_seconds == 0) out = _current_level;
-    else switch (_stage)
+    else switch (_dahdsr_stage)
     {
     case env_stage::delay: 
       if constexpr(Trigger == trigger_multi)
@@ -1037,13 +1040,13 @@ void env_engine::process_mono_type_sync_trigger_mode(plugin_block& block, cv_cv_
       break;
     case env_stage::attack: 
       if constexpr (Trigger == trigger_multi)
-        out = _current_level = _multitrig_level + (1 - _multitrig_level) * calc_slope(slope_pos, _slp_att_splt_bnd, _slp_att_exp);
+        out = _current_level = _multitrig_level + (1 - _multitrig_level) * calc_slope(slope_pos, _dahdsr_slp_att_splt_bnd, _dahdsr_slp_att_exp);
       else
-        _current_level = _multitrig_level = out = calc_slope(slope_pos, _slp_att_splt_bnd, _slp_att_exp); 
+        _current_level = _multitrig_level = out = calc_slope(slope_pos, _dahdsr_slp_att_splt_bnd, _dahdsr_slp_att_exp);
       break;
     case env_stage::hold: _current_level = _multitrig_level = out = 1; break;
-    case env_stage::release: out = _current_level * (1 - calc_slope(slope_pos, _slp_rls_splt_bnd, _slp_rls_exp)); break;
-    case env_stage::decay: _current_level = _multitrig_level = out = _stn + (1 - _stn) * (1 - calc_slope(slope_pos, _slp_dcy_splt_bnd, _slp_dcy_exp)); break;
+    case env_stage::release: out = _current_level * (1 - calc_slope(slope_pos, _dahdsr_slp_rls_splt_bnd, _dahdsr_slp_rls_exp)); break;
+    case env_stage::decay: _current_level = _multitrig_level = out = _dahdsr_stn + (1 - _dahdsr_stn) * (1 - calc_slope(slope_pos, _dahdsr_slp_dcy_splt_bnd, _dahdsr_slp_dcy_exp)); break;
     default: assert(false); stage_seconds = 0; break;
     }
 
@@ -1061,13 +1064,13 @@ void env_engine::process_mono_type_sync_trigger_mode(plugin_block& block, cv_cv_
     if (_stage_pos < stage_seconds) continue;
 
     _stage_pos = 0;
-    switch (_stage)
+    switch (_dahdsr_stage)
     {
-    case env_stage::hold: _stage = env_stage::decay; break;
-    case env_stage::attack: _stage = env_stage::hold; break;
-    case env_stage::delay: _stage = env_stage::attack; break;
-    case env_stage::release: _stage = env_stage::filter; break;
-    case env_stage::decay: _stage = Type == type_sustain ? env_stage::sustain : env_stage::release; break;
+    case env_stage::hold: _dahdsr_stage = env_stage::decay; break;
+    case env_stage::attack: _dahdsr_stage = env_stage::hold; break;
+    case env_stage::delay: _dahdsr_stage = env_stage::attack; break;
+    case env_stage::release: _dahdsr_stage = env_stage::filter; break;
+    case env_stage::decay: _dahdsr_stage = Type == type_sustain ? env_stage::sustain : env_stage::release; break;
     default: assert(false); break;
     }
   }
