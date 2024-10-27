@@ -4,6 +4,10 @@ using namespace juce;
 
 namespace plugin_base {
 
+static float const point_size = 8.0f;
+static float const line_thickness = 2.0f;
+static float const padding = point_size * 0.5f + 2;
+  
 mseg_editor::
 mseg_editor(
   plugin_gui* gui, lnf* lnf, int module_index, int module_slot, 
@@ -87,13 +91,51 @@ mseg_editor::make_slope_path(
   }
 }
 
+void 
+mseg_editor::mouseMove(MouseEvent const& event)
+{
+  float const x = padding;
+  float const y = padding;
+  // float const w = getLocalBounds().getWidth() - padding * 2.0f;
+  float const h = getLocalBounds().getHeight() - padding * 2.0f;
+
+  auto const state = _gui->automation_state();
+  // float end_y = state->get_plain_at(_module_index, _module_slot, _end_y_param, 0).real();
+  float start_y = state->get_plain_at(_module_index, _module_slot, _start_y_param, 0).real();
+
+  float start_y_x1 = x - point_size / 2;
+  float start_y_y1 = y + h - start_y * h - point_size / 2;
+  float start_y_x2 = start_y_x1 + point_size;
+  float start_y_y2 = start_y_y1 + point_size;
+
+  int prev_hovered_point = _hovered_point;
+  int prev_hovered_slope = _hovered_slope;
+  bool prev_hovered_end_y = _hovered_end_y;
+  bool prev_hovered_start_y = _hovered_start_y;
+
+  _hovered_point = -1;
+  _hovered_slope = -1;
+  _hovered_end_y = false;
+  _hovered_start_y = false;
+  setMouseCursor(MouseCursor::ParentCursor);
+
+  // todo this is bound to cause overlapping on near points ...
+  if (start_y_x1 <= event.x && event.x <= start_y_x2 && start_y_y1 <= event.y && event.y <= start_y_y2)
+  {
+    _hovered_start_y = true;
+    setMouseCursor(MouseCursor::DraggingHandCursor);
+  }
+
+  if (_hovered_point != prev_hovered_point || _hovered_slope != prev_hovered_slope || 
+    _hovered_start_y != prev_hovered_start_y || _hovered_end_y != prev_hovered_end_y)
+  {
+    repaint();
+  }
+}
+
 void
 mseg_editor::paint(Graphics& g)
 {
-  float const point_size = 8.0f;
-  float const line_thickness = 2.0f;
-  float const padding = point_size * 0.5f + 2;
-
   float const x = padding;
   float const y = padding;
   float const w = getLocalBounds().getWidth() - padding * 2.0f;
@@ -140,9 +182,9 @@ mseg_editor::paint(Graphics& g)
   g.fillPath(sloped_path);
 
   // point marker
-  g.setColour(_lnf->colors().mseg_point.withAlpha(0.5f));
+  g.setColour(_hovered_start_y ? _lnf->colors().mseg_line.withAlpha(0.5f) : _lnf->colors().mseg_point.withAlpha(0.5f));
   g.fillEllipse(x - point_size / 2, y + h - start_y * h - point_size / 2, point_size, point_size);
-  g.setColour(_lnf->colors().mseg_point);
+  g.setColour(_hovered_start_y ? _lnf->colors().mseg_line : _lnf->colors().mseg_point);
   g.drawEllipse(x - point_size / 2, y + h - start_y * h - point_size / 2, point_size, point_size, 1);
 
   // point marker

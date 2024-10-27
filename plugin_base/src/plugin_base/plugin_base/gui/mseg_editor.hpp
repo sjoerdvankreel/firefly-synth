@@ -29,6 +29,11 @@ public juce::Component
   int const _y_param;
   int const _slope_param;
 
+  int _hovered_point = -1;
+  int _hovered_slope = -1;
+  bool _hovered_end_y = false;
+  bool _hovered_start_y = false;
+
   float sloped_y_pos(
     float pos, int index, 
     float y1, float y2) const;
@@ -41,6 +46,8 @@ public juce::Component
 
 public:
   void paint(juce::Graphics& g) override;
+  void mouseMove(juce::MouseEvent const& event) override;
+
   mseg_editor(
     plugin_gui* gui, lnf* lnf, int module_index, int module_slot, 
     int start_y_param, int end_y_param, int on_param, int x_param, int y_param, int slope_param);
