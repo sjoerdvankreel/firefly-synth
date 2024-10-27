@@ -130,7 +130,22 @@ mseg_editor::mouseDown(MouseEvent const& event)
 void
 mseg_editor::mouseDrag(MouseEvent const& event)
 {
-  startDragging(String("FOO"), this, ScaledImage{});
+  Image image(Image::PixelFormat::ARGB, point_size, point_size, true);
+  Graphics g(image);
+  if (_dragging_slope != -1)
+  {
+    g.setColour(_lnf->colors().mseg_line);
+    g.drawEllipse(0.0f, 0.0f, point_size, point_size, 1.0f);
+  }
+  else
+  {
+    g.setColour(_lnf->colors().mseg_line);
+    g.drawEllipse(0.0f, 0.0f, point_size, point_size, 1.0f);
+    g.setColour(_lnf->colors().mseg_line.withAlpha(0.5f));
+    g.fillEllipse(0.0f, 0.0f, point_size, point_size);
+  }
+  Point<int> offset(image.getWidth() / 2 + point_size, image.getHeight() / 2 + point_size);
+  startDragging(String(""), this, ScaledImage(image), false, &offset);
 }
 
 void
