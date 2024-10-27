@@ -145,6 +145,7 @@ private:
   // from 0 to seg_count + 2, with the last 2 ones being the filter stage and end marker stage
   int _mseg_stage = 0;
   int _mseg_seg_count = 0;
+  double _mseg_total_time = 0;
   std::vector<mseg_segment> _mseg_segments = {};
   std::array<double, mseg_max_seg_count> _mseg_exp = {};
   std::array<double, mseg_max_seg_count> _mseg_time = {};
@@ -841,7 +842,9 @@ env_engine::process_internal(plugin_block& block, cv_cv_matrix_mixdown const* mo
   // drop the mod indicators when we ended
   if ((!is_mseg && _dahdsr_stage == env_stage::end) || (is_mseg && _mseg_stage == _mseg_seg_count + mseg_stage_end)) return;
   float flt = block.state.own_block_automation[param_filter][0].real() / 1000.0f;
-  float normalized_pos = std::clamp(_total_pos / (_dahdsr_dly + _dahdsr_att + _dahdsr_hld + _dahdsr_dcy + _dahdsr_rls + flt), 0.0, 1.0);
+  double dahdsr_total_time = _dahdsr_dly + _dahdsr_att + _dahdsr_hld + _dahdsr_dcy + _dahdsr_rls + flt;
+  double total_time = is_mseg ? _mseg_total_time + flt : dahdsr_total_time;
+  float normalized_pos = std::clamp(_total_pos / total_time, 0.0, 1.0);
   block.push_modulation_output(modulation_output::make_mod_output_cv_state(
     block.voice->state.slot,
     block.module_desc_.info.global,
@@ -972,10 +975,10 @@ void env_engine::process_mono_type_sync_trigger_mode(plugin_block& block, cv_cv_
     }
     else
     {
-      double mseg_time = block.normalized_to_raw_fast<domain_type::log>(module_env, param_mseg_length_time, (*(*modulation)[param_mseg_length_time][0])[block.start_frame]);
+      _mseg_total_time = block.normalized_to_raw_fast<domain_type::log>(module_env, param_mseg_length_time, (*(*modulation)[param_mseg_length_time][0])[block.start_frame]);
       if constexpr (Sync)
-        mseg_time = timesig_to_time(block.host.bpm, params[param_mseg_length_sync].domain.timesigs[block_auto[param_mseg_length_sync][0].step()]);
-      mseg_time *= scale_length;
+        _mseg_total_time = timesig_to_time(block.host.bpm, params[param_mseg_length_sync].domain.timesigs[block_auto[param_mseg_length_sync][0].step()]);
+      _mseg_total_time *= scale_length;
 
       // figure out active segments and sort by x
       _mseg_stage = 0;
@@ -1009,7 +1012,7 @@ void env_engine::process_mono_type_sync_trigger_mode(plugin_block& block, cv_cv_
         if (i == 0) { from_x = 0.0; to_x = _mseg_segments[i].to_x; }
         else { from_x = _mseg_segments[i - 1].to_x; to_x = _mseg_segments[i].to_x; }
         _mseg_y[i + 1] = _mseg_segments[i].to_y;
-        _mseg_time[i] = (to_x - from_x) * mseg_time;
+        _mseg_time[i] = (to_x - from_x) * _mseg_total_time;
 
         float ms = _mseg_segments[i].slope;
         init_slope_exp(ms, _mseg_exp[i]);
