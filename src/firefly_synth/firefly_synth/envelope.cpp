@@ -132,6 +132,12 @@ private:
   // dahdsr
   env_stage _dahdsr_stage = {};
 
+  // mseg
+  int _mseg_stage = 0;
+  int _mseg_seg_count = 0;
+  double _mseg_slope[mseg_max_seg_count];
+  double _mseg_time[mseg_max_seg_count + 1];
+
   // shared
   cv_filter _filter = {};
   double _stage_pos = 0;
@@ -169,11 +175,20 @@ init_default(plugin_state& state)
 { state.set_text_at(module_env, 1, param_on, 0, "On"); }
 
 void
-env_plot_length_seconds(plugin_state const& state, int slot, float& dly, float& att, float& hld, float& dcy, float& rls, float& flt)
+env_plot_length_seconds(plugin_state const& state, int slot, float& dly, float& att, float& hld, float& dcy, float& rls, bool& is_mseg, float& mseg, float& flt)
 {
   float const bpm = 120;
+  dly = att = hld = dcy = rls = mseg = flt = 0.0f;
   bool sync = state.get_plain_at(module_env, slot, param_sync, 0).step() != 0;
+  is_mseg = state.get_plain_at(module_env, slot, param_mode, 0).step() == mode_mseg;
+
   flt = state.get_plain_at(module_env, slot, param_filter, 0).real() / 1000.0f;
+  if (is_mseg)
+  {
+    mseg = sync_or_time_from_state(state, bpm, sync, module_env, slot, param_mseg_length_time, param_mseg_length_sync);
+    return;
+  }
+
   hld = sync_or_time_from_state(state, bpm, sync, module_env, slot, param_hold_time, param_hold_tempo);
   dly = sync_or_time_from_state(state, bpm, sync, module_env, slot, param_delay_time, param_delay_tempo);
   dcy = sync_or_time_from_state(state, bpm, sync, module_env, slot, param_decay_time, param_decay_tempo);
@@ -205,20 +220,22 @@ render_graph(
   if (state.get_plain_at(module_env, mapping.module_slot, param_on, 0).step() == 0) 
     return graph_data(graph_data_type::off, { state.desc().plugin->modules[mapping.module_index].info.tag.menu_display_name });
 
-  float dly, att, hld, dcy, rls, flt;
-  env_plot_length_seconds(state, mapping.module_slot, dly, att, hld, dcy, rls, flt);
+  bool is_mseg;
+  float dly, att, hld, dcy, rls, mseg, flt;
+  env_plot_length_seconds(state, mapping.module_slot, dly, att, hld, dcy, rls, is_mseg, mseg, flt);
   float dahd = dly + att + hld + dcy;
   float dahdrf = dahd + rls + flt;
-
-  if(dahdrf < 1e-5) return graph_data({}, false, {"0 Sec"});
+  float msegf = mseg + flt;
+  float total_length = is_mseg ? msegf : dahdrf;
+  if(total_length < 1e-5) return graph_data({}, false, {"0 Sec"});
   
-  std::string partition = float_to_string(dahdrf, 2) + " Sec";
+  std::string partition = float_to_string(total_length, 2) + " Sec";
   bool sync = state.get_plain_at(module_env, mapping.module_slot, param_sync, 0).step() != 0;
-  if(sync) partition = float_to_string(dahdrf / timesig_to_time(120, { 1, 1 }), 2) + " Bar";
+  if(sync) partition = float_to_string(total_length / timesig_to_time(120, { 1, 1 }), 2) + " Bar";
 
   auto const params = make_graph_engine_params();
-  int sample_rate = params.max_frame_count / dahdrf;
-  int voice_release_at = dahd / dahdrf * params.max_frame_count;
+  int sample_rate = params.max_frame_count / total_length;
+  int voice_release_at = dahd / total_length * params.max_frame_count; // todo
 
   engine->process_begin(&state, sample_rate, params.max_frame_count, voice_release_at);
   auto const* block = engine->process(module_env, mapping.module_slot, custom_outputs, nullptr, [mapping, &custom_outputs](plugin_block& block) {
