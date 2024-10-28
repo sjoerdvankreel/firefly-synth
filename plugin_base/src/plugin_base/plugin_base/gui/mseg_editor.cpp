@@ -196,10 +196,10 @@ mseg_editor::mouseDrag(MouseEvent const& event)
   }
 
   Point<int> offset(image.getWidth() / 2 + point_size, image.getHeight() / 2 + point_size);
-  if (_dragging_start_y) _gui->param_begin_changes(_module_index, _module_index, _start_y_param, 0);
-  else if (_dragging_end_y) _gui->param_begin_changes(_module_index, _module_index, _end_y_param, 0);
-  else if (_dragging_point != -1) _gui->param_begin_changes(_module_index, _module_index, _y_param, _sorted_points[_dragging_point].param_index);
-  else if (_dragging_slope != -1) _gui->param_begin_changes(_module_index, _module_index, _slope_param, _sorted_points[_dragging_slope].param_index);
+  if (_dragging_start_y) _gui->param_begin_changes(_module_index, _module_slot, _start_y_param, 0);
+  else if (_dragging_end_y) _gui->param_begin_changes(_module_index, _module_slot, _end_y_param, 0);
+  else if (_dragging_point != -1) _gui->param_begin_changes(_module_index, _module_slot, _y_param, _sorted_points[_dragging_point].param_index);
+  else if (_dragging_slope != -1) _gui->param_begin_changes(_module_index, _module_slot, _slope_param, _sorted_points[_dragging_slope].param_index);
   else assert(false);
   startDragging(String(mseg_magic), this, ScaledImage(image), false, &offset);
 }
@@ -213,10 +213,10 @@ mseg_editor::isInterestedInDragSource(DragAndDropTarget::SourceDetails const& de
 void
 mseg_editor::itemDropped(DragAndDropTarget::SourceDetails const& details)
 {
-  if (_dragging_start_y) _gui->param_end_changes(_module_index, _module_index, _start_y_param, 0);
-  else if (_dragging_end_y) _gui->param_end_changes(_module_index, _module_index, _end_y_param, 0);
-  else if (_dragging_point != -1) _gui->param_end_changes(_module_index, _module_index, _y_param, _sorted_points[_dragging_point].param_index);
-  else if (_dragging_slope != -1) _gui->param_end_changes(_module_index, _module_index, _slope_param, _sorted_points[_dragging_slope].param_index);
+  if (_dragging_start_y) _gui->param_end_changes(_module_index, _module_slot, _start_y_param, 0);
+  else if (_dragging_end_y) _gui->param_end_changes(_module_index, _module_slot, _end_y_param, 0);
+  else if (_dragging_point != -1) _gui->param_end_changes(_module_index, _module_slot, _y_param, _sorted_points[_dragging_point].param_index);
+  else if (_dragging_slope != -1) _gui->param_end_changes(_module_index, _module_slot, _slope_param, _sorted_points[_dragging_slope].param_index);
   else assert(false);
 
   _hit_test_point = -1;
