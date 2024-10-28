@@ -69,7 +69,6 @@ public:
   void paint(juce::Graphics& g) override;
   void state_changed(int index, plain_value plain) override;
 
-  void mouseUp(juce::MouseEvent const& event) override;
   void mouseDown(juce::MouseEvent const& event) override;
   void mouseDrag(juce::MouseEvent const& event) override;
   void mouseMove(juce::MouseEvent const& event) override;

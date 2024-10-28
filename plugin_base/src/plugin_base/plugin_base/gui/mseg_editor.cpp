@@ -145,15 +145,6 @@ mseg_editor::make_slope_path(
 }
 
 void
-mseg_editor::mouseUp(MouseEvent const& event)
-{
-  _dragging_point = -1;
-  _dragging_slope = -1;
-  _dragging_end_y = false;
-  _dragging_start_y = false;
-}
-
-void
 mseg_editor::mouseDown(MouseEvent const& event)
 {
   _dragging_point = _hit_test_point;
