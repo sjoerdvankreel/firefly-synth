@@ -255,6 +255,13 @@ mseg_editor::itemDragMove(juce::DragAndDropTarget::SourceDetails const& details)
     repaint();
     return;
   }
+
+  if (_dragging_slope != -1)
+  {
+    _gui->param_changing(_module_index, _module_slot, _slope_param, _dragging_slope, drag_y_amt);
+    repaint();
+    return;
+  }
 }
 
 bool
