@@ -28,13 +28,14 @@ autobuilds:
 * integrate https://github.com/surge-synthesizer/monique-monosynth/blob/main/.github/workflows/build-pr.yml
 
 mseg:
+V paint left right
+V select env length time/bars
+V disable regular env stuff when mseg
 draw the grid
 deal with the dsp
 deal with retrigger etc
-select env length time/bars
 do the actual editing
 snap to grid ?
-disable regular env stuff when mseg
 what can be modulated ?
 do sustain marker
 mseg as lfo

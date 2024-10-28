@@ -347,6 +347,8 @@ mseg_editor::paint(Graphics& g)
   // filler
   g.setColour(_lnf->colors().mseg_area);
   g.fillRect(x, y + h, w, padding);
+  g.fillRect(x + w, y + h - end_y * h, padding, end_y * h + padding);
+  g.fillRect(0.0f, y + h - start_y * h, padding, start_y * h + padding);
 
   // grid
   g.setColour(_lnf->colors().mseg_grid);
