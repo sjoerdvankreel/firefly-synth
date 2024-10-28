@@ -47,6 +47,20 @@ plugin_state::add_listener(int index, state_listener* listener) const
 }
 
 void
+plugin_state::add_listener(int m, int mi, int p, int pi, state_listener* listener) const
+{
+  int index = desc().param_mappings.topo_to_index[m][mi][p][pi];
+  add_listener(index, listener);
+}
+
+void
+plugin_state::remove_listener(int m, int mi, int p, int pi, state_listener* listener) const
+{
+  int index = desc().param_mappings.topo_to_index[m][mi][p][pi];
+  remove_listener(index, listener);
+}
+
+void
 plugin_state::remove_any_listener(any_state_listener* listener) const
 {
   assert(_notify);

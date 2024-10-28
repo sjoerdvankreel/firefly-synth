@@ -77,6 +77,8 @@ public:
   void remove_any_listener(any_state_listener* listener) const;
   void add_listener(int index, state_listener* listener) const;
   void remove_listener(int index, state_listener* listener) const;
+  void add_listener(int m, int mi, int p, int pi, state_listener* listener) const;
+  void remove_listener(int m, int mi, int p, int pi, state_listener* listener) const;
 
   void clear_module(int index, int slot);
   void copy_module_to(int index, int source_slot, int target_slot);

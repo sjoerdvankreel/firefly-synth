@@ -24,7 +24,8 @@ struct mseg_point
 class mseg_editor:
 public juce::Component,
 public juce::DragAndDropContainer,
-public juce::DragAndDropTarget
+public juce::DragAndDropTarget,
+public state_listener
 {
   plugin_gui* const _gui;
   lnf* const _lnf;
@@ -64,7 +65,9 @@ public juce::DragAndDropTarget
     int slope_index, bool closed, juce::Path& path) const;
 
 public:
+  
   void paint(juce::Graphics& g) override;
+  void state_changed(int index, plain_value plain) override;
 
   void mouseUp(juce::MouseEvent const& event) override;
   void mouseDown(juce::MouseEvent const& event) override;
@@ -76,6 +79,7 @@ public:
   void itemDragMove(juce::DragAndDropTarget::SourceDetails const& details) override;
   bool isInterestedInDragSource(juce::DragAndDropTarget::SourceDetails const& details) override;
 
+  ~mseg_editor();
   mseg_editor(
     plugin_gui* gui, lnf* lnf, int module_index, int module_slot, 
     int start_y_param, int end_y_param, int on_param, int x_param, int y_param, int slope_param);

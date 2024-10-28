@@ -24,6 +24,17 @@ _on_param(on_param), _x_param(x_param), _y_param(y_param), _slope_param(slope_pa
   auto const& param_list = topo.modules[module_index].params;
   (void)param_list;
 
+  _gui->automation_state()->add_listener(_module_index, _module_slot, _end_y_param, 0, this);
+  _gui->automation_state()->add_listener(_module_index, _module_slot, _start_y_param, 0, this);
+  for(int i = 0; i < _gui->automation_state()->desc().plugin->modules[_module_index].params[_on_param].info.slot_count; i++)
+    _gui->automation_state()->add_listener(_module_index, _module_slot, _on_param, i, this);
+  for (int i = 0; i < _gui->automation_state()->desc().plugin->modules[_module_index].params[_x_param].info.slot_count; i++)
+    _gui->automation_state()->add_listener(_module_index, _module_slot, _x_param, i, this);
+  for (int i = 0; i < _gui->automation_state()->desc().plugin->modules[_module_index].params[_y_param].info.slot_count; i++)
+    _gui->automation_state()->add_listener(_module_index, _module_slot, _y_param, i, this);
+  for (int i = 0; i < _gui->automation_state()->desc().plugin->modules[_module_index].params[_slope_param].info.slot_count; i++)
+    _gui->automation_state()->add_listener(_module_index, _module_slot, _slope_param, i, this);
+
   auto is_linear_unit = [](param_topo const& pt) { 
     return pt.domain.type == domain_type::identity && pt.domain.min == 0 && pt.domain.max == 1; };
   assert(is_linear_unit(param_list[start_y_param]));
@@ -37,6 +48,27 @@ _on_param(on_param), _x_param(x_param), _y_param(y_param), _slope_param(slope_pa
   assert(param_list[y_param].info.slot_count == param_list[x_param].info.slot_count);
   assert(param_list[on_param].info.slot_count == param_list[x_param].info.slot_count);
   assert(param_list[slope_param].info.slot_count == param_list[x_param].info.slot_count + 1);
+}
+
+mseg_editor::
+~mseg_editor()
+{
+  _gui->automation_state()->remove_listener(_module_index, _module_slot, _end_y_param, 0, this);
+  _gui->automation_state()->remove_listener(_module_index, _module_slot, _start_y_param, 0, this);
+  for (int i = 0; i < _gui->automation_state()->desc().plugin->modules[_module_index].params[_on_param].info.slot_count; i++)
+    _gui->automation_state()->remove_listener(_module_index, _module_slot, _on_param, i, this);
+  for (int i = 0; i < _gui->automation_state()->desc().plugin->modules[_module_index].params[_x_param].info.slot_count; i++)
+    _gui->automation_state()->remove_listener(_module_index, _module_slot, _x_param, i, this);
+  for (int i = 0; i < _gui->automation_state()->desc().plugin->modules[_module_index].params[_y_param].info.slot_count; i++)
+    _gui->automation_state()->remove_listener(_module_index, _module_slot, _y_param, i, this);
+  for (int i = 0; i < _gui->automation_state()->desc().plugin->modules[_module_index].params[_slope_param].info.slot_count; i++)
+    _gui->automation_state()->remove_listener(_module_index, _module_slot, _slope_param, i, this);
+}
+
+void 
+mseg_editor::state_changed(int index, plain_value plain)
+{
+  repaint();
 }
 
 float 
