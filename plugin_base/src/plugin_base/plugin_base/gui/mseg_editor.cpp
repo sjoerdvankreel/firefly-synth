@@ -190,7 +190,8 @@ mseg_editor::mouseDrag(MouseEvent const& event)
   if (_dragging_start_y) _gui->param_begin_changes(_module_index, _module_slot, _start_y_param, 0);
   else if (_dragging_end_y) _gui->param_begin_changes(_module_index, _module_slot, _end_y_param, 0);
   else if (_dragging_point != -1) _gui->param_begin_changes(_module_index, _module_slot, _y_param, _sorted_points[_dragging_point].param_index);
-  else if (_dragging_slope != -1) _gui->param_begin_changes(_module_index, _module_slot, _slope_param, _sorted_points[_dragging_slope].param_index);
+  else if (_dragging_slope != -1) _gui->param_begin_changes(_module_index, _module_slot, _slope_param, 
+    _dragging_slope == _sorted_points.size()? _sorted_points[_dragging_slope - 1].param_index + 1: _sorted_points[_dragging_slope].param_index);
   else assert(false);
   startDragging(String(mseg_magic), this, ScaledImage(image), false, &offset);
 }
@@ -207,7 +208,8 @@ mseg_editor::itemDropped(DragAndDropTarget::SourceDetails const& details)
   if (_dragging_start_y) _gui->param_end_changes(_module_index, _module_slot, _start_y_param, 0);
   else if (_dragging_end_y) _gui->param_end_changes(_module_index, _module_slot, _end_y_param, 0);
   else if (_dragging_point != -1) _gui->param_end_changes(_module_index, _module_slot, _y_param, _sorted_points[_dragging_point].param_index);
-  else if (_dragging_slope != -1) _gui->param_end_changes(_module_index, _module_slot, _slope_param, _sorted_points[_dragging_slope].param_index);
+  else if (_dragging_slope != -1) _gui->param_end_changes(_module_index, _module_slot, _slope_param, 
+    _dragging_slope == _sorted_points.size() ? _sorted_points[_dragging_slope - 1].param_index + 1 : _sorted_points[_dragging_slope].param_index);
   else assert(false);
 
   _hit_test_point = -1;
@@ -232,7 +234,7 @@ mseg_editor::itemDragMove(juce::DragAndDropTarget::SourceDetails const& details)
   //float const w = getLocalBounds().getWidth() - padding * 2.0f;
   float const h = getLocalBounds().getHeight() - padding * 2.0f;
 
-  float drag_y_amt = 1.0f - std::clamp((details.localPosition.y - y) / h, 0.0f, 1.0f);;
+  float drag_y_amt = 1.0f - std::clamp((details.localPosition.y - y) / h, 0.0f, 1.0f);
 
   if (_dragging_start_y)
   {
