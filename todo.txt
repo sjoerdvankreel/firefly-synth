@@ -48,6 +48,7 @@ do sustain/release on env + all the mono-mode stuff
 make the mseg editor react to automation (but NOT modulation!_)
 thoroughly test the case when we add/rem points! 
 fix the undo stuff
+recheck all the set_raw/plain_at blah, should be moved through gui_param_etc
 
 make a patch cleanup button
 update the routing graph for arp
