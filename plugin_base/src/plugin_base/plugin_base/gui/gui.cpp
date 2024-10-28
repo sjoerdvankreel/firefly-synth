@@ -414,14 +414,62 @@ plugin_gui::theme_changed(std::string const& theme_name)
   setSize(w, w * ratio);
   resized();
   _tooltip = std::make_unique<TooltipWindow>(getChildComponent(0));
-} 
+}
 
 void
-plugin_gui::param_changed(int index, plain_value plain)
+plugin_gui::param_begin_changes(int m, int mi, int p, int pi)
 {
-  if (_automation_state->desc().params[index]->param->dsp.direction == param_direction::input)
-    for (int i = 0; i < _param_listeners.size(); i++)
-      _param_listeners[i]->gui_param_changed(index, plain);
+  int index = automation_state()->desc().param_mappings.topo_to_index[m][mi][p][pi];
+  param_begin_changes(index);
+}
+
+void
+plugin_gui::param_end_changes(int m, int mi, int p, int pi)
+{
+  int index = automation_state()->desc().param_mappings.topo_to_index[m][mi][p][pi];
+  param_end_changes(index);
+}
+
+void
+plugin_gui::param_changing(int m, int mi, int p, int pi, plain_value plain)
+{
+  int index = automation_state()->desc().param_mappings.topo_to_index[m][mi][p][pi];
+  param_changing(index, plain);
+}
+
+void
+plugin_gui::param_changed(int m, int mi, int p, int pi, plain_value plain)
+{
+  int index = automation_state()->desc().param_mappings.topo_to_index[m][mi][p][pi];
+  param_changed(index, plain);
+}
+
+void
+plugin_gui::param_changing(int m, int mi, int p, int pi, double raw)
+{
+  int index = automation_state()->desc().param_mappings.topo_to_index[m][mi][p][pi];
+  param_changing(index, raw);
+}
+
+void
+plugin_gui::param_changed(int m, int mi, int p, int pi, double raw)
+{
+  int index = automation_state()->desc().param_mappings.topo_to_index[m][mi][p][pi];
+  param_changed(index, raw);
+}
+
+void
+plugin_gui::param_changing(int index, double raw)
+{
+  plain_value plain = _automation_state->desc().raw_to_plain_at_index(index, raw);
+  param_changing(index, plain);
+}
+
+void
+plugin_gui::param_changed(int index, double raw)
+{
+  plain_value plain = _automation_state->desc().raw_to_plain_at_index(index, raw);
+  param_changed(index, plain);
 }
 
 void
@@ -446,6 +494,14 @@ plugin_gui::param_changing(int index, plain_value plain)
   if (_automation_state->desc().params[index]->param->dsp.direction == param_direction::input)
     for (int i = 0; i < _param_listeners.size(); i++)
       _param_listeners[i]->gui_param_changing(index, plain);
+}
+
+void
+plugin_gui::param_changed(int index, plain_value plain)
+{
+  if (_automation_state->desc().params[index]->param->dsp.direction == param_direction::input)
+    for (int i = 0; i < _param_listeners.size(); i++)
+      _param_listeners[i]->gui_param_changed(index, plain);
 }
 
 void

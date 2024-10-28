@@ -171,8 +171,18 @@ public:
 
   void param_end_changes(int index);
   void param_begin_changes(int index);
+  void param_changed(int index, double raw);
+  void param_changing(int index, double raw);
   void param_changed(int index, plain_value plain);
   void param_changing(int index, plain_value plain);
+
+  void param_end_changes(int m, int mi, int p, int pi);
+  void param_begin_changes(int m, int mi, int p, int pi);
+  void param_changed(int m, int mi, int p, int pi, double raw);
+  void param_changing(int m, int mi, int p, int pi, double raw);
+  void param_changed(int m, int mi, int p, int pi, plain_value plain);
+  void param_changing(int m, int mi, int p, int pi, plain_value plain);
+
   graph_engine* get_module_graph_engine(module_topo const& module);
 
   void set_system_dpi_scale(float scale);

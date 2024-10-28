@@ -135,10 +135,9 @@ mseg_editor::mouseDoubleClick(MouseEvent const& event)
 {
   if (!hit_test(event)) return;
 
-  auto const state = _gui->automation_state();
   if (_hit_test_point >= 0)
   {
-    state->set_raw_at(_module_index, _module_slot, _on_param, _sorted_points[_hit_test_point].param_index, 0);
+    _gui->param_changed(_module_index, _module_slot, _on_param, _sorted_points[_hit_test_point].param_index, 0);
     repaint();
   }
 }
@@ -147,6 +146,7 @@ void
 mseg_editor::mouseDrag(MouseEvent const& event)
 {
   if (isDragAndDropActive()) return;
+  if (_dragging_slope == -1 && _dragging_point == -1) return;
   Image image(Image::PixelFormat::ARGB, point_size, point_size, true);
   Graphics g(image);
   if (_dragging_slope != -1)
