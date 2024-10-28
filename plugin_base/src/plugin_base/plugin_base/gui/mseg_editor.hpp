@@ -25,6 +25,7 @@ class mseg_editor:
 public juce::Component,
 public juce::DragAndDropContainer,
 public juce::DragAndDropTarget,
+public juce::SettableTooltipClient,
 public state_listener
 {
   plugin_gui* const _gui;
