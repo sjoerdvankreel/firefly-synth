@@ -253,14 +253,16 @@ mseg_editor::itemDragMove(juce::DragAndDropTarget::SourceDetails const& details)
 
   if (_dragging_point != -1)
   {
-    _gui->param_changing(_module_index, _module_slot, _y_param, _dragging_point, drag_y_amt);
+    _gui->param_changing(_module_index, _module_slot, _y_param, _sorted_points[_dragging_point].param_index, drag_y_amt);
     repaint();
     return;
   }
 
   if (_dragging_slope != -1)
   {
-    _gui->param_changing(_module_index, _module_slot, _slope_param, _dragging_slope, drag_y_amt);
+    _gui->param_changing(_module_index, _module_slot, _slope_param, 
+      _dragging_slope == _sorted_points.size() ? _sorted_points[_dragging_slope - 1].param_index + 1 : _sorted_points[_dragging_slope].param_index, 
+      drag_y_amt);
     repaint();
     return;
   }
