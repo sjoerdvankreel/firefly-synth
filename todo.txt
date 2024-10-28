@@ -50,6 +50,7 @@ thoroughly test the case when we add/rem points!
 fix the undo stuff
 recheck all the set_raw/plain_at blah, should be moved through gui_param_etc
 test the heck out of it in debug
+show tooltips on hover ie what are we editing
 
 make a patch cleanup button
 update the routing graph for arp
