@@ -8,11 +8,11 @@
 
 namespace plugin_base {
 
-struct mseg_point
+struct mseg_seg
 {
   float x;
   float y;
-  int param_index;
+  float slope;
 };
 
 // visual mseg editor normalized in xy [0, 0], [1, 1]
@@ -21,6 +21,11 @@ struct mseg_point
 // counted X, Y, On parameters (at least 1 so section count = N + 1)
 // counted slope parameters with count = N + 1
 // optional 1 sustain point in case of envelope
+// we keep a local copy of all param values and
+// just flush the entire thing to the plug param state
+// on each change -- this simplifies splicing / joining segs
+// and also helps to keep stuff sorted
+// TODO replace on_param by seg_count and keep stuff in check
 class mseg_editor:
 public juce::Component,
 public juce::DragAndDropContainer,
@@ -33,14 +38,17 @@ public state_listener
 
   int const _module_index;
   int const _module_slot;
+  /*
   int const _start_y_param;
   int const _end_y_param;
   int const _on_param;
   int const _x_param;
   int const _y_param;
   int const _slope_param;
+  TODO */
 
-  // index into _sorted_points, not regular params!
+  // index into gui copy of params
+  /*
   int _hit_test_point = -1;
   int _hit_test_slope = -1;
   bool _hit_test_end_y = false;
@@ -49,21 +57,19 @@ public state_listener
   int _dragging_slope = -1;
   bool _dragging_end_y = false;
   bool _dragging_start_y = false;
+  TODO */
 
-  std::vector<mseg_point> _sorted_points = {};
+  float _gui_start_y = 0.0f;
+  std::vector<mseg_seg> _gui_segs = {};
 
-  void calc_sorted_points();
   bool hit_test(juce::MouseEvent const& e);
 
   float sloped_y_pos(
-    float pos, int index, 
-    float y1, float y2) const;
+    float pos, int seg) const;
 
   void make_slope_path(
-    float x, float y, float w, float h,
-    mseg_point const& from,
-    mseg_point const& to,
-    int slope_index, bool closed, juce::Path& path) const;
+    float x, float y, float w, float h, 
+    int seg, bool closed, juce::Path& path) const;
 
 public:
   

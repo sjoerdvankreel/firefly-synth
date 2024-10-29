@@ -14,9 +14,9 @@ mseg_editor(
   plugin_gui* gui, lnf* lnf, int module_index, int module_slot, 
   int start_y_param, int end_y_param, int on_param, int x_param, int y_param, int slope_param):
 _gui(gui), _lnf(lnf),
-_module_index(module_index), _module_slot(module_slot), 
+_module_index(module_index), _module_slot(module_slot)/*, TODO
 _start_y_param(start_y_param), _end_y_param(end_y_param),
-_on_param(on_param), _x_param(x_param), _y_param(y_param), _slope_param(slope_param)
+_on_param(on_param), _x_param(x_param), _y_param(y_param), _slope_param(slope_param) */
 {
   assert(gui != nullptr);
   assert(lnf != nullptr);
@@ -24,6 +24,14 @@ _on_param(on_param), _x_param(x_param), _y_param(y_param), _slope_param(slope_pa
   auto const& param_list = topo.modules[module_index].params;
   (void)param_list;
 
+  // TODO
+  // add some dummy data
+  _gui_start_y = 0.33f;
+  _gui_segs.push_back({ 0.25f, 1.0f, 0.25f });
+  _gui_segs.push_back({ 0.5f, 0.5f, 0.5f });
+  _gui_segs.push_back({ 1.0f, 0.0f, 0.75f });
+
+  /* TODO
   _gui->automation_state()->add_listener(_module_index, _module_slot, _end_y_param, 0, this);
   _gui->automation_state()->add_listener(_module_index, _module_slot, _start_y_param, 0, this);
   for(int i = 0; i < _gui->automation_state()->desc().plugin->modules[_module_index].params[_on_param].info.slot_count; i++)
@@ -48,11 +56,13 @@ _on_param(on_param), _x_param(x_param), _y_param(y_param), _slope_param(slope_pa
   assert(param_list[y_param].info.slot_count == param_list[x_param].info.slot_count);
   assert(param_list[on_param].info.slot_count == param_list[x_param].info.slot_count);
   assert(param_list[slope_param].info.slot_count == param_list[x_param].info.slot_count + 1);
+  */
 }
 
 mseg_editor::
 ~mseg_editor()
 {
+  /* TODO
   _gui->automation_state()->remove_listener(_module_index, _module_slot, _end_y_param, 0, this);
   _gui->automation_state()->remove_listener(_module_index, _module_slot, _start_y_param, 0, this);
   for (int i = 0; i < _gui->automation_state()->desc().plugin->modules[_module_index].params[_on_param].info.slot_count; i++)
@@ -63,61 +73,40 @@ mseg_editor::
     _gui->automation_state()->remove_listener(_module_index, _module_slot, _y_param, i, this);
   for (int i = 0; i < _gui->automation_state()->desc().plugin->modules[_module_index].params[_slope_param].info.slot_count; i++)
     _gui->automation_state()->remove_listener(_module_index, _module_slot, _slope_param, i, this);
+  */
 }
 
 void 
 mseg_editor::state_changed(int index, plain_value plain)
 {
-  repaint();
+  //repaint(); TODO
 }
 
 float 
-mseg_editor::sloped_y_pos(
-  float pos, int index, 
-  float y1, float y2) const
+mseg_editor::sloped_y_pos(float pos, int seg) const
 {
-  auto const state = _gui->automation_state();
-  float slope = state->get_plain_at(_module_index, _module_slot, _slope_param, index).real();
+  float slope = _gui_segs[seg].slope;
+  float y1 = seg == 0 ? _gui_start_y : _gui_segs[seg - 1].y;
+  float y2 = _gui_segs[seg].y;
   double const slope_min = exp_slope_min;
   double const slope_max = (1.0 - exp_slope_min);
   double const slope_range = slope_max - slope_min;
   double const slope_bounded = exp_slope_min + slope_range * slope;
   double const exp = std::log(slope_bounded) / std::log(0.5);
   return y1 + std::pow(pos, exp) * (y2 - y1); 
-}
 
-void
-mseg_editor::calc_sorted_points()
-{
-  _sorted_points.clear();
-  auto const state = _gui->automation_state();
-  int max_point_count = state->desc().plugin->modules[_module_index].params[_on_param].info.slot_count;
-  for (int i = 0; i < max_point_count; i++)
-    if (state->get_plain_at(_module_index, _module_slot, _on_param, i).step() != 0)
-    {
-      mseg_point point;
-      point.param_index = i;
-      point.x = state->get_plain_at(_module_index, _module_slot, _x_param, i).real();
-      point.y = state->get_plain_at(_module_index, _module_slot, _y_param, i).real();
-      _sorted_points.push_back(point);
-    }
-
-  // dsp also must sort !
-  std::sort(_sorted_points.begin(), _sorted_points.end(), [](auto const& l, auto const& r) { return l.x < r.x; });
+  // TODO DSP NOT needs to sort!
 }
 
 void 
 mseg_editor::make_slope_path(
-  float x, float y, float w, float h, 
-  mseg_point const& from, 
-  mseg_point const& to,
-  int slope_index, bool closed, Path& path) const
+  float x, float y, float w, float h,
+  int seg, bool closed, juce::Path& path) const
 {
   path = {};
-  float x1_norm = from.x;
-  float x2_norm = to.x;
-  float y1_norm = from.y;
-  float y2_norm = to.y;
+  float x1_norm = seg == 0? 0.0f: _gui_segs[seg - 1].x;
+  float x2_norm = _gui_segs[seg].x;
+  float y1_norm = seg == 0? _gui_start_y: _gui_segs[seg - 1].y;
 
   int const pixel_count = (int)std::ceil((x2_norm - x1_norm) * w);
   if (closed)
@@ -131,7 +120,7 @@ mseg_editor::make_slope_path(
   {
     float pos = j / (pixel_count - 1.0f);
     float x_this_pos_norm = x1_norm + pos * (x2_norm - x1_norm);
-    float y_this_pos_norm = sloped_y_pos(pos, slope_index, y1_norm, y2_norm);
+    float y_this_pos_norm = sloped_y_pos(pos, seg);
     float x_this_pos = x + w * x_this_pos_norm;
     float y_this_pos = y + h - h * y_this_pos_norm;
     path.lineTo(x_this_pos, y_this_pos);
@@ -147,15 +136,19 @@ mseg_editor::make_slope_path(
 void
 mseg_editor::mouseDown(MouseEvent const& event)
 {
+  /*
   _dragging_point = _hit_test_point;
   _dragging_slope = _hit_test_slope;
   _dragging_end_y = _hit_test_end_y;
   _dragging_start_y = _hit_test_start_y;
+  TODO
+  */
 }
 
 void
 mseg_editor::mouseDoubleClick(MouseEvent const& event)
 {
+  /*
   if (!hit_test(event)) return;
 
   if (_hit_test_point >= 0)
@@ -163,11 +156,14 @@ mseg_editor::mouseDoubleClick(MouseEvent const& event)
     _gui->param_changed(_module_index, _module_slot, _on_param, _sorted_points[_hit_test_point].param_index, 0);
     repaint();
   }
+  TODO
+  */
 }
 
 void
 mseg_editor::mouseDrag(MouseEvent const& event)
 {
+  /* TODO
   if (isDragAndDropActive()) return;
   if (_dragging_slope == -1 && _dragging_point == -1 && !_dragging_start_y && !_dragging_end_y) return;
   
@@ -194,6 +190,7 @@ mseg_editor::mouseDrag(MouseEvent const& event)
     _dragging_slope == _sorted_points.size()? _sorted_points[_dragging_slope - 1].param_index + 1: _sorted_points[_dragging_slope].param_index);
   else assert(false);
   startDragging(String(mseg_magic), this, ScaledImage(image), false, &offset);
+  */
 }
 
 bool
@@ -205,6 +202,7 @@ mseg_editor::isInterestedInDragSource(DragAndDropTarget::SourceDetails const& de
 void
 mseg_editor::itemDropped(DragAndDropTarget::SourceDetails const& details)
 {
+  /* TODO
   if (_dragging_start_y) _gui->param_end_changes(_module_index, _module_slot, _start_y_param, 0);
   else if (_dragging_end_y) _gui->param_end_changes(_module_index, _module_slot, _end_y_param, 0);
   else if (_dragging_point != -1) _gui->param_end_changes(_module_index, _module_slot, _y_param, _sorted_points[_dragging_point].param_index);
@@ -224,11 +222,13 @@ mseg_editor::itemDropped(DragAndDropTarget::SourceDetails const& details)
 
   setMouseCursor(MouseCursor::ParentCursor);
   repaint();
+  */
 }
 
 void 
 mseg_editor::itemDragMove(juce::DragAndDropTarget::SourceDetails const& details)
 {
+  /* TODO
   //float const x = padding;
   float const y = padding;
   //float const w = getLocalBounds().getWidth() - padding * 2.0f;
@@ -266,11 +266,13 @@ mseg_editor::itemDragMove(juce::DragAndDropTarget::SourceDetails const& details)
     repaint();
     return;
   }
+  */
 }
 
 bool
 mseg_editor::hit_test(MouseEvent const& e)
 {
+  /* TODO
   float const x = padding;
   float const y = padding;
   float const w = getLocalBounds().getWidth() - padding * 2.0f;
@@ -373,12 +375,15 @@ mseg_editor::hit_test(MouseEvent const& e)
     return true;
   }
 
+  */
+
   return false;
 }
 
 void
 mseg_editor::mouseMove(MouseEvent const& event)
 {
+  /* TODO
   int prev_hovered_point = _hit_test_point;
   int prev_hovered_slope = _hit_test_slope;
   bool prev_hovered_end_y = _hit_test_end_y;
@@ -409,6 +414,8 @@ mseg_editor::mouseMove(MouseEvent const& event)
   if (_hit_test_point != prev_hovered_point || _hit_test_slope != prev_hovered_slope ||
     _hit_test_start_y != prev_hovered_start_y || _hit_test_end_y != prev_hovered_end_y)
     repaint();
+
+    */
 }
 
 void
@@ -422,11 +429,8 @@ mseg_editor::paint(Graphics& g)
   Path sloped_path;
   float slope_marker_x;
   float slope_marker_y;
-  auto const state = _gui->automation_state();
-  float end_y = state->get_plain_at(_module_index, _module_slot, _end_y_param, 0).real();
-  float start_y = state->get_plain_at(_module_index, _module_slot, _start_y_param, 0).real();
-
-  calc_sorted_points();
+  float start_y = _gui_start_y;
+  float end_y = _gui_segs[_gui_segs.size() - 1].y;
 
   // bg
   g.setColour(_lnf->colors().mseg_background);
@@ -444,22 +448,26 @@ mseg_editor::paint(Graphics& g)
 
   // start to point 0
   g.setColour(_lnf->colors().mseg_line);
-  make_slope_path(x, y, w, h, { 0.0f, start_y }, _sorted_points[0], 0, false, sloped_path);
+  make_slope_path(x, y, w, h, 0, false, sloped_path);
   g.strokePath(sloped_path, PathStrokeType(line_thickness));
   g.setColour(_lnf->colors().mseg_area);
-  make_slope_path(x, y, w, h, { 0.0f, start_y }, _sorted_points[0], 0, true, sloped_path);
+  make_slope_path(x, y, w, h, 0, true, sloped_path);
   g.fillPath(sloped_path);
 
-  // point marker
-  g.setColour(_hit_test_start_y ? _lnf->colors().mseg_line.withAlpha(0.5f) : _lnf->colors().mseg_point.withAlpha(0.5f));
+  // start y point marker
+  //g.setColour(_hit_test_start_y ? _lnf->colors().mseg_line.withAlpha(0.5f) : _lnf->colors().mseg_point.withAlpha(0.5f));
+  g.setColour(_lnf->colors().mseg_point.withAlpha(0.5f));
   g.fillEllipse(x - point_size / 2, y + h - start_y * h - point_size / 2, point_size, point_size);
-  g.setColour(_hit_test_start_y ? _lnf->colors().mseg_line : _lnf->colors().mseg_point);
+  //g.setColour(_hit_test_start_y ? _lnf->colors().mseg_line : _lnf->colors().mseg_point);
+  g.setColour(_lnf->colors().mseg_point);
   g.drawEllipse(x - point_size / 2, y + h - start_y * h - point_size / 2, point_size, point_size, 1);
 
   // point marker
-  g.setColour(_hit_test_point == 0 ? _lnf->colors().mseg_line.withAlpha(0.5f) : _lnf->colors().mseg_point.withAlpha(0.5f));
+  //g.setColour(_hit_test_point == 0 ? _lnf->colors().mseg_line.withAlpha(0.5f) : _lnf->colors().mseg_point.withAlpha(0.5f));
+  g.setColour(_lnf->colors().mseg_point.withAlpha(0.5f));
   g.fillEllipse(x + w * _sorted_points[0].x - point_size / 2, y + h - h * _sorted_points[0].y - point_size / 2, point_size, point_size);
-  g.setColour(_hit_test_point == 0 ? _lnf->colors().mseg_line : _lnf->colors().mseg_point);
+  //g.setColour(_hit_test_point == 0 ? _lnf->colors().mseg_line : _lnf->colors().mseg_point);
+  g.setColour(_lnf->colors().mseg_point);
   g.drawEllipse(x + w * _sorted_points[0].x - point_size / 2, y + h - h * _sorted_points[0].y - point_size / 2, point_size, point_size, 1);
 
   // slope marker
