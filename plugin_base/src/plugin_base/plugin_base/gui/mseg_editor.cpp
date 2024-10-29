@@ -255,6 +255,7 @@ mseg_editor::mouseDrag(MouseEvent const& event)
       _gui->param_begin_changes(_module_index, _module_slot, _slope_param, _drag_seg);
     else
     {
+      _gui->automation_state()->begin_undo_region();
       _gui->param_begin_changes(_module_index, _module_slot, _x_param, _drag_seg);
       _gui->param_begin_changes(_module_index, _module_slot, _y_param, _drag_seg);
     }
@@ -280,8 +281,11 @@ mseg_editor::itemDropped(DragAndDropTarget::SourceDetails const& details)
   else
   {
     assert(_drag_seg != -1);
+    auto const& desc = _gui->automation_state()->desc();
     _gui->param_end_changes(_module_index, _module_slot, _x_param, _drag_seg);
     _gui->param_end_changes(_module_index, _module_slot, _y_param, _drag_seg);
+    int this_module_global = desc.module_topo_to_index.at(_module_index) + _module_slot;
+    _gui->automation_state()->end_undo_region("Change", desc.modules[this_module_global].info.name + " MSEG Point");
   }
 
   _drag_seg = -1;
