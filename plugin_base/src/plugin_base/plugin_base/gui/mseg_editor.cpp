@@ -36,7 +36,8 @@ _x_param(x_param), _y_param(y_param), _slope_param(slope_param)
   assert(param_list[slope_param].info.slot_count == param_list[x_param].info.slot_count); 
 
   _max_seg_count = param_list[x_param].info.slot_count;
-  _current_seg_count = _gui->automation_state()->get_plain_at(_module_index, _module_slot, _count_param, 0).step();
+  init_from_plug_state();
+
   _gui->automation_state()->add_listener(_module_index, _module_slot, _count_param, 0, this);
   _gui->automation_state()->add_listener(_module_index, _module_slot, _start_y_param, 0, this);
   for (int i = 0; i < _gui->automation_state()->desc().plugin->modules[_module_index].params[_x_param].info.slot_count; i++)
@@ -44,17 +45,7 @@ _x_param(x_param), _y_param(y_param), _slope_param(slope_param)
   for (int i = 0; i < _gui->automation_state()->desc().plugin->modules[_module_index].params[_y_param].info.slot_count; i++)
     _gui->automation_state()->add_listener(_module_index, _module_slot, _y_param, i, this);
   for (int i = 0; i < _gui->automation_state()->desc().plugin->modules[_module_index].params[_slope_param].info.slot_count; i++)
-    _gui->automation_state()->add_listener(_module_index, _module_slot, _slope_param, i, this);
-
-  _gui_start_y = _gui->automation_state()->get_plain_at(_module_index, _module_slot, _start_y_param, 0).real();
-  for (int i = 0; i < _current_seg_count; i++)
-  {
-    mseg_seg seg = {};
-    seg.x = _gui->automation_state()->get_plain_at(_module_index, _module_slot, _x_param, i).real();
-    seg.y = _gui->automation_state()->get_plain_at(_module_index, _module_slot, _y_param, i).real();
-    seg.slope = _gui->automation_state()->get_plain_at(_module_index, _module_slot, _slope_param, i).real();
-    _gui_segs.push_back(seg);
-  }
+    _gui->automation_state()->add_listener(_module_index, _module_slot, _slope_param, i, this); 
 }
 
 mseg_editor::
@@ -71,9 +62,45 @@ mseg_editor::
 }
 
 void 
+mseg_editor::init_from_plug_state()
+{
+  _gui_segs.clear();
+  _gui_start_y = _gui->automation_state()->get_plain_at(_module_index, _module_slot, _start_y_param, 0).real();
+  _current_seg_count = _gui->automation_state()->get_plain_at(_module_index, _module_slot, _count_param, 0).step();
+  for (int i = 0; i < _current_seg_count; i++)
+  {
+    mseg_seg seg = {};
+    seg.x = _gui->automation_state()->get_plain_at(_module_index, _module_slot, _x_param, i).real();
+    seg.y = _gui->automation_state()->get_plain_at(_module_index, _module_slot, _y_param, i).real();
+    seg.slope = _gui->automation_state()->get_plain_at(_module_index, _module_slot, _slope_param, i).real();
+    _gui_segs.push_back(seg);
+  }
+}
+
+void 
 mseg_editor::state_changed(int index, plain_value plain)
 {
-  //repaint(); TODO
+  int new_seg_count = _gui->automation_state()->get_plain_at(_module_index, _module_slot, _count_param, 0).step();
+  if (new_seg_count != _current_seg_count)
+  {
+    init_from_plug_state();
+    repaint();
+    return;
+  }
+
+  bool changed = false;
+  changed |= _start_y_param != _gui->automation_state()->get_plain_at(_module_index, _module_slot, _start_y_param, 0).real();
+  for (int i = 0; i < _current_seg_count; i++)
+  {
+    changed |= _x_param != _gui->automation_state()->get_plain_at(_module_index, _module_slot, _x_param, i).real();
+    changed |= _y_param != _gui->automation_state()->get_plain_at(_module_index, _module_slot, _y_param, i).real();
+    changed |= _slope_param != _gui->automation_state()->get_plain_at(_module_index, _module_slot, _slope_param, i).real();
+  }
+  if (changed)
+  {
+    init_from_plug_state();
+    repaint();
+  }
 }
 
 float 

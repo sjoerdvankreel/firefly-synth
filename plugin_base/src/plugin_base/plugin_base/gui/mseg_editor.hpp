@@ -53,6 +53,8 @@ public state_listener
   float _gui_start_y = 0.0f;
   std::vector<mseg_seg> _gui_segs = {};
 
+  void init_from_plug_state();
+
   float sloped_y_pos(
     float pos, int seg) const;
   bool hit_test(
