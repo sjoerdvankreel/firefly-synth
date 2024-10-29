@@ -31,6 +31,7 @@ mseg:
 V paint left right
 V select env length time/bars
 V disable regular env stuff when mseg
+do value in tooltip
 draw the grid
 deal with the dsp
 deal with retrigger etc
