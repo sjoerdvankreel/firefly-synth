@@ -44,18 +44,7 @@ public state_listener
   int const _y_param;
   int const _slope_param;
 
-  // index into gui copy of params
-  /*
-  int _hit_test_point = -1;
-  int _hit_test_slope = -1;
-  bool _hit_test_end_y = false;
-  bool _hit_test_start_y = false;
-  int _dragging_point = -1;
-  int _dragging_slope = -1;
-  bool _dragging_end_y = false;
-  bool _dragging_start_y = false;
-  TODO */
-
+  int _max_seg_count = -1;
   float _gui_start_y = 0.0f;
   std::vector<mseg_seg> _gui_segs = {};
 
@@ -73,7 +62,6 @@ public:
   void paint(juce::Graphics& g) override;
   void state_changed(int index, plain_value plain) override;
 
-  void mouseDown(juce::MouseEvent const& event) override;
   void mouseDrag(juce::MouseEvent const& event) override;
   void mouseMove(juce::MouseEvent const& event) override;
   void mouseDoubleClick(juce::MouseEvent const& event) override;
