@@ -392,17 +392,17 @@ mseg_editor::mouseMove(MouseEvent const& event)
     setMouseCursor(MouseCursor::DraggingHandCursor);
     if (_hit_test_end_y) setTooltip(topo.modules[_module_index].params[_end_y_param].info.tag.display_name);
     if (_hit_test_start_y) setTooltip(topo.modules[_module_index].params[_start_y_param].info.tag.display_name);
-    if (_hit_test_point != 0) setTooltip(
-      topo.modules[_module_index].params[_y_param].info.tag.display_name + 
+    if (_hit_test_point != -1) setTooltip(
+      topo.modules[_module_index].params[_y_param].info.tag.display_name + " " +
       std::to_string(_sorted_points[_hit_test_point].param_index + 1));
-    if (_hit_test_slope != 0)
+    if (_hit_test_slope != -1)
     {
       int slope_index = _hit_test_slope == _sorted_points.size() ?
         _sorted_points[_hit_test_slope - 1].param_index + 1 :
         _sorted_points[_hit_test_slope].param_index; 
       setTooltip(
-        topo.modules[_module_index].params[_slope_param].info.tag.display_name +
-        std::to_string(slope_index));
+        topo.modules[_module_index].params[_slope_param].info.tag.display_name + " " +
+        std::to_string(slope_index + 1));
     }
   }
 
