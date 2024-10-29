@@ -133,8 +133,18 @@ mseg_editor::mouseDoubleClick(MouseEvent const& event)
   bool hit_seg_slope;
   bool hit = hit_test(event, hit_start_y, hit_seg, hit_seg_slope);
   
+  // cannot delete the first one
   if (hit && hit_start_y) return;
-  if (hit && hit_seg_slope) return;
+  
+  // reset slope to default
+  if (hit && hit_seg_slope)
+  {
+    _gui_segs[hit_seg].slope = 0.5f;
+    repaint();
+    return;
+  }
+
+  // cannot delete the last one
   if (hit && hit_seg == _gui_segs.size() - 1) return;
 
   // case join  
