@@ -154,6 +154,7 @@ mseg_editor::mouseDoubleClick(MouseEvent const& event)
 
   if (event.x <= x) return;
   if (event.x >= x + w) return;
+  if (_gui_segs.size() == _max_seg_count) return;
 
   float new_norm_x = (event.x - x) / w;
   for(int i = 0; i < _gui_segs.size(); i++)

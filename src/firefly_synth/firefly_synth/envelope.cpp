@@ -609,7 +609,7 @@ env_topo(int section, gui_position const& pos)
   mseg_count.gui.bindings.enabled.bind_params({ param_on, param_mode }, [](auto const& vs) { return vs[0] != 0 && vs[1] == mode_mseg; });
   mseg_count.info.description = "TODO";
   auto& mseg_x = result.params.emplace_back(make_param(
-    make_topo_info_basic("{CFF71CB5-C93F-44BE-AC42-1814D96B291A}", "MSEG X", param_mseg_x, mseg_max_seg_count - 1),
+    make_topo_info_basic("{CFF71CB5-C93F-44BE-AC42-1814D96B291A}", "MSEG X", param_mseg_x, mseg_max_seg_count),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.0, 2, ""),
     make_param_gui_none(section_mseg)));
   mseg_x.gui.bindings.enabled.bind_params({ param_on, param_mode }, [](auto const& vs) { return vs[0] != 0 && vs[1] == mode_mseg; });
@@ -621,7 +621,7 @@ env_topo(int section, gui_position const& pos)
     return "0.0";
   };
   auto& mseg_y = result.params.emplace_back(make_param(
-    make_topo_info_basic("{60F4F483-F5C9-486D-8D6B-E4098B08FDC4}", "MSEG Y", param_mseg_y, mseg_max_seg_count - 1),
+    make_topo_info_basic("{60F4F483-F5C9-486D-8D6B-E4098B08FDC4}", "MSEG Y", param_mseg_y, mseg_max_seg_count),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.0, 2, ""),
     make_param_gui_none(section_mseg)));
   mseg_y.gui.bindings.enabled.bind_params({ param_on, param_mode }, [](auto const& vs) { return vs[0] != 0 && vs[1] == mode_mseg; });
