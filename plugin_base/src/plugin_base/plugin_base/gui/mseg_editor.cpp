@@ -201,7 +201,21 @@ mseg_editor::mouseDrag(MouseEvent const& event)
     g.fillEllipse(0.0f, 0.0f, point_size, point_size);
   }
 
-  // TODO startchanges et all
+  if (_drag_start_y) 
+    _gui->param_begin_changes(_module_index, _module_slot, _start_y_param, 0);
+  else if (_drag_seg != -1)
+  {
+    if (_drag_seg_slope) 
+      _gui->param_begin_changes(_module_index, _module_slot, _slope_param, _drag_seg);
+    else
+    {
+      _gui->param_begin_changes(_module_index, _module_slot, _x_param, _drag_seg);
+      _gui->param_begin_changes(_module_index, _module_slot, _y_param, _drag_seg);
+    }
+  }
+  else 
+    assert(false);
+
   Point<int> offset(image.getWidth() / 2 + point_size, image.getHeight() / 2 + point_size);
   startDragging(String(mseg_magic), this, ScaledImage(image), false, &offset);
 }
@@ -215,27 +229,21 @@ mseg_editor::isInterestedInDragSource(DragAndDropTarget::SourceDetails const& de
 void
 mseg_editor::itemDropped(DragAndDropTarget::SourceDetails const& details)
 {
-  /* TODO
-  if (_dragging_start_y) _gui->param_end_changes(_module_index, _module_slot, _start_y_param, 0);
-  else if (_dragging_end_y) _gui->param_end_changes(_module_index, _module_slot, _end_y_param, 0);
-  else if (_dragging_point != -1) _gui->param_end_changes(_module_index, _module_slot, _y_param, _sorted_points[_dragging_point].param_index);
-  else if (_dragging_slope != -1) _gui->param_end_changes(_module_index, _module_slot, _slope_param, 
-    _dragging_slope == _sorted_points.size() ? _sorted_points[_dragging_slope - 1].param_index + 1 : _sorted_points[_dragging_slope].param_index);
-  else assert(false);
+  if (_drag_start_y) _gui->param_end_changes(_module_index, _module_slot, _start_y_param, 0);
+  else if (_drag_seg != -1 && _drag_seg_slope) _gui->param_end_changes(_module_index, _module_slot, _slope_param, _drag_seg);
+  else
+  {
+    assert(_drag_seg != -1);
+    _gui->param_end_changes(_module_index, _module_slot, _x_param, _drag_seg);
+    _gui->param_end_changes(_module_index, _module_slot, _y_param, _drag_seg);
+  }
 
-  _hit_test_point = -1;
-  _hit_test_slope = -1;
-  _hit_test_end_y = false;
-  _hit_test_start_y = false;
-
-  _dragging_point = -1;
-  _dragging_slope = -1;
-  _dragging_end_y = false;
-  _dragging_start_y = false;
+  _drag_seg = -1;
+  _drag_seg_slope = false;
+  _drag_start_y = false;
 
   setMouseCursor(MouseCursor::ParentCursor);
   repaint();
-  */
 }
 
 void 
@@ -250,6 +258,7 @@ mseg_editor::itemDragMove(juce::DragAndDropTarget::SourceDetails const& details)
   if (_drag_start_y)
   {
     _gui_start_y = drag_y_amt;
+    _gui->param_changing(_module_index, _module_slot, _start_y_param, 0, drag_y_amt);
     repaint();
     return;
   }
@@ -260,6 +269,7 @@ mseg_editor::itemDragMove(juce::DragAndDropTarget::SourceDetails const& details)
     float y2 = _gui_segs[_drag_seg].y;
     if (y1 > y2) drag_y_amt = 1.0f - drag_y_amt;
     _gui_segs[_drag_seg].slope = drag_y_amt;
+    _gui->param_changing(_module_index, _module_slot, _slope_param, _drag_seg, drag_y_amt);
     repaint();
     return;
   }
@@ -268,6 +278,7 @@ mseg_editor::itemDragMove(juce::DragAndDropTarget::SourceDetails const& details)
   if (_drag_seg != -1 && !_drag_seg_slope && _drag_seg == _gui_segs.size() - 1)
   {
     _gui_segs[_drag_seg].y = drag_y_amt;
+    _gui->param_changing(_module_index, _module_slot, _y_param, _drag_seg, drag_y_amt);
     repaint();
     return;
   }
@@ -275,12 +286,14 @@ mseg_editor::itemDragMove(juce::DragAndDropTarget::SourceDetails const& details)
   // tricky as we should not move before/beyond prev/next seg
   if (_drag_seg != -1 && !_drag_seg_slope)
   {
+    _gui_segs[_drag_seg].y = drag_y_amt;
+    _gui->param_changing(_module_index, _module_slot, _y_param, _drag_seg, drag_y_amt);
+
     float prev_x = _drag_seg == 0 ? 0.0f : _gui_segs[_drag_seg - 1].x;
     float next_x = _gui_segs[_drag_seg + 1].x;
-    _gui_segs[_drag_seg].y = drag_y_amt;
-    float this_x = (details.localPosition.x - x) / w;
-    _gui_segs[_drag_seg].x = std::clamp(this_x, prev_x, next_x);
-    // TODO sort on drop
+    float this_x = std::clamp((details.localPosition.x - x) / w, prev_x, next_x);
+    _gui_segs[_drag_seg].x = this_x;
+    _gui->param_changing(_module_index, _module_slot, _x_param, _drag_seg, this_x);
     repaint();
     return;
   }
