@@ -44,7 +44,12 @@ public state_listener
   int const _y_param;
   int const _slope_param;
 
+  int _drag_seg = -1;
+  bool _drag_start_y = false;
+  bool _drag_seg_slope = false;
+
   int _max_seg_count = -1;
+  int _current_seg_count = -1;
   float _gui_start_y = 0.0f;
   std::vector<mseg_seg> _gui_segs = {};
 

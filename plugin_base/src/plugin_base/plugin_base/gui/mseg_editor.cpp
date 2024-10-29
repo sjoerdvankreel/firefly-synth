@@ -36,6 +36,7 @@ _x_param(x_param), _y_param(y_param), _slope_param(slope_param)
   assert(param_list[slope_param].info.slot_count == param_list[x_param].info.slot_count); 
 
   _max_seg_count = param_list[x_param].info.slot_count;
+  _current_seg_count = _gui->automation_state()->get_plain_at(_module_index, _module_slot, _count_param, 0).step();
   _gui->automation_state()->add_listener(_module_index, _module_slot, _count_param, 0, this);
   _gui->automation_state()->add_listener(_module_index, _module_slot, _start_y_param, 0, this);
   for (int i = 0; i < _gui->automation_state()->desc().plugin->modules[_module_index].params[_x_param].info.slot_count; i++)
@@ -46,7 +47,7 @@ _x_param(x_param), _y_param(y_param), _slope_param(slope_param)
     _gui->automation_state()->add_listener(_module_index, _module_slot, _slope_param, i, this);
 
   _gui_start_y = _gui->automation_state()->get_plain_at(_module_index, _module_slot, _start_y_param, 0).real();
-  for (int i = 0; i < _gui->automation_state()->desc().plugin->modules[_module_index].params[_x_param].info.slot_count; i++)
+  for (int i = 0; i < _current_seg_count; i++)
   {
     mseg_seg seg = {};
     seg.x = _gui->automation_state()->get_plain_at(_module_index, _module_slot, _x_param, i).real();
@@ -132,7 +133,6 @@ mseg_editor::mouseDoubleClick(MouseEvent const& event)
   int hit_seg;
   bool hit_start_y;
   bool hit_seg_slope;
-
   bool hit = hit_test(event, hit_start_y, hit_seg, hit_seg_slope);
   
   if (hit && hit_start_y) return;
@@ -173,13 +173,12 @@ mseg_editor::mouseDoubleClick(MouseEvent const& event)
 void
 mseg_editor::mouseDrag(MouseEvent const& event)
 {
-  /* TODO
   if (isDragAndDropActive()) return;
-  if (_dragging_slope == -1 && _dragging_point == -1 && !_dragging_start_y && !_dragging_end_y) return;
+  if (!hit_test(event, _drag_start_y, _drag_seg, _drag_seg_slope)) return;
   
   Image image(Image::PixelFormat::ARGB, point_size, point_size, true);
   Graphics g(image);
-  if (_dragging_slope != -1)
+  if (_drag_seg_slope)
   {
     g.setColour(_lnf->colors().mseg_line);
     g.drawEllipse(0.0f, 0.0f, point_size, point_size, 1.0f);
@@ -192,15 +191,9 @@ mseg_editor::mouseDrag(MouseEvent const& event)
     g.fillEllipse(0.0f, 0.0f, point_size, point_size);
   }
 
+  // TODO startchanges et all
   Point<int> offset(image.getWidth() / 2 + point_size, image.getHeight() / 2 + point_size);
-  if (_dragging_start_y) _gui->param_begin_changes(_module_index, _module_slot, _start_y_param, 0);
-  else if (_dragging_end_y) _gui->param_begin_changes(_module_index, _module_slot, _end_y_param, 0);
-  else if (_dragging_point != -1) _gui->param_begin_changes(_module_index, _module_slot, _y_param, _sorted_points[_dragging_point].param_index);
-  else if (_dragging_slope != -1) _gui->param_begin_changes(_module_index, _module_slot, _slope_param, 
-    _dragging_slope == _sorted_points.size()? _sorted_points[_dragging_slope - 1].param_index + 1: _sorted_points[_dragging_slope].param_index);
-  else assert(false);
   startDragging(String(mseg_magic), this, ScaledImage(image), false, &offset);
-  */
 }
 
 bool
@@ -238,45 +231,20 @@ mseg_editor::itemDropped(DragAndDropTarget::SourceDetails const& details)
 void 
 mseg_editor::itemDragMove(juce::DragAndDropTarget::SourceDetails const& details)
 {
-  /* TODO
   //float const x = padding;
   float const y = padding;
   //float const w = getLocalBounds().getWidth() - padding * 2.0f;
   float const h = getLocalBounds().getHeight() - padding * 2.0f;
-
   float drag_y_amt = 1.0f - std::clamp((details.localPosition.y - y) / h, 0.0f, 1.0f);
 
-  if (_dragging_start_y)
+  if (_drag_start_y)
   {
-    // todo start/end
-    _gui->param_changing(_module_index, _module_slot, _start_y_param, 0, drag_y_amt);
+    _gui_start_y = drag_y_amt;
     repaint();
     return;
   }
 
-  if (_dragging_end_y)
-  {
-    _gui->param_changing(_module_index, _module_slot, _end_y_param, 0, drag_y_amt);
-    repaint();
-    return;
-  }
-
-  if (_dragging_point != -1)
-  {
-    _gui->param_changing(_module_index, _module_slot, _y_param, _sorted_points[_dragging_point].param_index, drag_y_amt);
-    repaint();
-    return;
-  }
-
-  if (_dragging_slope != -1)
-  {
-    _gui->param_changing(_module_index, _module_slot, _slope_param, 
-      _dragging_slope == _sorted_points.size() ? _sorted_points[_dragging_slope - 1].param_index + 1 : _sorted_points[_dragging_slope].param_index, 
-      drag_y_amt);
-    repaint();
-    return;
-  }
-  */
+  // TODO everything
 }
 
 bool
