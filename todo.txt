@@ -34,8 +34,8 @@ V disable regular env stuff when mseg
 V swap x/y for slope
 V limit the point count
 V double click slope = linear 
+V do value in tooltip
 
-do value in tooltip
 draw the grid
 deal with the dsp
 deal with retrigger etc

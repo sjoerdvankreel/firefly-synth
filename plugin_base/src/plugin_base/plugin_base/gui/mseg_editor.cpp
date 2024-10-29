@@ -140,6 +140,7 @@ mseg_editor::mouseDoubleClick(MouseEvent const& event)
   if (hit && hit_seg_slope)
   {
     _gui_segs[hit_seg].slope = 0.5f;
+    _gui->param_changed(_module_index, _module_slot, _slope_param, hit_seg, 0.5f);
     repaint();
     return;
   }
@@ -147,12 +148,28 @@ mseg_editor::mouseDoubleClick(MouseEvent const& event)
   // cannot delete the last one
   if (hit && hit_seg == _gui_segs.size() - 1) return;
 
+  auto update_plug_all_params = [this]() {
+    auto const& desc = _gui->automation_state()->desc();
+    _gui->automation_state()->begin_undo_region();
+    _gui->param_changed(_module_index, _module_slot, _count_param, 0, _current_seg_count);
+    for (int i = 0; i < _current_seg_count; i++)
+    {
+      _gui->param_changed(_module_index, _module_slot, _x_param, i, _gui_segs[i].x);
+      _gui->param_changed(_module_index, _module_slot, _y_param, i, _gui_segs[i].y);
+      _gui->param_changed(_module_index, _module_slot, _slope_param, i, _gui_segs[i].slope);
+    }
+    int this_module_global = desc.module_topo_to_index.at(_module_index) + _module_slot;
+    _gui->automation_state()->end_undo_region("Change", desc.modules[this_module_global].info.name + " MSEG Points");
+  };
+
   // case join  
   if(hit)
   {
     if (_gui_segs.size() > 1)
     {
       _gui_segs.erase(_gui_segs.begin() + hit_seg);
+      _current_seg_count--;
+      update_plug_all_params();
       repaint();
     }
     return;
@@ -175,6 +192,8 @@ mseg_editor::mouseDoubleClick(MouseEvent const& event)
       new_seg.y = 0.5f;
       new_seg.slope = 0.5f;
       _gui_segs.insert(_gui_segs.begin() + i, new_seg);
+      _current_seg_count++;
+      update_plug_all_params();
       repaint();
       break;
     }
