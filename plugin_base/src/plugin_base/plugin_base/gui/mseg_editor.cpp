@@ -88,8 +88,6 @@ mseg_editor::sloped_y_pos(float pos, int seg) const
   double const slope_bounded = exp_slope_min + slope_range * slope;
   double const exp = std::log(slope_bounded) / std::log(0.5);
   return y1 + std::pow(pos, exp) * (y2 - y1); 
-
-  // TODO DSP NOT needs to sort!
 }
 
 void 
@@ -136,10 +134,11 @@ mseg_editor::mouseDoubleClick(MouseEvent const& event)
   bool hit = hit_test(event, hit_start_y, hit_seg, hit_seg_slope);
   
   if (hit && hit_start_y) return;
+  if (hit && hit_seg_slope) return;
   if (hit && hit_seg == _gui_segs.size() - 1) return;
 
   // case join  
-  if(hit && !hit_seg_slope)
+  if(hit)
   {
     if (_gui_segs.size() > 1)
     {
@@ -244,7 +243,19 @@ mseg_editor::itemDragMove(juce::DragAndDropTarget::SourceDetails const& details)
     return;
   }
 
-  // TODO everything
+  if (_drag_seg == -1) 
+    return;
+
+  if (_drag_seg_slope)
+  {
+    _gui_segs[_drag_seg].slope = drag_y_amt;
+    repaint();
+    return;
+  }
+
+  _gui_segs[_drag_seg].y = drag_y_amt;
+  repaint();
+  return;
 }
 
 bool
@@ -310,8 +321,16 @@ mseg_editor::mouseMove(MouseEvent const& event)
 
   setTooltip("");
   setMouseCursor(MouseCursor::ParentCursor);
+
+  float const x = padding;
+  float const w = getLocalBounds().getWidth() - padding * 2.0f;
+
   if (!hit_test(event, hit_start_y, hit_seg, hit_seg_slope))
+  {
+    if (x < event.x && event.x < x + w)
+      setMouseCursor(MouseCursor::PointingHandCursor);
     return;
+  }
 
   setMouseCursor(MouseCursor::DraggingHandCursor);
   auto const& topo = *_gui->automation_state()->desc().plugin;

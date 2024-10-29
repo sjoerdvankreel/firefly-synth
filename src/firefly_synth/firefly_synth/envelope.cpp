@@ -982,6 +982,8 @@ void env_engine::process_mono_type_sync_trigger_mode(plugin_block& block, cv_cv_
 
 #if 0 // TODO figure out
 
+
+      // TODO DSP NOT needs to sort!
       for (int i = 0; i < mseg_max_seg_count - 1; i++)
         if(block_auto[param_mseg_on][i].step() != 0)
         {
