@@ -148,16 +148,45 @@ mseg_editor::mouseDown(MouseEvent const& event)
 void
 mseg_editor::mouseDoubleClick(MouseEvent const& event)
 {
-  /*
-  if (!hit_test(event)) return;
+  int hit_seg;
+  bool hit_start_y;
+  bool hit_seg_slope;
 
-  if (_hit_test_point >= 0)
+  bool hit = hit_test(event, hit_start_y, hit_seg, hit_seg_slope);
+  
+  if (hit && hit_start_y) return;
+  if (hit && hit_seg == _gui_segs.size() - 1) return;
+
+  // case join  
+  if(hit && !hit_seg_slope)
   {
-    _gui->param_changed(_module_index, _module_slot, _on_param, _sorted_points[_hit_test_point].param_index, 0);
-    repaint();
+    if (_gui_segs.size() > 1)
+    {
+      _gui_segs.erase(_gui_segs.begin() + hit_seg);
+      repaint();
+    }
+    return;
   }
-  TODO
-  */
+
+  // case splice
+  float const x = padding;
+  float const w = getLocalBounds().getWidth() - padding * 2.0f;
+
+  if (event.x <= x) return;
+  if (event.x >= x + w) return;
+
+  float new_norm_x = (event.x - x) / w;
+  for(int i = 0; i < _gui_segs.size(); i++)
+    if (new_norm_x < _gui_segs[i].x)
+    {
+      mseg_seg new_seg;
+      new_seg.x = new_norm_x;
+      new_seg.y = 0.5f;
+      new_seg.slope = 0.5f;
+      _gui_segs.insert(_gui_segs.begin() + i, new_seg);
+      repaint();
+      break;
+    }
 }
 
 void
