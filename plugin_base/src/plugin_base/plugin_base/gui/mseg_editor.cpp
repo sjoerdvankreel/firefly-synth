@@ -342,11 +342,26 @@ mseg_editor::mouseMove(MouseEvent const& event)
 
   setMouseCursor(MouseCursor::DraggingHandCursor);
   auto const& topo = *_gui->automation_state()->desc().plugin;
-  if (hit_start_y) setTooltip(topo.modules[_module_index].params[_start_y_param].info.tag.display_name);
+  if (hit_start_y)
+  {
+    std::string text = _gui->automation_state()->desc().plugin->modules[_module_index].params[_start_y_param].domain.raw_to_text(false, _gui_start_y);
+    setTooltip(topo.modules[_module_index].params[_start_y_param].info.tag.display_name + ": " + text);
+  }
   else if (hit_seg != -1)
   {
-    if(hit_seg_slope) setTooltip(topo.modules[_module_index].params[_slope_param].info.tag.display_name + " " + std::to_string(hit_seg + 1));
-    else setTooltip(topo.modules[_module_index].params[_y_param].info.tag.display_name + " " + std::to_string(hit_seg + 1));
+    if (hit_seg_slope)
+    {
+      std::string text = _gui->automation_state()->desc().plugin->modules[_module_index].params[_slope_param].domain.raw_to_text(false, _gui_segs[hit_seg].slope);
+      setTooltip(topo.modules[_module_index].params[_slope_param].info.tag.display_name + " " + std::to_string(hit_seg + 1) + ": " + text);
+    }
+    else
+    {
+      std::string text_x = _gui->automation_state()->desc().plugin->modules[_module_index].params[_x_param].domain.raw_to_text(false, _gui_segs[hit_seg].x);
+      std::string text_y = _gui->automation_state()->desc().plugin->modules[_module_index].params[_y_param].domain.raw_to_text(false, _gui_segs[hit_seg].y);
+      setTooltip(
+        topo.modules[_module_index].params[_x_param].info.tag.display_name + " " + std::to_string(hit_seg + 1) + ": " + text_x + ", " +
+        topo.modules[_module_index].params[_y_param].info.tag.display_name + " " + std::to_string(hit_seg + 1) + ": " + text_y);
+    }
   }
 
   repaint();
