@@ -241,18 +241,11 @@ mseg_editor::itemDropped(DragAndDropTarget::SourceDetails const& details)
 void 
 mseg_editor::itemDragMove(juce::DragAndDropTarget::SourceDetails const& details)
 {
-  //float const x = padding;
+  float const x = padding;
   float const y = padding;
-  //float const w = getLocalBounds().getWidth() - padding * 2.0f;
+  float const w = getLocalBounds().getWidth() - padding * 2.0f;
   float const h = getLocalBounds().getHeight() - padding * 2.0f;
   float drag_y_amt = 1.0f - std::clamp((details.localPosition.y - y) / h, 0.0f, 1.0f);
-
-  if (_drag_seg_slope)
-  {
-    float y1 = _drag_seg == 0 ? _gui_start_y : _gui_segs[_drag_seg - 1].y;
-    float y2 = _gui_segs[_drag_seg].y;
-    if (y1 > y2) drag_y_amt = 1.0f - drag_y_amt;
-  }
 
   if (_drag_start_y)
   {
@@ -261,19 +254,36 @@ mseg_editor::itemDragMove(juce::DragAndDropTarget::SourceDetails const& details)
     return;
   }
 
-  if (_drag_seg == -1) 
-    return;
-
-  if (_drag_seg_slope)
+  if (_drag_seg != -1 && _drag_seg_slope)
   {
+    float y1 = _drag_seg == 0 ? _gui_start_y : _gui_segs[_drag_seg - 1].y;
+    float y2 = _gui_segs[_drag_seg].y;
+    if (y1 > y2) drag_y_amt = 1.0f - drag_y_amt;
     _gui_segs[_drag_seg].slope = drag_y_amt;
     repaint();
     return;
   }
 
-  _gui_segs[_drag_seg].y = drag_y_amt;
-  repaint();
-  return;
+  // last seg - only drag y
+  if (_drag_seg != -1 && !_drag_seg_slope && _drag_seg == _gui_segs.size() - 1)
+  {
+    _gui_segs[_drag_seg].y = drag_y_amt;
+    repaint();
+    return;
+  }
+
+  // tricky as we should not move before/beyond prev/next seg
+  if (_drag_seg != -1 && !_drag_seg_slope)
+  {
+    float prev_x = _drag_seg == 0 ? 0.0f : _gui_segs[_drag_seg - 1].x;
+    float next_x = _gui_segs[_drag_seg + 1].x;
+    _gui_segs[_drag_seg].y = drag_y_amt;
+    float this_x = (details.localPosition.x - x) / w;
+    _gui_segs[_drag_seg].x = std::clamp(this_x, prev_x, next_x);
+    // TODO sort on drop
+    repaint();
+    return;
+  }
 }
 
 bool
