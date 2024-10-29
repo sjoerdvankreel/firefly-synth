@@ -236,6 +236,13 @@ mseg_editor::itemDragMove(juce::DragAndDropTarget::SourceDetails const& details)
   float const h = getLocalBounds().getHeight() - padding * 2.0f;
   float drag_y_amt = 1.0f - std::clamp((details.localPosition.y - y) / h, 0.0f, 1.0f);
 
+  if (_drag_seg_slope)
+  {
+    float y1 = _drag_seg == 0 ? _gui_start_y : _gui_segs[_drag_seg - 1].y;
+    float y2 = _gui_segs[_drag_seg].y;
+    if (y1 > y2) drag_y_amt = 1.0f - drag_y_amt;
+  }
+
   if (_drag_start_y)
   {
     _gui_start_y = drag_y_amt;

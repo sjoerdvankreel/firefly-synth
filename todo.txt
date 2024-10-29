@@ -31,6 +31,8 @@ mseg:
 V paint left right
 V select env length time/bars
 V disable regular env stuff when mseg
+V swap x/y for slope
+
 do value in tooltip
 draw the grid
 deal with the dsp
@@ -55,7 +57,7 @@ show tooltips on hover ie what are we editing
 double click slope = linear
 limit the point count
 do external editor
-swap x/y for slope
+drag x
 
 make a patch cleanup button
 update the routing graph for arp
