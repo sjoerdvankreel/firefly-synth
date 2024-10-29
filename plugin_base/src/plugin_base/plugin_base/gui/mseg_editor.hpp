@@ -38,14 +38,11 @@ public state_listener
 
   int const _module_index;
   int const _module_slot;
-  /*
   int const _start_y_param;
-  int const _end_y_param;
-  int const _on_param;
+  int const _count_param;
   int const _x_param;
   int const _y_param;
   int const _slope_param;
-  TODO */
 
   // index into gui copy of params
   /*
@@ -62,11 +59,11 @@ public state_listener
   float _gui_start_y = 0.0f;
   std::vector<mseg_seg> _gui_segs = {};
 
-  bool hit_test(juce::MouseEvent const& e);
-
   float sloped_y_pos(
     float pos, int seg) const;
-
+  bool hit_test(
+    juce::MouseEvent const& e, bool& hit_start_y,
+    int& hit_seg, bool& hit_seg_slope) const;
   void make_slope_path(
     float x, float y, float w, float h, 
     int seg, bool closed, juce::Path& path) const;
@@ -88,7 +85,7 @@ public:
   ~mseg_editor();
   mseg_editor(
     plugin_gui* gui, lnf* lnf, int module_index, int module_slot, 
-    int start_y_param, int end_y_param, int on_param, int x_param, int y_param, int slope_param);
+    int start_y_param, int count_param, int x_param, int y_param, int slope_param);
 };
 
 }

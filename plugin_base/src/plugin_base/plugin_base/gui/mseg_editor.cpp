@@ -12,11 +12,11 @@ static float const padding = point_size * 0.5f + 2;
 mseg_editor::
 mseg_editor(
   plugin_gui* gui, lnf* lnf, int module_index, int module_slot, 
-  int start_y_param, int end_y_param, int on_param, int x_param, int y_param, int slope_param):
+  int start_y_param, int count_param, int x_param, int y_param, int slope_param):
 _gui(gui), _lnf(lnf),
-_module_index(module_index), _module_slot(module_slot)/*, TODO
-_start_y_param(start_y_param), _end_y_param(end_y_param),
-_on_param(on_param), _x_param(x_param), _y_param(y_param), _slope_param(slope_param) */
+_module_index(module_index), _module_slot(module_slot),
+_start_y_param(start_y_param), _count_param(count_param),
+_x_param(x_param), _y_param(y_param), _slope_param(slope_param)
 {
   assert(gui != nullptr);
   assert(lnf != nullptr);
@@ -270,26 +270,19 @@ mseg_editor::itemDragMove(juce::DragAndDropTarget::SourceDetails const& details)
 }
 
 bool
-mseg_editor::hit_test(MouseEvent const& e)
+mseg_editor::hit_test(
+  MouseEvent const& e, bool& hit_start_y,
+  int& hit_seg, bool& hit_seg_slope) const
 {
-  /* TODO
   float const x = padding;
   float const y = padding;
+  float const start_y = _gui_start_y;
   float const w = getLocalBounds().getWidth() - padding * 2.0f;
   float const h = getLocalBounds().getHeight() - padding * 2.0f;
 
-  auto const state = _gui->automation_state();
-  float end_y = state->get_plain_at(_module_index, _module_slot, _end_y_param, 0).real();
-  float start_y = state->get_plain_at(_module_index, _module_slot, _start_y_param, 0).real();
-
-  _hit_test_point = -1;
-  _hit_test_slope = -1;
-  _hit_test_end_y = false;
-  _hit_test_start_y = false;
-
-  calc_sorted_points();
-
-  // todo this is bound to cause overlapping on near points ...
+  hit_seg = -1;
+  hit_start_y = false;
+  hit_seg_slope = false;
 
   float start_y_x1 = x - point_size / 2;
   float start_y_y1 = y + h - start_y * h - point_size / 2;
@@ -297,85 +290,35 @@ mseg_editor::hit_test(MouseEvent const& e)
   float start_y_y2 = start_y_y1 + point_size;
   if (start_y_x1 <= e.x && e.x <= start_y_x2 && start_y_y1 <= e.y && e.y <= start_y_y2)
   {
-    _hit_test_point = -1;
-    _hit_test_slope = -1;
-    _hit_test_end_y = false;
-    _hit_test_start_y = true;
+    hit_start_y = true;
     return true;
   }
 
-  float start_slope_x1 = x + (0.0f + _sorted_points[0].x) * 0.5f * w - point_size / 2;
-  float start_slope_y1 = y + h - h * sloped_y_pos(0.5f, 0, start_y, _sorted_points[0].y) - point_size / 2;
-  float start_slope_x2 = start_slope_x1 + point_size;
-  float start_slope_y2 = start_slope_y1 + point_size;
-  if (start_slope_x1 <= e.x && e.x <= start_slope_x2 && start_slope_y1 <= e.y && e.y <= start_slope_y2)
+  for (int i = 0; i < _gui_segs.size(); i++)
   {
-    _hit_test_point = -1;
-    _hit_test_slope = 0;
-    _hit_test_end_y = false;
-    _hit_test_start_y = false;
-    return true;
-  }
+    float prev_x = i == 0 ? 0.0f : _gui_segs[i - 1].x;
+    float this_slope_x1 = x + (prev_x + _gui_segs[i].x) * 0.5f * w - point_size / 2;
+    float this_slope_y1 = y + h - h * sloped_y_pos(0.5f, i) - point_size / 2;
+    float this_slope_x2 = this_slope_x1 + point_size;
+    float this_slope_y2 = this_slope_y1 + point_size;
+    if (this_slope_x1 <= e.x && e.x <= this_slope_x2 && this_slope_y1 <= e.y && e.y <= this_slope_y2)
+    {
+      hit_seg = i;
+      hit_seg_slope = true;
+      return true;
+    }
 
-  for (int i = 0; i < _sorted_points.size(); i++)
-  {
-    float this_point_x1 = x + w * _sorted_points[i].x - point_size / 2;
-    float this_point_y1 = y + h - h * _sorted_points[i].y - point_size / 2;
+    float this_point_x1 = x + w * _gui_segs[i].x - point_size / 2;
+    float this_point_y1 = y + h - h * _gui_segs[i].y - point_size / 2;
     float this_point_x2 = this_point_x1 + point_size;
     float this_point_y2 = this_point_y1 + point_size;
     if (this_point_x1 <= e.x && e.x <= this_point_x2 && this_point_y1 <= e.y && e.y <= this_point_y2)
     {
-      _hit_test_point = i;
-      _hit_test_slope = -1;
-      _hit_test_end_y = false;
-      _hit_test_start_y = false;
+      hit_seg = i;
+      hit_seg_slope = false;
       return true;
     }
-
-    if (i > 0)
-    {
-      float this_slope_x1 = x + (_sorted_points[i - 1].x + _sorted_points[i].x) * 0.5f * w - point_size / 2;
-      float this_slope_y1 = y + h - h * sloped_y_pos(0.5f, i, _sorted_points[i - 1].y, _sorted_points[i].y) - point_size / 2;
-      float this_slope_x2 = this_slope_x1 + point_size;
-      float this_slope_y2 = this_slope_y1 + point_size;
-      if (this_slope_x1 <= e.x && e.x <= this_slope_x2 && this_slope_y1 <= e.y && e.y <= this_slope_y2)
-      {
-        _hit_test_point = -1;
-        _hit_test_slope = i;
-        _hit_test_end_y = false;
-        _hit_test_start_y = false;
-        return true;
-      }
-    }
   }
-
-  float last_slope_x1 = x + (_sorted_points[_sorted_points.size() - 1].x + 1.0f) * 0.5f * w - point_size / 2;
-  float last_slope_y1 = y + h - h * sloped_y_pos(0.5f, _sorted_points.size(), _sorted_points[_sorted_points.size() - 1].y, end_y) - point_size / 2;
-  float last_slope_x2 = last_slope_x1 + point_size;
-  float last_slope_y2 = last_slope_y1 + point_size;
-  if (last_slope_x1 <= e.x && e.x <= last_slope_x2 && last_slope_y1 <= e.y && e.y <= last_slope_y2)
-  {
-    _hit_test_point = -1;
-    _hit_test_slope = _sorted_points.size();
-    _hit_test_end_y = false;
-    _hit_test_start_y = false;
-    return true;
-  }
-
-  float end_y_x1 = x + w - 1 - point_size / 2;
-  float end_y_y1 = y + h - end_y * h - point_size / 2;
-  float end_y_x2 = end_y_x1 + point_size;
-  float end_y_y2 = end_y_y1 + point_size;
-  if (end_y_x1 <= e.x && e.x <= end_y_x2 && end_y_y1 <= e.y && e.y <= end_y_y2)
-  {
-    _hit_test_point = -1;
-    _hit_test_slope = -1;
-    _hit_test_end_y = true;
-    _hit_test_start_y = false;
-    return true;
-  }
-
-  */
 
   return false;
 }
@@ -383,39 +326,25 @@ mseg_editor::hit_test(MouseEvent const& e)
 void
 mseg_editor::mouseMove(MouseEvent const& event)
 {
-  /* TODO
-  int prev_hovered_point = _hit_test_point;
-  int prev_hovered_slope = _hit_test_slope;
-  bool prev_hovered_end_y = _hit_test_end_y;
-  bool prev_hovered_start_y = _hit_test_start_y;
-  auto const& topo = *_gui->automation_state()->desc().plugin;
+  int hit_seg;
+  bool hit_start_y;
+  bool hit_seg_slope;
 
-  setMouseCursor(MouseCursor::ParentCursor);
   setTooltip("");
-  if (hit_test(event))
+  setMouseCursor(MouseCursor::ParentCursor);
+  if (!hit_test(event, hit_start_y, hit_seg, hit_seg_slope))
+    return;
+
+  setMouseCursor(MouseCursor::DraggingHandCursor);
+  auto const& topo = *_gui->automation_state()->desc().plugin;
+  if (hit_start_y) setTooltip(topo.modules[_module_index].params[_start_y_param].info.tag.display_name);
+  else if (hit_seg != -1)
   {
-    setMouseCursor(MouseCursor::DraggingHandCursor);
-    if (_hit_test_end_y) setTooltip(topo.modules[_module_index].params[_end_y_param].info.tag.display_name);
-    if (_hit_test_start_y) setTooltip(topo.modules[_module_index].params[_start_y_param].info.tag.display_name);
-    if (_hit_test_point != -1) setTooltip(
-      topo.modules[_module_index].params[_y_param].info.tag.display_name + " " +
-      std::to_string(_sorted_points[_hit_test_point].param_index + 1));
-    if (_hit_test_slope != -1)
-    {
-      int slope_index = _hit_test_slope == _sorted_points.size() ?
-        _sorted_points[_hit_test_slope - 1].param_index + 1 :
-        _sorted_points[_hit_test_slope].param_index; 
-      setTooltip(
-        topo.modules[_module_index].params[_slope_param].info.tag.display_name + " " +
-        std::to_string(slope_index + 1));
-    }
+    if(hit_seg_slope) setTooltip(topo.modules[_module_index].params[_slope_param].info.tag.display_name + " " + std::to_string(hit_seg + 1));
+    else setTooltip(topo.modules[_module_index].params[_y_param].info.tag.display_name + " " + std::to_string(hit_seg + 1));
   }
 
-  if (_hit_test_point != prev_hovered_point || _hit_test_slope != prev_hovered_slope ||
-    _hit_test_start_y != prev_hovered_start_y || _hit_test_end_y != prev_hovered_end_y)
-    repaint();
-
-    */
+  repaint();
 }
 
 void
