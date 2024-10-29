@@ -446,14 +446,6 @@ mseg_editor::paint(Graphics& g)
   g.setColour(_lnf->colors().mseg_grid);
   g.drawRect(getLocalBounds(), 1.0f);
 
-  // start to point 0
-  g.setColour(_lnf->colors().mseg_line);
-  make_slope_path(x, y, w, h, 0, false, sloped_path);
-  g.strokePath(sloped_path, PathStrokeType(line_thickness));
-  g.setColour(_lnf->colors().mseg_area);
-  make_slope_path(x, y, w, h, 0, true, sloped_path);
-  g.fillPath(sloped_path);
-
   // start y point marker
   //g.setColour(_hit_test_start_y ? _lnf->colors().mseg_line.withAlpha(0.5f) : _lnf->colors().mseg_point.withAlpha(0.5f));
   g.setColour(_lnf->colors().mseg_point.withAlpha(0.5f));
@@ -462,63 +454,32 @@ mseg_editor::paint(Graphics& g)
   g.setColour(_lnf->colors().mseg_point);
   g.drawEllipse(x - point_size / 2, y + h - start_y * h - point_size / 2, point_size, point_size, 1);
 
-  // point marker
-  //g.setColour(_hit_test_point == 0 ? _lnf->colors().mseg_line.withAlpha(0.5f) : _lnf->colors().mseg_point.withAlpha(0.5f));
-  g.setColour(_lnf->colors().mseg_point.withAlpha(0.5f));
-  g.fillEllipse(x + w * _sorted_points[0].x - point_size / 2, y + h - h * _sorted_points[0].y - point_size / 2, point_size, point_size);
-  //g.setColour(_hit_test_point == 0 ? _lnf->colors().mseg_line : _lnf->colors().mseg_point);
-  g.setColour(_lnf->colors().mseg_point);
-  g.drawEllipse(x + w * _sorted_points[0].x - point_size / 2, y + h - h * _sorted_points[0].y - point_size / 2, point_size, point_size, 1);
-
-  // slope marker
-  slope_marker_x = x + (0.0f + _sorted_points[0].x) * 0.5f * w - point_size / 2;
-  slope_marker_y = y + h - h * sloped_y_pos(0.5f, 0, start_y, _sorted_points[0].y) - point_size / 2;
-  g.setColour(_hit_test_slope == 0 ? _lnf->colors().mseg_line : _lnf->colors().mseg_point);
-  g.drawEllipse(slope_marker_x, slope_marker_y, point_size, point_size, 1.0f);
-
-  // mid sections
-  for (int i = 1; i < _sorted_points.size(); i++)
+  // actual segments
+  for (int i = 0; i < _gui_segs.size(); i++)
   {
-    // point n - 1 to n
     g.setColour(_lnf->colors().mseg_line);
-    make_slope_path(x, y, w, h, _sorted_points[i - 1], _sorted_points[i], i, false, sloped_path);
+    make_slope_path(x, y, w, h, i, false, sloped_path);
     g.strokePath(sloped_path, PathStrokeType(line_thickness));
     g.setColour(_lnf->colors().mseg_area);
-    make_slope_path(x, y, w, h, _sorted_points[i - 1], _sorted_points[i], i, true, sloped_path);
+    make_slope_path(x, y, w, h, i, true, sloped_path);
     g.fillPath(sloped_path);
 
     // point marker
-    g.setColour(_hit_test_point == i ? _lnf->colors().mseg_line.withAlpha(0.5f) : _lnf->colors().mseg_point.withAlpha(0.5f));
-    g.fillEllipse(x + w * _sorted_points[i].x - point_size / 2, y + h - h * _sorted_points[i].y - point_size / 2, point_size, point_size);
-    g.setColour(_hit_test_point == i ? _lnf->colors().mseg_line : _lnf->colors().mseg_point.withAlpha(0.5f));
-    g.drawEllipse(x + w * _sorted_points[i].x - point_size / 2, y + h - h * _sorted_points[i].y - point_size / 2, point_size, point_size, 1);
+    //g.setColour(_hit_test_point == i ? _lnf->colors().mseg_line.withAlpha(0.5f) : _lnf->colors().mseg_point.withAlpha(0.5f));
+    g.setColour(_lnf->colors().mseg_point.withAlpha(0.5f));
+    g.fillEllipse(x + w * _gui_segs[i].x - point_size / 2, y + h - h * _gui_segs[i].y - point_size / 2, point_size, point_size);
+    //g.setColour(_hit_test_point == i ? _lnf->colors().mseg_line : _lnf->colors().mseg_point.withAlpha(0.5f));
+    g.setColour(_lnf->colors().mseg_point.withAlpha(0.5f));
+    g.drawEllipse(x + w * _gui_segs[i].x - point_size / 2, y + h - h * _gui_segs[i].y - point_size / 2, point_size, point_size, 1);
 
     // slope marker
-    slope_marker_x = x + (_sorted_points[i - 1].x + _sorted_points[i].x) * 0.5f * w - point_size / 2;
-    slope_marker_y = y + h - h * sloped_y_pos(0.5f, i, _sorted_points[i - 1].y, _sorted_points[i].y) - point_size / 2;
-    g.setColour(_hit_test_slope == i ? _lnf->colors().mseg_line : _lnf->colors().mseg_point);
+    float prev_x = i == 0 ? 0.0f : _gui_segs[i - 1].x;
+    slope_marker_x = x + (prev_x + _gui_segs[i].x) * 0.5f * w - point_size / 2;
+    slope_marker_y = y + h - h * sloped_y_pos(0.5f, i) - point_size / 2;
+    //g.setColour(_hit_test_slope == i ? _lnf->colors().mseg_line : _lnf->colors().mseg_point);
+    g.setColour(_lnf->colors().mseg_point);
     g.drawEllipse(slope_marker_x, slope_marker_y, point_size, point_size, 1.0f);
   }
-
-  // last to end point
-  g.setColour(_lnf->colors().mseg_line);
-  make_slope_path(x, y, w, h, _sorted_points[_sorted_points.size() - 1], { 1.0f, end_y }, _sorted_points.size(), false, sloped_path);
-  g.strokePath(sloped_path, PathStrokeType(line_thickness));
-  g.setColour(_lnf->colors().mseg_area);
-  make_slope_path(x, y, w, h, _sorted_points[_sorted_points.size() - 1], { 1.0f, end_y }, _sorted_points.size(), true, sloped_path);
-  g.fillPath(sloped_path);
-
-  // point marker
-  g.setColour(_hit_test_end_y ? _lnf->colors().mseg_line.withAlpha(0.5f) : _lnf->colors().mseg_point.withAlpha(0.5f));
-  g.fillEllipse(x + w - 1 - point_size / 2, y + h - end_y * h - point_size / 2, point_size, point_size);
-  g.setColour(_hit_test_end_y ? _lnf->colors().mseg_line: _lnf->colors().mseg_point);
-  g.drawEllipse(x + w - 1 - point_size / 2, y + h - end_y * h - point_size / 2, point_size, point_size, 1);
-
-  // slope marker
-  slope_marker_x = x + (_sorted_points[_sorted_points.size() - 1].x + 1.0f) * 0.5f * w - point_size / 2;
-  slope_marker_y = y + h - h * sloped_y_pos(0.5f, _sorted_points.size(), _sorted_points[_sorted_points.size() - 1].y, end_y) - point_size / 2;
-  g.setColour(_hit_test_slope == _sorted_points.size() ? _lnf->colors().mseg_line : _lnf->colors().mseg_point);
-  g.drawEllipse(slope_marker_x, slope_marker_y, point_size, point_size, 1.0f);
 }
 
 }
