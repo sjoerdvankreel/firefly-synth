@@ -157,7 +157,6 @@ mseg_editor::make_slope_path(
 void
 mseg_editor::mouseDoubleClick(MouseEvent const& event)
 {
-#if 0 // TODO
   int hit_seg;
   bool hit_start_y;
   bool hit_seg_slope;
@@ -215,11 +214,11 @@ mseg_editor::mouseDoubleClick(MouseEvent const& event)
 
   float new_norm_x = (event.x - x) / w;
   for(int i = 0; i < _gui_segs.size(); i++)
-    if (new_norm_x < _gui_segs[i].x)
+    if (new_norm_x < get_seg_norm_x(i))
     {
       mseg_seg new_seg;
-      new_seg.x = new_norm_x;
       new_seg.y = 0.5f;
+      new_seg.w = 10.0f;
       new_seg.slope = 0.5f;
       _gui_segs.insert(_gui_segs.begin() + i, new_seg);
       _current_seg_count++;
@@ -227,7 +226,6 @@ mseg_editor::mouseDoubleClick(MouseEvent const& event)
       repaint();
       break;
     }
-#endif
 }
 
 void
