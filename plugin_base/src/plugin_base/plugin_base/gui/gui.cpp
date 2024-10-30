@@ -2,6 +2,7 @@
 #include <plugin_base/gui/lnf.hpp>
 #include <plugin_base/gui/controls.hpp>
 #include <plugin_base/gui/containers.hpp>
+#include <plugin_base/gui/mseg_editor.hpp>
 #include <plugin_base/topo/plugin.hpp>
 #include <plugin_base/shared/io_user.hpp>
 #include <plugin_base/shared/io_plugin.hpp>
@@ -193,6 +194,7 @@ gui_undo_listener::mouseUp(MouseEvent const& event)
   if(dynamic_cast<Label*>(event.originalComponent)) return; // needed for comboboxes
   if(dynamic_cast<Button*>(event.originalComponent)) return;
   if(dynamic_cast<TabBarButton*>(event.originalComponent)) return;
+  if(dynamic_cast<mseg_editor*>(event.originalComponent)) return;
   if(dynamic_cast<param_component*>(event.originalComponent)) return;
 
   juce::PopupMenu menu;

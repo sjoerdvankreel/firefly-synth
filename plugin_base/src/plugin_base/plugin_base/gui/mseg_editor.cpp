@@ -282,19 +282,27 @@ mseg_editor::mouseUp(juce::MouseEvent const& event)
       options = options.withTargetComponent(this);
       menu.setLookAndFeel(&getLookAndFeel());
 
+      int param_index;
       auto lnf = dynamic_cast<plugin_base::lnf*>(&getLookAndFeel());
       auto colors = lnf->module_gui_colors(desc.plugin->modules[_module_index].info.tag.full_name);
-      int index = desc.param_mappings.topo_to_index[_module_index][_module_slot][_start_y_param][0];
-      auto host_menu = desc.menu_handler->context_menu(desc.params[index]->info.id_hash);
-      if (!host_menu || host_menu->root.children.empty()) return;
+      
+      if (hit_start_y || hit_seg_slope)
+      {
+        if(hit_start_y)
+          param_index = desc.param_mappings.topo_to_index[_module_index][_module_slot][_start_y_param][0];
+        else
+          param_index = desc.param_mappings.topo_to_index[_module_index][_module_slot][_slope_param][hit_seg];
+        auto host_menu = desc.menu_handler->context_menu(desc.params[param_index]->info.id_hash);
+        if (!host_menu || host_menu->root.children.empty()) return;
 
-      menu.addColouredItem(-1, "Host", colors.tab_text, false, false, nullptr);
-      fill_host_menu(menu, host_menu->root.children);
+        menu.addColouredItem(-1, "Host", colors.tab_text, false, false, nullptr);
+        fill_host_menu(menu, host_menu->root.children);
 
-      menu.showMenuAsync(options, [this, host_menu = host_menu.release()](int id) {
-        if(id > 0) host_menu->clicked(id - 1);
-        delete host_menu;
-      });
+        menu.showMenuAsync(options, [this, host_menu = host_menu.release()](int id) {
+          if (id > 0) host_menu->clicked(id - 1);
+          delete host_menu;
+        });
+      }
     }
 
     return;
