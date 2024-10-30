@@ -10,7 +10,7 @@ namespace plugin_base {
 
 struct mseg_seg
 {
-  float x;
+  float w;
   float y;
   float slope;
 };
@@ -19,7 +19,7 @@ struct mseg_seg
 // the plug must provide:
 // 1 start-y and count param
 // 1 grid_x and 1 grid_y param for snapping
-// counted X, Y, Slope parameters (at least 1 so section count = N)
+// counted Width, Y, Slope parameters (at least 1 so section count = N)
 // optional 1 sustain point in case of envelope
 // we keep a local copy of all param values and
 // just flush the entire thing to the plug param state
@@ -39,7 +39,7 @@ public state_listener
   int const _module_slot;
   int const _start_y_param;
   int const _count_param;
-  int const _x_param;
+  int const _w_param;
   int const _y_param;
   int const _slope_param;
   int const _grid_x_param;
@@ -60,6 +60,14 @@ public state_listener
 
   float sloped_y_pos(
     float pos, int seg) const;
+  float get_seg_total_x(
+    int seg) const;
+
+  float get_seg_last_total_x() const 
+  { return get_seg_total_x(_gui_segs.size() - 1); }
+  float get_seg_norm_x(int seg) const
+  { return get_seg_total_x(seg) / get_seg_last_total_x(); }
+
   bool hit_test(
     juce::MouseEvent const& e, bool& hit_start_y,
     int& hit_seg, bool& hit_seg_slope) const;
@@ -84,7 +92,7 @@ public:
   ~mseg_editor();
   mseg_editor(
     plugin_gui* gui, lnf* lnf, int module_index, int module_slot, 
-    int start_y_param, int count_param, int x_param, int y_param, 
+    int start_y_param, int count_param, int w_param, int y_param, 
     int slope_param, int grid_x_param, int grid_y_param);
 };
 

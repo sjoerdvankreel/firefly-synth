@@ -35,7 +35,7 @@ enum {
   param_attack_time, param_attack_tempo, param_attack_slope, 
   param_decay_time, param_decay_tempo, param_decay_slope, 
   param_release_time, param_release_tempo, param_release_slope,
-  param_mseg_start_y, param_mseg_count, param_mseg_x, param_mseg_y,
+  param_mseg_start_y, param_mseg_count, param_mseg_w, param_mseg_y,
   param_mseg_slope, param_mseg_grid_x, param_mseg_grid_y };
 
 static constexpr bool is_dahdsr_exp_slope(int mode) { 
@@ -590,7 +590,7 @@ env_topo(int section, gui_position const& pos)
   mseg_section.gui.custom_gui_factory = [](plugin_gui* gui, lnf* lnf, int module_slot, component_store store) {
     return &store_component<mseg_editor>(
       store, gui, lnf, module_env, module_slot, param_mseg_start_y, param_mseg_count, 
-      param_mseg_x, param_mseg_y, param_mseg_slope, param_mseg_grid_x, param_mseg_grid_y); };
+      param_mseg_w, param_mseg_y, param_mseg_slope, param_mseg_grid_x, param_mseg_grid_y); };
   auto& mseg_start_y = result.params.emplace_back(make_param(
     make_topo_info_basic("{BB1A9691-DA7D-460D-BDF3-7D99F272CD05}", "MSEG Start Y", param_mseg_start_y, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.0, 2, ""),
@@ -603,17 +603,17 @@ env_topo(int section, gui_position const& pos)
     make_param_gui_none(section_mseg)));
   mseg_count.gui.bindings.enabled.bind_params({ param_on, param_mode }, [](auto const& vs) { return vs[0] != 0 && vs[1] == mode_mseg; });
   mseg_count.info.description = "TODO";
-  auto& mseg_x = result.params.emplace_back(make_param(
-    make_topo_info_basic("{CFF71CB5-C93F-44BE-AC42-1814D96B291A}", "MSEG X", param_mseg_x, mseg_max_seg_count),
-    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.0, 2, ""),
+  auto& mseg_w = result.params.emplace_back(make_param(
+    make_topo_info_basic("{CFF71CB5-C93F-44BE-AC42-1814D96B291A}", "MSEG Width", param_mseg_w, mseg_max_seg_count),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_linear(1.0, 100.0, 10.0, 2, ""),
     make_param_gui_none(section_mseg)));
-  mseg_x.gui.bindings.enabled.bind_params({ param_on, param_mode }, [](auto const& vs) { return vs[0] != 0 && vs[1] == mode_mseg; });
-  mseg_x.info.description = "TODO";
-  mseg_x.domain.default_selector_ = [](int, int s) {
-    if (s == 0) return "25";
-    if (s == 1) return "50";
-    if (s == 2) return "100";
-    return "0.0";
+  mseg_w.gui.bindings.enabled.bind_params({ param_on, param_mode }, [](auto const& vs) { return vs[0] != 0 && vs[1] == mode_mseg; });
+  mseg_w.info.description = "TODO";
+  mseg_w.domain.default_selector_ = [](int, int s) {
+    if (s == 0) return "10";
+    if (s == 1) return "10";
+    if (s == 2) return "10";
+    return "0";
   };
   auto& mseg_y = result.params.emplace_back(make_param(
     make_topo_info_basic("{60F4F483-F5C9-486D-8D6B-E4098B08FDC4}", "MSEG Y", param_mseg_y, mseg_max_seg_count),
@@ -982,8 +982,14 @@ void env_engine::process_mono_type_sync_trigger_mode(plugin_block& block, cv_cv_
       _mseg_seg_count = block_auto[param_mseg_count][0].step();
       _mseg_start_y = block.normalized_to_raw_fast<domain_type::identity>(module_env, param_mseg_start_y, (*(*modulation)[param_mseg_start_y][0])[block.start_frame]);
 
+#if 0 // TODO figure out
       for (int i = 0; i < _mseg_seg_count; i++)
       {
+        auto get_mseg_norm_x = [](int seg) {
+          float nx = 0.0f;
+          float total = 0.0f;
+          for(int i = 0; i < )
+        };
         float from_x = i == 0? 0.0f: block.normalized_to_raw_fast<domain_type::identity>(module_env, param_mseg_x, (*(*modulation)[param_mseg_x][i - 1])[block.start_frame]);
         float to_x = block.normalized_to_raw_fast<domain_type::identity>(module_env, param_mseg_x, (*(*modulation)[param_mseg_x][i])[block.start_frame]);
         float slope = block.normalized_to_raw_fast<domain_type::identity>(module_env, param_mseg_slope, (*(*modulation)[param_mseg_slope][i])[block.start_frame]);
@@ -991,6 +997,7 @@ void env_engine::process_mono_type_sync_trigger_mode(plugin_block& block, cv_cv_
         _mseg_time[i] = (to_x - from_x) * _mseg_total_time;
         init_slope_exp(slope, _mseg_exp[i]);
       }
+#endif
     }
   }
 

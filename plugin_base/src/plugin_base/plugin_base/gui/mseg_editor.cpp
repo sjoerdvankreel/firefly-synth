@@ -12,12 +12,12 @@ static float const padding = point_size * 0.5f + 2;
 mseg_editor::
 mseg_editor(
   plugin_gui* gui, lnf* lnf, int module_index, int module_slot, 
-  int start_y_param, int count_param, int x_param, int y_param, 
+  int start_y_param, int count_param, int w_param, int y_param, 
   int slope_param, int grid_x_param, int grid_y_param):
 _gui(gui), _lnf(lnf),
 _module_index(module_index), _module_slot(module_slot),
 _start_y_param(start_y_param), _count_param(count_param),
-_x_param(x_param), _y_param(y_param), _slope_param(slope_param), 
+_w_param(w_param), _y_param(y_param), _slope_param(slope_param), 
 _grid_x_param(grid_x_param), _grid_y_param(grid_y_param)
 {
   assert(gui != nullptr);
@@ -31,24 +31,28 @@ _grid_x_param(grid_x_param), _grid_y_param(grid_y_param)
   assert(is_step_gte_0(param_list[grid_x_param]));
   assert(is_step_gte_0(param_list[grid_y_param]));
 
-  auto is_linear_unit = [](param_topo const& pt) { 
+  // todo not identity in the dsp
+  auto check_w_param = [](param_topo const& pt) {
+    return pt.domain.type == domain_type::linear && pt.domain.min == 1 && pt.domain.max == 100; };
+  assert(check_w_param(param_list[w_param]));
+
+  auto is_linear_unit = [](param_topo const& pt) {
     return pt.domain.type == domain_type::identity && pt.domain.min == 0 && pt.domain.max == 1; };
   assert(is_linear_unit(param_list[start_y_param]));
-  assert(is_linear_unit(param_list[x_param]));
   assert(is_linear_unit(param_list[y_param]));
   assert(is_linear_unit(param_list[slope_param]));
   assert(param_list[start_y_param].info.slot_count == 1);
-  assert(param_list[x_param].info.slot_count >= 1);
-  assert(param_list[y_param].info.slot_count == param_list[x_param].info.slot_count);
-  assert(param_list[slope_param].info.slot_count == param_list[x_param].info.slot_count); 
+  assert(param_list[w_param].info.slot_count >= 1);
+  assert(param_list[y_param].info.slot_count == param_list[w_param].info.slot_count);
+  assert(param_list[slope_param].info.slot_count == param_list[w_param].info.slot_count); 
 
-  _max_seg_count = param_list[x_param].info.slot_count;
+  _max_seg_count = param_list[w_param].info.slot_count;
   init_from_plug_state();
 
   _gui->automation_state()->add_listener(_module_index, _module_slot, _count_param, 0, this);
   _gui->automation_state()->add_listener(_module_index, _module_slot, _start_y_param, 0, this);
-  for (int i = 0; i < _gui->automation_state()->desc().plugin->modules[_module_index].params[_x_param].info.slot_count; i++)
-    _gui->automation_state()->add_listener(_module_index, _module_slot, _x_param, i, this);
+  for (int i = 0; i < _gui->automation_state()->desc().plugin->modules[_module_index].params[_w_param].info.slot_count; i++)
+    _gui->automation_state()->add_listener(_module_index, _module_slot, _w_param, i, this);
   for (int i = 0; i < _gui->automation_state()->desc().plugin->modules[_module_index].params[_y_param].info.slot_count; i++)
     _gui->automation_state()->add_listener(_module_index, _module_slot, _y_param, i, this);
   for (int i = 0; i < _gui->automation_state()->desc().plugin->modules[_module_index].params[_slope_param].info.slot_count; i++)
@@ -60,8 +64,8 @@ mseg_editor::
 {
   _gui->automation_state()->remove_listener(_module_index, _module_slot, _count_param, 0, this);
   _gui->automation_state()->remove_listener(_module_index, _module_slot, _start_y_param, 0, this);
-  for (int i = 0; i < _gui->automation_state()->desc().plugin->modules[_module_index].params[_x_param].info.slot_count; i++)
-    _gui->automation_state()->remove_listener(_module_index, _module_slot, _x_param, i, this);
+  for (int i = 0; i < _gui->automation_state()->desc().plugin->modules[_module_index].params[_w_param].info.slot_count; i++)
+    _gui->automation_state()->remove_listener(_module_index, _module_slot, _w_param, i, this);
   for (int i = 0; i < _gui->automation_state()->desc().plugin->modules[_module_index].params[_y_param].info.slot_count; i++)
     _gui->automation_state()->remove_listener(_module_index, _module_slot, _y_param, i, this);
   for (int i = 0; i < _gui->automation_state()->desc().plugin->modules[_module_index].params[_slope_param].info.slot_count; i++)
@@ -77,7 +81,7 @@ mseg_editor::init_from_plug_state()
   for (int i = 0; i < _current_seg_count; i++)
   {
     mseg_seg seg = {};
-    seg.x = _gui->automation_state()->get_plain_at(_module_index, _module_slot, _x_param, i).real();
+    seg.w = _gui->automation_state()->get_plain_at(_module_index, _module_slot, _w_param, i).real();
     seg.y = _gui->automation_state()->get_plain_at(_module_index, _module_slot, _y_param, i).real();
     seg.slope = _gui->automation_state()->get_plain_at(_module_index, _module_slot, _slope_param, i).real();
     _gui_segs.push_back(seg);
@@ -90,6 +94,15 @@ mseg_editor::state_changed(int index, plain_value plain)
   if (_drag_seg != -1 || _drag_start_y) return;
   _is_dirty = true;
   repaint();
+}
+
+float
+mseg_editor::get_seg_total_x(int seg) const
+{
+  float result = 0.0f;
+  for (int i = 0; i <= seg; i++)
+    result += _gui_segs[i].w;
+  return result;
 }
 
 float 
@@ -112,8 +125,8 @@ mseg_editor::make_slope_path(
   int seg, bool closed, juce::Path& path) const
 {
   path = {};
-  float x1_norm = seg == 0? 0.0f: _gui_segs[seg - 1].x;
-  float x2_norm = _gui_segs[seg].x;
+  float x1_norm = seg == 0 ? 0.0f : get_seg_norm_x(seg - 1);
+  float x2_norm = get_seg_norm_x(seg);
   float y1_norm = seg == 0? _gui_start_y: _gui_segs[seg - 1].y;
 
   int const pixel_count = (int)std::ceil((x2_norm - x1_norm) * w);
@@ -144,6 +157,7 @@ mseg_editor::make_slope_path(
 void
 mseg_editor::mouseDoubleClick(MouseEvent const& event)
 {
+#if 0 // TODO
   int hit_seg;
   bool hit_start_y;
   bool hit_seg_slope;
@@ -170,7 +184,7 @@ mseg_editor::mouseDoubleClick(MouseEvent const& event)
     _gui->param_changed(_module_index, _module_slot, _count_param, 0, _current_seg_count);
     for (int i = 0; i < _current_seg_count; i++)
     {
-      _gui->param_changed(_module_index, _module_slot, _x_param, i, _gui_segs[i].x);
+      _gui->param_changed(_module_index, _module_slot, _w_param, i, _gui_segs[i].w);
       _gui->param_changed(_module_index, _module_slot, _y_param, i, _gui_segs[i].y);
       _gui->param_changed(_module_index, _module_slot, _slope_param, i, _gui_segs[i].slope);
     }
@@ -213,6 +227,7 @@ mseg_editor::mouseDoubleClick(MouseEvent const& event)
       repaint();
       break;
     }
+#endif
 }
 
 void
@@ -247,7 +262,7 @@ mseg_editor::mouseDrag(MouseEvent const& event)
     else
     {
       _undo_token = _gui->automation_state()->begin_undo_region();
-      _gui->param_begin_changes(_module_index, _module_slot, _x_param, _drag_seg);
+      _gui->param_begin_changes(_module_index, _module_slot, _w_param, _drag_seg);
       _gui->param_begin_changes(_module_index, _module_slot, _y_param, _drag_seg);
     }
   }
@@ -306,24 +321,24 @@ mseg_editor::mouseUp(juce::MouseEvent const& event)
       }
       else
       {
-        int param_x_index = desc.param_mappings.topo_to_index[_module_index][_module_slot][_x_param][hit_seg];
-        auto host_menu_x = desc.menu_handler->context_menu(desc.params[param_x_index]->info.id_hash);
-        if (!host_menu_x || host_menu_x->root.children.empty()) return;
+        int param_w_index = desc.param_mappings.topo_to_index[_module_index][_module_slot][_w_param][hit_seg];
+        auto host_menu_w = desc.menu_handler->context_menu(desc.params[param_w_index]->info.id_hash);
+        if (!host_menu_w || host_menu_w->root.children.empty()) return;
 
         int param_y_index = desc.param_mappings.topo_to_index[_module_index][_module_slot][_y_param][hit_seg];
         auto host_menu_y = desc.menu_handler->context_menu(desc.params[param_y_index]->info.id_hash);
         if (!host_menu_y || host_menu_y->root.children.empty()) return;
 
-        menu.addColouredItem(-1, "Host X", colors.tab_text, false, false, nullptr);
-        fill_host_menu(menu, 0, host_menu_x->root.children);
-        host_menu_x.release();
+        menu.addColouredItem(-1, "Host W", colors.tab_text, false, false, nullptr);
+        fill_host_menu(menu, 0, host_menu_w->root.children);
+        host_menu_w.release();
 
         menu.addColouredItem(-1, "Host Y", colors.tab_text, false, false, nullptr);
         fill_host_menu(menu, 10000, host_menu_y->root.children);
         host_menu_y.release();
 
         // reaper doesnt like both menus active so recreate them on the spot
-        menu.showMenuAsync(options, [this, param_x_index, param_y_index](int id) {
+        menu.showMenuAsync(options, [this, param_w_index, param_y_index](int id) {
           auto const& desc = _gui->automation_state()->desc();
           if (id > 10000)
           {
@@ -332,8 +347,8 @@ mseg_editor::mouseUp(juce::MouseEvent const& event)
           }
           else if (id > 0)
           {
-            auto host_menu_x = desc.menu_handler->context_menu(desc.params[param_x_index]->info.id_hash);
-            host_menu_x->clicked(id - 1);
+            auto host_menu_w = desc.menu_handler->context_menu(desc.params[param_w_index]->info.id_hash);
+            host_menu_w->clicked(id - 1);
           }
         });
       }
@@ -347,7 +362,7 @@ mseg_editor::mouseUp(juce::MouseEvent const& event)
   else if(_drag_seg != -1)
   {
     _gui->param_end_changes(_module_index, _module_slot, _y_param, _drag_seg);
-    _gui->param_end_changes(_module_index, _module_slot, _x_param, _drag_seg);
+    _gui->param_end_changes(_module_index, _module_slot, _w_param, _drag_seg);
     int this_module_global = desc.module_topo_to_index.at(_module_index) + _module_slot;
     _gui->automation_state()->end_undo_region(_undo_token, "Change", desc.modules[this_module_global].info.name + " MSEG Point " + std::to_string(_drag_seg + 1));
     _undo_token = -1;
@@ -364,6 +379,7 @@ mseg_editor::mouseUp(juce::MouseEvent const& event)
 void 
 mseg_editor::itemDragMove(juce::DragAndDropTarget::SourceDetails const& details)
 {
+#if 0 // TODO
   float const x = padding;
   float const y = padding;
   float const w = getLocalBounds().getWidth() - padding * 2.0f;
@@ -412,6 +428,7 @@ mseg_editor::itemDragMove(juce::DragAndDropTarget::SourceDetails const& details)
     repaint();
     return;
   }
+#endif
 }
 
 bool
@@ -441,8 +458,8 @@ mseg_editor::hit_test(
 
   for (int i = 0; i < _gui_segs.size(); i++)
   {
-    float prev_x = i == 0 ? 0.0f : _gui_segs[i - 1].x;
-    float this_slope_x1 = x + (prev_x + _gui_segs[i].x) * 0.5f * w - point_size / 2;
+    float prev_x = i == 0 ? 0.0f : get_seg_norm_x(i - 1);
+    float this_slope_x1 = x + (prev_x + get_seg_norm_x(i)) * 0.5f * w - point_size / 2;
     float this_slope_y1 = y + h - h * sloped_y_pos(0.5f, i) - point_size / 2;
     float this_slope_x2 = this_slope_x1 + point_size;
     float this_slope_y2 = this_slope_y1 + point_size;
@@ -453,7 +470,7 @@ mseg_editor::hit_test(
       return true;
     }
 
-    float this_point_x1 = x + w * _gui_segs[i].x - point_size / 2;
+    float this_point_x1 = x + w * get_seg_norm_x(i) - point_size / 2;
     float this_point_y1 = y + h - h * _gui_segs[i].y - point_size / 2;
     float this_point_x2 = this_point_x1 + point_size;
     float this_point_y2 = this_point_y1 + point_size;
@@ -504,10 +521,10 @@ mseg_editor::mouseMove(MouseEvent const& event)
     }
     else
     {
-      std::string text_x = _gui->automation_state()->desc().plugin->modules[_module_index].params[_x_param].domain.raw_to_text(false, _gui_segs[hit_seg].x);
+      std::string text_w = _gui->automation_state()->desc().plugin->modules[_module_index].params[_w_param].domain.raw_to_text(false, _gui_segs[hit_seg].w);
       std::string text_y = _gui->automation_state()->desc().plugin->modules[_module_index].params[_y_param].domain.raw_to_text(false, _gui_segs[hit_seg].y);
       setTooltip(
-        topo.modules[_module_index].params[_x_param].info.tag.display_name + " " + std::to_string(hit_seg + 1) + ": " + text_x + ", " +
+        topo.modules[_module_index].params[_w_param].info.tag.display_name + " " + std::to_string(hit_seg + 1) + ": " + text_w + ", " +
         topo.modules[_module_index].params[_y_param].info.tag.display_name + " " + std::to_string(hit_seg + 1) + ": " + text_y);
     }
   }
@@ -568,13 +585,13 @@ mseg_editor::paint(Graphics& g)
 
     // point marker
     g.setColour(_lnf->colors().mseg_point.withAlpha(0.5f));
-    g.fillEllipse(x + w * _gui_segs[i].x - point_size / 2, y + h - h * _gui_segs[i].y - point_size / 2, point_size, point_size);
+    g.fillEllipse(x + w * get_seg_norm_x(i) - point_size / 2, y + h - h * _gui_segs[i].y - point_size / 2, point_size, point_size);
     g.setColour(_lnf->colors().mseg_point.withAlpha(0.5f));
-    g.drawEllipse(x + w * _gui_segs[i].x - point_size / 2, y + h - h * _gui_segs[i].y - point_size / 2, point_size, point_size, 1);
+    g.drawEllipse(x + w * get_seg_norm_x(i) - point_size / 2, y + h - h * _gui_segs[i].y - point_size / 2, point_size, point_size, 1);
 
     // slope marker
-    float prev_x = i == 0 ? 0.0f : _gui_segs[i - 1].x;
-    slope_marker_x = x + (prev_x + _gui_segs[i].x) * 0.5f * w - point_size / 2;
+    float prev_x = i == 0 ? 0.0f : get_seg_norm_x(i - 1);
+    slope_marker_x = x + (prev_x + get_seg_norm_x(i)) * 0.5f * w - point_size / 2;
     slope_marker_y = y + h - h * sloped_y_pos(0.5f, i) - point_size / 2;
     g.setColour(_lnf->colors().mseg_point);
     g.drawEllipse(slope_marker_x, slope_marker_y, point_size, point_size, 1.0f);
