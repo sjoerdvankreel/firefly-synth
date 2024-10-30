@@ -262,6 +262,8 @@ mseg_editor::mouseDrag(MouseEvent const& event)
       _gui->param_begin_changes(_module_index, _module_slot, _slope_param, _drag_seg);
     else
     {
+      _drag_seg_initial_x = event.x;
+      _drag_seg_initial_w = _gui_segs[_drag_seg].w;
       _undo_token = _gui->automation_state()->begin_undo_region();
       _gui->param_begin_changes(_module_index, _module_slot, _w_param, _drag_seg);
       _gui->param_begin_changes(_module_index, _module_slot, _y_param, _drag_seg);
@@ -269,7 +271,6 @@ mseg_editor::mouseDrag(MouseEvent const& event)
   }
   else 
     assert(false);
-
   Point<int> offset(image.getWidth() / 2 + point_size, image.getHeight() / 2 + point_size);
   startDragging(String(mseg_magic), this, ScaledImage(image), false, &offset);
 }
@@ -372,6 +373,8 @@ mseg_editor::mouseUp(juce::MouseEvent const& event)
   _drag_seg = -1;
   _drag_seg_slope = false;
   _drag_start_y = false;
+  _drag_seg_initial_x = 0.0f;
+  _drag_seg_initial_w = 0.0f;
 
   setMouseCursor(MouseCursor::ParentCursor);
   repaint();
@@ -380,9 +383,7 @@ mseg_editor::mouseUp(juce::MouseEvent const& event)
 void 
 mseg_editor::itemDragMove(juce::DragAndDropTarget::SourceDetails const& details)
 {
-  float const x = padding;
   float const y = padding;
-  float const w = getLocalBounds().getWidth() - padding * 2.0f;
   float const h = getLocalBounds().getHeight() - padding * 2.0f;
   float drag_y_amt = 1.0f - std::clamp((details.localPosition.y - y) / h, 0.0f, 1.0f);
 
@@ -407,8 +408,18 @@ mseg_editor::itemDragMove(juce::DragAndDropTarget::SourceDetails const& details)
 
   if (_drag_seg != -1 && !_drag_seg_slope)
   {
-    float norm_event_x = std::clamp((details.localPosition.x - x) / w, 0.0f, 1.0f);
-    float new_width = seg_w_min + norm_event_x * (seg_w_max - seg_w_min);
+    float sensitivity = 200.0f;
+    float position_bipolar = details.localPosition.x - _drag_seg_initial_x;
+    position_bipolar = std::clamp(position_bipolar, -sensitivity, sensitivity);
+    position_bipolar /= sensitivity;
+
+    float new_width_norm;
+    float old_width_norm = (_drag_seg_initial_w - seg_w_min) / (seg_w_max - seg_w_min);
+    if (position_bipolar >= 0)
+      new_width_norm = old_width_norm + (1.0f - old_width_norm) * position_bipolar;
+    else
+      new_width_norm = old_width_norm * (position_bipolar + 1.0f);
+    float new_width = seg_w_min + new_width_norm * (seg_w_max - seg_w_min);
     _gui_segs[_drag_seg].w = new_width;
     _gui->param_changing(_module_index, _module_slot, _w_param, _drag_seg, new_width);
     _gui_segs[_drag_seg].y = drag_y_amt;
