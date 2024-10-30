@@ -316,14 +316,25 @@ mseg_editor::mouseUp(juce::MouseEvent const& event)
 
         menu.addColouredItem(-1, "Host X", colors.tab_text, false, false, nullptr);
         fill_host_menu(menu, 0, host_menu_x->root.children);
+        host_menu_x.release();
+
         menu.addColouredItem(-1, "Host Y", colors.tab_text, false, false, nullptr);
         fill_host_menu(menu, 10000, host_menu_y->root.children);
+        host_menu_y.release();
 
-        menu.showMenuAsync(options, [this, host_menu_x = host_menu_x.release(), host_menu_y = host_menu_y.release()](int id) {
-          if (id > 10000) host_menu_y->clicked(id - 1 - 10000);
-          else if(id > 0) host_menu_x->clicked(id - 1);
-          delete host_menu_x;
-          delete host_menu_y;
+        // reaper doesnt like both menus active so recreate them on the spot
+        menu.showMenuAsync(options, [this, param_x_index, param_y_index](int id) {
+          auto const& desc = _gui->automation_state()->desc();
+          if (id > 10000)
+          {
+            auto host_menu_y = desc.menu_handler->context_menu(desc.params[param_y_index]->info.id_hash);
+            host_menu_y->clicked(id - 1 - 10000);
+          }
+          else if (id > 0)
+          {
+            auto host_menu_x = desc.menu_handler->context_menu(desc.params[param_x_index]->info.id_hash);
+            host_menu_x->clicked(id - 1);
+          }
         });
       }
     }
