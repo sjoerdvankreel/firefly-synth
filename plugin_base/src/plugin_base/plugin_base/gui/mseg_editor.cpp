@@ -260,12 +260,11 @@ mseg_editor::mouseUp(juce::MouseEvent const& event)
 {
   if (_drag_start_y) _gui->param_end_changes(_module_index, _module_slot, _start_y_param, 0);
   else if (_drag_seg != -1 && _drag_seg_slope) _gui->param_end_changes(_module_index, _module_slot, _slope_param, _drag_seg);
-  else
+  else if(_drag_seg != -1)
   {
-    assert(_drag_seg != -1);
     auto const& desc = _gui->automation_state()->desc();
-    _gui->param_end_changes(_module_index, _module_slot, _x_param, _drag_seg);
     _gui->param_end_changes(_module_index, _module_slot, _y_param, _drag_seg);
+    _gui->param_end_changes(_module_index, _module_slot, _x_param, _drag_seg);
     int this_module_global = desc.module_topo_to_index.at(_module_index) + _module_slot;
     _gui->automation_state()->end_undo_region(_undo_token, "Change", desc.modules[this_module_global].info.name + " MSEG Point " + std::to_string(_drag_seg + 1));
     _undo_token = -1;
@@ -441,17 +440,18 @@ mseg_editor::paint(Graphics& g)
   float const w = getLocalBounds().getWidth() - padding * 2.0f;
   float const h = getLocalBounds().getHeight() - padding * 2.0f;
 
-  Path sloped_path;
-  float slope_marker_x;
-  float slope_marker_y;
-  float start_y = _gui_start_y;
-  float end_y = _gui_segs[_gui_segs.size() - 1].y;
-
   if (_is_dirty)
   {
     init_from_plug_state();
     _is_dirty = false;
   }
+
+  Path sloped_path;
+  float slope_marker_x;
+  float slope_marker_y;
+
+  float start_y = _gui_start_y;
+  float end_y = _gui_segs[_gui_segs.size() - 1].y;
 
   // bg
   g.setColour(_lnf->colors().mseg_background);

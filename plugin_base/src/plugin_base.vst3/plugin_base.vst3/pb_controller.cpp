@@ -54,7 +54,7 @@ _extra_state(gui_extra_state_keyset(*_desc->plugin))
 void 
 pb_controller::gui_param_begin_changes(int index) 
 { 
-  _undo_token = _automation_state.begin_undo_region();
+  _undo_tokens.push(_automation_state.begin_undo_region());
   beginEdit(automation_state().desc().param_mappings.index_to_tag[index]);
 }
 
@@ -62,8 +62,8 @@ void
 pb_controller::gui_param_end_changes(int index)
 {
   endEdit(automation_state().desc().param_mappings.index_to_tag[index]);
-  automation_state().end_undo_region(_undo_token, "Change", automation_state().desc().params[index]->full_name);
-  _undo_token = -1;
+  automation_state().end_undo_region(_undo_tokens.top(), "Change", automation_state().desc().params[index]->full_name);
+  _undo_tokens.pop();
 }
 
 IPlugView* PLUGIN_API
