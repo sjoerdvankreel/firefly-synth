@@ -43,28 +43,28 @@ V fix the undo stuff
 V recheck all the set_raw/plain_at blah, should be moved through gui_param_etc
 V do the actual editing
 V deal with the dsp
+V up the vno
+V do host context menu for params
+V what can be modulated ?
+V better defaults
+V make the mseg editor react to automation (but NOT modulation!_)
+V test the heck out of it in debug
+V thoroughly test the case when we add/rem points! 
+X disable stuff based on point count and last
 
-up the vno
-do host context menu for params
 allow more slope, but - do we need to convert the existing env ?
 draw the grid
 deal with retrigger etc
 snap to grid ?
-what can be modulated ?
 do sustain marker
 mseg as lfo
 see if we can paint the vcv matrices more often based on static stuff
 same for vlfo/venv ==> stick to last note or something ?
 vlfo smooth not paint good (prolly looking for note rand?)
 why does it keep on dirtying the graph state?
-better defaults
 do sustain/release on env + all the mono-mode stuff
-make the mseg editor react to automation (but NOT modulation!_)
-thoroughly test the case when we add/rem points! 
-test the heck out of it in debug
 do external editor
 do docs
-disable stuff based on point count and last
 
 make a patch cleanup button
 update the routing graph for arp
@@ -74,12 +74,6 @@ arp new note = reset table pos yes/no?
 do more keyboard tracking just do it -- also trackmode mul/add
 do global unison subvoice index as a mod source
 turn on stuff when dragging (e.g. basic sin, dist skew etc)
-
-mseg:
-- for lfo
-- for env + sustain point
-- update the mode description in the gui
-
 
 wishlist:
 use fftw
@@ -94,7 +88,6 @@ show effective modulation in the ui for clap param mod
 Feedback FM - but needs per-sample processing, not block
 
 wishlist sometime:
-mseg
 midi mpe
 cheby shaper
 phaser/flanger/chorus
