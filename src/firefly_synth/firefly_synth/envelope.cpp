@@ -454,7 +454,7 @@ env_topo(int section, gui_position const& pos)
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   mseg_time.gui.bindings.enabled.bind_params({ param_on, param_mode, param_sync }, [](auto const& vs) { return vs[0] != 0 && vs[1] == mode_mseg && vs[2] == 0; });
   mseg_time.gui.bindings.visible.bind_params({ param_on, param_mode, param_sync }, [](auto const& vs) { return vs[1] == mode_mseg && vs[2] == 0; });
-  mseg_time.info.description = "TODO";
+  mseg_time.info.description = "Total time of the MSEG generator.";
   auto& mseg_sync = result.params.emplace_back(make_param(
     make_topo_info("{CA478736-06B5-411F-9CCA-BE3D25C1E447}", true, "MSEG Tempo", "Tempo", "MSEG Tempo", param_mseg_length_sync, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_timesig_default(false, { 4, 1 }, { 1, 1 }),
@@ -463,7 +463,7 @@ env_topo(int section, gui_position const& pos)
   mseg_sync.gui.submenu = make_timesig_submenu(mseg_sync.domain.timesigs);
   mseg_sync.gui.bindings.enabled.bind_params({ param_on, param_mode, param_sync }, [](auto const& vs) { return vs[0] != 0 && vs[1] == mode_mseg && vs[2] != 0; });
   mseg_sync.gui.bindings.visible.bind_params({ param_on, param_mode, param_sync }, [](auto const& vs) { return vs[1] == mode_mseg && vs[2] != 0; });
-  mseg_sync.info.description = "TODO";
+  mseg_sync.info.description = "Total bars of the MSEG generator.";
 
   auto& dahdr_section = result.sections.emplace_back(make_param_section(section_dahdr,
     make_topo_tag_basic("{96BDC7C2-7DF4-4CC5-88F9-2256975D70AC}", "DAHDR"),
@@ -596,25 +596,25 @@ env_topo(int section, gui_position const& pos)
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.0, 2, ""),
     make_param_gui_none(section_mseg)));
   mseg_start_y.gui.bindings.enabled.bind_params({ param_on, param_mode }, [](auto const& vs) { return vs[0] != 0 && vs[1] == mode_mseg; });
-  mseg_start_y.info.description = "TODO";
+  mseg_start_y.info.description = "MSEG generator start level.";
   auto& mseg_count = result.params.emplace_back(make_param(
     make_topo_info_basic("{6A21F9F6-BBEE-4030-9CF9-342BEF176D4A}", "MSEG Count", param_mseg_count, 1),
     make_param_dsp_voice(param_automate::none), make_domain_step(1, mseg_max_seg_count, 3, 0),
     make_param_gui_none(section_mseg)));
   mseg_count.gui.bindings.enabled.bind_params({ param_on, param_mode }, [](auto const& vs) { return vs[0] != 0 && vs[1] == mode_mseg; });
-  mseg_count.info.description = "TODO";
+  mseg_count.info.description = "MSEG generator segment count.";
   auto& mseg_w = result.params.emplace_back(make_param(
     make_topo_info_basic("{2A14D13D-F617-46B0-81C6-CCC5274FD64D}", "MSEG Width", param_mseg_w, mseg_max_seg_count),
     make_param_dsp_accurate(param_automate::modulate), make_domain_linear(1.0, 100.0, 10.0, 2, ""),
     make_param_gui_none(section_mseg)));
   mseg_w.gui.bindings.enabled.bind_params({ param_on, param_mode }, [](auto const& vs) { return vs[0] != 0 && vs[1] == mode_mseg; });
-  mseg_w.info.description = "TODO";
+  mseg_w.info.description = "MSEG generator segment width.";
   auto& mseg_y = result.params.emplace_back(make_param(
     make_topo_info_basic("{60F4F483-F5C9-486D-8D6B-E4098B08FDC4}", "MSEG Y", param_mseg_y, mseg_max_seg_count),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.0, 2, ""),
     make_param_gui_none(section_mseg)));
   mseg_y.gui.bindings.enabled.bind_params({ param_on, param_mode }, [](auto const& vs) { return vs[0] != 0 && vs[1] == mode_mseg; });
-  mseg_y.info.description = "TODO";
+  mseg_y.info.description = "MSEG generator segment level.";
   mseg_y.domain.default_selector_ = [](int, int s) {
     if (s == 0) return "100";
     if (s == 1) return "50";
@@ -626,7 +626,7 @@ env_topo(int section, gui_position const& pos)
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 2, ""),
     make_param_gui_none(section_mseg)));
   mseg_slope.gui.bindings.enabled.bind_params({ param_on, param_mode }, [](auto const& vs) { return vs[0] != 0 && vs[1] == mode_mseg; });
-  mseg_slope.info.description = "TODO";
+  mseg_slope.info.description = "MSEG generator segment slope.";
   mseg_slope.domain.default_selector_ = [](int, int s) {
     if (s == 0) return "25";
     if (s == 1) return "50";
@@ -638,13 +638,13 @@ env_topo(int section, gui_position const& pos)
     make_param_dsp_voice(param_automate::none), make_domain_step(0, 15, 0, 0),
     make_param_gui_none(section_mseg)));
   mseg_grid_x.gui.bindings.enabled.bind_params({ param_on, param_mode }, [](auto const& vs) { return vs[0] != 0 && vs[1] == mode_mseg; });
-  mseg_grid_x.info.description = "TODO";
+  mseg_grid_x.info.description = "MSEG generator horizontal snapping grid size.";
   auto& mseg_grid_y = result.params.emplace_back(make_param(
     make_topo_info_basic("{45B0EC7D-AB84-48AB-9CB3-F526FCFBE485}", "MSEG Grid Y", param_mseg_grid_y, 1),
     make_param_dsp_voice(param_automate::none), make_domain_step(0, 15, 0, 0),
     make_param_gui_none(section_mseg)));
   mseg_grid_y.gui.bindings.enabled.bind_params({ param_on, param_mode }, [](auto const& vs) { return vs[0] != 0 && vs[1] == mode_mseg; });
-  mseg_grid_y.info.description = "TODO";
+  mseg_grid_y.info.description = "MSEG generator vertical snapping grid size";
 
   return result;
 }

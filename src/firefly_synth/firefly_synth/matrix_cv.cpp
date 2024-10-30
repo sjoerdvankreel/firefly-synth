@@ -285,7 +285,7 @@ static float
 scale_to_longest_mod_source(
   plugin_state const& state, param_topo_mapping const& mapping,
   std::vector<module_output_mapping> const& sources, 
-  float& max_dahd, float& max_env, // todo rename in caller
+  float& max_dahd, float& max_env,
   int& module_index, int& module_slot)
 {
   auto const& map = mapping;
@@ -293,10 +293,10 @@ scale_to_longest_mod_source(
 
   // scale to longest env or lfo, prefer env
   bool is_mseg;
-  float dahd = 0.01f; // TODO
+  float dahd = 0.01f; // TODO ?
   float total_length = 0.01f;
   float result = 0.01f;
-  max_dahd = 0.01f; // TODO
+  max_dahd = 0.01f; // TODO ?
   max_env = 0.01f;
   module_slot = -1;
   module_index = -1;
