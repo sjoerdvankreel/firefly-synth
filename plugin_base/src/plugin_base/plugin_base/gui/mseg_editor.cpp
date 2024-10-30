@@ -34,7 +34,6 @@ _grid_x_param(grid_x_param), _grid_y_param(grid_y_param)
   assert(is_step_gte_0(param_list[grid_x_param]));
   assert(is_step_gte_0(param_list[grid_y_param]));
 
-  // todo not identity in the dsp
   auto check_w_param = [](param_topo const& pt) {
     return pt.domain.type == domain_type::linear && pt.domain.min == seg_w_min && pt.domain.max == seg_w_max; };
   assert(check_w_param(param_list[w_param]));

@@ -976,22 +976,23 @@ void env_engine::process_mono_type_sync_trigger_mode(plugin_block& block, cv_cv_
       _mseg_seg_count = block_auto[param_mseg_count][0].step();
       _mseg_start_y = block.normalized_to_raw_fast<domain_type::identity>(module_env, param_mseg_start_y, (*(*modulation)[param_mseg_start_y][0])[block.start_frame]);
 
-#if 0 // TODO figure out
+      float mseg_total_length = 0;
+      float mseg_seg_x[mseg_max_seg_count];
       for (int i = 0; i < _mseg_seg_count; i++)
       {
-        auto get_mseg_norm_x = [](int seg) {
-          float nx = 0.0f;
-          float total = 0.0f;
-          for(int i = 0; i < )
-        };
-        float from_x = i == 0? 0.0f: block.normalized_to_raw_fast<domain_type::identity>(module_env, param_mseg_x, (*(*modulation)[param_mseg_x][i - 1])[block.start_frame]);
-        float to_x = block.normalized_to_raw_fast<domain_type::identity>(module_env, param_mseg_x, (*(*modulation)[param_mseg_x][i])[block.start_frame]);
+        mseg_total_length += block.normalized_to_raw_fast<domain_type::linear>(module_env, param_mseg_w, (*(*modulation)[param_mseg_w][i])[block.start_frame]);
+        mseg_seg_x[i] = mseg_total_length;
+      }
+
+      for (int i = 0; i < _mseg_seg_count; i++)
+      {
+        float to_x = mseg_seg_x[i] / mseg_total_length;
+        float from_x = i == 0 ? 0.0f : mseg_seg_x[i - 1] / mseg_total_length;
         float slope = block.normalized_to_raw_fast<domain_type::identity>(module_env, param_mseg_slope, (*(*modulation)[param_mseg_slope][i])[block.start_frame]);
         _mseg_y[i] = block.normalized_to_raw_fast<domain_type::identity>(module_env, param_mseg_y, (*(*modulation)[param_mseg_y][i])[block.start_frame]);
         _mseg_time[i] = (to_x - from_x) * _mseg_total_time;
         init_slope_exp(slope, _mseg_exp[i]);
       }
-#endif
     }
   }
 
