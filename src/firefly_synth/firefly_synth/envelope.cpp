@@ -604,17 +604,11 @@ env_topo(int section, gui_position const& pos)
   mseg_count.gui.bindings.enabled.bind_params({ param_on, param_mode }, [](auto const& vs) { return vs[0] != 0 && vs[1] == mode_mseg; });
   mseg_count.info.description = "TODO";
   auto& mseg_w = result.params.emplace_back(make_param(
-    make_topo_info_basic("{CFF71CB5-C93F-44BE-AC42-1814D96B291A}", "MSEG Width", param_mseg_w, mseg_max_seg_count),
+    make_topo_info_basic("{2A14D13D-F617-46B0-81C6-CCC5274FD64D}", "MSEG Width", param_mseg_w, mseg_max_seg_count),
     make_param_dsp_accurate(param_automate::modulate), make_domain_linear(1.0, 100.0, 10.0, 2, ""),
     make_param_gui_none(section_mseg)));
   mseg_w.gui.bindings.enabled.bind_params({ param_on, param_mode }, [](auto const& vs) { return vs[0] != 0 && vs[1] == mode_mseg; });
   mseg_w.info.description = "TODO";
-  mseg_w.domain.default_selector_ = [](int, int s) {
-    if (s == 0) return "10";
-    if (s == 1) return "10";
-    if (s == 2) return "10";
-    return "0";
-  };
   auto& mseg_y = result.params.emplace_back(make_param(
     make_topo_info_basic("{60F4F483-F5C9-486D-8D6B-E4098B08FDC4}", "MSEG Y", param_mseg_y, mseg_max_seg_count),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.0, 2, ""),
