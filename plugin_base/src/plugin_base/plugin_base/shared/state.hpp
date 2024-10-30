@@ -63,9 +63,9 @@ public:
 
   void undo(int index);
   void redo(int index);
-  void begin_undo_region();
   void discard_undo_region();
-  void end_undo_region(std::string const& action, std::string const& item);
+  int begin_undo_region();
+  void end_undo_region(int token, std::string const& action, std::string const& item);
 
   plugin_desc const& desc() const { return *_desc; }
   jarray<plain_value, 4> const& state() const { return _state; }

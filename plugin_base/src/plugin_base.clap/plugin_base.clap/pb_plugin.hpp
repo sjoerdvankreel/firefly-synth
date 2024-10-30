@@ -54,6 +54,8 @@ public gui_param_listener
   std::vector<modulation_output> _modulation_outputs = {};
   std::unique_ptr<modulation_output_queue> _modulation_output_queue = {};
 
+  int _undo_token = -1;
+
   // see param_state_changed and timerCallback()
   // and vst3 pb_controller _inside_set_param_normalized
   // for the gory details

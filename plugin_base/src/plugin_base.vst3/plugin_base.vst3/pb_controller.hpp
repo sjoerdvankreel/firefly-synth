@@ -48,6 +48,8 @@ public Steinberg::Vst::EditControllerEx1
   std::vector<modulation_output> _modulation_outputs_to_gui = {};
   std::array<modulation_output, modulation_output_param_count> _modulation_outputs_from_audio = {};
 
+  int _undo_token = -1;
+
   // see param_state_changed and setParamNormalized
   // when host comes at us with an automation value, that is
   // reported through setParamNormalized, which through a

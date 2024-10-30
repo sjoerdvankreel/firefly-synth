@@ -80,6 +80,7 @@ mseg_editor::init_from_plug_state()
 void 
 mseg_editor::state_changed(int index, plain_value plain)
 {
+  if (_drag_seg != -1 || _drag_start_y) return;
   _is_dirty = true;
   repaint();
 }
@@ -158,7 +159,7 @@ mseg_editor::mouseDoubleClick(MouseEvent const& event)
 
   auto update_plug_all_params = [this](std::string const& action) {
     auto const& desc = _gui->automation_state()->desc();
-    _gui->automation_state()->begin_undo_region();
+    int undo_token = _gui->automation_state()->begin_undo_region();
     _gui->param_changed(_module_index, _module_slot, _count_param, 0, _current_seg_count);
     for (int i = 0; i < _current_seg_count; i++)
     {
@@ -167,7 +168,7 @@ mseg_editor::mouseDoubleClick(MouseEvent const& event)
       _gui->param_changed(_module_index, _module_slot, _slope_param, i, _gui_segs[i].slope);
     }
     int this_module_global = desc.module_topo_to_index.at(_module_index) + _module_slot;
-    _gui->automation_state()->end_undo_region(action, desc.modules[this_module_global].info.name + " MSEG Point");
+    _gui->automation_state()->end_undo_region(undo_token, action, desc.modules[this_module_global].info.name + " MSEG Point");
   };
 
   // case join  
@@ -236,7 +237,7 @@ mseg_editor::mouseDrag(MouseEvent const& event)
       _gui->param_begin_changes(_module_index, _module_slot, _slope_param, _drag_seg);
     else
     {
-      _gui->automation_state()->begin_undo_region();
+      _undo_token = _gui->automation_state()->begin_undo_region();
       _gui->param_begin_changes(_module_index, _module_slot, _x_param, _drag_seg);
       _gui->param_begin_changes(_module_index, _module_slot, _y_param, _drag_seg);
     }
@@ -254,8 +255,8 @@ mseg_editor::isInterestedInDragSource(DragAndDropTarget::SourceDetails const& de
   return details.description == String(mseg_magic);
 }
 
-void
-mseg_editor::itemDropped(DragAndDropTarget::SourceDetails const& details)
+void 
+mseg_editor::mouseUp(juce::MouseEvent const& event)
 {
   if (_drag_start_y) _gui->param_end_changes(_module_index, _module_slot, _start_y_param, 0);
   else if (_drag_seg != -1 && _drag_seg_slope) _gui->param_end_changes(_module_index, _module_slot, _slope_param, _drag_seg);
@@ -266,7 +267,8 @@ mseg_editor::itemDropped(DragAndDropTarget::SourceDetails const& details)
     _gui->param_end_changes(_module_index, _module_slot, _x_param, _drag_seg);
     _gui->param_end_changes(_module_index, _module_slot, _y_param, _drag_seg);
     int this_module_global = desc.module_topo_to_index.at(_module_index) + _module_slot;
-    _gui->automation_state()->end_undo_region("Change", desc.modules[this_module_global].info.name + " MSEG Point " + std::to_string(_drag_seg + 1));
+    _gui->automation_state()->end_undo_region(_undo_token, "Change", desc.modules[this_module_global].info.name + " MSEG Point " + std::to_string(_drag_seg + 1));
+    _undo_token = -1;
   }
 
   _drag_seg = -1;

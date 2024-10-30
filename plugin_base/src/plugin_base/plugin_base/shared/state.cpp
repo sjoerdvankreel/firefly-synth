@@ -129,20 +129,23 @@ plugin_state::discard_undo_region()
   _undo_entries.clear();
 }
 
-void
+int
 plugin_state::begin_undo_region()
 {
+  int result = _undo_region;
   if(_undo_region == 0) _undo_state_before = jarray<plain_value, 4>(_state);
   _undo_region++;
   assert(_undo_region > 0);
+  return result;
 }
 
 void 
-plugin_state::end_undo_region(std::string const& action, std::string const& item)
+plugin_state::end_undo_region(int token, std::string const& action, std::string const& item)
 {
   int const max_undo_size = 32;
   assert(_undo_region > 0);
   _undo_region--;
+  assert(token == _undo_region);
   if(_undo_region != 0) return;
   auto entry = std::make_shared<undo_entry>();
   entry->item = item;

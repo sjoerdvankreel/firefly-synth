@@ -49,6 +49,7 @@ public state_listener
   bool _drag_seg_slope = false;
   bool _is_dirty = false;
 
+  int _undo_token = -1;
   int _max_seg_count = -1;
   int _current_seg_count = -1;
   float _gui_start_y = 0.0f;
@@ -70,11 +71,12 @@ public:
   void paint(juce::Graphics& g) override;
   void state_changed(int index, plain_value plain) override;
 
+  void mouseUp(juce::MouseEvent const& event) override;
   void mouseDrag(juce::MouseEvent const& event) override;
   void mouseMove(juce::MouseEvent const& event) override;
   void mouseDoubleClick(juce::MouseEvent const& event) override;
 
-  void itemDropped(juce::DragAndDropTarget::SourceDetails const& details) override;
+  void itemDropped(juce::DragAndDropTarget::SourceDetails const& details) override {};
   void itemDragMove(juce::DragAndDropTarget::SourceDetails const& details) override;
   bool isInterestedInDragSource(juce::DragAndDropTarget::SourceDetails const& details) override;
 

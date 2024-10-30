@@ -236,9 +236,9 @@ gui_undo_listener::mouseUp(MouseEvent const& event)
       auto load_result = plugin_io_load_instance_state(clip_data, new_state, true);
       if (load_result.ok() && !load_result.warnings.size())
       {
-        _gui->automation_state()->begin_undo_region();
+        int undo_token = _gui->automation_state()->begin_undo_region();
         _gui->automation_state()->copy_from(new_state.state(), true);
-        _gui->automation_state()->end_undo_region("Paste", "Patch");
+        _gui->automation_state()->end_undo_region(undo_token, "Paste", "Patch");
       }
       else
       {
@@ -298,17 +298,17 @@ gui_tab_menu_listener::mouseUp(MouseEvent const& event)
     {
       int action_id = (id % 1000) / 100;
       int menu_id = module_menus[id / 1000].menu_id;
-      _state->begin_undo_region();
+      int undo_token = _state->begin_undo_region();
       result = handler->execute_module(menu_id, action_id, _module, _slot, id % 100);
-      _state->end_undo_region(tab_menu_module_actions[action_id], result.item());
+      _state->end_undo_region(undo_token, tab_menu_module_actions[action_id], result.item());
     }
     else if(10000 <= id && id < 20000)
     {
       auto const& menu = custom_menus[(id - 10000) / 1000];
       auto const& action_entry = menu.entries[((id - 10000) % 1000) / 100];
-      _state->begin_undo_region();
+      int undo_token = _state->begin_undo_region();
       result = handler->execute_custom(menu.menu_id, action_entry.action, _module, _slot);
-      _state->end_undo_region(action_entry.title, result.item());
+      _state->end_undo_region(undo_token, action_entry.title, result.item());
     }
     delete handler;
     if(!result.show_warning()) return;
@@ -1399,10 +1399,10 @@ plugin_gui::init_patch()
     if(result == 1)
     {
       _extra_state->clear();
-      _automation_state->begin_undo_region();
+      int undo_token = _automation_state->begin_undo_region();
       _automation_state->init(state_init_type::default_, true);
       fire_state_loaded();
-      _automation_state->end_undo_region("Init", "Patch");
+      _automation_state->end_undo_region(undo_token, "Init", "Patch");
     }
   });
 }
@@ -1417,10 +1417,10 @@ plugin_gui::clear_patch()
     if (result == 1)
     {
       _extra_state->clear();
-      _automation_state->begin_undo_region();
+      int undo_token = _automation_state->begin_undo_region();
       _automation_state->init(state_init_type::minimal, true);
       fire_state_loaded();
-      _automation_state->end_undo_region("Clear", "Patch");
+      _automation_state->end_undo_region(undo_token, "Clear", "Patch");
     }
   });
 }
@@ -1457,11 +1457,12 @@ void
 plugin_gui::load_patch(std::string const& path, bool preset)
 {
   PB_LOG_FUNC_ENTRY_EXIT();  
-  _automation_state->begin_undo_region();
+  int undo_token = _automation_state->begin_undo_region();
   auto icon = MessageBoxIconType::WarningIcon;
   auto result = plugin_io_load_file_patch_state(path, *_automation_state);
   if (result.error.size())
   {
+    _automation_state->end_undo_region(undo_token, "Load", preset ? "Preset" : "Patch");
     auto options = MessageBoxOptions::makeOptionsOk(icon, "Error", result.error, String(), this);
     options = options.withAssociatedComponent(getChildComponent(0));
     AlertWindow::showAsync(options, nullptr);
@@ -1470,7 +1471,7 @@ plugin_gui::load_patch(std::string const& path, bool preset)
 
   if(preset) _extra_state->clear();
   fire_state_loaded();
-  _automation_state->end_undo_region("Load", preset ? "Preset" : "Patch");
+  _automation_state->end_undo_region(undo_token, "Load", preset ? "Preset" : "Patch");
 
   if (result.warnings.size())
   {
