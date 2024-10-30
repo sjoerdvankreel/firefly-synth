@@ -35,11 +35,18 @@ V swap x/y for slope
 V limit the point count
 V double click slope = linear 
 V do value in tooltip
+V drag x
+V disable x for modulation if is count - 1 plus fix it in the dsp to be sure
+V fishy stuff with undo
+V show tooltips on hover ie what are we editing
+V fix the undo stuff
+V recheck all the set_raw/plain_at blah, should be moved through gui_param_etc
+V do the actual editing
 
+allow more slope, but - do we need to convert the existing env ?
 draw the grid
 deal with the dsp
 deal with retrigger etc
-do the actual editing
 snap to grid ?
 what can be modulated ?
 do sustain marker
@@ -52,14 +59,9 @@ better defaults
 do sustain/release on env + all the mono-mode stuff
 make the mseg editor react to automation (but NOT modulation!_)
 thoroughly test the case when we add/rem points! 
-fix the undo stuff
-recheck all the set_raw/plain_at blah, should be moved through gui_param_etc
 test the heck out of it in debug
-show tooltips on hover ie what are we editing
 do external editor
-drag x
-disable x for modulation if is count - 1 plus fix it in the dsp to be sure
-fishy stuff with undo
+do docs
 
 make a patch cleanup button
 update the routing graph for arp
