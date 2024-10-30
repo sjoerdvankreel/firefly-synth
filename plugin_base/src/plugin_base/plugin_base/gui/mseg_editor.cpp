@@ -4,6 +4,9 @@ using namespace juce;
 
 namespace plugin_base {
 
+static float const seg_w_min = 1.0f;
+static float const seg_w_max = 100.0f;
+
 static char const* mseg_magic = "MSEG_MAGIC";
 static float const point_size = 8.0f;
 static float const line_thickness = 2.0f;
@@ -33,7 +36,7 @@ _grid_x_param(grid_x_param), _grid_y_param(grid_y_param)
 
   // todo not identity in the dsp
   auto check_w_param = [](param_topo const& pt) {
-    return pt.domain.type == domain_type::linear && pt.domain.min == 1 && pt.domain.max == 100; };
+    return pt.domain.type == domain_type::linear && pt.domain.min == seg_w_min && pt.domain.max == seg_w_max; };
   assert(check_w_param(param_list[w_param]));
 
   auto is_linear_unit = [](param_topo const& pt) {
@@ -377,7 +380,6 @@ mseg_editor::mouseUp(juce::MouseEvent const& event)
 void 
 mseg_editor::itemDragMove(juce::DragAndDropTarget::SourceDetails const& details)
 {
-#if 0 // TODO
   float const x = padding;
   float const y = padding;
   float const w = getLocalBounds().getWidth() - padding * 2.0f;
@@ -403,30 +405,37 @@ mseg_editor::itemDragMove(juce::DragAndDropTarget::SourceDetails const& details)
     return;
   }
 
-  // last seg - only drag y
-  if (_drag_seg != -1 && !_drag_seg_slope && _drag_seg == _gui_segs.size() - 1)
-  {
-    _gui_segs[_drag_seg].y = drag_y_amt;
-    _gui->param_changing(_module_index, _module_slot, _y_param, _drag_seg, drag_y_amt);
-    repaint();
-    return;
-  }
-
-  // tricky as we should not move before/beyond prev/next seg
   if (_drag_seg != -1 && !_drag_seg_slope)
   {
     _gui_segs[_drag_seg].y = drag_y_amt;
     _gui->param_changing(_module_index, _module_slot, _y_param, _drag_seg, drag_y_amt);
 
-    float prev_x = _drag_seg == 0 ? 0.0f : _gui_segs[_drag_seg - 1].x;
-    float next_x = _gui_segs[_drag_seg + 1].x;
-    float this_x = std::clamp((details.localPosition.x - x) / w, prev_x, next_x);
-    _gui_segs[_drag_seg].x = this_x;
-    _gui->param_changing(_module_index, _module_slot, _x_param, _drag_seg, this_x);
+    float x_if_minimal = 0.0f;
+    for (int i = 0; i < _drag_seg - 1; i++)
+      x_if_minimal += _gui_segs[_drag_seg].w;
+    x_if_minimal += 1.0f;
+    float total_x_if_minimal = 0.0f;
+    for (int i = 0; i < _gui_segs.size(); i++)
+      total_x_if_minimal += i == _drag_seg? 1.0f: _gui_segs[_drag_seg].w;
+    float norm_x_if_minimal = x_if_minimal / total_x_if_minimal;
+
+    float x_if_maximal = 0.0f;
+    for (int i = 0; i < _drag_seg - 1; i++)
+      x_if_maximal += _gui_segs[_drag_seg].w;
+    x_if_maximal += 100.0f;
+    float total_x_if_maximal = 0.0f;
+    for (int i = 0; i < _gui_segs.size(); i++)
+      total_x_if_maximal += i == _drag_seg ? 100.0f : _gui_segs[_drag_seg].w;
+    float norm_x_if_maximal = x_if_maximal / total_x_if_maximal;
+
+    float norm_event_x = (details.localPosition.x - x) / w;
+    float norm_new_width = std::clamp((norm_event_x - norm_x_if_minimal) / (norm_x_if_maximal - norm_x_if_minimal), 0.0f, 1.0f);
+    float new_width = seg_w_min + norm_new_width * (seg_w_max - seg_w_min);
+    _gui_segs[_drag_seg].w = new_width;
+    _gui->param_changing(_module_index, _module_slot, _w_param, _drag_seg, new_width);
     repaint();
     return;
   }
-#endif
 }
 
 bool

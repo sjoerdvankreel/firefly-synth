@@ -44,6 +44,7 @@ V recheck all the set_raw/plain_at blah, should be moved through gui_param_etc
 V do the actual editing
 V deal with the dsp
 
+up the vno
 do host context menu for params
 allow more slope, but - do we need to convert the existing env ?
 draw the grid
