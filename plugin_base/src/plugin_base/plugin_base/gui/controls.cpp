@@ -68,25 +68,6 @@ fill_popup_menu(param_domain const& domain, PopupMenu& menu, gui_submenu const* 
   }
 }
 
-static void
-fill_host_menu(PopupMenu& menu, std::vector<std::shared_ptr<host_menu_item>> const& children)
-{
-  for(int i = 0; i < children.size(); i++)
-  {
-    auto const& child = *children[i].get();
-    if(child.flags & host_menu_flags_separator)
-      menu.addSeparator();
-    else if(child.children.empty())
-      menu.addItem(child.tag + 1, child.name, child.flags & host_menu_flags_enabled, child.flags & host_menu_flags_checked);
-    else
-    {
-      PopupMenu submenu;
-      fill_host_menu(submenu, child.children);
-      menu.addSubMenu(child.name, submenu, child.flags & host_menu_flags_enabled);
-    }
-  }
-}
-
 void 
 text_button::mouseUp(MouseEvent const& e)
 {

@@ -267,8 +267,34 @@ mseg_editor::isInterestedInDragSource(DragAndDropTarget::SourceDetails const& de
 void 
 mseg_editor::mouseUp(juce::MouseEvent const& event)
 {
+  auto const& desc = _gui->automation_state()->desc();
+
   if (event.mods.isRightButtonDown())
   {
+    int hit_seg;
+    bool hit_start_y;
+    bool hit_seg_slope;
+    if (hit_test(event, hit_start_y, hit_seg, hit_seg_slope))
+    {
+      PopupMenu menu;
+      PopupMenu::Options options;
+      options = options.withTargetComponent(this);
+      menu.setLookAndFeel(&getLookAndFeel());
+
+      auto lnf = dynamic_cast<plugin_base::lnf*>(&getLookAndFeel());
+      auto colors = lnf->module_gui_colors(desc.plugin->modules[_module_index].info.tag.full_name);
+      int index = desc.param_mappings.topo_to_index[_module_index][_module_slot][_start_y_param][0];
+      auto host_menu = desc.menu_handler->context_menu(desc.params[index]->info.id_hash);
+      if (!host_menu || host_menu->root.children.empty()) return;
+
+      menu.addColouredItem(-1, "Host", colors.tab_text, false, false, nullptr);
+      fill_host_menu(menu, host_menu->root.children);
+
+      menu.showMenuAsync(options, [this, host_menu = host_menu.release()](int id) {
+        if(id > 0) host_menu->clicked(id - 1);
+        delete host_menu;
+      });
+    }
 
     return;
   }
@@ -277,7 +303,6 @@ mseg_editor::mouseUp(juce::MouseEvent const& event)
   else if (_drag_seg != -1 && _drag_seg_slope) _gui->param_end_changes(_module_index, _module_slot, _slope_param, _drag_seg);
   else if(_drag_seg != -1)
   {
-    auto const& desc = _gui->automation_state()->desc();
     _gui->param_end_changes(_module_index, _module_slot, _y_param, _drag_seg);
     _gui->param_end_changes(_module_index, _module_slot, _x_param, _drag_seg);
     int this_module_global = desc.module_topo_to_index.at(_module_index) + _module_slot;
