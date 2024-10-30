@@ -274,6 +274,7 @@ mseg_editor::mouseUp(juce::MouseEvent const& event)
     int hit_seg;
     bool hit_start_y;
     bool hit_seg_slope;
+
     if (hit_test(event, hit_start_y, hit_seg, hit_seg_slope))
     {
       PopupMenu menu;
