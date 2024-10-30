@@ -218,6 +218,8 @@ mseg_editor::mouseDoubleClick(MouseEvent const& event)
 void
 mseg_editor::mouseDrag(MouseEvent const& event)
 {
+  // right mouse-up triggers context menu
+  if (event.mods.isRightButtonDown()) return;
   if (isDragAndDropActive()) return;
   if (!hit_test(event, _drag_start_y, _drag_seg, _drag_seg_slope)) return;
   
@@ -265,6 +267,11 @@ mseg_editor::isInterestedInDragSource(DragAndDropTarget::SourceDetails const& de
 void 
 mseg_editor::mouseUp(juce::MouseEvent const& event)
 {
+  if (event.mods.isRightButtonDown())
+  {
+    return;
+  }
+
   if (_drag_start_y) _gui->param_end_changes(_module_index, _module_slot, _start_y_param, 0);
   else if (_drag_seg != -1 && _drag_seg_slope) _gui->param_end_changes(_module_index, _module_slot, _slope_param, _drag_seg);
   else if(_drag_seg != -1)
