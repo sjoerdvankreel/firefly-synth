@@ -269,6 +269,7 @@ mseg_editor::mouseUp(juce::MouseEvent const& event)
 {
   if (event.mods.isRightButtonDown())
   {
+
     return;
   }
 
