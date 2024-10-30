@@ -408,18 +408,8 @@ mseg_editor::itemDragMove(juce::DragAndDropTarget::SourceDetails const& details)
 
   if (_drag_seg != -1 && !_drag_seg_slope)
   {
-    float sensitivity = 200.0f;
-    float position_bipolar = details.localPosition.x - _drag_seg_initial_x;
-    position_bipolar = std::clamp(position_bipolar, -sensitivity, sensitivity);
-    position_bipolar /= sensitivity;
-
-    float new_width_norm;
-    float old_width_norm = (_drag_seg_initial_w - seg_w_min) / (seg_w_max - seg_w_min);
-    if (position_bipolar >= 0)
-      new_width_norm = old_width_norm + (1.0f - old_width_norm) * position_bipolar;
-    else
-      new_width_norm = old_width_norm * (position_bipolar + 1.0f);
-    float new_width = seg_w_min + new_width_norm * (seg_w_max - seg_w_min);
+    float diff = details.localPosition.x - _drag_seg_initial_x;
+    float new_width = std::clamp(_drag_seg_initial_w + diff, seg_w_min, seg_w_max);
     _gui_segs[_drag_seg].w = new_width;
     _gui->param_changing(_module_index, _module_slot, _w_param, _drag_seg, new_width);
     _gui_segs[_drag_seg].y = drag_y_amt;
