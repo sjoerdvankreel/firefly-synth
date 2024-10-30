@@ -17,12 +17,6 @@ using namespace plugin_base;
 
 namespace firefly_synth {
 
-struct mseg_segment {
-  float to_x;
-  float to_y;
-  float slope;
-};
-
 static int const mseg_max_seg_count = 16;
 static float const log_half = std::log(0.5f); 
 static float const max_filter_time_ms = 500;
@@ -100,7 +94,7 @@ public module_engine {
   void process_internal(plugin_block& block, cv_cv_matrix_mixdown const* modulation);
 
 public:
-  env_engine() { _mseg_segments.reserve(mseg_max_seg_count); }
+  PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(env_engine);
 
   void reset_audio(plugin_block const* block,
     std::vector<note_event> const* in_notes,
@@ -145,11 +139,11 @@ private:
   // from 0 to seg_count + 2, with the last 2 ones being the filter stage and end marker stage
   int _mseg_stage = 0;
   int _mseg_seg_count = 0;
+  double _mseg_start_y = 0;
   double _mseg_total_time = 0;
-  std::vector<mseg_segment> _mseg_segments = {};
+  std::array<double, mseg_max_seg_count> _mseg_y = {};
   std::array<double, mseg_max_seg_count> _mseg_exp = {};
   std::array<double, mseg_max_seg_count> _mseg_time = {};
-  std::array<double, mseg_max_seg_count + 1> _mseg_y = {};
 
   // shared
   cv_filter _filter = {};
@@ -970,53 +964,20 @@ void env_engine::process_mono_type_sync_trigger_mode(plugin_block& block, cv_cv_
         _mseg_total_time = timesig_to_time(block.host.bpm, params[param_mseg_length_sync].domain.timesigs[block_auto[param_mseg_length_sync][0].step()]);
       _mseg_total_time *= scale_length;
 
-      // figure out active segments and sort by x
       _mseg_stage = 0;
-      _mseg_seg_count = 1; // with 0 points active, straight from start_y to end_y
-      std::fill(&_mseg_y[0], &_mseg_y[0] + mseg_max_seg_count + 1, 0.0);
-      std::fill(&_mseg_exp[0], &_mseg_exp[0] + mseg_max_seg_count, 0.0);
-      std::fill(&_mseg_time[0], &_mseg_time[0] + mseg_max_seg_count, 0.0);
-      _mseg_y[0] = block.normalized_to_raw_fast<domain_type::identity>(module_env, param_mseg_start_y, (*(*modulation)[param_mseg_start_y][0])[block.start_frame]);
+      _mseg_seg_count = block_auto[param_mseg_count][0].step();
+      _mseg_start_y = block.normalized_to_raw_fast<domain_type::identity>(module_env, param_mseg_start_y, (*(*modulation)[param_mseg_start_y][0])[block.start_frame]);
 
-      _mseg_segments.clear();
-
-#if 0 // TODO figure out
-
-
-      // TODO DSP NOT needs to sort!
-      for (int i = 0; i < mseg_max_seg_count - 1; i++)
-        if(block_auto[param_mseg_on][i].step() != 0)
-        {
-          mseg_segment seg;
-          seg.to_x = block.normalized_to_raw_fast<domain_type::identity>(module_env, param_mseg_x, (*(*modulation)[param_mseg_x][i])[block.start_frame]);
-          seg.to_y = block.normalized_to_raw_fast<domain_type::identity>(module_env, param_mseg_y, (*(*modulation)[param_mseg_y][i])[block.start_frame]);
-          seg.slope = block.normalized_to_raw_fast<domain_type::identity>(module_env, param_mseg_slope, (*(*modulation)[param_mseg_slope][i])[block.start_frame]);
-          _mseg_segments.push_back(seg);
-        }
-      mseg_segment last_seg;
-      last_seg.to_x = 1.0f;
-      last_seg.to_y = block.normalized_to_raw_fast<domain_type::identity>(module_env, param_mseg_end_y, (*(*modulation)[param_mseg_end_y][0])[block.start_frame]);
-      last_seg.slope = block.normalized_to_raw_fast<domain_type::identity>(module_env, param_mseg_slope, (*(*modulation)[param_mseg_slope][_mseg_segments.size()])[block.start_frame]);
-      _mseg_segments.push_back(last_seg);
-
-      std::sort(_mseg_segments.begin(), _mseg_segments.end(), [](auto const& l, auto const& r) { return l.to_x < r.to_x; });
-      _mseg_seg_count = _mseg_segments.size() + 1;
-      for (int i = 0; i < _mseg_segments.size(); i++)
+      for (int i = 0; i < _mseg_seg_count; i++)
       {
-        float from_x, to_x;
-        if (i == 0) { from_x = 0.0; to_x = _mseg_segments[i].to_x; }
-        else { from_x = _mseg_segments[i - 1].to_x; to_x = _mseg_segments[i].to_x; }
-        _mseg_y[i + 1] = _mseg_segments[i].to_y;
+        float from_x = i == 0? 0.0f: block.normalized_to_raw_fast<domain_type::identity>(module_env, param_mseg_x, (*(*modulation)[param_mseg_x][i - 1])[block.start_frame]);
+        float to_x = block.normalized_to_raw_fast<domain_type::identity>(module_env, param_mseg_x, (*(*modulation)[param_mseg_x][i])[block.start_frame]);
+        float slope = block.normalized_to_raw_fast<domain_type::identity>(module_env, param_mseg_slope, (*(*modulation)[param_mseg_slope][i])[block.start_frame]);
+        _mseg_y[i] = block.normalized_to_raw_fast<domain_type::identity>(module_env, param_mseg_y, (*(*modulation)[param_mseg_y][i])[block.start_frame]);
         _mseg_time[i] = (to_x - from_x) * _mseg_total_time;
-
-        float ms = _mseg_segments[i].slope;
-        init_slope_exp(ms, _mseg_exp[i]);
+        init_slope_exp(slope, _mseg_exp[i]);
       }
-
-#endif 
-
     }
-
   }
 
   for (int f = block.start_frame; f < block.end_frame; f++)
@@ -1155,7 +1116,8 @@ void env_engine::process_mono_type_sync_trigger_mode(plugin_block& block, cv_cv_
       else
       {
         // TODO handle trigger modes
-        out = _mseg_y[_mseg_stage] + (_mseg_y[_mseg_stage + 1] - _mseg_y[_mseg_stage]) * calc_slope(slope_pos, 0.0f, _mseg_exp[_mseg_stage]);
+        float prev_y = _mseg_stage == 0 ? _mseg_start_y : _mseg_y[_mseg_stage - 1];
+        out = prev_y + (_mseg_y[_mseg_stage] - prev_y) * calc_slope(slope_pos, 0.0f, _mseg_exp[_mseg_stage]);
         _current_level = out;
         _multitrig_level = out;
       }

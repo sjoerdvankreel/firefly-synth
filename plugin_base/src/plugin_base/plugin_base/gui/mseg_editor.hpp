@@ -23,9 +23,8 @@ struct mseg_seg
 // optional 1 sustain point in case of envelope
 // we keep a local copy of all param values and
 // just flush the entire thing to the plug param state
-// on each change -- this simplifies splicing / joining segs
+// on change -- this simplifies splicing / joining segs
 // and also helps to keep stuff sorted
-// TODO replace on_param by seg_count and keep stuff in check
 class mseg_editor:
 public juce::Component,
 public juce::DragAndDropContainer,
