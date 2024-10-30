@@ -177,9 +177,6 @@ mseg_editor::mouseDoubleClick(MouseEvent const& event)
     return;
   }
 
-  // cannot delete the last one
-  if (hit && hit_seg == _gui_segs.size() - 1) return;
-
   auto update_plug_all_params = [this](std::string const& action) {
     auto const& desc = _gui->automation_state()->desc();
     int undo_token = _gui->automation_state()->begin_undo_region();
