@@ -47,6 +47,7 @@ public state_listener
   int _drag_seg = -1;
   bool _drag_start_y = false;
   bool _drag_seg_slope = false;
+  bool _is_dirty = false;
 
   int _max_seg_count = -1;
   int _current_seg_count = -1;

@@ -80,27 +80,8 @@ mseg_editor::init_from_plug_state()
 void 
 mseg_editor::state_changed(int index, plain_value plain)
 {
-  int new_seg_count = _gui->automation_state()->get_plain_at(_module_index, _module_slot, _count_param, 0).step();
-  if (new_seg_count != _current_seg_count)
-  {
-    init_from_plug_state();
-    repaint();
-    return;
-  }
-
-  bool changed = false;
-  changed |= _start_y_param != _gui->automation_state()->get_plain_at(_module_index, _module_slot, _start_y_param, 0).real();
-  for (int i = 0; i < _current_seg_count; i++)
-  {
-    changed |= _x_param != _gui->automation_state()->get_plain_at(_module_index, _module_slot, _x_param, i).real();
-    changed |= _y_param != _gui->automation_state()->get_plain_at(_module_index, _module_slot, _y_param, i).real();
-    changed |= _slope_param != _gui->automation_state()->get_plain_at(_module_index, _module_slot, _slope_param, i).real();
-  }
-  if (changed)
-  {
-    init_from_plug_state();
-    repaint();
-  }
+  _is_dirty = true;
+  repaint();
 }
 
 float 
@@ -463,6 +444,12 @@ mseg_editor::paint(Graphics& g)
   float slope_marker_y;
   float start_y = _gui_start_y;
   float end_y = _gui_segs[_gui_segs.size() - 1].y;
+
+  if (_is_dirty)
+  {
+    init_from_plug_state();
+    _is_dirty = false;
+  }
 
   // bg
   g.setColour(_lnf->colors().mseg_background);
