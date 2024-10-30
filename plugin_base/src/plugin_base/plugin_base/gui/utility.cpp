@@ -53,7 +53,7 @@ make_drag_source_image(Font const& font, std::string const& text, Colour border_
 }
 
 void
-fill_host_menu(PopupMenu& menu, std::vector<std::shared_ptr<host_menu_item>> const& children)
+fill_host_menu(PopupMenu& menu, int tag_offset, std::vector<std::shared_ptr<host_menu_item>> const& children)
 {
   for (int i = 0; i < children.size(); i++)
   {
@@ -61,11 +61,11 @@ fill_host_menu(PopupMenu& menu, std::vector<std::shared_ptr<host_menu_item>> con
     if (child.flags & host_menu_flags_separator)
       menu.addSeparator();
     else if (child.children.empty())
-      menu.addItem(child.tag + 1, child.name, child.flags & host_menu_flags_enabled, child.flags & host_menu_flags_checked);
+      menu.addItem(child.tag + 1 + tag_offset, child.name, child.flags & host_menu_flags_enabled, child.flags & host_menu_flags_checked);
     else
     {
       PopupMenu submenu;
-      fill_host_menu(submenu, child.children);
+      fill_host_menu(submenu, tag_offset, child.children);
       menu.addSubMenu(child.name, submenu, child.flags & host_menu_flags_enabled);
     }
   }

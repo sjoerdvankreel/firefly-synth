@@ -398,7 +398,7 @@ param_component::mouseUp(MouseEvent const& evt)
   {
     have_menu = true;
     menu.addColouredItem(-1, "Host", colors.tab_text, false, false, nullptr);
-    fill_host_menu(menu, host_menu->root.children);
+    fill_host_menu(menu, 0, host_menu->root.children);
   }
 
   if(!have_menu) return;

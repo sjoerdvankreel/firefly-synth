@@ -63,6 +63,7 @@ thoroughly test the case when we add/rem points!
 test the heck out of it in debug
 do external editor
 do docs
+disable stuff based on point count and last
 
 make a patch cleanup button
 update the routing graph for arp

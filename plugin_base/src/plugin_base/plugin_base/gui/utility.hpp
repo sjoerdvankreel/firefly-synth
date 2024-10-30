@@ -24,6 +24,7 @@ make_drag_source_image(
 void
 fill_host_menu(
   juce::PopupMenu& menu, 
+  int tag_offset,
   std::vector<std::shared_ptr<host_menu_item>> const& children);
 
 }

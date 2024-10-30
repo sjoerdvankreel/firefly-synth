@@ -282,25 +282,48 @@ mseg_editor::mouseUp(juce::MouseEvent const& event)
       options = options.withTargetComponent(this);
       menu.setLookAndFeel(&getLookAndFeel());
 
-      int param_index;
       auto lnf = dynamic_cast<plugin_base::lnf*>(&getLookAndFeel());
       auto colors = lnf->module_gui_colors(desc.plugin->modules[_module_index].info.tag.full_name);
       
       if (hit_start_y || hit_seg_slope)
       {
+        int param_index;
         if(hit_start_y)
           param_index = desc.param_mappings.topo_to_index[_module_index][_module_slot][_start_y_param][0];
         else
           param_index = desc.param_mappings.topo_to_index[_module_index][_module_slot][_slope_param][hit_seg];
+
         auto host_menu = desc.menu_handler->context_menu(desc.params[param_index]->info.id_hash);
         if (!host_menu || host_menu->root.children.empty()) return;
 
         menu.addColouredItem(-1, "Host", colors.tab_text, false, false, nullptr);
-        fill_host_menu(menu, host_menu->root.children);
+        fill_host_menu(menu, 0, host_menu->root.children);
 
         menu.showMenuAsync(options, [this, host_menu = host_menu.release()](int id) {
           if (id > 0) host_menu->clicked(id - 1);
           delete host_menu;
+        });
+      }
+      else
+      {
+        int param_x_index = desc.param_mappings.topo_to_index[_module_index][_module_slot][_x_param][hit_seg];
+        auto host_menu_x = desc.menu_handler->context_menu(desc.params[param_x_index]->info.id_hash);
+        if (!host_menu_x || host_menu_x->root.children.empty()) return;
+
+        int param_y_index = desc.param_mappings.topo_to_index[_module_index][_module_slot][_y_param][hit_seg];
+        auto host_menu_y = desc.menu_handler->context_menu(desc.params[param_y_index]->info.id_hash);
+        if (!host_menu_y || host_menu_y->root.children.empty()) return;
+
+        menu.addColouredItem(-1, "Host X", colors.tab_text, false, false, nullptr);
+        fill_host_menu(menu, 0, host_menu_x->root.children);
+        menu.addColouredItem(-1, "Host Y", colors.tab_text, false, false, nullptr);
+        fill_host_menu(menu, 10000, host_menu_y->root.children);
+
+        menu.showMenuAsync(options, [this, host_menu_x = host_menu_x.release(), host_menu_y = host_menu_y.release()](int id) {
+          if (id > 10000) host_menu_y->clicked(id - 1 - 10000);
+          else if(id > 0) host_menu_x->clicked(id - 1);
+          delete host_menu_x;
+          delete host_menu_y;
         });
       }
     }
