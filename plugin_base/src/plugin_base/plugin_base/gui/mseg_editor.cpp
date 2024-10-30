@@ -218,8 +218,8 @@ mseg_editor::mouseDoubleClick(MouseEvent const& event)
     {
       mseg_seg new_seg;
       new_seg.y = 0.5f;
-      new_seg.w = 10.0f;
       new_seg.slope = 0.5f;
+      new_seg.w = _gui_segs[i].w;
       _gui_segs.insert(_gui_segs.begin() + i, new_seg);
       _current_seg_count++;
       update_plug_all_params("Add");
