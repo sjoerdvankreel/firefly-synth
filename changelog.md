@@ -1,3 +1,9 @@
+### ?, ? - V1.9.7.
+
+- Add MSEG support for envelopes and LFO's (see manual). 
+* Visual editor, snap-to-grid, max 16 segments.
+* All points and slopes fully automatable and per-voice-start modulatable.
+
 ### October 23, 2024 - V1.9.6.
 
 - Fixed a couple of outdated parameter descriptions.
