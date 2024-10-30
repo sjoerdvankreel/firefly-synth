@@ -175,7 +175,7 @@ mseg_editor::mouseDoubleClick(MouseEvent const& event)
   // cannot delete the last one
   if (hit && hit_seg == _gui_segs.size() - 1) return;
 
-  auto update_plug_all_params = [this]() {
+  auto update_plug_all_params = [this](std::string const& action) {
     auto const& desc = _gui->automation_state()->desc();
     _gui->automation_state()->begin_undo_region();
     _gui->param_changed(_module_index, _module_slot, _count_param, 0, _current_seg_count);
@@ -186,7 +186,7 @@ mseg_editor::mouseDoubleClick(MouseEvent const& event)
       _gui->param_changed(_module_index, _module_slot, _slope_param, i, _gui_segs[i].slope);
     }
     int this_module_global = desc.module_topo_to_index.at(_module_index) + _module_slot;
-    _gui->automation_state()->end_undo_region("Change", desc.modules[this_module_global].info.name + " MSEG Points");
+    _gui->automation_state()->end_undo_region(action, desc.modules[this_module_global].info.name + " MSEG Point");
   };
 
   // case join  
@@ -196,7 +196,7 @@ mseg_editor::mouseDoubleClick(MouseEvent const& event)
     {
       _gui_segs.erase(_gui_segs.begin() + hit_seg);
       _current_seg_count--;
-      update_plug_all_params();
+      update_plug_all_params("Delete");
       repaint();
     }
     return;
@@ -220,7 +220,7 @@ mseg_editor::mouseDoubleClick(MouseEvent const& event)
       new_seg.slope = 0.5f;
       _gui_segs.insert(_gui_segs.begin() + i, new_seg);
       _current_seg_count++;
-      update_plug_all_params();
+      update_plug_all_params("Add");
       repaint();
       break;
     }
@@ -285,7 +285,7 @@ mseg_editor::itemDropped(DragAndDropTarget::SourceDetails const& details)
     _gui->param_end_changes(_module_index, _module_slot, _x_param, _drag_seg);
     _gui->param_end_changes(_module_index, _module_slot, _y_param, _drag_seg);
     int this_module_global = desc.module_topo_to_index.at(_module_index) + _module_slot;
-    _gui->automation_state()->end_undo_region("Change", desc.modules[this_module_global].info.name + " MSEG Point");
+    _gui->automation_state()->end_undo_region("Change", desc.modules[this_module_global].info.name + " MSEG Point " + std::to_string(_drag_seg + 1));
   }
 
   _drag_seg = -1;
