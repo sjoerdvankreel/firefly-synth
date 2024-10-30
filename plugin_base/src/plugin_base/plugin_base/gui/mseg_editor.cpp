@@ -407,32 +407,12 @@ mseg_editor::itemDragMove(juce::DragAndDropTarget::SourceDetails const& details)
 
   if (_drag_seg != -1 && !_drag_seg_slope)
   {
-    _gui_segs[_drag_seg].y = drag_y_amt;
-    _gui->param_changing(_module_index, _module_slot, _y_param, _drag_seg, drag_y_amt);
-
-    float x_if_minimal = 0.0f;
-    for (int i = 0; i < _drag_seg - 1; i++)
-      x_if_minimal += _gui_segs[_drag_seg].w;
-    x_if_minimal += 1.0f;
-    float total_x_if_minimal = 0.0f;
-    for (int i = 0; i < _gui_segs.size(); i++)
-      total_x_if_minimal += i == _drag_seg? 1.0f: _gui_segs[_drag_seg].w;
-    float norm_x_if_minimal = x_if_minimal / total_x_if_minimal;
-
-    float x_if_maximal = 0.0f;
-    for (int i = 0; i < _drag_seg - 1; i++)
-      x_if_maximal += _gui_segs[_drag_seg].w;
-    x_if_maximal += 100.0f;
-    float total_x_if_maximal = 0.0f;
-    for (int i = 0; i < _gui_segs.size(); i++)
-      total_x_if_maximal += i == _drag_seg ? 100.0f : _gui_segs[_drag_seg].w;
-    float norm_x_if_maximal = x_if_maximal / total_x_if_maximal;
-
-    float norm_event_x = (details.localPosition.x - x) / w;
-    float norm_new_width = std::clamp((norm_event_x - norm_x_if_minimal) / (norm_x_if_maximal - norm_x_if_minimal), 0.0f, 1.0f);
-    float new_width = seg_w_min + norm_new_width * (seg_w_max - seg_w_min);
+    float norm_event_x = std::clamp((details.localPosition.x - x) / w, 0.0f, 1.0f);
+    float new_width = seg_w_min + norm_event_x * (seg_w_max - seg_w_min);
     _gui_segs[_drag_seg].w = new_width;
     _gui->param_changing(_module_index, _module_slot, _w_param, _drag_seg, new_width);
+    _gui_segs[_drag_seg].y = drag_y_amt;
+    _gui->param_changing(_module_index, _module_slot, _y_param, _drag_seg, drag_y_amt);
     repaint();
     return;
   }
