@@ -581,8 +581,6 @@ env_topo(int section, gui_position const& pos)
   release_slope.gui.bindings.enabled.bind_params({ param_on, param_mode }, [](auto const& vs) { return vs[0] != 0 && is_dahdsr_exp_slope(vs[1]); });
   release_slope.info.description = "Controls release slope for exponential types. Modulation takes place only at voice start.";
 
-  // todo disable the other controls for dahdsr
-  // todo what can be automated/modulated
   auto& mseg_section = result.sections.emplace_back(make_param_section(section_mseg,
     make_topo_tag_basic("{62ECE061-2CF7-42BD-A7FE-9069306DB83F}", "MSEG"),
     make_param_section_gui({ 0, 4, 2, 1 }, { 1, 1 })));
