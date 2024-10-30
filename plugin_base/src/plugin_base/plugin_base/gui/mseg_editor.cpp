@@ -12,17 +12,24 @@ static float const padding = point_size * 0.5f + 2;
 mseg_editor::
 mseg_editor(
   plugin_gui* gui, lnf* lnf, int module_index, int module_slot, 
-  int start_y_param, int count_param, int x_param, int y_param, int slope_param):
+  int start_y_param, int count_param, int x_param, int y_param, 
+  int slope_param, int grid_x_param, int grid_y_param):
 _gui(gui), _lnf(lnf),
 _module_index(module_index), _module_slot(module_slot),
 _start_y_param(start_y_param), _count_param(count_param),
-_x_param(x_param), _y_param(y_param), _slope_param(slope_param)
+_x_param(x_param), _y_param(y_param), _slope_param(slope_param), 
+_grid_x_param(grid_x_param), _grid_y_param(grid_y_param)
 {
   assert(gui != nullptr);
   assert(lnf != nullptr);
   auto const& topo = *gui->automation_state()->desc().plugin;
   auto const& param_list = topo.modules[module_index].params;
   (void)param_list;
+
+  auto is_step_gte_0 = [](param_topo const& pt) {
+    return pt.domain.type == domain_type::step && pt.domain.min == 0; };
+  assert(is_step_gte_0(param_list[grid_x_param]));
+  assert(is_step_gte_0(param_list[grid_y_param]));
 
   auto is_linear_unit = [](param_topo const& pt) { 
     return pt.domain.type == domain_type::identity && pt.domain.min == 0 && pt.domain.max == 1; };

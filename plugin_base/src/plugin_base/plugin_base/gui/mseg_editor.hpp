@@ -17,9 +17,9 @@ struct mseg_seg
 
 // visual mseg editor normalized in xy [0, 0], [1, 1]
 // the plug must provide:
-// 1 start-y and 1 end-y param
-// counted X, Y, On parameters (at least 1 so section count = N + 1)
-// counted slope parameters with count = N + 1
+// 1 start-y and count param
+// 1 grid_x and 1 grid_y param for snapping
+// counted X, Y, Slope parameters (at least 1 so section count = N)
 // optional 1 sustain point in case of envelope
 // we keep a local copy of all param values and
 // just flush the entire thing to the plug param state
@@ -42,6 +42,8 @@ public state_listener
   int const _x_param;
   int const _y_param;
   int const _slope_param;
+  int const _grid_x_param;
+  int const _grid_y_param;
 
   int _drag_seg = -1;
   bool _drag_start_y = false;
@@ -82,7 +84,8 @@ public:
   ~mseg_editor();
   mseg_editor(
     plugin_gui* gui, lnf* lnf, int module_index, int module_slot, 
-    int start_y_param, int count_param, int x_param, int y_param, int slope_param);
+    int start_y_param, int count_param, int x_param, int y_param, 
+    int slope_param, int grid_x_param, int grid_y_param);
 };
 
 }
