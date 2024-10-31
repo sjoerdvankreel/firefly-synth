@@ -57,6 +57,7 @@ V bigass editor tooltip no workie
 V do external editor
 V draw the grid
 
+do the kvr arm64 thing
 do the actual snapping
 deal with retrigger etc
 do sustain marker
