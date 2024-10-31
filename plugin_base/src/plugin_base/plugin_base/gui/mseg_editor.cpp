@@ -652,6 +652,14 @@ mseg_editor::paint(Graphics& g)
       g.drawLine(x + (i + 1) / (snap_x_count + 1.0f) * w, 0, x + (i + 1) / (snap_x_count + 1.0f) * w, getLocalBounds().getHeight(), 2.0f);
     g.drawLine(x + w, 0, x + w, getLocalBounds().getHeight(), 2.0f);
   }
+  int snap_y_count = _gui->automation_state()->get_plain_at(_module_index, _module_slot, _grid_y_param, 0).step();
+  if (snap_y_count != 0)
+  {
+    g.drawLine(0, y, getLocalBounds().getWidth(), y, 2.0f);
+    for (int i = 0; i < snap_y_count; i++)
+      g.drawLine(0, y + (i + 1) / (snap_y_count + 1.0f) * h, getLocalBounds().getWidth(), y + (i + 1) / (snap_y_count + 1.0f) * h, 2.0f);
+    g.drawLine(0, y + h, getLocalBounds().getWidth(), y + h, 2.0f);
+  }
 
   // filler
   g.setColour(_lnf->colors().mseg_area);
