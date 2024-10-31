@@ -59,6 +59,9 @@ _grid_x_param(grid_x_param), _grid_y_param(grid_y_param), _is_external(is_extern
     _gui->automation_state()->add_listener(_module_index, _module_slot, _y_param, i, this);
   for (int i = 0; i < _gui->automation_state()->desc().plugin->modules[_module_index].params[_slope_param].info.slot_count; i++)
     _gui->automation_state()->add_listener(_module_index, _module_slot, _slope_param, i, this); 
+
+  if(is_external)
+    _tooltip = std::make_unique<TooltipWindow>(this);
 }
 
 mseg_editor::

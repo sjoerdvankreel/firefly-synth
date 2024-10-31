@@ -53,8 +53,9 @@ V thoroughly test the case when we add/rem points!
 X disable stuff based on point count and last
 X allow more slope, but - do we need to convert the existing env ?
 V bigass editor do background title
+V bigass editor tooltip no workie
+V do external editor
 
-bigass editor tooltip no workie
 draw the grid
 deal with retrigger etc
 snap to grid ?
@@ -65,7 +66,6 @@ same for vlfo/venv ==> stick to last note or something ?
 vlfo smooth not paint good (prolly looking for note rand?)
 why does it keep on dirtying the graph state?
 do sustain/release on env + all the mono-mode stuff
-do external editor
 do docs
 
 make a patch cleanup button

@@ -47,6 +47,9 @@ public state_listener
 
   bool const _is_external;
 
+  // dont get picked up from the main window, so needed for external
+  std::unique_ptr<juce::TooltipWindow> _tooltip = {};
+
   int _drag_seg = -1;
   bool _drag_start_y = false;
   bool _drag_seg_slope = false;
