@@ -633,13 +633,13 @@ env_topo(int section, gui_position const& pos)
   };
   auto& mseg_grid_x = result.params.emplace_back(make_param(
     make_topo_info_basic("{617AA518-4734-4C72-A515-B6F468DF0252}", "MSEG Grid X", param_mseg_grid_x, 1),
-    make_param_dsp_voice(param_automate::none), make_domain_step(0, 15, 0, 0),
+    make_param_dsp_voice(param_automate::none), make_domain_step(0, 16, 0, 0),
     make_param_gui_none(section_mseg)));
   mseg_grid_x.gui.bindings.enabled.bind_params({ param_on, param_mode }, [](auto const& vs) { return vs[0] != 0 && vs[1] == mode_mseg; });
   mseg_grid_x.info.description = "MSEG generator horizontal snapping grid size.";
   auto& mseg_grid_y = result.params.emplace_back(make_param(
     make_topo_info_basic("{45B0EC7D-AB84-48AB-9CB3-F526FCFBE485}", "MSEG Grid Y", param_mseg_grid_y, 1),
-    make_param_dsp_voice(param_automate::none), make_domain_step(0, 15, 0, 0),
+    make_param_dsp_voice(param_automate::none), make_domain_step(0, 16, 0, 0),
     make_param_gui_none(section_mseg)));
   mseg_grid_y.gui.bindings.enabled.bind_params({ param_on, param_mode }, [](auto const& vs) { return vs[0] != 0 && vs[1] == mode_mseg; });
   mseg_grid_y.info.description = "MSEG generator vertical snapping grid size";

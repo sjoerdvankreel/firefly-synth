@@ -632,11 +632,20 @@ mseg_editor::paint(Graphics& g)
   g.setColour(_lnf->colors().mseg_background);
   g.fillRect(getLocalBounds());
 
+  // grid
+  g.setColour(_lnf->colors().mseg_grid);
+  g.drawRect(getLocalBounds(), 2.0f);
+
   // snap grid
   g.setColour(_lnf->colors().mseg_grid);
   int snap_x_count = _gui->automation_state()->get_plain_at(_module_index, _module_slot, _grid_x_param, 0).step();
-  for (int i = 0; i < snap_x_count; i++)
-    g.drawLine(x + (i + 1) / (snap_x_count + 1.0f) * w, 0, x + (i + 1) / (snap_x_count + 1.0f) * w, getLocalBounds().getHeight(), 1.0f);
+  if (snap_x_count != 0)
+  {
+    g.drawLine(x, 0, x, getLocalBounds().getHeight(), 2.0f);
+    for (int i = 0; i < snap_x_count; i++)
+      g.drawLine(x + (i + 1) / (snap_x_count + 1.0f) * w, 0, x + (i + 1) / (snap_x_count + 1.0f) * w, getLocalBounds().getHeight(), 2.0f);
+    g.drawLine(x + w, 0, x + w, getLocalBounds().getHeight(), 2.0f);
+  }
 
   // filler
   g.setColour(_lnf->colors().mseg_area);
@@ -656,10 +665,6 @@ mseg_editor::paint(Graphics& g)
       getLocalBounds().getHeight() - bg_text_padding, 
       Justification::centredTop, false);
   }
-
-  // grid
-  g.setColour(_lnf->colors().mseg_grid);
-  g.drawRect(getLocalBounds(), 1.0f);
 
   // start y point marker
   g.setColour(_lnf->colors().mseg_point.withAlpha(0.5f));
