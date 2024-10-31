@@ -638,27 +638,30 @@ mseg_editor::paint(Graphics& g)
   g.setColour(_lnf->colors().mseg_background);
   g.fillRect(getLocalBounds());
 
-  // grid
-  g.setColour(_lnf->colors().mseg_grid);
-  g.drawRect(getLocalBounds(), 2.0f);
+  // border
+  int snap_x_count = _gui->automation_state()->get_plain_at(_module_index, _module_slot, _grid_x_param, 0).step();
+  int snap_y_count = _gui->automation_state()->get_plain_at(_module_index, _module_slot, _grid_y_param, 0).step();
+  if (snap_x_count == 0 && snap_y_count == 0)
+  {
+    g.setColour(_lnf->colors().mseg_grid);
+    g.drawRect(getLocalBounds(), _is_external? 2.0f: 1.0f);
+  }
 
   // snap grid
   g.setColour(_lnf->colors().mseg_grid);
-  int snap_x_count = _gui->automation_state()->get_plain_at(_module_index, _module_slot, _grid_x_param, 0).step();
   if (snap_x_count != 0)
   {
-    g.drawLine(x, 0, x, getLocalBounds().getHeight(), 2.0f);
+    g.drawLine(x, 0, x, getLocalBounds().getHeight(), _is_external ? 2.0f : 1.0f);
     for (int i = 0; i < snap_x_count; i++)
-      g.drawLine(x + (i + 1) / (snap_x_count + 1.0f) * w, 0, x + (i + 1) / (snap_x_count + 1.0f) * w, getLocalBounds().getHeight(), 2.0f);
-    g.drawLine(x + w, 0, x + w, getLocalBounds().getHeight(), 2.0f);
+      g.drawLine(x + (i + 1) / (snap_x_count + 1.0f) * w, 0, x + (i + 1) / (snap_x_count + 1.0f) * w, getLocalBounds().getHeight(), _is_external ? 2.0f : 1.0f);
+    g.drawLine(x + w, 0, x + w, getLocalBounds().getHeight(), _is_external ? 2.0f : 1.0f);
   }
-  int snap_y_count = _gui->automation_state()->get_plain_at(_module_index, _module_slot, _grid_y_param, 0).step();
   if (snap_y_count != 0)
   {
-    g.drawLine(0, y, getLocalBounds().getWidth(), y, 2.0f);
+    g.drawLine(0, y, getLocalBounds().getWidth(), y, _is_external ? 2.0f : 1.0f);
     for (int i = 0; i < snap_y_count; i++)
-      g.drawLine(0, y + (i + 1) / (snap_y_count + 1.0f) * h, getLocalBounds().getWidth(), y + (i + 1) / (snap_y_count + 1.0f) * h, 2.0f);
-    g.drawLine(0, y + h, getLocalBounds().getWidth(), y + h, 2.0f);
+      g.drawLine(0, y + (i + 1) / (snap_y_count + 1.0f) * h, getLocalBounds().getWidth(), y + (i + 1) / (snap_y_count + 1.0f) * h, _is_external ? 2.0f : 1.0f);
+    g.drawLine(0, y + h, getLocalBounds().getWidth(), y + h, _is_external ? 2.0f : 1.0f);
   }
 
   // filler
