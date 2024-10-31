@@ -294,6 +294,7 @@ mseg_editor::mouseUp(juce::MouseEvent const& event)
       PopupMenu menu;
       PopupMenu::Options options;
       options = options.withTargetComponent(this);
+      options = options.withMousePosition();
       menu.setLookAndFeel(&getLookAndFeel());
 
       auto lnf = dynamic_cast<plugin_base::lnf*>(&getLookAndFeel());
@@ -376,15 +377,21 @@ mseg_editor::mouseUp(juce::MouseEvent const& event)
 
       menu.addSubMenu("Snap X", x_menu);
       menu.addSubMenu("Snap Y", y_menu);
-      if(!_is_external)
-        menu.addItem(2000 + 1, "Open Editor");
+      if (_is_external)
+        menu.addItem(2000 + 1, "Close Editor");
+      else
+        menu.addItem(3000 + 1, "Open Editor");
 
       menu.showMenuAsync(options, [this, max_x, max_y](int result) {
         if (1 <= result && result <= max_x)
           _gui->automation_state()->set_raw_at(_module_index, _module_slot, _grid_x_param, 0, result - 1);
-        if (1000 + 1 <= result && result <= 1000 + max_y)
+        else if (1000 + 1 <= result && result <= 1000 + max_y)
           _gui->automation_state()->set_raw_at(_module_index, _module_slot, _grid_y_param, 0, result - 1000 - 1);
-        if (result == 2000 + 1)
+        else if (result == 2000 + 1)
+        {
+          auto* dialog = findParentComponentOfClass<DialogWindow>();
+          if(dialog) dialog->exitModalState();
+        } else if (result == 3000 + 1)
         {
           auto const& desc = _gui->automation_state()->desc();
           int module_global = desc.module_topo_to_index.at(_module_index) + _module_slot;
