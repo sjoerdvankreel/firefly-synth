@@ -402,7 +402,21 @@ mseg_editor::mouseUp(juce::MouseEvent const& event)
           editor->setSize(600, 200);
           editor->setLookAndFeel(_lnf);
           options.content.setOwned(editor);
-          auto editor_window = options.launchAsync();
+
+          auto editor_window = new DialogWindow(options.dialogTitle, options.dialogBackgroundColour,
+            options.escapeKeyTriggersCloseButton, true,
+            options.componentToCentreAround != nullptr
+            ? Component::getApproximateScaleFactorForComponent(options.componentToCentreAround): 1.0f);
+          if (options.content.willDeleteObject())
+            editor_window->setContentOwned(options.content.release(), true);
+          else
+            editor_window->setContentNonOwned(options.content.release(), true);
+          editor_window->centreAroundComponent(options.componentToCentreAround, getWidth(), getHeight());
+          editor_window->setResizable(options.resizable, options.useBottomRightCornerResizer);
+          editor_window->setUsingNativeTitleBar(options.useNativeTitleBar);
+          setAlwaysOnTop(WindowUtils::areThereAnyAlwaysOnTopWindows());
+
+          editor_window->enterModalState(true, nullptr, true);
           editor_window->setTitleBarHeight(0); // DialogWindow seems not easy to style, so just drop the titlebar
           editor_window->setLookAndFeel(_lnf);
           editor_window->setTopLeftPosition(_gui->getScreenBounds().getTopLeft());
