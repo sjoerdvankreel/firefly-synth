@@ -403,7 +403,7 @@ mseg_editor::mouseUp(juce::MouseEvent const& event)
           editor->setLookAndFeel(_lnf);
           options.content.setOwned(editor);
           auto editor_window = options.launchAsync();
-          editor_window->setTitleBarHeight(0);
+          editor_window->setTitleBarHeight(0); // DialogWindow seems not easy to style, so just drop the titlebar
           editor_window->setLookAndFeel(_lnf);
           editor_window->setTopLeftPosition(_gui->getScreenBounds().getTopLeft());
           editor_window->setResizeLimits(200, 100, _gui->getScreenBounds().getWidth(), _gui->getScreenBounds().getHeight());
