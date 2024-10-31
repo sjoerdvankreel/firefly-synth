@@ -598,16 +598,10 @@ mseg_editor::paint(Graphics& g)
   float const bg_text_factor = 1.33f;
   float const bg_text_padding = 3.0f;
 
-  float x = padding;
-  float y = padding;
-  float w = getLocalBounds().getWidth() - padding * 2.0f;
-  float h = getLocalBounds().getHeight() - padding * 2.0f;
-
-  if (_is_external)
-  {
-    y += _lnf->font().getHeight() * bg_text_factor + bg_text_padding * 2.0f;
-    h -= _lnf->font().getHeight() * bg_text_factor + bg_text_padding * 2.0f;
-  }
+  float const x = padding;
+  float const y = padding;
+  float const w = getLocalBounds().getWidth() - padding * 2.0f;
+  float const h = getLocalBounds().getHeight() - padding * 2.0f;
 
   if (_is_dirty)
   {
