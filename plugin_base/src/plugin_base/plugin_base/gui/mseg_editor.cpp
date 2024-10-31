@@ -288,6 +288,7 @@ mseg_editor::mouseUp(juce::MouseEvent const& event)
     bool hit_start_y;
     bool hit_seg_slope;
 
+    // pop up the host menu for points and slopes
     if (hit_test(event, hit_start_y, hit_seg, hit_seg_slope))
     {
       PopupMenu menu;
@@ -350,6 +351,56 @@ mseg_editor::mouseUp(juce::MouseEvent const& event)
           }
         });
       }
+    }
+    else
+    {
+      // pop up the snap-to-grid menu when no seg is hit
+      
+      PopupMenu menu;
+      PopupMenu::Options options;
+      options = options.withTargetComponent(this);
+      menu.setLookAndFeel(&getLookAndFeel());
+
+      PopupMenu x_menu;
+      int max_x = desc.plugin->modules[_module_index].params[_grid_x_param].domain.max;
+      int current_x = _gui->automation_state()->get_plain_at(_module_index, _module_slot, _grid_x_param, 0).step();
+      for (int i = 0; i < max_x; i++)
+        x_menu.addItem(i + 1, i == 0 ? "Off" : std::to_string(i + 1), true, i == current_x);
+
+      PopupMenu y_menu;
+      int max_y = desc.plugin->modules[_module_index].params[_grid_y_param].domain.max;
+      int current_y = _gui->automation_state()->get_plain_at(_module_index, _module_slot, _grid_y_param, 0).step();
+      for (int i = 0; i < max_y; i++)
+        y_menu.addItem(i + 1000 + 1, i == 0 ? "Off" : std::to_string(i + 1), true, i == current_y);
+
+      menu.addSubMenu("Snap X", x_menu);
+      menu.addSubMenu("Snap Y", y_menu);
+      menu.addItem(2000 + 1, "Open Editor");
+
+      menu.showMenuAsync(options, [this, max_x, max_y](int result) {
+        if (1 <= result && result <= max_x)
+          _gui->automation_state()->set_raw_at(_module_index, _module_slot, _grid_x_param, 0, result - 1);
+        if (1000 + 1 <= result && result <= 1000 + max_y)
+          _gui->automation_state()->set_raw_at(_module_index, _module_slot, _grid_y_param, 0, result - 1000 - 1);
+        if (result == 2000 + 1)
+        {
+          auto const& desc = _gui->automation_state()->desc();
+          int module_global = desc.module_topo_to_index.at(_module_index) + _module_slot;
+
+          DialogWindow::LaunchOptions options;
+          options.resizable = true;
+          options.useBottomRightCornerResizer = true;
+          options.escapeKeyTriggersCloseButton = true;
+          options.dialogTitle = desc.modules[module_global].info.name;
+          options.componentToCentreAround = findParentComponentOfClass<plugin_gui>();
+          auto editor = new mseg_editor(
+            _gui, _lnf, _module_index, _module_slot, _start_y_param,
+            _count_param, _w_param, _y_param, _slope_param, _grid_x_param, _grid_y_param);
+          editor->setSize(640, 320);
+          options.content.setOwned(editor);
+          options.launchAsync();
+        }
+      });
     }
 
     return;
