@@ -387,9 +387,15 @@ mseg_editor::mouseUp(juce::MouseEvent const& event)
 
       menu.showMenuAsync(options, [this, max_x, max_y](int result) {
         if (1 <= result && result <= max_x)
+        {
           _gui->automation_state()->set_raw_at(_module_index, _module_slot, _grid_x_param, 0, result - 1);
+          repaint();
+        }
         else if (1000 + 1 <= result && result <= 1000 + max_y)
+        {
           _gui->automation_state()->set_raw_at(_module_index, _module_slot, _grid_y_param, 0, result - 1000 - 1);
+          repaint();
+        }
         else if (result == 2000 + 1)
         {
           auto* dialog = findParentComponentOfClass<DialogWindow>();
@@ -602,6 +608,7 @@ mseg_editor::paint(Graphics& g)
 {
   float const bg_text_factor = 1.33f;
   float const bg_text_padding = 3.0f;
+  auto const& desc = _gui->automation_state()->desc();
 
   float const x = padding;
   float const y = padding;
@@ -625,6 +632,12 @@ mseg_editor::paint(Graphics& g)
   g.setColour(_lnf->colors().mseg_background);
   g.fillRect(getLocalBounds());
 
+  // snap grid
+  g.setColour(_lnf->colors().mseg_grid);
+  int snap_x_count = _gui->automation_state()->get_plain_at(_module_index, _module_slot, _grid_x_param, 0).step();
+  for (int i = 0; i < snap_x_count; i++)
+    g.drawLine(x + (i + 1) / (snap_x_count + 1.0f) * w, 0, x + (i + 1) / (snap_x_count + 1.0f) * w, getLocalBounds().getHeight(), 1.0f);
+
   // filler
   g.setColour(_lnf->colors().mseg_area);
   g.fillRect(x, y + h, w, padding);
@@ -634,7 +647,6 @@ mseg_editor::paint(Graphics& g)
   // bg text
   if (_is_external)
   {
-    auto const& desc = _gui->automation_state()->desc();
     int this_module_global = desc.module_topo_to_index.at(_module_index) + _module_slot;
     auto bg_text = desc.modules[this_module_global].info.name + " MSEG";
     g.setFont(_lnf->font().withHeight(_lnf->font().getHeight() * bg_text_factor));
