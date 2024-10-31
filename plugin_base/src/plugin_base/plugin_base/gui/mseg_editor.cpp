@@ -595,10 +595,16 @@ mseg_editor::mouseMove(MouseEvent const& event)
 void
 mseg_editor::paint(Graphics& g)
 {
-  float const x = padding;
-  float const y = padding;
-  float const w = getLocalBounds().getWidth() - padding * 2.0f;
-  float const h = getLocalBounds().getHeight() - padding * 2.0f;
+  float x = padding;
+  float y = padding;
+  float w = getLocalBounds().getWidth() - padding * 2.0f;
+  float h = getLocalBounds().getHeight() - padding * 2.0f;
+
+  if (_is_external)
+  {
+    y += _lnf->font().getHeight();
+    h -= _lnf->font().getHeight();
+  }
 
   if (_is_dirty)
   {
@@ -629,10 +635,9 @@ mseg_editor::paint(Graphics& g)
     auto const& desc = _gui->automation_state()->desc();
     int this_module_global = desc.module_topo_to_index.at(_module_index) + _module_slot;
     auto bg_text = desc.modules[this_module_global].info.name + " MSEG";
-    auto bg_font = _lnf->font().withHeight(_lnf->font().getHeight() * 2);
-    g.setFont(bg_font);
+    g.setFont(_lnf->font());
     g.setColour(_lnf->colors().mseg_text.withAlpha(0.5f));
-    g.drawText(bg_text, x, y, w, h, Justification::topLeft, false);
+    g.drawText(bg_text, x, 0, w, _lnf->font().getHeight(), Justification::topLeft, false);
   }
 
   // grid
