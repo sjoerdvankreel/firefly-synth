@@ -389,18 +389,21 @@ mseg_editor::mouseUp(juce::MouseEvent const& event)
           auto const& desc = _gui->automation_state()->desc();
           int module_global = desc.module_topo_to_index.at(_module_index) + _module_slot;
 
+          DialogWindow::LaunchOptions options;
+          options.resizable = true;
+          options.useNativeTitleBar = false;
+          options.useBottomRightCornerResizer = true;
+          options.escapeKeyTriggersCloseButton = true;
+          options.dialogTitle = desc.modules[module_global].info.name;
+          options.componentToCentreAround = findParentComponentOfClass<plugin_gui>();
           auto editor = new mseg_editor(
             _gui, _lnf, _module_index, _module_slot, _start_y_param,
             _count_param, _w_param, _y_param, _slope_param, _grid_x_param, _grid_y_param, true);
           editor->setSize(600, 200);
           editor->setLookAndFeel(_lnf);
-          ResizableWindow* editor_window = new ResizableWindow(desc.modules[module_global].info.name, false);
-          editor_window->setResizable(true, true);
-          editor_window->setUsingNativeTitleBar(false);
-          editor_window->setContentOwned(editor, true);
+          options.content.setOwned(editor);
+          auto editor_window = options.launchAsync();
           editor_window->setLookAndFeel(_lnf);
-          editor_window->centreAroundComponent(_gui, 600, 200);
-          editor_window->setVisible(true);
         }
       });
     }
