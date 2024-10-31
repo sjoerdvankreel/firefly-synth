@@ -623,6 +623,19 @@ mseg_editor::paint(Graphics& g)
   g.fillRect(x + w, y + h - end_y * h, padding, end_y * h + padding);
   g.fillRect(0.0f, y + h - start_y * h, padding, start_y * h + padding);
 
+  // bg text
+  if (_is_external)
+  {
+    auto const& desc = _gui->automation_state()->desc();
+    int this_module_global = desc.module_topo_to_index.at(_module_index) + _module_slot;
+    auto bg_text = desc.modules[this_module_global].info.name + " MSEG";
+    auto bg_font = _lnf->font().withHeight(_lnf->font().getHeight() * 2);
+    int text_w = bg_font.getStringWidth(String(bg_text));
+    g.setFont(bg_font);
+    g.setColour(_lnf->colors().mseg_text.withAlpha(0.5f));
+    g.drawText(bg_text, x + (w - text_w) * 0.5f, y + (h - bg_font.getHeight()) * 0.5f, text_w, bg_font.getHeight(), Justification::centred, false);
+  }
+
   // grid
   g.setColour(_lnf->colors().mseg_grid);
   g.drawRect(getLocalBounds(), 1.0f);
