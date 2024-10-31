@@ -429,7 +429,7 @@ mseg_editor::mouseUp(juce::MouseEvent const& event)
           editor_window->setLookAndFeel(_lnf);
           editor_window->setTopLeftPosition(_gui->getScreenBounds().getTopLeft());
           editor_window->setResizeLimits(
-            _gui->getScreenBounds().getWidth() / 2, _gui->getScreenBounds().getHeight() / 5, 
+            _gui->getScreenBounds().getWidth() / 4, _gui->getScreenBounds().getHeight() / 10, 
             _gui->getScreenBounds().getWidth(), _gui->getScreenBounds().getHeight() / 2.5f);
         }
       });
