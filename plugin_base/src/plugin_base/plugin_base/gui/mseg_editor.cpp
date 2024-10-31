@@ -392,10 +392,10 @@ mseg_editor::mouseUp(juce::MouseEvent const& event)
           DialogWindow::LaunchOptions options;
           options.resizable = true;
           options.useNativeTitleBar = false;
+          options.componentToCentreAround = nullptr;
           options.useBottomRightCornerResizer = true;
           options.escapeKeyTriggersCloseButton = true;
           options.dialogTitle = desc.modules[module_global].info.name;
-          options.componentToCentreAround = findParentComponentOfClass<plugin_gui>();
           auto editor = new mseg_editor(
             _gui, _lnf, _module_index, _module_slot, _start_y_param,
             _count_param, _w_param, _y_param, _slope_param, _grid_x_param, _grid_y_param, true);
@@ -403,7 +403,10 @@ mseg_editor::mouseUp(juce::MouseEvent const& event)
           editor->setLookAndFeel(_lnf);
           options.content.setOwned(editor);
           auto editor_window = options.launchAsync();
+          editor_window->setTitleBarHeight(0);
           editor_window->setLookAndFeel(_lnf);
+          editor_window->setTopLeftPosition(_gui->getScreenBounds().getTopLeft());
+          editor_window->setResizeLimits(200, 100, _gui->getScreenBounds().getWidth(), _gui->getScreenBounds().getHeight());
         }
       });
     }
