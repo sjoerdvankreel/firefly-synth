@@ -661,7 +661,7 @@ mseg_editor::paint(Graphics& g)
   if (_is_external)
   {
     int this_module_global = desc.module_topo_to_index.at(_module_index) + _module_slot;
-    auto bg_text = desc.modules[this_module_global].info.name + " MSEG";
+    auto bg_text = desc.modules[this_module_global].info.name + " MSEG: " + std::to_string(_current_seg_count);
     g.setFont(_lnf->font().withHeight(_lnf->font().getHeight() * bg_text_factor));
     g.setColour(_lnf->colors().mseg_text.withAlpha(0.5f));
     g.drawText(bg_text, bg_text_padding, bg_text_padding, 
