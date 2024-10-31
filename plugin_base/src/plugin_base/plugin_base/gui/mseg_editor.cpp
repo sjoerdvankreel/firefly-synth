@@ -53,6 +53,8 @@ _grid_x_param(grid_x_param), _grid_y_param(grid_y_param), _is_external(is_extern
 
   _gui->automation_state()->add_listener(_module_index, _module_slot, _count_param, 0, this);
   _gui->automation_state()->add_listener(_module_index, _module_slot, _start_y_param, 0, this);
+  _gui->automation_state()->add_listener(_module_index, _module_slot, _grid_x_param, 0, this);
+  _gui->automation_state()->add_listener(_module_index, _module_slot, _grid_y_param, 0, this);
   for (int i = 0; i < _gui->automation_state()->desc().plugin->modules[_module_index].params[_w_param].info.slot_count; i++)
     _gui->automation_state()->add_listener(_module_index, _module_slot, _w_param, i, this);
   for (int i = 0; i < _gui->automation_state()->desc().plugin->modules[_module_index].params[_y_param].info.slot_count; i++)
@@ -69,6 +71,8 @@ mseg_editor::
 {
   _gui->automation_state()->remove_listener(_module_index, _module_slot, _count_param, 0, this);
   _gui->automation_state()->remove_listener(_module_index, _module_slot, _start_y_param, 0, this);
+  _gui->automation_state()->remove_listener(_module_index, _module_slot, _grid_x_param, 0, this);
+  _gui->automation_state()->remove_listener(_module_index, _module_slot, _grid_y_param, 0, this);
   for (int i = 0; i < _gui->automation_state()->desc().plugin->modules[_module_index].params[_w_param].info.slot_count; i++)
     _gui->automation_state()->remove_listener(_module_index, _module_slot, _w_param, i, this);
   for (int i = 0; i < _gui->automation_state()->desc().plugin->modules[_module_index].params[_y_param].info.slot_count; i++)
@@ -388,12 +392,14 @@ mseg_editor::mouseUp(juce::MouseEvent const& event)
       menu.showMenuAsync(options, [this, max_x, max_y](int result) {
         if (1 <= result && result <= max_x)
         {
-          _gui->automation_state()->set_raw_at(_module_index, _module_slot, _grid_x_param, 0, result - 1);
+          // TODO re-snap INSIDE undo region
+          _gui->param_changed(_module_index, _module_slot, _grid_x_param, 0, result - 1);
           repaint();
         }
         else if (1000 + 1 <= result && result <= 1000 + max_y)
         {
-          _gui->automation_state()->set_raw_at(_module_index, _module_slot, _grid_y_param, 0, result - 1000 - 1);
+          // TODO re-snap INSIDE undo region
+          _gui->param_changed(_module_index, _module_slot, _grid_y_param, 0, result - 1000 - 1);
           repaint();
         }
         else if (result == 2000 + 1)
