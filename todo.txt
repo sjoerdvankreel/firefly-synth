@@ -53,6 +53,8 @@ V thoroughly test the case when we add/rem points!
 X disable stuff based on point count and last
 X allow more slope, but - do we need to convert the existing env ?
 
+bigass editor tooltip no workie
+bigass editor do background title
 draw the grid
 deal with retrigger etc
 snap to grid ?
