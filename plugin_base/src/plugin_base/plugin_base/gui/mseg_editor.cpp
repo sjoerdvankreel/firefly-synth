@@ -359,6 +359,7 @@ mseg_editor::mouseUp(juce::MouseEvent const& event)
       PopupMenu menu;
       PopupMenu::Options options;
       options = options.withTargetComponent(this);
+      options = options.withMousePosition();
       menu.setLookAndFeel(&getLookAndFeel());
 
       PopupMenu x_menu;
