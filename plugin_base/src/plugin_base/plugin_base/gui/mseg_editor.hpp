@@ -45,6 +45,8 @@ public state_listener
   int const _grid_x_param;
   int const _grid_y_param;
 
+  bool const _is_external;
+
   int _drag_seg = -1;
   bool _drag_start_y = false;
   bool _drag_seg_slope = false;
@@ -96,7 +98,7 @@ public:
   mseg_editor(
     plugin_gui* gui, lnf* lnf, int module_index, int module_slot, 
     int start_y_param, int count_param, int w_param, int y_param, 
-    int slope_param, int grid_x_param, int grid_y_param);
+    int slope_param, int grid_x_param, int grid_y_param, bool is_external = false);
 };
 
 }

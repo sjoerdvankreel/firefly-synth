@@ -16,12 +16,12 @@ mseg_editor::
 mseg_editor(
   plugin_gui* gui, lnf* lnf, int module_index, int module_slot, 
   int start_y_param, int count_param, int w_param, int y_param, 
-  int slope_param, int grid_x_param, int grid_y_param):
+  int slope_param, int grid_x_param, int grid_y_param, bool is_external):
 _gui(gui), _lnf(lnf),
 _module_index(module_index), _module_slot(module_slot),
 _start_y_param(start_y_param), _count_param(count_param),
 _w_param(w_param), _y_param(y_param), _slope_param(slope_param), 
-_grid_x_param(grid_x_param), _grid_y_param(grid_y_param)
+_grid_x_param(grid_x_param), _grid_y_param(grid_y_param), _is_external(is_external)
 {
   assert(gui != nullptr);
   assert(lnf != nullptr);
@@ -375,7 +375,8 @@ mseg_editor::mouseUp(juce::MouseEvent const& event)
 
       menu.addSubMenu("Snap X", x_menu);
       menu.addSubMenu("Snap Y", y_menu);
-      menu.addItem(2000 + 1, "Open Editor");
+      if(!_is_external)
+        menu.addItem(2000 + 1, "Open Editor");
 
       menu.showMenuAsync(options, [this, max_x, max_y](int result) {
         if (1 <= result && result <= max_x)
@@ -389,16 +390,18 @@ mseg_editor::mouseUp(juce::MouseEvent const& event)
 
           DialogWindow::LaunchOptions options;
           options.resizable = true;
+          options.useNativeTitleBar = false;
           options.useBottomRightCornerResizer = true;
           options.escapeKeyTriggersCloseButton = true;
           options.dialogTitle = desc.modules[module_global].info.name;
           options.componentToCentreAround = findParentComponentOfClass<plugin_gui>();
           auto editor = new mseg_editor(
             _gui, _lnf, _module_index, _module_slot, _start_y_param,
-            _count_param, _w_param, _y_param, _slope_param, _grid_x_param, _grid_y_param);
+            _count_param, _w_param, _y_param, _slope_param, _grid_x_param, _grid_y_param, true);
           editor->setSize(640, 320);
           options.content.setOwned(editor);
-          options.launchAsync();
+          auto editor_window = options.launchAsync();
+          editor_window->setLookAndFeel(_lnf);
         }
       });
     }
