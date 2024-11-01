@@ -603,7 +603,7 @@ env_topo(int section, gui_position const& pos)
   mseg_count.info.description = "MSEG generator segment count.";
   auto& mseg_sustain = result.params.emplace_back(make_param(
     make_topo_info_basic("{22E90A9A-D6B2-4852-9FF9-22FD49380943}", "MSEG Sustain Point", param_mseg_sustain, 1),
-    make_param_dsp_voice(param_automate::none), make_domain_step(0, mseg_max_seg_count - 2, 3, 0),
+    make_param_dsp_voice(param_automate::none), make_domain_step(0, mseg_max_seg_count - 2, 1, 0),
     make_param_gui_none(section_mseg)));
   mseg_sustain.gui.bindings.enabled.bind_params({ param_on, param_mode, param_type }, [](auto const& vs) { return vs[0] != 0 && vs[1] == mode_mseg && vs[2] == type_sustain; });
   mseg_sustain.info.description = "MSEG generator sustain point.";

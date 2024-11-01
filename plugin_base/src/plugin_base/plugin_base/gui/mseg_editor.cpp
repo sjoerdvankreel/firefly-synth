@@ -343,26 +343,37 @@ mseg_editor::mouseUp(juce::MouseEvent const& event)
         auto host_menu_y = desc.menu_handler->context_menu(desc.params[param_y_index]->info.id_hash);
         if (!host_menu_y || host_menu_y->root.children.empty()) return;
 
+        if (_sustain_param != -1 && hit_seg < _current_seg_count - 1)
+        {
+          int current_sustain_point = _gui->automation_state()->get_plain_at(_module_index, _module_slot, _sustain_param, 0).step();
+          menu.addItem(1, "Sustain", hit_seg != current_sustain_point, hit_seg == current_sustain_point);
+        }
+
         menu.addColouredItem(-1, "Host W", colors.tab_text, false, false, nullptr);
-        fill_host_menu(menu, 0, host_menu_w->root.children);
+        fill_host_menu(menu, 10000, host_menu_w->root.children);
         host_menu_w.release();
 
         menu.addColouredItem(-1, "Host Y", colors.tab_text, false, false, nullptr);
-        fill_host_menu(menu, 10000, host_menu_y->root.children);
+        fill_host_menu(menu, 20000, host_menu_y->root.children);
         host_menu_y.release();
 
         // reaper doesnt like both menus active so recreate them on the spot
-        menu.showMenuAsync(options, [this, param_w_index, param_y_index](int id) {
+        menu.showMenuAsync(options, [this, param_w_index, param_y_index, hit_seg](int id) {
           auto const& desc = _gui->automation_state()->desc();
-          if (id > 10000)
+          if (id > 20000)
           {
             auto host_menu_y = desc.menu_handler->context_menu(desc.params[param_y_index]->info.id_hash);
-            host_menu_y->clicked(id - 1 - 10000);
+            host_menu_y->clicked(id - 1 - 20000);
           }
-          else if (id > 0)
+          else if (id > 10000)
           {
             auto host_menu_w = desc.menu_handler->context_menu(desc.params[param_w_index]->info.id_hash);
-            host_menu_w->clicked(id - 1);
+            host_menu_w->clicked(id - 1 - 10000);
+          }
+          else if (id == 1)
+          {
+            _gui->param_changed(_module_index, _module_slot, _sustain_param, 0, hit_seg);
+            repaint();
           }
         });
       }
@@ -399,13 +410,11 @@ mseg_editor::mouseUp(juce::MouseEvent const& event)
       menu.showMenuAsync(options, [this, max_x, max_y](int result) {
         if (1 <= result && result <= max_x)
         {
-          // TODO re-snap INSIDE undo region
           _gui->param_changed(_module_index, _module_slot, _grid_x_param, 0, result - 1);
           repaint();
         }
         else if (1000 + 1 <= result && result <= 1000 + max_y)
         {
-          // TODO re-snap INSIDE undo region
           _gui->param_changed(_module_index, _module_slot, _grid_y_param, 0, result - 1000 - 1);
           repaint();
         }
@@ -607,9 +616,10 @@ mseg_editor::mouseMove(MouseEvent const& event)
     {
       std::string text_w = _gui->automation_state()->desc().plugin->modules[_module_index].params[_w_param].domain.raw_to_text(false, _gui_segs[hit_seg].w);
       std::string text_y = _gui->automation_state()->desc().plugin->modules[_module_index].params[_y_param].domain.raw_to_text(false, _gui_segs[hit_seg].y);
+      std::string sustain = _gui->automation_state()->get_plain_at(_module_index, _module_slot, _sustain_param, 0).step() == hit_seg ? std::string(", Sustain") : std::string("");
       setTooltip(
         topo.modules[_module_index].params[_w_param].info.tag.display_name + " " + std::to_string(hit_seg + 1) + ": " + text_w + ", " +
-        topo.modules[_module_index].params[_y_param].info.tag.display_name + " " + std::to_string(hit_seg + 1) + ": " + text_y);
+        topo.modules[_module_index].params[_y_param].info.tag.display_name + " " + std::to_string(hit_seg + 1) + ": " + text_y + sustain);
     }
   }
 
@@ -640,6 +650,10 @@ mseg_editor::paint(Graphics& g)
 
   float start_y = _gui_start_y;
   float end_y = _gui_segs[_gui_segs.size() - 1].y;
+
+  int sustain_point = -1;
+  if(_sustain_param != -1)
+    sustain_point = _gui->automation_state()->get_plain_at(_module_index, _module_slot, _sustain_param, 0).step();
 
   // bg
   g.setColour(_lnf->colors().mseg_background);
@@ -694,9 +708,10 @@ mseg_editor::paint(Graphics& g)
     g.fillPath(sloped_path);
 
     // point marker
-    g.setColour(_lnf->colors().mseg_point.withAlpha(0.5f));
+    auto point_base_color = i == sustain_point ? _lnf->colors().mseg_line : _lnf->colors().mseg_point;
+    g.setColour(point_base_color.withAlpha(0.5f));
     g.fillEllipse(x + w * get_seg_norm_x(i) - point_size / 2, y + h - h * _gui_segs[i].y - point_size / 2, point_size, point_size);
-    g.setColour(_lnf->colors().mseg_point.withAlpha(0.5f));
+    g.setColour(point_base_color);
     g.drawEllipse(x + w * get_seg_norm_x(i) - point_size / 2, y + h - h * _gui_segs[i].y - point_size / 2, point_size, point_size, 1);
 
     // slope marker
