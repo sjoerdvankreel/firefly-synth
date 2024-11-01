@@ -73,7 +73,7 @@ lfo_frequency_from_state(
   plugin_state const& state, int module_index, int module_slot, int bpm);
 extern void
 env_plot_length_seconds(
-  plugin_state const& state, int slot, float& dly, float& att, float& hld, float& dcy, float& rls, bool& is_mseg, float& mseg, float& flt);
+  plugin_state const& state, int slot, float& dly, float& att, float& hld, float& dcy, float& rls, bool& is_mseg, float& mseg, float& mseg_stn_at, float& flt);
 
 static std::vector<list_item>
 type_items()
@@ -285,7 +285,7 @@ static float
 scale_to_longest_mod_source(
   plugin_state const& state, param_topo_mapping const& mapping,
   std::vector<module_output_mapping> const& sources, 
-  float& max_dahd, float& max_env,
+  float& max_to_stn, float& max_env,
   int& module_index, int& module_slot)
 {
   auto const& map = mapping;
@@ -293,15 +293,15 @@ scale_to_longest_mod_source(
 
   // scale to longest env or lfo, prefer env
   bool is_mseg;
-  float dahd = 0.01f; // TODO ?
+  float to_stn = 0.01f;
   float total_length = 0.01f;
   float result = 0.01f;
-  max_dahd = 0.01f; // TODO ?
+  max_to_stn = 0.01f;
   max_env = 0.01f;
   module_slot = -1;
   module_index = -1;
 
-  float dly, att, hld, dcy, rls, mseg, flt;
+  float dly, att, hld, dcy, rls, mseg, mseg_stn_at, flt;
   int ti = state.get_plain_at(map.module_index, map.module_slot, param_target, map.param_slot).step();
 
   // first check the envelopes, longest wins
@@ -312,12 +312,12 @@ scale_to_longest_mod_source(
         int si = state.get_plain_at(map.module_index, map.module_slot, param_source, r).step();
         if (sources[si].module_index == module_env)
         {
-          env_plot_length_seconds(state, sources[si].module_slot, dly, att, hld, dcy, rls, is_mseg, mseg, flt);
-          dahd = dly + att + hld + dcy;
-          total_length = is_mseg? mseg + flt: dahd + rls + flt;
+          env_plot_length_seconds(state, sources[si].module_slot, dly, att, hld, dcy, rls, is_mseg, mseg, mseg_stn_at, flt);
+          to_stn = is_mseg? mseg_stn_at: dly + att + hld + dcy;
+          total_length = is_mseg? mseg + flt: to_stn + rls + flt;
           if (total_length > max_env)
           {
-            max_dahd = dahd;
+            max_to_stn = to_stn;
             max_env = total_length;
             result = max_env;
             module_slot = sources[si].module_slot;
@@ -370,15 +370,15 @@ render_graph(
   }
 
   // scale to longest env or lfo
-  float max_dahd;
   float max_env;
-  int module_index;
+  float max_to_stn;
   int module_slot;
-  float max_cv_length = scale_to_longest_mod_source(state, mapping, sources, max_dahd, max_env, module_index, module_slot);
+  int module_index;
+  float max_cv_length = scale_to_longest_mod_source(state, mapping, sources, max_to_stn, max_env, module_index, module_slot);
 
   auto const params = make_graph_engine_params();
   int sample_rate = params.max_frame_count / max_cv_length;
-  int voice_release_at = max_dahd / max_env * params.max_frame_count;
+  int voice_release_at = max_to_stn / max_env * params.max_frame_count;
   int ti = state.get_plain_at(map.module_index, map.module_slot, param_target, map.param_slot).step();
 
   // make dependent renderers know they are plotting for us

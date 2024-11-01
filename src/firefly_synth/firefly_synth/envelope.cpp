@@ -186,10 +186,10 @@ init_default(plugin_state& state)
 { state.set_text_at(module_env, 1, param_on, 0, "On"); }
 
 void
-env_plot_length_seconds(plugin_state const& state, int slot, float& dly, float& att, float& hld, float& dcy, float& rls, bool& is_mseg, float& mseg, float& flt)
+env_plot_length_seconds(plugin_state const& state, int slot, float& dly, float& att, float& hld, float& dcy, float& rls, bool& is_mseg, float& mseg, float& mseg_stn_at, float& flt)
 {
   float const bpm = 120;
-  dly = att = hld = dcy = rls = mseg = flt = 0.0f;
+  dly = att = hld = dcy = rls = mseg = flt = mseg_stn_at = 0.0f;
   bool sync = state.get_plain_at(module_env, slot, param_sync, 0).step() != 0;
   is_mseg = state.get_plain_at(module_env, slot, param_mode, 0).step() == mode_mseg;
 
@@ -197,6 +197,16 @@ env_plot_length_seconds(plugin_state const& state, int slot, float& dly, float& 
   if (is_mseg)
   {
     mseg = sync_or_time_from_state(state, bpm, sync, module_env, slot, param_mseg_length_time, param_mseg_length_sync);
+    int mseg_seg_count = state.get_plain_at(module_env, slot, param_mseg_count, 0).step();
+    int mseg_stn_seg = state.get_plain_at(module_env, slot, param_mseg_sustain, 0).step();
+
+    float mseg_total = 0.0f;
+    for (int i = 0; i < mseg_seg_count; i++)
+    {
+      mseg_total += state.get_plain_at(module_env, slot, param_mseg_w, i).real();
+      if (i == mseg_stn_seg) mseg_stn_at = mseg_total;
+    }
+    mseg_stn_at = mseg_stn_at / mseg_total * mseg;
     return;
   }
 
@@ -232,8 +242,8 @@ render_graph(
     return graph_data(graph_data_type::off, { state.desc().plugin->modules[mapping.module_index].info.tag.menu_display_name });
 
   bool is_mseg;
-  float dly, att, hld, dcy, rls, mseg, flt;
-  env_plot_length_seconds(state, mapping.module_slot, dly, att, hld, dcy, rls, is_mseg, mseg, flt);
+  float dly, att, hld, dcy, rls, mseg, mseg_stn_at, flt;
+  env_plot_length_seconds(state, mapping.module_slot, dly, att, hld, dcy, rls, is_mseg, mseg, mseg_stn_at, flt);
   float dahd = dly + att + hld + dcy;
   float dahdrf = dahd + rls + flt;
   float msegf = mseg + flt;
@@ -246,7 +256,7 @@ render_graph(
 
   auto const params = make_graph_engine_params();
   int sample_rate = params.max_frame_count / total_length;
-  int voice_release_at = dahd / total_length * params.max_frame_count; // todo
+  int voice_release_at = (is_mseg? mseg_stn_at: dahd) / total_length * params.max_frame_count; // todo
 
   engine->process_begin(&state, sample_rate, params.max_frame_count, voice_release_at);
   auto const* block = engine->process(module_env, mapping.module_slot, custom_outputs, nullptr, [mapping, &custom_outputs](plugin_block& block) {

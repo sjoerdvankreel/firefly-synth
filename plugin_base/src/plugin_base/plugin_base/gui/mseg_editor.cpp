@@ -335,27 +335,29 @@ mseg_editor::mouseUp(juce::MouseEvent const& event)
       }
       else
       {
-        int param_w_index = desc.param_mappings.topo_to_index[_module_index][_module_slot][_w_param][hit_seg];
-        auto host_menu_w = desc.menu_handler->context_menu(desc.params[param_w_index]->info.id_hash);
-        if (!host_menu_w || host_menu_w->root.children.empty()) return;
-
-        int param_y_index = desc.param_mappings.topo_to_index[_module_index][_module_slot][_y_param][hit_seg];
-        auto host_menu_y = desc.menu_handler->context_menu(desc.params[param_y_index]->info.id_hash);
-        if (!host_menu_y || host_menu_y->root.children.empty()) return;
-
         if (_sustain_param != -1 && hit_seg < _current_seg_count - 1)
         {
           int current_sustain_point = _gui->automation_state()->get_plain_at(_module_index, _module_slot, _sustain_param, 0).step();
           menu.addItem(1, "Sustain", hit_seg != current_sustain_point, hit_seg == current_sustain_point);
         }
 
-        menu.addColouredItem(-1, "Host W", colors.tab_text, false, false, nullptr);
-        fill_host_menu(menu, 10000, host_menu_w->root.children);
-        host_menu_w.release();
+        int param_w_index = desc.param_mappings.topo_to_index[_module_index][_module_slot][_w_param][hit_seg];
+        auto host_menu_w = desc.menu_handler->context_menu(desc.params[param_w_index]->info.id_hash);
+        if (host_menu_w && !host_menu_w->root.children.empty())
+        {
+          menu.addColouredItem(-1, "Host W", colors.tab_text, false, false, nullptr);
+          fill_host_menu(menu, 10000, host_menu_w->root.children);
+          host_menu_w.release();
+        }
 
-        menu.addColouredItem(-1, "Host Y", colors.tab_text, false, false, nullptr);
-        fill_host_menu(menu, 20000, host_menu_y->root.children);
-        host_menu_y.release();
+        int param_y_index = desc.param_mappings.topo_to_index[_module_index][_module_slot][_y_param][hit_seg];
+        auto host_menu_y = desc.menu_handler->context_menu(desc.params[param_y_index]->info.id_hash);
+        if (host_menu_y && !host_menu_y->root.children.empty())
+        {
+          menu.addColouredItem(-1, "Host Y", colors.tab_text, false, false, nullptr);
+          fill_host_menu(menu, 20000, host_menu_y->root.children);
+          host_menu_y.release();
+        }
 
         // reaper doesnt like both menus active so recreate them on the spot
         menu.showMenuAsync(options, [this, param_w_index, param_y_index, hit_seg](int id) {
