@@ -35,7 +35,7 @@ enum {
   param_attack_time, param_attack_tempo, param_attack_slope, 
   param_decay_time, param_decay_tempo, param_decay_slope, 
   param_release_time, param_release_tempo, param_release_slope,
-  param_mseg_start_y, param_mseg_count, param_mseg_w, param_mseg_y,
+  param_mseg_start_y, param_mseg_count, param_mseg_sustain, param_mseg_w, param_mseg_y,
   param_mseg_slope, param_mseg_grid_x, param_mseg_grid_y };
 
 static constexpr bool is_dahdsr_exp_slope(int mode) { 
@@ -587,8 +587,8 @@ env_topo(int section, gui_position const& pos)
   mseg_section.gui.bindings.visible.bind_params({ param_mode }, [](auto const& vs) { return vs[0] == mode_mseg; });
   mseg_section.gui.custom_gui_factory = [](plugin_gui* gui, lnf* lnf, int module_slot, component_store store) {
     return &store_component<mseg_editor>(
-      store, gui, lnf, module_env, module_slot, param_mseg_start_y, param_mseg_count, 
-      param_mseg_w, param_mseg_y, param_mseg_slope, param_mseg_grid_x, param_mseg_grid_y); };
+      store, gui, lnf, module_env, module_slot, param_mseg_start_y, param_mseg_count, param_mseg_sustain,
+      param_mseg_w, param_mseg_y, param_mseg_slope, param_mseg_grid_x, param_mseg_grid_y, false); };
   auto& mseg_start_y = result.params.emplace_back(make_param(
     make_topo_info_basic("{BB1A9691-DA7D-460D-BDF3-7D99F272CD05}", "MSEG Start Y", param_mseg_start_y, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.0, 2, ""),
@@ -601,6 +601,12 @@ env_topo(int section, gui_position const& pos)
     make_param_gui_none(section_mseg)));
   mseg_count.gui.bindings.enabled.bind_params({ param_on, param_mode }, [](auto const& vs) { return vs[0] != 0 && vs[1] == mode_mseg; });
   mseg_count.info.description = "MSEG generator segment count.";
+  auto& mseg_sustain = result.params.emplace_back(make_param(
+    make_topo_info_basic("{22E90A9A-D6B2-4852-9FF9-22FD49380943}", "MSEG Sustain Point", param_mseg_sustain, 1),
+    make_param_dsp_voice(param_automate::none), make_domain_step(0, mseg_max_seg_count - 2, 3, 0),
+    make_param_gui_none(section_mseg)));
+  mseg_sustain.gui.bindings.enabled.bind_params({ param_on, param_mode, param_type }, [](auto const& vs) { return vs[0] != 0 && vs[1] == mode_mseg && vs[2] == type_sustain; });
+  mseg_sustain.info.description = "MSEG generator sustain point.";
   auto& mseg_w = result.params.emplace_back(make_param(
     make_topo_info_basic("{2A14D13D-F617-46B0-81C6-CCC5274FD64D}", "MSEG Width", param_mseg_w, mseg_max_seg_count),
     make_param_dsp_accurate(param_automate::modulate), make_domain_linear(1.0, 100.0, 10.0, 2, ""),

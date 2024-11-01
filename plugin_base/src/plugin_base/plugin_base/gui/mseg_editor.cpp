@@ -15,11 +15,11 @@ static float const padding = point_size * 0.5f + 2;
 mseg_editor::
 mseg_editor(
   plugin_gui* gui, lnf* lnf, int module_index, int module_slot, 
-  int start_y_param, int count_param, int w_param, int y_param, 
+  int start_y_param, int count_param, int sustain_param, int w_param, int y_param, 
   int slope_param, int grid_x_param, int grid_y_param, bool is_external):
 _gui(gui), _lnf(lnf),
 _module_index(module_index), _module_slot(module_slot),
-_start_y_param(start_y_param), _count_param(count_param),
+_start_y_param(start_y_param), _count_param(count_param), _sustain_param(sustain_param),
 _w_param(w_param), _y_param(y_param), _slope_param(slope_param), 
 _grid_x_param(grid_x_param), _grid_y_param(grid_y_param), _is_external(is_external)
 {
@@ -37,6 +37,13 @@ _grid_x_param(grid_x_param), _grid_y_param(grid_y_param), _is_external(is_extern
   auto check_w_param = [](param_topo const& pt) {
     return pt.domain.type == domain_type::linear && pt.domain.min == seg_w_min && pt.domain.max == seg_w_max; };
   assert(check_w_param(param_list[w_param]));
+
+  if (sustain_param != -1)
+  {
+    auto check_stn_param = [&param_list, w_param](param_topo const& pt) {
+      return pt.domain.type == domain_type::step && pt.domain.min == 0 && pt.domain.max == param_list[w_param].info.slot_count - 2; };
+    assert(check_stn_param(param_list[sustain_param]));
+  }
 
   auto is_linear_unit = [](param_topo const& pt) {
     return pt.domain.type == domain_type::identity && pt.domain.min == 0 && pt.domain.max == 1; };
@@ -419,8 +426,8 @@ mseg_editor::mouseUp(juce::MouseEvent const& event)
           options.escapeKeyTriggersCloseButton = true;
           options.dialogTitle = desc.modules[module_global].info.name;
           auto editor = new mseg_editor(
-            _gui, _lnf, _module_index, _module_slot, _start_y_param,
-            _count_param, _w_param, _y_param, _slope_param, _grid_x_param, _grid_y_param, true);
+            _gui, _lnf, _module_index, _module_slot, _start_y_param, _count_param, 
+            _sustain_param, _w_param, _y_param, _slope_param, _grid_x_param, _grid_y_param, true);
           editor->setSize(_gui->getScreenBounds().getWidth() / 2, _gui->getScreenBounds().getHeight() / 5);
           editor->setLookAndFeel(_lnf);
           options.content.setOwned(editor);
