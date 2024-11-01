@@ -56,11 +56,11 @@ V bigass editor do background title
 V bigass editor tooltip no workie
 V do external editor
 V draw the grid
+V do sustain marker
 
 do the kvr arm64 thing
 do the actual snapping
 deal with retrigger etc
-do sustain marker
 mseg as lfo
 see if we can paint the vcv matrices more often based on static stuff
 same for vlfo/venv ==> stick to last note or something ?
