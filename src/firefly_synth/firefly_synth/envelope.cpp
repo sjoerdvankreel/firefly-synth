@@ -153,6 +153,7 @@ private:
   cv_filter _filter = {};
   double _stage_pos = 0;
   double _total_pos = 0;
+  double _release_at = 0;
   double _current_level = 0;
   double _multitrig_level = 0;
   bool _voice_initialized = false;
@@ -692,6 +693,7 @@ env_engine::reset_audio(
 {
   _stage_pos = 0;
   _total_pos = 0;
+  _release_at = 0;
   _current_level = 0;
   _multitrig_level = 0;
   _voice_initialized = false;
@@ -957,6 +959,7 @@ void env_engine::process_mono_type_sync_trigger_mode(plugin_block& block, cv_cv_
       _dahdsr_dly *= scale_length;
       _dahdsr_att *= scale_length;
       _dahdsr_rls *= scale_length;
+      _release_at = _dahdsr_dly + _dahdsr_att + _dahdsr_hld + _dahdsr_dcy;
 
       if constexpr (is_dahdsr_exp_slope(Mode))
       {
@@ -1009,8 +1012,10 @@ void env_engine::process_mono_type_sync_trigger_mode(plugin_block& block, cv_cv_
         float slope = block.normalized_to_raw_fast<domain_type::identity>(module_env, param_mseg_slope, (*(*modulation)[param_mseg_slope][i])[block.start_frame]);
         _mseg_y[i] = block.normalized_to_raw_fast<domain_type::identity>(module_env, param_mseg_y, (*(*modulation)[param_mseg_y][i])[block.start_frame]);
         _mseg_time[i] = (to_x - from_x) * _mseg_total_time;
-        if (i == _mseg_sustain_point) 
+        if (i == _mseg_sustain_point)
           _mseg_stn = _mseg_y[i];
+        if (i <= _mseg_sustain_point)
+          _release_at += _mseg_time[i];
         init_slope_exp(slope, _mseg_exp[i]);
       }
     }
