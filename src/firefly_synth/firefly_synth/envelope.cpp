@@ -136,6 +136,7 @@ private:
   // mseg
   static int const mseg_stage_end = 1;
   static int const mseg_stage_filter = 0;
+  static int const mseg_stage_sustaining = -99;
 
   // from 0 to seg_count + 2, with the last 2 ones being the filter stage and end marker stage
   int _mseg_stage = 0;
@@ -1070,12 +1071,18 @@ void env_engine::process_mono_type_sync_trigger_mode(plugin_block& block, cv_cv_
       }
     }
 
-    // TODO sustain-release for mseg
     if (!is_mseg && (block.voice->state.release_frame == f && 
       (Type == type_sustain || (Type == type_release && _dahdsr_stage != env_stage::release))))
     {
       _stage_pos = 0;
       _dahdsr_stage = env_stage::release;
+    }
+
+    if (is_mseg && (block.voice->state.release_frame == f &&
+      (Type == type_sustain || (Type == type_release && _mseg_stage >= 0 && _mseg_stage < _mseg_sustain_point))))
+    {
+      _stage_pos = 0;
+      _mseg_stage = _mseg_sustain_point + 1;
     }
 
     if ((!is_mseg && _dahdsr_stage == env_stage::sustain) && Type == type_sustain)
@@ -1086,7 +1093,7 @@ void env_engine::process_mono_type_sync_trigger_mode(plugin_block& block, cv_cv_
       continue;
     }
 
-    if ((is_mseg && _mseg_stage == _mseg_sustain_point) && Type == type_sustain)
+    if ((is_mseg && _mseg_stage == mseg_stage_sustaining) && Type == type_sustain)
     {
       _current_level = _mseg_stn;
       _multitrig_level = _mseg_stn;
@@ -1184,9 +1191,14 @@ void env_engine::process_mono_type_sync_trigger_mode(plugin_block& block, cv_cv_
     }
     else
     {
-      _mseg_stage++;
-      // <= since we can move into filter stage here
-      assert(_mseg_stage <= _mseg_seg_count);
+      if (_mseg_stage == _mseg_sustain_point && Type == type_sustain)
+        _mseg_stage = mseg_stage_sustaining;
+      else
+      {
+        _mseg_stage++;
+        // <= since we can move into filter stage here
+        assert(0 <= _mseg_stage && _mseg_stage <= _mseg_seg_count);
+      }
     }
   }
 }

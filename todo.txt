@@ -58,6 +58,7 @@ V do external editor
 V draw the grid
 V do sustain marker
 
+right click not work in renoise
 do a couple test files
 do the actual snapping
 deal with retrigger etc
