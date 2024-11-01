@@ -58,7 +58,7 @@ V do external editor
 V draw the grid
 V do sustain marker
 
-do the kvr arm64 thing
+do a couple test files
 do the actual snapping
 deal with retrigger etc
 mseg as lfo
@@ -72,6 +72,7 @@ do docs
 make a patch cleanup button
 update the routing graph for arp
 
+do the kvr arm64 thing
 ditch after-mod, claim micro support ?
 arp new note = reset table pos yes/no?
 do more keyboard tracking just do it -- also trackmode mul/add

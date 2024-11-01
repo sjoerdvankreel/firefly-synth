@@ -140,6 +140,8 @@ private:
   // from 0 to seg_count + 2, with the last 2 ones being the filter stage and end marker stage
   int _mseg_stage = 0;
   int _mseg_seg_count = 0;
+  int _mseg_sustain_point = -1;
+  double _mseg_stn = 0;
   double _mseg_start_y = 0;
   double _mseg_total_time = 0;
   std::array<double, mseg_max_seg_count> _mseg_y = {};
@@ -978,6 +980,7 @@ void env_engine::process_mono_type_sync_trigger_mode(plugin_block& block, cv_cv_
 
       _mseg_stage = 0;
       _mseg_seg_count = block_auto[param_mseg_count][0].step();
+      _mseg_sustain_point = block_auto[param_mseg_sustain][0].step();         
       _mseg_start_y = block.normalized_to_raw_fast<domain_type::identity>(module_env, param_mseg_start_y, (*(*modulation)[param_mseg_start_y][0])[block.start_frame]);
 
       float mseg_total_length = 0;
@@ -995,6 +998,8 @@ void env_engine::process_mono_type_sync_trigger_mode(plugin_block& block, cv_cv_
         float slope = block.normalized_to_raw_fast<domain_type::identity>(module_env, param_mseg_slope, (*(*modulation)[param_mseg_slope][i])[block.start_frame]);
         _mseg_y[i] = block.normalized_to_raw_fast<domain_type::identity>(module_env, param_mseg_y, (*(*modulation)[param_mseg_y][i])[block.start_frame]);
         _mseg_time[i] = (to_x - from_x) * _mseg_total_time;
+        if (i == _mseg_sustain_point) 
+          _mseg_stn = _mseg_y[i];
         init_slope_exp(slope, _mseg_exp[i]);
       }
     }
@@ -1073,12 +1078,19 @@ void env_engine::process_mono_type_sync_trigger_mode(plugin_block& block, cv_cv_
       _dahdsr_stage = env_stage::release;
     }
 
-    // TODO sustain-release for mseg
     if ((!is_mseg && _dahdsr_stage == env_stage::sustain) && Type == type_sustain)
     {
       _current_level = _dahdsr_stn;
       _multitrig_level = _dahdsr_stn;
       block.state.own_cv[0][0][f] = _filter.next(_dahdsr_stn);
+      continue;
+    }
+
+    if ((is_mseg && _mseg_stage == _mseg_sustain_point) && Type == type_sustain)
+    {
+      _current_level = _mseg_stn;
+      _multitrig_level = _mseg_stn;
+      block.state.own_cv[0][0][f] = _filter.next(_mseg_stn);
       continue;
     }
 
