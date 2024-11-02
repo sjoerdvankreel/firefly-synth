@@ -58,15 +58,15 @@ V do external editor
 V draw the grid
 V do sustain marker
 V right click not work in renoise
+V deal with retrigger etc
+V do sustain/release on env + all the mono-mode stuff
+X why does it keep on dirtying the graph state?
+X see if we can paint the vcv matrices more often based on static stuff
+X same for vlfo/venv ==> stick to last note or something ?
+X vlfo smooth not paint good (prolly looking for note rand?)
 
 do a couple test files
 do the actual snapping
-deal with retrigger etc
-see if we can paint the vcv matrices more often based on static stuff
-same for vlfo/venv ==> stick to last note or something ?
-vlfo smooth not paint good (prolly looking for note rand?)
-why does it keep on dirtying the graph state?
-do sustain/release on env + all the mono-mode stuff
 do docs
 
 shortlist:
