@@ -547,10 +547,14 @@ mseg_editor::itemDragMove(juce::DragAndDropTarget::SourceDetails const& details)
     else
     {
       float if_norm_x = get_seg_norm_x(_drag_seg, new_width);
-      if(0.45 <= if_norm_x && if_norm_x <= 0.55)
+      for (int i = 0; i <= snap_x_count; i++)
       {
-        _gui_segs[_drag_seg].w = new_width;
-        _gui->param_changing(_module_index, _module_slot, _w_param, _drag_seg, new_width);
+        float snap_norm_x = (float)i / (snap_x_count + 1.0f);
+        if (snap_norm_x - 0.01f <= if_norm_x && if_norm_x <= snap_norm_x + 0.01f)
+        {
+          _gui_segs[_drag_seg].w = new_width;
+          _gui->param_changing(_module_index, _module_slot, _w_param, _drag_seg, new_width);
+        }
       }
     }
 
