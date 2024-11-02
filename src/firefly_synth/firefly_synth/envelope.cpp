@@ -139,6 +139,7 @@ private:
   static int const mseg_stage_sustaining = -99;
 
   // from 0 to seg_count + 2, with the last 2 ones being the filter stage and end marker stage
+  int _mseg_type = -1;
   int _mseg_stage = 0;
   int _mseg_seg_count = 0;
   int _mseg_sustain_point = -1;
@@ -997,6 +998,12 @@ void env_engine::process_mono_type_sync_trigger_mode(plugin_block& block, cv_cv_
       _mseg_sustain_point = block_auto[param_mseg_sustain][0].step();         
       _mseg_start_y = block.normalized_to_raw_fast<domain_type::identity>(module_env, param_mseg_start_y, (*(*modulation)[param_mseg_start_y][0])[block.start_frame]);
 
+      // there's nothing to release !
+      // can happen when stn point is out of bounds
+      _mseg_type = Type;
+      if (_mseg_sustain_point >= _mseg_seg_count - 1)
+        _mseg_type = type_follow;
+
       float mseg_total_length = 0;
       float mseg_seg_x[mseg_max_seg_count];
       for (int i = 0; i < _mseg_seg_count; i++)
@@ -1095,7 +1102,7 @@ void env_engine::process_mono_type_sync_trigger_mode(plugin_block& block, cv_cv_
     }
 
     if (is_mseg && (block.voice->state.release_frame == f &&
-      (Type == type_sustain || (Type == type_release && _mseg_stage >= 0 && _mseg_stage <= _mseg_sustain_point))))
+      (_mseg_type == type_sustain || (_mseg_type == type_release && _mseg_stage >= 0 && _mseg_stage <= _mseg_sustain_point))))
     {
       _stage_pos = 0;
       _total_pos = _release_at;
@@ -1110,7 +1117,7 @@ void env_engine::process_mono_type_sync_trigger_mode(plugin_block& block, cv_cv_
       continue;
     }
 
-    if ((is_mseg && _mseg_stage == mseg_stage_sustaining) && Type == type_sustain)
+    if ((is_mseg && _mseg_stage == mseg_stage_sustaining) && _mseg_type == type_sustain)
     {
       _current_level = _mseg_stn;
       _multitrig_level = _mseg_stn;
@@ -1212,7 +1219,7 @@ void env_engine::process_mono_type_sync_trigger_mode(plugin_block& block, cv_cv_
     }
     else
     {
-      if (_mseg_stage == _mseg_sustain_point && Type == type_sustain)
+      if (_mseg_stage == _mseg_sustain_point && _mseg_type == type_sustain)
         _mseg_stage = mseg_stage_sustaining;
       else
       {
