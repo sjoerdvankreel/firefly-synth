@@ -190,10 +190,12 @@ mseg_editor::mouseDoubleClick(MouseEvent const& event)
     return;
   }
 
-  auto update_plug_all_params = [this](std::string const& action) {
+  auto update_plug_all_params = [this](int new_sustain_point, std::string const& action) {
     auto const& desc = _gui->automation_state()->desc();
     int undo_token = _gui->automation_state()->begin_undo_region();
     _gui->param_changed(_module_index, _module_slot, _count_param, 0, _current_seg_count);
+    if (_sustain_param != -1)
+      _gui->param_changed(_module_index, _module_slot, _sustain_param, 0, new_sustain_point);
     for (int i = 0; i < _current_seg_count; i++)
     {
       _gui->param_changed(_module_index, _module_slot, _w_param, i, _gui_segs[i].w);
@@ -205,13 +207,18 @@ mseg_editor::mouseDoubleClick(MouseEvent const& event)
   };
 
   // case join  
+  int sustain_point = -1;
+  if (_sustain_param != -1)
+    sustain_point = _gui->automation_state()->get_plain_at(_module_index, _module_slot, _sustain_param, 0).step();
   if(hit)
   {
     if (_gui_segs.size() > 1)
     {
+      if (_sustain_param != -1 && sustain_point > 0 && sustain_point > hit_seg)
+        sustain_point--;
       _gui_segs.erase(_gui_segs.begin() + hit_seg);
       _current_seg_count--;
-      update_plug_all_params("Delete");
+      update_plug_all_params(sustain_point, "Delete");
       repaint();
     }
     return;
@@ -233,9 +240,11 @@ mseg_editor::mouseDoubleClick(MouseEvent const& event)
       new_seg.y = 0.5f;
       new_seg.slope = 0.5f;
       new_seg.w = _gui_segs[i].w;
+      if (_sustain_param != -1 && sustain_point > hit_seg && sustain_point < _max_seg_count - 1)
+        sustain_point++;
       _gui_segs.insert(_gui_segs.begin() + i, new_seg);
       _current_seg_count++;
-      update_plug_all_params("Add");
+      update_plug_all_params(sustain_point, "Add");
       repaint();
       break;
     }

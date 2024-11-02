@@ -257,7 +257,7 @@ render_graph(
 
   auto const params = make_graph_engine_params();
   int sample_rate = params.max_frame_count / total_length;
-  int voice_release_at = (is_mseg? mseg_stn_at: dahd) / total_length * params.max_frame_count; // todo
+  int voice_release_at = (is_mseg? mseg_stn_at: dahd) / total_length * params.max_frame_count;
 
   engine->process_begin(&state, sample_rate, params.max_frame_count, voice_release_at);
   auto const* block = engine->process(module_env, mapping.module_slot, custom_outputs, nullptr, [mapping, &custom_outputs](plugin_block& block) {
