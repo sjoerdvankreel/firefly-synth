@@ -493,6 +493,14 @@ mseg_editor::itemDragMove(juce::DragAndDropTarget::SourceDetails const& details)
   float const h = getLocalBounds().getHeight() - padding * 2.0f;
   float drag_y_amt = 1.0f - std::clamp((details.localPosition.y - y) / h, 0.0f, 1.0f);
 
+  //int snap_x_count = _gui->automation_state()->get_plain_at(_module_index, _module_slot, _grid_x_param, 0).step();
+  int snap_y_count = _gui->automation_state()->get_plain_at(_module_index, _module_slot, _grid_y_param, 0).step();
+
+  if (snap_y_count != 0)
+  {
+    drag_y_amt = std::clamp(std::round(drag_y_amt * (snap_y_count + 1)) / (snap_y_count + 1), 0.0f, 1.0f);
+  }
+
   if (_drag_start_y)
   {
     _gui_start_y = drag_y_amt;
