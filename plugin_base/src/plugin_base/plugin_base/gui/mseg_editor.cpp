@@ -113,11 +113,11 @@ mseg_editor::state_changed(int index, plain_value plain)
 }
 
 float
-mseg_editor::get_seg_total_x(int seg) const
+mseg_editor::get_seg_total_x(int seg, float if_width) const
 {
   float result = 0.0f;
   for (int i = 0; i <= seg; i++)
-    result += _gui_segs[i].w;
+    result += i != seg || if_width < 0.01f? _gui_segs[i].w: if_width;
   return result;
 }
 
@@ -489,8 +489,11 @@ mseg_editor::mouseUp(juce::MouseEvent const& event)
 void 
 mseg_editor::itemDragMove(juce::DragAndDropTarget::SourceDetails const& details)
 {
+  float const x = padding;
   float const y = padding;
+  float const w = getLocalBounds().getWidth() - padding * 2.0f;
   float const h = getLocalBounds().getHeight() - padding * 2.0f;
+
   float drag_y_amt = 1.0f - std::clamp((details.localPosition.y - y) / h, 0.0f, 1.0f);
   float snap_drag_y_amt = drag_y_amt;
 
@@ -523,17 +526,30 @@ mseg_editor::itemDragMove(juce::DragAndDropTarget::SourceDetails const& details)
 
   if (_drag_seg != -1 && !_drag_seg_slope)
   {
-    float norm_add;
-    float diff = details.localPosition.x - _drag_seg_initial_x;
-    float sensitivity_l = _drag_seg_initial_x;
-    float sensitivity_r = getLocalBounds().getWidth() - _drag_seg_initial_x;
-    if (diff >= 0)
-      norm_add = diff / sensitivity_r;
-    else
-      norm_add = -1.0f + details.localPosition.x / sensitivity_l;
-    float norm_w = (_drag_seg_initial_w - seg_w_min) / (seg_w_max - seg_w_min);
-    norm_w += norm_add;
-    norm_w = std::clamp(norm_w, 0.0f, 1.0f);
+    auto screen_drag_x_to_normalized_width = [this](int screen_drag_x) {
+      float norm_add;
+      float diff = screen_drag_x - _drag_seg_initial_x;
+      float sensitivity_l = _drag_seg_initial_x;
+      float sensitivity_r = getLocalBounds().getWidth() - _drag_seg_initial_x;
+      if (diff >= 0)
+        norm_add = diff / sensitivity_r;
+      else
+        norm_add = -1.0f + screen_drag_x / sensitivity_l;
+      float norm_w = (_drag_seg_initial_w - seg_w_min) / (seg_w_max - seg_w_min);
+      norm_w += norm_add;
+      norm_w = std::clamp(norm_w, 0.0f, 1.0f);
+      return norm_w;
+    };
+    
+    float norm_w = screen_drag_x_to_normalized_width(details.localPosition.x);
+    if (snap_x_count != 0)
+    {
+      float new_norm_x = get_seg_norm_x(_drag_seg, seg_w_min + norm_w * (seg_w_max - seg_w_min));
+      float snap_drag_norm_x = std::clamp(std::round(new_norm_x * (snap_x_count + 1)) / (snap_x_count + 1), 0.0f, 1.0f);
+      float screen_drag_snap_x = x + w * snap_drag_norm_x;
+      norm_w = screen_drag_x_to_normalized_width(screen_drag_snap_x);
+    }
+
     float new_width = seg_w_min + norm_w * (seg_w_max - seg_w_min);
     _gui_segs[_drag_seg].w = new_width;
     _gui->param_changing(_module_index, _module_slot, _w_param, _drag_seg, new_width);
