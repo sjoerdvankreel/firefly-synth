@@ -546,7 +546,7 @@ mseg_editor::itemDragMove(juce::DragAndDropTarget::SourceDetails const& details)
     }
     else
     {
-      float if_norm_x = get_seg_norm_x(_drag_seg, new_width);
+      float if_norm_x = get_seg_norm_x(_drag_seg, _drag_seg, new_width);
       for (int i = 0; i <= snap_x_count + 1; i++)
       {
         float snap_norm_x = (float)i / (snap_x_count + 1);
