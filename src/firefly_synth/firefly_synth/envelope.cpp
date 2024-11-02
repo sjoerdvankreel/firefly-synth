@@ -1070,13 +1070,14 @@ void env_engine::process_mono_type_sync_trigger_mode(plugin_block& block, cv_cv_
       // the last note in a monophonic section
       if constexpr (Trigger != trigger_legato)
       {
-        // TODO mseg for mono modes
         if(block.state.mono_note_stream[f].event_type == mono_note_stream_event::on)
         {
-          if(_dahdsr_stage < env_stage::release)
+          if(!is_mseg && _dahdsr_stage < env_stage::release ||
+            is_mseg && _mseg_stage <= _mseg_sustain_point)
           {
             _stage_pos = 0;
             _total_pos = 0;
+            _mseg_stage = 0;
             _dahdsr_stage = env_stage::delay;
             if constexpr (Trigger == trigger_retrig)
             {
@@ -1186,7 +1187,7 @@ void env_engine::process_mono_type_sync_trigger_mode(plugin_block& block, cv_cv_
           _mseg_y[_mseg_stage - 1];
         out = prev_y + (_mseg_y[_mseg_stage] - prev_y) * calc_slope(slope_pos, 0.0f, _mseg_exp[_mseg_stage]);
         if(_mseg_stage <= _mseg_sustain_point)
-          _current_level = out;
+          _current_level = _multitrig_level = out;
       }
     }
 
