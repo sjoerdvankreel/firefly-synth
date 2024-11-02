@@ -492,19 +492,20 @@ mseg_editor::itemDragMove(juce::DragAndDropTarget::SourceDetails const& details)
   float const y = padding;
   float const h = getLocalBounds().getHeight() - padding * 2.0f;
   float drag_y_amt = 1.0f - std::clamp((details.localPosition.y - y) / h, 0.0f, 1.0f);
+  float snap_drag_y_amt = drag_y_amt;
 
-  //int snap_x_count = _gui->automation_state()->get_plain_at(_module_index, _module_slot, _grid_x_param, 0).step();
+  int snap_x_count = _gui->automation_state()->get_plain_at(_module_index, _module_slot, _grid_x_param, 0).step();
   int snap_y_count = _gui->automation_state()->get_plain_at(_module_index, _module_slot, _grid_y_param, 0).step();
 
   if (snap_y_count != 0)
   {
-    drag_y_amt = std::clamp(std::round(drag_y_amt * (snap_y_count + 1)) / (snap_y_count + 1), 0.0f, 1.0f);
+    snap_drag_y_amt = std::clamp(std::round(drag_y_amt * (snap_y_count + 1)) / (snap_y_count + 1), 0.0f, 1.0f);
   }
 
   if (_drag_start_y)
   {
-    _gui_start_y = drag_y_amt;
-    _gui->param_changing(_module_index, _module_slot, _start_y_param, 0, drag_y_amt);
+    _gui_start_y = snap_drag_y_amt;
+    _gui->param_changing(_module_index, _module_slot, _start_y_param, 0, snap_drag_y_amt);
     repaint();
     return;
   }
@@ -536,8 +537,8 @@ mseg_editor::itemDragMove(juce::DragAndDropTarget::SourceDetails const& details)
     float new_width = seg_w_min + norm_w * (seg_w_max - seg_w_min);
     _gui_segs[_drag_seg].w = new_width;
     _gui->param_changing(_module_index, _module_slot, _w_param, _drag_seg, new_width);
-    _gui_segs[_drag_seg].y = drag_y_amt;
-    _gui->param_changing(_module_index, _module_slot, _y_param, _drag_seg, drag_y_amt);
+    _gui_segs[_drag_seg].y = snap_drag_y_amt;
+    _gui->param_changing(_module_index, _module_slot, _y_param, _drag_seg, snap_drag_y_amt);
     repaint();
     return;
   }
