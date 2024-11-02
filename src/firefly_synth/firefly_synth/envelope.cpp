@@ -1095,7 +1095,7 @@ void env_engine::process_mono_type_sync_trigger_mode(plugin_block& block, cv_cv_
     }
 
     if (is_mseg && (block.voice->state.release_frame == f &&
-      (Type == type_sustain || (Type == type_release && _mseg_stage >= 0 && _mseg_stage < _mseg_sustain_point))))
+      (Type == type_sustain || (Type == type_release && _mseg_stage >= 0 && _mseg_stage <= _mseg_sustain_point))))
     {
       _stage_pos = 0;
       _total_pos = _release_at;
