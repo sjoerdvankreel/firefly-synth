@@ -1179,12 +1179,19 @@ void env_engine::process_mono_type_sync_trigger_mode(plugin_block& block, cv_cv_
       }
       else
       {
-        // TODO handle trigger modes
-        // _multitrig_level = out;
-        float prev_y = 
-          _mseg_stage == 0 ? _mseg_start_y : 
-          _mseg_stage == _mseg_sustain_point + 1? _current_level:
-          _mseg_y[_mseg_stage - 1];
+        float prev_y;
+        if (_mseg_stage == 0)
+        {
+          if constexpr (Trigger == trigger_multi)
+            prev_y = _multitrig_level;
+          else
+            prev_y = _mseg_start_y;
+        }
+        else
+        {
+          prev_y = _mseg_stage == _mseg_sustain_point + 1 ? _current_level : _mseg_y[_mseg_stage - 1];
+        }
+
         out = prev_y + (_mseg_y[_mseg_stage] - prev_y) * calc_slope(slope_pos, 0.0f, _mseg_exp[_mseg_stage]);
         if(_mseg_stage <= _mseg_sustain_point)
           _current_level = _multitrig_level = out;
