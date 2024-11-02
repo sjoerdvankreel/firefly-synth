@@ -1,11 +1,12 @@
 ### ?, ? - V1.9.7.
 
-- Add MSEG support for envelopes and LFO's (see manual).
+- Add MSEG Envelope support.
 * Visual editor, snap-to-grid, max 16 segments.
 * Optional resizable pop-up editor for more precise control.
 * MSEG is a prime candidate for LFO/ENV smoothing!
 * All x/y points and slopes fully automatable and per-voice-start modulatable.
 * All x/y points and slopes with fully host-integrated context menu like any other param.
+- Bugfix: graph would not display modulation correctly when releasing envelope before the sustain point.
 
 ### October 23, 2024 - V1.9.6.
 
