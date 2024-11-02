@@ -284,8 +284,11 @@ mseg_editor::mouseDrag(MouseEvent const& event)
       _drag_seg_initial_x = event.x;
       _drag_seg_initial_w = _gui_segs[_drag_seg].w;
       _undo_token = _gui->automation_state()->begin_undo_region();
-      _gui->param_begin_changes(_module_index, _module_slot, _w_param, _drag_seg);
       _gui->param_begin_changes(_module_index, _module_slot, _y_param, _drag_seg);
+
+      // when snapping we adjust all of them
+      for(int i = 0; i < _current_seg_count; i++)
+        _gui->param_begin_changes(_module_index, _module_slot, _w_param, i);
     }
   }
   else 
@@ -465,12 +468,18 @@ mseg_editor::mouseUp(juce::MouseEvent const& event)
     return;
   }
 
-  if (_drag_start_y) _gui->param_end_changes(_module_index, _module_slot, _start_y_param, 0);
-  else if (_drag_seg != -1 && _drag_seg_slope) _gui->param_end_changes(_module_index, _module_slot, _slope_param, _drag_seg);
+  if (_drag_start_y) 
+    _gui->param_end_changes(_module_index, _module_slot, _start_y_param, 0);
+  else if (_drag_seg != -1 && _drag_seg_slope) 
+    _gui->param_end_changes(_module_index, _module_slot, _slope_param, _drag_seg);
   else if(_drag_seg != -1)
   {
     _gui->param_end_changes(_module_index, _module_slot, _y_param, _drag_seg);
-    _gui->param_end_changes(_module_index, _module_slot, _w_param, _drag_seg);
+
+    // when snapping we adjust all of them
+    for (int i = 0; i < _current_seg_count; i++)
+      _gui->param_end_changes(_module_index, _module_slot, _w_param, i);
+
     int this_module_global = desc.module_topo_to_index.at(_module_index) + _module_slot;
     _gui->automation_state()->end_undo_region(_undo_token, "Change", desc.modules[this_module_global].info.name + " MSEG Point " + std::to_string(_drag_seg + 1));
     _undo_token = -1;
@@ -546,14 +555,18 @@ mseg_editor::itemDragMove(juce::DragAndDropTarget::SourceDetails const& details)
     }
     else
     {
-      float if_norm_x = get_seg_norm_x(_drag_seg, new_width);
+      float if_norm_x = get_seg_norm_x(_drag_seg, _drag_seg, new_width);
       for (int i = 0; i <= snap_x_count + 1; i++)
       {
         float snap_norm_x = (float)i / (snap_x_count + 1);
         if (snap_norm_x - 0.01f <= if_norm_x && if_norm_x <= snap_norm_x + 0.01f)
         {
-          _gui_segs[_drag_seg].w = new_width;
-          _gui->param_changing(_module_index, _module_slot, _w_param, _drag_seg, new_width);
+          // adjust all otherwise its not workable
+          for (int j = 0; j < _current_seg_count; j++)
+          {
+
+          }
+          break;
         }
       }
     }
