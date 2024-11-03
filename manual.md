@@ -203,7 +203,7 @@ are per-voice-start automatable and modulatable. When snap-x is on, all segments
 Segment Y and slope are always automatable/modulatable.
 
 You can set 1 point as a sustain point. In DAHDSR terms, this means that "all the rest" is considered
-the release section. Retrigger/multitrigger and follow/release envelope types are also implemented
+to be the release section. Retrigger/multitrigger and follow/release envelope types are also implemented
 by considering all segments after the sustain point as a single "release"  section.
 
 ### GUI
