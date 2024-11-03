@@ -70,12 +70,12 @@ public state_listener
   float sloped_y_pos(
     float pos, int seg) const;
   float get_seg_total_x(
-    int seg) const;
+    int seg, float if_width = -1.0f) const;
 
   float get_seg_last_total_x() const 
   { return get_seg_total_x(_gui_segs.size() - 1); }
-  float get_seg_norm_x(int seg) const
-  { return get_seg_total_x(seg) / get_seg_last_total_x(); }
+  float get_seg_norm_x(int seg, float if_width = -1.0f) const
+  { return get_seg_total_x(seg, if_width) / get_seg_last_total_x(); }
 
   bool hit_test(
     juce::MouseEvent const& e, bool& hit_start_y,
