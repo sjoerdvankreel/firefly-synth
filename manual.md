@@ -206,6 +206,9 @@ You can set 1 point as a sustain point. In DAHDSR terms, this means that "all th
 to be the release section. Retrigger/multitrigger and follow/release envelope types are also implemented
 by considering all segments after the sustain point as a single "release"  section.
 
+The MSEG as a whole can be either set to absolute time or synced to project tempo (bars).
+When set to time, the total MSEG time is modulatable.
+
 ### GUI
 
 * Double-click an existing point to delete it.
