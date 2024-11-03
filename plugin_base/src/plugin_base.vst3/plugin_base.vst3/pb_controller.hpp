@@ -9,6 +9,7 @@
 #include <public.sdk/source/vst/vsteditcontroller.h>
 
 #include <map>
+#include <stack>
 #include <utility>
 
 namespace plugin_base::vst3 {
@@ -47,6 +48,8 @@ public Steinberg::Vst::EditControllerEx1
   std::array<int, modulation_output_param_count> _modulation_output_param_tags = {};
   std::vector<modulation_output> _modulation_outputs_to_gui = {};
   std::array<modulation_output, modulation_output_param_count> _modulation_outputs_from_audio = {};
+
+  std::stack<int> _undo_tokens = {};
 
   // see param_state_changed and setParamNormalized
   // when host comes at us with an automation value, that is

@@ -5,9 +5,15 @@
 
 #include <string>
 
+namespace juce { class Component; }
+
 namespace plugin_base {
 
 struct module_topo;
+
+typedef std::function<juce::Component*(
+  plugin_gui* gui, lnf* lnf, int module_slot, component_store store)>
+custom_param_section_gui_factory;
 
 // param section ui
 struct param_section_gui final {
@@ -15,6 +21,7 @@ struct param_section_gui final {
   gui_position position;
   gui_dimension dimension;
   gui_scroll_mode scroll_mode;
+  custom_param_section_gui_factory custom_gui_factory = {};
   gui_label_edit_cell_split cell_split = gui_label_edit_cell_split::no_split;
   bool wrap_in_container = true; // see multi_own_grid
   int merge_with_section = -1;

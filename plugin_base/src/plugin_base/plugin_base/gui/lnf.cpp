@@ -83,7 +83,13 @@ override_colors(gui_colors const& base, var const& json)
   result.graph_background = override_color_if_present(json, "graph_background", result.graph_background);
   result.graph_area = override_color_if_present(json, "graph_area", result.graph_area);
   result.graph_line = override_color_if_present(json, "graph_line", result.graph_line);
-  result.bubble_outline = override_color_if_present(json, "bubble_outline", result.bubble_outline);  
+  result.mseg_grid = override_color_if_present(json, "mseg_grid", result.mseg_grid);
+  result.mseg_background = override_color_if_present(json, "mseg_background", result.mseg_background);
+  result.mseg_area = override_color_if_present(json, "mseg_area", result.mseg_area);
+  result.mseg_line = override_color_if_present(json, "mseg_line", result.mseg_line);
+  result.mseg_point = override_color_if_present(json, "mseg_point", result.mseg_point);
+  result.mseg_text = override_color_if_present(json, "mseg_text", result.mseg_text);
+  result.bubble_outline = override_color_if_present(json, "bubble_outline", result.bubble_outline);
   result.param_background = override_color_if_present(json, "param_background", result.param_background);
   result.param_highlight = override_color_if_present(json, "param_highlight", result.param_highlight);
   result.param_shadow1 = override_color_if_present(json, "param_shadow1", result.param_shadow1);

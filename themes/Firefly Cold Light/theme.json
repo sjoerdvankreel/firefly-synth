@@ -34,6 +34,10 @@
     "graph_text": "C0FFFFFF",
     "graph_background": "FF000000",
     "graph_modulation_bubble": "C0FFFFFF",
+    "mseg_grid": "40FFFFFF",
+    "mseg_background": "FF000000",
+    "mseg_point": "C0FFFFFF",
+    "mseg_text": "C0FFFFFF",
     "bubble_outline": "FF999999",
     "param_background": "FF333333",
     "param_highlight": "FFFFFFFF",
@@ -70,6 +74,8 @@
         "scrollbar_thumb": "FFCCCCCC",
         "graph_area": "80999999",
         "graph_line": "FF999999",
+        "mseg_area": "80999999",
+        "mseg_line": "FF999999",
         "table_header": "FFCCCCCC",
         "popup_text_highlighted": "FFEEEEEE"
       }
@@ -111,6 +117,8 @@
         "scrollbar_thumb": "FF40A0FF",
         "graph_area": "8040A0FF",
         "graph_line": "FF40A0FF",
+        "mseg_area": "8040A0FF",
+        "mseg_line": "FF40A0FF",
         "table_header": "FFCCCCCC",
         "popup_text_highlighted": "FF40A0FF"
       }
@@ -164,6 +172,8 @@
         "scrollbar_thumb": "FF40FFA0",
         "graph_area": "8040FFA0",
         "graph_line": "FF40FFA0",
+        "mseg_area": "8040FFA0",
+        "mseg_line": "FF40FFA0",
         "table_header": "FFCCCCCC",
         "popup_text_highlighted": "FF40FFA0"
       }

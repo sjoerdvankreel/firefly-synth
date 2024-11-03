@@ -2,6 +2,7 @@
 #include <plugin_base/gui/lnf.hpp>
 #include <plugin_base/gui/controls.hpp>
 #include <plugin_base/gui/containers.hpp>
+#include <plugin_base/gui/mseg_editor.hpp>
 #include <plugin_base/topo/plugin.hpp>
 #include <plugin_base/shared/io_user.hpp>
 #include <plugin_base/shared/io_plugin.hpp>
@@ -193,6 +194,7 @@ gui_undo_listener::mouseUp(MouseEvent const& event)
   if(dynamic_cast<Label*>(event.originalComponent)) return; // needed for comboboxes
   if(dynamic_cast<Button*>(event.originalComponent)) return;
   if(dynamic_cast<TabBarButton*>(event.originalComponent)) return;
+  if(dynamic_cast<mseg_editor*>(event.originalComponent)) return;
   if(dynamic_cast<param_component*>(event.originalComponent)) return;
 
   juce::PopupMenu menu;
@@ -236,9 +238,9 @@ gui_undo_listener::mouseUp(MouseEvent const& event)
       auto load_result = plugin_io_load_instance_state(clip_data, new_state, true);
       if (load_result.ok() && !load_result.warnings.size())
       {
-        _gui->automation_state()->begin_undo_region();
+        int undo_token = _gui->automation_state()->begin_undo_region();
         _gui->automation_state()->copy_from(new_state.state(), true);
-        _gui->automation_state()->end_undo_region("Paste", "Patch");
+        _gui->automation_state()->end_undo_region(undo_token, "Paste", "Patch");
       }
       else
       {
@@ -298,17 +300,17 @@ gui_tab_menu_listener::mouseUp(MouseEvent const& event)
     {
       int action_id = (id % 1000) / 100;
       int menu_id = module_menus[id / 1000].menu_id;
-      _state->begin_undo_region();
+      int undo_token = _state->begin_undo_region();
       result = handler->execute_module(menu_id, action_id, _module, _slot, id % 100);
-      _state->end_undo_region(tab_menu_module_actions[action_id], result.item());
+      _state->end_undo_region(undo_token, tab_menu_module_actions[action_id], result.item());
     }
     else if(10000 <= id && id < 20000)
     {
       auto const& menu = custom_menus[(id - 10000) / 1000];
       auto const& action_entry = menu.entries[((id - 10000) % 1000) / 100];
-      _state->begin_undo_region();
+      int undo_token = _state->begin_undo_region();
       result = handler->execute_custom(menu.menu_id, action_entry.action, _module, _slot);
-      _state->end_undo_region(action_entry.title, result.item());
+      _state->end_undo_region(undo_token, action_entry.title, result.item());
     }
     delete handler;
     if(!result.show_warning()) return;
@@ -414,14 +416,62 @@ plugin_gui::theme_changed(std::string const& theme_name)
   setSize(w, w * ratio);
   resized();
   _tooltip = std::make_unique<TooltipWindow>(getChildComponent(0));
-} 
+}
 
 void
-plugin_gui::param_changed(int index, plain_value plain)
+plugin_gui::param_begin_changes(int m, int mi, int p, int pi)
 {
-  if (_automation_state->desc().params[index]->param->dsp.direction == param_direction::input)
-    for (int i = 0; i < _param_listeners.size(); i++)
-      _param_listeners[i]->gui_param_changed(index, plain);
+  int index = automation_state()->desc().param_mappings.topo_to_index[m][mi][p][pi];
+  param_begin_changes(index);
+}
+
+void
+plugin_gui::param_end_changes(int m, int mi, int p, int pi)
+{
+  int index = automation_state()->desc().param_mappings.topo_to_index[m][mi][p][pi];
+  param_end_changes(index);
+}
+
+void
+plugin_gui::param_changing(int m, int mi, int p, int pi, plain_value plain)
+{
+  int index = automation_state()->desc().param_mappings.topo_to_index[m][mi][p][pi];
+  param_changing(index, plain);
+}
+
+void
+plugin_gui::param_changed(int m, int mi, int p, int pi, plain_value plain)
+{
+  int index = automation_state()->desc().param_mappings.topo_to_index[m][mi][p][pi];
+  param_changed(index, plain);
+}
+
+void
+plugin_gui::param_changing(int m, int mi, int p, int pi, double raw)
+{
+  int index = automation_state()->desc().param_mappings.topo_to_index[m][mi][p][pi];
+  param_changing(index, raw);
+}
+
+void
+plugin_gui::param_changed(int m, int mi, int p, int pi, double raw)
+{
+  int index = automation_state()->desc().param_mappings.topo_to_index[m][mi][p][pi];
+  param_changed(index, raw);
+}
+
+void
+plugin_gui::param_changing(int index, double raw)
+{
+  plain_value plain = _automation_state->desc().raw_to_plain_at_index(index, raw);
+  param_changing(index, plain);
+}
+
+void
+plugin_gui::param_changed(int index, double raw)
+{
+  plain_value plain = _automation_state->desc().raw_to_plain_at_index(index, raw);
+  param_changed(index, plain);
 }
 
 void
@@ -446,6 +496,14 @@ plugin_gui::param_changing(int index, plain_value plain)
   if (_automation_state->desc().params[index]->param->dsp.direction == param_direction::input)
     for (int i = 0; i < _param_listeners.size(); i++)
       _param_listeners[i]->gui_param_changing(index, plain);
+}
+
+void
+plugin_gui::param_changed(int index, plain_value plain)
+{
+  if (_automation_state->desc().params[index]->param->dsp.direction == param_direction::input)
+    for (int i = 0; i < _param_listeners.size(); i++)
+      _param_listeners[i]->gui_param_changed(index, plain);
 }
 
 void
@@ -1043,10 +1101,22 @@ Component&
 plugin_gui::make_param_section(module_desc const& module, param_section const& section, bool first_horizontal)
 {
   auto const& params = module.params;
-  bool is_parent_grid_param = false;
   grid_component& grid = make_component<grid_component>(section.gui.dimension, 
     margin_param, margin_param, section.gui.autofit_row, section.gui.autofit_column);
   
+  // easy case - plug builds its own param gui
+  if (section.gui.custom_gui_factory != nullptr)
+  {
+    auto store = [this](std::unique_ptr<Component>&& owned) -> Component& {
+      auto result = owned.get();
+      _components.emplace_back(std::move(owned));
+      return *result; };
+    auto& custom = *section.gui.custom_gui_factory(this, module_lnf(module.module->info.index), module.info.slot, store);
+    grid.add(custom, { 0, 0 });
+    return make_component<param_section_container>(this, _lnf.get(), &module, &section, &grid, first_horizontal ? 0 : margin_hsection);
+  }
+
+  bool is_parent_grid_param = false;
   for(int p = 0; p < module.module->params.size(); p++)
     if(module.module->params[p].gui.section == section.index)
       if (module.module->params[p].gui.layout == param_layout::parent_grid)
@@ -1331,10 +1401,10 @@ plugin_gui::init_patch()
     if(result == 1)
     {
       _extra_state->clear();
-      _automation_state->begin_undo_region();
+      int undo_token = _automation_state->begin_undo_region();
       _automation_state->init(state_init_type::default_, true);
       fire_state_loaded();
-      _automation_state->end_undo_region("Init", "Patch");
+      _automation_state->end_undo_region(undo_token, "Init", "Patch");
     }
   });
 }
@@ -1349,10 +1419,10 @@ plugin_gui::clear_patch()
     if (result == 1)
     {
       _extra_state->clear();
-      _automation_state->begin_undo_region();
+      int undo_token = _automation_state->begin_undo_region();
       _automation_state->init(state_init_type::minimal, true);
       fire_state_loaded();
-      _automation_state->end_undo_region("Clear", "Patch");
+      _automation_state->end_undo_region(undo_token, "Clear", "Patch");
     }
   });
 }
@@ -1389,11 +1459,12 @@ void
 plugin_gui::load_patch(std::string const& path, bool preset)
 {
   PB_LOG_FUNC_ENTRY_EXIT();  
-  _automation_state->begin_undo_region();
+  int undo_token = _automation_state->begin_undo_region();
   auto icon = MessageBoxIconType::WarningIcon;
   auto result = plugin_io_load_file_patch_state(path, *_automation_state);
   if (result.error.size())
   {
+    _automation_state->end_undo_region(undo_token, "Load", preset ? "Preset" : "Patch");
     auto options = MessageBoxOptions::makeOptionsOk(icon, "Error", result.error, String(), this);
     options = options.withAssociatedComponent(getChildComponent(0));
     AlertWindow::showAsync(options, nullptr);
@@ -1402,7 +1473,7 @@ plugin_gui::load_patch(std::string const& path, bool preset)
 
   if(preset) _extra_state->clear();
   fire_state_loaded();
-  _automation_state->end_undo_region("Load", preset ? "Preset" : "Patch");
+  _automation_state->end_undo_region(undo_token, "Load", preset ? "Preset" : "Patch");
 
   if (result.warnings.size())
   {

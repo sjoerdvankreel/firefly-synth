@@ -10,6 +10,7 @@
 #include <Client/libMTSClient.h>
 #include <readerwriterqueue.h>
 
+#include <stack>
 #include <memory>
 #include <atomic>
 #include <cstdint>
@@ -53,6 +54,8 @@ public gui_param_listener
   std::unique_ptr<event_queue> _to_audio_events = {};
   std::vector<modulation_output> _modulation_outputs = {};
   std::unique_ptr<modulation_output_queue> _modulation_output_queue = {};
+
+  std::stack<int> _undo_tokens = {};
 
   // see param_state_changed and timerCallback()
   // and vst3 pb_controller _inside_set_param_normalized

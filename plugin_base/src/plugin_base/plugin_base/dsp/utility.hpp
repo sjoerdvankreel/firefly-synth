@@ -12,6 +12,7 @@
 namespace plugin_base {
 
 int const midi_middle_c = 60;
+double const exp_slope_min = 0.001;
 
 std::pair<std::uint32_t, std::uint32_t> disable_denormals();
 void restore_denormals(std::pair<std::uint32_t, std::uint32_t> state);

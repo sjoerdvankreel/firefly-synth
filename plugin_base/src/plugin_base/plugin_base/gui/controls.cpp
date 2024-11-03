@@ -68,25 +68,6 @@ fill_popup_menu(param_domain const& domain, PopupMenu& menu, gui_submenu const* 
   }
 }
 
-static void
-fill_host_menu(PopupMenu& menu, std::vector<std::shared_ptr<host_menu_item>> const& children)
-{
-  for(int i = 0; i < children.size(); i++)
-  {
-    auto const& child = *children[i].get();
-    if(child.flags & host_menu_flags_separator)
-      menu.addSeparator();
-    else if(child.children.empty())
-      menu.addItem(child.tag + 1, child.name, child.flags & host_menu_flags_enabled, child.flags & host_menu_flags_checked);
-    else
-    {
-      PopupMenu submenu;
-      fill_host_menu(submenu, child.children);
-      menu.addSubMenu(child.name, submenu, child.flags & host_menu_flags_enabled);
-    }
-  }
-}
-
 void 
 text_button::mouseUp(MouseEvent const& e)
 {
@@ -417,7 +398,7 @@ param_component::mouseUp(MouseEvent const& evt)
   {
     have_menu = true;
     menu.addColouredItem(-1, "Host", colors.tab_text, false, false, nullptr);
-    fill_host_menu(menu, host_menu->root.children);
+    fill_host_menu(menu, 0, host_menu->root.children);
   }
 
   if(!have_menu) return;
@@ -429,9 +410,9 @@ param_component::mouseUp(MouseEvent const& evt)
       auto plugin_menus = plugin_handler->menus();
       auto const& menu = plugin_menus[(id - 10000) / 1000];
       auto const& action_entry = menu.entries[((id - 10000) % 1000) / 100];
-      _gui->automation_state()->begin_undo_region();
+      int undo_token = _gui->automation_state()->begin_undo_region();
       std::string item = plugin_handler->execute(menu.menu_id, action_entry.action, _module->info.topo, _module->info.slot, _param->info.topo, _param->info.slot);      
-      _gui->automation_state()->end_undo_region(action_entry.title, item);
+      _gui->automation_state()->end_undo_region(undo_token, action_entry.title, item);
     }
     delete host_menu;
     delete plugin_handler;
@@ -817,7 +798,7 @@ param_combobox::itemDropped(DragAndDropTarget::SourceDetails const& details)
   }
 
   int item_index = tag - 1;
-  _gui->automation_state()->begin_undo_region();
+  int undo_token = _gui->automation_state()->begin_undo_region();
 
   // found corresponding drop target, select it
   // dont do setSelectedId -- that triggers async update and gets us 2 items in the undo history
@@ -840,7 +821,7 @@ param_combobox::itemDropped(DragAndDropTarget::SourceDetails const& details)
           _module->module->params[i].domain.raw_to_plain(_param->param->gui.drop_route_enabled_param_value));
       
       itemDragExit(details);
-      _gui->automation_state()->end_undo_region("Drop", _gui->automation_state()->plain_to_text_at_index(
+      _gui->automation_state()->end_undo_region(undo_token, "Drop", _gui->automation_state()->plain_to_text_at_index(
         false, _param->info.global, _gui->automation_state()->get_plain_at_index(_param->info.global)));
        return;
     }

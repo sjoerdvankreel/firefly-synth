@@ -1,3 +1,13 @@
+### November 3, 2024 - V1.9.7.
+
+- Bugfix: graph would not display modulation correctly when releasing envelope before the sustain point.
+- Add MSEG Envelope support (it's hidden inside envelope mode) (see manual).
+* Visual editor, snap-to-grid, max 16 segments, single sustain point.
+* Optional resizable pop-up editor for more precise control.
+* All y points and slopes fully automatable and per-voice-start modulatable.
+* All width, y points and slopes with fully host-integrated context menu like any other param.
+* When horizontal snapping is off, all segment widths automatable and per-voice-start modulatable.
+
 ### October 23, 2024 - V1.9.6.
 
 - Fixed a couple of outdated parameter descriptions.

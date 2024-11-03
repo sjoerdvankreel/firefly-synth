@@ -91,7 +91,7 @@ _modulation_output_queue(std::make_unique<modulation_output_queue>(default_q_siz
 void
 pb_plugin::gui_param_begin_changes(int index)
 {
-  _automation_state.begin_undo_region();
+  _undo_tokens.push(_automation_state.begin_undo_region());
   push_to_audio(index, sync_event_type::begin_edit);
 }
 
@@ -99,7 +99,8 @@ void
 pb_plugin::gui_param_end_changes(int index) 
 { 
   push_to_audio(index, sync_event_type::end_edit); 
-  _automation_state.end_undo_region("Change", _automation_state.desc().params[index]->full_name);
+  _automation_state.end_undo_region(_undo_tokens.top(), "Change", _automation_state.desc().params[index]->full_name);
+  _undo_tokens.pop();
 }
 
 void

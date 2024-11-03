@@ -63,9 +63,9 @@ public:
 
   void undo(int index);
   void redo(int index);
-  void begin_undo_region();
   void discard_undo_region();
-  void end_undo_region(std::string const& action, std::string const& item);
+  int begin_undo_region();
+  void end_undo_region(int token, std::string const& action, std::string const& item);
 
   plugin_desc const& desc() const { return *_desc; }
   jarray<plain_value, 4> const& state() const { return _state; }
@@ -77,6 +77,8 @@ public:
   void remove_any_listener(any_state_listener* listener) const;
   void add_listener(int index, state_listener* listener) const;
   void remove_listener(int index, state_listener* listener) const;
+  void add_listener(int m, int mi, int p, int pi, state_listener* listener) const;
+  void remove_listener(int m, int mi, int p, int pi, state_listener* listener) const;
 
   void clear_module(int index, int slot);
   void copy_module_to(int index, int source_slot, int target_slot);

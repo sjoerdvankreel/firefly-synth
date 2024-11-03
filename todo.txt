@@ -27,9 +27,10 @@ autobuilds:
 * ask paul
 * integrate https://github.com/surge-synthesizer/monique-monosynth/blob/main/.github/workflows/build-pr.yml
 
-make a patch cleanup button
-update the routing graph for arp
-
+shortlist:
+mseg as lfo
+do the kvr arm64 thing
+update all hosts and dependencies
 ditch after-mod, claim micro support ?
 arp new note = reset table pos yes/no?
 do more keyboard tracking just do it -- also trackmode mul/add
@@ -40,6 +41,8 @@ wishlist:
 use fftw
 should figure out a way to do user supplied formulas?
 update the manuals routing overview image with new colors
+make a patch cleanup button
+update the routing graph for arp
 filter micro tuning
 DSF falloff to the left
 clap polyphonic modulation
@@ -49,7 +52,6 @@ show effective modulation in the ui for clap param mod
 Feedback FM - but needs per-sample processing, not block
 
 wishlist sometime:
-mseg
 midi mpe
 cheby shaper
 phaser/flanger/chorus
