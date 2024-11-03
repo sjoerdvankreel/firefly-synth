@@ -289,7 +289,7 @@ mseg_editor::mouseDrag(MouseEvent const& event)
       _drag_seg_initial_x = event.x;
       _drag_seg_initial_w = _gui_segs[_drag_seg].w;
       _undo_token = _gui->automation_state()->begin_undo_region();
-      if(snap_x)
+      if(!snap_x)
         _gui->param_begin_changes(_module_index, _module_slot, _w_param, _drag_seg);
       _gui->param_begin_changes(_module_index, _module_slot, _y_param, _drag_seg);
     }

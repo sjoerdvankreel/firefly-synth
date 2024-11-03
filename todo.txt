@@ -64,9 +64,9 @@ X why does it keep on dirtying the graph state?
 X see if we can paint the vcv matrices more often based on static stuff
 X same for vlfo/venv ==> stick to last note or something ?
 X vlfo smooth not paint good (prolly looking for note rand?)
+V do the actual snapping
 
 do a couple test files
-do the actual snapping
 do docs
 
 shortlist:
