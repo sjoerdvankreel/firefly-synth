@@ -37,6 +37,7 @@ It's basically [InfernalSynth](https://github.com/sjoerdvankreel/infernal-synth)
 
 Realtime modulation animation videos:
 
+- [mseg_demo.mp4](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/video/mseg_demo.mp4)
 - [big_pad_2_visual_demo.mp4](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/video/big_pad_2_visual_demo.mp4)
 - [arp_demo_2_reaper_clap.mp4](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/video/arp_demo_2_reaper_clap.mp4)
 - [arp_demo_1_renoise_vst3.mp4](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/video/arp_demo_1_renoise_vst3.mp4)
