@@ -261,7 +261,8 @@ mseg_editor::mouseDrag(MouseEvent const& event)
   if (event.mods.isRightButtonDown()) return;
   if (isDragAndDropActive()) return;
   if (!hit_test(event, _drag_start_y, _drag_seg, _drag_seg_slope)) return;
-  
+  bool snap_x = _gui->automation_state()->get_plain_at(_module_index, _module_slot, _snap_x_param, 0).step() != 0;
+
   Image image(Image::PixelFormat::ARGB, point_size, point_size, true);
   Graphics g(image);
   if (_drag_seg_slope)
@@ -288,7 +289,8 @@ mseg_editor::mouseDrag(MouseEvent const& event)
       _drag_seg_initial_x = event.x;
       _drag_seg_initial_w = _gui_segs[_drag_seg].w;
       _undo_token = _gui->automation_state()->begin_undo_region();
-      _gui->param_begin_changes(_module_index, _module_slot, _w_param, _drag_seg);
+      if(snap_x)
+        _gui->param_begin_changes(_module_index, _module_slot, _w_param, _drag_seg);
       _gui->param_begin_changes(_module_index, _module_slot, _y_param, _drag_seg);
     }
   }
@@ -308,6 +310,7 @@ void
 mseg_editor::mouseUp(juce::MouseEvent const& event)
 {
   auto const& desc = _gui->automation_state()->desc();
+  bool current_snap_x = _gui->automation_state()->get_plain_at(_module_index, _module_slot, _snap_x_param, 0).step() != 0;
 
   if (event.mods.isRightButtonDown())
   {
@@ -354,14 +357,17 @@ mseg_editor::mouseUp(juce::MouseEvent const& event)
           menu.addItem(1, "Sustain", hit_seg != current_sustain_point, hit_seg == current_sustain_point);
         }
 
-        // TODO not if snap
-        int param_w_index = desc.param_mappings.topo_to_index[_module_index][_module_slot][_w_param][hit_seg];
-        auto host_menu_w = desc.menu_handler->context_menu(desc.params[param_w_index]->info.id_hash);
-        if (host_menu_w && !host_menu_w->root.children.empty())
+        int param_w_index = -1;
+        if (!current_snap_x)
         {
-          menu.addColouredItem(-1, "Host W", colors.tab_text, false, false, nullptr);
-          fill_host_menu(menu, 10000, host_menu_w->root.children);
-          host_menu_w.release();
+          param_w_index = desc.param_mappings.topo_to_index[_module_index][_module_slot][_w_param][hit_seg];
+          auto host_menu_w = desc.menu_handler->context_menu(desc.params[param_w_index]->info.id_hash);
+          if (host_menu_w && !host_menu_w->root.children.empty())
+          {
+            menu.addColouredItem(-1, "Host W", colors.tab_text, false, false, nullptr);
+            fill_host_menu(menu, 10000, host_menu_w->root.children);
+            host_menu_w.release();
+          }
         }
 
         int param_y_index = desc.param_mappings.topo_to_index[_module_index][_module_slot][_y_param][hit_seg];
@@ -411,7 +417,6 @@ mseg_editor::mouseUp(juce::MouseEvent const& event)
         y_menu.addItem(i + 1, i == 0 ? "Off" : std::to_string(i + 1), true, i == current_y);
       menu.addSubMenu("Snap Y", y_menu);
 
-      bool current_snap_x = _gui->automation_state()->get_plain_at(_module_index, _module_slot, _snap_x_param, 0).step() != 0;
       menu.addItem(1000 + 1, "Snap X", true, current_snap_x);
 
       if (_is_external)
@@ -471,9 +476,9 @@ mseg_editor::mouseUp(juce::MouseEvent const& event)
   else if (_drag_seg != -1 && _drag_seg_slope) _gui->param_end_changes(_module_index, _module_slot, _slope_param, _drag_seg);
   else if(_drag_seg != -1)
   {
+    if(!current_snap_x)
+      _gui->param_end_changes(_module_index, _module_slot, _w_param, _drag_seg);
     _gui->param_end_changes(_module_index, _module_slot, _y_param, _drag_seg);
-    // todo not if snapx
-    _gui->param_end_changes(_module_index, _module_slot, _w_param, _drag_seg);
     int this_module_global = desc.module_topo_to_index.at(_module_index) + _module_slot;
     _gui->automation_state()->end_undo_region(_undo_token, "Change", desc.modules[this_module_global].info.name + " MSEG Point " + std::to_string(_drag_seg + 1));
     _undo_token = -1;
@@ -497,6 +502,7 @@ mseg_editor::itemDragMove(juce::DragAndDropTarget::SourceDetails const& details)
   float drag_y_amt = 1.0f - std::clamp((details.localPosition.y - y) / h, 0.0f, 1.0f);
   float snap_drag_y_amt = drag_y_amt;
 
+  bool snap_x = _gui->automation_state()->get_plain_at(_module_index, _module_slot, _snap_x_param, 0).step() != 0;
   int snap_y_count = _gui->automation_state()->get_plain_at(_module_index, _module_slot, _snap_y_param, 0).step();
   if (snap_y_count != 0)
   {
@@ -524,21 +530,23 @@ mseg_editor::itemDragMove(juce::DragAndDropTarget::SourceDetails const& details)
 
   if (_drag_seg != -1 && !_drag_seg_slope)
   {
-    float norm_add;
-    float diff = details.localPosition.x - _drag_seg_initial_x;
-    float sensitivity_l = _drag_seg_initial_x;
-    float sensitivity_r = getLocalBounds().getWidth() - _drag_seg_initial_x;
-    if (diff >= 0)
-      norm_add = diff / sensitivity_r;
-    else
-      norm_add = -1.0f + details.localPosition.x / sensitivity_l;
-    float norm_w = (_drag_seg_initial_w - seg_w_min) / (seg_w_max - seg_w_min);
-    norm_w += norm_add;
-    norm_w = std::clamp(norm_w, 0.0f, 1.0f);
-    float new_width = seg_w_min + norm_w * (seg_w_max - seg_w_min);
-    // todo not if snapx
-    _gui_segs[_drag_seg].w = new_width;
-    _gui->param_changing(_module_index, _module_slot, _w_param, _drag_seg, new_width);    
+    if (!snap_x)
+    {
+      float norm_add;
+      float diff = details.localPosition.x - _drag_seg_initial_x;
+      float sensitivity_l = _drag_seg_initial_x;
+      float sensitivity_r = getLocalBounds().getWidth() - _drag_seg_initial_x;
+      if (diff >= 0)
+        norm_add = diff / sensitivity_r;
+      else
+        norm_add = -1.0f + details.localPosition.x / sensitivity_l;
+      float norm_w = (_drag_seg_initial_w - seg_w_min) / (seg_w_max - seg_w_min);
+      norm_w += norm_add;
+      norm_w = std::clamp(norm_w, 0.0f, 1.0f);
+      float new_width = seg_w_min + norm_w * (seg_w_max - seg_w_min);
+      _gui_segs[_drag_seg].w = new_width;
+      _gui->param_changing(_module_index, _module_slot, _w_param, _drag_seg, new_width);
+    }
     _gui_segs[_drag_seg].y = snap_drag_y_amt;
     _gui->param_changing(_module_index, _module_slot, _y_param, _drag_seg, snap_drag_y_amt);
     repaint();
@@ -636,7 +644,6 @@ mseg_editor::mouseMove(MouseEvent const& event)
     }
     else
     {
-      // todo not if snapx
       std::string text_w = _gui->automation_state()->desc().plugin->modules[_module_index].params[_w_param].domain.raw_to_text(false, _gui_segs[hit_seg].w);
       std::string text_y = _gui->automation_state()->desc().plugin->modules[_module_index].params[_y_param].domain.raw_to_text(false, _gui_segs[hit_seg].y);
       std::string sustain = _gui->automation_state()->get_plain_at(_module_index, _module_slot, _sustain_param, 0).step() == hit_seg ? std::string(", Sustain") : std::string("");
@@ -688,7 +695,7 @@ mseg_editor::paint(Graphics& g)
   g.drawLine(x, y, x, y + h, _is_external ? 2.0f : 1.0f);
   if(snap_x)
     for (int i = 0; i < _current_seg_count - 1; i++)
-      g.drawLine(x + (i + 1) / _current_seg_count * w, y, x + (i + 1) / _current_seg_count * w, y + h, _is_external ? 2.0f : 1.0f);
+      g.drawLine(x + (i + 1.0f) / _current_seg_count * w, y, x + (i + 1.0f) / _current_seg_count * w, y + h, _is_external ? 2.0f : 1.0f);
   g.drawLine(x + w, y, x + w, y + h, _is_external ? 2.0f : 1.0f);
   int snap_y_count = _gui->automation_state()->get_plain_at(_module_index, _module_slot, _snap_y_param, 0).step();
   g.drawLine(x, y, x + w, y, _is_external ? 2.0f : 1.0f);
