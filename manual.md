@@ -190,17 +190,38 @@ These are probably best used as on-note versions, but regular versions are avail
 
 Alternative to DAHDSR generators (set env mode to MSEG).
 
-* Max 16 segments
+* Single start-y value + max 16 segments
 * Per-segment width, y, and slope controls
 * Inline visual editor + resizable popup-editor
 * Visual editor with snap-to-grid support (see below)
 * Automation and per-voice-start modulation of all width, y and slope params
 
+MSEG segments are defined as a single start-y values + N (segment count) times width+y+slope parameters.
+Width parameters are relative to each other with bounds (1, 100). For example an MSEG curve with widths
+(1, 2, 4) will result in relative segment sizes of (1/7, 2/7, 4/7). When snap-x is off, segment widths
+are per-voice-start automatable and modulatable. When snap-x is on, all segments have equal size.
+Segment Y and slope are always automatable/modulatable.
+
+You can set 1 point as a sustain point. In DAHDSR terms, this means that "all the rest" is considered
+the release section. Retrigger/multitrigger and follow/release envelope types are also implemented
+by considering all segments after the sustain point as a single "release"  section.
+
 ### GUI
 
+* Right-click for context menu.
+* Editor context menu: allows to control snap-x and snap-y values.
+* Per-point context menu: host controls for width/y/slope, and set point as sustain point.
+* Drag points around to define the curve. Slopes and Y points are always draggable. Width is only draggable when snap-x is off.
 
+### Snap-to-grid
 
-### Visual editor
+Snap-Y is really just a visiual helper. It allows you to vertically divide the grid into N sections and when
+dragging points it will snap the vertical position onto the grid. Slopes are not snapped. However
+automation/modulation of point vertical positions is still possible, but it will not take snapping into account.
+
+Snap-X (when on) forces all segments to be equal width. Unlike snap-y, when snap-x is on,
+this really does affect how the audio engine works. When on, all segments are equal width,
+and automation/modulation of the segment widths is NOT possible.
 
 ## Feature overview
 
