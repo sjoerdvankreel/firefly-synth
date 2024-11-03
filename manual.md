@@ -186,11 +186,28 @@ These are probably best used as on-note versions, but regular versions are avail
 * Table absolute position: with a table size of 5 this gets you 0.0, 0.25, 0.5, 0.75, 1.0.
 * Table relative position: takes flipping into account. F.e. with flip set to 2, gets you 0.0, 0.25, 0.75, 0.5, 1.0.
 
+## MSEG Envelopes
+
+Alternative to DAHDSR generators (set env mode to MSEG).
+
+* Max 16 segments
+* Per-segment width, y, and slope controls
+* Inline visual editor + resizable popup-editor
+* Visual editor with snap-to-grid support (see below)
+* Automation and per-voice-start modulation of all width, y and slope params
+
+### GUI
+
+
+
+### Visual editor
+
 ## Feature overview
 
 See the parameter reference document for details.
 
 - Arpeggiator.
+- MSEG envelopes.
 - Microtuning support.
 - Envelope 1 hardwired to voice gain.
 - Per-voice and global audio routing matrices.
