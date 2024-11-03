@@ -65,7 +65,6 @@ X see if we can paint the vcv matrices more often based on static stuff
 X same for vlfo/venv ==> stick to last note or something ?
 X vlfo smooth not paint good (prolly looking for note rand?)
 
-snap-x != grid! set grid hcount equal to point count, divide even!
 do a couple test files
 do the actual snapping
 do docs
