@@ -215,6 +215,7 @@ by considering all segments after the sustain point as a single "release"  secti
 * Editor context menu: allows to control snap-x and snap-y values and open/close external editor.
 * Drag points around to define the curve. Slopes and Y points are always draggable. Width is only draggable when snap-x is off.
 * External editor is resizable and synced with inline editor.
+* Right-click or ESC to close external editor.
 
 ### Snap-to-grid
 
