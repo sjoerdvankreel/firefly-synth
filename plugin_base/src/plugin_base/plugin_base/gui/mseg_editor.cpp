@@ -113,11 +113,11 @@ mseg_editor::state_changed(int index, plain_value plain)
 }
 
 float
-mseg_editor::get_seg_total_x(int seg, float if_width) const
+mseg_editor::get_seg_total_x(int seg) const
 {
   float result = 0.0f;
   for (int i = 0; i <= seg; i++)
-    result += (seg != seg || if_width < 0.01f) ? _gui_segs[i].w: if_width;
+    result += _gui_segs[i].w;
   return result;
 }
 
@@ -491,7 +491,6 @@ mseg_editor::itemDragMove(juce::DragAndDropTarget::SourceDetails const& details)
 {
   float const y = padding;
   float const h = getLocalBounds().getHeight() - padding * 2.0f;
-
   float drag_y_amt = 1.0f - std::clamp((details.localPosition.y - y) / h, 0.0f, 1.0f);
   float snap_drag_y_amt = drag_y_amt;
 
@@ -536,24 +535,10 @@ mseg_editor::itemDragMove(juce::DragAndDropTarget::SourceDetails const& details)
     norm_w += norm_add;
     norm_w = std::clamp(norm_w, 0.0f, 1.0f);
     float new_width = seg_w_min + norm_w * (seg_w_max - seg_w_min);
+    _gui_segs[_drag_seg].w = new_width;
+    _gui->param_changing(_module_index, _module_slot, _w_param, _drag_seg, new_width);
     _gui_segs[_drag_seg].y = snap_drag_y_amt;
     _gui->param_changing(_module_index, _module_slot, _y_param, _drag_seg, snap_drag_y_amt);
-
-    if (snap_x_count == 0)
-    {
-      _gui_segs[_drag_seg].w = new_width;
-      _gui->param_changing(_module_index, _module_slot, _w_param, _drag_seg, new_width);
-    }
-    else
-    {
-      float if_norm_x = get_seg_norm_x(_drag_seg, new_width);
-      if(0.45 <= if_norm_x && if_norm_x <= 0.55)
-      {
-        _gui_segs[_drag_seg].w = new_width;
-        _gui->param_changing(_module_index, _module_slot, _w_param, _drag_seg, new_width);
-      }
-    }
-
     repaint();
     return;
   }
