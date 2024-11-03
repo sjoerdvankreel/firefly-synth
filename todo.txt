@@ -68,6 +68,7 @@ V do the actual snapping
 
 do a couple test files
 do docs
+check the fx
 
 shortlist:
 mseg as lfo
