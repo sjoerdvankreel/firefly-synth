@@ -211,8 +211,8 @@ by considering all segments after the sustain point as a single "release"  secti
 * Double-click an existing point to delete it.
 * Double-click elsewhere to insert a new point.
 * Right-click for context menu.
-* Editor context menu: allows to control snap-x and snap-y values.
 * Per-point context menu: host controls for width/y/slope, and set point as sustain point.
+* Editor context menu: allows to control snap-x and snap-y values and open/close external editor.
 * Drag points around to define the curve. Slopes and Y points are always draggable. Width is only draggable when snap-x is off.
 
 ### Snap-to-grid
