@@ -65,10 +65,9 @@ X see if we can paint the vcv matrices more often based on static stuff
 X same for vlfo/venv ==> stick to last note or something ?
 X vlfo smooth not paint good (prolly looking for note rand?)
 V do the actual snapping
+V do a couple test files
 
-do a couple test files
 do docs
-check the fx
 
 shortlist:
 mseg as lfo
