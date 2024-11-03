@@ -36,7 +36,7 @@ enum {
   param_decay_time, param_decay_tempo, param_decay_slope, 
   param_release_time, param_release_tempo, param_release_slope,
   param_mseg_start_y, param_mseg_count, param_mseg_sustain, param_mseg_w, param_mseg_y,
-  param_mseg_slope, param_mseg_grid_x, param_mseg_grid_y };
+  param_mseg_slope, param_mseg_snap_x, param_mseg_snap_y };
 
 static constexpr bool is_dahdsr_exp_slope(int mode) { 
   return mode == mode_exp_uni || mode == mode_exp_bi || mode == mode_exp_split; }
@@ -199,13 +199,14 @@ env_plot_length_seconds(plugin_state const& state, int slot, float& dly, float& 
   if (is_mseg)
   {
     mseg = sync_or_time_from_state(state, bpm, sync, module_env, slot, param_mseg_length_time, param_mseg_length_sync);
+    bool snap_x = state.get_plain_at(module_env, slot, param_mseg_snap_x, 0).step() != 0;
     int mseg_seg_count = state.get_plain_at(module_env, slot, param_mseg_count, 0).step();
     int mseg_stn_seg = state.get_plain_at(module_env, slot, param_mseg_sustain, 0).step();
 
     float mseg_total = 0.0f;
     for (int i = 0; i < mseg_seg_count; i++)
     {
-      mseg_total += state.get_plain_at(module_env, slot, param_mseg_w, i).real();
+      mseg_total += snap_x? 1.0f: state.get_plain_at(module_env, slot, param_mseg_w, i).real();
       if (i == mseg_stn_seg) mseg_stn_at = mseg_total;
     }
     mseg_stn_at = mseg_stn_at / mseg_total * mseg;
@@ -603,7 +604,7 @@ env_topo(int section, gui_position const& pos)
   mseg_section.gui.custom_gui_factory = [](plugin_gui* gui, lnf* lnf, int module_slot, component_store store) {
     return &store_component<mseg_editor>(
       store, gui, lnf, module_env, module_slot, param_mseg_start_y, param_mseg_count, param_mseg_sustain,
-      param_mseg_w, param_mseg_y, param_mseg_slope, param_mseg_grid_x, param_mseg_grid_y, false); };
+      param_mseg_w, param_mseg_y, param_mseg_slope, param_mseg_snap_x, param_mseg_snap_y, false); };
   auto& mseg_start_y = result.params.emplace_back(make_param(
     make_topo_info_basic("{BB1A9691-DA7D-460D-BDF3-7D99F272CD05}", "MSEG Start Y", param_mseg_start_y, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.0, 2, ""),
@@ -626,7 +627,7 @@ env_topo(int section, gui_position const& pos)
     make_topo_info_basic("{2A14D13D-F617-46B0-81C6-CCC5274FD64D}", "MSEG Width", param_mseg_w, mseg_max_seg_count),
     make_param_dsp_accurate(param_automate::modulate), make_domain_linear(1.0, 100.0, 10.0, 2, ""),
     make_param_gui_none(section_mseg)));
-  mseg_w.gui.bindings.enabled.bind_params({ param_on, param_mode }, [](auto const& vs) { return vs[0] != 0 && vs[1] == mode_mseg; });
+  mseg_w.gui.bindings.enabled.bind_params({ param_on, param_mode, param_mseg_snap_x }, [](auto const& vs) { return vs[0] != 0 && vs[1] == mode_mseg && vs[2] == 0; });
   mseg_w.info.description = "MSEG generator segment width.";
   auto& mseg_y = result.params.emplace_back(make_param(
     make_topo_info_basic("{60F4F483-F5C9-486D-8D6B-E4098B08FDC4}", "MSEG Y", param_mseg_y, mseg_max_seg_count),
@@ -652,18 +653,18 @@ env_topo(int section, gui_position const& pos)
     if (s == 2) return "75";
     return "0.0";
   };
-  auto& mseg_grid_x = result.params.emplace_back(make_param(
-    make_topo_info_basic("{617AA518-4734-4C72-A515-B6F468DF0252}", "MSEG Grid X", param_mseg_grid_x, 1),
+  auto& mseg_snap_x = result.params.emplace_back(make_param(
+    make_topo_info_basic("{A0926574-3C50-4651-938B-8F5242372D50}", "MSEG Snap X", param_mseg_snap_x, 1),
+    make_param_dsp_voice(param_automate::none), make_domain_toggle(false),
+    make_param_gui_none(section_mseg)));
+  mseg_snap_x.gui.bindings.enabled.bind_params({ param_on, param_mode }, [](auto const& vs) { return vs[0] != 0 && vs[1] == mode_mseg; });
+  mseg_snap_x.info.description = "MSEG generator horizontal snapping on/off.";
+  auto& mseg_snap_y = result.params.emplace_back(make_param(
+    make_topo_info_basic("{45B0EC7D-AB84-48AB-9CB3-F526FCFBE485}", "MSEG Snap Y", param_mseg_snap_y, 1),
     make_param_dsp_voice(param_automate::none), make_domain_step(0, 16, 0, 0),
     make_param_gui_none(section_mseg)));
-  mseg_grid_x.gui.bindings.enabled.bind_params({ param_on, param_mode }, [](auto const& vs) { return vs[0] != 0 && vs[1] == mode_mseg; });
-  mseg_grid_x.info.description = "MSEG generator horizontal snapping grid size.";
-  auto& mseg_grid_y = result.params.emplace_back(make_param(
-    make_topo_info_basic("{45B0EC7D-AB84-48AB-9CB3-F526FCFBE485}", "MSEG Grid Y", param_mseg_grid_y, 1),
-    make_param_dsp_voice(param_automate::none), make_domain_step(0, 16, 0, 0),
-    make_param_gui_none(section_mseg)));
-  mseg_grid_y.gui.bindings.enabled.bind_params({ param_on, param_mode }, [](auto const& vs) { return vs[0] != 0 && vs[1] == mode_mseg; });
-  mseg_grid_y.info.description = "MSEG generator vertical snapping grid size";
+  mseg_snap_y.gui.bindings.enabled.bind_params({ param_on, param_mode }, [](auto const& vs) { return vs[0] != 0 && vs[1] == mode_mseg; });
+  mseg_snap_y.info.description = "MSEG generator vertical snapping grid size";
 
   return result;
 }
@@ -1006,9 +1007,11 @@ void env_engine::process_mono_type_sync_trigger_mode(plugin_block& block, cv_cv_
 
       float mseg_total_length = 0;
       float mseg_seg_x[mseg_max_seg_count];
+      bool mseg_snap_x = block_auto[param_mseg_snap_x][0].step() != 0;
       for (int i = 0; i < _mseg_seg_count; i++)
       {
-        mseg_total_length += block.normalized_to_raw_fast<domain_type::linear>(module_env, param_mseg_w, (*(*modulation)[param_mseg_w][i])[block.start_frame]);
+        mseg_total_length += mseg_snap_x? 1.0f: 
+          block.normalized_to_raw_fast<domain_type::linear>(module_env, param_mseg_w, (*(*modulation)[param_mseg_w][i])[block.start_frame]);
         mseg_seg_x[i] = mseg_total_length;
       }
 

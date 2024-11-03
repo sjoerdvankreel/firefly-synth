@@ -16,12 +16,12 @@ mseg_editor::
 mseg_editor(
   plugin_gui* gui, lnf* lnf, int module_index, int module_slot, 
   int start_y_param, int count_param, int sustain_param, int w_param, int y_param, 
-  int slope_param, int grid_x_param, int grid_y_param, bool is_external):
+  int slope_param, int snap_x_param, int snap_y_param, bool is_external):
 _gui(gui), _lnf(lnf),
 _module_index(module_index), _module_slot(module_slot),
 _start_y_param(start_y_param), _count_param(count_param), _sustain_param(sustain_param),
 _w_param(w_param), _y_param(y_param), _slope_param(slope_param), 
-_grid_x_param(grid_x_param), _grid_y_param(grid_y_param), _is_external(is_external)
+_snap_x_param(snap_x_param), _snap_y_param(snap_y_param), _is_external(is_external)
 {
   assert(gui != nullptr);
   assert(lnf != nullptr);
@@ -29,10 +29,13 @@ _grid_x_param(grid_x_param), _grid_y_param(grid_y_param), _is_external(is_extern
   auto const& param_list = topo.modules[module_index].params;
   (void)param_list;
 
+  auto is_toggle = [](param_topo const& pt) {
+    return pt.domain.type == domain_type::toggle; };
+  assert(is_toggle(param_list[snap_x_param]));
+
   auto is_step_gte_0 = [](param_topo const& pt) {
     return pt.domain.type == domain_type::step && pt.domain.min == 0; };
-  assert(is_step_gte_0(param_list[grid_x_param]));
-  assert(is_step_gte_0(param_list[grid_y_param]));
+  assert(is_step_gte_0(param_list[snap_y_param]));
 
   auto check_w_param = [](param_topo const& pt) {
     return pt.domain.type == domain_type::linear && pt.domain.min == seg_w_min && pt.domain.max == seg_w_max; };
@@ -60,8 +63,8 @@ _grid_x_param(grid_x_param), _grid_y_param(grid_y_param), _is_external(is_extern
 
   _gui->automation_state()->add_listener(_module_index, _module_slot, _count_param, 0, this);
   _gui->automation_state()->add_listener(_module_index, _module_slot, _start_y_param, 0, this);
-  _gui->automation_state()->add_listener(_module_index, _module_slot, _grid_x_param, 0, this);
-  _gui->automation_state()->add_listener(_module_index, _module_slot, _grid_y_param, 0, this);
+  _gui->automation_state()->add_listener(_module_index, _module_slot, _snap_x_param, 0, this);
+  _gui->automation_state()->add_listener(_module_index, _module_slot, _snap_y_param, 0, this);
   for (int i = 0; i < _gui->automation_state()->desc().plugin->modules[_module_index].params[_w_param].info.slot_count; i++)
     _gui->automation_state()->add_listener(_module_index, _module_slot, _w_param, i, this);
   for (int i = 0; i < _gui->automation_state()->desc().plugin->modules[_module_index].params[_y_param].info.slot_count; i++)
@@ -78,8 +81,8 @@ mseg_editor::
 {
   _gui->automation_state()->remove_listener(_module_index, _module_slot, _count_param, 0, this);
   _gui->automation_state()->remove_listener(_module_index, _module_slot, _start_y_param, 0, this);
-  _gui->automation_state()->remove_listener(_module_index, _module_slot, _grid_x_param, 0, this);
-  _gui->automation_state()->remove_listener(_module_index, _module_slot, _grid_y_param, 0, this);
+  _gui->automation_state()->remove_listener(_module_index, _module_slot, _snap_x_param, 0, this);
+  _gui->automation_state()->remove_listener(_module_index, _module_slot, _snap_y_param, 0, this);
   for (int i = 0; i < _gui->automation_state()->desc().plugin->modules[_module_index].params[_w_param].info.slot_count; i++)
     _gui->automation_state()->remove_listener(_module_index, _module_slot, _w_param, i, this);
   for (int i = 0; i < _gui->automation_state()->desc().plugin->modules[_module_index].params[_y_param].info.slot_count; i++)
@@ -94,12 +97,13 @@ mseg_editor::init_from_plug_state()
   _gui_segs.clear();
   _gui_start_y = _gui->automation_state()->get_plain_at(_module_index, _module_slot, _start_y_param, 0).real();
   _current_seg_count = _gui->automation_state()->get_plain_at(_module_index, _module_slot, _count_param, 0).step();
+  bool snap_x = _gui->automation_state()->get_plain_at(_module_index, _module_slot, _snap_x_param, 0).step() != 0;
   for (int i = 0; i < _current_seg_count; i++)
   {
     mseg_seg seg = {};
-    seg.w = _gui->automation_state()->get_plain_at(_module_index, _module_slot, _w_param, i).real();
     seg.y = _gui->automation_state()->get_plain_at(_module_index, _module_slot, _y_param, i).real();
     seg.slope = _gui->automation_state()->get_plain_at(_module_index, _module_slot, _slope_param, i).real();
+    seg.w = snap_x ? 1.0f : _gui->automation_state()->get_plain_at(_module_index, _module_slot, _w_param, i).real();
     _gui_segs.push_back(seg);
   }
 }
@@ -350,6 +354,7 @@ mseg_editor::mouseUp(juce::MouseEvent const& event)
           menu.addItem(1, "Sustain", hit_seg != current_sustain_point, hit_seg == current_sustain_point);
         }
 
+        // TODO not if snap
         int param_w_index = desc.param_mappings.topo_to_index[_module_index][_module_slot][_w_param][hit_seg];
         auto host_menu_w = desc.menu_handler->context_menu(desc.params[param_w_index]->info.id_hash);
         if (host_menu_w && !host_menu_w->root.children.empty())
@@ -399,41 +404,38 @@ mseg_editor::mouseUp(juce::MouseEvent const& event)
       options = options.withMousePosition();
       menu.setLookAndFeel(&getLookAndFeel());
 
-      PopupMenu x_menu;
-      int max_x = desc.plugin->modules[_module_index].params[_grid_x_param].domain.max;
-      int current_x = _gui->automation_state()->get_plain_at(_module_index, _module_slot, _grid_x_param, 0).step();
-      for (int i = 0; i < max_x; i++)
-        x_menu.addItem(i + 1, i == 0 ? "Off" : std::to_string(i + 1), true, i == current_x);
-
       PopupMenu y_menu;
-      int max_y = desc.plugin->modules[_module_index].params[_grid_y_param].domain.max;
-      int current_y = _gui->automation_state()->get_plain_at(_module_index, _module_slot, _grid_y_param, 0).step();
+      int max_y = desc.plugin->modules[_module_index].params[_snap_y_param].domain.max;
+      int current_y = _gui->automation_state()->get_plain_at(_module_index, _module_slot, _snap_y_param, 0).step();
       for (int i = 0; i < max_y; i++)
-        y_menu.addItem(i + 1000 + 1, i == 0 ? "Off" : std::to_string(i + 1), true, i == current_y);
-
-      menu.addSubMenu("Snap X", x_menu);
+        y_menu.addItem(i + 1, i == 0 ? "Off" : std::to_string(i + 1), true, i == current_y);
       menu.addSubMenu("Snap Y", y_menu);
+
+      bool current_snap_x = _gui->automation_state()->get_plain_at(_module_index, _module_slot, _snap_x_param, 0).step() != 0;
+      menu.addItem(1000 + 1, "Snap X", true, current_snap_x);
+
       if (_is_external)
         menu.addItem(2000 + 1, "Close Editor");
       else
         menu.addItem(3000 + 1, "Open Editor");
 
-      menu.showMenuAsync(options, [this, max_x, max_y](int result) {
-        if (1 <= result && result <= max_x)
+      menu.showMenuAsync(options, [this, current_snap_x, max_y](int result) {
+        if (1 <= result && result <= max_y)
         {
-          _gui->param_changed(_module_index, _module_slot, _grid_x_param, 0, result - 1);
+          _gui->param_changed(_module_index, _module_slot, _snap_y_param, 0, result - 1);
           repaint();
         }
-        else if (1000 + 1 <= result && result <= 1000 + max_y)
+        else if (result == 1000 + 1)
         {
-          _gui->param_changed(_module_index, _module_slot, _grid_y_param, 0, result - 1000 - 1);
+          _gui->param_changed(_module_index, _module_slot, _snap_x_param, 0, current_snap_x? 0: 1);
           repaint();
         }
         else if (result == 2000 + 1)
         {
           auto* dialog = findParentComponentOfClass<DialogWindow>();
           if(dialog) dialog->exitModalState();
-        } else if (result == 3000 + 1)
+        } 
+        else if (result == 3000 + 1)
         {
           auto const& desc = _gui->automation_state()->desc();
           int module_global = desc.module_topo_to_index.at(_module_index) + _module_slot;
@@ -447,7 +449,7 @@ mseg_editor::mouseUp(juce::MouseEvent const& event)
           options.dialogTitle = desc.modules[module_global].info.name;
           auto editor = new mseg_editor(
             _gui, _lnf, _module_index, _module_slot, _start_y_param, _count_param, 
-            _sustain_param, _w_param, _y_param, _slope_param, _grid_x_param, _grid_y_param, true);
+            _sustain_param, _w_param, _y_param, _slope_param, _snap_x_param, _snap_y_param, true);
           editor->setSize(_gui->getScreenBounds().getWidth() / 2, _gui->getScreenBounds().getHeight() / 5);
           editor->setLookAndFeel(_lnf);
           options.content.setOwned(editor);
@@ -470,6 +472,7 @@ mseg_editor::mouseUp(juce::MouseEvent const& event)
   else if(_drag_seg != -1)
   {
     _gui->param_end_changes(_module_index, _module_slot, _y_param, _drag_seg);
+    // todo not if snapx
     _gui->param_end_changes(_module_index, _module_slot, _w_param, _drag_seg);
     int this_module_global = desc.module_topo_to_index.at(_module_index) + _module_slot;
     _gui->automation_state()->end_undo_region(_undo_token, "Change", desc.modules[this_module_global].info.name + " MSEG Point " + std::to_string(_drag_seg + 1));
@@ -494,9 +497,7 @@ mseg_editor::itemDragMove(juce::DragAndDropTarget::SourceDetails const& details)
   float drag_y_amt = 1.0f - std::clamp((details.localPosition.y - y) / h, 0.0f, 1.0f);
   float snap_drag_y_amt = drag_y_amt;
 
-  int snap_x_count = _gui->automation_state()->get_plain_at(_module_index, _module_slot, _grid_x_param, 0).step();
-  int snap_y_count = _gui->automation_state()->get_plain_at(_module_index, _module_slot, _grid_y_param, 0).step();
-
+  int snap_y_count = _gui->automation_state()->get_plain_at(_module_index, _module_slot, _snap_y_param, 0).step();
   if (snap_y_count != 0)
   {
     snap_drag_y_amt = std::clamp(std::round(drag_y_amt * (snap_y_count + 1)) / (snap_y_count + 1), 0.0f, 1.0f);
@@ -535,8 +536,9 @@ mseg_editor::itemDragMove(juce::DragAndDropTarget::SourceDetails const& details)
     norm_w += norm_add;
     norm_w = std::clamp(norm_w, 0.0f, 1.0f);
     float new_width = seg_w_min + norm_w * (seg_w_max - seg_w_min);
+    // todo not if snapx
     _gui_segs[_drag_seg].w = new_width;
-    _gui->param_changing(_module_index, _module_slot, _w_param, _drag_seg, new_width);
+    _gui->param_changing(_module_index, _module_slot, _w_param, _drag_seg, new_width);    
     _gui_segs[_drag_seg].y = snap_drag_y_amt;
     _gui->param_changing(_module_index, _module_slot, _y_param, _drag_seg, snap_drag_y_amt);
     repaint();
@@ -634,6 +636,7 @@ mseg_editor::mouseMove(MouseEvent const& event)
     }
     else
     {
+      // todo not if snapx
       std::string text_w = _gui->automation_state()->desc().plugin->modules[_module_index].params[_w_param].domain.raw_to_text(false, _gui_segs[hit_seg].w);
       std::string text_y = _gui->automation_state()->desc().plugin->modules[_module_index].params[_y_param].domain.raw_to_text(false, _gui_segs[hit_seg].y);
       std::string sustain = _gui->automation_state()->get_plain_at(_module_index, _module_slot, _sustain_param, 0).step() == hit_seg ? std::string(", Sustain") : std::string("");
@@ -681,12 +684,13 @@ mseg_editor::paint(Graphics& g)
 
   // snap grid
   g.setColour(_lnf->colors().mseg_grid);
-  int snap_x_count = _gui->automation_state()->get_plain_at(_module_index, _module_slot, _grid_x_param, 0).step();
+  bool snap_x = _gui->automation_state()->get_plain_at(_module_index, _module_slot, _snap_x_param, 0).step() != 0;
   g.drawLine(x, y, x, y + h, _is_external ? 2.0f : 1.0f);
-  for (int i = 0; i < snap_x_count; i++)
-    g.drawLine(x + (i + 1) / (snap_x_count + 1.0f) * w, y, x + (i + 1) / (snap_x_count + 1.0f) * w, y + h, _is_external ? 2.0f : 1.0f);
+  if(snap_x)
+    for (int i = 0; i < _current_seg_count - 1; i++)
+      g.drawLine(x + (i + 1) / _current_seg_count * w, y, x + (i + 1) / _current_seg_count * w, y + h, _is_external ? 2.0f : 1.0f);
   g.drawLine(x + w, y, x + w, y + h, _is_external ? 2.0f : 1.0f);
-  int snap_y_count = _gui->automation_state()->get_plain_at(_module_index, _module_slot, _grid_y_param, 0).step();
+  int snap_y_count = _gui->automation_state()->get_plain_at(_module_index, _module_slot, _snap_y_param, 0).step();
   g.drawLine(x, y, x + w, y, _is_external ? 2.0f : 1.0f);
   for (int i = 0; i < snap_y_count; i++)
     g.drawLine(x, y + (i + 1) / (snap_y_count + 1.0f) * h, x + w, y + (i + 1) / (snap_y_count + 1.0f) * h, _is_external ? 2.0f : 1.0f);

@@ -43,8 +43,8 @@ public state_listener
   int const _w_param;
   int const _y_param;
   int const _slope_param;
-  int const _grid_x_param;
-  int const _grid_y_param;
+  int const _snap_x_param;
+  int const _snap_y_param;
 
   bool const _is_external;
 
@@ -102,7 +102,7 @@ public:
   mseg_editor(
     plugin_gui* gui, lnf* lnf, int module_index, int module_slot, 
     int start_y_param, int count_param, int sustain_param, int w_param, int y_param, 
-    int slope_param, int grid_x_param, int grid_y_param, bool is_external);
+    int slope_param, int snap_x_param, int snap_y_param, bool is_external);
 };
 
 }
