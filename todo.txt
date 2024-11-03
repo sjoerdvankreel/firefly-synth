@@ -28,6 +28,7 @@ autobuilds:
 * integrate https://github.com/surge-synthesizer/monique-monosynth/blob/main/.github/workflows/build-pr.yml
 
 shortlist:
+make it work in ableton
 mseg as lfo
 do the kvr arm64 thing
 update all hosts and dependencies
