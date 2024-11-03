@@ -68,6 +68,7 @@ V do the actual snapping
 V do a couple test files
 
 do docs
+do demo vid
 
 shortlist:
 mseg as lfo
