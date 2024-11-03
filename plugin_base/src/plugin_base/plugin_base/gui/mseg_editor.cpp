@@ -113,11 +113,11 @@ mseg_editor::state_changed(int index, plain_value plain)
 }
 
 float
-mseg_editor::get_seg_total_x(int seg, int if_seg, float if_width) const
+mseg_editor::get_seg_total_x(int seg, float if_width) const
 {
   float result = 0.0f;
   for (int i = 0; i <= seg; i++)
-    result += i == if_seg ? if_width : _gui_segs[i].w;
+    result += (seg != seg || if_width < 0.01f) ? _gui_segs[i].w: if_width;
   return result;
 }
 
@@ -547,9 +547,9 @@ mseg_editor::itemDragMove(juce::DragAndDropTarget::SourceDetails const& details)
     else
     {
       float if_norm_x = get_seg_norm_x(_drag_seg, new_width);
-      for (int i = 0; i <= snap_x_count + 1; i++)
+      for (int i = 0; i <= snap_x_count; i++)
       {
-        float snap_norm_x = (float)i / (snap_x_count + 1);
+        float snap_norm_x = (float)i / (snap_x_count + 1.0f);
         if (snap_norm_x - 0.01f <= if_norm_x && if_norm_x <= snap_norm_x + 0.01f)
         {
           _gui_segs[_drag_seg].w = new_width;
