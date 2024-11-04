@@ -1,3 +1,7 @@
+?, ? - V1.9.8.
+
+- Add MSEG LFO's.
+
 ### November 3, 2024 - V1.9.7.
 
 - Bugfix: graph would not display modulation correctly when releasing envelope before the sustain point.
