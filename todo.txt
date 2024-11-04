@@ -22,6 +22,7 @@ on release:
 
 mseg lfo:
 * up the vno
+* vlfo not paint good for static 1
 * what is usable: sync, step, smooth, snap (how to snap ?)
 * what is not usable: skew x/y, shape, seed, phase
 * left panel becomes: [sync, step, smooth, snap (glfo only)]
