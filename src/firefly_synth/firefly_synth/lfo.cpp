@@ -25,13 +25,13 @@ enum { custom_tag_ref_phase, custom_tag_rand_seed, custom_tag_end_value };
 enum class lfo_stage { cycle, filter, end };
 enum { scratch_rate, scratch_count };
 enum { type_off, type_repeat, type_one_shot, type_one_phase };
-enum { section_left, section_sync, section_skew, section_shape, section_phase_or_host };
+enum { section_left, section_shared, section_non_mseg, section_non_mseg_phase };
 enum {
-  param_type, param_rate, param_tempo, param_sync,
-  param_skew_x, param_skew_x_amt, param_skew_y, param_skew_y_amt,
-  param_shape, param_steps, param_seed, param_voice_rnd_source, param_filter, 
-  param_phase, // phase offset for voice lfo
-  param_snap = param_phase // snap to host project time for global lfo
+  param_type, param_rate, param_tempo,  // main
+  param_sync, param_snap, param_smooth, param_steps, // shared
+  param_shape, param_seed, param_voice_rnd_source, // non mseg
+  param_skew_x, param_skew_x_amt, param_skew_y, param_skew_y_amt, // non mseg
+  param_phase // todo
 };
 
 static bool
@@ -390,11 +390,11 @@ lfo_topo(int section, gui_position const& pos, bool global, bool is_fx)
     "static noise, smoothing control, phase andjustment, stair-stepping " +
     "and horizontal and vertical skewing controls with various types.";
 
-  std::vector<int> column_sizes = { 32, 13, 34, 55, 8 };
+  std::vector<int> column_sizes = { 32, 47, 55, 8 };
   module_topo result(make_module(info,
     make_module_dsp(stage, module_output::cv, 1, {
       make_module_dsp_output(true, -1, make_topo_info_basic("{197CB1D4-8A48-4093-A5E7-2781C731BBFC}", "Output", 0, 1)) }),
-    make_module_gui(section, pos, { { 1, 1 }, column_sizes })));
+    make_module_gui(section, pos, { { 1 }, column_sizes })));
   result.gui.tabbed_name = "LFO";
   result.gui.is_drag_mod_source = true;
   
@@ -407,7 +407,7 @@ lfo_topo(int section, gui_position const& pos, bool global, bool is_fx)
 
   result.sections.emplace_back(make_param_section(section_left,
     make_topo_tag_basic("{F0002F24-0CA7-4DF3-A5E3-5B33055FD6DC}", "Left"),
-    make_param_section_gui({ 0, 0, 2, 1 }, gui_dimension({ 1, 1 }, { { gui_dimension::auto_size_all, 1 } }), gui_label_edit_cell_split::horizontal)));
+    make_param_section_gui({ 0, 0, 1, 1 }, gui_dimension({ 1, 1 }, { { gui_dimension::auto_size_all, 1 } }), gui_label_edit_cell_split::horizontal)));
   auto& type = result.params.emplace_back(make_param(
     make_topo_info_basic("{252D76F2-8B36-4F15-94D0-2E974EC64522}", "Type", param_type, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(type_items(), ""),
@@ -434,76 +434,54 @@ lfo_topo(int section, gui_position const& pos, bool global, bool is_fx)
   tempo.gui.bindings.visible.bind_params({ param_type, param_sync }, [](auto const& vs) { return vs[1] != 0; });
   tempo.info.description = "LFO rate in bars.";
 
-  auto& sync_section = result.sections.emplace_back(make_param_section(section_sync,
-    make_topo_tag_basic("{404ADE73-7C3D-4BEF-8B5A-2E6DE467AB37}", "Sync"),
-    make_param_section_gui({ 0, 1, 2, 1 }, gui_dimension({ 1, 1 }, { { 1 } }), gui_label_edit_cell_split::vertical)));
-  sync_section.gui.merge_with_section = section_skew;
+  result.sections.emplace_back(make_param_section(section_shared,
+    make_topo_tag_basic("{3184E473-F733-48B8-ACC7-A5989DDB6925}", "Shared"),
+    make_param_section_gui({ 0, 1, 1, 1 }, gui_dimension({ 1, 1 }, { 1, 1 }))));
   auto& sync = result.params.emplace_back(make_param(
     make_topo_info("{7F59C0F3-739E-4068-B1FD-B1520775FFBA}", true, "Tempo Sync", "Sync", "Sync", param_sync, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_toggle(false),
-    make_param_gui_single(section_sync, gui_edit_type::toggle, { 0, 0 },
+    make_param_gui_single(section_shared, gui_edit_type::toggle, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::top, gui_label_justify::center))));
   sync.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   sync.info.description = "Toggles time or tempo-synced type.";
-
-  auto& skew_section = result.sections.emplace_back(make_param_section(section_skew,
-    make_topo_tag_basic("{6DE1B08B-6C81-4146-B752-02F9559EA8CE}", "Skew"),
-    make_param_section_gui({ 0, 2, 2, 1 }, gui_dimension({1, 1}, {
-    gui_dimension::auto_size_all, gui_dimension::auto_size_all, gui_dimension::auto_size_all }), gui_label_edit_cell_split::horizontal)));
-  skew_section.gui.merge_with_section = section_sync;
-  auto& x_mode = result.params.emplace_back(make_param(
-    make_topo_info("{A95BA410-6777-4386-8E86-38B5CBA3D9F1}", true, "Skew X Mode", "Skew X", "Skew X", param_skew_x, 1),
-    make_param_dsp_automate_if_voice(!global), make_domain_item(wave_skew_type_items(), "Off"),
-    make_param_gui_single(section_skew, gui_edit_type::autofit_list, { 0, 0 },
+  // TODO disable for voice
+  auto& snap = result.params.emplace_back(make_param(
+    make_topo_info("{B97DF7D3-3259-4343-9577-858C6A5B786B}", true, "Snap To Project", "Snp", "Snp", param_snap, 1),
+    make_param_dsp(param_direction::input, global? param_rate::block: param_rate::voice, param_automate::automate), make_domain_toggle(false),
+    make_param_gui_single(section_shared, gui_edit_type::toggle, { 1, 0 },
+      make_label(gui_label_contents::name, gui_label_align::top, gui_label_justify::center))));
+  snap.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
+  snap.info.description = "In global module, snaps lfo phase to project/song time. Note this defeats rate modulation!";
+  auto& smooth = result.params.emplace_back(make_param(
+    make_topo_info_basic("{21DBFFBE-79DA-45D4-B778-AC939B7EF785}", "Smooth", param_smooth, 1),
+    make_param_dsp_automate_if_voice(!global), make_domain_linear(0, max_filter_time_ms, 0, 0, "Ms"),
+    make_param_gui_single(section_shared, gui_edit_type::hslider, { 0, 1 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  x_mode.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
-  x_mode.info.description = "Horizontal skew mode.";
-  auto& x_amt = result.params.emplace_back(make_param(
-    make_topo_info("{8CEDE705-8901-4247-9854-83FB7BEB14F9}", true, "Skew X Amt", "Skew X", "Skew X", param_skew_x_amt, 1),
-    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
-    make_param_gui_single(section_skew, gui_edit_type::knob, { 0, 2 }, make_label_none())));
-  x_amt.gui.bindings.enabled.bind_params({ param_type, param_skew_x }, [](auto const& vs) { return vs[0] != type_off && vs[1] != wave_skew_type_off; });
-  x_amt.info.description = "Horizontal skew amount.";
-  x_mode.gui.alternate_drag_param_id = x_amt.info.tag.id;
-  auto& y_mode = result.params.emplace_back(make_param(
-    make_topo_info("{5D716AA7-CAE6-4965-8FC1-345DAA7141B6}", true, "Skew Y Mode", "Skew Y", "Skew Y", param_skew_y, 1),
-    make_param_dsp_automate_if_voice(!global), make_domain_item(wave_skew_type_items(), "Off"),
-    make_param_gui_single(section_skew, gui_edit_type::autofit_list, { 1, 0 },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  y_mode.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
-  y_mode.info.description = "Vertical skew mode.";
-  auto& y_amt = result.params.emplace_back(make_param(
-    make_topo_info("{8939B05F-8677-4AA9-8C4C-E6D96D9AB640}", true, "Skew Y Amt", "Skew Y", "Skew Y", param_skew_y_amt, 1),
-    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
-    make_param_gui_single(section_skew, gui_edit_type::knob, { 1, 2 }, make_label_none())));
-  y_amt.gui.bindings.enabled.bind_params({ param_type, param_skew_y }, [](auto const& vs) { return vs[0] != type_off && vs[1] != wave_skew_type_off; });
-  y_amt.info.description = "Vertical skew amount.";
-  y_mode.gui.alternate_drag_param_id = y_amt.info.tag.id;
-
-  auto& shape_section = result.sections.emplace_back(make_param_section(section_shape,
-    make_topo_tag_basic("{A5B5DC53-2E73-4C0B-9DD1-721A335EA076}", "Right"),
-    make_param_section_gui({ 0, 3, 2, 1 }, gui_dimension({ 1, 1 }, {
-    gui_dimension::auto_size_all, gui_dimension::auto_size, gui_dimension::auto_size_all, 1 }), gui_label_edit_cell_split::horizontal)));
-  shape_section.gui.merge_with_section = section_phase_or_host;
-  auto& shape = result.params.emplace_back(make_param(
-    make_topo_info_basic("{7D48C09B-AC99-4B88-B880-4633BC8DFB37}", "Shape", param_shape, 1),
-    make_param_dsp_automate_if_voice(!global), make_domain_item(wave_shape_type_items(wave_target::lfo, global), "Sin"),
-    make_param_gui_single(section_shape, gui_edit_type::autofit_list, { 0, 0 },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  shape.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
-  shape.info.description = std::string("Selects waveform: various periodic functions plus smooth and static noise.");
+  smooth.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
+  smooth.info.description = "Applies a lowpass filter to smooth out rough edges.";
   auto& steps = result.params.emplace_back(make_param(
     make_topo_info_basic("{445CF696-0364-4638-9BD5-3E1C9A957B6A}", "Steps", param_steps, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_step(1, 99, 1, 0),
-    make_param_gui_single(section_shape, gui_edit_type::hslider, { 1, 0 },
+    make_param_gui_single(section_shared, gui_edit_type::hslider, { 1, 1 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   steps.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   steps.info.description = std::string("Step count for static and smooth noise generators, set to > 1. ") +
     "Stair-stepping for periodic generators. Set to 1 for continuous or > 1 for stair-stepping.";
+
+  result.sections.emplace_back(make_param_section(section_non_mseg,
+    make_topo_tag_basic("{6DE1B08B-6C81-4146-B752-02F9559EA8CE}", "Non MSEG"),
+    make_param_section_gui({ 0, 2, 1, 1 }, gui_dimension({ 1, 1 }, { 1, 1, 1 }))));
+  auto& shape = result.params.emplace_back(make_param(
+    make_topo_info_basic("{7D48C09B-AC99-4B88-B880-4633BC8DFB37}", "Shape", param_shape, 1),
+    make_param_dsp_automate_if_voice(!global), make_domain_item(wave_shape_type_items(wave_target::lfo, global), "Sin"),
+    make_param_gui_single(section_non_mseg, gui_edit_type::autofit_list, { 0, 0 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
+  shape.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
+  shape.info.description = std::string("Selects waveform: various periodic functions plus smooth and static noise.");
   auto& seed = result.params.emplace_back(make_param(
     make_topo_info_basic("{19ED9A71-F50A-47D6-BF97-70EA389A62EA}", "Seed", param_seed, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_step(1, 255, 1, 0),
-    make_param_gui_single(section_shape, gui_edit_type::hslider, { 0, 2 },
+    make_param_gui_single(section_non_mseg, gui_edit_type::hslider, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   seed.gui.bindings.visible.bind_params({ param_type, param_shape }, [](auto const& vs) { return !is_noise_voice_rand(vs[1]); });
   seed.gui.bindings.enabled.bind_params({ param_type, param_shape }, [](auto const& vs) { return vs[0] != type_off && is_noise_not_voice_rand(vs[1]); });
@@ -511,43 +489,52 @@ lfo_topo(int section, gui_position const& pos, bool global, bool is_fx)
   auto& voice_rnd_source = result.params.emplace_back(make_param(
     make_topo_info_basic("{81DAE640-815C-4D61-8DDE-D4CAD70309EF}", "Source", param_voice_rnd_source, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_step(0, on_voice_random_count - 1, 1, 1),
-    make_param_gui_single(section_shape, gui_edit_type::list, { 0, 2 },
+    make_param_gui_single(section_non_mseg, gui_edit_type::list, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   voice_rnd_source.gui.bindings.visible.bind_params({ param_type, param_shape }, [](auto const& vs) { return is_noise_voice_rand(vs[1]); });
   voice_rnd_source.gui.bindings.enabled.bind_params({ param_type, param_shape }, [](auto const& vs) { return vs[0] != type_off && is_noise_voice_rand(vs[1]); });
   voice_rnd_source.info.description = "Per-voice random stream source for static and smooth noise generators.";
-  auto& smooth = result.params.emplace_back(make_param(
-    make_topo_info_basic("{21DBFFBE-79DA-45D4-B778-AC939B7EF785}", "Smooth", param_filter, 1),
-    make_param_dsp_automate_if_voice(!global), make_domain_linear(0, max_filter_time_ms, 0, 0, "Ms"),
-    make_param_gui_single(section_shape, gui_edit_type::hslider, { 1, 2 },
+  auto& x_mode = result.params.emplace_back(make_param(
+    make_topo_info("{A95BA410-6777-4386-8E86-38B5CBA3D9F1}", true, "Skew X Mode", "Skew X", "Skew X", param_skew_x, 1),
+    make_param_dsp_automate_if_voice(!global), make_domain_item(wave_skew_type_items(), "Off"),
+    make_param_gui_single(section_non_mseg, gui_edit_type::autofit_list, { 0, 1 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  smooth.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
-  smooth.info.description = "Applies a lowpass filter to smooth out rough edges.";
+  x_mode.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
+  x_mode.info.description = "Horizontal skew mode.";
+  auto& x_amt = result.params.emplace_back(make_param(
+    make_topo_info("{8CEDE705-8901-4247-9854-83FB7BEB14F9}", true, "Skew X Amt", "Skew X", "Skew X", param_skew_x_amt, 1),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
+    make_param_gui_single(section_non_mseg, gui_edit_type::knob, { 0, 2 }, make_label_none())));
+  x_amt.gui.bindings.enabled.bind_params({ param_type, param_skew_x }, [](auto const& vs) { return vs[0] != type_off && vs[1] != wave_skew_type_off; });
+  x_amt.info.description = "Horizontal skew amount.";
+  result.params[param_skew_x].gui.alternate_drag_param_id = x_amt.info.tag.id;
+  auto& y_mode = result.params.emplace_back(make_param(
+    make_topo_info("{5D716AA7-CAE6-4965-8FC1-345DAA7141B6}", true, "Skew Y Mode", "Skew Y", "Skew Y", param_skew_y, 1),
+    make_param_dsp_automate_if_voice(!global), make_domain_item(wave_skew_type_items(), "Off"),
+    make_param_gui_single(section_non_mseg, gui_edit_type::autofit_list, { 1, 1 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
+  y_mode.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
+  y_mode.info.description = "Vertical skew mode.";
+  auto& y_amt = result.params.emplace_back(make_param(
+    make_topo_info("{8939B05F-8677-4AA9-8C4C-E6D96D9AB640}", true, "Skew Y Amt", "Skew Y", "Skew Y", param_skew_y_amt, 1),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
+    make_param_gui_single(section_non_mseg, gui_edit_type::knob, { 1, 2 }, make_label_none())));
+  y_amt.gui.bindings.enabled.bind_params({ param_type, param_skew_y }, [](auto const& vs) { return vs[0] != type_off && vs[1] != wave_skew_type_off; });
+  y_amt.info.description = "Vertical skew amount.";
+  result.params[param_skew_y].gui.alternate_drag_param_id = y_amt.info.tag.id;
 
-  auto& phase_or_host_section = result.sections.emplace_back(make_param_section(section_phase_or_host,
+  result.sections.emplace_back(make_param_section(section_non_mseg_phase,
     make_topo_tag_basic("{8EB0A04C-5D69-4B0E-89BD-884BC2EFDFBE}", "Phase"),
-    make_param_section_gui({ 0, 4, 2, 1 }, gui_dimension({ 1, 1 }, { 1 }), gui_label_edit_cell_split::vertical)));
-  phase_or_host_section.gui.merge_with_section = section_shape;
-  if (!global)
-  {
-    auto& phase = result.params.emplace_back(make_param(
-      make_topo_info("{B23E9732-ECE3-4D5D-8EC1-FF299C6926BB}", true, "Phase Offset", "Phs", "Phs", param_phase, 1),
-      make_param_dsp(param_direction::input, param_rate::voice, param_automate::automate), make_domain_percentage_identity(0, 0, true),
-      make_param_gui_single(section_phase_or_host, gui_edit_type::knob, { 0, 0 },
-        make_label(gui_label_contents::name, gui_label_align::top, gui_label_justify::center))));
-    phase.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
-    phase.info.description = "In per-voice module, allows for phase adjustment of periodic generators.";
-  }
-  else
-  {
-    auto& host = result.params.emplace_back(make_param(
-      make_topo_info("{B97DF7D3-3259-4343-9577-858C6A5B786B}", true, "Snap To Project", "Snp", "Snp", param_snap, 1),
-      make_param_dsp(param_direction::input, param_rate::block, param_automate::automate), make_domain_toggle(false),
-      make_param_gui_single(section_phase_or_host, gui_edit_type::toggle, { 0, 0 },
-        make_label(gui_label_contents::name, gui_label_align::top, gui_label_justify::center))));
-    host.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
-    host.info.description = "In global module, snaps lfo phase to project/song time. Note this defeats rate modulation!";
-  }
+    make_param_section_gui({ 0, 3, 1, 1 }, gui_dimension({ 1, 1 }, { 1 }), gui_label_edit_cell_split::vertical)));
+  // TODO phase_or_host_section.gui.merge_with_section = section_shape;
+  // TODO disable for global
+  auto& phase = result.params.emplace_back(make_param(
+    make_topo_info("{B23E9732-ECE3-4D5D-8EC1-FF299C6926BB}", true, "Phase Offset", "Phs", "Phs", param_phase, 1),
+    make_param_dsp(param_direction::input, global? param_rate::block: param_rate::voice, param_automate::automate), make_domain_percentage_identity(0, 0, true),
+    make_param_gui_single(section_non_mseg_phase, gui_edit_type::knob, { 0, 0 },
+      make_label(gui_label_contents::name, gui_label_align::top, gui_label_justify::center))));
+  phase.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
+  phase.info.description = "In per-voice module, allows for phase adjustment of periodic generators.";
 
   return result;
 }
@@ -564,8 +551,8 @@ void
 lfo_engine::update_block_params(plugin_block const* block)
 {
   auto const& block_auto = block->state.own_block_automation;
-  float filter = block_auto[param_filter][0].real();
-  _filter.init(block->sample_rate, filter / 1000.0f);
+  float smooth = block_auto[param_smooth][0].real();
+  _filter.init(block->sample_rate, smooth / 1000.0f);
 }
 
 void 
@@ -1025,8 +1012,8 @@ void lfo_engine::process_loop(plugin_block& block, cv_cv_matrix_mixdown const* m
     if (ended)
     {
       _stage = lfo_stage::filter;
-      float filter_ms = block_auto[param_filter][0].real();
-      _end_filter_stage_samples = block.sample_rate * filter_ms * 0.001;
+      float smooth_ms = block_auto[param_smooth][0].real();
+      _end_filter_stage_samples = block.sample_rate * smooth_ms * 0.001;
     }
   }
 }
