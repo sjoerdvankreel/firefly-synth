@@ -31,6 +31,7 @@ microtuning:
 
 autobuilds:
 * ask paul
+* sign the mac version
 * integrate https://github.com/surge-synthesizer/monique-monosynth/blob/main/.github/workflows/build-pr.yml
 
 shortlist:
