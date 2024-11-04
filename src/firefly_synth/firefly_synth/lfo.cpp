@@ -472,8 +472,8 @@ lfo_topo(int section, gui_position const& pos, bool global, bool is_fx)
   auto& non_mseg_section = result.sections.emplace_back(make_param_section(section_non_mseg,
     make_topo_tag_basic("{6DE1B08B-6C81-4146-B752-02F9559EA8CE}", "Non MSEG"),
     make_param_section_gui({ 0, 2, 1, 1 }, gui_dimension({ 1, 1 }, 
-      { gui_dimension::auto_size, gui_dimension::auto_size_all, gui_dimension::auto_size_all,
-      gui_dimension::auto_size_all, gui_dimension::auto_size_all, 1 }))));
+      { gui_dimension::auto_size_all, 1, gui_dimension::auto_size_all, 
+      gui_dimension::auto_size_all, gui_dimension::auto_size_all, gui_dimension::auto_size_all }), gui_label_edit_cell_split::horizontal)));
   non_mseg_section.gui.merge_with_section = section_non_mseg_phase;
   non_mseg_section.gui.autofit_row = 0;
   auto& shape = result.params.emplace_back(make_param(
@@ -521,7 +521,7 @@ lfo_topo(int section, gui_position const& pos, bool global, bool is_fx)
   y_mode.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   y_mode.info.description = "Vertical skew mode.";
   auto& y_amt = result.params.emplace_back(make_param(
-    make_topo_info("{8939B05F-8677-4AA9-8C4C-E6D96D9AB640}", true, "Skew Y Amt", "Skew Y", "Skew Y Amt", param_skew_y_amt, 1),
+    make_topo_info("{8939B05F-8677-4AA9-8C4C-E6D96D9AB640}", true, "Skew Y Amt", "Amt", "Skew Y Amt", param_skew_y_amt, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
     make_param_gui_single(section_non_mseg, gui_edit_type::knob, { 1, 4 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
