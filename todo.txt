@@ -21,9 +21,9 @@ on release:
 15 update the website (vimexx)
 
 mseg lfo:
-* up the vno
+V up the vno
+V vlfo not paint good for static 1
 * allow phase adjust for global
-* vlfo not paint good for static 1
 * what is usable: sync, step, smooth, snap (how to snap ?)
 * what is not usable: skew x/y, shape, seed, phase
 * left panel becomes: [sync, step, smooth, snap (glfo only)]
