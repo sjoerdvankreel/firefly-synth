@@ -30,8 +30,7 @@ enum {
   param_type, param_rate, param_tempo,  // main
   param_sync, param_snap, param_smooth, param_steps, // shared
   param_shape, param_seed, param_voice_rnd_source, // non mseg
-  param_skew_x, param_skew_x_amt, param_skew_y, param_skew_y_amt, // non mseg
-  param_phase // todo
+  param_skew_x, param_skew_x_amt, param_skew_y, param_skew_y_amt, param_phase // non mseg
 };
 
 static bool
@@ -537,7 +536,7 @@ lfo_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_param_dsp(param_direction::input, global? param_rate::block: param_rate::voice, param_automate::automate), make_domain_percentage_identity(0, 0, true),
     make_param_gui_single(section_non_mseg_phase, gui_edit_type::knob, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::top, gui_label_justify::center))));
-  phase.gui.bindings.enabled.bind_params({ param_type }, [global](auto const& vs) { return !global && vs[0] != type_off; });
+  phase.gui.bindings.enabled.bind_params({ param_type, param_snap }, [global](auto const& vs) { return vs[0] != type_off && (!global || vs[1] != 0); });
   phase.info.description = "In per-voice module, allows for phase adjustment of periodic generators.";
 
   return result;
@@ -615,7 +614,7 @@ lfo_engine::reset_graph(
   {
     _ref_phase = new_ref_phase;
     _phase = _ref_phase;
-    if (!_global)
+    if (!_global || block_auto[param_snap][0].step() != 0)
     {
       // need to derive the new actual phase
       _phase += block_auto[param_phase][0].real();
@@ -673,7 +672,7 @@ lfo_engine::reset_audio(
 
   update_block_params(block);
   auto const& block_auto = block->state.own_block_automation;
-  _phase = _global? 0: block_auto[param_phase][0].real();
+  _phase = (_global && block_auto[param_snap][0].step() == 0) ? 0 : block_auto[param_phase][0].real();
 
   // global unison
   if (!_global && block->voice->state.sub_voice_count > 1)
@@ -988,8 +987,11 @@ void lfo_engine::process_loop(plugin_block& block, cv_cv_matrix_mixdown const* m
       {
         std::int64_t samples0 = (std::int64_t)(block.sample_rate / rate0);
         std::int64_t phase_frames = block.host.project_time % samples0;
-        _ref_phase = phase_frames / (float)samples0;
-        _phase = _ref_phase;
+        _phase = phase_frames / (float)samples0;
+        _ref_phase = _phase;
+        // need to derive the new actual phase
+        _phase += block_auto[param_phase][0].real();
+        _phase -= std::floor(_phase);
       }
     }
   }
