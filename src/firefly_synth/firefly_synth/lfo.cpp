@@ -471,8 +471,11 @@ lfo_topo(int section, gui_position const& pos, bool global, bool is_fx)
 
   auto& non_mseg_section = result.sections.emplace_back(make_param_section(section_non_mseg,
     make_topo_tag_basic("{6DE1B08B-6C81-4146-B752-02F9559EA8CE}", "Non MSEG"),
-    make_param_section_gui({ 0, 2, 1, 1 }, gui_dimension({ 1, 1 }, { 1, 1, 1 }))));
+    make_param_section_gui({ 0, 2, 1, 1 }, gui_dimension({ 1, 1 }, 
+      { gui_dimension::auto_size, gui_dimension::auto_size_all, gui_dimension::auto_size_all,
+      gui_dimension::auto_size_all, gui_dimension::auto_size_all, 1 }))));
   non_mseg_section.gui.merge_with_section = section_non_mseg_phase;
+  non_mseg_section.gui.autofit_row = 0;
   auto& shape = result.params.emplace_back(make_param(
     make_topo_info_basic("{7D48C09B-AC99-4B88-B880-4633BC8DFB37}", "Shape", param_shape, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(wave_shape_type_items(wave_target::lfo, global), "Sin"),
@@ -499,31 +502,31 @@ lfo_topo(int section, gui_position const& pos, bool global, bool is_fx)
   auto& x_mode = result.params.emplace_back(make_param(
     make_topo_info("{A95BA410-6777-4386-8E86-38B5CBA3D9F1}", true, "Skew X Mode", "Skew X", "Skew X", param_skew_x, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(wave_skew_type_items(), "Off"),
-    make_param_gui_single(section_non_mseg, gui_edit_type::autofit_list, { 0, 1 },
+    make_param_gui_single(section_non_mseg, gui_edit_type::autofit_list, { 0, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   x_mode.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   x_mode.info.description = "Horizontal skew mode.";
   auto& x_amt = result.params.emplace_back(make_param(
-    make_topo_info("{8CEDE705-8901-4247-9854-83FB7BEB14F9}", true, "Skew X Amt", "Skew X", "Skew X", param_skew_x_amt, 1),
+    make_topo_info("{8CEDE705-8901-4247-9854-83FB7BEB14F9}", true, "Skew X Amt", "Amt", "Skew X Amt", param_skew_x_amt, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
-    make_param_gui_single(section_non_mseg, gui_edit_type::knob, { 0, 2 }, make_label_none())));
+    make_param_gui_single(section_non_mseg, gui_edit_type::knob, { 0, 4 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   x_amt.gui.bindings.enabled.bind_params({ param_type, param_skew_x }, [](auto const& vs) { return vs[0] != type_off && vs[1] != wave_skew_type_off; });
   x_amt.info.description = "Horizontal skew amount.";
-  result.params[param_skew_x].gui.alternate_drag_param_id = x_amt.info.tag.id;
   auto& y_mode = result.params.emplace_back(make_param(
     make_topo_info("{5D716AA7-CAE6-4965-8FC1-345DAA7141B6}", true, "Skew Y Mode", "Skew Y", "Skew Y", param_skew_y, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(wave_skew_type_items(), "Off"),
-    make_param_gui_single(section_non_mseg, gui_edit_type::autofit_list, { 1, 1 },
+    make_param_gui_single(section_non_mseg, gui_edit_type::autofit_list, { 1, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   y_mode.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   y_mode.info.description = "Vertical skew mode.";
   auto& y_amt = result.params.emplace_back(make_param(
-    make_topo_info("{8939B05F-8677-4AA9-8C4C-E6D96D9AB640}", true, "Skew Y Amt", "Skew Y", "Skew Y", param_skew_y_amt, 1),
+    make_topo_info("{8939B05F-8677-4AA9-8C4C-E6D96D9AB640}", true, "Skew Y Amt", "Skew Y", "Skew Y Amt", param_skew_y_amt, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
-    make_param_gui_single(section_non_mseg, gui_edit_type::knob, { 1, 2 }, make_label_none())));
+    make_param_gui_single(section_non_mseg, gui_edit_type::knob, { 1, 4 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   y_amt.gui.bindings.enabled.bind_params({ param_type, param_skew_y }, [](auto const& vs) { return vs[0] != type_off && vs[1] != wave_skew_type_off; });
   y_amt.info.description = "Vertical skew amount.";
-  result.params[param_skew_y].gui.alternate_drag_param_id = y_amt.info.tag.id;
 
   auto& non_mseg_phase_section = result.sections.emplace_back(make_param_section(section_non_mseg_phase,
     make_topo_tag_basic("{8EB0A04C-5D69-4B0E-89BD-884BC2EFDFBE}", "Phase"),
