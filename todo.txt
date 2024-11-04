@@ -25,6 +25,7 @@ mseg lfo:
 * what is not usable: skew x/y, shape, seed, phase
 * left panel becomes: [sync, step, smooth, snap (glfo only)]
 * right panel becomes: [skew x/y, shape, seed, phase (vlfo only)] or MSEG 
+* deal with oneshot (not onephase)
 
 microtuning:
 * check up on andreyas comments
