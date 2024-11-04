@@ -28,7 +28,7 @@ enum { type_off, type_repeat, type_one_shot, type_one_phase };
 enum { section_left, section_shared, section_non_mseg, section_non_mseg_phase };
 enum {
   param_type, param_rate, param_tempo,  // main
-  param_sync, param_snap, param_smooth, param_steps, // shared
+  param_mseg_on, param_sync, param_snap, param_smooth, param_steps, // shared
   param_shape, param_seed, param_voice_rnd_source, // non mseg
   param_skew_x, param_skew_x_amt, param_skew_y, param_skew_y_amt, param_phase // non mseg
 };
@@ -435,34 +435,39 @@ lfo_topo(int section, gui_position const& pos, bool global, bool is_fx)
 
   result.sections.emplace_back(make_param_section(section_shared,
     make_topo_tag_basic("{3184E473-F733-48B8-ACC7-A5989DDB6925}", "Shared"),
-    make_param_section_gui({ 0, 1, 1, 1 }, gui_dimension({ 1, 1 }, { 
-      gui_dimension::auto_size_all, gui_dimension::auto_size_all, gui_dimension::auto_size_all, 1 }),
-      gui_label_edit_cell_split::horizontal)));
+    make_param_section_gui({ 0, 1, 1, 1 }, gui_dimension({ 1, 1 }, { 1, 1, 1, 1, 1, 1 }))));
+  auto& mseg_on = result.params.emplace_back(make_param(
+    make_topo_info("{B38CCF7E-16E6-4359-8817-205C8AC21A04}", true, "MSEG On", "MSEG", "MSEG On", param_mseg_on, 1),
+    make_param_dsp(param_direction::input, global ? param_rate::block : param_rate::voice, param_automate::automate), make_domain_toggle(false),
+    make_param_gui_single(section_shared, gui_edit_type::toggle, { 0, 0, 1, 2 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
+  mseg_on.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
+  mseg_on.info.description = "Toggles MSEG mode on/off.";
   auto& sync = result.params.emplace_back(make_param(
     make_topo_info("{7F59C0F3-739E-4068-B1FD-B1520775FFBA}", true, "Tempo Sync", "Sync", "Sync", param_sync, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_toggle(false),
-    make_param_gui_single(section_shared, gui_edit_type::toggle, { 0, 0 },
+    make_param_gui_single(section_shared, gui_edit_type::toggle, { 0, 2, 1, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   sync.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   sync.info.description = "Toggles time or tempo-synced type.";
   auto& snap = result.params.emplace_back(make_param(
     make_topo_info("{B97DF7D3-3259-4343-9577-858C6A5B786B}", true, "Snap To Project", "Snp", "Snp", param_snap, 1),
     make_param_dsp(param_direction::input, global? param_rate::block: param_rate::voice, param_automate::automate), make_domain_toggle(false),
-    make_param_gui_single(section_shared, gui_edit_type::toggle, { 1, 0 },
+    make_param_gui_single(section_shared, gui_edit_type::toggle, { 0, 4, 1, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   snap.gui.bindings.enabled.bind_params({ param_type }, [global](auto const& vs) { return global && vs[0] != type_off; });
   snap.info.description = "In global module, snaps lfo phase to project/song time. Note this defeats rate modulation!";
   auto& smooth = result.params.emplace_back(make_param(
     make_topo_info_basic("{21DBFFBE-79DA-45D4-B778-AC939B7EF785}", "Smooth", param_smooth, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_linear(0, max_filter_time_ms, 0, 0, "Ms"),
-    make_param_gui_single(section_shared, gui_edit_type::hslider, { 0, 2 },
+    make_param_gui_single(section_shared, gui_edit_type::hslider, { 1, 0, 1, 3 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   smooth.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   smooth.info.description = "Applies a lowpass filter to smooth out rough edges.";
   auto& steps = result.params.emplace_back(make_param(
     make_topo_info_basic("{445CF696-0364-4638-9BD5-3E1C9A957B6A}", "Steps", param_steps, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_step(1, 99, 1, 0),
-    make_param_gui_single(section_shared, gui_edit_type::hslider, { 1, 2 },
+    make_param_gui_single(section_shared, gui_edit_type::hslider, { 1, 3, 1, 3 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   steps.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   steps.info.description = std::string("Step count for static and smooth noise generators, set to > 1. ") +
