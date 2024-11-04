@@ -20,6 +20,12 @@ on release:
 14 update kvr 
 15 update the website (vimexx)
 
+mseg lfo:
+* what is usable: sync, step, smooth, snap (how to snap ?)
+* what is not usable: skew x/y, shape, seed, phase
+* left panel becomes: [sync, step, smooth, snap (glfo only)]
+* right panel becomes: [skew x/y, shape, seed, phase (vlfo only)] or MSEG 
+
 microtuning:
 * check up on andreyas comments
 
