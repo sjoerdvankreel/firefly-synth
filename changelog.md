@@ -1,6 +1,7 @@
 ?, ? - V1.9.8.
 
 - Add MSEG LFO's.
+- Bugfix: VLFO random generators would not be plotted when no voice is active.
 
 ### November 3, 2024 - V1.9.7.
 

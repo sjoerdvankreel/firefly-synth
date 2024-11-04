@@ -623,6 +623,19 @@ lfo_engine::reset_graph(
     }
   }
 
+  // should be always there for GLFO
+  // for VLFO, when it's not running,
+  // we fall back to static seed
+  // this does the "right" thing for not-per-voice-seeded stuff
+  // and has the side effect that the static seed is rendered
+  // instead of the per-voice-seed when the vlfo is not running for 
+  // but still better than plotting nothing
+  if (!seen_rand_seed)
+  {
+    new_rand_seed = block_auto[param_seed][0].step();
+    seen_rand_seed = true;
+  }
+
   if (seen_rand_seed)
   {
     if(is_noise_static(block_auto[param_shape][0].step()))
