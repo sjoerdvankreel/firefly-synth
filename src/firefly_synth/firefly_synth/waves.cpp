@@ -45,13 +45,13 @@ wave_make_name_shape(int shape, wave_target target)
   case wave_shape_type_cos_cos_cos: return "CsCsCs";
   case wave_shape_type_sqr_or_fold: return target == wave_target::shaper ? "Fldbk": "Sqr";
   case wave_shape_type_smooth_1: return "Smooth 1";
-  case wave_shape_type_smooth_free_1: return "Free Smooth 1";
+  case wave_shape_type_smooth_free_1: return "FreeSmth 1";
   case wave_shape_type_static_1: return "Static 1";
-  case wave_shape_type_static_free_1: return "Free Static 1";
+  case wave_shape_type_static_free_1: return "FreeStatic 1";
   case wave_shape_type_smooth_2: return "Smooth 2";
-  case wave_shape_type_smooth_free_2: return "Free Smooth 2";
+  case wave_shape_type_smooth_free_2: return "FreeSmth 2";
   case wave_shape_type_static_2: return "Static 2";
-  case wave_shape_type_static_free_2: return "Free Static 2";
+  case wave_shape_type_static_free_2: return "FreeStatic 2";
   default: assert(false); return {};
   }
 }

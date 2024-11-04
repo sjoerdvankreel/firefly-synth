@@ -477,14 +477,14 @@ lfo_topo(int section, gui_position const& pos, bool global, bool is_fx)
   non_mseg_section.gui.merge_with_section = section_non_mseg_phase;
   non_mseg_section.gui.autofit_row = 0;
   auto& shape = result.params.emplace_back(make_param(
-    make_topo_info_basic("{7D48C09B-AC99-4B88-B880-4633BC8DFB37}", "Shape", param_shape, 1),
+    make_topo_info("{7D48C09B-AC99-4B88-B880-4633BC8DFB37}", true, "Shape", "Shp", "Shape", param_shape, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(wave_shape_type_items(wave_target::lfo, global), "Sin"),
     make_param_gui_single(section_non_mseg, gui_edit_type::autofit_list, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   shape.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   shape.info.description = std::string("Selects waveform: various periodic functions plus smooth and static noise.");
   auto& seed = result.params.emplace_back(make_param(
-    make_topo_info_basic("{19ED9A71-F50A-47D6-BF97-70EA389A62EA}", "Seed", param_seed, 1),
+    make_topo_info("{19ED9A71-F50A-47D6-BF97-70EA389A62EA}", true, "Seed", "Sed", "Seed", param_seed, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_step(1, 255, 1, 0),
     make_param_gui_single(section_non_mseg, gui_edit_type::hslider, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
@@ -492,7 +492,7 @@ lfo_topo(int section, gui_position const& pos, bool global, bool is_fx)
   seed.gui.bindings.enabled.bind_params({ param_type, param_shape }, [](auto const& vs) { return vs[0] != type_off && is_noise_not_voice_rand(vs[1]); });
   seed.info.description = "Seed value for static and smooth noise generators.";
   auto& voice_rnd_source = result.params.emplace_back(make_param(
-    make_topo_info_basic("{81DAE640-815C-4D61-8DDE-D4CAD70309EF}", "Source", param_voice_rnd_source, 1),
+    make_topo_info("{81DAE640-815C-4D61-8DDE-D4CAD70309EF}", true, "Source", "Src", "Source", param_voice_rnd_source, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_step(0, on_voice_random_count - 1, 1, 1),
     make_param_gui_single(section_non_mseg, gui_edit_type::list, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
@@ -500,7 +500,7 @@ lfo_topo(int section, gui_position const& pos, bool global, bool is_fx)
   voice_rnd_source.gui.bindings.enabled.bind_params({ param_type, param_shape }, [](auto const& vs) { return vs[0] != type_off && is_noise_voice_rand(vs[1]); });
   voice_rnd_source.info.description = "Per-voice random stream source for static and smooth noise generators.";
   auto& x_mode = result.params.emplace_back(make_param(
-    make_topo_info("{A95BA410-6777-4386-8E86-38B5CBA3D9F1}", true, "Skew X Mode", "Skew X", "Skew X", param_skew_x, 1),
+    make_topo_info("{A95BA410-6777-4386-8E86-38B5CBA3D9F1}", true, "Skew X Mode", "X", "Skew X", param_skew_x, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(wave_skew_type_items(), "Off"),
     make_param_gui_single(section_non_mseg, gui_edit_type::autofit_list, { 0, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
@@ -514,7 +514,7 @@ lfo_topo(int section, gui_position const& pos, bool global, bool is_fx)
   x_amt.gui.bindings.enabled.bind_params({ param_type, param_skew_x }, [](auto const& vs) { return vs[0] != type_off && vs[1] != wave_skew_type_off; });
   x_amt.info.description = "Horizontal skew amount.";
   auto& y_mode = result.params.emplace_back(make_param(
-    make_topo_info("{5D716AA7-CAE6-4965-8FC1-345DAA7141B6}", true, "Skew Y Mode", "Skew Y", "Skew Y", param_skew_y, 1),
+    make_topo_info("{5D716AA7-CAE6-4965-8FC1-345DAA7141B6}", true, "Skew Y Mode", "Y", "Skew Y", param_skew_y, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(wave_skew_type_items(), "Off"),
     make_param_gui_single(section_non_mseg, gui_edit_type::autofit_list, { 1, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
