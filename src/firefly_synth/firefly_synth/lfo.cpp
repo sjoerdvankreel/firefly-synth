@@ -469,9 +469,10 @@ lfo_topo(int section, gui_position const& pos, bool global, bool is_fx)
   steps.info.description = std::string("Step count for static and smooth noise generators, set to > 1. ") +
     "Stair-stepping for periodic generators. Set to 1 for continuous or > 1 for stair-stepping.";
 
-  result.sections.emplace_back(make_param_section(section_non_mseg,
+  auto& non_mseg_section = result.sections.emplace_back(make_param_section(section_non_mseg,
     make_topo_tag_basic("{6DE1B08B-6C81-4146-B752-02F9559EA8CE}", "Non MSEG"),
     make_param_section_gui({ 0, 2, 1, 1 }, gui_dimension({ 1, 1 }, { 1, 1, 1 }))));
+  non_mseg_section.gui.merge_with_section = section_non_mseg_phase;
   auto& shape = result.params.emplace_back(make_param(
     make_topo_info_basic("{7D48C09B-AC99-4B88-B880-4633BC8DFB37}", "Shape", param_shape, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(wave_shape_type_items(wave_target::lfo, global), "Sin"),
@@ -524,11 +525,10 @@ lfo_topo(int section, gui_position const& pos, bool global, bool is_fx)
   y_amt.info.description = "Vertical skew amount.";
   result.params[param_skew_y].gui.alternate_drag_param_id = y_amt.info.tag.id;
 
-  result.sections.emplace_back(make_param_section(section_non_mseg_phase,
+  auto& non_mseg_phase_section = result.sections.emplace_back(make_param_section(section_non_mseg_phase,
     make_topo_tag_basic("{8EB0A04C-5D69-4B0E-89BD-884BC2EFDFBE}", "Phase"),
     make_param_section_gui({ 0, 3, 1, 1 }, gui_dimension({ 1, 1 }, { 1 }), gui_label_edit_cell_split::vertical)));
-  // TODO phase_or_host_section.gui.merge_with_section = section_shape;
-  // TODO disable for global
+  non_mseg_phase_section.gui.merge_with_section = section_non_mseg;
   auto& phase = result.params.emplace_back(make_param(
     make_topo_info("{B23E9732-ECE3-4D5D-8EC1-FF299C6926BB}", true, "Phase Offset", "Phs", "Phs", param_phase, 1),
     make_param_dsp(param_direction::input, global? param_rate::block: param_rate::voice, param_automate::automate), make_domain_percentage_identity(0, 0, true),
