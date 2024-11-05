@@ -77,3 +77,4 @@ visual routing indicators
 automated regression tests
 better studiorack integration
 do async clear delay lines etc on patch select
+glfo + snap + phase > 0.5 not ok
