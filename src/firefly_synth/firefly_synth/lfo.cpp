@@ -124,6 +124,7 @@ public module_engine {
   int _prev_global_seed = -1;
   int _prev_global_steps = -1;
   int _prev_global_shape = -1;
+  bool _prev_global_snap = false;
   bool _per_voice_seed_was_initialized = false;
 
   // graphing
@@ -451,7 +452,7 @@ lfo_topo(int section, gui_position const& pos, bool global, bool is_fx)
   sync.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   sync.info.description = "Toggles time or tempo-synced type.";
   auto& snap = result.params.emplace_back(make_param(
-    make_topo_info("{B97DF7D3-3259-4343-9577-858C6A5B786B}", true, "Snap To Project", "Snp", "Snp", param_snap, 1),
+    make_topo_info("{B97DF7D3-3259-4343-9577-858C6A5B786B}", true, "Snap To Project", "Snap", "Snap", param_snap, 1),
     make_param_dsp(param_direction::input, global? param_rate::block: param_rate::voice, param_automate::automate), make_domain_toggle(false),
     make_param_gui_single(section_shared, gui_edit_type::toggle, { 0, 4, 1, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
@@ -674,6 +675,7 @@ lfo_engine::reset_audio(
   _prev_global_seed = -1;
   _prev_global_shape = -1;
   _prev_global_steps = -1;
+  _prev_global_snap = false;
 
   update_block_params(block);
   auto const& block_auto = block->state.own_block_automation;
@@ -703,6 +705,10 @@ lfo_engine::process_internal(plugin_block& block, cv_cv_matrix_mixdown const* mo
   auto const& block_auto = block.state.own_block_automation;
   int type = block_auto[param_type][0].step();
   int shape = block_auto[param_shape][0].step();
+  int seed = block_auto[param_seed][0].step();
+  int steps = block_auto[param_steps][0].step();
+  bool snap = block_auto[param_snap][0].step() != 0;
+
   if (type == type_off)
   {
     block.state.own_cv[0][0].fill(block.start_frame, block.end_frame, 0.0f);
@@ -728,7 +734,8 @@ lfo_engine::process_internal(plugin_block& block, cv_cv_matrix_mixdown const* mo
       is_noise_static(shape) ? _static_noise.seed() : _smooth_noise.seed()));
   }
 
-  if(_stage == lfo_stage::end)
+  // snap-to-project may cause the phase to reset for lfos that are already "ended"
+  if(_stage == lfo_stage::end && (!_global || !snap))
   {
     // need to keep updating the ui in this case
     // as long as the phase is wrapping we'll push out
@@ -746,15 +753,13 @@ lfo_engine::process_internal(plugin_block& block, cv_cv_matrix_mixdown const* mo
     return; 
   }
 
-  int steps = block_auto[param_steps][0].step();
-  int seed = block_auto[param_seed][0].step();
-
   if(_global)
   {
     update_block_params(&block);
-    if (seed != _prev_global_seed || steps != _prev_global_steps || shape != _prev_global_shape)
+    if (seed != _prev_global_seed || steps != _prev_global_steps || shape != _prev_global_shape || snap != _prev_global_snap)
     {
       _prev_global_seed = seed;
+      _prev_global_snap = snap;
       _prev_global_steps = steps;
       _prev_global_shape = shape;
       if (!_noise_graph_was_init)
@@ -990,13 +995,27 @@ void lfo_engine::process_loop(plugin_block& block, cv_cv_matrix_mixdown const* m
       float rate0 = rate_curve[block.start_frame];
       if (rate0 > 0.0f)
       {
+        float phase_offset = block_auto[param_phase][0].real();
         std::int64_t samples0 = (std::int64_t)(block.sample_rate / rate0);
         std::int64_t phase_frames = block.host.project_time % samples0;
-        _phase = phase_frames / (float)samples0;
-        _ref_phase = _phase;
-        // need to derive the new actual phase
-        _phase += block_auto[param_phase][0].real();
-        _phase -= std::floor(_phase);
+
+        // if phase in samples lands after the one-shot time, dont reset!
+        bool do_reset = true;
+        if constexpr (Type == type_one_shot)
+          do_reset = block.host.project_time < samples0;
+        else if constexpr(Type == type_one_phase)
+          do_reset = block.host.project_time < samples0 * phase_offset;
+
+        if (do_reset)
+        {
+          _phase = phase_frames / (float)samples0;
+          _ref_phase = _phase;
+          // need to derive the new actual phase
+          _phase += phase_offset;
+          _phase -= std::floor(_phase);
+          _end_filter_pos = 0;
+          _stage = lfo_stage::cycle;
+        }
       }
     }
   }
