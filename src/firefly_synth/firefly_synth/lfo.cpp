@@ -558,9 +558,9 @@ lfo_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_topo_tag_basic("{FF935A6F-7099-4EC2-B289-D04E8A96505A}", "MSEG"),
     make_param_section_gui({ 0, 2, 1, 2 }, { 1, 1 })));
   mseg_section.gui.bindings.visible.bind_params({ param_mseg_on }, [](auto const& vs) { return vs[0] != 0; });
-  mseg_section.gui.custom_gui_factory = [](plugin_gui* gui, lnf* lnf, int module_slot, component_store store) {
+  mseg_section.gui.custom_gui_factory = [global](plugin_gui* gui, lnf* lnf, int module_slot, component_store store) {
     return &store_component<mseg_editor>(
-      store, gui, lnf, module_env, module_slot, param_mseg_start_y, param_mseg_count, -1,
+      store, gui, lnf, global? module_glfo: module_vlfo, module_slot, param_mseg_start_y, param_mseg_count, -1,
       param_mseg_w, param_mseg_y, param_mseg_slope, param_mseg_snap_x, param_mseg_snap_y, false); };
   auto& mseg_start_y = result.params.emplace_back(make_param(
     make_topo_info_basic("{25C93688-3623-48FC-BCBC-B4418227737D}", "MSEG Start Y", param_mseg_start_y, 1),

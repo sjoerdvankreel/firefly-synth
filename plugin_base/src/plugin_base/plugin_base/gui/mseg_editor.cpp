@@ -392,7 +392,7 @@ mseg_editor::mouseUp(juce::MouseEvent const& event)
             auto host_menu_w = desc.menu_handler->context_menu(desc.params[param_w_index]->info.id_hash);
             host_menu_w->clicked(id - 1 - 10000);
           }
-          else if (id == 1)
+          else if (id == 1 && _sustain_param != -1)
           {
             _gui->param_changed(_module_index, _module_slot, _sustain_param, 0, hit_seg);
             repaint();
@@ -646,7 +646,8 @@ mseg_editor::mouseMove(MouseEvent const& event)
     {
       std::string text_w = _gui->automation_state()->desc().plugin->modules[_module_index].params[_w_param].domain.raw_to_text(false, _gui_segs[hit_seg].w);
       std::string text_y = _gui->automation_state()->desc().plugin->modules[_module_index].params[_y_param].domain.raw_to_text(false, _gui_segs[hit_seg].y);
-      std::string sustain = _gui->automation_state()->get_plain_at(_module_index, _module_slot, _sustain_param, 0).step() == hit_seg ? std::string(", Sustain") : std::string("");
+      std::string sustain = (_sustain_param != -1 && _gui->automation_state()->get_plain_at(_module_index, _module_slot, _sustain_param, 0).step() == hit_seg)
+        ? std::string(", Sustain") : std::string("");
       setTooltip(
         topo.modules[_module_index].params[_w_param].info.tag.display_name + " " + std::to_string(hit_seg + 1) + ": " + text_w + ", " +
         topo.modules[_module_index].params[_y_param].info.tag.display_name + " " + std::to_string(hit_seg + 1) + ": " + text_y + sustain);
