@@ -24,15 +24,16 @@ mseg lfo:
 V up the vno
 V vlfo not paint good for static 1
 V allow phase adjust for global
-* snap + oneshot no workie
+X check if disable section disable controls in the matrix
+X snap + oneshot no workie
 * what is usable: sync, step, smooth, snap (how to snap ?)
 * what is not usable: skew x/y, shape, seed, phase
 * left panel becomes: [sync, step, smooth, snap (glfo only)]
 * right panel becomes: [skew x/y, shape, seed, phase (vlfo only)] or MSEG 
-* deal with oneshot (not onephase)
+* deal with oneshot (not onephase) =>  make'em equal
 * deal with the filter stage
 * deal with the fx version (glfo)
-* check if disable section disable controls in the matrix
+* 
 
 microtuning:
 * check up on andreyas comments
