@@ -1,8 +1,10 @@
 ?, ? - V1.9.8.
 
-- Add MSEG LFO's.
-- Global LFO's now react to phase adjustment when in snap-to-host-time mode.
+- Add MSEG LFO.
+- Global LFO now reacts to phase adjustment when in snap-to-host-time mode.
 - Bugfix: per-voice LFO random generators would not be plotted when no voice is active.
+- Bugfix: global LFO would not react to single-cycle mode when snapped to project time.
+- Bugfix: global LFO would get stuck in one-shot mode preventing to switch back to repeating mode.
 
 ### November 3, 2024 - V1.9.7.
 

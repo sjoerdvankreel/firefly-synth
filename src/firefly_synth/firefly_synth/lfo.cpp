@@ -122,6 +122,7 @@ public module_engine {
 
   int _per_voice_seed = -1;
   int _prev_global_seed = -1;
+  int _prev_global_type = -1;
   int _prev_global_steps = -1;
   int _prev_global_shape = -1;
   bool _prev_global_snap = false;
@@ -149,6 +150,9 @@ public module_engine {
   void process_uni_type_sync_snap_shape_xy_quantize(plugin_block& block, cv_cv_matrix_mixdown const* modulation, Shape shape, SkewX skew_x, SkewY skew_y, Quantize quantize);
   template <bool GlobalUnison, int Type, bool Sync, bool Snap, class Calc, class Quantize>
   void process_loop(plugin_block& block, cv_cv_matrix_mixdown const* modulation, Calc calc, Quantize quantize);
+
+  // without this it's annoying when switching between repeat/oneshot
+  void reset_for_global(float new_phase, float phase_offset);
 
   void process_internal(plugin_block& block, cv_cv_matrix_mixdown const* modulation);
 
@@ -564,6 +568,18 @@ lfo_engine::update_block_params(plugin_block const* block)
   _filter.init(block->sample_rate, smooth / 1000.0f);
 }
 
+void
+lfo_engine::reset_for_global(float new_phase, float phase_offset)
+{
+  _phase = new_phase;
+  _ref_phase = _phase;
+  // need to derive the new actual phase
+  _phase += phase_offset;
+  _phase -= std::floor(_phase);
+  _end_filter_pos = 0;
+  _stage = lfo_stage::cycle;
+}
+
 void 
 lfo_engine::reset_graph(
   plugin_block const* block,
@@ -673,6 +689,7 @@ lfo_engine::reset_audio(
   _noise_graph_was_init = false;
   _per_voice_seed_was_initialized = false;
   _prev_global_seed = -1;
+  _prev_global_type = -1;
   _prev_global_shape = -1;
   _prev_global_steps = -1;
   _prev_global_snap = false;
@@ -735,7 +752,8 @@ lfo_engine::process_internal(plugin_block& block, cv_cv_matrix_mixdown const* mo
   }
 
   // snap-to-project may cause the phase to reset for lfos that are already "ended"
-  if(_stage == lfo_stage::end && (!_global || !snap))
+  // as does changing of any of the block params
+  if(_stage == lfo_stage::end && !_global)
   {
     // need to keep updating the ui in this case
     // as long as the phase is wrapping we'll push out
@@ -756,12 +774,14 @@ lfo_engine::process_internal(plugin_block& block, cv_cv_matrix_mixdown const* mo
   if(_global)
   {
     update_block_params(&block);
-    if (seed != _prev_global_seed || steps != _prev_global_steps || shape != _prev_global_shape || snap != _prev_global_snap)
+    if (type != _prev_global_type || seed != _prev_global_seed || steps != _prev_global_steps || shape != _prev_global_shape || snap != _prev_global_snap)
     {
       _prev_global_seed = seed;
+      _prev_global_type = type;
       _prev_global_snap = snap;
       _prev_global_steps = steps;
       _prev_global_shape = shape;
+      reset_for_global(0.0f, block_auto[param_phase][0].real());
       if (!_noise_graph_was_init)
       {
         _smooth_noise = noise_generator<true>(seed, steps);
@@ -1000,21 +1020,19 @@ void lfo_engine::process_loop(plugin_block& block, cv_cv_matrix_mixdown const* m
         std::int64_t phase_frames = block.host.project_time % samples0;
 
         // if phase in samples lands after the one-shot time, dont reset!
-        bool do_reset = true;
-        if constexpr (Type == type_one_shot)
-          do_reset = block.host.project_time < samples0;
-        else if constexpr(Type == type_one_phase)
-          do_reset = block.host.project_time < samples0 * phase_offset;
-
-        if (do_reset)
+        if constexpr (Type == type_repeat)
         {
-          _phase = phase_frames / (float)samples0;
-          _ref_phase = _phase;
-          // need to derive the new actual phase
-          _phase += phase_offset;
-          _phase -= std::floor(_phase);
-          _end_filter_pos = 0;
-          _stage = lfo_stage::cycle;
+          reset_for_global(phase_frames / (float)samples0, phase_offset);
+        }
+        else if constexpr (Type == type_one_shot)
+        {
+          if (block.host.project_time < samples0)
+            reset_for_global(phase_frames / (float)samples0, phase_offset);
+        }
+        else if constexpr (Type == type_one_phase)
+        {
+          if(block.host.project_time < samples0 * phase_offset)
+            reset_for_global(phase_frames / (float)samples0, phase_offset);
         }
       }
     }
