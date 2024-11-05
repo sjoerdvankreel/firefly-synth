@@ -32,6 +32,7 @@ V allow phase adjust for global
 * deal with oneshot (not onephase)
 * deal with the filter stage
 * deal with the fx version (glfo)
+* check if disable section disable controls in the matrix
 
 microtuning:
 * check up on andreyas comments
