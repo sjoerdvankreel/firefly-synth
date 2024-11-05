@@ -546,7 +546,7 @@ lfo_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_param_dsp(param_direction::input, global? param_rate::block: param_rate::voice, param_automate::automate), make_domain_percentage_identity(0, 0, true),
     make_param_gui_single(section_non_mseg_phase, gui_edit_type::knob, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::top, gui_label_justify::center))));
-  phase.gui.bindings.enabled.bind_params({ param_type, param_snap }, [global](auto const& vs) { return vs[0] != type_off && (!global || vs[1] != 0); });
+  phase.gui.bindings.enabled.bind_params({ param_type }, [global](auto const& vs) { return vs[0] != type_off; });
   phase.info.description = "In per-voice module, allows for phase adjustment of periodic generators.";
 
   return result;
