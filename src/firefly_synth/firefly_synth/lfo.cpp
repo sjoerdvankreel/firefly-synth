@@ -518,7 +518,7 @@ lfo_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_param_dsp_automate_if_voice(!global), make_domain_step(0, on_voice_random_count - 1, 1, 1),
     make_param_gui_single(section_non_mseg, gui_edit_type::list, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  voice_rnd_source.gui.bindings.visible.bind_params({ param_type, param_shape }, [](auto const& vs) { return is_noise_voice_rand(vs[1]); });
+  voice_rnd_source.gui.bindings.visible.bind_params({ param_type, param_shape }, [global](auto const& vs) { return !global && is_noise_voice_rand(vs[1]); });
   voice_rnd_source.gui.bindings.enabled.bind_params({ param_type, param_shape, param_mseg_on }, [](auto const& vs) { return vs[0] != type_off && is_noise_voice_rand(vs[1]) && vs[2] == 0; });
   voice_rnd_source.info.description = "Per-voice random stream source for static and smooth noise generators.";
   auto& x_mode = result.params.emplace_back(make_param(
