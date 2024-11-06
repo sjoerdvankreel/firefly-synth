@@ -629,6 +629,57 @@
 <td colspan='11' class='description'>LFO rate in bars.</td>
 </tr>
 <tr>
+<td rowspan='2'>Phase Offset</td>
+<td>Shared</td>
+<td>Yes</td>
+<td>Patch</td>
+<td>1</td>
+<td>Input</td>
+<td>Block</td>
+<td>Automate</td>
+<td>0 %</td>
+<td>100 %</td>
+<td>0 %</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>In per-voice module, allows for phase adjustment of periodic generators.</td>
+</tr>
+<tr>
+<td rowspan='2'>Steps</td>
+<td>Shared</td>
+<td>Yes</td>
+<td>Patch</td>
+<td>1</td>
+<td>Input</td>
+<td>Block</td>
+<td>None</td>
+<td>1</td>
+<td>99</td>
+<td>1</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Step count for static and smooth noise generators, set to > 1. Stair-stepping for periodic generators. Set to 1 for continuous or > 1 for stair-stepping.</td>
+</tr>
+<tr>
+<td rowspan='2'>Smooth</td>
+<td>Shared</td>
+<td>Yes</td>
+<td>Patch</td>
+<td>1</td>
+<td>Input</td>
+<td>Block</td>
+<td>None</td>
+<td>0 Ms</td>
+<td>500 Ms</td>
+<td>0 Ms</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Applies a lowpass filter to smooth out rough edges.</td>
+</tr>
+<tr>
 <td rowspan='2'>Tempo Sync</td>
 <td>Shared</td>
 <td>Yes</td>
@@ -678,57 +729,6 @@
 </tr>
 <tr>
 <td colspan='11' class='description'>Toggles MSEG mode on/off.</td>
-</tr>
-<tr>
-<td rowspan='2'>Phase Offset</td>
-<td>Shared</td>
-<td>Yes</td>
-<td>Patch</td>
-<td>1</td>
-<td>Input</td>
-<td>Block</td>
-<td>Automate</td>
-<td>0 %</td>
-<td>100 %</td>
-<td>0 %</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>In per-voice module, allows for phase adjustment of periodic generators.</td>
-</tr>
-<tr>
-<td rowspan='2'>Smooth</td>
-<td>Shared</td>
-<td>Yes</td>
-<td>Patch</td>
-<td>1</td>
-<td>Input</td>
-<td>Block</td>
-<td>None</td>
-<td>0 Ms</td>
-<td>500 Ms</td>
-<td>0 Ms</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Applies a lowpass filter to smooth out rough edges.</td>
-</tr>
-<tr>
-<td rowspan='2'>Steps</td>
-<td>Shared</td>
-<td>Yes</td>
-<td>Patch</td>
-<td>1</td>
-<td>Input</td>
-<td>Block</td>
-<td>None</td>
-<td>1</td>
-<td>99</td>
-<td>1</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Step count for static and smooth noise generators, set to > 1. Stair-stepping for periodic generators. Set to 1 for continuous or > 1 for stair-stepping.</td>
 </tr>
 <tr>
 <td rowspan='2'>Shape</td>
@@ -2113,6 +2113,57 @@
 <td colspan='11' class='description'>LFO rate in bars.</td>
 </tr>
 <tr>
+<td rowspan='2'>Phase Offset</td>
+<td>Shared</td>
+<td>Yes</td>
+<td>Patch</td>
+<td>1</td>
+<td>Input</td>
+<td>Voice</td>
+<td>Automate</td>
+<td>0 %</td>
+<td>100 %</td>
+<td>0 %</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>In per-voice module, allows for phase adjustment of periodic generators.</td>
+</tr>
+<tr>
+<td rowspan='2'>Steps</td>
+<td>Shared</td>
+<td>Yes</td>
+<td>Patch</td>
+<td>1</td>
+<td>Input</td>
+<td>Voice</td>
+<td>Automate</td>
+<td>1</td>
+<td>99</td>
+<td>1</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Step count for static and smooth noise generators, set to > 1. Stair-stepping for periodic generators. Set to 1 for continuous or > 1 for stair-stepping.</td>
+</tr>
+<tr>
+<td rowspan='2'>Smooth</td>
+<td>Shared</td>
+<td>Yes</td>
+<td>Patch</td>
+<td>1</td>
+<td>Input</td>
+<td>Voice</td>
+<td>Automate</td>
+<td>0 Ms</td>
+<td>500 Ms</td>
+<td>0 Ms</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Applies a lowpass filter to smooth out rough edges.</td>
+</tr>
+<tr>
 <td rowspan='2'>Tempo Sync</td>
 <td>Shared</td>
 <td>Yes</td>
@@ -2162,57 +2213,6 @@
 </tr>
 <tr>
 <td colspan='11' class='description'>Toggles MSEG mode on/off.</td>
-</tr>
-<tr>
-<td rowspan='2'>Phase Offset</td>
-<td>Shared</td>
-<td>Yes</td>
-<td>Patch</td>
-<td>1</td>
-<td>Input</td>
-<td>Voice</td>
-<td>Automate</td>
-<td>0 %</td>
-<td>100 %</td>
-<td>0 %</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>In per-voice module, allows for phase adjustment of periodic generators.</td>
-</tr>
-<tr>
-<td rowspan='2'>Smooth</td>
-<td>Shared</td>
-<td>Yes</td>
-<td>Patch</td>
-<td>1</td>
-<td>Input</td>
-<td>Voice</td>
-<td>Automate</td>
-<td>0 Ms</td>
-<td>500 Ms</td>
-<td>0 Ms</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Applies a lowpass filter to smooth out rough edges.</td>
-</tr>
-<tr>
-<td rowspan='2'>Steps</td>
-<td>Shared</td>
-<td>Yes</td>
-<td>Patch</td>
-<td>1</td>
-<td>Input</td>
-<td>Voice</td>
-<td>Automate</td>
-<td>1</td>
-<td>99</td>
-<td>1</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Step count for static and smooth noise generators, set to > 1. Stair-stepping for periodic generators. Set to 1 for continuous or > 1 for stair-stepping.</td>
 </tr>
 <tr>
 <td rowspan='2'>Shape</td>
