@@ -110,6 +110,7 @@ public:
 
 class lfo_engine :
 public module_engine {
+
   float _phase;
   float _ref_phase;
   float _lfo_end_value;
@@ -118,8 +119,19 @@ public module_engine {
   bool const _global;
   lfo_stage _stage = {};
   cv_filter _filter = {};
+
+  // noise
   noise_generator<true> _smooth_noise;
   noise_generator<false> _static_noise;
+
+  // mseg - we deal with mseg by filling these out
+  // at voice start (VLFO) or block start (GLFO)
+  // then indexing the resulting segments by the phase
+  int _mseg_seg_count = 0;
+  double _mseg_start_y = 0;
+  std::array<double, mseg_max_seg_count> _mseg_y = {};
+  std::array<double, mseg_max_seg_count> _mseg_slope = {};
+  std::array<double, mseg_max_seg_count> _mseg_time = {}; // sums up to 1
 
   int _end_filter_pos = 0;
   int _end_filter_stage_samples = 0;
@@ -130,7 +142,7 @@ public module_engine {
   int _prev_global_steps = -1;
   int _prev_global_shape = -1;
   bool _prev_global_snap = false;
-  bool _per_voice_seed_was_initialized = false;
+  bool _voice_was_initialized = false;
 
   // graphing
   bool _noise_graph_was_init = false;
@@ -158,6 +170,10 @@ public module_engine {
   // without this it's annoying when switching between repeat/oneshot
   void reset_for_global(float new_phase, float phase_offset);
 
+  // set the mseg curve
+  void init_mseg(plugin_block& block, cv_cv_matrix_mixdown const* modulation);
+
+  // process loop
   void process_internal(plugin_block& block, cv_cv_matrix_mixdown const* modulation);
 
 public:
@@ -645,6 +661,31 @@ lfo_engine::reset_for_global(float new_phase, float phase_offset)
   _stage = lfo_stage::cycle;
 }
 
+void
+lfo_engine::init_mseg(plugin_block& block, cv_cv_matrix_mixdown const* modulation)
+{
+  auto const& block_auto = block.state.own_block_automation;
+  bool mseg_snap_x = block_auto[param_mseg_snap_x][0].step() != 0;
+  _mseg_seg_count = block_auto[param_mseg_count][0].step();
+
+  _mseg_start_y = (*(*modulation)[param_mseg_start_y][0])[block.start_frame];
+  for (int i = 0; i < _mseg_seg_count; i++)
+  {
+    _mseg_y[i] = (*(*modulation)[param_mseg_y][i])[block.start_frame];
+    _mseg_slope[i] = (*(*modulation)[param_mseg_slope][i])[block.start_frame];
+    _mseg_time[i] = mseg_snap_x? 1.0 / _mseg_seg_count: (*(*modulation)[param_mseg_w][i])[block.start_frame];
+  }
+
+  if (mseg_snap_x) return;
+
+  // normalize
+  double mseg_total_size = 0.0f;
+  for (int i = 0; i < _mseg_seg_count; i++)
+    mseg_total_size += _mseg_time[i];
+  for (int i = 0; i < _mseg_seg_count; i++)
+    _mseg_time[i] /= mseg_total_size;
+}
+
 void 
 lfo_engine::reset_graph(
   plugin_block const* block,
@@ -752,7 +793,7 @@ lfo_engine::reset_audio(
   _end_filter_stage_samples = 0;
   _per_voice_seed = -1;
   _noise_graph_was_init = false;
-  _per_voice_seed_was_initialized = false;
+  _voice_was_initialized = false;
   _prev_global_seed = -1;
   _prev_global_type = -1;
   _prev_global_shape = -1;
@@ -790,6 +831,7 @@ lfo_engine::process_internal(plugin_block& block, cv_cv_matrix_mixdown const* mo
   int seed = block_auto[param_seed][0].step();
   int steps = block_auto[param_steps][0].step();
   bool snap = block_auto[param_snap][0].step() != 0;
+  bool is_mseg = block_auto[param_mseg_on][0].step() != 0;
 
   if (type == type_off)
   {
@@ -839,6 +881,7 @@ lfo_engine::process_internal(plugin_block& block, cv_cv_matrix_mixdown const* mo
   if(_global)
   {
     update_block_params(&block);
+    init_mseg(block, modulation);
     if (type != _prev_global_type || seed != _prev_global_seed || steps != _prev_global_steps || shape != _prev_global_shape || snap != _prev_global_snap)
     {
       _prev_global_seed = seed;
@@ -857,9 +900,12 @@ lfo_engine::process_internal(plugin_block& block, cv_cv_matrix_mixdown const* mo
   else
   {
     // cannot do this in reset() because we depend on output of the on-note module
-    if (!_per_voice_seed_was_initialized)
+    if (!_voice_was_initialized)
     {
-      if (is_noise(shape))
+      if (is_mseg)
+      {
+        init_mseg(block, modulation);
+      } else if (is_noise(shape))
       {
         if (is_noise_not_voice_rand(shape))
           _per_voice_seed = block_auto[param_seed][0].step();
@@ -876,8 +922,8 @@ lfo_engine::process_internal(plugin_block& block, cv_cv_matrix_mixdown const* mo
           _smooth_noise = noise_generator<true>(_per_voice_seed, steps);
           _static_noise = noise_generator<false>(_per_voice_seed, steps);
         }
-      }      
-      _per_voice_seed_was_initialized = true;
+      }
+      _voice_was_initialized = true;
     }
   }
 
@@ -919,8 +965,18 @@ lfo_engine::process_uni_type_sync(plugin_block& block, cv_cv_matrix_mixdown cons
 template <bool GlobalUnison, int Type, bool Sync, bool Snap> void
 lfo_engine::process_uni_type_sync_snap(plugin_block& block, cv_cv_matrix_mixdown const* modulation)
 {
+  // todo deal with the skew
+  auto const& block_auto = block.state.own_block_automation;
+  bool is_mseg = block_auto[param_mseg_on][0].step() != 0;
+  if (is_mseg)
+  {
+    process_uni_type_sync_snap_shape<GlobalUnison, Type, Sync, Snap>(block, modulation, 
+      [](float in) { return bipolar_to_unipolar(std::sin(in * 4 * pi32)); });
+    return;
+  }
+
   int seed = _global ? _prev_global_seed : _per_voice_seed;
-  switch (block.state.own_block_automation[param_shape][0].step())
+  switch (block_auto[param_shape][0].step())
   {
   case wave_shape_type_saw: process_uni_type_sync_snap_shape<GlobalUnison, Type, Sync, Snap>(block, modulation, wave_shape_uni_saw); break;
   case wave_shape_type_tri: process_uni_type_sync_snap_shape<GlobalUnison, Type, Sync, Snap>(block, modulation, wave_shape_uni_tri); break;

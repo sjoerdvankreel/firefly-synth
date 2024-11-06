@@ -36,7 +36,6 @@ V right panel becomes: [skew x/y, shape, seed, phase (vlfo only)] or MSEG
 * deal with oneshot (not onephase) =>  make'em equal
 * deal with the filter stage
 * deal with the fx version (glfo)
-* retest the mseg env
 
 microtuning:
 * check up on andreyas comments
