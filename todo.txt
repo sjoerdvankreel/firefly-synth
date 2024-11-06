@@ -20,23 +20,6 @@ on release:
 14 update kvr 
 15 update the website (vimexx)
 
-mseg lfo:
-V up the vno
-V vlfo not paint good for static 1
-V allow phase adjust for global
-X check if disable section disable controls in the matrix
-X snap + oneshot no workie
-V allow phase for mseg
-V glfo SED overlaps SRC
-X close ext editor when plug gui closes
-V what is usable: sync, step, smooth, snap (how to snap ?)
-V what is not usable: skew x/y, shape, seed, phase
-V left panel becomes: [sync, step, smooth, snap (glfo only)]
-V right panel becomes: [skew x/y, shape, seed, phase (vlfo only)] or MSEG 
-* deal with oneshot (not onephase) =>  make'em equal
-* deal with the filter stage
-* deal with the fx version (glfo)
-
 microtuning:
 * check up on andreyas comments
 
@@ -46,12 +29,10 @@ autobuilds:
 * integrate https://github.com/surge-synthesizer/monique-monosynth/blob/main/.github/workflows/build-pr.yml
 
 shortlist:
-make it work in ableton
-mseg as lfo
 do the kvr arm64 thing
+make it work in ableton
 update all hosts and dependencies
 ditch after-mod, claim micro support ?
-arp new note = reset table pos yes/no?
 do more keyboard tracking just do it -- also trackmode mul/add
 do global unison subvoice index as a mod source
 turn on stuff when dragging (e.g. basic sin, dist skew etc)
