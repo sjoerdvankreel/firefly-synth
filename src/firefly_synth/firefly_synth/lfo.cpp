@@ -522,7 +522,7 @@ lfo_topo(int section, gui_position const& pos, bool global, bool is_fx)
   voice_rnd_source.gui.bindings.enabled.bind_params({ param_type, param_shape, param_mseg_on }, [](auto const& vs) { return vs[0] != type_off && is_noise_voice_rand(vs[1]) && vs[2] == 0; });
   voice_rnd_source.info.description = "Per-voice random stream source for static and smooth noise generators.";
   auto& x_mode = result.params.emplace_back(make_param(
-    make_topo_info("{A95BA410-6777-4386-8E86-38B5CBA3D9F1}", true, "Skew X Mode", "X", "Skew X", param_skew_x, 1),
+    make_topo_info("{A95BA410-6777-4386-8E86-38B5CBA3D9F1}", true, "Skew X Mode", "Skew X", "Skew X", param_skew_x, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(wave_skew_type_items(), "Off"),
     make_param_gui_single(section_non_mseg, gui_edit_type::autofit_list, { 0, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
@@ -536,7 +536,7 @@ lfo_topo(int section, gui_position const& pos, bool global, bool is_fx)
   x_amt.gui.bindings.enabled.bind_params({ param_type, param_skew_x, param_mseg_on }, [](auto const& vs) { return vs[0] != type_off && vs[1] != wave_skew_type_off && vs[2] == 0; });
   x_amt.info.description = "Horizontal skew amount.";
   auto& y_mode = result.params.emplace_back(make_param(
-    make_topo_info("{5D716AA7-CAE6-4965-8FC1-345DAA7141B6}", true, "Skew Y Mode", "Y", "Skew Y", param_skew_y, 1),
+    make_topo_info("{5D716AA7-CAE6-4965-8FC1-345DAA7141B6}", true, "Skew Y Mode", "Skew Y", "Skew Y", param_skew_y, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(wave_skew_type_items(), "Off"),
     make_param_gui_single(section_non_mseg, gui_edit_type::autofit_list, { 1, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
