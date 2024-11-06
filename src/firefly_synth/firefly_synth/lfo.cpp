@@ -128,10 +128,10 @@ public module_engine {
   // at voice start (VLFO) or block start (GLFO)
   // then indexing the resulting segments by the phase
   int _mseg_seg_count = 0;
-  double _mseg_start_y = 0;
-  std::array<double, mseg_max_seg_count> _mseg_y = {};
-  std::array<double, mseg_max_seg_count> _mseg_slope = {};
-  std::array<double, mseg_max_seg_count> _mseg_time = {}; // sums up to 1
+  float _mseg_start_y = 0;
+  std::array<float, mseg_max_seg_count> _mseg_y = {};
+  std::array<float, mseg_max_seg_count> _mseg_exp = {};
+  std::array<float, mseg_max_seg_count> _mseg_time = {};
 
   int _end_filter_pos = 0;
   int _end_filter_stage_samples = 0;
@@ -672,18 +672,23 @@ lfo_engine::init_mseg(plugin_block& block, cv_cv_matrix_mixdown const* modulatio
   for (int i = 0; i < _mseg_seg_count; i++)
   {
     _mseg_y[i] = (*(*modulation)[param_mseg_y][i])[block.start_frame];
-    _mseg_slope[i] = (*(*modulation)[param_mseg_slope][i])[block.start_frame];
+    _mseg_exp[i] = (float)mseg_exp((*(*modulation)[param_mseg_slope][i])[block.start_frame]);
     _mseg_time[i] = mseg_snap_x? 1.0 / _mseg_seg_count: (*(*modulation)[param_mseg_w][i])[block.start_frame];
   }
 
-  if (mseg_snap_x) return;
+  // normalize so it sums up to 1 (eg 0.25, 0.25, 0.25, 0.25)
+  if (!mseg_snap_x)
+  {
+    float mseg_total_size = 0.0f;
+    for (int i = 0; i < _mseg_seg_count; i++)
+      mseg_total_size += _mseg_time[i];
+    for (int i = 0; i < _mseg_seg_count; i++)
+      _mseg_time[i] /= mseg_total_size;
+  }
 
-  // normalize
-  double mseg_total_size = 0.0f;
-  for (int i = 0; i < _mseg_seg_count; i++)
-    mseg_total_size += _mseg_time[i];
-  for (int i = 0; i < _mseg_seg_count; i++)
-    _mseg_time[i] /= mseg_total_size;
+  // now make it accumulated for easier lookup (eg 0.25 0.5 0.75 1.0)
+  for (int i = 1; i < _mseg_seg_count; i++)
+    _mseg_time[i] += _mseg_time[i - 1];
 }
 
 void 
@@ -970,8 +975,22 @@ lfo_engine::process_uni_type_sync_snap(plugin_block& block, cv_cv_matrix_mixdown
   bool is_mseg = block_auto[param_mseg_on][0].step() != 0;
   if (is_mseg)
   {
-    process_uni_type_sync_snap_shape<GlobalUnison, Type, Sync, Snap>(block, modulation, 
-      [](float in) { return bipolar_to_unipolar(std::sin(in * 4 * pi32)); });
+    process_uni_type_sync_snap_shape<GlobalUnison, Type, Sync, Snap>(block, modulation, [this](float in) { 
+      for (int i = 0; i < _mseg_seg_count; i++)
+      {
+        if (in <= _mseg_time[i] || i == _mseg_seg_count - 1)
+        {
+          float this_y = _mseg_y[i];
+          float this_x = _mseg_time[i];
+          float this_exp = _mseg_exp[i];
+          float prev_x = i == 0 ? 0.0f : _mseg_time[i - 1];
+          float prev_y = i == 0 ? _mseg_start_y : _mseg_y[i - 1];
+          return prev_y + std::pow((in - prev_x) / (this_x - prev_x), this_exp) * (this_y - prev_y);
+        }
+      }
+      assert(false);
+      return 0.0f;
+    });
     return;
   }
 

@@ -17,6 +17,16 @@ double const exp_slope_min = 0.001;
 std::pair<std::uint32_t, std::uint32_t> disable_denormals();
 void restore_denormals(std::pair<std::uint32_t, std::uint32_t> state);
 
+inline double
+mseg_exp(double slope)
+{
+  double const slope_min = exp_slope_min;
+  double const slope_max = (1.0 - exp_slope_min);
+  double const slope_range = slope_max - slope_min;
+  double const slope_bounded = exp_slope_min + slope_range * slope;
+  return std::log(slope_bounded) / std::log(0.5);
+}
+
 // for smoothing midi or host granularity changes
 class block_filter
 {

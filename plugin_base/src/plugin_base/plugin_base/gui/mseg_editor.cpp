@@ -131,11 +131,7 @@ mseg_editor::sloped_y_pos(float pos, int seg) const
   float slope = _gui_segs[seg].slope;
   float y1 = seg == 0 ? _gui_start_y : _gui_segs[seg - 1].y;
   float y2 = _gui_segs[seg].y;
-  double const slope_min = exp_slope_min;
-  double const slope_max = (1.0 - exp_slope_min);
-  double const slope_range = slope_max - slope_min;
-  double const slope_bounded = exp_slope_min + slope_range * slope;
-  double const exp = std::log(slope_bounded) / std::log(0.5);
+  double exp = mseg_exp(slope);
   return y1 + std::pow(pos, exp) * (y2 - y1); 
 }
 
