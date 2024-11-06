@@ -26,6 +26,7 @@ V vlfo not paint good for static 1
 V allow phase adjust for global
 X check if disable section disable controls in the matrix
 X snap + oneshot no workie
+* close ext editor when plug gui closes
 * what is usable: sync, step, smooth, snap (how to snap ?)
 * what is not usable: skew x/y, shape, seed, phase
 * left panel becomes: [sync, step, smooth, snap (glfo only)]
