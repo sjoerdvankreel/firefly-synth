@@ -20,6 +20,9 @@ on release:
 14 update kvr 
 15 update the website (vimexx)
 
+mseglfo:
+manual
+
 microtuning:
 * check up on andreyas comments
 
