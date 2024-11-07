@@ -186,15 +186,14 @@ These are probably best used as on-note versions, but regular versions are avail
 * Table absolute position: with a table size of 5 this gets you 0.0, 0.25, 0.5, 0.75, 1.0.
 * Table relative position: takes flipping into account. F.e. with flip set to 2, gets you 0.0, 0.25, 0.75, 0.5, 1.0.
 
-## MSEG Envelopes
-
-Alternative to DAHDSR generators (set env mode to MSEG).
+## MSEG
 
 * Single start-y value + max 16 segments
 * Per-segment width, y, and slope controls
 * Inline visual editor + resizable popup-editor
 * Visual editor with snap-to-grid support (see below)
 * Automation and per-voice-start modulation of all width, y and slope params
+* For envelopes, set mode to MSEG. For LFO's, toggle the MSEG switch.
 
 MSEG segments are defined as a single start-y value + N (segment count) times width+y+slope parameters.
 Width parameters are relative to each other with bounds (1, 100). For example an MSEG curve with widths
@@ -202,12 +201,14 @@ Width parameters are relative to each other with bounds (1, 100). For example an
 are per-voice-start automatable and modulatable. When snap-x is on, all segments have equal size.
 Segment Y and slope are always automatable/modulatable.
 
-You can set 1 point as a sustain point. In DAHDSR terms, this means that "all the rest" is considered
-to be the release section. Retrigger/multitrigger and follow/release envelope types are also implemented
-by considering all segments after the sustain point as a single "release"  section.
-
 The MSEG as a whole can be either set to absolute time or synced to project tempo (bars).
 When set to time, the total MSEG time is modulatable.
+
+For LFO's: MSEGs react to step count, smoothing and phase adjustment, but not X/Y skewing.
+
+For envelopes, you can set 1 point as a sustain point. In DAHDSR terms, this means that "all the rest" is considered
+to be the release section. Retrigger/multitrigger and follow/release envelope types are also implemented
+by considering all segments after the sustain point as a single "release"  section.
 
 ### GUI
 
