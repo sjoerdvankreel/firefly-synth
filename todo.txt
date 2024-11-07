@@ -22,7 +22,6 @@ on release:
 
 mseglfo:
 manual
-global mseg without snapx is borked
 
 microtuning:
 * check up on andreyas comments

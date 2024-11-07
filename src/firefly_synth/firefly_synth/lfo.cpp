@@ -664,6 +664,7 @@ lfo_engine::reset_for_global(float new_phase, float phase_offset)
 void
 lfo_engine::init_mseg(plugin_block& block, cv_cv_matrix_mixdown const* modulation)
 {
+  int this_module = _global ? module_glfo : module_vlfo;
   auto const& block_auto = block.state.own_block_automation;
   bool mseg_snap_x = block_auto[param_mseg_snap_x][0].step() != 0;
   _mseg_seg_count = block_auto[param_mseg_count][0].step();
@@ -673,7 +674,8 @@ lfo_engine::init_mseg(plugin_block& block, cv_cv_matrix_mixdown const* modulatio
   {
     _mseg_y[i] = (*(*modulation)[param_mseg_y][i])[block.start_frame];
     _mseg_exp[i] = (float)mseg_exp((*(*modulation)[param_mseg_slope][i])[block.start_frame]);
-    _mseg_time[i] = mseg_snap_x? 1.0 / _mseg_seg_count: (*(*modulation)[param_mseg_w][i])[block.start_frame];
+    _mseg_time[i] = mseg_snap_x? 1.0 / _mseg_seg_count: 
+      block.normalized_to_raw_fast<domain_type::linear>(this_module, param_mseg_w, (*(*modulation)[param_mseg_w][i])[block.start_frame]);
   }
 
   // normalize so it sums up to 1 (eg 0.25, 0.25, 0.25, 0.25)
@@ -688,7 +690,10 @@ lfo_engine::init_mseg(plugin_block& block, cv_cv_matrix_mixdown const* modulatio
 
   // now make it accumulated for easier lookup (eg 0.25 0.5 0.75 1.0)
   for (int i = 1; i < _mseg_seg_count; i++)
+  {
     _mseg_time[i] += _mseg_time[i - 1];
+    check_unipolar(_mseg_time[i]);
+  }
 }
 
 void 
