@@ -198,8 +198,8 @@ These are probably best used as on-note versions, but regular versions are avail
 MSEG segments are defined as a single start-y value + N (segment count) times width+y+slope parameters.
 Width parameters are relative to each other with bounds (1, 100). For example an MSEG curve with widths
 (1, 2, 4) will result in relative segment sizes of (1/7, 2/7, 4/7). When snap-x is off, segment widths
-are per-voice-start automatable and modulatable. When snap-x is on, all segments have equal size.
-Segment Y and slope are always automatable/modulatable.
+are automatable and modulatable. When snap-x is on, all segments have equal size.
+Segment Y and slope are always automatable/modulatable. Automation/modulation is per-voice-start (envelope/VLFO) or per-block (GLFO). 
 
 The MSEG as a whole can be either set to absolute time or synced to project tempo (bars).
 When set to time, the total MSEG time is modulatable.
