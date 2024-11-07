@@ -25,15 +25,14 @@ microtuning:
 
 autobuilds:
 * ask paul
+* sign the mac version
 * integrate https://github.com/surge-synthesizer/monique-monosynth/blob/main/.github/workflows/build-pr.yml
 
 shortlist:
-make it work in ableton
-mseg as lfo
 do the kvr arm64 thing
+make it work in ableton
 update all hosts and dependencies
 ditch after-mod, claim micro support ?
-arp new note = reset table pos yes/no?
 do more keyboard tracking just do it -- also trackmode mul/add
 do global unison subvoice index as a mod source
 turn on stuff when dragging (e.g. basic sin, dist skew etc)
@@ -63,3 +62,4 @@ visual routing indicators
 automated regression tests
 better studiorack integration
 do async clear delay lines etc on patch select
+glfo + snap + phase > 0.5 not ok

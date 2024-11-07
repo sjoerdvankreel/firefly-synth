@@ -1,10 +1,10 @@
 <html>
 <head>
-<title>Firefly Synth 1.9.7</title>
+<title>Firefly Synth 1.9.8</title>
 <style>th, td { padding: 3px; }a, a:visited { color: #666666; }.description { background:#EEEEEE; }h1 { font-size: 19px; color: black; }h2 { font-size: 17px; color: black; }h3 { font-size: 15px; color: black; }body { font-family: Verdana; color: black; }html { position: relative; max-width: 1024px; margin: auto; }tr td { width: auto; white-space: nowrap; } tr th { width: auto; white-space: nowrap; }table, th, td { font-size: 13px; border: 1px solid gray; border-collapse: collapse; text-align: left; }tr td:last-child { width: 100%; white-space: wrap; } tr th:last-child { width: 100%; white-space: wrap; }</style>
 </head>
 <body>
-<h1>Firefly Synth 1.9.7</h1>
+<h1>Firefly Synth 1.9.8</h1>
 <h2>Module Overview</h2>
 <table>
 <tr>
@@ -629,110 +629,25 @@
 <td colspan='11' class='description'>LFO rate in bars.</td>
 </tr>
 <tr>
-<td rowspan='2'>Tempo Sync</td>
-<td>Sync</td>
+<td rowspan='2'>Phase Offset</td>
+<td>Shared</td>
 <td>Yes</td>
 <td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Block</td>
-<td>None</td>
-<td>Off</td>
-<td>On</td>
-<td>Off</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Toggles time or tempo-synced type.</td>
-</tr>
-<tr>
-<td rowspan='2'>Skew X Mode</td>
-<td>Skew</td>
-<td>Yes</td>
-<td>Patch</td>
-<td>1</td>
-<td>Input</td>
-<td>Block</td>
-<td>None</td>
-<td>Off</td>
-<td>Exp Bi</td>
-<td>Off</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Horizontal skew mode.</td>
-</tr>
-<tr>
-<td rowspan='2'>Skew X Amt</td>
-<td>Skew</td>
-<td>Yes</td>
-<td>Patch</td>
-<td>1</td>
-<td>Input</td>
-<td>Accurate</td>
-<td>Modulate</td>
+<td>Automate</td>
 <td>0 %</td>
 <td>100 %</td>
-<td>50 %</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Horizontal skew amount.</td>
-</tr>
-<tr>
-<td rowspan='2'>Skew Y Mode</td>
-<td>Skew</td>
-<td>Yes</td>
-<td>Patch</td>
-<td>1</td>
-<td>Input</td>
-<td>Block</td>
-<td>None</td>
-<td>Off</td>
-<td>Exp Bi</td>
-<td>Off</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Vertical skew mode.</td>
-</tr>
-<tr>
-<td rowspan='2'>Skew Y Amt</td>
-<td>Skew</td>
-<td>Yes</td>
-<td>Patch</td>
-<td>1</td>
-<td>Input</td>
-<td>Accurate</td>
-<td>Modulate</td>
 <td>0 %</td>
-<td>100 %</td>
-<td>50 %</td>
 <td>N/A</td>
 </tr>
 <tr>
-<td colspan='11' class='description'>Vertical skew amount.</td>
-</tr>
-<tr>
-<td rowspan='2'>Shape</td>
-<td>Right</td>
-<td>Yes</td>
-<td>Patch</td>
-<td>1</td>
-<td>Input</td>
-<td>Block</td>
-<td>None</td>
-<td>Saw</td>
-<td>Free Static 1</td>
-<td>Sin</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Selects waveform: various periodic functions plus smooth and static noise.</td>
+<td colspan='11' class='description'>In per-voice module, allows for phase adjustment of periodic generators.</td>
 </tr>
 <tr>
 <td rowspan='2'>Steps</td>
-<td>Right</td>
+<td>Shared</td>
 <td>Yes</td>
 <td>Patch</td>
 <td>1</td>
@@ -748,8 +663,93 @@
 <td colspan='11' class='description'>Step count for static and smooth noise generators, set to > 1. Stair-stepping for periodic generators. Set to 1 for continuous or > 1 for stair-stepping.</td>
 </tr>
 <tr>
+<td rowspan='2'>Smooth</td>
+<td>Shared</td>
+<td>Yes</td>
+<td>Patch</td>
+<td>1</td>
+<td>Input</td>
+<td>Block</td>
+<td>None</td>
+<td>0 Ms</td>
+<td>500 Ms</td>
+<td>0 Ms</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Applies a lowpass filter to smooth out rough edges.</td>
+</tr>
+<tr>
+<td rowspan='2'>Tempo Sync</td>
+<td>Shared</td>
+<td>Yes</td>
+<td>Patch</td>
+<td>1</td>
+<td>Input</td>
+<td>Block</td>
+<td>None</td>
+<td>Off</td>
+<td>On</td>
+<td>Off</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Toggles time or tempo-synced type.</td>
+</tr>
+<tr>
+<td rowspan='2'>Snap To Project</td>
+<td>Shared</td>
+<td>Yes</td>
+<td>Patch</td>
+<td>1</td>
+<td>Input</td>
+<td>Block</td>
+<td>Automate</td>
+<td>Off</td>
+<td>On</td>
+<td>Off</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>In global module, snaps lfo phase to project/song time. Note this defeats rate modulation!</td>
+</tr>
+<tr>
+<td rowspan='2'>MSEG On</td>
+<td>Shared</td>
+<td>Yes</td>
+<td>Patch</td>
+<td>1</td>
+<td>Input</td>
+<td>Block</td>
+<td>Automate</td>
+<td>Off</td>
+<td>On</td>
+<td>Off</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Toggles MSEG mode on/off.</td>
+</tr>
+<tr>
+<td rowspan='2'>Shape</td>
+<td>Non MSEG</td>
+<td>Yes</td>
+<td>Patch</td>
+<td>1</td>
+<td>Input</td>
+<td>Block</td>
+<td>None</td>
+<td>Saw</td>
+<td>FreeStatic 1</td>
+<td>Sin</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Selects waveform: various periodic functions plus smooth and static noise.</td>
+</tr>
+<tr>
 <td rowspan='2'>Seed</td>
-<td>Right</td>
+<td>Non MSEG</td>
 <td>Yes</td>
 <td>Patch</td>
 <td>1</td>
@@ -766,7 +766,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Source</td>
-<td>Right</td>
+<td>Non MSEG</td>
 <td>Yes</td>
 <td>Patch</td>
 <td>1</td>
@@ -782,38 +782,191 @@
 <td colspan='11' class='description'>Per-voice random stream source for static and smooth noise generators.</td>
 </tr>
 <tr>
-<td rowspan='2'>Smooth</td>
-<td>Right</td>
+<td rowspan='2'>Skew X Mode</td>
+<td>Non MSEG</td>
 <td>Yes</td>
 <td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Block</td>
 <td>None</td>
-<td>0 Ms</td>
-<td>500 Ms</td>
-<td>0 Ms</td>
+<td>Off</td>
+<td>Exp Bi</td>
+<td>Off</td>
 <td>N/A</td>
 </tr>
 <tr>
-<td colspan='11' class='description'>Applies a lowpass filter to smooth out rough edges.</td>
+<td colspan='11' class='description'>Horizontal skew mode.</td>
 </tr>
 <tr>
-<td rowspan='2'>Snap To Project</td>
-<td>Phase</td>
+<td rowspan='2'>Skew X Amt</td>
+<td>Non MSEG</td>
+<td>Yes</td>
+<td>Patch</td>
+<td>1</td>
+<td>Input</td>
+<td>Accurate</td>
+<td>Modulate</td>
+<td>0 %</td>
+<td>100 %</td>
+<td>50 %</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Horizontal skew amount.</td>
+</tr>
+<tr>
+<td rowspan='2'>Skew Y Mode</td>
+<td>Non MSEG</td>
 <td>Yes</td>
 <td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Block</td>
-<td>Automate</td>
+<td>None</td>
+<td>Off</td>
+<td>Exp Bi</td>
+<td>Off</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Vertical skew mode.</td>
+</tr>
+<tr>
+<td rowspan='2'>Skew Y Amt</td>
+<td>Non MSEG</td>
+<td>Yes</td>
+<td>Patch</td>
+<td>1</td>
+<td>Input</td>
+<td>Accurate</td>
+<td>Modulate</td>
+<td>0 %</td>
+<td>100 %</td>
+<td>50 %</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Vertical skew amount.</td>
+</tr>
+<tr>
+<td rowspan='2'>MSEG Start Y</td>
+<td>MSEG</td>
+<td>No</td>
+<td>Patch</td>
+<td>1</td>
+<td>Input</td>
+<td>Accurate</td>
+<td>Modulate</td>
+<td>0.00 %</td>
+<td>100.00 %</td>
+<td>0.00 %</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>MSEG generator start level.</td>
+</tr>
+<tr>
+<td rowspan='2'>MSEG Count</td>
+<td>MSEG</td>
+<td>No</td>
+<td>Patch</td>
+<td>1</td>
+<td>Input</td>
+<td>Block</td>
+<td>None</td>
+<td>1</td>
+<td>16</td>
+<td>3</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>MSEG generator segment count.</td>
+</tr>
+<tr>
+<td rowspan='2'>MSEG Width</td>
+<td>MSEG</td>
+<td>No</td>
+<td>Patch</td>
+<td>16</td>
+<td>Input</td>
+<td>Accurate</td>
+<td>Modulate</td>
+<td>1.00</td>
+<td>100.00</td>
+<td>10.00</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>MSEG generator segment width.</td>
+</tr>
+<tr>
+<td rowspan='2'>MSEG Y</td>
+<td>MSEG</td>
+<td>No</td>
+<td>Patch</td>
+<td>16</td>
+<td>Input</td>
+<td>Accurate</td>
+<td>Modulate</td>
+<td>0.00 %</td>
+<td>100.00 %</td>
+<td>50.00 %</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>MSEG generator segment level.</td>
+</tr>
+<tr>
+<td rowspan='2'>MSEG Slope</td>
+<td>MSEG</td>
+<td>No</td>
+<td>Patch</td>
+<td>16</td>
+<td>Input</td>
+<td>Accurate</td>
+<td>Modulate</td>
+<td>0.00 %</td>
+<td>100.00 %</td>
+<td>50.00 %</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>MSEG generator segment slope.</td>
+</tr>
+<tr>
+<td rowspan='2'>MSEG Snap X</td>
+<td>MSEG</td>
+<td>No</td>
+<td>Patch</td>
+<td>1</td>
+<td>Input</td>
+<td>Block</td>
+<td>None</td>
 <td>Off</td>
 <td>On</td>
 <td>Off</td>
 <td>N/A</td>
 </tr>
 <tr>
-<td colspan='11' class='description'>In global module, snaps lfo phase to project/song time. Note this defeats rate modulation!</td>
+<td colspan='11' class='description'>MSEG generator horizontal snapping on/off.</td>
+</tr>
+<tr>
+<td rowspan='2'>MSEG Snap Y</td>
+<td>MSEG</td>
+<td>No</td>
+<td>Patch</td>
+<td>1</td>
+<td>Input</td>
+<td>Block</td>
+<td>None</td>
+<td>0</td>
+<td>16</td>
+<td>0</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>MSEG generator vertical snapping grid size</td>
 </tr>
 </table>
 <a name='7'/>
@@ -1960,110 +2113,25 @@
 <td colspan='11' class='description'>LFO rate in bars.</td>
 </tr>
 <tr>
-<td rowspan='2'>Tempo Sync</td>
-<td>Sync</td>
+<td rowspan='2'>Phase Offset</td>
+<td>Shared</td>
 <td>Yes</td>
 <td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Voice</td>
 <td>Automate</td>
-<td>Off</td>
-<td>On</td>
-<td>Off</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Toggles time or tempo-synced type.</td>
-</tr>
-<tr>
-<td rowspan='2'>Skew X Mode</td>
-<td>Skew</td>
-<td>Yes</td>
-<td>Patch</td>
-<td>1</td>
-<td>Input</td>
-<td>Voice</td>
-<td>Automate</td>
-<td>Off</td>
-<td>Exp Bi</td>
-<td>Off</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Horizontal skew mode.</td>
-</tr>
-<tr>
-<td rowspan='2'>Skew X Amt</td>
-<td>Skew</td>
-<td>Yes</td>
-<td>Patch</td>
-<td>1</td>
-<td>Input</td>
-<td>Accurate</td>
-<td>Modulate</td>
 <td>0 %</td>
 <td>100 %</td>
-<td>50 %</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Horizontal skew amount.</td>
-</tr>
-<tr>
-<td rowspan='2'>Skew Y Mode</td>
-<td>Skew</td>
-<td>Yes</td>
-<td>Patch</td>
-<td>1</td>
-<td>Input</td>
-<td>Voice</td>
-<td>Automate</td>
-<td>Off</td>
-<td>Exp Bi</td>
-<td>Off</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Vertical skew mode.</td>
-</tr>
-<tr>
-<td rowspan='2'>Skew Y Amt</td>
-<td>Skew</td>
-<td>Yes</td>
-<td>Patch</td>
-<td>1</td>
-<td>Input</td>
-<td>Accurate</td>
-<td>Modulate</td>
 <td>0 %</td>
-<td>100 %</td>
-<td>50 %</td>
 <td>N/A</td>
 </tr>
 <tr>
-<td colspan='11' class='description'>Vertical skew amount.</td>
-</tr>
-<tr>
-<td rowspan='2'>Shape</td>
-<td>Right</td>
-<td>Yes</td>
-<td>Patch</td>
-<td>1</td>
-<td>Input</td>
-<td>Voice</td>
-<td>Automate</td>
-<td>Saw</td>
-<td>Free Static 2</td>
-<td>Sin</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Selects waveform: various periodic functions plus smooth and static noise.</td>
+<td colspan='11' class='description'>In per-voice module, allows for phase adjustment of periodic generators.</td>
 </tr>
 <tr>
 <td rowspan='2'>Steps</td>
-<td>Right</td>
+<td>Shared</td>
 <td>Yes</td>
 <td>Patch</td>
 <td>1</td>
@@ -2079,8 +2147,93 @@
 <td colspan='11' class='description'>Step count for static and smooth noise generators, set to > 1. Stair-stepping for periodic generators. Set to 1 for continuous or > 1 for stair-stepping.</td>
 </tr>
 <tr>
+<td rowspan='2'>Smooth</td>
+<td>Shared</td>
+<td>Yes</td>
+<td>Patch</td>
+<td>1</td>
+<td>Input</td>
+<td>Voice</td>
+<td>Automate</td>
+<td>0 Ms</td>
+<td>500 Ms</td>
+<td>0 Ms</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Applies a lowpass filter to smooth out rough edges.</td>
+</tr>
+<tr>
+<td rowspan='2'>Tempo Sync</td>
+<td>Shared</td>
+<td>Yes</td>
+<td>Patch</td>
+<td>1</td>
+<td>Input</td>
+<td>Voice</td>
+<td>Automate</td>
+<td>Off</td>
+<td>On</td>
+<td>Off</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Toggles time or tempo-synced type.</td>
+</tr>
+<tr>
+<td rowspan='2'>Snap To Project</td>
+<td>Shared</td>
+<td>Yes</td>
+<td>Patch</td>
+<td>1</td>
+<td>Input</td>
+<td>Voice</td>
+<td>Automate</td>
+<td>Off</td>
+<td>On</td>
+<td>Off</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>In global module, snaps lfo phase to project/song time. Note this defeats rate modulation!</td>
+</tr>
+<tr>
+<td rowspan='2'>MSEG On</td>
+<td>Shared</td>
+<td>Yes</td>
+<td>Patch</td>
+<td>1</td>
+<td>Input</td>
+<td>Voice</td>
+<td>Automate</td>
+<td>Off</td>
+<td>On</td>
+<td>Off</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Toggles MSEG mode on/off.</td>
+</tr>
+<tr>
+<td rowspan='2'>Shape</td>
+<td>Non MSEG</td>
+<td>Yes</td>
+<td>Patch</td>
+<td>1</td>
+<td>Input</td>
+<td>Voice</td>
+<td>Automate</td>
+<td>Saw</td>
+<td>FreeStatic 2</td>
+<td>Sin</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Selects waveform: various periodic functions plus smooth and static noise.</td>
+</tr>
+<tr>
 <td rowspan='2'>Seed</td>
-<td>Right</td>
+<td>Non MSEG</td>
 <td>Yes</td>
 <td>Patch</td>
 <td>1</td>
@@ -2097,7 +2250,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Source</td>
-<td>Right</td>
+<td>Non MSEG</td>
 <td>Yes</td>
 <td>Patch</td>
 <td>1</td>
@@ -2113,38 +2266,191 @@
 <td colspan='11' class='description'>Per-voice random stream source for static and smooth noise generators.</td>
 </tr>
 <tr>
-<td rowspan='2'>Smooth</td>
-<td>Right</td>
+<td rowspan='2'>Skew X Mode</td>
+<td>Non MSEG</td>
 <td>Yes</td>
 <td>Patch</td>
 <td>1</td>
 <td>Input</td>
 <td>Voice</td>
 <td>Automate</td>
-<td>0 Ms</td>
-<td>500 Ms</td>
-<td>0 Ms</td>
+<td>Off</td>
+<td>Exp Bi</td>
+<td>Off</td>
 <td>N/A</td>
 </tr>
 <tr>
-<td colspan='11' class='description'>Applies a lowpass filter to smooth out rough edges.</td>
+<td colspan='11' class='description'>Horizontal skew mode.</td>
 </tr>
 <tr>
-<td rowspan='2'>Phase Offset</td>
-<td>Phase</td>
+<td rowspan='2'>Skew X Amt</td>
+<td>Non MSEG</td>
 <td>Yes</td>
 <td>Patch</td>
 <td>1</td>
 <td>Input</td>
-<td>Voice</td>
-<td>Automate</td>
+<td>Accurate</td>
+<td>Modulate</td>
 <td>0 %</td>
 <td>100 %</td>
-<td>0 %</td>
+<td>50 %</td>
 <td>N/A</td>
 </tr>
 <tr>
-<td colspan='11' class='description'>In per-voice module, allows for phase adjustment of periodic generators.</td>
+<td colspan='11' class='description'>Horizontal skew amount.</td>
+</tr>
+<tr>
+<td rowspan='2'>Skew Y Mode</td>
+<td>Non MSEG</td>
+<td>Yes</td>
+<td>Patch</td>
+<td>1</td>
+<td>Input</td>
+<td>Voice</td>
+<td>Automate</td>
+<td>Off</td>
+<td>Exp Bi</td>
+<td>Off</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Vertical skew mode.</td>
+</tr>
+<tr>
+<td rowspan='2'>Skew Y Amt</td>
+<td>Non MSEG</td>
+<td>Yes</td>
+<td>Patch</td>
+<td>1</td>
+<td>Input</td>
+<td>Accurate</td>
+<td>Modulate</td>
+<td>0 %</td>
+<td>100 %</td>
+<td>50 %</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Vertical skew amount.</td>
+</tr>
+<tr>
+<td rowspan='2'>MSEG Start Y</td>
+<td>MSEG</td>
+<td>No</td>
+<td>Patch</td>
+<td>1</td>
+<td>Input</td>
+<td>Accurate</td>
+<td>Modulate</td>
+<td>0.00 %</td>
+<td>100.00 %</td>
+<td>0.00 %</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>MSEG generator start level.</td>
+</tr>
+<tr>
+<td rowspan='2'>MSEG Count</td>
+<td>MSEG</td>
+<td>No</td>
+<td>Patch</td>
+<td>1</td>
+<td>Input</td>
+<td>Voice</td>
+<td>None</td>
+<td>1</td>
+<td>16</td>
+<td>3</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>MSEG generator segment count.</td>
+</tr>
+<tr>
+<td rowspan='2'>MSEG Width</td>
+<td>MSEG</td>
+<td>No</td>
+<td>Patch</td>
+<td>16</td>
+<td>Input</td>
+<td>Accurate</td>
+<td>Modulate</td>
+<td>1.00</td>
+<td>100.00</td>
+<td>10.00</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>MSEG generator segment width.</td>
+</tr>
+<tr>
+<td rowspan='2'>MSEG Y</td>
+<td>MSEG</td>
+<td>No</td>
+<td>Patch</td>
+<td>16</td>
+<td>Input</td>
+<td>Accurate</td>
+<td>Modulate</td>
+<td>0.00 %</td>
+<td>100.00 %</td>
+<td>50.00 %</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>MSEG generator segment level.</td>
+</tr>
+<tr>
+<td rowspan='2'>MSEG Slope</td>
+<td>MSEG</td>
+<td>No</td>
+<td>Patch</td>
+<td>16</td>
+<td>Input</td>
+<td>Accurate</td>
+<td>Modulate</td>
+<td>0.00 %</td>
+<td>100.00 %</td>
+<td>50.00 %</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>MSEG generator segment slope.</td>
+</tr>
+<tr>
+<td rowspan='2'>MSEG Snap X</td>
+<td>MSEG</td>
+<td>No</td>
+<td>Patch</td>
+<td>1</td>
+<td>Input</td>
+<td>Voice</td>
+<td>None</td>
+<td>Off</td>
+<td>On</td>
+<td>Off</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>MSEG generator horizontal snapping on/off.</td>
+</tr>
+<tr>
+<td rowspan='2'>MSEG Snap Y</td>
+<td>MSEG</td>
+<td>No</td>
+<td>Patch</td>
+<td>1</td>
+<td>Input</td>
+<td>Voice</td>
+<td>None</td>
+<td>0</td>
+<td>16</td>
+<td>0</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>MSEG generator vertical snapping grid size</td>
 </tr>
 </table>
 <a name='14'/>
