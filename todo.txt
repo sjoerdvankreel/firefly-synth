@@ -21,6 +21,8 @@ on release:
 15 update the website (vimexx)
 
 small stuff:
+* do windows clang build
+* do some flstudio clap stuff
 * update submodules
 V update rwqueue
 V update sse2neon
