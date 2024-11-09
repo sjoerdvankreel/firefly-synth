@@ -24,6 +24,7 @@ small stuff:
 V update rwqueue
 V update sse2neon
 X update mtsesp
+V clap + helpers
 
 microtuning:
 * check up on andreyas comments
