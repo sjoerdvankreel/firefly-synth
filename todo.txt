@@ -31,6 +31,10 @@ V clap + helpers
 V vst3 cmake base plugiface publicsdk
 V juce
 - update hosts
+- arm64 thing
+- do the kvr arm64 thing
+- make it work in ableton
+- wait for bitwig response
 
 microtuning:
 * check up on andreyas comments
@@ -41,9 +45,6 @@ autobuilds:
 * integrate https://github.com/surge-synthesizer/monique-monosynth/blob/main/.github/workflows/build-pr.yml
 
 shortlist:
-do the kvr arm64 thing
-make it work in ableton
-update all hosts and dependencies
 ditch after-mod, claim micro support ?
 do more keyboard tracking just do it -- also trackmode mul/add
 do global unison subvoice index as a mod source
