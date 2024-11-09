@@ -23,7 +23,7 @@ on release:
 small stuff:
 * do windows clang build
 * do some flstudio clap stuff
-* update submodules
+V update submodules
 V update rwqueue
 V update sse2neon
 X update mtsesp
@@ -35,6 +35,7 @@ V juce
 - do the kvr arm64 thing
 - make it work in ableton
 - wait for bitwig response
+- proper flstudio clap support + demos
 
 microtuning:
 * check up on andreyas comments
@@ -69,7 +70,6 @@ midi mpe
 cheby shaper
 phaser/flanger/chorus
 vst3 note expressions
-flstudio clap support
 show clap mod indicator
 visual routing indicators
 automated regression tests
