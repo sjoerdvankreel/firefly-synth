@@ -36,6 +36,7 @@ X make it work in ableton
 X wait for bitwig response
 X check ableton + mail the guy
 - proper flstudio clap support + demos
+- checkout JUCE_DSP_USE_STATIC_FFTW
 
 microtuning:
 * check up on andreyas comments
