@@ -37,6 +37,8 @@ X wait for bitwig response
 X check ableton + mail the guy
 - proper flstudio clap support + demos
 - checkout JUCE_DSP_USE_STATIC_FFTW
+- give it a spin on all the new hosts and platforms
+- it looks like crap on reaper win
 
 microtuning:
 * check up on andreyas comments
@@ -69,7 +71,7 @@ Feedback FM - but needs per-sample processing, not block
 wishlist sometime:
 midi mpe
 cheby shaper
-phaser/flinger/chorus
+phaser/flanger/chorus
 vst3 note expressions
 show clap mod indicator
 visual routing indicators

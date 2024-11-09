@@ -1,6 +1,7 @@
 #include <plugin_base/desc/plugin.hpp>
 #include <plugin_base/shared/utility.hpp>
 #include <juce_core/juce_core.h>
+#include <juce_dsp/juce_dsp.h>
 
 #include <chrono>
 #include <cassert>
@@ -10,27 +11,6 @@
 using namespace juce;
 
 namespace plugin_base {
-
-// https://rosettacode.org/wiki/Fast_Fourier_transform#C.2B.2B
-static void
-fft(std::complex<float>* inout, std::complex<float>* scratch, int count)
-{
-  if (count < 2) return;
-  assert(count == next_pow2(count));
-  std::complex<float>* even = scratch;
-  std::complex<float>* odd = scratch + count / 2;
-  for (std::size_t i = 0; i < count / 2; i++) even[i] = inout[i * 2];
-  for (std::size_t i = 0; i < count / 2; i++) odd[i] = inout[i * 2 + 1];
-  fft(odd, inout, count / 2);
-  fft(even, inout, count / 2);
-  for (std::size_t i = 0; i < count / 2; i++)
-  {
-    float im = -2.0f * pi32 * i / count;
-    std::complex<float> t = std::polar(1.0f, im) * odd[i];
-    inout[i] = even[i] + t;
-    inout[i + count / 2] = even[i] - t;
-  }
-}
 
 double
 seconds_since_epoch()
@@ -64,23 +44,20 @@ std::vector<float>
 fft(std::vector<float> const& in)
 {
   std::size_t pow2 = next_pow2(in.size());
-  std::vector<std::complex<float>> inout(pow2, std::complex<float>());
-  std::vector<std::complex<float>> scratch(pow2, std::complex<float>());
-  for (std::size_t i = 0; i < in.size(); i++)
-    inout[i] = std::complex<float>(in[i], 0.0f);
-  fft(inout.data(), scratch.data(), pow2);
-
-  // drop above nyquist
-  inout.erase(inout.begin() + pow2 / 2, inout.end());
+  std::vector<float> out(pow2, 0.0f);
+  std::copy(in.begin(), in.end(), out.begin());
+  std::size_t order = std::log2(pow2);
+  juce::dsp::FFT fft(order);
+  fft.performRealOnlyForwardTransform(out.data(), true);
+  out.erase(out.begin() + pow2 / 2, out.end());
   
   // scale to 0..1
-  std::vector<float> result;
   float max = std::numeric_limits<float>::min();
-  for (int i = 0; i < inout.size(); i++)
-    max = std::max(max, std::abs(inout[i].real()));
-  for (int i = 0; i < inout.size(); i++)
-    result.push_back(max == 0.0f? 0.0f: std::abs(inout[i].real()) / max);
-  return result;
+  for (int i = 0; i < out.size(); i++)
+    max = std::max(max, std::abs(out[i]));
+  for (int i = 0; i < out.size(); i++)
+    out[i] = max == 0.0f ? 0.0f : std::abs(out[i]) / max;
+  return out;
 }
 
 std::vector<float> 
