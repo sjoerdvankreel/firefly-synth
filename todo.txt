@@ -20,6 +20,9 @@ on release:
 14 update kvr 
 15 update the website (vimexx)
 
+small stuff:
+V update rwqueue
+
 microtuning:
 * check up on andreyas comments
 
