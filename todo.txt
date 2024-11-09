@@ -25,6 +25,7 @@ V update rwqueue
 V update sse2neon
 X update mtsesp
 V clap + helpers
+V vst3 cmake base plugiface publicsdk
 
 microtuning:
 * check up on andreyas comments
