@@ -21,12 +21,14 @@ on release:
 15 update the website (vimexx)
 
 small stuff:
+* update submodules
 V update rwqueue
 V update sse2neon
 X update mtsesp
 V clap + helpers
 V vst3 cmake base plugiface publicsdk
 V juce
+- update hosts
 
 microtuning:
 * check up on andreyas comments

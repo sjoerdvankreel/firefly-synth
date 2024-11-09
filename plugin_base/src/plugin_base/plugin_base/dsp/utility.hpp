@@ -170,7 +170,7 @@ fast_rand_seed(int seed)
 inline float
 fast_rand_next(std::uint32_t& state)
 {
-  float const max_int = static_cast<float>(std::numeric_limits<std::int32_t>::max());
+  float constexpr max_int = static_cast<float>(std::numeric_limits<std::int32_t>::max());
   state = static_cast<std::uint64_t>(state) * 48271 % 0x7fffffff;
   return static_cast<float>(state) / max_int;
 }

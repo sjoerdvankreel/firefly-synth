@@ -25,7 +25,7 @@ get_combobox_mod_target_indicator_width(ComboBox const& box, Font const& font)
   if (param_cb == nullptr) return 0;
   auto drop_action = param_cb->get_drop_target_action();
   if (drop_action == drop_target_action::none) return 0;
-  return font.getStringWidth("[N/A]") + 2;
+  return TextLayout::getStringWidth(font, "[N/A]") + 2;
 }
 
 static void 
@@ -333,9 +333,9 @@ Font
 lnf::font() const
 {
   // Handle the case for missing resources.
-  Font result;
+  Font result(FontOptions(_global_settings.get_font_height()));
   if(_typeface.get())
-    result = Font(_typeface);
+    result = Font(FontOptions(_typeface));
   result.setHeight(_global_settings.get_font_height());
   result.setStyleFlags(_desc->plugin->gui.font_flags);
   return result;
@@ -406,7 +406,7 @@ lnf::getTabButtonBestWidth(TabBarButton& b, int)
     float bar_width = b.getTabbedButtonBar().getWidth();
     int tab_count = b.getTabbedButtonBar().getNumTabs();
     if(!auto_size) return bar_width / tab_count;
-    return font().getStringWidth(b.getButtonText()) + _global_settings.section_radius + 10;
+    return TextLayout::getStringWidth(font(), b.getButtonText()) + _global_settings.section_radius + 10;
   }
   auto full_name = _desc->plugin->modules[_module].info.tag.full_name;
   int header_width = _default_settings.header_width;
@@ -446,7 +446,7 @@ lnf::drawTooltip(Graphics& g, String const& text, int w, int h)
   g.fillRect(bounds.toFloat());
   g.setColour(colors().bubble_outline);
   g.drawRect(bounds.toFloat().reduced(0.5f, 0.5f), 1.0f);
-  auto layout = detail::LookAndFeelHelpers::layoutTooltipText(text, findColour(TooltipWindow::textColourId));
+  auto layout = detail::LookAndFeelHelpers::layoutTooltipText(TypefaceMetricsKind::portable, text, findColour(TooltipWindow::textColourId));
   layout.draw(g, Rectangle<float>(w, h));
 }
 
@@ -909,15 +909,15 @@ lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, f
   assert(style == Slider::SliderStyle::LinearHorizontal);
 
   // output meter
-  auto const& param_topo = *ps->param()->param;
-  if (ps && ps->param()->param->gui.edit_type == gui_edit_type::output_meter)
+  auto const* param_topo = ps? ps->param()->param: nullptr;
+  if (param_topo && param_topo->gui.edit_type == gui_edit_type::output_meter)
   {
     int block_pad = 2;
     int block_count = 20;
     float block_width_base = width / block_count;
     float actual_block_width = (int)(block_width_base - block_pad);
     float actual_cell_width = actual_block_width + block_pad;
-    float pos_adjust = pos * (param_topo.domain.max - param_topo.domain.min);
+    float pos_adjust = pos * (param_topo->domain.max - param_topo->domain.min);
     int block_count_off = block_count * std::clamp(pos_adjust, 0.0f, 1.0f);
 
     g.setColour(colors().param_meter1);
