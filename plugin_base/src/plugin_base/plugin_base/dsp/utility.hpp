@@ -198,7 +198,7 @@ check_bipolar(double val)
   if (-1 <= val && val <= 1) return val;
   assert(-1 <= val && val <= 1);
   return val;
-#endif;
+#endif
 }
 
 inline float
@@ -224,7 +224,7 @@ check_bipolar(float val)
   if (-1 - 1e-5 <= val && val <= 1 + 1e-5) return val;
   assert(-1 - 1e-5 <= val && val <= 1 + 1e-5);
   return val;
-#endif;
+#endif
 }
 
 inline float mix_signal(float mix, float dry, float wet) 

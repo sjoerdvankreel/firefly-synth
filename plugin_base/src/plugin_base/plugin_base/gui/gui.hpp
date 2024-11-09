@@ -81,8 +81,8 @@ public juce::MouseListener
 {
   plugin_gui* const _gui;
 public:
-  void mouseUp(juce::MouseEvent const& event);
-  gui_undo_listener(plugin_gui* gui): _gui(gui) {}
+  gui_undo_listener(plugin_gui* gui) : _gui(gui) {}
+  void mouseUp(juce::MouseEvent const& event) override;
 };
 
 // triggers clear/copy/swap/etc
@@ -97,7 +97,7 @@ public juce::MouseListener
   juce::TabBarButton* _button;
 
 public:
-  void mouseUp(juce::MouseEvent const& event);
+  void mouseUp(juce::MouseEvent const& event) override;
   ~gui_tab_menu_listener() { _button->removeMouseListener(this); }
   gui_tab_menu_listener(plugin_gui* gui, plugin_state* state, lnf* lnf, juce::TabBarButton* button, int module, int slot):
   _gui(gui), _lnf(lnf), _state(state), _button(button), _module(module), _slot(slot) { _button->addMouseListener(this, true); }
