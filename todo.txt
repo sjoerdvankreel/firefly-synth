@@ -30,13 +30,12 @@ X update mtsesp
 V clap + helpers
 V vst3 cmake base plugiface publicsdk
 V juce
-- update hosts
-- arm64 thing
-- do the kvr arm64 thing
-- make it work in ableton
-- wait for bitwig response
+V update hosts == except bitwig wait for response
+X do the kvr arm64 thing
+X make it work in ableton
+X wait for bitwig response
+X check ableton + mail the guy
 - proper flstudio clap support + demos
-- check ableton + mail the guy
 
 microtuning:
 * check up on andreyas comments
@@ -69,7 +68,7 @@ Feedback FM - but needs per-sample processing, not block
 wishlist sometime:
 midi mpe
 cheby shaper
-phaser/flanger/chorus
+phaser/flinger/chorus
 vst3 note expressions
 show clap mod indicator
 visual routing indicators
