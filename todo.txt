@@ -36,6 +36,7 @@ V juce
 - make it work in ableton
 - wait for bitwig response
 - proper flstudio clap support + demos
+- check ableton + mail the guy
 
 microtuning:
 * check up on andreyas comments
