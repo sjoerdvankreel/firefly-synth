@@ -22,6 +22,7 @@ on release:
 
 small stuff:
 V update rwqueue
+V update sse2neon
 
 microtuning:
 * check up on andreyas comments
