@@ -39,6 +39,7 @@ X check ableton + mail the guy
 - checkout JUCE_DSP_USE_STATIC_FFTW
 - give it a spin on all the new hosts and platforms
 - it looks like crap on reaper win
+- not all graphs need to rerender on modulation
 
 microtuning:
 * check up on andreyas comments

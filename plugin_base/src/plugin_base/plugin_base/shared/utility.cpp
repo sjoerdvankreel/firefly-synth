@@ -44,19 +44,20 @@ std::vector<float>
 fft(std::vector<float> const& in)
 {
   std::size_t pow2 = next_pow2(in.size());
-  std::vector<float> out(pow2, 0.0f);
-  std::copy(in.begin(), in.end(), out.begin());
   std::size_t order = std::log2(pow2);
   juce::dsp::FFT fft(order);
+  std::vector<float> out(fft.getSize() * 2, 0.0f);
+  std::copy(in.begin(), in.end(), out.begin());
   fft.performRealOnlyForwardTransform(out.data(), true);
   out.erase(out.begin() + pow2 / 2, out.end());
-  
-  // scale to 0..1
+
+  // scale to 0..1, real part is in even indices, drop imag parts
   float max = std::numeric_limits<float>::min();
-  for (int i = 0; i < out.size(); i++)
+  for (int i = 0; i < out.size(); i += 2)
     max = std::max(max, std::abs(out[i]));
-  for (int i = 0; i < out.size(); i++)
-    out[i] = max == 0.0f ? 0.0f : std::abs(out[i]) / max;
+  for (int i = 0; i < out.size() / 2; i++)
+    out[i] = max == 0.0f ? 0.0f : std::abs(out[i * 2]) / max;
+  out.erase(out.begin() + pow2 / 4, out.end());
   return out;
 }
 
