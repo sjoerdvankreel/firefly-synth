@@ -1,3 +1,9 @@
+?, ? - V1.9.9.
+
+- Update all dependencies to latest.
+- Update all supported hosts (for testing) to latest.
+- Replace homebrew fft with juce version, should speed up filter rendering a bit.
+
 ### November 7, 2024 - V1.9.8.
 
 - Global LFO now reacts to phase adjustment when in snap-to-host-time mode.

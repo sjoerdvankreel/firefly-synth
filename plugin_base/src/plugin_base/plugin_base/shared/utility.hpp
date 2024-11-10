@@ -1,5 +1,7 @@
 #pragma once
 
+#include <juce_dsp/juce_dsp.h>
+
 #include <set>
 #include <string>
 #include <vector>
@@ -38,6 +40,18 @@
 
 namespace plugin_base {
 
+// wraps a juce fft and retains the output buffer
+class cached_fft
+{
+  int const _in_samples;
+  std::vector<float> _output;
+  juce::dsp::FFT const _juce_fft;
+
+public:
+  cached_fft(int in_samples);
+  std::vector<float> const& perform(std::vector<float> const& in);
+};
+
 struct format_basic_config;
 inline char constexpr resource_folder_themes[] = "themes";
 inline char constexpr resource_folder_presets[] = "presets";
@@ -47,8 +61,6 @@ inline double constexpr pi64 = 3.14159265358979323846264338327950288;
 double seconds_since_epoch();
 std::vector<char> file_load(std::filesystem::path const& path);
 std::filesystem::path get_resource_location(format_basic_config const* config);
-
-std::vector<float> fft(std::vector<float> const& in);
 std::vector<float> log_remap_series_x(std::vector<float> const& in, float midpoint);
 
 template <class T> 

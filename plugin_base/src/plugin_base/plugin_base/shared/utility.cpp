@@ -1,7 +1,6 @@
 #include <plugin_base/desc/plugin.hpp>
 #include <plugin_base/shared/utility.hpp>
 #include <juce_core/juce_core.h>
-#include <juce_dsp/juce_dsp.h>
 
 #include <chrono>
 #include <cassert>
@@ -40,25 +39,32 @@ file_load(std::filesystem::path const& path)
   return data;
 }
 
-std::vector<float> 
-fft(std::vector<float> const& in)
+cached_fft::
+cached_fft(int in_samples):
+_in_samples(in_samples),
+_output(next_pow2(in_samples) * 2, 0.0f),
+_juce_fft(std::log2(next_pow2(in_samples)))
+{ assert(in_samples > 1); }
+
+std::vector<float> const& 
+cached_fft::perform(std::vector<float> const& in)
 {
-  std::size_t pow2 = next_pow2(in.size());
-  std::size_t order = std::log2(pow2);
-  juce::dsp::FFT fft(order);
-  std::vector<float> out(fft.getSize() * 2, 0.0f);
-  std::copy(in.begin(), in.end(), out.begin());
-  fft.performRealOnlyForwardTransform(out.data(), true);
-  out.erase(out.begin() + pow2 / 2, out.end());
+  _output.clear();
+  int np2 = next_pow2(_in_samples);
+  assert(in.size() == _in_samples);
+  _output.resize(np2 * 2);
+  std::copy(in.begin(), in.end(), _output.begin());
+  _juce_fft.performRealOnlyForwardTransform(_output.data(), true);
+  _output.erase(_output.begin() + np2 / 2, _output.end());
 
   // scale to 0..1, real part is in even indices, drop imag parts
   float max = std::numeric_limits<float>::min();
-  for (int i = 0; i < out.size(); i += 2)
-    max = std::max(max, std::abs(out[i]));
-  for (int i = 0; i < out.size() / 2; i++)
-    out[i] = max == 0.0f ? 0.0f : std::abs(out[i * 2]) / max;
-  out.erase(out.begin() + pow2 / 4, out.end());
-  return out;
+  for (int i = 0; i < _output.size(); i += 2)
+    max = std::max(max, std::abs(_output[i]));
+  for (int i = 0; i < _output.size() / 2; i++)
+    _output[i] = max == 0.0f ? 0.0f : std::abs(_output[i * 2]) / max;
+  _output.erase(_output.begin() + np2 / 4, _output.end());
+  return _output;
 }
 
 std::vector<float> 
