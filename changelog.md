@@ -1,8 +1,9 @@
 ?, ? - V1.9.9.
 
+- Fix a couple compiler warnings.
 - Update all dependencies to latest.
 - Update all supported hosts (for testing) to latest.
-- Replace homebrew fft with juce version, should speed up filter rendering a bit.
+- Replace homebrew fft with juce version, should speed up filter graph rendering a bit.
 
 ### November 7, 2024 - V1.9.8.
 
