@@ -133,7 +133,9 @@ pb_controller::setParamNormalized(ParamID tag, ParamValue value)
   bool needs_mod_output_rescan = false;
   if (tag == _modulation_output_count_param_tag)
   {
-    _modulation_output_count = *reinterpret_cast<std::size_t*>(&value);
+    // make it debuggable
+    auto num_mod_outputs_as_size_t = *reinterpret_cast<std::size_t*>(&value);
+    _modulation_output_count = (int)num_mod_outputs_as_size_t;
     needs_mod_output_rescan = true;
   }
   auto mod_output_iter = _tag_to_modulation_output_index.find(tag);
