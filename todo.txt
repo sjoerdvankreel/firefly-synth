@@ -40,7 +40,7 @@ X check ableton + mail the guy
 - give it a spin on all the new hosts and platforms
 - it looks like crap on reaper win
 - not all graphs need to rerender on modulation
-- visual mod demo is borked in new reaper
+- visual mod demo is borked in new reaper for vst3 only (also on 193)
 
 microtuning:
 * check up on andreyas comments
