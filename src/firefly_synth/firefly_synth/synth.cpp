@@ -227,7 +227,7 @@ make_title_section(plugin_gui* gui, lnf* lnf, component_store store, bool is_fx)
   std::string name = is_fx? FF_SYNTH_FX_NAME: FF_SYNTH_INST_NAME;
   for(int i = 0; i < name.size(); i++) name[i] = std::toupper(name[i]); 
   auto& grid = store_component<grid_component>(store, gui_dimension({ { 2, 1 }, { synth_first_column_size, synth_second_column_size } }), 2, 2, 0, 1);
-  auto& title_label = store_component<autofit_label>(store, lnf, name, true, 15);
+  auto& title_label = store_component<autofit_label>(store, lnf, name, true, 14);
   title_label.setColour(Label::ColourIds::textColourId, colors.control_text);
   title_label.setJustificationType(Justification::left);  
   grid.add(title_label, { 0, 0, 1, 1 });
@@ -237,7 +237,7 @@ make_title_section(plugin_gui* gui, lnf* lnf, component_store store, bool is_fx)
 #else
   version_text += "X64"; 
 #endif
-  auto& version_label = store_component<autofit_label>(store, lnf, version_text, false, 10);
+  auto& version_label = store_component<autofit_label>(store, lnf, version_text, false, 8);
   version_label.setJustificationType(Justification::right);
   version_label.setColour(Label::ColourIds::textColourId, colors.control_text);
   grid.add(version_label, { 1, 0, 1, 1 });
