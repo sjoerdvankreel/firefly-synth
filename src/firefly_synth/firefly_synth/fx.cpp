@@ -342,7 +342,6 @@ public:
 class fx_graph_engine:
 public graph_engine
 {
-  // todo make sure nextpow2(4096)==4096
   cached_fft _cached_fft;
 public:
   fx_graph_engine(plugin_desc const* desc, graph_engine_params const& params) :
