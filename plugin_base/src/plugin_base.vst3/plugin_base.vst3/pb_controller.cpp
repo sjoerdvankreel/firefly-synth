@@ -299,7 +299,7 @@ pb_controller::initialize(FUnknown* context)
       param_info.stepCount = 0;
       param_info.unitId = kRootUnitId;
       param_info.id = source.info.id_hash;
-      param_info.flags = ParameterInfo::kIsHidden;
+      param_info.flags = ParameterInfo::kIsHidden | ParameterInfo::kIsHidden;
       parameters.addParameter(new Parameter(param_info));
       param_info.defaultNormalizedValue = source.source->default_;
       _midi_id_to_param[source.source->id] = param_info.id;
