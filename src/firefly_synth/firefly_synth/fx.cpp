@@ -341,7 +341,7 @@ public:
 // tack some cached buffers for fft onto graph_engine
 class fx_graph_engine:
 public graph_engine
-{
+{  
   cached_fft _cached_fft;
 public:
   fx_graph_engine(plugin_desc const* desc, graph_engine_params const& params) :

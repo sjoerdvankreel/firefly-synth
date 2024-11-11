@@ -250,7 +250,7 @@ lnf::init_theme(std::filesystem::path const& theme_folder, var const& json)
       }    
     }
   } 
-
+   
   assert(json.hasProperty("global_settings"));
   var global_settings = json["global_settings"];
   if (global_settings.hasProperty("lighten"))
