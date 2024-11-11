@@ -1,7 +1,7 @@
 {
   "global_settings": {
     "lighten": "0.15",
-    "windows_font_height": "12",
+    "windows_font_height": "11",
     "linux_font_height": "11",
     "mac_font_height": "11",
     "combo_radius": "3",

@@ -236,7 +236,7 @@ make_title_section(plugin_gui* gui, lnf* lnf, component_store store, bool is_fx)
   version_text += "ARM";
 #else
   version_text += "X64"; 
-#endif
+#endif 
   auto& version_label = store_component<autofit_label>(store, lnf, version_text, false, 9);
   version_label.setJustificationType(Justification::right);
   version_label.setColour(Label::ColourIds::textColourId, colors.control_text);
