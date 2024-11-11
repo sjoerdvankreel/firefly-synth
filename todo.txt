@@ -35,14 +35,13 @@ X do the kvr arm64 thing
 X make it work in ableton
 X wait for bitwig response
 X check ableton + mail the guy
+X checkout JUCE_DSP_USE_STATIC_FFTW
+X not all graphs need to rerender on modulation
 - proper flstudio clap support + demos
-- checkout JUCE_DSP_USE_STATIC_FFTW
 - give it a spin on all the new hosts and platforms
 - it looks like crap on reaper win
-- not all graphs need to rerender on modulation
-- visual mod demo is borked in new reaper for vst3 only (also on 193)
-=> do vismod demo for all hosts
-- contact reaper?
+- do vismod demo for all hosts
+- checkout required fontsize for all platforms
 
 microtuning:
 * check up on andreyas comments
@@ -53,6 +52,7 @@ autobuilds:
 * integrate https://github.com/surge-synthesizer/monique-monosynth/blob/main/.github/workflows/build-pr.yml
 
 shortlist:
+visual mod demo is borked in new reaper for vst3 only (also on 193)
 ditch after-mod, claim micro support ?
 do more keyboard tracking just do it -- also trackmode mul/add
 do global unison subvoice index as a mod source
