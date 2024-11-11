@@ -42,6 +42,8 @@ X not all graphs need to rerender on modulation
 - it looks like crap on reaper win
 - do vismod demo for all hosts
 - checkout required fontsize for all platforms
+- juce 8 is win10+!
+- keep taps on https://forum.juce.com/t/how-to-disable-directx-in-juce-8/61822/27
 
 microtuning:
 * check up on andreyas comments

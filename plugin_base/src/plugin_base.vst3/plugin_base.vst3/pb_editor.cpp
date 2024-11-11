@@ -107,6 +107,7 @@ pb_editor::attached(void* parent, FIDString type)
     loop->registerEventHandler(this, fd);
 #endif
   _gui->addToDesktop(0, parent);
+  _gui->getPeer()->setCurrentRenderingEngine(0);
   _gui->setVisible(true);
   _gui->add_param_listener(_controller);
   _gui->reloaded();

@@ -227,6 +227,7 @@ pb_plugin::guiSetParent(clap_window const* window) noexcept
 {
   PB_LOG_FUNC_ENTRY_EXIT();
   _gui->addToDesktop(0, window->ptr);
+  _gui->getPeer()->setCurrentRenderingEngine(0);
 #if (defined __linux__) || (defined  __FreeBSD__)
   for (int fd : LinuxEventLoopInternal::getRegisteredFds())
     _host.posixFdSupportRegister(fd, CLAP_POSIX_FD_READ);
