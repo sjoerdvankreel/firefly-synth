@@ -25,7 +25,8 @@ get_combobox_mod_target_indicator_width(ComboBox const& box, Font const& font)
   if (param_cb == nullptr) return 0;
   auto drop_action = param_cb->get_drop_target_action();
   if (drop_action == drop_target_action::none) return 0;
-  return TextLayout::getStringWidth(font, "[N/A]") + 2;
+#pragma warning(suppress : 4996) // TODO once it gets better
+  return font.getStringWidth("[N/A]") + 2;
 }
 
 static void 
@@ -406,7 +407,8 @@ lnf::getTabButtonBestWidth(TabBarButton& b, int)
     float bar_width = b.getTabbedButtonBar().getWidth();
     int tab_count = b.getTabbedButtonBar().getNumTabs();
     if(!auto_size) return bar_width / tab_count;
-    return TextLayout::getStringWidth(font(), b.getButtonText()) + _global_settings.section_radius + 10;
+#pragma warning(suppress : 4996) // TODO once it gets better
+    return font().getStringWidth(b.getButtonText()) + _global_settings.section_radius + 10;
   }
   auto full_name = _desc->plugin->modules[_module].info.tag.full_name;
   int header_width = _default_settings.header_width;

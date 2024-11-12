@@ -38,7 +38,8 @@ make_drag_source_image(Font const& font, std::string const& text, Colour border_
   float margin_w = 8.0f;
   float margin_h = 4.0f;
   float text_h = font.getHeight();
-  float text_w = TextLayout::getStringWidth(font, String(text));
+#pragma warning(suppress : 4996) // TODO once it gets better
+  float text_w = font.getStringWidthFloat(String(text));
 
   Image image(Image::PixelFormat::ARGB, text_w + margin_w + extra_left, text_h + margin_h + extra_top, true);
   Graphics g(image);
