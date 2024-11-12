@@ -49,7 +49,6 @@ X do vismod demo for all hosts
 V juce 8 is win10+!
 V checkout required fontsize for all platforms
 - proper flstudio clap support + demos
-- keep taps on https://forum.juce.com/t/how-to-disable-directx-in-juce-8/61822/27
 
 microtuning:
 * check up on andreyas comments
@@ -65,7 +64,7 @@ ditch after-mod, claim micro support ?
 do more keyboard tracking just do it -- also trackmode mul/add
 do global unison subvoice index as a mod source
 turn on stuff when dragging (e.g. basic sin, dist skew etc)
-switch juce to direct2d once it gets better (fonts are ugly, checkboxes have severe aliasing)
+switch juce to direct2d once it gets better (fonts are ugly, checkboxes have severe aliasing) keep taps on https://forum.juce.com/t/how-to-disable-directx-in-juce-8/61822/27
 juce::font::getstringwidth is deprecated, but the alternative is slow as molasses, keep taps on https://forum.juce.com/t/juce-8-0-2-glypharrangement-slow-in-debug-builds/63702
 
 wishlist:
