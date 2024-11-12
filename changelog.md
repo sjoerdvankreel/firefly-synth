@@ -1,10 +1,10 @@
-?, ? - V1.9.9.
+### November 12, 2024 - V1.9.9.
 
 - Fix a couple compiler warnings.
 - Update all dependencies to latest.
 - Update all supported hosts (for testing) to latest.
-- Add new host test file for flstudio + CLAP, seems OK now.
-- Breaking change: since JUCE 8 is minimum Windows 10, now so is firefly!
+- Add new host test file for FLStudio + CLAP, seems OK now.
+- Breaking change: since JUCE 8 is minimum Windows 10, now so is Firefly!
 - Replace homebrew fft with juce version, should speed up filter graph rendering a bit.
 
 ### November 7, 2024 - V1.9.8.
