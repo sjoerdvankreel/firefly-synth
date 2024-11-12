@@ -71,9 +71,9 @@ Extract the zipped folder and copy/replace it (the entire folder, not just the .
 - Linux: ~/.vst3 or ~/.clap
 
 # System requirements and supported environments
+- Windows: 64-bit (X64) cpu with AVX support. Tested on Windows 11. Needs Windows 10+.
 - Mac: 64-bit (X64) cpu for Intel-based Macs. 64-bit ARM cpu for Apple Silicon. Universal binaries are provided. Tested on MacOS 14, minimum required is 10.15.
 - Linux: 64-bit (X64) cpu. Provided binaries do not require AVX support, but you might want to build with march=native for better performance. Tested on Ubuntu 22, minimum required is 18. Needs glibc 2.25+. Known to work on Fedora and Mint, too.
-- Windows: 64-bit (X64) cpu with AVX support. Tested on Windows 11. Windows 7+ should work but you might need this:<br/>[https://learn.microsoft.com/en-US/cpp/windows/latest-supported-vc-redist?view=msvc-170](https://learn.microsoft.com/en-US/cpp/windows/latest-supported-vc-redist?view=msvc-170).
 - Explicitly supported hosts: Reaper, Bitwig, FLStudio, Waveform 13+. Please use a recent version.
 - Explicitly NOT supported hosts:<br/>Renoise (bug), Cakewalk (probably same as this: https://forum.renoise.com/t/possible-probable-bug-w-r-t-vst3-parameter-flushing/70684/9).
 - All other hosts, you'll just have to try and see.
