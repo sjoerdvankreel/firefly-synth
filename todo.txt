@@ -68,7 +68,6 @@ switch juce to direct2d once it gets better (fonts are ugly, checkboxes have sev
 juce::font::getstringwidth is deprecated, but the alternative is slow as molasses, keep taps on https://forum.juce.com/t/juce-8-0-2-glypharrangement-slow-in-debug-builds/63702
 
 wishlist:
-use fftw
 should figure out a way to do user supplied formulas?
 update the manuals routing overview image with new colors
 make a patch cleanup button
