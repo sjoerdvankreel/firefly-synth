@@ -42,6 +42,7 @@ V test all the popups
 V test all the dragging
 V it looks like crap on reaper win
 V fix the sizing on the combos, fontheigth 11 seems ok
+- fx test reaper vst3 loads borked on Mac reaper 7.27
 - proper flstudio clap support + demos
 - give it a spin on all the new hosts and platforms
 - do vismod demo for all hosts
