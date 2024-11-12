@@ -21,35 +21,6 @@ on release:
 14 update kvr 
 15 update the website (vimexx)
 
-small stuff:
-X do windows clang build
-V update submodules
-V update rwqueue
-V update sse2neon
-X update mtsesp
-V clap + helpers
-V vst3 cmake base plugiface publicsdk
-V juce
-V update hosts == except bitwig wait for response
-X do the kvr arm64 thing
-X make it work in ableton
-X wait for bitwig response
-X check ableton + mail the guy
-X checkout JUCE_DSP_USE_STATIC_FFTW
-X not all graphs need to rerender on modulation
-V test all the layout
-V test all the popups
-V test all the dragging
-V it looks like crap on reaper win
-V fix the sizing on the combos, fontheigth 11 seems ok
-V do fx test all hosts and recheck all
-X fx test reaper vst3 loads borked on Mac reaper 7.27
-V give it a spin on all the new hosts and platforms
-X do vismod demo for all hosts
-V juce 8 is win10+!
-V checkout required fontsize for all platforms
-V proper flstudio clap support + demos
-
 microtuning:
 * check up on andreyas comments
 
