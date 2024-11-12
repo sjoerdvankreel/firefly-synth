@@ -4,6 +4,7 @@ update submodules
 cpu/mem profiling
 
 on release: 
+0 test win/lin/mac
 1 dont forget to update the version nr in code and cmake and mac bundle and build/zip scripts and studiorack and site
 2 drop all conversion code on breaking plugin id
 3 run some debug builds
