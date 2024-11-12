@@ -49,6 +49,7 @@ V fix the sizing on the combos, fontheigth 11 seems ok
 - checkout required fontsize for all platforms
 - juce 8 is win10+!
 - keep taps on https://forum.juce.com/t/how-to-disable-directx-in-juce-8/61822/27
+- do fx test all hosts and recheck all
 
 microtuning:
 * check up on andreyas comments
