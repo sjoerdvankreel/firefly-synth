@@ -48,7 +48,7 @@ V give it a spin on all the new hosts and platforms
 X do vismod demo for all hosts
 V juce 8 is win10+!
 V checkout required fontsize for all platforms
-- proper flstudio clap support + demos
+V proper flstudio clap support + demos
 
 microtuning:
 * check up on andreyas comments

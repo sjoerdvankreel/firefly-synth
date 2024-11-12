@@ -3,6 +3,7 @@
 - Fix a couple compiler warnings.
 - Update all dependencies to latest.
 - Update all supported hosts (for testing) to latest.
+- Add new host test file for flstudio + CLAP, seems OK now.
 - Breaking change: since JUCE 8 is minimum Windows 10, now so is firefly!
 - Replace homebrew fft with juce version, should speed up filter graph rendering a bit.
 
