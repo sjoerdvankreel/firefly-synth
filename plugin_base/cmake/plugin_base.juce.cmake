@@ -1,5 +1,4 @@
 add_definitions(-DJUCE_USE_CURL=0)
-add_definitions(-DJUCE_DISPLAY_SPLASH_SCREEN=0)
 add_definitions(-DJUCE_MODAL_LOOPS_PERMITTED=0)
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")

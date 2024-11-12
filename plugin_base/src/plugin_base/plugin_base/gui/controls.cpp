@@ -296,6 +296,7 @@ _bold(bold), _tabular(tabular), _font_height(height)
   if(bold) label_font = label_font.boldened();
   if(height != -1) label_font = label_font.withHeight(height);
   float th = label_font.getHeight();
+#pragma warning(suppress : 4996) // TODO once it gets better
   float tw = label_font.getStringWidthFloat(reference_text);
   float nw = std::ceil(tw) + getBorderSize().getLeftAndRight();
   setSize(nw, std::ceil(th) + getBorderSize().getTopAndBottom());
@@ -311,6 +312,7 @@ autofit_combobox::max_text_width(PopupMenu const& menu)
   while(iter.next())
   {
     auto text = iter.getItem().text;
+#pragma warning(suppress : 4996) // TODO once it gets better
     auto text_width = font.getStringWidthFloat(text);
     if(iter.getItem().subMenu)
       result = std::max(result, max_text_width(*iter.getItem().subMenu));
@@ -325,7 +327,7 @@ autofit_combobox::autofit()
 {
   if(!_autofit) return;
 
-  int const hpadding = 19;
+  int const hpadding = 20;
   auto const& font = _lnf->getComboBoxFont(*this);
   float text_height = font.getHeight();
   float max_width = max_text_width(*getRootMenu());
@@ -437,7 +439,8 @@ static std::string
 get_longest_module_name(plugin_gui* gui)
 {
   float w = 0;
-  juce::Font font;
+  FontOptions options;
+  Font font(options);
   std::string result;
   std::string full_name;
   std::string display_name;
@@ -447,7 +450,8 @@ get_longest_module_name(plugin_gui* gui)
     if(desc.modules[i].module->gui.visible)
     {
       get_module_output_label_names(desc.modules[i], full_name, display_name);
-      float name_w = font.getStringWidth(display_name);
+#pragma warning(suppress : 4996) // TODO once it gets better
+      float name_w = font.getStringWidthFloat(display_name);
       if (name_w > w)
       {
         w = name_w;

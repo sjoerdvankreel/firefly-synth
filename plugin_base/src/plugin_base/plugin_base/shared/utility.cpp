@@ -11,27 +11,6 @@ using namespace juce;
 
 namespace plugin_base {
 
-// https://rosettacode.org/wiki/Fast_Fourier_transform#C.2B.2B
-static void
-fft(std::complex<float>* inout, std::complex<float>* scratch, int count)
-{
-  if (count < 2) return;
-  assert(count == next_pow2(count));
-  std::complex<float>* even = scratch;
-  std::complex<float>* odd = scratch + count / 2;
-  for (std::size_t i = 0; i < count / 2; i++) even[i] = inout[i * 2];
-  for (std::size_t i = 0; i < count / 2; i++) odd[i] = inout[i * 2 + 1];
-  fft(odd, inout, count / 2);
-  fft(even, inout, count / 2);
-  for (std::size_t i = 0; i < count / 2; i++)
-  {
-    float im = -2.0f * pi32 * i / count;
-    std::complex<float> t = std::polar(1.0f, im) * odd[i];
-    inout[i] = even[i] + t;
-    inout[i + count / 2] = even[i] - t;
-  }
-}
-
 double
 seconds_since_epoch()
 {
@@ -60,27 +39,32 @@ file_load(std::filesystem::path const& path)
   return data;
 }
 
-std::vector<float> 
-fft(std::vector<float> const& in)
-{
-  std::size_t pow2 = next_pow2(in.size());
-  std::vector<std::complex<float>> inout(pow2, std::complex<float>());
-  std::vector<std::complex<float>> scratch(pow2, std::complex<float>());
-  for (std::size_t i = 0; i < in.size(); i++)
-    inout[i] = std::complex<float>(in[i], 0.0f);
-  fft(inout.data(), scratch.data(), pow2);
+cached_fft::
+cached_fft(int in_samples):
+_in_samples(in_samples),
+_output(next_pow2(in_samples) * 2, 0.0f),
+_juce_fft(std::log2(next_pow2(in_samples)))
+{ assert(in_samples > 1); }
 
-  // drop above nyquist
-  inout.erase(inout.begin() + pow2 / 2, inout.end());
-  
-  // scale to 0..1
-  std::vector<float> result;
+std::vector<float> const& 
+cached_fft::perform(std::vector<float> const& in)
+{
+  _output.clear();
+  int np2 = next_pow2(_in_samples);
+  assert(in.size() == _in_samples);
+  _output.resize(np2 * 2);
+  std::copy(in.begin(), in.end(), _output.begin());
+  _juce_fft.performRealOnlyForwardTransform(_output.data(), true);
+  _output.erase(_output.begin() + np2 / 2, _output.end());
+
+  // scale to 0..1, real part is in even indices, drop imag parts
   float max = std::numeric_limits<float>::min();
-  for (int i = 0; i < inout.size(); i++)
-    max = std::max(max, std::abs(inout[i].real()));
-  for (int i = 0; i < inout.size(); i++)
-    result.push_back(max == 0.0f? 0.0f: std::abs(inout[i].real()) / max);
-  return result;
+  for (int i = 0; i < _output.size(); i += 2)
+    max = std::max(max, std::abs(_output[i]));
+  for (int i = 0; i < _output.size() / 2; i++)
+    _output[i] = max == 0.0f ? 0.0f : std::abs(_output[i * 2]) / max;
+  _output.erase(_output.begin() + np2 / 4, _output.end());
+  return _output;
 }
 
 std::vector<float> 

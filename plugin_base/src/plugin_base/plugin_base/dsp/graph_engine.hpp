@@ -38,7 +38,7 @@ class graph_engine {
   std::map<int, std::map<int, std::unique_ptr<module_engine>>> _activated = {};
 
 public:
-  ~graph_engine() { _engine.deactivate(); }
+  virtual ~graph_engine() { _engine.deactivate(); }
   graph_engine(plugin_desc const* desc, graph_engine_params const& params);
 
   void process_end();

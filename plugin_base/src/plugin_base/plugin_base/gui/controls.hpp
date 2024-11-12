@@ -155,7 +155,7 @@ public juce::Component
   param_desc const* const _param;
 
 protected:
-  void enablementChanged() { repaint(); }
+  void enablementChanged() override { repaint(); }
 
 public:
   void paint(juce::Graphics& g) override;

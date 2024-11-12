@@ -4,6 +4,7 @@ update submodules
 cpu/mem profiling
 
 on release: 
+0 test win/lin/mac
 1 dont forget to update the version nr in code and cmake and mac bundle and build/zip scripts and studiorack and site
 2 drop all conversion code on breaking plugin id
 3 run some debug builds
@@ -29,16 +30,15 @@ autobuilds:
 * integrate https://github.com/surge-synthesizer/monique-monosynth/blob/main/.github/workflows/build-pr.yml
 
 shortlist:
-do the kvr arm64 thing
-make it work in ableton
-update all hosts and dependencies
+visual mod demo is borked in new reaper for vst3 only (also on 193)
 ditch after-mod, claim micro support ?
 do more keyboard tracking just do it -- also trackmode mul/add
 do global unison subvoice index as a mod source
 turn on stuff when dragging (e.g. basic sin, dist skew etc)
+switch juce to direct2d once it gets better (fonts are ugly, checkboxes have severe aliasing) keep taps on https://forum.juce.com/t/how-to-disable-directx-in-juce-8/61822/27
+juce::font::getstringwidth is deprecated, but the alternative is slow as molasses, keep taps on https://forum.juce.com/t/juce-8-0-2-glypharrangement-slow-in-debug-builds/63702
 
 wishlist:
-use fftw
 should figure out a way to do user supplied formulas?
 update the manuals routing overview image with new colors
 make a patch cleanup button
@@ -56,7 +56,6 @@ midi mpe
 cheby shaper
 phaser/flanger/chorus
 vst3 note expressions
-flstudio clap support
 show clap mod indicator
 visual routing indicators
 automated regression tests

@@ -19,6 +19,10 @@ using namespace plugin_base;
 
 namespace firefly_synth {
 
+// pick stuff that plays nice with fft
+static int const graph_max_frame_count = 4096;
+static int const graph_max_sample_rate = 40960;
+
 static float const log_half = std::log(0.5f);
 
 static double const comb_max_ms = 5;
@@ -334,6 +338,17 @@ public:
   void process(plugin_block& block, cv_audio_matrix_mixdown const* modulation, jarray<float, 2> const* audio_in);
 };
 
+// tack some cached buffers for fft onto graph_engine
+class fx_graph_engine:
+public graph_engine
+{  
+  cached_fft _cached_fft;
+public:
+  fx_graph_engine(plugin_desc const* desc, graph_engine_params const& params) :
+  graph_engine(desc, params), _cached_fft(graph_max_frame_count) {}
+  std::vector<float> const& fft(std::vector<float> const& in) { return _cached_fft.perform(in); }
+};
+
 static void
 init_voice_default(plugin_state& state)
 {
@@ -359,16 +374,16 @@ make_graph_engine_params()
 {
   graph_engine_params result;
   result.bpm = 120;
-  result.max_frame_count = 4800;
   result.midi_key = midi_middle_c;
-  return result;   
+  result.max_frame_count = graph_max_frame_count;
+  return result;
 }
 
 static std::unique_ptr<graph_engine>
 make_graph_engine(plugin_desc const* desc)
 {
   auto params = make_graph_engine_params();
-  return std::make_unique<graph_engine>(desc, params);
+  return std::make_unique<fx_graph_engine>(desc, params);
 }
 
 static graph_data
@@ -389,7 +404,7 @@ render_graph(
   if (type_is_dst(type))
   {
     // need many samples for filters to stabilize
-    sample_rate = 48000;
+    sample_rate = graph_max_sample_rate;
     frame_count = shp_cycle_length * shp_cycle_count;
     audio_in.resize(jarray<int, 1>(2, frame_count));
     for(int i = 0; i < shp_cycle_count; i++)
@@ -399,8 +414,8 @@ render_graph(
   } else if(type == type_svf || type == type_cmb || type == type_meq)
   {
     // need many samples for fft to work
-    frame_count = 4800;
-    sample_rate = 48000;
+    frame_count = graph_max_frame_count;
+    sample_rate = graph_max_sample_rate;
     audio_in.resize(jarray<int, 1>(2, frame_count));
     audio_in[0][0] = 1;
     audio_in[1][0] = 1;
@@ -452,7 +467,7 @@ render_graph(
   // comb / filter plot FR
   if (type == type_cmb || type == type_svf || type == type_meq)
   {
-    auto response = fft(audio[0].data());
+    auto response = dynamic_cast<fx_graph_engine&>(*engine).fft(audio[0].data());
     if (type == type_cmb)
       return graph_data(jarray<float, 1>(response), false, 1.0f, false, { "24 kHz" });
 

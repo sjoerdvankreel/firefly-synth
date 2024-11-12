@@ -116,7 +116,7 @@ justification_type(gui_label const& label)
 
 static int
 module_header_height(int font_height)
-{ return font_height + 6; }
+{ return font_height + 7; }
 
 std::vector<list_item>
 gui_visuals_items()

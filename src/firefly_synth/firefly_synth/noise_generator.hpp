@@ -21,14 +21,15 @@ cosine_remap(float a, float b, float t)
   return lerp(a, b, (1 - std::cos(t * plugin_base::pi32)) * 0.5f);
 }
 
+inline int constexpr noise_generator_max_steps = 100;
+
 template <bool Smooth>
 class noise_generator
 {
-  static int const MAX_STEPS = 100;
   int _seed = 0;
   int _steps = 2;
   std::uint32_t _state = 0;
-  std::array<float, MAX_STEPS> _r = {};
+  std::array<float, noise_generator_max_steps> _r = {};
 
 public:
   float at(float phase) const;
@@ -46,7 +47,7 @@ noise_generator<Smooth>::init(int seed, int steps)
 {
   _seed = seed;
   _state = seed;
-  _steps = std::clamp(steps, 2, MAX_STEPS);
+  _steps = std::clamp(steps, 2, noise_generator_max_steps);
   for (int i = 0; i < _steps; ++i)
     _r[i] = plugin_base::fast_rand_next(_state);
 }
