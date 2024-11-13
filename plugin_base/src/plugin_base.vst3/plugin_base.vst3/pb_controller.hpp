@@ -84,11 +84,12 @@ public:
     Steinberg::int32 bus, Steinberg::int16 channel,
     Steinberg::Vst::CtrlNumber number, Steinberg::Vst::ParamID& id) override;
 
-  Steinberg::tresult PLUGIN_API notify(Steinberg::Vst::IMessage* message) override;
-  void PLUGIN_API queueClosed(Steinberg::Vst::DataExchangeUserContextID context_id) override;
+  void PLUGIN_API queueClosed(Steinberg::Vst::DataExchangeUserContextID context_id) override {}
   void PLUGIN_API queueOpened(Steinberg::Vst::DataExchangeUserContextID context_id, 
-    Steinberg::uint32 block_size, Steinberg::TBool& dispatch_on_bgthread) override;
-  void PLUGIN_API onDataExchangeBlocksReceived(Steinberg::Vst::DataExchangeUserContextID context_id, 
+    Steinberg::uint32 block_size, Steinberg::TBool& dispatch_on_bgthread) override { dispatch_on_bgthread = 0; }
+
+  Steinberg::tresult PLUGIN_API notify(Steinberg::Vst::IMessage* message) override;
+  void PLUGIN_API onDataExchangeBlocksReceived(Steinberg::Vst::DataExchangeUserContextID context_id,
     Steinberg::uint32 num_blocks, Steinberg::Vst::DataExchangeBlock* blocks, Steinberg::TBool on_bgthread) override;
 
   Steinberg::IPlugView* PLUGIN_API createView(char const* name) override;

@@ -133,24 +133,22 @@ pb_controller::getMidiControllerAssignment(int32 bus, int16 channel, CtrlNumber 
 tresult PLUGIN_API 
 pb_controller::notify(IMessage* message)
 {
-  return kResultTrue;
-}
-
-void PLUGIN_API 
-pb_controller::queueClosed(DataExchangeUserContextID context_id) 
-{
-}
-
-void PLUGIN_API
-pb_controller::queueOpened(DataExchangeUserContextID context_id,
-  uint32 block_size, TBool& dispatch_on_bgthread) 
-{
+  if (_exchange_receiver_handler.onMessage(message))
+    return kResultTrue;
+  return EditControllerEx1::notify(message);
 }
 
 void PLUGIN_API
 pb_controller::onDataExchangeBlocksReceived(DataExchangeUserContextID context_id,
   uint32 num_blocks, DataExchangeBlock* blocks, TBool on_bgthread) 
 {
+  assert(!on_bgthread);
+  if (num_blocks == 0) return;
+  _modulation_outputs.clear();
+  auto content = static_cast<data_exchange_block_content*>(blocks[num_blocks - 1].data);
+  for (int i = 0; i < content->mod_output_count; i++)
+    _modulation_outputs.push_back(content->mod_outputs[i]);
+  // todo modouts changed
 }
 
 void
