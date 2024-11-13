@@ -7,6 +7,7 @@
 
 #include <pluginterfaces/gui/iplugview.h>
 #include <public.sdk/source/vst/vsteditcontroller.h>
+#include <public.sdk/source/vst/utility/dataexchange.h>
 
 #include <map>
 #include <stack>
@@ -31,7 +32,8 @@ public format_menu_handler,
 public any_state_listener,
 public gui_param_listener,
 public Steinberg::Vst::IMidiMapping,
-public Steinberg::Vst::EditControllerEx1
+public Steinberg::Vst::EditControllerEx1,
+public Steinberg::Vst::IDataExchangeReceiver
 {
   // needs to be first, everyone else needs it
   std::unique_ptr<plugin_desc> _desc;
@@ -41,6 +43,7 @@ public Steinberg::Vst::EditControllerEx1
   std::map<int, int> _midi_id_to_param = {};
   std::stack<int> _undo_tokens = {};
   std::vector<modulation_output> _modulation_outputs = {};
+  Steinberg::Vst::DataExchangeReceiverHandler _exchange_receiver_handler { this };
 
   // see param_state_changed and setParamNormalized
   // when host comes at us with an automation value, that is
@@ -61,6 +64,7 @@ public:
   OBJ_METHODS(pb_controller, EditControllerEx1)
   DEFINE_INTERFACES
     DEF_INTERFACE(IMidiMapping)
+    DEF_INTERFACE(IDataExchangeReceiver)
   END_DEFINE_INTERFACES(EditControllerEx1)
   REFCOUNT_METHODS(EditControllerEx1)
   PB_PREVENT_ACCIDENTAL_COPY(pb_controller);
@@ -79,6 +83,13 @@ public:
   Steinberg::tresult PLUGIN_API getMidiControllerAssignment(
     Steinberg::int32 bus, Steinberg::int16 channel,
     Steinberg::Vst::CtrlNumber number, Steinberg::Vst::ParamID& id) override;
+
+  Steinberg::tresult PLUGIN_API notify(Steinberg::Vst::IMessage* message) override;
+  void PLUGIN_API queueClosed(Steinberg::Vst::DataExchangeUserContextID context_id) override;
+  void PLUGIN_API queueOpened(Steinberg::Vst::DataExchangeUserContextID context_id, 
+    Steinberg::uint32 block_size, Steinberg::TBool& dispatch_on_bgthread) override;
+  void PLUGIN_API onDataExchangeBlocksReceived(Steinberg::Vst::DataExchangeUserContextID context_id, 
+    Steinberg::uint32 num_blocks, Steinberg::Vst::DataExchangeBlock* blocks, Steinberg::TBool on_bgthread) override;
 
   Steinberg::IPlugView* PLUGIN_API createView(char const* name) override;
   Steinberg::tresult PLUGIN_API setState(Steinberg::IBStream* state) override;

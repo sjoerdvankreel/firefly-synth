@@ -130,6 +130,29 @@ pb_controller::getMidiControllerAssignment(int32 bus, int16 channel, CtrlNumber 
   return kResultTrue;
 }
 
+tresult PLUGIN_API 
+pb_controller::notify(IMessage* message)
+{
+  return kResultTrue;
+}
+
+void PLUGIN_API 
+pb_controller::queueClosed(DataExchangeUserContextID context_id) 
+{
+}
+
+void PLUGIN_API
+pb_controller::queueOpened(DataExchangeUserContextID context_id,
+  uint32 block_size, TBool& dispatch_on_bgthread) 
+{
+}
+
+void PLUGIN_API
+pb_controller::onDataExchangeBlocksReceived(DataExchangeUserContextID context_id,
+  uint32 num_blocks, DataExchangeBlock* blocks, TBool on_bgthread) 
+{
+}
+
 void
 pb_controller::param_state_changed(int index, plain_value plain)
 {
