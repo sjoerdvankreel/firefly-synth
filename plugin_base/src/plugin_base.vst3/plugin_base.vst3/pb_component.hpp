@@ -31,6 +31,7 @@ public Steinberg::Vst::AudioEffect {
 
   // https://steinbergmedia.github.io/vst3_dev_portal/pages/Tutorials/Data+Exchange.html
   std::unique_ptr<Steinberg::Vst::DataExchangeHandler> _exchange_handler = {};
+  Steinberg::Vst::DataExchangeBlock _exchange_block = { nullptr, 0, Steinberg::Vst::InvalidDataExchangeBlockID };
 
 public:
   PB_PREVENT_ACCIDENTAL_COPY(pb_component);

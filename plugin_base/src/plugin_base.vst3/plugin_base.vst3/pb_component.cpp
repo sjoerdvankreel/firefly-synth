@@ -104,19 +104,40 @@ pb_component::setBusArrangements(
 tresult PLUGIN_API 
 pb_component::setActive(TBool state)
 {
+  if (state)
+    _exchange_handler->onActivate(processSetup);
+  else
+    _exchange_handler->onDeactivate();
   return AudioEffect::setActive(state);
 }
 
 tresult PLUGIN_API 
 pb_component::disconnect(IConnectionPoint* other)
 {
+  if (_exchange_handler)
+  {
+    _exchange_handler->onDisconnect(other);
+    _exchange_handler.reset();
+  }
   return AudioEffect::disconnect(other);
 }
 
 tresult PLUGIN_API
 pb_component::connect(IConnectionPoint* other)
 {
-  return AudioEffect::connect(other);
+  tresult result = AudioEffect::connect(other);
+  if (result != kResultTrue) return result;
+
+  auto callback = [this](DataExchangeHandler::Config& config, ProcessSetup const& setup) {
+    config.numBlocks = 1; // ui discards all but the last one
+    config.alignment = 32;
+    config.userContextID = 0;
+    config.blockSize = sizeof(data_exchange_block_content);
+    return true; };
+
+  _exchange_handler = std::make_unique<DataExchangeHandler>(this, callback);
+  _exchange_handler->onConnect(other, getHostContext());
+  return kResultTrue;
 }
 
 tresult PLUGIN_API
@@ -247,7 +268,18 @@ pb_component::process(ProcessData& data)
     }
 
   // module modulation outputs
-  // TODO block.events.modulation_outputs
+  if (_exchange_block.blockID == Vst::InvalidDataExchangeBlockID)
+  {
+    _exchange_block = _exchange_handler->getCurrentOrNewBlock();
+    if (_exchange_block.blockID != Vst::InvalidDataExchangeBlockID)
+    {
+      auto content = static_cast<data_exchange_block_content*>(_exchange_block.data);
+      content->mod_output_count = std::min(data_exchange_block_content::max_mod_outputs, block.events.modulation_outputs.size());
+      for (int i = 0; i < content->mod_output_count; i++)
+        content->mod_outputs[i] = block.events.modulation_outputs[i];
+    }
+  }
+
   _splice_engine.release_block();
 
   return kResultOk;
