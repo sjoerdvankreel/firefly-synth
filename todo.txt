@@ -29,6 +29,9 @@ autobuilds:
 * sign the mac version
 * integrate https://github.com/surge-synthesizer/monique-monosynth/blob/main/.github/workflows/build-pr.yml
 
+fix the fake mod params:
+* check out this https://steinbergmedia.github.io/vst3_dev_portal/pages/Tutorials/Data+Exchange.html
+
 shortlist:
 do fx_test renoise
 visual mod demo is borked in new reaper for vst3 only (also on 193)
