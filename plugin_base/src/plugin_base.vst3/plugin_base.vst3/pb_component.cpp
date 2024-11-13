@@ -101,6 +101,24 @@ pb_component::setBusArrangements(
   return AudioEffect::setBusArrangements(inputs, input_count, outputs, output_count);
 }
 
+tresult PLUGIN_API 
+pb_component::setActive(TBool state)
+{
+  return AudioEffect::setActive(state);
+}
+
+tresult PLUGIN_API 
+pb_component::disconnect(IConnectionPoint* other)
+{
+  return AudioEffect::disconnect(other);
+}
+
+tresult PLUGIN_API
+pb_component::connect(IConnectionPoint* other)
+{
+  return AudioEffect::connect(other);
+}
+
 tresult PLUGIN_API
 pb_component::process(ProcessData& data)
 {
