@@ -30,6 +30,8 @@ autobuilds:
 * integrate https://github.com/surge-synthesizer/monique-monosynth/blob/main/.github/workflows/build-pr.yml
 
 fix the fake mod params:
+* also do the clap
+* all vismod hosts test both vst3 clap
 * check out this https://steinbergmedia.github.io/vst3_dev_portal/pages/Tutorials/Data+Exchange.html
 
 shortlist:

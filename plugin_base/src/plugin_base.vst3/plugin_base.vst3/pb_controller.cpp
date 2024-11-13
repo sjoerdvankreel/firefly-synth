@@ -148,7 +148,7 @@ pb_controller::onDataExchangeBlocksReceived(DataExchangeUserContextID context_id
   auto content = static_cast<data_exchange_block_content*>(blocks[num_blocks - 1].data);
   for (int i = 0; i < content->mod_output_count; i++)
     _modulation_outputs.push_back(content->mod_outputs[i]);
-  // todo modouts changed
+  if (_editor) _editor->modulation_outputs_changed();
 }
 
 void
