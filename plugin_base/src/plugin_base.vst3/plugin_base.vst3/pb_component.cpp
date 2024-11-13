@@ -38,11 +38,6 @@ _splice_engine(_desc.get(), false, nullptr, nullptr)
       _param_to_midi_id[source.info.id_hash] = source.source->id;
     }
   }
-
-  // fetch mod output param tags
-  _mod_output_count_param_tag = stable_hash(modulation_output_count_param_guid);
-  for (int i = 0; i < modulation_output_param_count; i++)
-    _mod_output_param_tags[i] = stable_hash(modulation_output_param_guids[i]);
 }
 
 tresult PLUGIN_API
@@ -234,21 +229,7 @@ pb_component::process(ProcessData& data)
     }
 
   // module modulation outputs
-  unused_index = 0;
-  if (data.outputParameterChanges)
-  {
-    auto num_modulation_outputs = block.events.modulation_outputs.size();
-    num_modulation_outputs = std::min((int)num_modulation_outputs, modulation_output_param_count);
-    queue = data.outputParameterChanges->addParameterData(_mod_output_count_param_tag, unused_index);
-    queue->addPoint(0, *reinterpret_cast<double*>(&num_modulation_outputs), unused_index);
-    for (int e = 0; e < block.events.modulation_outputs.size(); e++)
-    {
-      auto const& this_modulation_outputs = block.events.modulation_outputs[e];
-      queue = data.outputParameterChanges->addParameterData(_mod_output_param_tags[e], unused_index);
-      queue->addPoint(0, *reinterpret_cast<double const*>(&this_modulation_outputs.packed), unused_index);
-    }
-  }
-
+  // TODO block.events.modulation_outputs
   _splice_engine.release_block();
 
   return kResultOk;

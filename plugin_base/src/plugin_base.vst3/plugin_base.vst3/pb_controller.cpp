@@ -40,15 +40,6 @@ _extra_state(gui_extra_state_keyset(*_desc->plugin))
 { 
   PB_LOG_FUNC_ENTRY_EXIT();
   _automation_state.add_any_listener(this);
-
-  // fetch mod output param tags
-  _modulation_outputs_to_gui.resize(modulation_output_param_count);
-  _modulation_output_count_param_tag = stable_hash(modulation_output_count_param_guid);
-  for (int i = 0; i < modulation_output_param_count; i++)
-  {
-    _modulation_output_param_tags[i] = stable_hash(modulation_output_param_guids[i]);
-    _tag_to_modulation_output_index[_modulation_output_param_tags[i]] = i;
-  }
 }
 
 void 
@@ -71,7 +62,7 @@ pb_controller::createView(char const* name)
 {
   PB_LOG_FUNC_ENTRY_EXIT();
   if (ConstString(name) != ViewType::kEditor) return nullptr;
-  return _editor = new pb_editor(this, &_modulation_outputs_to_gui);
+  return _editor = new pb_editor(this, &_modulation_outputs);
 }
 
 tresult PLUGIN_API
@@ -123,46 +114,6 @@ pb_controller::setParamNormalized(ParamID tag, ParamValue value)
   {
     _automation_state.set_normalized_at_index(mapping_iter->second, normalized_value(value));
     if (_editor) _editor->automation_state_changed(mapping_iter->second, normalized_value(value));
-  }
-
-  // modulation output support
-  // this is a bit of a cop out but at least it should be working without resorting to messaging
-  // upon receiving the "count" param, update the count
-  // upon receiving any other param, set the fill bit
-  // whenever the first N consecutive fill bits >= count, repaint and reset
-  bool needs_mod_output_rescan = false;
-  if (tag == _modulation_output_count_param_tag)
-  {
-    _modulation_output_count = *reinterpret_cast<std::size_t*>(&value);
-    needs_mod_output_rescan = true;
-  }
-  auto mod_output_iter = _tag_to_modulation_output_index.find(tag);
-  if (mod_output_iter != _tag_to_modulation_output_index.end())
-  {
-    _modulation_output_param_set[mod_output_iter->second] = true;
-    _modulation_outputs_from_audio[mod_output_iter->second].packed = *reinterpret_cast<std::uint64_t*>(&value);
-    needs_mod_output_rescan = true;
-  }
-  if (needs_mod_output_rescan)
-  {
-    bool filled_to_count = true;
-    for (int i = 0; i < _modulation_output_count; i++)
-      if (!_modulation_output_param_set[i])
-      {
-        filled_to_count = false;
-        break;
-      }
-    if (filled_to_count)
-    {
-      _modulation_output_param_set.fill(false);
-      _modulation_outputs_to_gui.clear();
-      _modulation_outputs_to_gui.insert(
-        _modulation_outputs_to_gui.begin(),
-        _modulation_outputs_from_audio.begin(), 
-        _modulation_outputs_from_audio.begin() + _modulation_output_count);
-      _modulation_output_count = 0;
-      if (_editor) _editor->modulation_outputs_changed();
-    }
   }
 
   _inside_set_param_normalized = false;
@@ -304,26 +255,6 @@ pb_controller::initialize(FUnknown* context)
       param_info.defaultNormalizedValue = source.source->default_;
       _midi_id_to_param[source.source->id] = param_info.id;
     }
-  }
-
-  // add fake mod output parameters
-  ParameterInfo mod_output_count_param = {};
-  mod_output_count_param.unitId = kRootUnitId;
-  mod_output_count_param.defaultNormalizedValue = 0;
-  mod_output_count_param.stepCount = modulation_output_param_count + 1;
-  mod_output_count_param.id = stable_hash(modulation_output_count_param_guid);
-  mod_output_count_param.flags = ParameterInfo::kIsReadOnly | ParameterInfo::kIsHidden;
-  parameters.addParameter(new Parameter(mod_output_count_param));
-
-  for (int i = 0; i < modulation_output_param_count; i++)
-  {
-    ParameterInfo mod_output_param = {};
-    mod_output_param.stepCount = 0;
-    mod_output_param.unitId = kRootUnitId;
-    mod_output_param.defaultNormalizedValue = 0;
-    mod_output_param.id = stable_hash(modulation_output_param_guids[i]);
-    mod_output_param.flags = ParameterInfo::kIsReadOnly | ParameterInfo::kIsHidden;
-    parameters.addParameter(new Parameter(mod_output_param));
   }
 
   // make sure no clashes

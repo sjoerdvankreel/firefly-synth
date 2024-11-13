@@ -39,17 +39,8 @@ public Steinberg::Vst::EditControllerEx1
   plugin_state _automation_state = {};
   extra_state _extra_state;
   std::map<int, int> _midi_id_to_param = {};
-
-  // modulation output states
-  int _modulation_output_count = 0;
-  int _modulation_output_count_param_tag = -1;
-  std::map<int, int> _tag_to_modulation_output_index = {};
-  std::array<bool, modulation_output_param_count> _modulation_output_param_set = {};
-  std::array<int, modulation_output_param_count> _modulation_output_param_tags = {};
-  std::vector<modulation_output> _modulation_outputs_to_gui = {};
-  std::array<modulation_output, modulation_output_param_count> _modulation_outputs_from_audio = {};
-
   std::stack<int> _undo_tokens = {};
+  std::vector<modulation_output> _modulation_outputs = {};
 
   // see param_state_changed and setParamNormalized
   // when host comes at us with an automation value, that is
