@@ -129,7 +129,7 @@ pb_component::connect(IConnectionPoint* other)
   if (result != kResultTrue) return result;
 
   auto callback = [this](DataExchangeHandler::Config& config, ProcessSetup const& setup) {
-    config.numBlocks = 1; // ui discards all but the last one
+    config.numBlocks = 2;
     config.alignment = 32;
     config.userContextID = 0;
     config.blockSize = sizeof(data_exchange_block_content);
@@ -269,15 +269,15 @@ pb_component::process(ProcessData& data)
 
   // module modulation outputs
   if (_exchange_block.blockID == Vst::InvalidDataExchangeBlockID)
-  {
     _exchange_block = _exchange_handler->getCurrentOrNewBlock();
-    if (_exchange_block.blockID != Vst::InvalidDataExchangeBlockID)
-    {
-      auto content = static_cast<data_exchange_block_content*>(_exchange_block.data);
-      content->mod_output_count = std::min(data_exchange_block_content::max_mod_outputs, block.events.modulation_outputs.size());
-      for (int i = 0; i < content->mod_output_count; i++)
-        content->mod_outputs[i] = block.events.modulation_outputs[i];
-    }
+  if (_exchange_block.blockID != Vst::InvalidDataExchangeBlockID)
+  {
+    auto content = static_cast<data_exchange_block_content*>(_exchange_block.data);
+    content->mod_output_count = std::min(data_exchange_block_content::max_mod_outputs, block.events.modulation_outputs.size());
+    for (int i = 0; i < content->mod_output_count; i++)
+      content->mod_outputs[i] = block.events.modulation_outputs[i];
+    _exchange_handler->sendCurrentBlock();
+    _exchange_block = _exchange_handler->getCurrentOrNewBlock();
   }
 
   _splice_engine.release_block();
