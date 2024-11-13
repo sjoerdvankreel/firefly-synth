@@ -31,6 +31,7 @@ autobuilds:
 
 fix the fake mod params:
 * also do the clap
+* check the mem usage
 * vst3 file load is borked
 * all vismod hosts test both vst3 clap
 * check out this https://steinbergmedia.github.io/vst3_dev_portal/pages/Tutorials/Data+Exchange.html
