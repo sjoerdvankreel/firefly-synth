@@ -1,3 +1,7 @@
+### June 18, 2025 - V2.0.0 - alpha.
+
+- Switching over to a new product.
+
 ### November 12, 2024 - V1.9.9.
 
 - Fix a couple compiler warnings.
