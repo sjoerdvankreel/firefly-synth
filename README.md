@@ -1,3 +1,5 @@
+PROJECT ARCHIVED IN FAVOR OF [Firefly Synth 2](https://github.com/sjoerdvankreel/firefly-synth-2)
+
 "This wouldn't be FOSSPicks without a new open source software synthesizer, and this time it's Firefly Synth's turn – which isn't a synth designed to recreate the sound of flying insects.
 Instead, it's capable of producing a huge range of powerfully complex sounds, from beautifully warm analog strings and brass-like melodies to percussion and eardrum piercing leads.
 It does all this from a user interface totally unlike any other software synth, replacing skeuomorphism with practical and instant access to dozens of its features.
